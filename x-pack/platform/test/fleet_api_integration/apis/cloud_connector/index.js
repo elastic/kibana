@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export const INGEST_SAVED_OBJECT_INDEX = '.kibana_ingest';
-
-export const FLEET_SETUP_LOCK_TYPE = 'fleet-setup-lock';
-
-export const CLOUD_CONNECTOR_SAVED_OBJECT_TYPE = 'fleet-cloud-connector';
+export default function loadTests({ loadTestFile }) {
+  describe('Cloud Connectors', () => {
+    loadTestFile(require.resolve('./cloud_connector'));
+    loadTestFile(require.resolve('./privileges'));
+  });
+}

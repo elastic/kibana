@@ -80,10 +80,19 @@ import { auditLoggingService } from './audit_logging';
 import { agentPolicyService } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { licenseService } from './license';
+import { cloudConnectorService } from '.';
 
 jest.mock('./spaces/helpers');
 
 jest.mock('./license');
+
+// Mock cloudConnectorService
+jest.mock('.', () => ({
+  ...jest.requireActual('.'),
+  cloudConnectorService: {
+    create: jest.fn(),
+  },
+}));
 
 const mockedSendTelemetryEvents = sendTelemetryEvents as jest.MockedFunction<
   typeof sendTelemetryEvents
@@ -392,6 +401,231 @@ describe('Package policy service', () => {
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
       ).rejects.toThrowError(/Input tcp is not allowed for deployment mode 'agentless'/);
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should handle cloud connector variables when supports_cloud_connector is true', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      const packagePolicyWithCloudConnector = {
+        name: 'test-package-policy',
+        namespace: 'test',
+        enabled: true,
+        policy_id: 'test',
+        policy_ids: ['test'],
+        supports_cloud_connector: true,
+        inputs: [
+          {
+            type: 'cis_aws', // tcp input is in the blocklist for agentless
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: packagePolicyWithCloudConnector,
+        references: [],
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet(['test', 'default'], {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+          },
+        },
+      });
+
+      const result = await packagePolicyService.create(
+        soClient,
+        esClient,
+        packagePolicyWithCloudConnector
+      );
+
+      expect(result.supports_cloud_connector).toBe(true);
+      expect(result.inputs[0].streams[0].vars).toHaveProperty('role_arn');
+      expect(result.inputs[0].streams[0].vars).toHaveProperty('external_id');
+      expect(cloudConnectorService.create).toHaveBeenCalled();
+    });
+
+    it('should not process cloud connector variables and create cloud connector when supports_cloud_connector is false', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      const packagePolicyWithoutCloudConnector = {
+        name: 'test-package-policy',
+        namespace: 'test',
+        enabled: true,
+        policy_id: 'test',
+        policy_ids: ['test'],
+        supports_cloud_connector: false,
+        inputs: [
+          {
+            type: 'aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: packagePolicyWithoutCloudConnector,
+        references: [],
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet(['test', 'default'], {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: false,
+          },
+        },
+      });
+
+      const result = await packagePolicyService.create(
+        soClient,
+        esClient,
+        packagePolicyWithoutCloudConnector
+      );
+
+      expect(result.supports_cloud_connector).toBe(false);
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+    });
+
+    it('should not create cloud connector when cloud connnector is not enabled in agentless policy', async () => {
+      const soClient = createSavedObjectClientMock();
+
+      const packagePolicyWithoutCloudConnector = {
+        name: 'test-package-policy',
+        namespace: 'test',
+        enabled: true,
+        policy_id: 'test',
+        policy_ids: ['test'],
+        supports_cloud_connector: true,
+        inputs: [
+          {
+            type: 'aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: packagePolicyWithoutCloudConnector,
+        references: [],
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet(['default'], {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: false,
+          },
+        },
+      });
+
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+    });
+
+    it('should not create cloud connector when cloud connnector id is already set', async () => {
+      const soClient = createSavedObjectClientMock();
+
+      const packagePolicyWithoutCloudConnector = {
+        name: 'test-package-policy',
+        namespace: 'test',
+        enabled: true,
+        policy_id: 'test',
+        policy_ids: ['test'],
+        supports_cloud_connector: true,
+        inputs: [
+          {
+            type: 'aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: packagePolicyWithoutCloudConnector,
+        references: [],
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet(['default'], {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+          },
+        },
+      });
+
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
     });
   });
 
