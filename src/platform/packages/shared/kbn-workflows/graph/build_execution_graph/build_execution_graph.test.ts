@@ -8,7 +8,14 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type { IfStep, ForEachStep, WorkflowYaml, WaitStep, ConnectorStep } from '../../spec/schema';
+import type {
+  IfStep,
+  ForEachStep,
+  WorkflowYaml,
+  WaitStep,
+  ConnectorStep,
+  WorkflowOnFailure,
+} from '../../spec/schema';
 import type {
   EnterIfNode,
   ExitIfNode,
@@ -700,6 +707,60 @@ describe('convertToWorkflowGraph', () => {
           id: 'exitForeach(foreach_testForeachConnectorStep)',
           startNodeId: 'foreach_testForeachConnectorStep',
         } as ExitForeachNode);
+      });
+    });
+  });
+
+  describe('step with retry', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testRetryConnectorStep',
+          type: 'slack',
+          connectorId: 'slack',
+          'on-failure': {
+            retry: {
+              'max-attempts': 3,
+              delay: '5s',
+            },
+          } as WorkflowOnFailure,
+          with: {
+            message: 'Hello from retry step',
+          },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should have correct topological order for step with retry', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topsort = graphlib.alg.topsort(executionGraph);
+      expect(topsort).toEqual([
+        'retry_testRetryConnectorStep',
+        'testRetryConnectorStep',
+        'exitRetry(retry_testRetryConnectorStep)',
+      ]);
+    });
+
+    it('should have correct edges for step with retry', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual([
+        { v: 'retry_testRetryConnectorStep', w: 'testRetryConnectorStep' },
+        { v: 'testRetryConnectorStep', w: 'exitRetry(retry_testRetryConnectorStep)' },
+      ]);
+    });
+
+    it('should configure retry node correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const retryNode = executionGraph.node('retry_testRetryConnectorStep');
+      expect(retryNode).toEqual({
+        id: 'retry_testRetryConnectorStep',
+        type: 'enter-retry',
+        exitNodeId: 'exitRetry(retry_testRetryConnectorStep)',
+        configuration: {
+          'max-attempts': 3,
+          delay: '5s',
+        },
       });
     });
   });

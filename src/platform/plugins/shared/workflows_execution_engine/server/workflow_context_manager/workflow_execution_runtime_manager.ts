@@ -143,9 +143,9 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public setWorkflowError(error: Error | string): void {
+  public setWorkflowError(error: Error | string | undefined): void {
     this.workflowExecutionState.updateWorkflowExecution({
-      error: String(error),
+      error: error ? String(error) : undefined,
     });
   }
 
@@ -293,7 +293,6 @@ export class WorkflowExecutionRuntimeManager {
       },
       async () => {
         const startedStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
-
         // if there is a last step execution, fail it
         // if not, create a new step execution with fail
         const stepExecutionId = startedStepExecution?.id || undefined;
@@ -348,11 +347,11 @@ export class WorkflowExecutionRuntimeManager {
         this.workflowExecutionState.upsertStep({
           id: latestStepExecution.id,
           stepId,
-          status: ExecutionStatus.WAITING_FOR_INPUT,
+          status: ExecutionStatus.WAITING,
         });
 
         this.workflowExecutionState.updateWorkflowExecution({
-          status: ExecutionStatus.WAITING_FOR_INPUT,
+          status: ExecutionStatus.WAITING,
         });
       }
     );
