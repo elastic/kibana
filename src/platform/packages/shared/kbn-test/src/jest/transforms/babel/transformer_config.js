@@ -7,32 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  presets: [
-    [
-      require.resolve('@kbn/babel-preset/node_preset'),
+module.exports = (overrides = {}) => {
+  const nodePresetOptions = {
+    '@babel/preset-env': {
+      // disable built-in filtering, which is more performant but strips the import of `regenerator-runtime` required by EUI
+      useBuiltIns: false,
+      corejs: false,
+    },
+    defer_requires: {
+      enabled: true,
+    },
+    ...overrides,
+  };
+
+  return {
+    presets: [[require.resolve('@kbn/babel-preset/node_preset'), nodePresetOptions]],
+    overrides: [
       {
-        '@babel/preset-env': {
-          // disable built-in filtering, which is more performant but strips the import of `regenerator-runtime` required by EUI
-          useBuiltIns: false,
-          corejs: false,
-        },
+        exclude: require('@kbn/babel-preset/styled_components_files').USES_STYLED_COMPONENTS,
+        presets: [
+          [
+            require.resolve('@emotion/babel-preset-css-prop'),
+            {
+              autoLabel: 'always',
+              labelFormat: '[local]',
+              sourceMap: false,
+            },
+          ],
+        ],
       },
     ],
-  ],
-  overrides: [
-    {
-      exclude: require('@kbn/babel-preset/styled_components_files').USES_STYLED_COMPONENTS,
-      presets: [
-        [
-          require.resolve('@emotion/babel-preset-css-prop'),
-          {
-            autoLabel: 'always',
-            labelFormat: '[local]',
-            sourceMap: false,
-          },
-        ],
-      ],
-    },
-  ],
+  };
 };

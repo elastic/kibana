@@ -103,7 +103,13 @@ describe('defer_requires plugin - transform contract', () => {
       presets: [
         [
           require.resolve('./node_preset'),
-          { '@babel/preset-env': { modules: 'cjs' }, defer_requires: opts.defer_requires || {} },
+          {
+            '@babel/preset-env': { modules: 'cjs' },
+            defer_requires: {
+              enabled: true,
+              ...(opts.defer_requires || {}),
+            },
+          },
         ],
       ],
       generatorOpts: { compact: false },
@@ -371,7 +377,8 @@ describe('defer_requires plugin integration tests', () => {
       const babel = require('@babel/core');
       const src = '@kbn/test/src/jest/transforms/babel/transformer_config';
       // eslint-disable-next-line import/no-dynamic-require
-      const transformerConfig = require(src);
+      const createTransformerConfig = require(src);
+      const transformerConfig = createTransformerConfig();
       return babel.transformSync(input, {
         filename: opts.filename || 'file.js',
         sourceType: 'module',
@@ -502,7 +509,10 @@ describe('defer_requires plugin integration tests', () => {
             require.resolve('./node_preset'),
             {
               '@babel/preset-env': { modules: 'cjs' },
-              defer_requires: { disableStyledComponentsDynamicCreationWarning: false },
+              defer_requires: {
+                enabled: true,
+                disableStyledComponentsDynamicCreationWarning: false,
+              },
             },
           ],
         ],
