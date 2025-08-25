@@ -70,6 +70,8 @@ export const MlPageControlsContext = createContext<{
   setIsRightSectionMounted: (v: boolean) => void;
   headerRestrictWidth?: boolean | number;
   setHeaderRestrictWidth: (v: number | undefined) => void;
+  wrapHeader: boolean;
+  setWrapHeader: (v: boolean) => void;
 }>({
   setHeaderActionMenu: () => {},
   headerPortal: createHtmlPortalNode(),
@@ -83,6 +85,8 @@ export const MlPageControlsContext = createContext<{
   setIsRightSectionMounted: () => {},
   headerRestrictWidth: undefined,
   setHeaderRestrictWidth: () => {},
+  wrapHeader: false,
+  setWrapHeader: () => {},
 });
 
 /**
@@ -139,6 +143,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
     const [isRightSectionMounted, setIsRightSectionMounted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [headerRestrictWidth, setHeaderRestrictWidth] = useState<number | undefined>(undefined);
+    const [wrapHeader, setWrapHeader] = useState<boolean>(false);
 
     useEffect(() => {
       const subscriptions = new Subscription();
@@ -209,7 +214,12 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
         margin-inline: auto;
       `;
       return (
-        <EuiFlexGroup justifyContent="spaceBetween" css={styles} alignItems="center">
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          css={styles}
+          alignItems="center"
+          wrap={wrapHeader}
+        >
           <EuiPageHeaderSection>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               {isLeftSectionMounted ? (
@@ -246,6 +256,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
       isRightSectionMounted,
       leftHeaderPortalNode,
       rightHeaderPortalNode,
+      wrapHeader,
     ]);
     useDocTitle(activeRoute);
 
@@ -281,6 +292,8 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
           setIsRightSectionMounted,
           headerRestrictWidth,
           setHeaderRestrictWidth,
+          wrapHeader,
+          setWrapHeader,
         }}
       >
         {entryPoint === undefined ? (

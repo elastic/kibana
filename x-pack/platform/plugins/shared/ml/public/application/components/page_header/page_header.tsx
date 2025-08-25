@@ -16,8 +16,10 @@ export const MlPageHeader: FC<
     leftSideItems?: ReactNode | ReactNode[];
     rightSideItems?: ReactNode | ReactNode[];
     restrictWidth?: number;
+    // Allow the header to wrap onto multiple lines (stack actions under title on small screens)
+    wrapHeader?: boolean;
   }>
-> = ({ children, leftSideItems, rightSideItems, restrictWidth }) => {
+> = ({ children, leftSideItems, rightSideItems, restrictWidth, wrapHeader }) => {
   const {
     headerPortal,
     leftHeaderPortal,
@@ -26,6 +28,7 @@ export const MlPageHeader: FC<
     setIsLeftSectionMounted,
     setIsRightSectionMounted,
     setHeaderRestrictWidth,
+    setWrapHeader,
   } = useContext(MlPageControlsContext);
 
   useEffect(() => {
@@ -33,14 +36,16 @@ export const MlPageHeader: FC<
     setIsLeftSectionMounted(!!leftSideItems);
     setIsRightSectionMounted(!!rightSideItems);
     setHeaderRestrictWidth(restrictWidth);
+    setWrapHeader(!!wrapHeader);
     return () => {
       setIsHeaderMounted(false);
       setIsLeftSectionMounted(false);
       setIsRightSectionMounted(false);
       setHeaderRestrictWidth(undefined);
+      setWrapHeader(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [leftSideItems, rightSideItems, restrictWidth]);
+  }, [leftSideItems, rightSideItems, restrictWidth, wrapHeader]);
 
   return (
     <>

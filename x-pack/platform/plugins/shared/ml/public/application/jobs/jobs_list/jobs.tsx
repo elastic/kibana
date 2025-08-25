@@ -70,6 +70,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, r
   return (
     <>
       <MlPageHeader
+        wrapHeader
         rightSideItems={[
           <SuppliedConfigurationsButton />,
           <AnomalyDetectionSettingsButton />,
