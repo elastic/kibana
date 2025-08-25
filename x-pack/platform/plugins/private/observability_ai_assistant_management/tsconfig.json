@@ -30,7 +30,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/licensing-plugin"
   ],
   "exclude": ["target/**/*"]
 }
