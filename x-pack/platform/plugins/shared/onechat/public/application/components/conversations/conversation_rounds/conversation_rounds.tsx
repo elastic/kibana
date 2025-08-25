@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSendMessage } from '../../../context/send_message_context';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { ConversationContent } from '../conversation_grid';
@@ -19,6 +19,11 @@ import { RoundResponse } from './round_response';
 export const ConversationRounds: React.FC<{}> = () => {
   const conversationRounds = useConversationRounds();
   const { isResponseLoading, retry, error } = useSendMessage();
+
+  const stepsFromPrevRounds = useMemo(() => {
+    return conversationRounds.flatMap(({ steps }) => steps);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationRounds.length]); // only render when a new round is added. Do not re-render as the content streams
 
   return (
     <ConversationContent>
@@ -44,7 +49,12 @@ export const ConversationRounds: React.FC<{}> = () => {
                 isError ? (
                   <RoundError error={error} onRetry={retry} />
                 ) : (
-                  <RoundResponse response={response} steps={steps} isLoading={isLoading} />
+                  <RoundResponse
+                    response={response}
+                    stepsFromCurrentRound={steps}
+                    stepsFromPrevRounds={stepsFromPrevRounds}
+                    isLoading={isLoading}
+                  />
                 )
               }
             />

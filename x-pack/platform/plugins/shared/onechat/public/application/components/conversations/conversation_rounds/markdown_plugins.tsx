@@ -8,11 +8,12 @@ import type { Code, InlineCode, Parent, Text } from 'mdast';
 import type { Node } from 'unist';
 import { visit } from 'unist-util-visit';
 import { css } from '@emotion/css';
-import classNames from 'classnames';
 import React from 'react';
 import { ChartType } from '@kbn/visualization-utils';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
+import classNames from 'classnames';
+import { useEuiTheme } from '@elastic/eui';
 import type { OnechatStartDependencies } from '../../../../types';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 
@@ -42,10 +43,12 @@ export const toolResultPlugin = () => {
 
 export function getToolResultHandler({
   pluginsStart,
-  steps,
+  stepsFromCurrentRound,
+  stepsFromPrevRounds,
 }: {
   pluginsStart: OnechatStartDependencies;
-  steps: ConversationRoundStep[];
+  stepsFromCurrentRound: ConversationRoundStep[];
+  stepsFromPrevRounds: ConversationRoundStep[];
 }) {
   return (props: any) => {
     const { resultId, chartType } = props;
@@ -54,7 +57,7 @@ export function getToolResultHandler({
       return <p>Visualization requires a tool result ID.</p>;
     }
 
-    console.log('Looking for tool result ID:', resultId, 'in steps:', steps);
+    const steps = [...stepsFromPrevRounds, ...stepsFromCurrentRound];
 
     const toolResult = steps
       .filter((s) => s.type === 'tool_call')
@@ -106,6 +109,7 @@ export const loadingCursorPlugin = () => {
     textNode.value = textNode.value.replace(CURSOR, '');
 
     const indexOfNode = parent!.children.indexOf(textNode);
+
     parent!.children.splice(indexOfNode + 1, 0, {
       type: 'cursor' as Text['type'],
       value: CURSOR,
@@ -117,28 +121,32 @@ export const loadingCursorPlugin = () => {
   };
 };
 
-const cursorCss = css`
-  @keyframes blink {
-    0% {
-      opacity: 0;
-    }
-    50% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
+export const Cursor = () => {
+  const { euiTheme } = useEuiTheme();
 
-  animation: blink 1s infinite;
-  width: 10px;
-  height: 16px;
-  vertical-align: middle;
-  display: inline-block;
-  background: rgba(0, 0, 0, 0.25);
-`;
+  const cursorCss = css`
+    @keyframes blink {
+      0% {
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
 
-export const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
+    animation: blink 1s infinite;
+    width: 10px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    background: ${euiTheme.colors.backgroundLightText};
+  `;
+
+  return <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
+};
 
 export const esqlLanguagePlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {

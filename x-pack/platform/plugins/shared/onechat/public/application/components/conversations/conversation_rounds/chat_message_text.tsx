@@ -32,14 +32,15 @@ import {
 
 interface Props {
   content: string;
-  steps: ConversationRoundStep[];
+  stepsFromPrevRounds: ConversationRoundStep[];
+  stepsFromCurrentRound: ConversationRoundStep[];
 }
 
 /**
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
  */
-export function ChatMessageText({ content, steps }: Props) {
+export function ChatMessageText({ content, stepsFromPrevRounds, stepsFromCurrentRound }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
@@ -103,22 +104,23 @@ export function ChatMessageText({ content, steps }: Props) {
           </EuiTableRowCell>
         );
       },
-      toolresult: getToolResultHandler({
-        pluginsStart,
-        steps,
-      }),
+      // toolresult: getToolResultHandler({
+      //   pluginsStart,
+      //   stepsFromCurrentRound,
+      //   stepsFromPrevRounds,
+      // }),
     };
 
     return {
       parsingPluginList: [
         loadingCursorPlugin,
         esqlLanguagePlugin,
-        toolResultPlugin,
+        // toolResultPlugin,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,
     };
-  }, [pluginsStart, steps]);
+  }, [pluginsStart, stepsFromCurrentRound, stepsFromPrevRounds]);
 
   return (
     <EuiText size="s" className={containerClassName}>

@@ -16,17 +16,19 @@ import { RoundTimer } from './round_timer';
 
 export interface RoundResponseProps {
   response: AssistantResponse;
-  steps: ConversationRoundStep[];
+  stepsFromCurrentRound: ConversationRoundStep[];
+  stepsFromPrevRounds: ConversationRoundStep[];
   isLoading: boolean;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
   response: { message },
-  steps,
+  stepsFromCurrentRound,
+  stepsFromPrevRounds,
   isLoading,
 }) => {
   const { showTimer, elapsedTime, isStopped } = useTimer({ isLoading });
-  const showThinking = showTimer || steps.length > 0;
+  const showThinking = showTimer || stepsFromCurrentRound.length > 0;
 
   return (
     <EuiFlexGroup
@@ -39,7 +41,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       {showThinking && (
         <EuiFlexItem grow={false}>
           <RoundThinking
-            steps={steps}
+            steps={stepsFromCurrentRound}
             loadingIndicator={
               showTimer ? <RoundTimer elapsedTime={elapsedTime} isStopped={isStopped} /> : null
             }
@@ -48,7 +50,11 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       )}
 
       <EuiFlexItem>
-        <ChatMessageText content={message} steps={steps} />
+        <ChatMessageText
+          content={message}
+          stepsFromCurrentRound={stepsFromCurrentRound}
+          stepsFromPrevRounds={stepsFromPrevRounds}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
