@@ -49,6 +49,7 @@ const createRulesClientMock = () => {
     getSpaceId: jest.fn(),
     bulkGetRules: jest.fn(),
     bulkEdit: jest.fn(),
+    bulkEditRuleParamsWithReadAuth: jest.fn(),
     bulkDeleteRules: jest.fn(),
     bulkEnableRules: jest.fn(),
     bulkDisableRules: jest.fn(),

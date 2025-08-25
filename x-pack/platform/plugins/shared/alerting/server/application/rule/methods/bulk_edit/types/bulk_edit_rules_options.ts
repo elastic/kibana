@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KueryNode } from '@kbn/es-query';
+import type { ParamsModifier, ShouldIncrementRevision } from '../../../../../rules_client/common';
 import type {
   bulkEditRuleSnoozeScheduleSchema,
   bulkEditOperationsSchema,
@@ -18,17 +19,6 @@ import type { Rule } from '../../../../../../common';
 export type BulkEditRuleSnoozeSchedule = TypeOf<typeof bulkEditRuleSnoozeScheduleSchema>;
 export type BulkEditOperation = TypeOf<typeof bulkEditOperationSchema>;
 export type BulkEditOperations = TypeOf<typeof bulkEditOperationsSchema>;
-
-export type ParamsModifier<Params extends RuleParams> = (
-  rule: Rule<Params>
-) => Promise<ParamsModifierResult<Params>>;
-
-interface ParamsModifierResult<Params extends RuleParams> {
-  modifiedParams: Params;
-  isParamsUpdateSkipped: boolean;
-}
-
-export type ShouldIncrementRevision<Params extends RuleParams> = (params?: Params) => boolean;
 
 export type BulkEditFields = keyof Pick<
   RuleDomain,
