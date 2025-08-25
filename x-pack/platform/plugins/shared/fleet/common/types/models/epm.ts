@@ -485,6 +485,7 @@ export type RegistryVarType =
   | 'yaml'
   | 'string'
   | 'textarea'
+  | 'duration'
   | 'url';
 export enum RegistryVarsEntryKeys {
   name = 'name',
@@ -500,6 +501,8 @@ export enum RegistryVarsEntryKeys {
   secret = 'secret',
   hide_in_deployment_modes = 'hide_in_deployment_modes',
   full_width = 'full_width',
+  min_duration = 'min_duration',
+  max_duration = 'max_duration',
   url_allowed_schemes = 'url_allowed_schemes',
 }
 
@@ -524,6 +527,8 @@ export interface RegistryVarsEntry {
   };
   [RegistryVarsEntryKeys.hide_in_deployment_modes]?: string[];
   [RegistryVarsEntryKeys.full_width]?: boolean;
+  [RegistryVarsEntryKeys.min_duration]?: string;
+  [RegistryVarsEntryKeys.max_duration]?: string;
   [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
 }
 
