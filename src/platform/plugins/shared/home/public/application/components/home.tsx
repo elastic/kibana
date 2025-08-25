@@ -9,10 +9,18 @@
 
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
+import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  FavoritesClient,
+  FavoritesContextProvider,
+} from '@kbn/content-management-favorites-public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import type {
   FeatureCatalogueEntry,
@@ -24,8 +32,13 @@ import { AddData } from './add_data';
 import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
+import { PersonalizedRecentlyViewed } from './personalization/recently_viewed_table';
+import { ContentByTagTable } from './personalization/content_by_tag_table';
+import { PersonalizedDashboardsCreatedByUser } from './personalization/created_by_user';
+import { HomeFavoriteDashboards } from './personalization/favorite_dashboards';
 
 export const KEY_ENABLE_WELCOME = 'home:welcome:show';
+const HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY = 'home:solutions:hide';
 
 export interface HomeProps {
   addBasePath: (url: string) => string;
@@ -35,12 +48,16 @@ export interface HomeProps {
   urlBasePath: string;
   hasUserDataView: () => Promise<boolean>;
   isCloudEnabled: boolean;
+  recentlyAccessed?: ChromeRecentlyAccessedHistoryItem[];
+  userId?: string;
+  dashboards?: any[];
 }
-
 interface State {
   isLoading: boolean;
   isNewKibanaInstance: boolean;
   isWelcomeEnabled: boolean;
+  selectedTabId: string;
+  hideSolutionsSection: boolean;
 }
 
 export class Home extends Component<HomeProps, State> {
@@ -65,6 +82,9 @@ export class Home extends Component<HomeProps, State> {
       isLoading: isWelcomeEnabled,
       isNewKibanaInstance: false,
       isWelcomeEnabled,
+      selectedTabId: 'recentlyViewed', // <-- default tab id
+      hideSolutionsSection:
+        props.localStorage.getItem(HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY) === 'true',
     };
   }
 
@@ -75,7 +95,7 @@ export class Home extends Component<HomeProps, State> {
     body.classList.remove('isHomPage');
   }
 
-  public componentDidMount() {
+  public async componentDidMount() {
     this._isMounted = true;
     this.fetchIsNewKibanaInstance();
 
@@ -127,34 +147,144 @@ export class Home extends Component<HomeProps, State> {
       .sort((directoryA, directoryB) => (directoryA.order ?? -1) - (directoryB.order ?? -1));
   }
 
+  private getDashboardsByUser(dashboards: any[], userId?: string) {
+    if (!userId) return [];
+    const log = dashboards.filter((dashboard) => {
+      return dashboard.createdBy === userId;
+    });
+    return log;
+  }
+
+  private onSelectedTabChanged = (id: string) => {
+    this.setState({ selectedTabId: id });
+  };
+
+  private renderTabs(tabs: { id: string; name: string; content: React.ReactNode }[]) {
+    const { selectedTabId } = this.state;
+    return (
+      <KibanaPageTemplate.Section bottomBorder paddingSize="m">
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <EuiTabs
+              css={css`
+                padding-left: 24px;
+              `}
+            >
+              {tabs.map((tab) => (
+                <EuiTab
+                  key={tab.id}
+                  onClick={() => this.onSelectedTabChanged(tab.id)}
+                  isSelected={tab.id === selectedTabId}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+            <div css={{ marginTop: 16, display: 'flex', flexGrow: 1 }}>
+              {tabs.find((tab) => tab.id === selectedTabId)?.content}
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ContentByTagTable />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </KibanaPageTemplate.Section>
+    );
+  }
+
+  private hideSolutions = () => {
+    this.props.localStorage.setItem(HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY, 'true');
+    this.setState({ hideSolutionsSection: false });
+  };
+
   private renderNormal() {
-    const { addBasePath, solutions, isCloudEnabled } = this.props;
-    const { application, trackUiMetric } = getServices();
+    const { addBasePath, solutions, isCloudEnabled, userId, dashboards, recentlyAccessed } =
+      this.props;
+
+    const { application, trackUiMetric, http, userProfile } = getServices();
+    const dashboardFavoritesClient = new FavoritesClient('dashboards', 'dashboard', {
+      http,
+      userProfile,
+    });
+    // console.log(getServices());
     const isDarkMode = getServices().theme?.getTheme().darkMode ?? false;
     const devTools = this.findDirectoryById('console');
     const manageDataFeatures = this.getFeaturesByCategory('admin');
-
+    const dashboardsCreatedByUser = this.getDashboardsByUser(dashboards ?? [], userId);
+    const dashboardQueryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
     // Show card for console if none of the manage data plugins are available, most likely in OSS
     if (manageDataFeatures.length < 1 && devTools) {
       manageDataFeatures.push(devTools);
     }
-
+    const tabs = [
+      {
+        id: 'recentlyViewed',
+        name: i18n.translate('home.tabs.recentlyViewed', {
+          defaultMessage: 'Recents',
+        }),
+        content: (
+          <PersonalizedRecentlyViewed
+            recentlyAccessed={recentlyAccessed}
+            addBasePath={addBasePath}
+          />
+        ),
+      },
+      {
+        id: 'favoriteDashboards',
+        name: i18n.translate('home.tabs.favorites', {
+          defaultMessage: 'Favorites',
+        }),
+        content: (
+          <QueryClientProvider client={dashboardQueryClient}>
+            <FavoritesContextProvider favoritesClient={dashboardFavoritesClient}>
+              <HomeFavoriteDashboards dashboards={dashboards ?? []} addBasePath={addBasePath} />
+            </FavoritesContextProvider>
+          </QueryClientProvider>
+        ),
+      },
+      {
+        id: 'createdByUser',
+        name: i18n.translate('home.tabs.createdByUser', {
+          defaultMessage: 'Created by me',
+        }),
+        content: (
+          <PersonalizedDashboardsCreatedByUser
+            dashboards={dashboardsCreatedByUser}
+            addBasePath={addBasePath}
+          />
+        ),
+      },
+    ];
     return (
       <KibanaPageTemplate
         data-test-subj="homeApp"
         pageHeader={{
           bottomBorder: false,
-          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />,
+          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home!" />,
+          paddingSize: 's',
         }}
         panelled={false}
       >
-        <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
+        {this.renderTabs(tabs)}
 
         <AddData
           addBasePath={addBasePath}
           application={application}
           isDarkMode={isDarkMode}
           isCloudEnabled={isCloudEnabled}
+        />
+
+        <SolutionsSection
+          addBasePath={addBasePath}
+          solutions={solutions}
+          onHideSolutionsSection={this.hideSolutions}
+          hideSolutionsSection={this.state.hideSolutionsSection}
         />
 
         <ManageData
