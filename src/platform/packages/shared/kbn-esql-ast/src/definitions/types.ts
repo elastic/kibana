@@ -39,6 +39,7 @@ export const fieldTypes = [
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
+
 /**
  * All supported field types in ES|QL. This is all the types
  * that can come back in the table from a query.
@@ -136,6 +137,9 @@ export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFun
  */
 export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
 
+export const isFieldType = (str: string | undefined): str is FieldType =>
+  typeof str !== undefined && ([...fieldTypes] as string[]).includes(str as string);
+
 export const isParameterType = (str: string | undefined): str is FunctionParameterType =>
   typeof str !== undefined &&
   str !== 'unsupported' &&
@@ -163,28 +167,10 @@ export interface FunctionParameter {
   fieldsOnly?: boolean;
 
   /**
-   * if provided this means that the value must be one
-   * of the options in the array iff the value is a literal.
-   *
-   * String values are case insensitive.
-   *
-   * If the value is not a literal, this field is ignored because
-   * we can't check the return value of a function to see if it
-   * matches one of the options prior to runtime.
+   * A list of suggested values for this parameter.
    */
-  acceptedValues?: string[];
+  suggestedValues?: string[];
 
-  /**
-   * Must only be included _in addition to_ acceptedValues.
-   *
-   * If provided this is the list of suggested values that
-   * will show up in the autocomplete. If omitted, the acceptedValues
-   * will be used as suggestions.
-   *
-   * This is useful for functions that accept
-   * values that we don't want to show as suggestions.
-   */
-  literalSuggestions?: string[];
   mapParams?: string;
 }
 
@@ -263,6 +249,38 @@ export interface ValidationErrors {
       extraArgs: number;
     };
   };
+  wrongNumberArgsExact: {
+    message: string;
+    type: {
+      fn: string;
+      expected: number;
+      actual: number;
+    };
+  };
+  wrongNumberArgsVariadic: {
+    message: string;
+    type: {
+      fn: string;
+      validArgCounts: number[];
+      actual: number;
+    };
+  };
+  wrongNumberArgsAtLeast: {
+    message: string;
+    type: {
+      fn: string;
+      minArgs: number;
+      actual: number;
+    };
+  };
+  noMatchingCallSignature: {
+    message: string;
+    type: {
+      functionName: string;
+      argTypes: string;
+      validSignatures: string[];
+    };
+  };
   wrongArgumentNumberTooFew: {
     message: string;
     type: {
@@ -295,6 +313,10 @@ export interface ValidationErrors {
   unsupportedFunctionForCommandOption: {
     message: string;
     type: { name: string; command: string; option: string };
+  };
+  functionNotAllowedHere: {
+    message: string;
+    type: { name: string; locationName: string };
   };
   unsupportedLiteralOption: {
     message: string;

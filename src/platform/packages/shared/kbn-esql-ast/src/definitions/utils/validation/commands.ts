@@ -11,12 +11,11 @@ import { validateFunction } from './function';
 import { validateOption } from './option';
 import { validateColumnForCommand } from './column';
 import { errors } from '../errors';
-import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLCommand, ESQLMessage } from '../../../types';
 import type { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
 
 export const validateCommandArguments = (
   command: ESQLCommand,
-  ast: ESQLAst,
   context: ICommandContext = {
     userDefinedColumns: new Map(), // Ensure context is always defined
     fields: new Map(),
@@ -30,11 +29,9 @@ export const validateCommandArguments = (
         messages.push(
           ...validateFunction({
             fn: arg,
-            parentCommand: command.name,
-            parentOption: undefined,
+            parentCommand: command,
             context,
             callbacks,
-            parentAst: ast,
           })
         );
       } else if (isOptionNode(arg)) {

@@ -12,12 +12,12 @@ import type {
   ESQLColumn,
   ESQLCommand,
   ESQLFunction,
+  ESQLIdentifier,
   ESQLLocation,
   ESQLMessage,
   ESQLSource,
-  ESQLIdentifier,
 } from '../../types';
-import type { ErrorTypes, ErrorValues } from '../types';
+import type { ErrorTypes, ErrorValues, FunctionDefinition, Signature } from '../types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -64,6 +64,25 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name },
         }),
       };
+    case 'noMatchingCallSignature':
+      const signatureList = (out.validSignatures as unknown as string[])
+        .map((sig) => `- (${sig})`)
+        .join('\n  ');
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.noMatchingCallSignatures', {
+          defaultMessage: `The arguments to [{functionName}] don't match a valid call signature.
+
+Received ({argTypes}).
+
+Expected one of:
+  {validSignatures}`,
+          values: {
+            functionName: out.functionName,
+            argTypes: out.argTypes,
+            validSignatures: signatureList,
+          },
+        }),
+      };
     case 'wrongArgumentNumber':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.wrongArgumentExactNumber', {
@@ -73,6 +92,44 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
             fn: out.fn,
             numArgs: out.numArgs,
             passedArgs: out.passedArgs,
+          },
+        }),
+      };
+    case 'wrongNumberArgsVariadic':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsVariadic', {
+          defaultMessage: '[{fn}] expected {validArgCounts} arguments, but got {actual}.',
+          values: {
+            fn: out.fn,
+            validArgCounts: i18n.formatList(
+              'disjunction',
+              Array.from(out.validArgCounts).map(String)
+            ),
+            actual: out.actual,
+          },
+        }),
+      };
+    case 'wrongNumberArgsExact':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsExact', {
+          defaultMessage:
+            '[{fn}] expected {expected, plural, one {one argument} other {{expected} arguments}}, but got {actual}.',
+          values: {
+            fn: out.fn,
+            expected: out.expected,
+            actual: out.actual,
+          },
+        }),
+      };
+    case 'wrongNumberArgsAtLeast':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsAtLeast', {
+          defaultMessage:
+            '[{fn}] expected at least {minArgs, plural, one {one argument} other {{minArgs} arguments}}, but got {actual}.',
+          values: {
+            fn: out.fn,
+            minArgs: out.minArgs,
+            actual: out.actual,
           },
         }),
       };
@@ -156,6 +213,17 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           }
         ),
       };
+    case 'functionNotAllowedHere':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.functionNotAvailableInLocation', {
+          defaultMessage: 'Function [{name}] not allowed in [{locationName}]',
+          values: {
+            locationName: out.locationName,
+            name: out.name,
+          },
+        }),
+      };
+
     case 'fnUnsupportedAfterCommand':
       return {
         type: 'error',
@@ -347,8 +415,8 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         message: i18n.translate('kbn-esql-ast.esql.validation.licenseRequired', {
           defaultMessage: '{name} requires a {requiredLicense} license.',
           values: {
-            name: out.name,
-            requiredLicense: out.requiredLicense,
+            name: out.name.toUpperCase(),
+            requiredLicense: out.requiredLicense.toUpperCase(),
           },
         }),
       };
@@ -360,7 +428,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: {
             name: out.name,
             signatureDescription: out.signatureDescription,
-            requiredLicense: out.requiredLicense,
+            requiredLicense: out.requiredLicense.toUpperCase(),
           },
         }),
       };
@@ -429,12 +497,6 @@ export const errors = {
   tooManyForks: (command: ESQLCommand): ESQLMessage =>
     errors.byId('tooManyForks', command.location, {}),
 
-  noAggFunction: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
-    errors.byId('noAggFunction', fn.location, {
-      commandName: cmd.name,
-      expression: fn.text,
-    }),
-
   expressionNotAggClosed: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
     errors.byId('expressionNotAggClosed', fn.location, {
       commandName: cmd.name,
@@ -459,4 +521,97 @@ export const errors = {
     errors.byId('invalidJoinIndex', identifier.location, {
       identifier: identifier.name,
     }),
+
+  noMatchingCallSignature: (
+    fn: ESQLFunction,
+    definition: FunctionDefinition,
+    argTypes: string[]
+  ): ESQLMessage => {
+    const validSignatures = definition.signatures
+      .toSorted((a, b) => a.params.length - b.params.length)
+      .map((sig) => {
+        const definitionArgTypes = buildSignatureTypes(sig);
+        return `${definitionArgTypes}`;
+      });
+
+    return errors.byId('noMatchingCallSignature', fn.location, {
+      functionName: fn.name,
+      argTypes: argTypes.join(', '),
+      validSignatures,
+    });
+  },
+
+  licenseRequired: (fn: ESQLFunction, license: string): ESQLMessage =>
+    errors.byId('licenseRequired', fn.location, {
+      name: fn.name,
+      requiredLicense: license,
+    }),
+
+  licenseRequiredForSignature: (fn: ESQLFunction, signature: Signature): ESQLMessage => {
+    const signatureDescription = signature.params
+      .map((param) => `'${param.name}' of type '${param.type}'`) // TODO this isn't well i18n'd
+      .join(', ');
+
+    return errors.byId('licenseRequiredForSignature', fn.location, {
+      name: fn.name,
+      signatureDescription,
+      requiredLicense: signature.license!,
+    });
+  },
+
+  functionNotAllowedHere: (fn: ESQLFunction, locationName: string): ESQLMessage =>
+    errors.byId('functionNotAllowedHere', fn.location, {
+      name: fn.name,
+      locationName,
+    }),
+
+  wrongNumberArgs: (fn: ESQLFunction, definition: FunctionDefinition): ESQLMessage => {
+    const validArgCounts = new Set<number>();
+    let minParams: number | undefined;
+    for (const sig of definition.signatures) {
+      if (sig.minParams) {
+        minParams = sig.minParams;
+        break;
+      }
+
+      validArgCounts.add(sig.params.length);
+      validArgCounts.add(sig.params.filter((p) => !p.optional).length);
+    }
+
+    const arity = fn.args.length;
+    if (minParams !== undefined) {
+      return errors.byId('wrongNumberArgsAtLeast', fn.location, {
+        fn: fn.name,
+        minArgs: minParams,
+        actual: arity,
+      });
+    } else if (validArgCounts.size === 1) {
+      const expected = Array.from(validArgCounts)[0];
+      return errors.byId('wrongNumberArgsExact', fn.location, {
+        fn: fn.name,
+        expected,
+        actual: fn.args.length,
+      });
+    } else {
+      return errors.byId('wrongNumberArgsVariadic', fn.location, {
+        fn: fn.name,
+        validArgCounts: Array.from(validArgCounts),
+        actual: arity,
+      });
+    }
+  },
 };
+
+export const buildSignatureTypes = (sig: Signature) =>
+  sig.params
+    .map((param) => {
+      let ret = param.type as string;
+      if (sig.minParams) {
+        ret = '...' + ret;
+      }
+      if (param.optional) {
+        ret = `[${ret}]`;
+      }
+      return ret;
+    })
+    .join(', ');
