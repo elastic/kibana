@@ -26,6 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Controller } from 'react-hook-form';
 import { labels } from '../../../../utils/i18n';
+import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 
 interface AgentSettingsTabProps {
   control: any;
@@ -40,6 +41,8 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   isCreateMode,
   isFormDisabled,
 }) => {
+  const { labels: existingLabels, isLoading: labelsLoading } = useAgentLabels();
+
   return (
     <>
       <EuiSpacer size="l" />
@@ -214,6 +217,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     defaultMessage: 'Add one or more labels',
                   })}
                   selectedOptions={(field.value || []).map((l: string) => ({ label: l }))}
+                  options={existingLabels.map((label) => ({ label }))}
                   onCreateOption={(searchValue: string) => {
                     const newLabel = searchValue.trim();
                     if (!newLabel) return;
@@ -221,8 +225,9 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     field.onChange(next);
                   }}
                   onChange={(options) => field.onChange(options.map((o) => o.label))}
-                  isDisabled={isFormDisabled}
+                  isDisabled={isFormDisabled || labelsLoading}
                   isClearable
+                  isLoading={labelsLoading}
                 />
               )}
             />
