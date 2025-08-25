@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { IndexDetails } from '@kbn/cloud-security-posture-common';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { useLocation } from 'react-router-dom';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
@@ -33,15 +34,15 @@ import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,
   CNVM_NOT_INSTALLED_ACTION_SUBJ,
   THIRD_PARTY_INTEGRATIONS_NO_VULNERABILITIES_FINDINGS_PROMPT,
-  THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
 } from './test_subjects';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
 import type { PostureTypes } from '../../common/types_old';
-import { useAdd3PIntegrationRoute } from '../common/api/use_wiz_integration_route';
 import cloudsSVG from '../assets/illustrations/clouds.svg';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
-import vulnerabilitiesVendorsSVG from '../assets/illustrations/vulnerabilities_vendors.svg';
+import vulnerabilityVendorDarkSVG from '../assets/illustrations/vulnerability_vendor_dark.svg';
+import vulnerabilityVendorBrightSVG from '../assets/illustrations/vulnerability_vendor_bright.svg';
+import { ThirdPartyIntegrationsPopover } from './third_party_integration_popover';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -76,8 +77,8 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
 }) => {
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
-  const wizAddIntegrationLink = useAdd3PIntegrationRoute('wiz');
   const is3PSupportedPage = location.pathname.includes(findingsNavigation.vulnerabilities.path);
+  const isDarkMode = useKibanaIsDarkMode();
 
   return (
     <EuiFlexGroup>
@@ -95,9 +96,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
               <FormattedMessage
                 id="xpack.csp.vulnerabilties.intergationNoInstalledEmptyPrompt.promptTitle"
                 defaultMessage="Elastic’s Cloud Native {lineBreak} Vulnerability Management"
-                values={{
-                  lineBreak: <br />,
-                }}
+                values={{ lineBreak: <br /> }}
               />
             </h2>
           }
@@ -143,6 +142,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
           }
         />
       </EuiFlexItem>
+
       {is3PSupportedPage && (
         <EuiFlexItem>
           <EuiEmptyPrompt
@@ -152,8 +152,8 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
               <EmptyStatesIllustrationContainer>
                 <EuiImage
                   size="fullWidth"
-                  src={vulnerabilitiesVendorsSVG}
-                  alt="vulnerabilitiesVendorsSVG"
+                  src={isDarkMode ? vulnerabilityVendorDarkSVG : vulnerabilityVendorBrightSVG}
+                  alt={isDarkMode ? 'vulnerabilityVendorDarkSVG' : 'vulnerabilityVendorBrightSVG'}
                   role="presentation"
                 />
               </EmptyStatesIllustrationContainer>
@@ -181,20 +181,10 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
             actions={
               <EuiFlexGroup justifyContent="center">
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="primary"
-                    fill
-                    href={wizAddIntegrationLink}
-                    isDisabled={!wizAddIntegrationLink}
-                    data-test-subj={
-                      THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON
-                    }
-                  >
-                    <FormattedMessage
-                      id="xpack.csp.cloudPosturePage.3pIntegrationsNoVulnFindingsPrompt.addWizIntegrationButtonTitle"
-                      defaultMessage="Add Wiz Integration"
-                    />
-                  </EuiButton>
+                  <ThirdPartyIntegrationsPopover
+                    findingsType="vulnerability"
+                    buttonTestSubj="thirdPartyVulnerabilityIntegrationPopoverButton"
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
