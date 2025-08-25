@@ -10,27 +10,9 @@ import type { Attachments } from '../../../../../../common/types/domain';
 import { AttachmentType } from '../../../../../../common/types/domain';
 import { PageAttachmentType, PersistableAttachmentType } from '../types';
 
-export function buildObsCaseSummaryPrompt(caseData: Case): string {
+export function buildCaseActivityPrompt(caseData: Case): string {
   const { comments = [] } = caseData;
-
-  let prompt = '';
-
-  prompt += buildCaseActivitySummary(comments);
-  prompt += getAnalysisInstructions();
-
-  return prompt;
-}
-
-function getAnalysisInstructions() {
-  return `## Analysis Instructions\n
-  Provide a concise summary in 3-4 sentences without any title that includes:\n
-  1. The core issue or incident being reported\n
-  2. The potential impact or severity level\n
-  3. Any relevant patterns\n
-  4. Any Synthetics monitors attached\n
-  Apart from that, provide following numbers in bullet points: Alerts and SLOs, only if they are available in the format of <alerts_count> Alerts.\n
-  Suggest next steps for investigation.\n\n
-  Addiontial instructions: Focus on investigation related details and avoid referring to specific users.\n\n`;
+  return buildCaseActivitySummary(comments);
 }
 
 function buildCaseActivitySummary(comments: Attachments) {

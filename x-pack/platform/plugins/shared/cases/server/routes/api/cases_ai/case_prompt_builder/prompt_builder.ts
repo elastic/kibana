@@ -9,5 +9,60 @@ import type { Case } from '../../../../../common';
 
 export abstract class CasePromptBuilder {
   constructor(protected caseData: Case) {}
-  abstract buildSummary(): string;
+
+  protected abstract getOpeningInstructions(): string;
+
+  protected getCaseOverview(): string {
+    const {
+      title,
+      description,
+      tags = [],
+      severity,
+      category,
+      assignees = [],
+      status,
+      created_at: createdAt,
+      updated_at: updatedAt,
+    } = this.caseData;
+
+    const createdDate = new Date(createdAt).toLocaleString();
+    const updatedDate = updatedAt ? new Date(updatedAt).toLocaleString() : 'N/A';
+
+    let caseOverview = `## Case Overview\n
+  - **Title**: ${title}\n
+  - **Status**: ${status || 'N/A'}\n
+  - **Severity**: ${severity || 'N/A'}\n
+  - **Created**: ${createdDate}\n
+  - **Last Updated**: ${updatedDate}\n`;
+
+    if (category) caseOverview += `- **Category**: ${category}\n`;
+    if (tags.length > 0) caseOverview += `- **Tags**: ${tags.join(', ')}\n`;
+
+    if (assignees.length > 0) {
+      caseOverview += `- **Assigned to**: ${assignees.length} ${
+        assignees.length === 1 ? 'person' : 'people'
+      }\n\n`;
+    }
+
+    if (description) {
+      caseOverview += `## Description\n${description}\n\n`;
+    }
+
+    return caseOverview;
+  }
+
+  protected getAdditionalContext(): string {
+    return '';
+  }
+
+  protected abstract getAnalysisInstructions(): string;
+
+  buildSummary(): string {
+    return [
+      this.getOpeningInstructions(),
+      this.getCaseOverview(),
+      this.getAdditionalContext(),
+      this.getAnalysisInstructions(),
+    ].join('\n\n');
+  }
 }
