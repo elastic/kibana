@@ -33,6 +33,9 @@ const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
   defaultMessage: 'Static values list',
 });
 
+const removeInternalStateForSerialization = (state: ESQLControlState) =>
+  state.controlType === EsqlControlType.VALUES_FROM_QUERY ? omit(state, 'availableOptions') : state;
+
 export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLControlApi> => {
   return {
     type: ESQL_CONTROL,
@@ -50,7 +53,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         controlGroupApi?.replacePanel(uuid, {
           panelType: 'esqlControl',
           serializedState: {
-            rawState: updatedState,
+            rawState: removeInternalStateForSerialization(updatedState),
           },
         });
       };
@@ -61,11 +64,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
           ...selections.getLatestState(),
         };
 
-        const rawState =
-          latestState.controlType === EsqlControlType.VALUES_FROM_QUERY
-            ? omit(latestState, 'availableOptions')
-            : latestState;
-
+        const rawState = removeInternalStateForSerialization(latestState);
         return {
           rawState,
           references: [],

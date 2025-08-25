@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { omit } from 'lodash';
 import { EuiFlyoutBody } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
@@ -156,20 +155,15 @@ export function ESQLControlsFlyout({
 
   const onCreateControl = useCallback(async () => {
     if (controlState && controlState.availableOptions?.length) {
-      const controlStateToSave =
-        controlState.controlType === EsqlControlType.VALUES_FROM_QUERY
-          ? omit(controlState, 'availableOptions')
-          : controlState;
-
       if (!isControlInEditMode) {
         if (cursorPosition) {
           const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
-          await onSaveControl?.(controlStateToSave, query);
+          await onSaveControl?.(controlState, query);
         } else {
-          await onSaveControl?.(controlStateToSave, queryString);
+          await onSaveControl?.(controlState, queryString);
         }
       } else {
-        await onSaveControl?.(controlStateToSave, '');
+        await onSaveControl?.(controlState, '');
       }
     }
     closeFlyout();
