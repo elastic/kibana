@@ -42,7 +42,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
       const CLOUD_SETUP_MAPPING: CloudSetupConfig = {
         policyTemplate: ASSET_POLICY_TEMPLATE,
         defaultProvider: 'aws',
-        namespaceSupportEnabled: true,
+        namespaceSupportEnabled: false,
         name: i18n.translate('xpack.securitySolution.assetInventory.assetIntegration.nameTitle', {
           defaultMessage: 'Cloud Asset Discovery',
         }),

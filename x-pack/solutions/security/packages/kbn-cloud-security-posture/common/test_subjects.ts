@@ -63,7 +63,7 @@ export const AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
   CLIENT_ID: 'cloudSetupAzureClientId',
   CLIENT_SECRET: 'passwordInput-client-secret',
   CLIENT_CERTIFICATE_PATH: 'cloudSetupAzureClientCertificatePath',
-  CLIENT_CERTIFICATE_PASSWORD: 'cloudSetupAzureClientCertificatePassword',
+  CLIENT_CERTIFICATE_PASSWORD: 'passwordInput-client-certificate-password',
   CLIENT_USERNAME: 'cloudSetupAzureClientUsername',
   CLIENT_PASSWORD: 'cloudSetupAzureClientPassword',
 };
