@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, IToasts, NotificationsStart } from '@kbn/core/public';
+import type { CoreStart, IToasts } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { ReactElement, PropsWithChildren } from 'react';
 import type React from 'react';

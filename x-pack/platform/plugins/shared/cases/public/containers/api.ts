@@ -10,6 +10,7 @@ import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/const
 import { type DataView } from '@kbn/data-views-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { lastValueFrom } from 'rxjs';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { CaseCustomField, User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
@@ -108,7 +109,6 @@ import {
   constructCustomFieldsFilter,
 } from './utils';
 import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
-import { buildDataTableRecordList } from '@kbn/discover-utils';
 
 export const resolveCase = async ({
   caseId,
