@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { getConnectorType as getInferenceConnectorType } from './inference';
+// export { getConnectorType as getInferenceConnectorType } from './inference';
+export { getConnectorTypes as getInferenceConnectorTypes } from './inference';

@@ -74,6 +74,8 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
                 readOnly={!canSave}
                 isEdit={isEdit}
                 registerPreSubmitValidator={registerPreSubmitValidator}
+                // TODO: need a better solution for this - is actionTypeModel ever null? If so, what action should be taken?
+                actionTypeModel={actionTypeModel!}
               />
             </Suspense>
           </EuiErrorBoundary>

@@ -19,6 +19,7 @@ const solutionMap = {
 } as { [key: string]: SolutionView };
 
 const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+  actionTypeModel,
   isEdit,
 }) => {
   const {
@@ -65,6 +66,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       enforceAdaptiveAllocations={isServerless}
       currentSolution={currentSolution}
       toasts={toasts}
+      providerId={actionTypeModel.id}
     />
   );
 };

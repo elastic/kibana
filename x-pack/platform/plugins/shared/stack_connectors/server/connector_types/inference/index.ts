@@ -15,9 +15,9 @@ import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common/src/service_providers';
 import {
-  INFERENCE_CONNECTOR_TITLE,
-  INFERENCE_CONNECTOR_ID,
+  // INFERENCE_CONNECTOR_ID,
   ServiceProviderKeys,
   SUB_ACTION,
 } from '../../../common/inference/constants';
@@ -47,105 +47,113 @@ const deleteInferenceEndpoint = async (
     throw e;
   }
 };
+// For now, all provider types return the same config, but this can now be customized by provider id - either inline or via a registry.
+export const getConnectorTypes = (): Array<SubActionConnectorType<Config, Secrets>> => {
+  const providerIds = Object.keys(SERVICE_PROVIDERS);
+  return providerIds.map((provider) => {
+    const providerDef = SERVICE_PROVIDERS[provider];
+    return {
+      // TODO: if we change the .inference id - will this impact already created connectors with id .inference?
+      // Looks like it does
+      id: provider, // providerId,
+      name: providerDef.name, // providerName,
+      getService: (params) => new InferenceConnector(params),
+      schema: {
+        config: ConfigSchema,
+        secrets: SecretsSchema,
+      },
+      validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
+      supportedFeatureIds: [
+        GenerativeAIForSecurityConnectorFeatureId,
+        GenerativeAIForSearchPlaygroundConnectorFeatureId,
+        GenerativeAIForObservabilityConnectorFeatureId,
+      ],
+      minimumLicenseRequired: 'enterprise' as const,
+      preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {
+        const esClient = services.scopedClusterClient.asInternalUser;
+        try {
+          const taskSettings = config?.taskTypeConfig
+            ? {
+                ...unflattenObject(config?.taskTypeConfig),
+              }
+            : {};
+          const serviceSettings = {
+            ...unflattenObject(config?.providerConfig ?? {}),
+            ...unflattenObject(secrets?.providerSecrets ?? {}),
+          };
 
-export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
-  id: INFERENCE_CONNECTOR_ID,
-  name: INFERENCE_CONNECTOR_TITLE,
-  getService: (params) => new InferenceConnector(params),
-  schema: {
-    config: ConfigSchema,
-    secrets: SecretsSchema,
-  },
-  validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
-  supportedFeatureIds: [
-    GenerativeAIForSecurityConnectorFeatureId,
-    GenerativeAIForSearchPlaygroundConnectorFeatureId,
-    GenerativeAIForObservabilityConnectorFeatureId,
-  ],
-  minimumLicenseRequired: 'enterprise' as const,
-  preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {
-    const esClient = services.scopedClusterClient.asInternalUser;
-    try {
-      const taskSettings = config?.taskTypeConfig
-        ? {
-            ...unflattenObject(config?.taskTypeConfig),
+          let inferenceExists = false;
+          try {
+            await esClient?.inference.get({
+              inference_id: config?.inferenceId,
+              task_type: config?.taskType as InferenceTaskType,
+            });
+            inferenceExists = true;
+          } catch (e) {
+            /* throws error if inference endpoint by id does not exist */
           }
-        : {};
-      const serviceSettings = {
-        ...unflattenObject(config?.providerConfig ?? {}),
-        ...unflattenObject(secrets?.providerSecrets ?? {}),
-      };
+          if (!isUpdate && inferenceExists) {
+            throw new Error(
+              `Inference with id ${config?.inferenceId} and task type ${config?.taskType} already exists.`
+            );
+          }
 
-      let inferenceExists = false;
-      try {
-        await esClient?.inference.get({
-          inference_id: config?.inferenceId,
-          task_type: config?.taskType as InferenceTaskType,
-        });
-        inferenceExists = true;
-      } catch (e) {
-        /* throws error if inference endpoint by id does not exist */
-      }
-      if (!isUpdate && inferenceExists) {
-        throw new Error(
-          `Inference with id ${config?.inferenceId} and task type ${config?.taskType} already exists.`
-        );
-      }
+          if (isUpdate && inferenceExists && config && config.provider) {
+            // TODO: replace, when update API for inference endpoint exists
+            await deleteInferenceEndpoint(
+              config.inferenceId,
+              config.taskType as InferenceTaskType,
+              logger,
+              esClient
+            );
+          }
 
-      if (isUpdate && inferenceExists && config && config.provider) {
-        // TODO: replace, when update API for inference endpoint exists
+          await esClient?.inference.put({
+            inference_id: config?.inferenceId ?? '',
+            task_type: config?.taskType as InferenceTaskType,
+            inference_config: {
+              service: config!.provider,
+              service_settings: serviceSettings,
+              task_settings: taskSettings,
+            },
+          });
+          logger.debug(
+            `Inference endpoint for task type "${config?.taskType}" and inference id ${
+              config?.inferenceId
+            } was successfuly ${isUpdate ? 'updated' : 'created'}`
+          );
+        } catch (e) {
+          logger.warn(
+            `Failed to ${isUpdate ? 'update' : 'create'} inference endpoint for task type "${
+              config?.taskType
+            }" and inference id ${config?.inferenceId}. Error: ${e.message}`
+          );
+          throw e;
+        }
+      },
+      postSaveHook: async ({ config, logger, services, wasSuccessful, isUpdate }) => {
+        if (!wasSuccessful && !isUpdate) {
+          const esClient = services.scopedClusterClient.asInternalUser;
+          await deleteInferenceEndpoint(
+            config.inferenceId,
+            config.taskType as InferenceTaskType,
+            logger,
+            esClient
+          );
+        }
+      },
+      postDeleteHook: async ({ config, logger, services }) => {
+        const esClient = services.scopedClusterClient.asInternalUser;
         await deleteInferenceEndpoint(
           config.inferenceId,
           config.taskType as InferenceTaskType,
           logger,
           esClient
         );
-      }
-
-      await esClient?.inference.put({
-        inference_id: config?.inferenceId ?? '',
-        task_type: config?.taskType as InferenceTaskType,
-        inference_config: {
-          service: config!.provider,
-          service_settings: serviceSettings,
-          task_settings: taskSettings,
-        },
-      });
-      logger.debug(
-        `Inference endpoint for task type "${config?.taskType}" and inference id ${
-          config?.inferenceId
-        } was successfuly ${isUpdate ? 'updated' : 'created'}`
-      );
-    } catch (e) {
-      logger.warn(
-        `Failed to ${isUpdate ? 'update' : 'create'} inference endpoint for task type "${
-          config?.taskType
-        }" and inference id ${config?.inferenceId}. Error: ${e.message}`
-      );
-      throw e;
-    }
-  },
-  postSaveHook: async ({ config, logger, services, wasSuccessful, isUpdate }) => {
-    if (!wasSuccessful && !isUpdate) {
-      const esClient = services.scopedClusterClient.asInternalUser;
-      await deleteInferenceEndpoint(
-        config.inferenceId,
-        config.taskType as InferenceTaskType,
-        logger,
-        esClient
-      );
-    }
-  },
-  postDeleteHook: async ({ config, logger, services }) => {
-    const esClient = services.scopedClusterClient.asInternalUser;
-    await deleteInferenceEndpoint(
-      config.inferenceId,
-      config.taskType as InferenceTaskType,
-      logger,
-      esClient
-    );
-  },
-});
+      },
+    };
+  });
+};
 
 export const configValidator = (configObject: Config, validatorServices: ValidatorServices) => {
   try {

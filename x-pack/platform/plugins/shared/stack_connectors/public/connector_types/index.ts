@@ -12,10 +12,10 @@ import { getCasesWebhookConnectorType } from './cases_webhook';
 import { getEmailConnectorType } from './email';
 import { getIndexConnectorType } from './es_index';
 import { getJiraConnectorType } from './jira';
-import { getOpenAIConnectorType } from './openai';
-import { getBedrockConnectorType } from './bedrock';
-import { getGeminiConnectorType } from './gemini';
-import { getInferenceConnectorType } from './inference';
+// import { getOpenAIConnectorType } from './openai';
+// import { getBedrockConnectorType } from './bedrock';
+// import { getGeminiConnectorType } from './gemini';
+import { getInferenceConnectorTypes } from './inference';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getPagerDutyConnectorType } from './pagerduty';
 import { getResilientConnectorType } from './resilient';
@@ -68,9 +68,9 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getJiraConnectorType());
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
-  connectorTypeRegistry.register(getOpenAIConnectorType());
-  connectorTypeRegistry.register(getBedrockConnectorType());
-  connectorTypeRegistry.register(getGeminiConnectorType());
+  // connectorTypeRegistry.register(getOpenAIConnectorType());
+  // connectorTypeRegistry.register(getBedrockConnectorType());
+  // connectorTypeRegistry.register(getGeminiConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
   connectorTypeRegistry.register(getTorqConnectorType());
   connectorTypeRegistry.register(getTinesConnectorType());
@@ -85,7 +85,10 @@ export function registerConnectorTypes({
     connectorTypeRegistry.register(getCrowdStrikeConnectorType());
   }
   if (!ExperimentalFeaturesService.get().inferenceConnectorOff) {
-    connectorTypeRegistry.register(getInferenceConnectorType());
+    // connectorTypeRegistry.register(getInferenceConnectorType());
+    for (const connector of getInferenceConnectorTypes()) {
+      connectorTypeRegistry.register(connector);
+    }
   }
   if (ExperimentalFeaturesService.get().microsoftDefenderEndpointOn) {
     connectorTypeRegistry.register(getMicrosoftDefenderEndpointConnectorType());

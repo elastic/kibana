@@ -14,21 +14,27 @@ export const INFERENCE_CONNECTOR_TITLE = i18n.translate(
   }
 );
 
+// TODO: this is duplicated in the package - is this one still used? It was also out of date
+// Might need to combine package and plugin to avoid duplication
 export enum ServiceProviderKeys {
+  'alibabacloud-ai-search' = 'alibabacloud-ai-search',
   amazonbedrock = 'amazonbedrock',
-  azureopenai = 'azureopenai',
+  'amazon_sagemaker' = 'amazon_sagemaker',
+  anthropic = 'anthropic',
   azureaistudio = 'azureaistudio',
+  azureopenai = 'azureopenai',
   cohere = 'cohere',
+  deepseek = 'deepseek',
+  elastic = 'elastic',
   elasticsearch = 'elasticsearch',
   googleaistudio = 'googleaistudio',
   googlevertexai = 'googlevertexai',
   hugging_face = 'hugging_face',
+  jinaai = 'jinaai',
   mistral = 'mistral',
   openai = 'openai',
-  anthropic = 'anthropic',
+  voyageai = 'voyageai',
   watsonxai = 'watsonxai',
-  'alibabacloud-ai-search' = 'alibabacloud-ai-search',
-  elastic = 'elastic',
 }
 
 export const INFERENCE_CONNECTOR_ID = '.inference';

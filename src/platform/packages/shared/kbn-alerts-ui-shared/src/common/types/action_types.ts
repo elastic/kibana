@@ -29,6 +29,7 @@ export interface ActionConnectorFieldsProps {
   readOnly: boolean;
   isEdit: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
+  actionTypeModel: ActionTypeModel;
 }
 
 export interface ActionConnectorProps<Config, Secrets> {

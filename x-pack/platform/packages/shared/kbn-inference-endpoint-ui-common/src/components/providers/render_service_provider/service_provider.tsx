@@ -53,7 +53,12 @@ interface ServiceProviderRecord {
   icon: string;
   name: string;
   solutions: ProviderSolution[];
+  // Optional default configuration for the service provider
+  defaults?: Record<string, any>;
 }
+// TODO: This should probably live somewhere else - should we combine the package and the plugin into a plugin and keep all inference related things there?
+// need to move all default config to be with this as well (from x-pack/platform/plugins/shared/stack_connectors/common/openai/constants.ts)
+export const DEFAULT_OPENAI_MODEL = 'gpt-4.1';
 
 export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecord> = {
   [ServiceProviderKeys.amazonbedrock]: {
@@ -120,6 +125,9 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     icon: openAIIcon,
     name: 'OpenAI',
     solutions: ['Observability', 'Security', 'Search'],
+    defaults: {
+      model_id: DEFAULT_OPENAI_MODEL,
+    },
   },
   [ServiceProviderKeys['alibabacloud-ai-search']]: {
     icon: alibabaCloudIcon,
