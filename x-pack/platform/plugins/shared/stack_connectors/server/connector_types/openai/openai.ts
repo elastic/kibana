@@ -289,7 +289,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
     const parentSpan = trace.getActiveSpan();
-    parentSpan?.setAttribute('openai.raw_request', body);
+    parentSpan?.setAttribute('openai.raw_request', executeBody);
 
     const executeBody = getRequestWithStreamOption(
       this.provider,
