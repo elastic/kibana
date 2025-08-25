@@ -22,7 +22,8 @@ export class EnterForeachNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    const foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id);
+    this.wfExecutionRuntimeManager.enterScope();
+    let foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id);
 
     if (!foreachState) {
       await this.wfExecutionRuntimeManager.startStep(this.step.id);
@@ -52,26 +53,27 @@ export class EnterForeachNodeImpl implements StepImplementation {
       );
 
       // Initialize foreach state
-      await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
+      foreachState = {
         items: evaluatedItems,
         item: evaluatedItems[0],
         index: 0,
         total: evaluatedItems.length,
-      });
+      };
     } else {
       // Update items and index if they have changed
       const items = foreachState.items;
       const index = foreachState.index + 1;
       const item = items[index];
       const total = foreachState.total;
-      await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
+      foreachState = {
         items,
         index,
         item,
         total,
-      });
+      };
     }
 
+    await this.wfExecutionRuntimeManager.setStepState(this.step.id, foreachState);
     this.wfExecutionRuntimeManager.goToNextStep();
   }
 

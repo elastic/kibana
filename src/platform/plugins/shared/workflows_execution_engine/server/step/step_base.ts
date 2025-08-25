@@ -36,6 +36,10 @@ export interface StepImplementation {
   run(): Promise<void>;
 }
 
+export interface StepErrorCatcher {
+  catchError(): Promise<void>;
+}
+
 export abstract class StepBase<TStep extends BaseStep> implements StepImplementation {
   protected step: TStep;
   protected contextManager: WorkflowContextManager;
@@ -73,10 +77,10 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
 
     try {
       const result = await this._run(input);
-      await this.workflowExecutionRuntime.setStepResult(stepId, result);
+      await this.workflowExecutionRuntime.setStepResult(result);
     } catch (error) {
       const result = await this.handleFailure(input, error);
-      await this.workflowExecutionRuntime.setStepResult(stepId, result);
+      await this.workflowExecutionRuntime.setStepResult(result);
     } finally {
       await this.workflowExecutionRuntime.finishStep(stepId);
     }

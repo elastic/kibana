@@ -662,12 +662,13 @@ export class WorkflowsService {
     return this.searchWorkflowLogs(query, params.sortOrder);
   }
 
-  public async getWorkflowStats(): Promise<WorkflowStatsDto | null> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+  public async getWorkflowStats(spaceId: string): Promise<WorkflowStatsDto | null> {
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
     try {
       const [workflowStatusStats, workflowExecutionStatusStats] = await Promise.all([
         this.getWorkflowStatusStats(savedObjectsClient),
-        this.getWorkflowExecutionStatusStats(),
+        this.getWorkflowExecutionStatusStats(spaceId),
       ]);
 
       return {
@@ -685,8 +686,9 @@ export class WorkflowsService {
     }
   }
 
-  public async getWorkflowAggs(fields: string[]): Promise<WorkflowAggsDto | null> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+  public async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto | null> {
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
     try {
       const aggs = fields.reduce<Record<string, object>>((acc, field) => {
         acc[field] = {
@@ -772,7 +774,7 @@ export class WorkflowsService {
     );
   }
 
-  private async getWorkflowExecutionStatusStats() {
+  private async getWorkflowExecutionStatusStats(spaceId: string) {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
@@ -781,11 +783,18 @@ export class WorkflowsService {
       index: this.workflowsExecutionIndex,
       size: 0, // no hits, just aggregations
       query: {
-        range: {
-          startedAt: {
-            gte: 'now-30d/d',
-            lt: 'now+1d/d',
-          },
+        bool: {
+          filter: [
+            { term: { spaceId } },
+            {
+              range: {
+                startedAt: {
+                  gte: 'now-30d/d',
+                  lt: 'now+1d/d',
+                },
+              },
+            },
+          ],
         },
       },
       aggs: {
