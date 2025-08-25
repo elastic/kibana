@@ -4062,13 +4062,13 @@
         "nunjucks"
       ],
       "reviewers": [
-        "team:security-scalability"
+        "team:integration-experience"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Security-Scalability",
+        "Team:Integration-Experience",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4081,13 +4081,13 @@
         "oas"
       ],
       "reviewers": [
-        "team:security-scalability"
+        "team:integration-experience"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Security-Scalability",
+        "Team:Integration-Experience",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4101,13 +4101,13 @@
         "@types/seedrandom"
       ],
       "reviewers": [
-        "team:security-scalability"
+        "team:integration-experience"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Security-Scalability",
+        "Team:Integration-Experience",
         "release_note:skip",
         "backport:all-open"
       ],
