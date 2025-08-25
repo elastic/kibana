@@ -108,6 +108,7 @@ import {
   constructCustomFieldsFilter,
 } from './utils';
 import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
 
 export const resolveCase = async ({
   caseId,
@@ -699,5 +700,8 @@ export const searchEvents = async (
     throw new AbortError();
   }
 
-  return response;
+  return buildDataTableRecordList({
+    dataView,
+    records: response?.rawResponse?.hits?.hits ?? [],
+  });
 };

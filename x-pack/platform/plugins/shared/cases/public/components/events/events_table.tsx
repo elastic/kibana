@@ -13,7 +13,6 @@ import { DataLoadingState, type SortOrder, UnifiedDataTable } from '@kbn/unified
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { buildDataTableRecordList } from '@kbn/discover-utils';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { AttachmentType, type EventAttachment } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui';
@@ -22,6 +21,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { useGetEvents } from '../../containers/use_get_events';
 import { EVENTS_TABLE } from './translations';
 import { useEventsDataView } from './use_events_data_view';
+import { useGetActions } from './use_get_actions';
 
 const defaultSort: SortOrder[] = [];
 
@@ -60,11 +60,6 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
     eventIds: events.flatMap((event) => event.eventId),
   });
 
-  const rows = buildDataTableRecordList({
-    dataView: eventsDataView,
-    records: eventsResponse.data?.rawResponse?.hits?.hits ?? [],
-  });
-
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord>();
 
   const handleRemoveColumn = useCallback(
@@ -81,6 +76,8 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
     (column: string): void => setColumns((previousColumns) => [...previousColumns, column]),
     []
   );
+
+  const getTriggerCompatibleActions = useGetActions();
 
   const handleRenderDocumentView = useCallback(() => {
     if (!expandedDoc) {
@@ -130,9 +127,7 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
         </>
       )}
       <EuiSpacer size="s" />
-      <CellActionsProvider
-        getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
-      >
+      <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
         <UnifiedDataTable
           consumer="cases"
           onSetColumns={setColumns}
@@ -149,7 +144,7 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
           setExpandedDoc={setExpandedDoc}
           expandedDoc={expandedDoc}
           renderDocumentView={handleRenderDocumentView}
-          rows={rows}
+          rows={eventsResponse.data}
         />
       </CellActionsProvider>
     </>
