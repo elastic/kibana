@@ -23,13 +23,29 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 const getSectionIdTestSubj = (sectionId: NavigationId) => `~nav-item-${sectionId}`;
 
-const TIMEOUT_CHECK = 3000;
+const TIMEOUT_CHECK = 30000;
 
 export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getService'>) {
   const testSubjects = ctx.getService('testSubjects');
   const browser = ctx.getService('browser');
   const retry = ctx.getService('retry');
   const log = ctx.getService('log');
+
+  async function getSideNavVersion(): Promise<'v1' | 'v2'> {
+    const sidenav = await testSubjects.find('~projectSideNav', TIMEOUT_CHECK);
+    const dataTestSubj = await sidenav.getAttribute('data-test-subj');
+    if (dataTestSubj && dataTestSubj.includes('projectSideNavV2')) return 'v2';
+    return 'v1';
+  }
+
+  async function noopIfV2() {
+    const version = await getSideNavVersion();
+    if (version === 'v2') {
+      log.debug('SolutionNavigation.noopIfV2 - skipping action for v2 sidenav');
+      return true;
+    }
+    return false;
+  }
 
   async function getByVisibleText(
     selector: string | (() => Promise<WebElementWrapper[]>),
@@ -58,6 +74,17 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     },
     // side nav related actions
     sidenav: {
+      async getVersion() {
+        return getSideNavVersion();
+      },
+      async skipIfV2(mochaContext: Mocha.Context) {
+        const version = await getSideNavVersion();
+        if (version === 'v2') {
+          log.debug('SolutionNavigation.sidenav.skipIfV2 - skipping test for v2 sidenav');
+          mochaContext.skip();
+          return true;
+        }
+      },
       async expectLinkExists(
         by:
           | { deepLinkId: AppDeepLinkId }
@@ -166,33 +193,59 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       async clickPanelLink(deepLinkId: string) {
         await testSubjects.click(`~panelNavItem-id-${deepLinkId}`);
       },
+      /**
+       * @deprecated - new side nav doesn't have accordion sections
+       * @param sectionId
+       */
       async expectSectionExists(sectionId: NavigationId) {
+        if (await noopIfV2()) return;
         log.debug('SolutionNavigation.sidenav.expectSectionExists', sectionId);
+
         await testSubjects.existOrFail(getSectionIdTestSubj(sectionId), { timeout: TIMEOUT_CHECK });
       },
+      /**
+       * @deprecated - new side nav doesn't have accordion sections
+       * @param sectionId
+       */
       async isSectionOpen(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
+
         const collapseBtn = await testSubjects.find(`~accordionArrow-${sectionId}`);
         const isExpanded = await collapseBtn.getAttribute('aria-expanded');
         return isExpanded === 'true';
       },
+      /**
+       * @deprecated - new side nav doesn't have accordion sections
+       * @param sectionId
+       */
       async expectSectionOpen(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.expectSectionOpen', sectionId);
+        if (await noopIfV2()) return;
         await this.expectSectionExists(sectionId);
         await retry.waitFor(`section ${sectionId} to be open`, async () => {
           const isOpen = await this.isSectionOpen(sectionId);
           return isOpen;
         });
       },
+      /**
+       * @deprecated - new side nav doesn't have accordion sections
+       * @param sectionId
+       */
       async expectSectionClosed(sectionId: NavigationId) {
+        if (await noopIfV2()) return;
         await this.expectSectionExists(sectionId);
         await retry.waitFor(`section ${sectionId} to be closed`, async () => {
           const isOpen = await this.isSectionOpen(sectionId);
           return !isOpen;
         });
       },
+      /**
+       * @deprecated - new side nav doesn't have accordion sections
+       * @param sectionId
+       */
       async openSection(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.openSection', sectionId);
+        if (await noopIfV2()) return;
         await this.expectSectionExists(sectionId);
         const isOpen = await this.isSectionOpen(sectionId);
         if (isOpen) return;
@@ -200,8 +253,13 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await collapseBtn.click();
         await this.expectSectionOpen(sectionId);
       },
+      /**
+       * @deprecated - new side nav doesn't have accordion sections
+       * @param sectionId
+       */
       async closeSection(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
+        if (await noopIfV2()) return;
         const isOpen = await this.isSectionOpen(sectionId);
         if (!isOpen) return;
         const collapseBtn = await testSubjects.find(`~accordionArrow-${sectionId}`, TIMEOUT_CHECK);

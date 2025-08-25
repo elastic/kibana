@@ -9,4 +9,5 @@ enabled:
   - x-pack/solutions/search/test/functional_search/config/config.feature_flags.ts
   - x-pack/solutions/search/test/api_integration/apis/search_playground/config.ts
   - x-pack/solutions/search/test/functional_solution_sidenav/config.ts
+  - x-pack/solutions/search/test/functional_solution_sidenav/config.nav_v2.ts
   - x-pack/solutions/search/test/accessibility/config.ts
