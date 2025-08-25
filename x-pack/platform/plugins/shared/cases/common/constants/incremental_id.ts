@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export { modelVersion1 } from './model_version_1';
-export { modelVersion2 } from './model_version_2';
-export { modelVersion3 } from './model_version_3';
-export { modelVersion4 } from './model_version_4';
+export const DEFAULT_TASK_INTERVAL_MINUTES = 1;
+export const DEFAULT_TASK_START_DELAY_MINUTES = 1;

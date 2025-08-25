@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export { modelVersion1 } from './model_version_1';
-export { modelVersion2 } from './model_version_2';
-export { modelVersion3 } from './model_version_3';
-export { modelVersion4 } from './model_version_4';
+import type { CoreSetup } from '@kbn/core/server';
+import { ADVANCED_SETTINGS_CONFIG } from './settings';
+
+export const registerUiSettings = (core: CoreSetup) => {
+  core.uiSettings.register(ADVANCED_SETTINGS_CONFIG);
+};
