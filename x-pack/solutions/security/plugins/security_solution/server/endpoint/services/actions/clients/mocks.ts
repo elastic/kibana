@@ -84,6 +84,7 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
     scan: jest.fn().mockReturnValue(Promise.resolve()),
     runscript: jest.fn().mockReturnValue(Promise.resolve()),
     getCustomScripts: jest.fn().mockReturnValue(Promise.resolve()),
+    cancel: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
