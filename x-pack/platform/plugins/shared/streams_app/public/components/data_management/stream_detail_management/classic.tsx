@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import type { ManagementTabs } from './wrapper';
@@ -17,12 +17,15 @@ import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
+import { StreamDetailDataQuality } from '../../stream_data_quality';
+import { StreamDetailDataQualityIndicator } from '../../stream_badges';
 
 const classicStreamManagementSubTabs = [
   'enrich',
   'advanced',
   'lifecycle',
   'significantEvents',
+  'dataQuality',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
@@ -112,6 +115,29 @@ export function ClassicStreamDetailManagement({
     };
     tabs.enrich = enrich;
   }
+
+  tabs.dataQuality = {
+    content: <StreamDetailDataQuality definition={definition} />,
+    label: (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem>
+          <EuiToolTip
+            content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
+              defaultMessage: 'View details about this classic stream’s data quality',
+            })}
+          >
+            <span>
+              {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+                defaultMessage: 'Data quality',
+              })}
+            </span>
+          </EuiToolTip>
+        </EuiFlexItem>
+        <StreamDetailDataQualityIndicator definition={definition} />
+        <EuiFlexItem />
+      </EuiFlexGroup>
+    ),
+  };
 
   if (definition.privileges.manage) {
     tabs.advanced = {

@@ -43,4 +43,5 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
   },
   showCurrentQualityIssues: false,
   qualityIssuesChart: 'degraded' as QualityIssueType,
+  view: 'classic',
 };

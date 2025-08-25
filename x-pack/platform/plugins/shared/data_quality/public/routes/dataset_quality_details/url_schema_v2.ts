@@ -21,6 +21,7 @@ export const getStateFromUrlValue = (
     showCurrentQualityIssues: urlValue.showCurrentQualityIssues,
     qualityIssuesChart: urlValue.qualityIssuesChart,
     expandedQualityIssue: urlValue.expandedQualityIssue,
+    view: 'classic',
   });
 
 export const getUrlValueFromState = (

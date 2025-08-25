@@ -26,6 +26,7 @@ export const getStateFromUrlValue = (
           type: 'degraded',
         }
       : undefined,
+    view: 'classic',
   });
 
 export const getUrlValueFromState = (

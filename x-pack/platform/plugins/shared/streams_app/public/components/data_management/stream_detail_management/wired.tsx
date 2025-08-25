@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
@@ -15,6 +15,8 @@ import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
+import { StreamDetailDataQuality } from '../../stream_data_quality';
+import { StreamDetailDataQualityIndicator } from '../../stream_badges';
 
 const wiredStreamManagementSubTabs = [
   'route',
@@ -22,6 +24,7 @@ const wiredStreamManagementSubTabs = [
   'schemaEditor',
   'lifecycle',
   'significantEvents',
+  'dataQuality',
 ] as const;
 
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
@@ -83,6 +86,28 @@ export function WiredStreamDetailManagement({
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
         defaultMessage: 'Schema editor',
       }),
+    },
+    dataQuality: {
+      content: <StreamDetailDataQuality definition={definition} />,
+      label: (
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <EuiToolTip
+              content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
+                defaultMessage: 'View details about this classic stream’s data quality',
+              })}
+            >
+              <span>
+                {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+                  defaultMessage: 'Data quality',
+                })}
+              </span>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <StreamDetailDataQualityIndicator definition={definition} />
+          <EuiFlexItem />
+        </EuiFlexGroup>
+      ),
     },
     ...otherTabs,
   };
