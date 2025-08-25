@@ -142,16 +142,28 @@ class SavedObjectFinderUiClass extends React.Component<
 
     const types = visibleTypes ?? Object.keys(metaDataMap);
 
-    const response = await contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
-      contentTypes: types.map((type) => ({ contentTypeId: type })),
-      query: {
-        text: queryText ? `${queryText}*` : undefined,
-        ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
-        limit: uiSettings.get(LISTING_LIMIT_SETTING), // TODO: support pagination,
-      },
+    // dashboard can't be retrieved with mSearch, so we're firing separate search requests per type
+    const responses = await Promise.all(
+      types.map(
+        async (contentTypeId: string) =>
+          await contentClient.search<SavedObjectCommon<FinderAttributes>>({
+            contentTypeId,
+            query: {
+              text: queryText ? `${queryText}*` : undefined,
+              ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
+              limit: uiSettings.get(LISTING_LIMIT_SETTING), // TODO: support pagination,
+            },
+          })
+      )
+    );
+
+    const hits: SavedObjectFinderItem[] = [];
+
+    responses.forEach((response) => {
+      hits.push(...response.hits);
     });
 
-    const savedObjects = response.hits
+    const savedObjects = hits
       .map((savedObject) => {
         const {
           attributes: { name, title, description },
@@ -282,9 +294,12 @@ class SavedObjectFinderUiClass extends React.Component<
             },
             'data-test-subj': 'savedObjectFinderType',
             render: (_, item) => {
+              if (!item) return null;
               const currentSavedObjectMetaData = savedObjectMetaData.find(
                 (metaData) => metaData.type === item.type
               )!;
+
+              console.log({ item });
               const iconType = (
                 currentSavedObjectMetaData ||
                 ({
