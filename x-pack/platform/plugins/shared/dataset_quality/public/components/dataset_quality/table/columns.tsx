@@ -480,7 +480,7 @@ const RedirectLink = ({
 }) => {
   const { sendTelemetry } = useDatasetRedirectLinkTelemetry({ rawName: dataStreamStat.rawName });
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat,
+    dataStreamStat: `${dataStreamStat.rawName},${dataStreamStat.rawName}${FAILURE_STORE_SELECTOR}`,
     sendTelemetry,
     timeRangeConfig: timeRange,
   });
