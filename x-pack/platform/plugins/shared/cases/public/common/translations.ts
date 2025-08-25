@@ -412,6 +412,13 @@ export const DISMISS = i18n.translate('xpack.cases.suggestions.button.dismiss', 
   defaultMessage: 'Dismiss',
 });
 
+export const DISMISS_SUGGESTION_ARIA_LABEL = i18n.translate(
+  'xpack.cases.suggestions.button.dismissAriaLabel',
+  {
+    defaultMessage: 'Dismiss suggestion',
+  }
+);
+
 export const ADD_TO_CASE = i18n.translate('xpack.cases.suggestions.button.addToCase', {
   defaultMessage: 'Add to Case',
 });

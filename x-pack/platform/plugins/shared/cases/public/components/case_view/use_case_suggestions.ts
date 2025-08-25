@@ -7,18 +7,16 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { SuggestionItem } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { getCaseSuggestions } from '../../containers/api';
-import type { SuggestionType } from '../../client/attachment_framework/types';
 
 const MAX_SUGGESTIONS = 2;
 
 export const useCaseSuggestions = ({ caseData }: { caseData: CaseUI }) => {
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['suggestions', caseData.id],
     queryFn: () => getCaseSuggestions({ caseId: caseData.id }),
     refetchOnWindowFocus: false,
@@ -28,39 +26,26 @@ export const useCaseSuggestions = ({ caseData }: { caseData: CaseUI }) => {
 
   const componentById = useMemo(
     () =>
-      new Map(attachmentSuggestionRegistry.list().map((component) => [component.id, component])),
+      new Map(
+        attachmentSuggestionRegistry
+          .list()
+          .map((suggestion) => [suggestion.id, suggestion.children])
+      ),
     [attachmentSuggestionRegistry]
   );
 
-  const suggestionAttachmentsWithInjectedComponent: (SuggestionItem & {
-    injectedComponent: SuggestionType['children'];
-  })[] = useMemo(() => {
-    return (data?.suggestions ?? []).flatMap((suggestion) => {
-      const component = componentById.get(suggestion.componentId);
-      if (!component) {
-        return [];
-      }
-      return [
-        {
-          ...suggestion,
-          injectedComponent: component.children,
-        },
-      ];
-    });
-  }, [data?.suggestions, componentById]);
-
   const visibleSuggestions = useMemo(
     () =>
-      suggestionAttachmentsWithInjectedComponent
+      (data?.suggestions || [])
         .filter(({ id }) => !dismissedIds.includes(id))
         .slice(0, MAX_SUGGESTIONS),
-    [suggestionAttachmentsWithInjectedComponent, dismissedIds]
+    [data?.suggestions, dismissedIds]
   );
 
   return {
     isLoadingSuggestions: isLoading,
     visibleSuggestions,
-    refetchSuggestions: refetch,
     setDismissedIds,
+    componentById,
   };
 };

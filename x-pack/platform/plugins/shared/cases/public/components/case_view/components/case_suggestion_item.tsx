@@ -28,22 +28,31 @@ export const CaseSuggestionItem = ({
   suggestion,
   caseData,
   setDismissedIds,
+  componentById,
 }: {
-  suggestion: SuggestionItem & {
-    injectedComponent: SuggestionType['children'];
-  };
+  suggestion: SuggestionItem;
   caseData: CaseUI;
   setDismissedIds: (callback: (prev: string[]) => string[]) => void;
+  componentById: Map<string, SuggestionType['children']>;
 }) => {
-  const { isAddingSuggestionToCase, onAddSuggestionToCase, onDismissSuggestion } =
-    useCaseSuggestionItem({
-      suggestion,
-      caseData,
-      setDismissedIds,
-    });
+  const {
+    isAddingSuggestionToCase,
+    onAddSuggestionToCase,
+    onDismissSuggestion,
+    InjectedComponent,
+  } = useCaseSuggestionItem({
+    suggestion,
+    caseData,
+    setDismissedIds,
+    componentById,
+  });
+
+  if (!InjectedComponent) {
+    return null;
+  }
 
   return (
-    <EuiFlexItem>
+    <EuiFlexItem data-test-subj={`suggestion-${suggestion.id}`}>
       <EuiPanel
         paddingSize="m"
         style={{ height: ITEM_HEIGHT, display: 'flex', flexDirection: 'column', gap: 8 }}
@@ -63,16 +72,27 @@ export const CaseSuggestionItem = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="cross" color="text" onClick={onDismissSuggestion} />
+            <EuiButtonIcon
+              iconType="cross"
+              color="text"
+              onClick={onDismissSuggestion}
+              aria-label={i18n.DISMISS_SUGGESTION_ARIA_LABEL}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiText size="s">{suggestion.description}</EuiText>
         <div style={{ height: '100%', display: 'flex' }}>
-          <suggestion.injectedComponent suggestion={suggestion} />
+          <InjectedComponent suggestion={suggestion} />
         </div>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" color="primary" onClick={onDismissSuggestion}>
+            <EuiButtonEmpty
+              size="s"
+              color="primary"
+              onClick={onDismissSuggestion}
+              aria-label={i18n.DISMISS_SUGGESTION_ARIA_LABEL}
+              data-test-subj={`dismiss-suggestion-${suggestion.id}-button`}
+            >
               {i18n.DISMISS}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -83,6 +103,8 @@ export const CaseSuggestionItem = ({
               iconType="plusInCircle"
               isLoading={isAddingSuggestionToCase}
               onClick={onAddSuggestionToCase}
+              aria-label={i18n.ADD_TO_CASE}
+              data-test-subj={`add-suggestion-${suggestion.id}-button`}
             >
               {i18n.ADD_TO_CASE}
             </EuiButton>

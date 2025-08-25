@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { SuggestionItem } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common';
 import { useCasesToast } from '../../common/use_cases_toast';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import * as i18n from '../../common/translations';
+import type { SuggestionType } from '../../client/attachment_framework/types';
 
 export const useCaseSuggestionItem = ({
   caseData,
   suggestion,
   setDismissedIds,
+  componentById,
 }: {
   caseData: CaseUI;
   suggestion: SuggestionItem;
   setDismissedIds: (callback: (prev: string[]) => string[]) => void;
+  componentById: Map<string, SuggestionType['children']>;
 }) => {
   const { showSuccessToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
@@ -48,5 +51,14 @@ export const useCaseSuggestionItem = ({
     });
   }, [createAttachments, caseData.id, caseData.owner, suggestion.data]);
 
-  return { isAddingSuggestionToCase, onAddSuggestionToCase, onDismissSuggestion };
+  const InjectedComponent = useMemo(() => {
+    return componentById.get(suggestion.componentId);
+  }, [componentById, suggestion.componentId]);
+
+  return {
+    isAddingSuggestionToCase,
+    onAddSuggestionToCase,
+    onDismissSuggestion,
+    InjectedComponent,
+  };
 };
