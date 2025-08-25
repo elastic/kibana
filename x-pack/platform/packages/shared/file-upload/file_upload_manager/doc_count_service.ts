@@ -14,6 +14,9 @@ const POLL_INTERVAL = 1; // seconds
 export class DocCountService {
   private indexName: string | null = null;
   private subscription: Subscription | null = null;
+  private initialDocCount: number | null = null;
+  private expectedDocCount: number | null = null;
+  private isAppendOperation: boolean = false;
 
   constructor(
     private data: DataPublicPluginStart,
@@ -24,8 +27,12 @@ export class DocCountService {
     this.subscription?.unsubscribe();
   }
 
-  public start(indexName: string): void {
+  public start(indexName: string, isAppendOperation = false, expectedDocCount = 0): void {
     this.indexName = indexName;
+    this.isAppendOperation = isAppendOperation;
+    this.expectedDocCount = expectedDocCount;
+    this.initialDocCount = null;
+
     this.subscription = this.pollIsSearchable()
       .pipe(finalize(() => this.onIndexSearchable(indexName)))
       .subscribe({
@@ -35,23 +42,51 @@ export class DocCountService {
         },
       });
   }
+
+  public updateExpectedDocCount(expectedDocCount: number): void {
+    this.expectedDocCount = expectedDocCount;
+  }
   private pollIsSearchable() {
     return timer(0, POLL_INTERVAL * 1000).pipe(
       exhaustMap(() => this.isSearchable$()),
       takeWhile((isSearchable) => !isSearchable, true) // takeUntil we get `true`, including the final one
     );
   }
+
   private isSearchable$() {
     return this.data.search
       .search({
         params: {
           index: this.indexName,
-          size: 1,
-          body: { query: { match_all: {} } },
+          size: this.isAppendOperation ? 0 : 1,
+          body: { 
+            query: { match_all: {} },
+            track_total_hits: this.isAppendOperation
+          },
         },
       })
       .pipe(
-        map((response) => response.rawResponse.hits.hits.length > 0),
+        map((response) => {
+          if (!this.isAppendOperation) {
+            // For new index creation, check if any documents exist
+            return response.rawResponse.hits.hits.length > 0;
+          }
+
+          // For append operations, check if document count has increased appropriately
+          const currentCount = typeof response.rawResponse.hits.total === 'number' 
+            ? response.rawResponse.hits.total 
+            : response.rawResponse.hits.total?.value ?? 0;
+
+          // First time polling - capture initial count
+          if (this.initialDocCount === null) {
+            this.initialDocCount = currentCount;
+            return false; // Keep polling
+          }
+
+          // Check if we have at least the expected increase in document count
+          const expectedMinCount = this.initialDocCount + (this.expectedDocCount ?? 0);
+          return currentCount >= expectedMinCount;
+        }),
         catchError((err) => throwError(() => err))
       );
   }
