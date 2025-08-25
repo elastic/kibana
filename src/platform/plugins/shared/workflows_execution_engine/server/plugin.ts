@@ -15,9 +15,9 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionStatus } from '@kbn/workflows';
 
-import { graphlib } from '@dagrejs/dagre';
 import { v4 as generateUuid } from 'uuid';
 import { Client } from '@elastic/elasticsearch';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -80,27 +80,23 @@ export class WorkflowsExecutionEnginePlugin
 
           return {
             async run() {
-              try {
-                const { workflowExecutionId } = taskInstance.params as any; // TODO: define type
-                const [, pluginsStart] = await core.getStartServices();
-                const { actions, taskManager } =
-                  pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
+              const { workflowExecutionId } = taskInstance.params as any; // TODO: define type
+              const [, pluginsStart] = await core.getStartServices();
+              const { actions, taskManager } =
+                pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
 
-                const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
-                  workflowExecutionId,
-                  actions,
-                  taskManager,
-                  esClient,
-                  logger,
-                  config,
-                  workflowExecutionRepository
-                );
-                await workflowRuntime.start();
+              const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
+                workflowExecutionId,
+                actions,
+                taskManager,
+                esClient,
+                logger,
+                config,
+                workflowExecutionRepository
+              );
+              await workflowRuntime.start();
 
-                await workflowExecutionLoop(workflowRuntime, workflowLogger, nodesFactory);
-              } catch (error) {
-                console.error(error);
-              }
+              await workflowExecutionLoop(workflowRuntime, workflowLogger, nodesFactory);
             },
             async cancel() {
               // Cancel function for the task
@@ -163,7 +159,6 @@ export class WorkflowsExecutionEnginePlugin
         workflowId: workflow.id,
         workflowDefinition: workflow.definition,
         context,
-        executionGraph: workflow.executionGraph,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
         createdBy: context.createdBy || '', // TODO: set if available
@@ -217,7 +212,7 @@ async function createContainer(
     throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
   }
 
-  const workflowExecutionGraph = graphlib.json.read(workflowExecution.executionGraph);
+  const workflowExecutionGraph = convertToWorkflowGraph(workflowExecution.workflowDefinition);
   const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
   const stepExecutionRepository = new StepExecutionRepository(esClient);
   const connectorExecutor = new ConnectorExecutor(unsecuredActionsClient);
