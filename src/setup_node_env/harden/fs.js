@@ -12,6 +12,7 @@ const { fsEventBus, FS_CONFIG_EVENT } = require('@kbn/security-hardening/fs-even
 
 const { getSafePath, validateAndSanitizeFileData } = require('./fs_validations');
 
+// eslint-disable-next-line no-unused-vars
 let hardeningConfig = null;
 
 // IMPORTANT: this is used for POC, however we can consider using preboot plugin to pass the config down
@@ -24,8 +25,8 @@ const shouldEnableHardenedFs = () => {
 
   // If the hardening config is not set or disabled, we also skip
   return (
-    Boolean(hardeningConfig?.enabled) &&
-    (!isJestTest || (isJestTest && process.env.KBN_ENABLE_HARDENED_FS))
+    // Boolean(hardeningConfig?.enabled) &&
+    !isJestTest || (isJestTest && process.env.KBN_ENABLE_HARDENED_FS)
   );
 };
 
