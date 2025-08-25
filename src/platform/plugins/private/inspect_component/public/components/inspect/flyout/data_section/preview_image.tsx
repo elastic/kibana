@@ -8,13 +8,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  useGeneratedHtmlId,
-  EuiImage,
-  EuiSkeletonRectangle,
-  EuiCard,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiImage, EuiSkeletonRectangle, EuiCard, EuiSpacer } from '@elastic/eui';
 // @ts-expect-error - this module has no exported types
 import domtoimage from 'dom-to-image-more';
 import { i18n } from '@kbn/i18n';
@@ -31,18 +25,17 @@ const PREVIEW_ALT_TEXT = i18n.translate(
   }
 );
 
-const PREVIEW_BADGE_LABEL = {
-  label: i18n.translate('kbnInspectComponent.inspectFlyout.dataSection.previewCardLabel', {
+const PREVIEW_BADGE_LABEL = i18n.translate(
+  'kbnInspectComponent.inspectFlyout.dataSection.previewCardLabel',
+  {
     defaultMessage: 'Preview',
-  }),
-};
+  }
+);
 
 /**
- * The PreviewImage component is responsible for rendering a scaled-down preview of a given HTML or SVG element.
- * It creates a screenshot-like preview using dom-to-image-more library for better quality and cross-browser support.
+ * The PreviewImage component is responsible for rendering a preview of a given HTML or SVG element.
  */
 export const PreviewImage = ({ element }: Props) => {
-  const generatedId = useGeneratedHtmlId();
   const [screenshot, setScreenshot] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -64,14 +57,11 @@ export const PreviewImage = ({ element }: Props) => {
         const elementHeight = elementRect.height;
 
         const screenshotDataUrl = await domtoimage.toPng(element, {
-          quality: 0.8,
-          bgcolor: 'transparent',
+          quality: 1,
           cacheBust: true,
-          width: elementWidth * 2,
-          height: elementHeight * 2,
+          width: elementWidth,
+          height: elementHeight,
           style: {
-            transform: 'scale(2)',
-            transformOrigin: 'top left',
             width: `${elementWidth}px`,
             height: `${elementHeight}px`,
           },
@@ -98,7 +88,7 @@ export const PreviewImage = ({ element }: Props) => {
     };
 
     generateScreenshot();
-  }, [element, generatedId]);
+  }, [element]);
 
   return (
     <>
@@ -111,8 +101,16 @@ export const PreviewImage = ({ element }: Props) => {
         data-test-subj="inspectFlyoutPreviewImage"
         css={cardCss}
       >
-        <EuiCard title="" betaBadgeProps={PREVIEW_BADGE_LABEL} paddingSize="s" css={cardCss}>
-          <EuiImage size="fullWidth" alt={PREVIEW_ALT_TEXT} src={screenshot} />
+        <EuiCard
+          title=""
+          betaBadgeProps={{
+            label: PREVIEW_BADGE_LABEL,
+            size: 's',
+          }}
+          css={cardCss}
+          paddingSize="xs"
+        >
+          <EuiImage alt={PREVIEW_ALT_TEXT} src={screenshot} />
         </EuiCard>
       </EuiSkeletonRectangle>
       <EuiSpacer size="l" />
