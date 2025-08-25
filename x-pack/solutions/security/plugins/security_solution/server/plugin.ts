@@ -294,6 +294,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       telemetry: core.analytics,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
+      config: this.config,
     });
 
     const requestContextFactory = new RequestContextFactory({

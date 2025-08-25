@@ -24,6 +24,7 @@ import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from '../constants';
+import type { ConfigType } from '../../../../config';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -43,6 +44,7 @@ interface RegisterParams {
   taskManager: TaskManagerSetupContract | undefined;
   experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
+  config: ConfigType;
 }
 
 interface RunParams {
@@ -52,6 +54,7 @@ interface RunParams {
   experimentalFeatures: ExperimentalFeatures;
   taskInstance: ConcreteTaskInstance;
   core: CoreStart;
+  config: ConfigType;
   getPrivilegedUserMonitoringDataClient: (
     namespace: string
   ) => Promise<undefined | PrivilegeMonitoringDataClient>;
@@ -74,6 +77,7 @@ export const registerPrivilegeMonitoringTask = ({
   taskManager,
   kibanaVersion,
   experimentalFeatures,
+  config,
 }: RegisterParams) => {
   if (!taskManager) {
     logger.info(
@@ -123,6 +127,7 @@ export const registerPrivilegeMonitoringTask = ({
         experimentalFeatures,
         getStartServices,
         getPrivilegedUserMonitoringDataClient,
+        config,
       }),
     },
   });
@@ -137,6 +142,7 @@ const createPrivilegeMonitoringTaskRunnerFactory =
     getPrivilegedUserMonitoringDataClient: (
       namespace: string
     ) => Promise<undefined | PrivilegeMonitoringDataClient>;
+    config: ConfigType;
   }): TaskRunCreatorFunction =>
   ({ taskInstance }) => {
     let cancelled = false;
@@ -151,6 +157,7 @@ const createPrivilegeMonitoringTaskRunnerFactory =
           taskInstance,
           experimentalFeatures: deps.experimentalFeatures,
           core,
+          config: deps.config,
           getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
         });
       },
@@ -192,6 +199,7 @@ const runPrivilegeMonitoringTask = async ({
   logger,
   taskInstance,
   getPrivilegedUserMonitoringDataClient,
+  config,
   core,
 }: RunParams): Promise<{
   state: PrivilegeMonitoringTaskState;
@@ -215,7 +223,12 @@ const runPrivilegeMonitoringTask = async ({
       logger.error('[Privilege Monitoring] error creating data client.');
       throw Error('No data client was found');
     }
-    const dataSourcesService = createDataSourcesService(dataClient);
+
+    // Get the user limit from configuration
+    const maxUsersAllowed =
+      config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+    const dataSourcesService = createDataSourcesService(dataClient, maxUsersAllowed);
+
     const request = buildFakeScopedRequest({
       namespace: state.namespace,
       coreStart: core,
