@@ -218,16 +218,25 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       return {
         api,
         Component: ({ className: controlPanelClassName }) => {
-          const [dataLoading, fieldFormatter, max, min, selectionHasNoResults, step, value] =
-            useBatchedPublishingSubjects(
-              dataLoading$,
-              dataControl.api.fieldFormatter,
-              max$,
-              min$,
-              selectionHasNoResults$,
-              step$,
-              selections.value$
-            );
+          const [
+            dataLoading,
+            fieldFormatter,
+            max,
+            min,
+            selectionHasNoResults,
+            step,
+            value,
+            fieldName,
+          ] = useBatchedPublishingSubjects(
+            dataLoading$,
+            dataControl.api.fieldFormatter,
+            max$,
+            min$,
+            selectionHasNoResults$,
+            step$,
+            selections.value$,
+            dataControl.stateManager.fieldName
+          );
 
           useEffect(() => {
             return () => {
@@ -242,6 +251,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           return (
             <RangeSliderControl
               controlPanelClassName={controlPanelClassName}
+              fieldName={fieldName}
               fieldFormatter={fieldFormatter}
               isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}

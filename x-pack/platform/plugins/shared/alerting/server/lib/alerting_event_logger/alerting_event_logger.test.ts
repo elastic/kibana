@@ -224,15 +224,18 @@ describe('AlertingEventLogger', () => {
       alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
 
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith({
-        ...event,
-        event: {
-          ...event.event,
-          action: EVENT_LOG_ACTIONS.executeStart,
-          start: runDate.toISOString(),
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(
+        {
+          ...event,
+          event: {
+            ...event.event,
+            action: EVENT_LOG_ACTIONS.executeStart,
+            start: runDate.toISOString(),
+          },
+          message: `rule execution start: "${ruleData.id}"`,
         },
-        message: `rule execution start: "${ruleData.id}"`,
-      });
+        expect.any(String)
+      );
 
       expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
       expect(eventLogger.startTiming).toHaveBeenCalledWith(event, new Date(mockNow));
@@ -656,7 +659,7 @@ describe('AlertingEventLogger', () => {
         ruleData
       );
 
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event, expect.any(String));
     });
 
     test('should throw error if backfill fields provided when execution type is not backfill', () => {
@@ -688,26 +691,29 @@ describe('AlertingEventLogger', () => {
         executionType.BACKFILL
       );
 
-      expect(eventLogger.logEvent).toHaveBeenCalledWith({
-        ...event,
-        kibana: {
-          ...event.kibana,
-          alert: {
-            ...event.kibana?.alert,
-            rule: {
-              ...event.kibana?.alert?.rule,
-              execution: {
-                ...event.kibana?.alert?.rule?.execution,
-                backfill: {
-                  id: 'abc',
-                  start: '2024-03-13T00:00:00.000Z',
-                  interval: '1h',
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(
+        {
+          ...event,
+          kibana: {
+            ...event.kibana,
+            alert: {
+              ...event.kibana?.alert,
+              rule: {
+                ...event.kibana?.alert?.rule,
+                execution: {
+                  ...event.kibana?.alert?.rule?.execution,
+                  backfill: {
+                    id: 'abc',
+                    start: '2024-03-13T00:00:00.000Z',
+                    interval: '1h',
+                  },
                 },
               },
             },
           },
         },
-      });
+        expect.any(String)
+      );
     });
   });
 
@@ -724,7 +730,7 @@ describe('AlertingEventLogger', () => {
 
       const event = createAlertRecord(ruleContext, ruleData, [alertSO], alert);
 
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event, expect.any(String));
     });
 
     test('should throw if trying to log alerts for backfill executions when no rule data is set', () => {
@@ -760,26 +766,29 @@ describe('AlertingEventLogger', () => {
         alert
       );
 
-      expect(eventLogger.logEvent).toHaveBeenCalledWith({
-        ...event,
-        rule: {
-          ...event.rule,
-          id: 'bbb',
-          name: 'rule-name',
-        },
-        kibana: {
-          ...event.kibana,
-          alert: {
-            ...event.kibana?.alert,
-            rule: {
-              ...event.kibana?.alert?.rule,
-              consumer: 'my-new-consumer',
-              revision: 10,
-              rule_type_id: 'test',
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(
+        {
+          ...event,
+          rule: {
+            ...event.rule,
+            id: 'bbb',
+            name: 'rule-name',
+          },
+          kibana: {
+            ...event.kibana,
+            alert: {
+              ...event.kibana?.alert,
+              rule: {
+                ...event.kibana?.alert?.rule,
+                consumer: 'my-new-consumer',
+                revision: 10,
+                rule_type_id: 'test',
+              },
             },
           },
         },
-      });
+        expect.any(String)
+      );
     });
   });
 
@@ -807,7 +816,7 @@ describe('AlertingEventLogger', () => {
 
       const event = createActionExecuteRecord(ruleContext, ruleData, [alertSO], action);
 
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event, expect.any(String));
     });
 
     test('should log action event with uuid', () => {
@@ -816,7 +825,7 @@ describe('AlertingEventLogger', () => {
 
       const event = createActionExecuteRecord(ruleContext, ruleData, [alertSO], action);
 
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event, expect.any(String));
     });
   });
 
@@ -841,7 +850,7 @@ describe('AlertingEventLogger', () => {
       alertingEventLogger.done({});
 
       const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event, expect.any(String));
     });
 
     test('should set fields from execution status if provided', () => {
@@ -861,7 +870,7 @@ describe('AlertingEventLogger', () => {
         },
       };
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('should set fields from execution status if execution status is error', () => {
@@ -899,7 +908,7 @@ describe('AlertingEventLogger', () => {
       };
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('should set fields from execution status if execution status is error and uses "unknown" if no reason is provided', () => {
@@ -937,7 +946,7 @@ describe('AlertingEventLogger', () => {
       };
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('should set fields from execution status if execution status is error and does not overwrite existing error message', () => {
@@ -979,7 +988,7 @@ describe('AlertingEventLogger', () => {
       };
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('should set fields from execution status if execution status is warning', () => {
@@ -1013,7 +1022,7 @@ describe('AlertingEventLogger', () => {
       };
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('should set fields from execution status if execution status is warning and uses "unknown" if no reason is provided', () => {
@@ -1047,7 +1056,7 @@ describe('AlertingEventLogger', () => {
       };
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('should set fields from execution status if execution status is warning and uses existing message if no message is provided', () => {
@@ -1083,7 +1092,7 @@ describe('AlertingEventLogger', () => {
       };
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('should set fields from backfill if provided', () => {
@@ -1147,7 +1156,7 @@ describe('AlertingEventLogger', () => {
       };
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('should set fields from backfill even when no rule data is provided', () => {
@@ -1209,7 +1218,7 @@ describe('AlertingEventLogger', () => {
       };
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('should set fields from execution metrics if provided', () => {
@@ -1262,7 +1271,7 @@ describe('AlertingEventLogger', () => {
       };
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('should set fields from execution timings if provided', () => {
@@ -1308,7 +1317,7 @@ describe('AlertingEventLogger', () => {
       };
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('should set fields from execution metrics and timings if both provided', () => {
@@ -1379,7 +1388,7 @@ describe('AlertingEventLogger', () => {
       };
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('should set fields to 0 execution metrics are provided but undefined', () => {
@@ -1419,7 +1428,7 @@ describe('AlertingEventLogger', () => {
       };
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent, expect.any(String));
     });
 
     test('overwrites the message when the final status is error', () => {
@@ -1490,7 +1499,7 @@ describe('AlertingEventLogger', () => {
       };
 
       const event = createGapRecord(ruleContext, ruleData, [alertSO], gap);
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event, expect.any(String));
     });
   });
 

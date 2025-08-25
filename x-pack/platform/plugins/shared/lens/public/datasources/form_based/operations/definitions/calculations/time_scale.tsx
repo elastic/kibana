@@ -78,7 +78,6 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
         dataType: 'number',
         operationType: NORMALIZE_BY_UNIT_ID,
         isBucketed: false,
-        scale: 'ratio',
         references: referenceIds,
         params: {
           ...getFormatFromPreviousColumn(previousColumn),

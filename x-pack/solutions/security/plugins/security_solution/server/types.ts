@@ -40,6 +40,7 @@ import type { EntityStoreDataClient } from './lib/entity_analytics/entity_store/
 import type { SiemRuleMigrationsClient } from './lib/siem_migrations/rules/siem_rule_migrations_service';
 import type { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
 import type { ApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
+import type { MlAuthz } from './lib/machine_learning/authz';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -67,6 +68,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
   getInferenceClient: () => InferenceClient;
   getAssetInventoryClient: () => AssetInventoryDataClient;
+  getMlAuthz: () => MlAuthz;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

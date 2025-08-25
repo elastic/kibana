@@ -974,7 +974,6 @@ describe('last_value', () => {
             label: 'Last value of test',
             operationType: 'last_value',
             params: { sortField: 'timestamp' },
-            scale: 'ratio',
             sourceField: 'bytes',
           } as LastValueIndexPatternColumn,
         },

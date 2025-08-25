@@ -8,5 +8,5 @@
  */
 
 export * from './action_types';
-export * from './alerts_types';
-export * from './rule_types';
+export type * from './alerts_types';
+export type * from './rule_types';

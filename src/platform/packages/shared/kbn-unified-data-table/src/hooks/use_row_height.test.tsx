@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react';
+import { RenderHookResult, act, renderHook } from '@testing-library/react';
 import { createLocalStorageMock } from '../../__mocks__/local_storage_mock';
-import { useRowHeight } from './use_row_height';
+import { UseRowHeightProps, useRowHeight } from './use_row_height';
 import { RowHeightMode } from '../components/row_height_settings';
 
 const CONFIG_ROW_HEIGHT = 3;
@@ -18,12 +18,16 @@ const renderRowHeightHook = (
   {
     previousRowHeight,
     previousConfigRowHeight,
+    configRowHeight = CONFIG_ROW_HEIGHT,
+    defaultRowHeight = CONFIG_ROW_HEIGHT,
     rowHeightState,
     onUpdateRowHeight,
   }: {
     previousRowHeight?: number;
     previousConfigRowHeight?: number;
     rowHeightState?: number;
+    configRowHeight?: number;
+    defaultRowHeight?: number;
     onUpdateRowHeight?: (rowHeight: number) => void;
   } = { previousRowHeight: 5, previousConfigRowHeight: CONFIG_ROW_HEIGHT }
 ) => {
@@ -32,19 +36,23 @@ const renderRowHeightHook = (
       ? { ['discover:dataGridRowHeight']: { previousRowHeight, previousConfigRowHeight } }
       : {};
   const storage = createLocalStorageMock(storageValue);
-  const initialProps = {
+  const initialProps: UseRowHeightProps = {
     storage,
     consumer: 'discover',
     key: 'dataGridRowHeight',
-    configRowHeight: CONFIG_ROW_HEIGHT,
+    defaultRowHeight,
+    configRowHeight,
     rowHeightState,
     onUpdateRowHeight,
   };
-
+  let hook!: RenderHookResult<ReturnType<typeof useRowHeight>, UseRowHeightProps>;
+  act(() => {
+    hook = renderHook(useRowHeight, { initialProps });
+  });
   return {
     storage,
     initialProps,
-    hook: renderHook(useRowHeight, { initialProps }),
+    hook,
   };
 };
 
@@ -107,13 +115,17 @@ describe('useRowHeightsOptions', () => {
       storage,
       hook: { result },
     } = renderRowHeightHook({ onUpdateRowHeight });
-    result.current.onChangeRowHeight?.(RowHeightMode.auto);
+    act(() => {
+      result.current.onChangeRowHeight?.(RowHeightMode.auto);
+    });
     expect(storage.get('discover:dataGridRowHeight')).toEqual({
       previousRowHeight: -1,
       previousConfigRowHeight: CONFIG_ROW_HEIGHT,
     });
     expect(onUpdateRowHeight).toHaveBeenLastCalledWith(-1);
-    result.current.onChangeRowHeight?.(RowHeightMode.custom);
+    act(() => {
+      result.current.onChangeRowHeight?.(RowHeightMode.custom);
+    });
     expect(storage.get('discover:dataGridRowHeight')).toEqual({
       previousRowHeight: CONFIG_ROW_HEIGHT,
       previousConfigRowHeight: CONFIG_ROW_HEIGHT,
@@ -127,7 +139,9 @@ describe('useRowHeightsOptions', () => {
       storage,
       hook: { result },
     } = renderRowHeightHook({ onUpdateRowHeight });
-    result.current.onChangeRowHeightLines?.(2);
+    act(() => {
+      result.current.onChangeRowHeightLines?.(2, true);
+    });
     expect(storage.get('discover:dataGridRowHeight')).toEqual({
       previousRowHeight: 2,
       previousConfigRowHeight: CONFIG_ROW_HEIGHT,
@@ -145,5 +159,131 @@ describe('useRowHeightsOptions', () => {
     hook.rerender({ ...initialProps, rowHeightState: 3 });
     expect(hook.result.current.rowHeight).toEqual(RowHeightMode.custom);
     expect(hook.result.current.rowHeightLines).toEqual(3);
+  });
+
+  it('should use configRowHeight for lineCountInput when rowHeightState is below 1', () => {
+    const {
+      hook: { result },
+    } = renderRowHeightHook({
+      rowHeightState: -1,
+      configRowHeight: 4,
+    });
+    expect(result.current.rowHeight).toEqual(RowHeightMode.auto);
+    expect(result.current.rowHeightLines).toEqual(-1);
+    expect(result.current.lineCountInput).toEqual(4);
+  });
+
+  it('should use defaultRowHeight for lineCountInput when rowHeightState and configRowHeight are below 1', () => {
+    const {
+      hook: { result },
+    } = renderRowHeightHook({
+      rowHeightState: -1,
+      configRowHeight: -1,
+      defaultRowHeight: 5,
+    });
+    expect(result.current.rowHeight).toEqual(RowHeightMode.auto);
+    expect(result.current.rowHeightLines).toEqual(-1);
+    expect(result.current.lineCountInput).toEqual(5);
+  });
+
+  it('should not update rowHeightState but update lineCountInput when newRowHeightLines is invalid', () => {
+    const onUpdateRowHeight = jest.fn();
+    const {
+      hook: { result },
+    } = renderRowHeightHook({ onUpdateRowHeight });
+    act(() => {
+      result.current.onChangeRowHeightLines?.(42, false);
+    });
+    expect(onUpdateRowHeight).not.toHaveBeenCalled();
+    expect(result.current.lineCountInput).toEqual(42);
+  });
+
+  it('should set lineCountInput to undefined when newRowHeightLines is 0 and invalid', () => {
+    const onUpdateRowHeight = jest.fn();
+    const {
+      hook: { result },
+    } = renderRowHeightHook({ onUpdateRowHeight });
+    act(() => {
+      result.current.onChangeRowHeightLines?.(0, false);
+    });
+    expect(onUpdateRowHeight).not.toHaveBeenCalled();
+    expect(result.current.lineCountInput).toBeUndefined();
+  });
+
+  it('should reset invalid lineCountInput to last valid rowHeightLines when switching from custom to auto', () => {
+    let rowHeightState = -1;
+    const { hook, initialProps } = renderRowHeightHook({
+      rowHeightState,
+      onUpdateRowHeight: (newRowHeight) => {
+        rowHeightState = newRowHeight;
+      },
+    });
+    act(() => {
+      hook.result.current.onChangeRowHeightLines?.(10, true);
+      hook.rerender({ ...initialProps, rowHeightState });
+    });
+    expect(hook.result.current.rowHeight).toEqual(RowHeightMode.custom);
+    expect(hook.result.current.rowHeightLines).toEqual(10);
+    expect(hook.result.current.lineCountInput).toEqual(10);
+    act(() => {
+      hook.result.current.onChangeRowHeightLines?.(42, false);
+      hook.rerender({ ...initialProps, rowHeightState });
+    });
+    expect(hook.result.current.rowHeight).toEqual(RowHeightMode.custom);
+    expect(hook.result.current.rowHeightLines).toEqual(10);
+    expect(hook.result.current.lineCountInput).toEqual(42);
+    act(() => {
+      hook.result.current.onChangeRowHeight?.(RowHeightMode.auto);
+      hook.rerender({ ...initialProps, rowHeightState });
+    });
+    expect(hook.result.current.rowHeight).toEqual(RowHeightMode.auto);
+    expect(hook.result.current.rowHeightLines).toEqual(-1);
+    expect(hook.result.current.lineCountInput).toEqual(10);
+  });
+
+  it('should update rowHeightLines to last lineCountInput when switching from auto to custom', () => {
+    let rowHeightState = 10;
+    const { hook, initialProps } = renderRowHeightHook({
+      rowHeightState,
+      onUpdateRowHeight: (newRowHeight) => {
+        rowHeightState = newRowHeight;
+      },
+    });
+    expect(hook.result.current.rowHeight).toEqual(RowHeightMode.custom);
+    expect(hook.result.current.rowHeightLines).toEqual(10);
+    expect(hook.result.current.lineCountInput).toEqual(10);
+    act(() => {
+      hook.result.current.onChangeRowHeight?.(RowHeightMode.auto);
+      hook.rerender({ ...initialProps, rowHeightState });
+    });
+    expect(hook.result.current.rowHeight).toEqual(RowHeightMode.auto);
+    expect(hook.result.current.rowHeightLines).toEqual(-1);
+    expect(hook.result.current.lineCountInput).toEqual(10);
+    act(() => {
+      hook.result.current.onChangeRowHeight?.(RowHeightMode.custom);
+      hook.rerender({ ...initialProps, rowHeightState });
+    });
+    expect(hook.result.current.rowHeight).toEqual(RowHeightMode.custom);
+    expect(hook.result.current.rowHeightLines).toEqual(10);
+    expect(hook.result.current.lineCountInput).toEqual(10);
+  });
+
+  it('should sync lineCountInput with rowHeightLines when rowHeightState changes by consumer in custom mode', () => {
+    let rowHeightState = 10;
+    const { hook, initialProps } = renderRowHeightHook({
+      rowHeightState,
+      onUpdateRowHeight: (newRowHeight) => {
+        rowHeightState = newRowHeight;
+      },
+    });
+    expect(hook.result.current.rowHeight).toEqual(RowHeightMode.custom);
+    expect(hook.result.current.rowHeightLines).toEqual(10);
+    expect(hook.result.current.lineCountInput).toEqual(10);
+    act(() => {
+      hook.rerender({ ...initialProps, rowHeightState: 15 });
+    });
+    expect(hook.result.current.rowHeight).toEqual(RowHeightMode.custom);
+    expect(hook.result.current.rowHeightLines).toEqual(15);
+    expect(hook.result.current.lineCountInput).toEqual(15);
   });
 });

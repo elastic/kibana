@@ -25,6 +25,7 @@ export const Search = React.memo<Props>(({ isSearching, onSearchInputChange, sea
     placeholder={i18n.FILTER_PLACEHOLDER}
     value={searchInput}
     fullWidth
+    aria-label={i18n.FIELDS_SEARCH}
   />
 ));
 Search.displayName = 'Search';

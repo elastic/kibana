@@ -13,6 +13,11 @@
     position: absolute;
     width: 100%;
   }
+
+  @media (max-width: map-get($euiBreakpoints, 'm')) {
+    // on smaller screens, the maximized panel should take the full height of the screen minus the sticky top nav
+    min-height: 'calc(100vh - var(--kbn-application--sticky-headers-offset, 0px))',
+  }
 }
 
 // Remove padding in fullscreen mode

@@ -8,7 +8,7 @@
 import {
   graphRequestSchema,
   graphResponseSchema,
-} from '@kbn/cloud-security-posture-common/schema/graph/latest';
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING } from '@kbn/management-settings-ids';

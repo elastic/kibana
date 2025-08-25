@@ -8,15 +8,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createAndLoginUserWithCustomRole, deleteAndLogoutUser } from './helpers';
-import { interceptRequest } from '../../common/intercept_request';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error', 'navigationalSearch', 'security']);
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
-  const toasts = getService('toasts');
-  const driver = getService('__webdriver__');
 
   describe('ai assistant management privileges', () => {
     describe('all privileges', () => {
@@ -59,70 +55,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldUseHashForSubUrl: false,
         });
         await testSubjects.existOrFail(ui.pages.settings.settingsPage);
-      });
-      it('allows updating of an advanced setting', async () => {
-        await PageObjects.common.navigateToUrl('obsAIAssistantManagement', '', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-          shouldUseHashForSubUrl: false,
-        });
-        const testSearchConnectorIndexPattern = 'my-search-index-pattern';
-        const searchConnectorIndexPatternInput = await testSubjects.find(
-          ui.pages.settings.searchConnectorIndexPatternInput
-        );
-        // make sure the input is empty (default value)
-        await searchConnectorIndexPatternInput.clearValue();
-        await searchConnectorIndexPatternInput.type(testSearchConnectorIndexPattern);
-        const saveButton = await testSubjects.find(ui.pages.settings.saveButton);
-        await saveButton.click();
-        // wait for page to refrsh
-        await testSubjects.missingOrFail(ui.pages.settings.searchConnectorIndexPatternInput, {
-          timeout: 2000,
-        });
-        // wait for the new page to fully load
-        await testSubjects.existOrFail(ui.pages.settings.searchConnectorIndexPatternInput, {
-          timeout: 2000,
-        });
-        expect(await searchConnectorIndexPatternInput.getAttribute('value')).to.be(
-          testSearchConnectorIndexPattern
-        );
-        // reset the value back to default
-        const resetToDefaultLink = await testSubjects.find(ui.pages.settings.resetToDefaultLink);
-        await resetToDefaultLink.click();
-
-        expect(await searchConnectorIndexPatternInput.getAttribute('value')).to.be('');
-        await saveButton.click();
-        await testSubjects.missingOrFail(ui.pages.settings.searchConnectorIndexPatternInput, {
-          timeout: 2000,
-        });
-        // wait for the new page to fully load
-        await testSubjects.existOrFail(ui.pages.settings.searchConnectorIndexPatternInput, {
-          timeout: 2000,
-        });
-        expect(await searchConnectorIndexPatternInput.getAttribute('value')).to.be('');
-      });
-      it('displays failure toast on failed request', async () => {
-        const searchConnectorIndexPatternInput = await testSubjects.find(
-          ui.pages.settings.searchConnectorIndexPatternInput
-        );
-        await searchConnectorIndexPatternInput.clearValue();
-        await searchConnectorIndexPatternInput.type('test');
-
-        await interceptRequest(
-          driver.driver,
-          '*kibana\\/settings*',
-          (responseFactory) => {
-            return responseFactory.fail();
-          },
-          async () => {
-            await testSubjects.click(ui.pages.settings.saveButton);
-          }
-        );
-
-        await retry.waitFor('Error saving settings toast', async () => {
-          const count = await toasts.getCount();
-          return count > 0;
-        });
       });
     });
     describe('with advancedSettings read privilege', () => {

@@ -21,6 +21,92 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.0.5 [kibana-9.0.5-release-notes]
+
+### Features and enhancements [kibana-9.0.5-features-enhancements]
+
+**Dashboards and Visualizations**:
+* Improves usability of dashboards when zooming up to 400% [#228978]({{kib-pull}}228978).
+
+### Fixes [kibana-9.0.5-fixes]
+
+**Dashboards and Visualizations**:
+* Fixes an issue with the plus sign `+` not being properly encoded when it's part of a date math expression [#230469]({{kib-pull}}230469).
+* Fixes an issue in Firefox preventing you from scrolling in the Lens editor flyout [#228625]({{kib-pull}}228625).
+* Fixes an issue preventing you from saving linked TSVB visualizations when changing data views [#228685]({{kib-pull}}228685).
+* Fixes a console error occurring when adding a Region map visualization to a dashboard [#228669]({{kib-pull}}228669).
+* Fixes an issue with the dashboard toolbar header not correctly staying visible when opening the Dashboards app from some specific sections of the Classic navigation [#229621]({{kib-pull}}229621).
+* Fixes an issue in reports where a PNG or PDF export would offset and clip part of the visualization in Lens [#228603]({{kib-pull}}228603).
+
+**Data ingestion and Fleet**:
+* Fixes an issue that could cause some SSL configurations set using the UI to be overridden [#230758]({{kib-pull}}230758).
+* Fixes an issue where the SSL configuration isn't properly added to agent policies with pre-configured output types [#230211]({{kib-pull}}230211).
+* Fixes agentless integrations using 'organization', 'division', or 'team' data fields being overwritten by package agentless metadata on the agent policy [#230479]({{kib-pull}}230479).
+* Adds `azure-blob-storage` and `gcs` inputs to the AGENTLESS_DISABLED_INPUTS list [#229117]({{kib-pull}}229117).
+
+**Discover**:
+* Improves performance of breakdown field search [#229335]({{kib-pull}}229335).
+* Enables the **Save query** button after making changes [#229053]({{kib-pull}}229053).
+* Fixes the field being picked for fetching stats in the sidebar popover [#228969]({{kib-pull}}228969).
+* Fixes an issue where some Discover **Copy to clipboard** actions only worked when accessing Kibana in a secure browser context [#229531]({{kib-pull}}229531).
+* Fixes the handling of the **Body cell lines** display option in Discover when the default value is set to `-1` in Advanced Settings [#228697]({{kib-pull}}228697). 
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.0.5 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.0.5 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes an issue with overlapping action icons in the **Data views** menu when on mobile [#229771]({{kib-pull}}229771).
+* Fixes a display issue with counter indicators on toast messages [#229300]({{kib-pull}}229300).
+* Fixes an issue leading to some features not being visible when updating a space solution view to Classic [#230385]({{kib-pull}}230385).
+* Decreases the loading time drastically when loading Index Management component templates [#228709]({{kib-pull}}228709).
+
+**Machine Learning**:
+* Removes `removeIfExists` from the synchronization task scheduler [#228783]({{kib-pull}}228783).
+
+
+## 9.0.4 [kibana-9.0.4-release-notes]
+
+### Features and enhancements [kibana-9.0.4-features-enhancements]
+
+**Data ingestion and Fleet**:
+* Adds a tooltip to the **Last activity** column in Agent list UI [#224850]({{kib-pull}}224850).
+
+**Machine Learning**:
+* Improves error messages in the AI Connector creation UI and ensures they're surfaced in {{kib}} [#221859]({{kib-pull}}221859).
+
+
+### Fixes [kibana-9.0.4-fixes]
+
+**Dashboards and Visualizations**:
+* Fixes an issue with dashboard sharing links where copied links were not shortened and some users were unable to copy links in new spaces [#227625]({{kib-pull}}227625).
+* Stops dashboards from recommending adhoc data views [#225705]({{kib-pull}}225705).
+* Prevents dashboards from initiating duplicate requests when making a selection on a control [#224761]({{kib-pull}}224761).
+
+**Data ingestion and Fleet**:
+* Fixes bug that causes the CSV export to fail in Agent list [#225050]({{kib-pull}}225050).
+* Replaces call to registry when deleting {{kib}} assets for custom packages [#224886]({{kib-pull}}224886).
+* Fixes an issue where the background task was not deleting some unenrolled {{agents}} [#224808]({{kib-pull}}224808).
+* Fixes bulk actions incorrectly selecting {{agents}} with the namespaces filter [#224036]({{kib-pull}}224036).
+
+**Discover**:
+* Makes expiration badges singular and plural [#227035]({{kib-pull}}227035).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.0.4 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.0.4 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Hides the header and side navigation when printing or exporting a dashboard with **Print layout** selected [#227095]({{kib-pull}}227095).
+
+**Search**:
+* Fixes handling of context limit errors in Playground when using the Elastic Managed LLM  [#225360]({{kib-pull}}225360).
+* Adjusts `z-index` of the header menu to avoid conflicting with Console [#224708]({{kib-pull}}224708).
+
 ## 9.0.3 [kibana-9.0.3-release-notes]
 
 :::{important}
@@ -41,6 +127,7 @@ For the Elastic Security 9.0.3 release information, refer to [Elastic Security S
 **Alerting**:
 * Fixes an issue that caused {{kib}} to repeatedly restart when `xpack.alerting.cancelAlertsOnRuleTimeout` was set to `false` in the `kibana.yml` file [#222263]({{kib-pull}}222263).
 * Resolves multiple issues in the Watcher UI that were introduced in 8.18.0, 8.18.1, 9.0.0, and 9.1.0. This includes the table not displaying more than 10 watches, an error banner appearing unexpectedly in certain scenarios, and the search bar functionality not working as expected [#223898]({{kib-pull}}223898).
+* Fixes an issue that caused errors when rules ran during an active maintenance window that had filters and a matching rule category [#221702]({{kib-pull}}221702).
 
 **Dashboards and Visualizations**:
 * Fixes an issue that prevented navigating through pages when inspecting a chart's data  [#217937]({{kib-pull}}217937).

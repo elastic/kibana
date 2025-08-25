@@ -168,7 +168,6 @@ describe('getDisallowedTermsMessage()', () => {
             dataType: 'number',
             operationType: 'moving_average',
             isBucketed: false,
-            scale: 'ratio',
             references: ['col2'],
             timeShift: '3h',
             params: {
@@ -435,7 +434,6 @@ describe('isSortableByColumn()', () => {
             operationType: 'differences',
             isBucketed: false,
             references: ['colX'],
-            scale: 'ratio',
           },
         ]),
         'col2'
@@ -453,7 +451,6 @@ describe('isSortableByColumn()', () => {
             operationType: 'differences',
             isBucketed: false,
             references: ['col3'],
-            scale: 'ratio',
           },
           {
             label: 'Average',
@@ -477,7 +474,6 @@ describe('isSortableByColumn()', () => {
             dataType: 'number',
             operationType: 'static_value',
             isBucketed: false,
-            scale: 'ratio',
             params: { value: 100 },
             references: [],
           } as ReferenceBasedIndexPatternColumn,
@@ -497,7 +493,6 @@ describe('isSortableByColumn()', () => {
             operationType: 'percentile_rank',
             sourceField: 'bytes',
             isBucketed: false,
-            scale: 'ratio',
             params: { value: 1024.5 },
           } as PercentileRanksIndexPatternColumn,
         ]),
@@ -516,7 +511,6 @@ describe('isSortableByColumn()', () => {
             operationType: 'percentile_rank',
             sourceField: 'bytes',
             isBucketed: false,
-            scale: 'ratio',
             params: { value: 1024 },
           } as PercentileRanksIndexPatternColumn,
         ]),

@@ -32,6 +32,13 @@ export interface FeatureTypeUsage {
   alert_suppression: AlertSuppressionUsage;
 }
 
+export interface UpgradeableRulesSummary {
+  total: number;
+  customized: number;
+  enabled: number;
+  disabled: number;
+}
+
 export interface RulesTypeUsage {
   query: FeatureTypeUsage;
   threshold: FeatureTypeUsage;
@@ -40,6 +47,8 @@ export interface RulesTypeUsage {
   threat_match: FeatureTypeUsage;
   new_terms: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
+  elastic_customized_total: FeatureTypeUsage;
+  elastic_noncustomized_total: FeatureTypeUsage;
   custom_total: FeatureTypeUsage;
   esql: FeatureTypeUsage;
 }
@@ -53,6 +62,7 @@ export interface RuleAdoption {
   detection_rule_detail: RuleMetric[];
   detection_rule_usage: RulesTypeUsage;
   detection_rule_status: EventLogStatusMetric;
+  elastic_detection_rule_upgrade_status: UpgradeableRulesSummary;
   spaces_usage: SpacesUsage;
 }
 
@@ -63,6 +73,7 @@ export interface RuleMetric {
   rule_version: number;
   enabled: boolean;
   elastic_rule: boolean;
+  is_customized: boolean;
   created_on: string;
   updated_on: string;
   alert_count_daily: number;

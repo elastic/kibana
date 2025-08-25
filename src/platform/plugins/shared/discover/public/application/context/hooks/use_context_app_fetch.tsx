@@ -14,20 +14,17 @@ import { Markdown } from '@kbn/shared-ux-markdown';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { getEsQuerySort, getTieBreakerFieldName } from '@kbn/discover-utils';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
+import type { ContextFetchState } from '../services/context_query_state';
 import {
-  ContextFetchState,
   FailureReason,
   getInitialContextQueryState,
   LoadingStatus,
 } from '../services/context_query_state';
-import { AppState } from '../services/context_state';
+import type { AppState } from '../services/context_state';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import {
-  getTieBreakerFieldName,
-  getEsQuerySort,
-} from '../../../../common/utils/sorting/get_es_query_sort';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },

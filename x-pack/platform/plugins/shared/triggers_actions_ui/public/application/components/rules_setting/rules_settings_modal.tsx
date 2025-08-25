@@ -247,7 +247,14 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   };
 
   return (
-    <EuiModal data-test-subj="rulesSettingsModal" onClose={onCloseModal} maxWidth={880}>
+    <EuiModal
+      data-test-subj="rulesSettingsModal"
+      onClose={onCloseModal}
+      maxWidth={880}
+      aria-label={i18n.translate('xpack.triggersActionsUI.rulesSettings.flyout.ruleSettingsLabel', {
+        defaultMessage: 'Rule settings',
+      })}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle component="h3">
           <FormattedMessage

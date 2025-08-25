@@ -849,7 +849,8 @@ export const UnifiedDataTable = ({
     storage,
     consumer,
     key: 'dataGridHeaderRowHeight',
-    configRowHeight: configHeaderRowHeight ?? 1,
+    defaultRowHeight: 1,
+    configRowHeight: configHeaderRowHeight,
     rowHeightState: headerRowHeightState,
     onUpdateRowHeight: onUpdateHeaderRowHeight,
   });
@@ -859,7 +860,8 @@ export const UnifiedDataTable = ({
       storage,
       consumer,
       key: 'dataGridRowHeight',
-      configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
+      defaultRowHeight: ROWS_HEIGHT_OPTIONS.default,
+      configRowHeight,
       rowHeightState,
       onUpdateRowHeight,
     });

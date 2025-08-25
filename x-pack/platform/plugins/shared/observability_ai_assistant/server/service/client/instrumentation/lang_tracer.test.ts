@@ -4,21 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  InMemorySpanExporter,
-  BasicTracerProvider,
-  SimpleSpanProcessor,
-  ReadableSpan,
-} from '@opentelemetry/sdk-trace-base';
-import { context } from '@opentelemetry/api';
+
+import { tracing } from '@elastic/opentelemetry-node/sdk';
+import { context, trace } from '@opentelemetry/api';
 import { LangTracer } from './lang_tracer';
 import { lastValueFrom, of, throwError } from 'rxjs';
 
 describe('langTracer', () => {
-  const provider = new BasicTracerProvider();
-  const memoryExporter = new InMemorySpanExporter();
-  provider.addSpanProcessor(new SimpleSpanProcessor(memoryExporter));
-  provider.register();
+  const memoryExporter = new tracing.InMemorySpanExporter();
+  const provider = new tracing.BasicTracerProvider({
+    spanProcessors: [new tracing.SimpleSpanProcessor(memoryExporter)],
+  });
+
+  trace.setGlobalTracerProvider(provider);
 
   beforeEach(() => {
     memoryExporter.reset();
@@ -36,7 +34,7 @@ describe('langTracer', () => {
       await lastValueFrom(tracer.startActiveSpan('my_span', spanCallback));
 
       const { span } = spanCallback.mock.calls[0][0] as {
-        span: ReadableSpan;
+        span: tracing.ReadableSpan;
       };
 
       expect(span.name).toEqual('my_span');
@@ -69,7 +67,7 @@ describe('langTracer', () => {
       await lastValueFrom(tracer.startActiveSpan('my_span', spanCallback)).catch(errorHandler);
 
       const { span } = spanCallback.mock.calls[0][0] as {
-        span: ReadableSpan;
+        span: tracing.ReadableSpan;
       };
 
       expect(span.status).toEqual({
@@ -95,7 +93,7 @@ describe('langTracer', () => {
       const mappedSpans = memoryExporter.getFinishedSpans().map((span) => ({
         name: span.name,
         id: span.spanContext().spanId,
-        parentId: span.parentSpanId,
+        parentId: span.parentSpanContext?.spanId,
       }));
 
       const parentSpan = mappedSpans.find((span) => span.name === 'parent');

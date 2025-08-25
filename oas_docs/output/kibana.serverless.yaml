@@ -101,17 +101,11 @@ tags:
     description: Manage the roles that grant Elasticsearch and Kibana privileges.
     externalDocs:
       description: Kibana role management
-<<<<<<< HEAD
-      url: https://www.elastic.co/guide/en/kibana/master/kibana-role-management.html
-  - description: |
-      Export sets of saved objects that you want to import into Kibana, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
-=======
       url: https://www.elastic.co/docs/deploy-manage/users-roles/serverless-custom-roles
   - name: saved objects
     x-displayName: Saved objects
     description: |
       Export or import sets of saved objects.
->>>>>>> 128b8457a61 ([DOCS] Fix URLs in Kibana API documentation (#215989))
 
       To manage a specific type of saved object, use the corresponding APIs.
       For example, use:
@@ -144,7 +138,7 @@ tags:
     x-displayName: Security detections
   - description: Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
     name: Security Endpoint Exceptions API
-    x-displayName: Security endpoint exceptions
+    x-displayName: Security Elastic Endpoint exceptions
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
     x-displayName: Security endpoint management
@@ -5389,7 +5383,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/APM_UI_service_object'
+              $ref: '#/components/schemas/APM_UI_delete_service_object'
         required: true
       responses:
         '200':
@@ -10547,7 +10541,7 @@ paths:
               type: object
               properties:
                 objects:
-                  description: Array of `rule_id` fields. Exports all rules when unspecified.
+                  description: Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified.
                   items:
                     type: object
                     properties:
@@ -11549,7 +11543,7 @@ paths:
         - Security Detections API
   /api/endpoint_list:
     post:
-      description: Create an endpoint exception list, which groups endpoint exception list items. If an endpoint exception list already exists, an empty response is returned.
+      description: Create the exception list for Elastic Endpoint rule exceptions. When you create the exception list, it will have a `list_id` of `endpoint_list`. If the Elastic Endpoint exception list already exists, your request will return an empty response.
       operationId: CreateEndpointList
       responses:
         '200':
@@ -11584,12 +11578,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Create an endpoint exception list
+      summary: Create an Elastic Endpoint rule exception list
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items:
     delete:
-      description: Delete an endpoint exception list item using the `id` or `item_id` field.
+      description: Delete an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       operationId: DeleteEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -11643,11 +11637,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Delete an endpoint exception list item
+      summary: Delete an Elastic Endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
     get:
-      description: Get the details of an endpoint exception list item using the `id` or `item_id` field.
+      description: Get the details of an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       operationId: ReadEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -11703,11 +11697,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Get an endpoint exception list item
+      summary: Get an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
     post:
-      description: Create an endpoint exception list item, and associate it with the endpoint exception list.
+      description: Create an Elastic Endpoint exception list item, and associate it with the Elastic Endpoint exception list.
       operationId: CreateEndpointListItem
       requestBody:
         content:
@@ -11782,11 +11776,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Create an endpoint exception list item
+      summary: Create an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
     put:
-      description: Update an endpoint exception list item using the `id` or `item_id` field.
+      description: Update an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       operationId: UpdateEndpointListItem
       requestBody:
         content:
@@ -11866,12 +11860,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Update an endpoint exception list item
+      summary: Update an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items/_find:
     get:
-      description: Get a list of all endpoint exception list items.
+      description: Get a list of all Elastic Endpoint exception list items.
       operationId: FindEndpointListItems
       parameters:
         - description: |
@@ -11971,7 +11965,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Get endpoint exception list items
+      summary: Get Elastic Endpoint exception list items
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint/action:
@@ -12086,7 +12080,11 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}:
     get:
-      description: Get information for the specified file using the file ID.
+      description: |
+        Get information for the specified file using the file ID.
+        > info
+        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileInfo
       parameters:
         - in: path
@@ -12111,7 +12109,11 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
-      description: Download a file from an endpoint.
+      description: |
+        Download a file from an endpoint. 
+        > info
+        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileDownload
       parameters:
         - in: path
@@ -49446,6 +49448,14 @@ components:
         result:
           description: Result
           type: string
+    APM_UI_delete_service_object:
+      description: Service
+      type: object
+      properties:
+        service:
+          $ref: '#/components/schemas/APM_UI_service_object'
+      required:
+        - service
     APM_UI_search_agent_configuration_object:
       type: object
       properties:
@@ -51453,14 +51463,14 @@ components:
       properties:
         add:
           items:
-            description: A list of users ids to assign.
+            description: A list of user profile `uid`s to assign. Users need to activate their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
             type: string
           type: array
         remove:
           items:
-            description: A list of users ids to unassign.
+            description: A list of user profile `uid`s to unassign. Users need to activate their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
             type: string
@@ -51717,7 +51727,9 @@ components:
             - delete
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -51735,7 +51747,9 @@ components:
             - disable
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -51766,7 +51780,9 @@ components:
             - include_exceptions
             - include_expired_exceptions
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -51858,7 +51874,9 @@ components:
           minItems: 1
           type: array
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -51881,7 +51899,9 @@ components:
             - enable
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -51901,7 +51921,9 @@ components:
             - export
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -51919,7 +51941,9 @@ components:
             - run
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -55800,7 +55824,7 @@ components:
       type: object
       properties:
         signal_ids:
-          description: List of alert `id`s.
+          description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
           items:
             format: nonempty
             minLength: 1
@@ -57191,7 +57215,7 @@ components:
       example: This list tracks allowlisted values.
       type: string
     Security_Endpoint_Exceptions_API_ExceptionListHumanId:
-      description: Exception list's human readable string identifier, e.g. `trusted-linux-processes`.
+      description: The exception list's human readable string identifier, `endpoint_list`.
       example: simple_list
       format: nonempty
       minLength: 1
@@ -59594,7 +59618,7 @@ components:
       example: This list tracks allowlisted values.
       type: string
     Security_Exceptions_API_ExceptionListHumanId:
-      description: Exception list's human readable string identifier, e.g. `trusted-linux-processes`.
+      description: The exception list's human readable string identifier, `endpoint_list`.
       example: simple_list
       format: nonempty
       minLength: 1

@@ -15,7 +15,8 @@ const getFeatureIdsForCategories = (
 ) => {
   return features
     .filter((feature) =>
-      feature.category
+      // We need to make sure we only reference non-deprecated features
+      feature.category && !feature.deprecated
         ? categories.includes(
             feature.category.id as 'observability' | 'enterpriseSearch' | 'securitySolution'
           )

@@ -189,7 +189,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         stateManager,
         controlFetch$: (onReload: () => void) => controlGroupApi.controlFetch$(uuid, onReload),
       }).subscribe((result) => {
-        // if there was an error during fetch, set blocking error and return early
+        // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
           dataControl.api.setBlockingError((result as { error: Error }).error);
           return;

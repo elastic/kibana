@@ -124,6 +124,9 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
           '--xpack.uptime.service.devUrl=mockDevUrl',
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
       },
       testFiles: options.testFiles,

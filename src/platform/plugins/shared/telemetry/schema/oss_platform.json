@@ -11448,6 +11448,12 @@
           "_meta": {
             "description": "Enable the new logs overview component."
           }
+        },
+        "observability:enableDiagnosticMode": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Enable diagnostic mode"
+          }
         }
       }
     },

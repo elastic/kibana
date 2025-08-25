@@ -9,6 +9,7 @@ import type { AwaitedProperties } from '@kbn/utility-types';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
@@ -83,6 +84,7 @@ export const createMockClients = () => {
     siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
     getInferenceClient: jest.fn(),
     assetInventoryDataClient: AssetInventoryDataClientMock.create(),
+    logger: loggerMock.create(),
   };
 };
 
@@ -173,6 +175,9 @@ const createSecuritySolutionRequestContextMock = (
     getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
     getAssetInventoryClient: jest.fn(() => clients.assetInventoryDataClient),
+    getMlAuthz: jest.fn(() => ({
+      validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
+    })),
   };
 };
 

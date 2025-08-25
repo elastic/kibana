@@ -120,8 +120,6 @@
       "@kbn/babel-transform/*": ["src/platform/packages/private/kbn-babel-transform/*"],
       "@kbn/banners-plugin": ["x-pack/platform/plugins/private/banners"],
       "@kbn/banners-plugin/*": ["x-pack/platform/plugins/private/banners/*"],
-      "@kbn/bazel-runner": ["packages/kbn-bazel-runner"],
-      "@kbn/bazel-runner/*": ["packages/kbn-bazel-runner/*"],
       "@kbn/calculate-auto": ["src/platform/packages/shared/kbn-calculate-auto"],
       "@kbn/calculate-auto/*": ["src/platform/packages/shared/kbn-calculate-auto/*"],
       "@kbn/calculate-width-from-char-count": ["src/platform/packages/shared/kbn-calculate-width-from-char-count"],
@@ -1076,6 +1074,8 @@
       "@kbn/index-management-shared-types/*": ["x-pack/platform/packages/shared/index-management/index_management_shared_types/*"],
       "@kbn/index-patterns-test-plugin": ["test/plugin_functional/plugins/index_patterns"],
       "@kbn/index-patterns-test-plugin/*": ["test/plugin_functional/plugins/index_patterns/*"],
+      "@kbn/indices-metadata-plugin": ["x-pack/platform/plugins/private/indices_metadata"],
+      "@kbn/indices-metadata-plugin/*": ["x-pack/platform/plugins/private/indices_metadata/*"],
       "@kbn/inference_integration_flyout": ["x-pack/platform/packages/private/ml/inference_integration_flyout"],
       "@kbn/inference_integration_flyout/*": ["x-pack/platform/packages/private/ml/inference_integration_flyout/*"],
       "@kbn/inference-common": ["x-pack/platform/packages/shared/ai-infra/inference-common"],
@@ -2106,7 +2106,11 @@
       "@kbn/zod-helpers/*": ["src/platform/packages/shared/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": ["typings/@emotion"],
+      // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
+      // We should be able to remove this once we support cjs/esm interop.
+      "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
+      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

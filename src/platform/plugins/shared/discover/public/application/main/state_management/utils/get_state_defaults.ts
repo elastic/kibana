@@ -8,18 +8,19 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getChartHidden } from '@kbn/unified-histogram-plugin/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
+  getDefaultSort,
+  getSortArray,
 } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { DiscoverAppState } from '../discover_app_state_container';
-import { DiscoverServices } from '../../../../build_services';
-import { getDefaultSort, getSortArray } from '../../../../utils/sorting';
+import type { DiscoverAppState } from '../discover_app_state_container';
+import type { DiscoverServices } from '../../../../build_services';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 

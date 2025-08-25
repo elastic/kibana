@@ -12,6 +12,8 @@ import { ASSISTANT_FEATURE_ID } from '../../../common/constants';
 export interface UseAssistantAvailability {
   // True when user is Enterprise. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
+  // When true, user has `All` privilege for `Management > AI Assistant`
+  isAssistantManagementEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
   hasAssistantPrivilege: boolean;
   // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
@@ -32,6 +34,8 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     capabilities[ASSISTANT_FEATURE_ID]?.updateAIAssistantAnonymization === true;
   const hasManageGlobalKnowledgeBase =
     capabilities[ASSISTANT_FEATURE_ID]?.manageGlobalKnowledgeBaseAIAssistant === true;
+  const hasManageAssistantPrivilege =
+    capabilities?.management?.kibana?.aiAssistantManagementSelection === true;
 
   // Connectors & Actions capabilities as defined in x-pack/plugins/actions/server/feature.ts
   // `READ` ui capabilities defined as: { ui: ['show', 'execute'] }
@@ -48,6 +52,7 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     hasConnectorsAllPrivilege,
     hasConnectorsReadPrivilege,
     isAssistantEnabled: isEnterprise,
+    isAssistantManagementEnabled: isEnterprise && hasManageAssistantPrivilege,
     hasUpdateAIAssistantAnonymization,
     hasManageGlobalKnowledgeBase,
   };

@@ -14,7 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { PanelsToggle, type PanelsToggleProps } from './panels_toggle';
 import { DiscoverAppStateProvider } from '../../application/main/state_management/discover_app_state_container';
-import { SidebarToggleState } from '../../application/types';
+import type { SidebarToggleState } from '../../application/types';
 
 describe('Panels toggle component', () => {
   const mountComponent = ({

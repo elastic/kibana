@@ -57,6 +57,14 @@ export const esClient = (
         return false;
       }
     },
+    clearCache: async () => {
+      try {
+        await client.indices.clearCache();
+        return true;
+      } catch (error) {
+        return false;
+      }
+    },
     searchIndex: async (index) => {
       try {
         const response = await client.search({

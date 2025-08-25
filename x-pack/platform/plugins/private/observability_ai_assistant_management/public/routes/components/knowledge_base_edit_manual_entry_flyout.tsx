@@ -142,7 +142,6 @@ export function KnowledgeBaseEditManualEntryFlyout({
             fullWidth
             value={newEntryTitle}
             onChange={(e) => setNewEntryTitle(e.target.value)}
-            isInvalid={isEntryTitleInvalid}
           />
         </EuiFormRow>
 

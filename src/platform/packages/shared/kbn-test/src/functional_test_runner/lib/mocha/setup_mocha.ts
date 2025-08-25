@@ -31,6 +31,7 @@ interface Options {
   config: Config;
   providers: ProviderCollection;
   esVersion: EsVersion;
+  skipRootHooks?: boolean;
   reporter?: any;
   reporterOptions?: any;
 }
@@ -45,12 +46,21 @@ export async function setupMocha({
   config,
   providers,
   esVersion,
+  skipRootHooks,
   reporter,
   reporterOptions,
 }: Options) {
+  const rootHooks = config.get('mochaOpts.rootHooks');
+
   // configure mocha
   const mocha = new Mocha({
     ...config.get('mochaOpts'),
+    rootHooks: {
+      beforeAll:
+        rootHooks?.beforeAll && !skipRootHooks ? () => rootHooks.beforeAll(providers) : undefined,
+      afterAll:
+        rootHooks?.afterAll && !skipRootHooks ? () => rootHooks.afterAll(providers) : undefined,
+    },
     reporter:
       reporter || (await providers.loadExternalService('mocha reporter', MochaReporterProvider)),
     reporterOptions,
@@ -72,7 +82,7 @@ export async function setupMocha({
     paths: config.get('testFiles'),
   });
 
-  // valiate that there aren't any tests in multiple ciGroups
+  // validate that there aren't any tests in multiple ciGroups
   validateCiGroupTags(log, mocha);
 
   filterSuites({

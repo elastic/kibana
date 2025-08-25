@@ -46,4 +46,11 @@ describe('Dependency operation', () => {
     cy.getByTestSubj('apmActionMenuButtonInvestigateButton').click();
     cy.getByTestSubj('apmActionMenuInvestigateButtonPopup');
   });
+
+  it('opens Span link flyout', () => {
+    cy.visitKibana(dependencyOperationHref);
+    cy.contains('Span links').click();
+    cy.contains('Span details');
+    cy.contains('Span B');
+  });
 });

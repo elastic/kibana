@@ -2,22 +2,28 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node", "jest","@kbn/ambient-ftr-types"]
+    "types": ["node", "jest", "@kbn/ambient-ftr-types"]
   },
   "include": [
     "**/*",
     "../../../typings/**/*",
-    "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
+    "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
-    { "path": "../security_solution_endpoint/tsconfig.json" },
+    {
+      "path": "../security_solution_endpoint/tsconfig.json"
+    },
     "@kbn/test-suites-serverless",
-    { "path": "../../test_serverless/api_integration/**/*" },
-    { "path": "../../test_serverless/shared/**/*" },
-    { "path": "../../api_integration/services/**/*" },
+    {
+      "path": "../../test_serverless/api_integration/**/*"
+    },
+    {
+      "path": "../../test_serverless/shared/**/*"
+    },
+    {
+      "path": "../../api_integration/services/**/*"
+    },
     "@kbn/dev-utils",
     "@kbn/test",
     "@kbn/expect",
@@ -57,6 +63,8 @@
     "@kbn/security-plugin-types-common",
     "@kbn/scout-info",
     "@kbn/babel-register",
-    "@kbn/config-schema"
+    "@kbn/response-ops-rule-params",
+    "@kbn/config-schema",
+    "@kbn/securitysolution-exceptions-common"
   ]
 }

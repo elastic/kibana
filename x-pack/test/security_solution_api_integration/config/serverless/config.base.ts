@@ -8,14 +8,22 @@ import path from 'path';
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { services } from './services';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { installMockPrebuiltRulesPackage } from '../../test_suites/detections_response/utils';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
+import { services } from './services';
 
 export interface CreateTestConfigOptions {
   testFiles: string[];
   junit: { reportName: string };
   kbnTestServerArgs?: string[];
   kbnTestServerEnv?: Record<string, string>;
+  /**
+   * Log message to wait for before initiating tests, defaults to waiting for Kibana status to be `available`.
+   * Note that this log message must not be filtered out by the current logging config, for example by the
+   * log level. If needed, you can adjust the logging level via `kbnTestServer.serverArgs`.
+   */
+  kbnTestServerWait?: RegExp;
   suiteTags?: { include?: string[]; exclude?: string[] };
 }
 
@@ -47,6 +55,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           ...svlSharedConfig.get('kbnTestServer.env'),
           ...options.kbnTestServerEnv,
         },
+        runOptions: {
+          ...svlSharedConfig.get('kbnTestServer.runOptions'),
+          wait: options.kbnTestServerWait,
+        },
       },
       testFiles: options.testFiles,
       junit: options.junit,
@@ -54,6 +66,15 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       mochaOpts: {
         ...svlSharedConfig.get('mochaOpts'),
         grep: '/^(?!.*(^|\\s)@skipInServerless(\\s|$)).*@serverless.*/',
+        rootHooks: {
+          // Some of the Rule Management API endpoints install prebuilt rules package under the hood.
+          // Prebuilt rules package installation has been known to be flakiness reason since
+          // EPR might be unavailable or the network may have faults.
+          // Real prebuilt rules package installation is prevented by
+          // installing a lightweight mock package.
+          beforeAll: ({ getService }: FtrProviderContext) =>
+            installMockPrebuiltRulesPackage({ getService }),
+        },
       },
     };
   };

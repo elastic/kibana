@@ -15,8 +15,6 @@ toc:
   - toc: release-notes
   - toc: extend
 subs:
-  version: "9.0.0"
-  branch: "9.0"
   ecloud:   "Elastic Cloud"
   ech:   "Elastic Cloud Hosted"
   ess:   "Elasticsearch Service"

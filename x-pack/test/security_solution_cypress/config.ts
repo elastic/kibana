@@ -60,6 +60,18 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
       ],
+      runOptions: {
+        wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,
+      },
     },
   };
 }
+
+/**
+ * A log message indicating that Fleet plugin has completed any necessary setup logic
+ * to make sure test suites can run without race conditions with Fleet plugin initialization.
+ *
+ * The message must not be filtered out by the logging configuration. Subsequently higher log level is better.
+ * "Fleet setup completed" has the same "info" level as "Kibana server is ready" log message.
+ */
+const FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP = /Fleet setup completed/;

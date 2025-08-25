@@ -100,9 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // Skipped due to change in QA environment for role management and spaces
-    // TODO: revisit once the change is rolled out to all environments
-    describe.skip('when in single space mode', function () {
+    describe('when in data views view', function () {
       let dataViewId = '';
       before(async () => {
         await esArchiver.load(
@@ -131,12 +129,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .set('kbn-xsrf', 'some-xsrf-token');
       });
 
-      it('hides spaces UI', async () => {
+      it('shows spaces column', async () => {
         await PageObjects.common.navigateToUrl('management', 'kibana/dataViews', {
           shouldUseHashForSubUrl: false,
         });
         await testSubjects.exists('detail-link-basic_index');
-        await testSubjects.missingOrFail('tableHeaderCell_namespaces_1');
+        await testSubjects.existOrFail('tableHeaderCell_namespaces_1');
       });
     });
   });

@@ -409,7 +409,13 @@ describe('bedrockClaudeAdapter', () => {
 
       const { toolChoice, tools, system } = getCallParams();
       expect(toolChoice).toBeUndefined();
-      expect(tools).toEqual([]);
+      expect(tools).toEqual([
+        {
+          description: 'myFunction',
+          input_schema: { properties: {}, type: 'object' },
+          name: 'myFunction',
+        },
+      ]);
       expect(system).toEqual(addNoToolUsageDirective('some system instruction'));
     });
 

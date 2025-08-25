@@ -162,7 +162,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
             compressed: false,
             'data-test-subj': `${id}-search-input`,
             css: css`
-              border-radius: 0px !important;
+              box-shadow: none;
             `,
           }}
           emptyMessage={'empty'}

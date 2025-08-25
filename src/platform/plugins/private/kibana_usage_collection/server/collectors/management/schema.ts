@@ -684,4 +684,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the new logs overview component.',
     },
   },
+  'observability:enableDiagnosticMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable diagnostic mode',
+    },
+  },
 };

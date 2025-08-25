@@ -73,7 +73,6 @@ describe('filters', () => {
           label: 'filters',
           dataType: 'document',
           operationType: 'filters',
-          scale: 'ordinal',
           isBucketed: true,
           params: {
             filters: [
@@ -198,7 +197,6 @@ describe('filters', () => {
         label: 'Filters',
         dataType: 'string',
         operationType: 'filters',
-        scale: 'ordinal',
         isBucketed: true,
         params: {
           filters: [
@@ -235,7 +233,6 @@ describe('filters', () => {
         label: 'Filters',
         dataType: 'string',
         operationType: 'filters',
-        scale: 'ordinal',
         isBucketed: true,
         params: {
           filters: [
@@ -274,7 +271,6 @@ describe('filters', () => {
         label: 'Filters',
         dataType: 'string',
         operationType: 'filters',
-        scale: 'ordinal',
         isBucketed: true,
         params: {
           filters: [

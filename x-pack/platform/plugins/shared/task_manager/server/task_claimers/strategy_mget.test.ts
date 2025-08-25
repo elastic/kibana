@@ -6,7 +6,6 @@
  */
 
 import _ from 'lodash';
-import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 import { filter, take } from 'rxjs';
 
@@ -53,10 +52,12 @@ jest.mock('../constants', () => ({
     'limitedToTwo',
     'limitedToFive',
     'yawn',
+    'sampleTaskSharedConcurrencyType1',
+    'sampleTaskSharedConcurrencyType2',
+    'sampleTaskZeroMaxConcurrency',
   ],
 }));
 
-let fakeTimer: sinon.SinonFakeTimers;
 const taskManagerLogger = mockLogger();
 
 beforeEach(() => jest.clearAllMocks());
@@ -114,10 +115,11 @@ const taskPartitioner = new TaskPartitioner({
 // needs more tests in the similar to the `strategy_default.test.ts` test suite
 describe('TaskClaiming', () => {
   beforeAll(() => {
-    fakeTimer = sinon.useFakeTimers();
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('1970-01-01T00:00:00.000Z'));
   });
 
-  afterAll(() => fakeTimer.restore());
+  afterAll(() => jest.useRealTimers());
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -1944,7 +1946,7 @@ describe('TaskClaiming', () => {
 
     test(`it should log warning on interval when the node has no assigned partitions`, async () => {
       // Reset the warning timer by advancing more
-      fakeTimer.tick(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
+      jest.advanceTimersByTime(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
 
       jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
       const taskManagerId = uuidv4();
@@ -1976,7 +1978,7 @@ describe('TaskClaiming', () => {
       );
 
       taskManagerLogger.warn.mockReset();
-      fakeTimer.tick(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL - 500);
+      jest.advanceTimersByTime(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL - 500);
 
       await testClaimAvailableTasks({
         storeOpts: {
@@ -1991,7 +1993,7 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.warn).not.toHaveBeenCalled();
 
-      fakeTimer.tick(500);
+      jest.advanceTimersByTime(500);
 
       await testClaimAvailableTasks({
         storeOpts: {
@@ -2012,7 +2014,7 @@ describe('TaskClaiming', () => {
 
     test(`it should log a message after the node no longer has no assigned partitions`, async () => {
       // Reset the warning timer by advancing more
-      fakeTimer.tick(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
+      jest.advanceTimersByTime(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
 
       jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
       const taskManagerId = uuidv4();
@@ -2045,7 +2047,7 @@ describe('TaskClaiming', () => {
 
       taskManagerLogger.warn.mockReset();
       jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([1, 2, 3]);
-      fakeTimer.tick(500);
+      jest.advanceTimersByTime(500);
 
       await testClaimAvailableTasks({
         storeOpts: {
@@ -2063,6 +2065,50 @@ describe('TaskClaiming', () => {
         `Background task node "${taskPartitioner.getPodName()}" now claiming with assigned partitions`,
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
+    });
+
+    test('should not claim the tasks that has 0 maxConcurrency (pollEnabled:false)', async () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+        bar: {
+          title: 'bar',
+          createTaskRunner: jest.fn(),
+        },
+        baz: {
+          title: 'baz',
+          createTaskRunner: jest.fn(),
+        },
+        sampleTaskZeroMaxConcurrency: {
+          title: 'report',
+          createTaskRunner: jest.fn(),
+          maxConcurrency: 0,
+        },
+      });
+      const { taskClaiming, store } = initialiseTestClaiming({
+        storeOpts: {
+          definitions,
+        },
+        taskClaimingOpts: {
+          maxAttempts: 5,
+        },
+      });
+
+      await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      const searchQuery = store.msearch.mock.calls[0]?.[0]?.[0].query;
+      const searchQueryMust = searchQuery?.bool?.must;
+
+      expect(Array.isArray(searchQueryMust) && searchQueryMust[1]).toEqual({
+        bool: { must: [{ terms: { 'task.taskType': ['foo', 'bar', 'baz'] } }] },
+      });
+
+      expect(JSON.stringify(searchQuery)).not.toContain('sampleTaskZeroMaxConcurrency');
     });
   });
 

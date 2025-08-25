@@ -284,6 +284,14 @@ export class RequestContextFactory implements IRequestContextFactory {
           experimentalFeatures: config.experimentalFeatures,
         });
       }),
+      getMlAuthz: memoize(() => {
+        return buildMlAuthz({
+          license: licensing.license,
+          ml: plugins.ml,
+          request,
+          savedObjectsClient: coreContext.savedObjects.client,
+        });
+      }),
     };
   }
 }

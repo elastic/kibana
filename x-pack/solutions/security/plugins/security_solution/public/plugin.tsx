@@ -42,8 +42,8 @@ import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations
 
 import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
-import type { AppLinkItems } from './common/links';
-import { updateAppLinks, type LinksPermissions } from './common/links';
+import type { AppLinkItems, LinksPermissions } from './common/links';
+import { updateAppLinks } from './common/links';
 import { registerDeepLinksUpdater } from './common/links/deep_links';
 import type { FleetUiExtensionGetterOptions, SecuritySolutionUiConfigType } from './common/types';
 
@@ -217,6 +217,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const isAssistantAvailable =
           productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
           license?.hasAtLeast('enterprise');
+
         const assistantManagementApp = management?.sections.section.kibana.getApp(
           'securityAiAssistantManagement'
         );

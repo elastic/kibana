@@ -27,7 +27,7 @@ const UNSAFE_HEADERS = [
   'keep-alive',
 ];
 
-const UNSAFE_HEADERS_PATTERNS = [/^proxy-/i];
+const UNSAFE_HEADERS_PATTERNS = [/^proxy-/i, /^:/];
 
 export function stripUnsafeHeaders(headers: Headers): Headers {
   return omitBy(

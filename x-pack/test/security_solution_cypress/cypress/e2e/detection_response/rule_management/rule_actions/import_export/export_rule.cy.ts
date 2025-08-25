@@ -11,8 +11,12 @@ import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
 } from '../../../../../tasks/api_calls/common';
-import { expectedExportedRule, getNewRule } from '../../../../../objects/rule';
-import { TOASTER_BODY, TOASTER } from '../../../../../screens/alerts_detection_rules';
+import { getCustomQueryRuleParams } from '../../../../../objects/rule';
+import {
+  TOASTER_BODY,
+  TOASTER,
+  SUCCESS_TOASTER_BODY,
+} from '../../../../../screens/alerts_detection_rules';
 import {
   selectAllRules,
   waitForRuleExecution,
@@ -27,13 +31,15 @@ import {
 } from '../../../../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../../../../objects/exception';
 import { createRule } from '../../../../../tasks/api_calls/rules';
+import { exportRuleFromDetailsPage, visitRuleDetailsPage } from '../../../../../tasks/rule_details';
 import { resetRulesTableState } from '../../../../../tasks/common';
 import { login } from '../../../../../tasks/login';
 import { visit } from '../../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 import {
   createAndInstallMockedPrebuiltRules,
-  getAvailablePrebuiltRulesCount,
+  getInstalledPrebuiltRulesCount,
+  installMockPrebuiltRulesPackage,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
@@ -49,7 +55,12 @@ const prebuiltRules = Array.from(Array(7)).map((_, i) => {
 });
 
 describe('Export rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   const downloadsFolder = Cypress.config('downloadsFolder');
+  const RULE_NAME = 'Rule to export';
 
   beforeEach(() => {
     preventPrebuiltRulesPackageInstallation();
@@ -64,20 +75,31 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
     // Prevent installation of whole prebuilt rules package, use mock prebuilt rules instead
     preventPrebuiltRulesPackageInstallation();
     visit(RULES_MANAGEMENT_URL);
-    createRule(getNewRule({ name: 'Rule to export', enabled: false })).as('ruleResponse');
+    createRule(getCustomQueryRuleParams({ name: RULE_NAME, enabled: false })).as('ruleResponse');
   });
 
-  it('exports a custom rule', function () {
+  it('exports a custom rule from the rule management table', function () {
     exportRule('Rule to export');
     cy.wait('@bulk_action').then(({ response }) => {
-      cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));
+      expect(response?.statusCode).to.equal(200);
       cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+    });
+  });
+
+  it('exports a custom rule from the rule details page', function () {
+    visitRuleDetailsPage(this.ruleResponse.body.id);
+
+    exportRuleFromDetailsPage();
+
+    cy.wait('@bulk_action').then(({ response }) => {
+      expect(response?.statusCode).to.equal(200);
+      cy.get(SUCCESS_TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
     });
   });
 
   it('creates an importable file from executed rule', () => {
     // Rule needs to be enabled to make sure it has been executed so rule's SO contains runtime fields like `execution_summary`
-    createRule(getNewRule({ name: 'Enabled rule to export', enabled: true }));
+    createRule(getCustomQueryRuleParams({ name: 'Enabled rule to export', enabled: true }));
     waitForRuleExecution('Enabled rule to export');
 
     exportRule('Enabled rule to export');
@@ -101,7 +123,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
     selectAllRules();
     bulkExportRules();
 
-    getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+    getInstalledPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
       const totalNumberOfRules =
         expectedNumberCustomRulesToBeExported + availablePrebuiltRulesCount;
       cy.get(TOASTER_BODY).should(
@@ -117,7 +139,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) =>
         createRule(
-          getNewRule({
+          getCustomQueryRuleParams({
             name: 'rule with exceptions',
             exceptions_list: [
               {

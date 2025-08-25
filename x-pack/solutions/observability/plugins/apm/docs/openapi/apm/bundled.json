@@ -389,7 +389,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/service_object"
+                "$ref": "#/components/schemas/delete_service_object"
               },
               "examples": {
                 "deleteAgentConfigurationRequest1": {
@@ -1612,6 +1612,18 @@
           },
           "settings": {
             "$ref": "#/components/schemas/settings_object"
+          }
+        }
+      },
+      "delete_service_object": {
+        "type": "object",
+        "description": "Service",
+        "required": [
+          "service"
+        ],
+        "properties": {
+          "service": {
+            "$ref": "#/components/schemas/service_object"
           }
         }
       },

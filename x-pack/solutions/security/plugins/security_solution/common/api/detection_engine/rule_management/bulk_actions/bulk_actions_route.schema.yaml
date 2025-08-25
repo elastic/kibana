@@ -1142,7 +1142,9 @@ components:
           description: Query to filter rules.
         ids:
           type: array
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           minItems: 1
           items:
             type: string

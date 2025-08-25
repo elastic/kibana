@@ -30,6 +30,7 @@ export const ToggleField = ({
   name,
   ...rest
 }: ToggleFieldProps) => {
+  // @ts-expect-error upgrade typescript v5.4.5
   const { field } = useController<ProcessorFormState, ToggleFieldProps['name']>({
     name,
   });

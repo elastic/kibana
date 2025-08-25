@@ -8,6 +8,7 @@
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
@@ -37,13 +38,17 @@ import { goToActionsStepTab } from '../../../../../tasks/create_new_rule';
 import { goToRuleEditSettings, visitRuleDetailsPage } from '../../../../../tasks/rule_details';
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 import { addEmailConnectorAndRuleAction } from '../../../../../tasks/common/rule_actions';
-import { saveEditedRule, visitEditRulePage } from '../../../../../tasks/edit_rule';
+import { saveEditedRule, visitRuleEditPage } from '../../../../../tasks/edit_rule';
 import { DISABLED_SNOOZE_BADGE } from '../../../../../screens/rule_snoozing';
 import { TOOLTIP } from '../../../../../screens/common';
 
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
 describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
@@ -179,7 +184,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
 
     it('adds an action to a snoozed rule', () => {
       createSnoozedRule(getNewRule({ name: 'Snoozed rule' })).then(({ body: rule }) => {
-        visitEditRulePage(rule.id);
+        visitRuleEditPage(rule.id);
         goToActionsStepTab();
 
         addEmailConnectorAndRuleAction('abc@example.com', 'Test action');

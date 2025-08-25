@@ -71,38 +71,66 @@ export const updateConversation = async ({
   const updatedAt = new Date().toISOString();
   const params = transformToUpdateScheme(updatedAt, conversationUpdateProps);
 
-  try {
-    const response = await esClient.updateByQuery({
-      conflicts: 'proceed',
-      index: conversationIndex,
-      query: {
-        ids: {
-          values: [params.id],
+  const maxRetries = 3;
+  let attempt = 0;
+  let response;
+  while (attempt < maxRetries) {
+    try {
+      response = await esClient.updateByQuery({
+        conflicts: 'proceed',
+        index: conversationIndex,
+        query: {
+          ids: {
+            values: [params.id],
+          },
         },
-      },
-      refresh: true,
-      script: getUpdateScript({ conversation: params, isPatch }).script,
-    });
-
-    if (response.failures && response.failures.length > 0) {
-      logger.warn(
-        `Error updating conversation: ${response.failures.map((f) => f.id)} by ID: ${params.id}`
-      );
-      return null;
+        refresh: true,
+        script: getUpdateScript({ conversation: params, isPatch }).script,
+      });
+      if (
+        (response?.updated && response?.updated > 0) ||
+        (response?.failures && response?.failures.length > 0)
+      ) {
+        break;
+      }
+      if (
+        response?.version_conflicts &&
+        response?.version_conflicts > 0 &&
+        response?.updated === 0
+      ) {
+        attempt++;
+        if (attempt < maxRetries) {
+          logger.warn(
+            `Version conflict detected, retrying updateConversation (attempt ${
+              attempt + 1
+            }) for conversation ID: ${params.id}`
+          );
+          await new Promise((resolve) => setTimeout(resolve, 100 * attempt));
+        }
+      } else {
+        break;
+      }
+    } catch (err) {
+      logger.warn(`Error updating conversation: ${err} by ID: ${params.id}`);
+      throw err;
     }
-
-    const updatedConversation = await getConversation({
-      esClient,
-      conversationIndex,
-      id: params.id,
-      logger,
-      user,
-    });
-    return updatedConversation;
-  } catch (err) {
-    logger.warn(`Error updating conversation: ${err} by ID: ${params.id}`);
-    throw err;
   }
+
+  if (response && response?.failures && response?.failures.length > 0) {
+    logger.warn(
+      `Error updating conversation: ${response?.failures.map((f) => f.id)} by ID: ${params.id}`
+    );
+    return null;
+  }
+
+  const updatedConversation = await getConversation({
+    esClient,
+    conversationIndex,
+    id: params.id,
+    logger,
+    user,
+  });
+  return updatedConversation;
 };
 
 export const transformToUpdateScheme = (

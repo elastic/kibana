@@ -25,7 +25,7 @@ import {
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 
-import { visitEditRulePage } from '../../../../tasks/edit_rule';
+import { visitRuleEditPage } from '../../../../tasks/edit_rule';
 
 const expectedValidEsqlQuery = 'from auditbeat* METADATA _id';
 
@@ -43,7 +43,7 @@ describe(
     describe('supports preview logged requests', () => {
       beforeEach(() => {
         createRule({ ...getEsqlRule(), query: expectedValidEsqlQuery }).then((createdRule) => {
-          visitEditRulePage(createdRule.body.id);
+          visitRuleEditPage(createdRule.body.id);
         });
       });
 
@@ -65,7 +65,7 @@ describe(
     describe('does not support preview logged requests', () => {
       beforeEach(() => {
         createRule(getNewThreatIndicatorRule()).then((createdRule) => {
-          visitEditRulePage(createdRule.body.id);
+          visitRuleEditPage(createdRule.body.id);
         });
       });
 

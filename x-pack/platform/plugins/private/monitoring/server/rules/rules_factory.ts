@@ -64,6 +64,7 @@ export class RulesFactory {
     type: string,
     rulesClient: RulesClient | undefined
   ): Promise<BaseRule[]> {
+    // @ts-expect-error upgrade typescript v5.4.5
     const ruleCls = BY_TYPE[type];
     if (!ruleCls || !rulesClient) {
       return [];

@@ -27,6 +27,7 @@ export function InventoryComponentWrapperMock({ children }: React.PropsWithChild
       <EuiThemeProvider>
         <KibanaReactContext.Provider>
           <InventoryContextProvider context={getMockInventoryContext()}>
+            {/* @ts-expect-error upgrade typescript v5.4.5 */}
             <RouterProvider router={inventoryRouter} history={history}>
               {children}
             </RouterProvider>
