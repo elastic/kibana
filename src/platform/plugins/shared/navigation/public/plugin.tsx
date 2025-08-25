@@ -106,7 +106,9 @@ export class NavigationPublicPlugin
 
       if (!this.isSolutionNavEnabled) return;
 
-      chrome.project.setCloudUrls(cloud!);
+      cloud?.getPrivilegedUrls().then((privilegedUrls) => {
+        chrome.project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() });
+      });
     };
 
     if (this.getIsUnauthenticated(core.http)) {

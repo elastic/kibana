@@ -228,7 +228,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Billing and subscription' });
+
+      await solutionNavigation.sidenav.expectLinkMissing({ text: 'Billing and subscription' }); // Billing is not shown for developer role
 
       await solutionNavigation.sidenav.openSection(
         'search_project_nav_footer.project_settings_project_nav'
@@ -256,7 +257,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'management:trained_models',
         'management',
         'cloudLinkDeployment',
-        'cloudLinkBilling',
+        // 'cloudLinkBilling', // Billing is not shown for developer role
       ]);
     });
   });
