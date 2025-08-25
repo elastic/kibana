@@ -46,12 +46,12 @@ const RemoveAlertFromCaseModalComponent: React.FC<RemoveAlertModalProps> = ({
         onClose();
       }}
       confirmButtonText={i18n.translate(
-        'xpack.observability.alerts.actions.removeFromCaseConfirm',
+        'xpack.cases.caseView.alerts.actions.removeFromCaseConfirm',
         {
           defaultMessage: 'Remove',
         }
       )}
-      title={i18n.translate('xpack.observability.alerts.actions.removeFromCaseTitle', {
+      title={i18n.translate('xpack.cases.caseView.alerts.actions.removeFromCaseTitle', {
         defaultMessage: 'Remove alert from case',
       })}
     />

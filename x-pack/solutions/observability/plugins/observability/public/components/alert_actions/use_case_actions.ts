@@ -49,14 +49,16 @@ export const useCaseActions = ({
     onSuccess: onAddToExistingCase,
   });
 
-  const removeAlertModal = cases?.hooks.useRemoveAlertFromCaseModal({
-    caseId,
-    alertId: alerts.map((alert) => alert._id),
-    onSuccess: onRemoveAlertFromCase,
-    onClose: () => {
-      closeActionsPopover();
-    },
-  });
+  const removeAlertModal = caseId
+    ? cases?.hooks.useRemoveAlertFromCaseModal({
+        caseId,
+        alertId: alerts.map((alert) => alert._id),
+        onSuccess: onRemoveAlertFromCase,
+        onClose: () => {
+          closeActionsPopover();
+        },
+      })
+    : undefined;
 
   function getCaseAttachments(): CaseAttachmentsWithoutOwner {
     return alerts.map((alert) => ({
