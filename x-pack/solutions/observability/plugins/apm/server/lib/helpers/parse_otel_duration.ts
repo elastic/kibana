@@ -11,5 +11,5 @@ export function parseOtelDuration(duration?: number[] | string) {
     ? parseFloat(duration)
     : 0;
 
-  return parsedDuration * 0.001;
+  return parsedDuration === undefined || Number.isNaN(parsedDuration) ? 0 : parsedDuration * 0.001;
 }
