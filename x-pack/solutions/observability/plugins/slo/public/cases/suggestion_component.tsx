@@ -11,9 +11,7 @@ import type { SLOSuggestion } from '../../common/cases/suggestions';
 import { SloOverview } from '../embeddable/slo/overview/slo_overview';
 
 export function SLOSuggestionChildren(props: SuggestionChildrenProps<SLOSuggestion>) {
-  const { suggestion } = props;
-  if (suggestion.data.length === 1) {
-    const slo = suggestion.data[0].payload;
-    return <SloOverview sloId={slo.id} sloInstanceId={slo.instanceId} />;
-  }
+  return props.suggestion.data.map((slo) => {
+    return <SloOverview sloId={slo.payload.id} sloInstanceId={slo.payload.instanceId} />;
+  });
 }

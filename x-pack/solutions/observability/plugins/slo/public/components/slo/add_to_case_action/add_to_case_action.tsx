@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { sloDetailsHistoryLocatorID } from '@kbn/observability-plugin/common';
 import { encode } from '@kbn/rison';
 import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect } from 'react';
+import { buildSloHistoryAttachment } from '../../../../common/cases/attachments';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useUrlAppState } from '../../../pages/slo_details/components/history/hooks/use_url_app_state';
 
@@ -73,26 +72,15 @@ function Content({ slo, onCancel, onConfirm }: Props) {
     casesModal.open({
       getAttachments: () => {
         return [
-          {
-            persistableStateAttachmentState: {
-              type: 'slo_history',
-              url: {
-                pathAndQuery: locator?.getRedirectUrl({
-                  id: slo.id,
-                  instanceId: 'instanceId' in slo ? slo.instanceId : ALL_VALUE,
-                  encodedAppState: encode(state),
-                }),
-                label: slo.name,
-                actionLabel: i18n.translate('xpack.slo.addToCase.caseAttachmentLabel', {
-                  defaultMessage: 'Go to SLO history',
-                }),
-                iconType: 'metricbeatApp',
-              },
-            },
-            persistableStateAttachmentTypeId: '.page',
-            type: 'persistableState',
-          },
-        ] as CaseAttachmentsWithoutOwner;
+          buildSloHistoryAttachment({
+            label: slo.name,
+            pathAndQuery: locator?.getRedirectUrl({
+              id: slo.id,
+              instanceId: 'instanceId' in slo ? slo.instanceId : ALL_VALUE,
+              encodedAppState: encode(state),
+            }),
+          }),
+        ];
       },
     });
 

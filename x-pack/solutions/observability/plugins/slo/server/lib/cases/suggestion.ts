@@ -6,46 +6,16 @@
  */
 
 import type { SuggestionHandlerResponse } from '@kbn/cases-plugin/common';
-import { AttachmentType, type SuggestionContext } from '@kbn/cases-plugin/common';
+import type { SuggestionContext } from '@kbn/cases-plugin/common';
 import type { SuggestionType } from '@kbn/cases-plugin/server';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import type { AttachmentFramework } from '@kbn/cases-plugin/server/attachment_framework/types';
 import type { AttachmentItem } from '@kbn/cases-plugin/common/types/domain';
-import { sloPaths } from '../../../common';
+import { buildSloHistoryAttachment } from '../../../common/cases/attachments';
 import type { SLOSuggestion } from '../../../common/cases/suggestions';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 import type { EsSummaryDocument } from '../../services/summary_transform_generator/helpers/create_temp_summary';
-
-const buildPayload = (src: EsSummaryDocument): SLOSuggestion => ({
-  id: src.slo.id,
-  name: src.slo.name,
-  instanceId: src.slo.instanceId,
-  summary: { status: src.status },
-});
-
-const buildItem = (svcName: string, payload: SLOSuggestion): AttachmentItem<SLOSuggestion> => ({
-  description: `SLO "${payload.name}" is ${payload.summary.status} for the service "${svcName}"`,
-  payload,
-  attachment: {
-    type: AttachmentType.persistableState,
-    persistableStateAttachmentTypeId: '.page',
-    persistableStateAttachmentState: {
-      type: 'slo_history',
-      url: {
-        pathAndQuery: sloPaths.sloDetailsHistory({
-          id: payload.id,
-          instanceId: payload.instanceId,
-        }),
-        label: payload.name,
-        actionLabel: i18n.translate('xpack.slo.addToCase.caseAttachmentLabel', {
-          defaultMessage: 'Go to SLO history',
-        }),
-        iconType: 'metricbeatApp',
-      },
-    },
-  },
-});
+import { sloPaths } from '../../../common';
 
 export function getSLOByServiceName(
   coreStart: CoreStart,
@@ -59,15 +29,6 @@ export function getSLOByServiceName(
       searchSLOByServiceName: {
         tool: {
           description: 'Suggest SLOs operating on the same service.',
-          schema: {
-            type: 'object',
-            properties: {
-              serviceName: {
-                type: 'string',
-                description: 'Name of the relevant service',
-              },
-            },
-          },
         },
         handler: async ({
           context: { 'service.name': serviceNames },
@@ -121,29 +82,36 @@ export function getSLOByServiceName(
             },
           });
 
-          const itemsByService = results.hits.hits.reduce<
-            Record<string, AttachmentItem<SLOSuggestion>[]>
-          >((acc, { _source: src }) => {
-            if (!src) return acc;
-            const svcName = (src.slo?.groupings?.service as { name: string }).name;
-            if (!svcName) return acc;
-
-            const payload = buildPayload(src);
-            const item = buildItem(svcName, payload);
-
-            (acc[svcName] ??= []).push(item);
-            return acc;
-          }, {});
-
-          const suggestions = Object.values(itemsByService).flatMap((items) =>
-            items.map((item) => ({
-              id: `${item.payload.id}-${item.payload.instanceId}`,
-              componentId: 'slo',
-              data: [item],
-            }))
+          logger.debug(
+            `Found ${results.hits.hits.length} SLOs for service ${serviceNames.join(', ')}`
           );
 
-          return { suggestions };
+          return {
+            suggestions: results.hits.hits.map((hit) => {
+              const src = hit._source!;
+              const svcName = (src.slo?.groupings?.service as { name: string }).name!;
+
+              const item: AttachmentItem<SLOSuggestion> = {
+                description: `SLO "${src.slo.name}" is ${src.status} for the service "${svcName}"`,
+                payload: {
+                  id: src.slo.id,
+                  instanceId: src.slo.instanceId,
+                },
+                attachment: buildSloHistoryAttachment({
+                  label: src.slo.name,
+                  pathAndQuery: sloPaths.sloDetailsHistory({
+                    id: src.slo.id,
+                    instanceId: src.slo.instanceId,
+                  }),
+                }),
+              };
+              return {
+                id: `${item.payload.id}-${item.payload.instanceId}`,
+                componentId: 'slo',
+                data: [item],
+              };
+            }),
+          };
         },
       },
     },
