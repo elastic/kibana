@@ -13,6 +13,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { metrics } from '@opentelemetry/api';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
@@ -75,6 +76,9 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly status$ = new BehaviorSubject<KibanaMigratorStatus>({
     status: 'waiting_to_start',
   });
+  private readonly soMigrationMeter = metrics
+    .getMeter('saved-objects')
+    .createHistogram('migrations');
   private readonly activeMappings: IndexMapping;
   private readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
   private readonly docLinks: DocLinksServiceStart;
@@ -144,11 +148,17 @@ export class KibanaMigrator implements IKibanaMigrator {
       if (!rerun) {
         this.status$.next({ status: 'running' });
       }
+
+      this.log.info(`Starting migration`);
+
       this.migrationResult = this.runMigrationsInternal({ skipVersionCheck }).then((result) => {
         // Similar to above, don't publish status updates when rerunning in CI.
         if (!rerun) {
           this.status$.next({ status: 'completed', result });
         }
+        const duration = 10; // TODO: Calculate
+        this.log.info(`Completed migration`);
+        this.soMigrationMeter.record(duration, { scope: 'global' }); // TODO: find better naming for scope
         return result;
       });
     }
@@ -181,6 +191,7 @@ export class KibanaMigrator implements IKibanaMigrator {
         elasticsearchClient: this.client,
         nodeRoles: this.nodeRoles,
         esCapabilities: this.esCapabilities,
+        meter: this.soMigrationMeter,
       });
     } else {
       return runV2Migration({
