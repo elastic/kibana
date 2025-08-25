@@ -182,7 +182,9 @@ describe('migrateOnRead', () => {
       expect(result).toEqual(definition);
       expect(mockStreamsAsserts).not.toHaveBeenCalled();
     });
+  });
 
+  describe('description migration', () => {
     it('should add description if missing', () => {
       const definition = {
         name: 'test-stream',
@@ -200,7 +202,9 @@ describe('migrateOnRead', () => {
       expect(result.description).toBe('');
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
+  });
 
+  describe('unwired migration', () => {
     it('should rename unwired to classic', () => {
       const definition = {
         name: 'test-stream',
