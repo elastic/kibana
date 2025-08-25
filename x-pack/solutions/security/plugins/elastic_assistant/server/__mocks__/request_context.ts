@@ -173,6 +173,7 @@ const createElasticAssistantRequestContextMock = (
     savedObjectsClient: clients.elasticAssistant.savedObjectsClient,
     telemetry: clients.elasticAssistant.telemetry,
     checkPrivileges: jest.fn(),
+    getCheckpointSaver: jest.fn().mockReturnValue(null),
   };
 };
 

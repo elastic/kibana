@@ -68,6 +68,7 @@ async function getAssistantGraph(logger: Logger): Promise<Drawable> {
     tools: [],
     savedObjectsClient: {} as unknown as SavedObjectsClientContract,
     contentReferencesStore: {} as unknown as ContentReferencesStore,
+    checkpointSaver: null,
   });
   return graph.getGraphAsync({ xray: true });
 }

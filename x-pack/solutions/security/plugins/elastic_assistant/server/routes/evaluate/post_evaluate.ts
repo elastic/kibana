@@ -466,6 +466,7 @@ export const postEvaluateRoute = (
                   actionsClient,
                   savedObjectsClient,
                   tools,
+                  checkpointSaver: null,
                 }),
               };
             })

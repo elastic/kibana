@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BaseCheckpointSaver } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
@@ -32,6 +33,7 @@ export interface GetDefaultAssistantGraphParams {
   signal?: AbortSignal;
   tools: StructuredTool[];
   contentReferencesStore: ContentReferencesStore;
+  checkpointSaver: BaseCheckpointSaver | null;
 }
 
 export type DefaultAssistantGraph = Awaited<ReturnType<typeof getDefaultAssistantGraph>>;
@@ -45,6 +47,7 @@ export const getDefaultAssistantGraph = async ({
   // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
   signal,
   tools,
+  checkpointSaver,
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default node parameters
@@ -80,7 +83,9 @@ export const getDefaultAssistantGraph = async ({
         [NodeType.TOOLS]: NodeType.TOOLS,
         [NodeType.END]: END,
       });
-    return graph.compile();
+    return graph.compile({
+      ...(checkpointSaver ? { checkpointer: checkpointSaver } : {}),
+    });
   } catch (e) {
     throw new Error(`Unable to compile DefaultAssistantGraph\n${e}`);
   }
