@@ -125,8 +125,10 @@ describe('RPC -> create()', () => {
         {
           contentTypeId: 'foo',
           result: {
-            item: {
-              any: 'object',
+            id: FOO_CONTENT_ID,
+            type: 'foo',
+            data: {
+              title: 'title',
             },
           },
         },
@@ -174,7 +176,9 @@ describe('RPC -> create()', () => {
       const { ctx, storage } = setup();
 
       const expected = {
-        item: 'CreateResult',
+        id: FOO_CONTENT_ID,
+        type: 'foo',
+        data: 'CreateResult',
       };
       storage.create.mockResolvedValueOnce(expected);
 

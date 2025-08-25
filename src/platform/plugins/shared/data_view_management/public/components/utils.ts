@@ -35,7 +35,6 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
     const isDefault = defaultIndex === id;
     const tags = getTags(idxPattern, isDefault, dataViewsService.getRollupsEnabled());
     const displayName = name ? name : title;
-
     return {
       id,
       namespaces,

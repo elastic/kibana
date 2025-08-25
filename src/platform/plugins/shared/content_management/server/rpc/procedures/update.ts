@@ -24,6 +24,7 @@ export const update: ProcedureDefinition<Context, UpdateIn<string>> = {
       version,
     });
 
-    return client.update(id, data, options);
+    const res = client.update(id, data, options);
+    return res;
   },
 };

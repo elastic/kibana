@@ -16,7 +16,10 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/server';
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type {
+  ContentManagementServerSetup,
+  ContentStorage,
+} from '@kbn/content-management-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type {
   PluginInitializerContext,
@@ -28,6 +31,7 @@ import type {
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { TypeOf } from '@kbn/config-schema';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -44,6 +48,7 @@ import { dashboardPersistableStateServiceFactory } from './dashboard_container/d
 import { registerAPIRoutes } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
+import type { dashboardAttributesSchemaResponse } from './content_management/v1/cm_services';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -82,7 +87,9 @@ export class DashboardPlugin
     );
 
     void core.getStartServices().then(([_, { savedObjectsTagging }]) => {
-      const { contentClient } = plugins.contentManagement.register({
+      const { contentClient } = plugins.contentManagement.register<
+        ContentStorage<TypeOf<typeof dashboardAttributesSchemaResponse>>
+      >({
         id: CONTENT_ID,
         storage: new DashboardStorage({
           throwOnResultValidationError: this.initializerContext.env.mode.dev,

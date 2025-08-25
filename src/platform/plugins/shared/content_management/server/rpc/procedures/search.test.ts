@@ -187,7 +187,15 @@ describe('RPC -> search()', () => {
       const { ctx, storage } = setup();
 
       const expected = {
-        hits: ['SearchResult'],
+        hits: [
+          {
+            id: FOO_CONTENT_ID,
+            type: 'foo',
+            data: {
+              title: 'title',
+            },
+          },
+        ],
         pagination: {
           total: 1,
           cursor: '',

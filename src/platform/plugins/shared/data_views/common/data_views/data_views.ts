@@ -806,25 +806,20 @@ export class DataViewsService {
    */
 
   savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {
+    const { id, type, version, attributes, namespaces } = savedObject;
     const {
-      id,
-      version,
-      namespaces,
-      attributes: {
-        title,
-        timeFieldName,
-        fields,
-        sourceFilters,
-        fieldFormatMap,
-        runtimeFieldMap,
-        typeMeta,
-        type,
-        fieldAttrs,
-        allowNoIndex,
-        name,
-        allowHidden,
-      },
-    } = savedObject;
+      title,
+      timeFieldName,
+      sourceFilters,
+      fields,
+      typeMeta,
+      fieldFormatMap,
+      fieldAttrs,
+      allowNoIndex = true,
+      allowHidden = false,
+      name,
+      runtimeFieldMap,
+    } = attributes;
 
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
@@ -870,7 +865,6 @@ export class DataViewsService {
     refreshFields: boolean = false
   ): Promise<DataView> => {
     const savedObject = await this.savedObjectsClient.get(id);
-
     return this.initFromSavedObject(savedObject, displayErrors, refreshFields);
   };
 
@@ -1084,7 +1078,6 @@ export class DataViewsService {
     indexPatternPromise.catch(() => {
       this.dataViewCache.delete(id);
     });
-
     return indexPatternPromise;
   };
 

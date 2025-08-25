@@ -46,7 +46,7 @@ export interface DeleteItemResponse {
 
 export interface SearchResponse<T = unknown> {
   contentTypeId: string;
-  result: SearchResult<T>;
+  result: SearchResult<GetResult<T>>;
 }
 
 export class ContentCrud<T = unknown> {
@@ -82,7 +82,6 @@ export class ContentCrud<T = unknown> {
 
     try {
       const result = await this.storage.get(ctx, contentId, options);
-
       this.eventBus.emit({
         type: 'getItemSuccess',
         contentId,
@@ -206,7 +205,17 @@ export class ContentCrud<T = unknown> {
         options,
       });
 
-      return { contentTypeId: this.contentTypeId, result };
+      const { id: savedObjectId, type, data: savedObjectData, meta } = result ?? {};
+
+      return {
+        contentTypeId: this.contentTypeId,
+        result: {
+          id: savedObjectId,
+          type,
+          data: savedObjectData,
+          meta,
+        },
+      };
     } catch (e) {
       this.eventBus.emit({
         type: 'updateItemError',
@@ -271,7 +280,6 @@ export class ContentCrud<T = unknown> {
 
     try {
       const result = await this.storage.search(ctx, query, options);
-
       this.eventBus.emit({
         type: 'searchItemSuccess',
         contentTypeId: this.contentTypeId,
@@ -280,7 +288,10 @@ export class ContentCrud<T = unknown> {
         options,
       });
 
-      return { contentTypeId: this.contentTypeId, result };
+      return {
+        contentTypeId: this.contentTypeId,
+        result,
+      };
     } catch (e) {
       this.eventBus.emit({
         type: 'searchItemError',

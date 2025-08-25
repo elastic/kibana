@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { GetResult } from '../../../common';
 import type { ContentStorage, StorageContext } from '../types';
 
 export interface FooContent {
@@ -31,15 +32,21 @@ class InMemoryStorage implements ContentStorage<any> {
 
     if (forwardInResponse) {
       // We add this so we can test that options are passed down to the storage layer
+
       return {
-        item: {
+        id,
+        type: 'foo',
+        data: {
           ...(await this.db.get(id)),
           options: forwardInResponse,
         },
       };
     }
+
     return {
-      item: this.db.get(id),
+      id,
+      type: 'foo',
+      data: this.db.get(id),
     };
   }
 
@@ -56,8 +63,8 @@ class InMemoryStorage implements ContentStorage<any> {
     return {
       hits: ids.map((id) =>
         forwardInResponse
-          ? { item: { ...this.db.get(id), options: forwardInResponse } }
-          : { item: this.db.get(id) }
+          ? { id, type: 'foo', data: { ...this.db.get(id), options: forwardInResponse } }
+          : { id, type: 'foo', data: this.db.get(id) }
       ),
     };
   }
@@ -89,7 +96,9 @@ class InMemoryStorage implements ContentStorage<any> {
     if (forwardInResponse) {
       // We add this so we can test that options are passed down to the storage layer
       return {
-        item: {
+        id,
+        type: 'foo',
+        data: {
           ...content,
           options: forwardInResponse,
         },
@@ -97,7 +106,9 @@ class InMemoryStorage implements ContentStorage<any> {
     }
 
     return {
-      item: content,
+      id,
+      type: 'foo',
+      data: content,
     };
   }
 
@@ -127,7 +138,9 @@ class InMemoryStorage implements ContentStorage<any> {
     if (forwardInResponse) {
       // We add this so we can test that options are passed down to the storage layer
       return {
-        item: {
+        id,
+        type: 'foo',
+        data: {
           ...updatedContent,
           options: forwardInResponse,
         },
@@ -135,7 +148,9 @@ class InMemoryStorage implements ContentStorage<any> {
     }
 
     return {
-      item: updatedContent,
+      id,
+      type: 'foo',
+      data: updatedContent,
     };
   }
 
@@ -181,9 +196,20 @@ class InMemoryStorage implements ContentStorage<any> {
       throw new Error(errorToThrow);
     }
 
+    const rgx = new RegExp(query.text);
+    const hits = [...this.db.values()].filter(({ title }) => {
+      return title.match(rgx);
+    });
+
     if (query.text.length < 2) {
       return {
-        hits: [],
+        hits: forwardInResponse
+          ? hits.map<GetResult<FooContent>>((hit) => ({
+              id: hit.id,
+              type: 'foo',
+              data: { ...hit, options: forwardInResponse },
+            }))
+          : (hits as unknown as Array<GetResult<FooContent>>),
         pagination: {
           total: 0,
           cursor: '',
@@ -191,12 +217,14 @@ class InMemoryStorage implements ContentStorage<any> {
       };
     }
 
-    const rgx = new RegExp(query.text);
-    const hits = [...this.db.values()].filter(({ title }) => {
-      return title.match(rgx);
-    });
     return {
-      hits: forwardInResponse ? hits.map((hit) => ({ ...hit, options: forwardInResponse })) : hits,
+      hits: forwardInResponse
+        ? hits.map<GetResult<FooContent>>((hit) => ({
+            id: hit.id,
+            type: 'foo',
+            data: { ...hit, options: forwardInResponse },
+          }))
+        : (hits as unknown as Array<GetResult<FooContent>>),
       pagination: {
         total: hits.length,
         cursor: '',

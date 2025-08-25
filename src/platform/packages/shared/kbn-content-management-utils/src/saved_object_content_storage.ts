@@ -255,9 +255,15 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       outcome,
     } = await soClient.resolve<Types['Attributes']>(this.savedObjectType, id);
 
-    const response: Types['GetOut'] = {
-      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
+    const item = savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false);
+
+    const { id: savedObjectId, type, attributes, ...meta } = item;
+    const response = {
+      id: savedObjectId,
+      type,
+      data: attributes,
       meta: {
+        ...meta,
         aliasPurpose,
         aliasTargetId,
         outcome,
@@ -329,9 +335,9 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       createOptions
     );
 
-    const result = {
-      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
-    };
+    const item = savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false);
+    const { id: savedObjectId, type, attributes: savedObjectData, ...meta } = item;
+    const result = { id: savedObjectId, type, data: savedObjectData, meta };
 
     const validationError = transforms.create.out.result.validate(result);
     if (validationError) {
@@ -367,7 +373,6 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
   ): Promise<Types['UpdateOut']> {
     const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
-
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
       Types['Attributes'],
@@ -395,10 +400,9 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       updateOptions
     );
 
-    const result = {
-      item: savedObjectToItem(partialSavedObject, this.allowedSavedObjectAttributes, true),
-    };
-
+    const item = savedObjectToItem(partialSavedObject, this.allowedSavedObjectAttributes, true);
+    const { id: savedObjectId, type, attributes: savedObjectData, ...meta } = item;
+    const result = { id: savedObjectId, type, data: savedObjectData, meta };
     const validationError = transforms.update.out.result.validate(result);
     if (validationError) {
       if (this.throwOnResultValidationError) {
@@ -461,9 +465,12 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     // Execute the query in the DB
     const soResponse = await soClient.find<Types['Attributes']>(soQuery);
     const response = {
-      hits: soResponse.saved_objects.map((so) =>
-        savedObjectToItem(so, this.allowedSavedObjectAttributes, false)
-      ),
+      hits: soResponse.saved_objects.map((so) => {
+        const item = savedObjectToItem(so, this.allowedSavedObjectAttributes, false);
+        const { id: savedObjectId, type, attributes: savedObjectData, ...meta } = item;
+
+        return { id: savedObjectId, type, data: savedObjectData, meta };
+      }),
       pagination: {
         total: soResponse.total,
       },
@@ -491,7 +498,6 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
-
     return value;
   }
 }
