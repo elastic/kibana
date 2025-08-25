@@ -56,54 +56,8 @@ export const PreviewImage = ({ element }: Props) => {
   useEffect(() => {
     const generateScreenshot = async () => {
       try {
-        if (element instanceof SVGElement) {
-          const svgData = new XMLSerializer().serializeToString(element);
-          const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-          const url = URL.createObjectURL(svgBlob);
-
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width || CARD_WIDTH;
-            canvas.height = img.height || CARD_HEIGHT;
-            const ctx = canvas.getContext('2d');
-            ctx?.drawImage(img, 0, 0);
-            setScreenshot(canvas.toDataURL('image/png'));
-            URL.revokeObjectURL(url);
-          };
-          img.src = url;
-          return;
-        }
-
-        setIsLoading(true);
-        const elementRect = element.getBoundingClientRect();
-        const elementWidth = elementRect.width;
-        const elementHeight = elementRect.height;
-
-        const screenshotDataUrl = await domtoimage.toPng(element, {
-          quality: 1,
-          cacheBust: true,
-          width: elementWidth,
-          height: elementHeight,
-          style: {
-            width: `${elementWidth}px`,
-            height: `${elementHeight}px`,
-          },
-          filter: (node: Node) => {
-            if (node instanceof HTMLElement) {
-              if (
-                node.tagName === 'SCRIPT' ||
-                node.style.display === 'none' ||
-                node.style.visibility === 'hidden'
-              ) {
-                return false;
-              }
-            }
-            return true;
-          },
-        });
-
-        setScreenshot(screenshotDataUrl);
+        const canvas = await domtoimage.toCanvas(element);
+        setScreenshot(canvas.toDataURL('image/png'));
       } catch (err) {
         return;
       } finally {
