@@ -8,19 +8,27 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import YAML from 'yaml';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { useYamlValidation } from '../lib/use_yaml_validation';
-import { navigateToErrorPosition } from '../lib/utils';
+import {
+  getHighlightStepDecorations,
+  getMonacoRangeFromYamlNode,
+  navigateToErrorPosition,
+} from '../lib/utils';
 import type { WorkflowYAMLEditorProps } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
+import { getStepNode } from '../../../../common/lib/yaml_utils';
+import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -34,7 +42,7 @@ const editorStyles = {
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
       height: '100%',
-      minHeight: 0,
+      position: 'relative',
       '.template-variable-valid': {
         backgroundColor: euiTheme.colors.backgroundLightPrimary,
         borderRadius: '2px',
@@ -43,6 +51,39 @@ const editorStyles = {
         backgroundColor: euiTheme.colors.backgroundLightWarning,
         borderRadius: '2px',
       },
+      '.step-highlight': {
+        backgroundColor: euiTheme.colors.backgroundBaseAccent,
+        borderRadius: '2px',
+      },
+      '.dimmed': {
+        opacity: 0.5,
+      },
+      '.step-execution-completed': {
+        backgroundColor: euiTheme.colors.backgroundLightSuccess,
+      },
+      '.step-execution-failed': {
+        backgroundColor: euiTheme.colors.backgroundLightDanger,
+      },
+      '.step-execution-completed-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.vis.euiColorVis0,
+          borderRadius: '50%',
+        },
+      },
+      '.step-execution-failed-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.danger,
+          borderRadius: '50%',
+        },
+      },
     }),
 };
 
@@ -50,12 +91,18 @@ export const WorkflowYAMLEditor = ({
   workflowId,
   filename = `${workflowId}.yaml`,
   readOnly = false,
+  hasChanges = false,
+  lastUpdatedAt,
+  highlightStep,
+  stepExecutions,
   onMount,
   onChange,
   onSave,
   onValidationErrors,
   ...props
 }: WorkflowYAMLEditorProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor | null>(
     null
   );
@@ -71,6 +118,12 @@ export const WorkflowYAMLEditor = ({
     ];
   }, [workflowJsonSchema]);
 
+  const yamlDocumentRef = useRef<YAML.Document | null>(null);
+  const highlightStepDecorationCollectionRef =
+    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const stepExecutionsDecorationCollectionRef =
+    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+
   const { validationErrors, validateVariables, handleMarkersChanged } = useYamlValidation({
     workflowYamlSchema: WORKFLOW_ZOD_SCHEMA_LOOSE,
     onValidationErrors,
@@ -78,13 +131,19 @@ export const WorkflowYAMLEditor = ({
 
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 
-  const validateMustacheExpressionsEverywhere = useCallback(() => {
+  const changeSideEffects = useCallback(() => {
     if (editorRef.current) {
       const model = editorRef.current.getModel();
       if (!model) {
         return;
       }
       validateVariables(editorRef.current);
+      try {
+        const value = editorRef.current.getValue();
+        yamlDocumentRef.current = YAML.parseDocument(value ?? '');
+      } catch (error) {
+        yamlDocumentRef.current = null;
+      }
     }
   }, [validateVariables]);
 
@@ -93,9 +152,9 @@ export const WorkflowYAMLEditor = ({
       if (onChange) {
         onChange(value);
       }
-      validateMustacheExpressionsEverywhere();
+      changeSideEffects();
     },
-    [onChange, validateMustacheExpressionsEverywhere]
+    [onChange, changeSideEffects]
   );
 
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -113,22 +172,117 @@ export const WorkflowYAMLEditor = ({
   useEffect(() => {
     // After editor is mounted, validate the initial content
     if (isEditorMounted && editorRef.current) {
-      validateMustacheExpressionsEverywhere();
+      changeSideEffects();
     }
-  }, [validateMustacheExpressionsEverywhere, isEditorMounted]);
+  }, [changeSideEffects, isEditorMounted]);
+
+  useEffect(() => {
+    const model = editorRef.current?.getModel() as monaco.editor.ITextModel;
+    if (!isEditorMounted || !yamlDocumentRef.current || !highlightStep || !model) {
+      if (highlightStepDecorationCollectionRef.current) {
+        highlightStepDecorationCollectionRef.current.clear();
+      }
+      return;
+    }
+    const stepNode = getStepNode(yamlDocumentRef.current, highlightStep);
+    if (!stepNode) {
+      return;
+    }
+    const range = getMonacoRangeFromYamlNode(model, stepNode);
+    if (!range) {
+      return;
+    }
+    editorRef.current?.revealLineInCenter(range.startLineNumber);
+    if (highlightStepDecorationCollectionRef.current) {
+      highlightStepDecorationCollectionRef.current.clear();
+    }
+    highlightStepDecorationCollectionRef.current =
+      editorRef.current?.createDecorationsCollection(getHighlightStepDecorations(model, range)) ??
+      null;
+  }, [highlightStep, isEditorMounted]);
+
+  useEffect(() => {
+    const model = editorRef.current?.getModel() as monaco.editor.ITextModel;
+    if (!isEditorMounted || !model || !stepExecutions || !yamlDocumentRef.current) {
+      if (stepExecutionsDecorationCollectionRef.current) {
+        stepExecutionsDecorationCollectionRef.current.clear();
+      }
+      return;
+    }
+    const decorations = stepExecutions
+      .map((stepExecution) => {
+        // @ts-expect-error - TODO: fix this
+        const stepNode = getStepNode(yamlDocumentRef.current, stepExecution.stepId);
+        if (!stepNode) {
+          return null;
+        }
+        const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
+        if (!stepRange) {
+          return null;
+        }
+        const decoration: monaco.editor.IModelDeltaDecoration = {
+          range: new monaco.Range(
+            stepRange.startLineNumber,
+            stepRange.startColumn,
+            stepRange.startLineNumber,
+            stepRange.endColumn
+          ),
+          options: {
+            glyphMarginClassName: `step-execution-${stepExecution.status}-glyph ${
+              !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
+            }`,
+          },
+        };
+        const bgClassName = `step-execution-${stepExecution.status} ${
+          !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
+        }`;
+        const decoration2: monaco.editor.IModelDeltaDecoration = {
+          range: new monaco.Range(
+            stepRange.startLineNumber,
+            stepRange.startColumn,
+            stepRange.endLineNumber - 1,
+            stepRange.endColumn
+          ),
+          options: {
+            className: bgClassName,
+            marginClassName: bgClassName,
+            isWholeLine: true,
+          },
+        };
+        return [decoration, decoration2];
+      })
+      .flat()
+      .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
+    if (stepExecutionsDecorationCollectionRef.current) {
+      stepExecutionsDecorationCollectionRef.current.clear();
+    }
+    stepExecutionsDecorationCollectionRef.current =
+      editorRef.current?.createDecorationsCollection(decorations) ?? null;
+  }, [isEditorMounted, stepExecutions, highlightStep]);
 
   const completionProvider = useMemo(() => {
     return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
   }, []);
 
+  useEffect(() => {
+    monaco.editor.defineTheme('workflows-subdued', {
+      base: 'vs',
+      inherit: true,
+      rules: [],
+      colors: {
+        'editor.background': euiTheme.colors.backgroundBaseSubdued,
+      },
+    });
+  }, [euiTheme]);
+
   const editorOptions = useMemo<monaco.editor.IStandaloneEditorConstructionOptions>(
     () => ({
       readOnly,
       minimap: { enabled: false },
+      automaticLayout: true,
       lineNumbers: 'on',
       glyphMargin: true,
       scrollBeyondLastLine: false,
-      automaticLayout: true,
       tabSize: 2,
       lineNumbersMinChars: 2,
       insertSpaces: true,
@@ -137,7 +291,11 @@ export const WorkflowYAMLEditor = ({
       wordWrap: 'on',
       wordWrapColumn: 80,
       wrappingIndent: 'indent',
-      theme: 'vs-light',
+      theme: 'workflows-subdued',
+      padding: {
+        top: 24,
+        bottom: 64,
+      },
       quickSuggestions: {
         other: true,
         comments: false,
@@ -177,6 +335,52 @@ export const WorkflowYAMLEditor = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={styles.container}>
+      <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} />
+      <EuiFlexItem
+        grow={false}
+        css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
+      >
+        {hasChanges ? (
+          <div
+            css={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 6px',
+              color: euiTheme.colors.accent,
+            }}
+          >
+            <EuiIcon type="dot" />
+            <span>
+              <FormattedMessage
+                id="workflows.workflowDetail.yamlEditor.unsavedChanges"
+                defaultMessage="Unsaved changes"
+              />
+            </span>
+          </div>
+        ) : (
+          <div
+            css={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 6px',
+              color: euiTheme.colors.textSubdued,
+            }}
+          >
+            <EuiIcon type="check" />
+            <span>
+              <FormattedMessage
+                id="workflows.workflowDetail.yamlEditor.saved"
+                defaultMessage="Saved"
+              />{' '}
+              {lastUpdatedAt ? <FormattedRelative value={lastUpdatedAt} /> : null}
+            </span>
+          </div>
+        )}
+      </EuiFlexItem>
       <EuiFlexItem css={{ flex: 1, minHeight: 0 }}>
         <YamlEditor
           editorDidMount={handleEditorDidMount}
@@ -188,7 +392,7 @@ export const WorkflowYAMLEditor = ({
           {...props}
         />
       </EuiFlexItem>
-      <EuiFlexItem css={{ flexGrow: 0, minHeight: 0 }}>
+      <EuiFlexItem grow={false}>
         <WorkflowYAMLValidationErrors
           isMounted={isEditorMounted}
           validationErrors={validationErrors}

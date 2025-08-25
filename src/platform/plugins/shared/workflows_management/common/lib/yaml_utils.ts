@@ -8,7 +8,7 @@
  */
 
 import type { z } from '@kbn/zod';
-import type { Node, Scalar } from 'yaml';
+import type { Node, Pair, Scalar, YAMLMap } from 'yaml';
 import {
   Document,
   isAlias,
@@ -84,31 +84,70 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   }
 }
 
-export function getCurrentPath(document: Document, absolutePosition: number) {
+export function getPathFromAncestors(
+  ancestors: readonly (Node | Document<Node, true> | Pair<unknown, unknown>)[]
+) {
   const path: Array<string | number> = [];
+
+  // Create a new array to store path components
+  ancestors.forEach((ancestor, index) => {
+    if (isPair(ancestor)) {
+      path.push((ancestor.key as Scalar).value as string);
+    } else if (isSeq(ancestor)) {
+      // If ancestor is a Sequence, we need to find the index of the child item
+      const childNode = ancestors[index + 1]; // Get the child node
+      const seqIndex = ancestor.items.findIndex((item) => item === childNode);
+      if (seqIndex !== -1) {
+        path.push(seqIndex);
+      }
+    }
+  });
+
+  return path;
+}
+
+export function getCurrentPath(document: Document, absolutePosition: number) {
+  let path: Array<string | number> = [];
+
   if (!document.contents) return [];
 
   visit(document, {
     Scalar(key, node, ancestors) {
       if (!node.range) return;
       if (absolutePosition >= node.range[0] && absolutePosition <= node.range[2]) {
-        // Create a new array to store path components
-        ancestors.forEach((ancestor, index) => {
-          if (isPair(ancestor)) {
-            path.push((ancestor.key as Scalar).value as string);
-          } else if (isSeq(ancestor)) {
-            // If ancestor is a Sequence, we need to find the index of the child item
-            const childNode = ancestors[index + 1]; // Get the child node
-            const seqIndex = ancestor.items.findIndex((item) => item === childNode);
-            if (seqIndex !== -1) {
-              path.push(seqIndex);
-            }
-          }
-        });
+        path = getPathFromAncestors(ancestors);
         return visit.BREAK;
       }
     },
   });
 
   return path;
+}
+
+export function getStepNode(document: Document, stepName: string): YAMLMap | null {
+  let stepNode: YAMLMap | null = null;
+  visit(document, {
+    Scalar(key, node, ancestors) {
+      if (!node.range) {
+        return;
+      }
+      const lastAncestor = ancestors?.[ancestors.length - 1];
+
+      const isNameProp =
+        isPair(lastAncestor) && isScalar(lastAncestor.key) && lastAncestor.key.value === 'name';
+
+      const isValueMatch = isNameProp && node.value === stepName;
+
+      const path = getPathFromAncestors(ancestors);
+
+      const isInSteps = path.length >= 3 && path[path.length - 3] === 'steps';
+
+      if (isValueMatch && isInSteps) {
+        stepNode = ancestors[ancestors.length - 2] as YAMLMap;
+
+        return visit.BREAK;
+      }
+    },
+  });
+  return stepNode;
 }
