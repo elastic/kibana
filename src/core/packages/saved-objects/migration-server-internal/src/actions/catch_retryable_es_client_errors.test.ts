@@ -62,19 +62,6 @@ describe('catchRetryableEsClientErrors', () => {
         type: 'retryable_es_client_error',
       });
     });
-    it('ResponseError of type snapshot_in_progress_exception', async () => {
-      const error = new esErrors.ResponseError(
-        elasticsearchClientMock.createApiResponse({
-          body: { error: { type: 'snapshot_in_progress_exception' } },
-        })
-      );
-      expect(
-        ((await Promise.reject(error).catch(catchRetryableEsClientErrors)) as any).left
-      ).toMatchObject({
-        message: 'snapshot_in_progress_exception',
-        type: 'retryable_es_client_error',
-      });
-    });
     it.each([503, 401, 403, 408, 410, 429])(
       'ResponseError with retryable status code (%d)',
       async (status) => {
