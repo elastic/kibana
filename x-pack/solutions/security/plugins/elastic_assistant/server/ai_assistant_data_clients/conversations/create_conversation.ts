@@ -90,6 +90,7 @@ export const transformToCreateScheme = (
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
     messages: messages?.map((message) => ({
       '@timestamp': message.timestamp,
+      id: message.id ?? uuidv4(),
       content: message.content,
       is_error: message.isError,
       reader: message.reader,

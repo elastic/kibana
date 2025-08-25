@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyTimestamp, NonEmptyString, User } from '../common_attributes.gen';
+import { NonEmptyString, NonEmptyTimestamp, User } from '../common_attributes.gen';
 
 /**
  * Trace Data
@@ -244,6 +244,10 @@ export const ConversationConfidenceEnum = ConversationConfidence.enum;
  */
 export type Message = z.infer<typeof Message>;
 export const Message = z.object({
+  /**
+   * Message id
+   */
+  id: NonEmptyString.optional(),
   /**
    * Message content.
    */
