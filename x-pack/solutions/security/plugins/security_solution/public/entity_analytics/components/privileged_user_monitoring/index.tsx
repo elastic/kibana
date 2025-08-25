@@ -75,6 +75,7 @@ export const PrivilegedUserMonitoring = ({
         )}
         {callout && !dismissCallout && (
           <EuiCallOut
+            data-test-subj="privilegedUserMonitoringOnboardingCallout"
             title={
               callout.userCount > 0 ? (
                 <FormattedMessage

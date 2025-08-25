@@ -15,8 +15,8 @@ import { createSearchUsageCollectorMock } from '../../../../../collectors/mocks'
 import { SessionsClient } from '../../../../sessions_client';
 import { getUiSessionMock } from '../../../__mocks__';
 import { SearchSessionsMgmtAPI } from '../../../lib/api';
-import { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
-import { UISession } from '../../../types';
+import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { UISession } from '../../../types';
 import { render, screen } from '@testing-library/react';
 import { SearchSessionStatus } from '../../../../../../../common';
 
@@ -50,6 +50,7 @@ const setup = ({
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
+    featureFlags: mockCoreStart.featureFlags,
   });
 
   const handleAction = jest.fn();

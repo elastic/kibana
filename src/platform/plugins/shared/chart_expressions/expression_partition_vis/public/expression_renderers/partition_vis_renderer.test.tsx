@@ -8,7 +8,7 @@
  */
 
 import { createMockPieParams, createMockVisData } from '../mocks';
-import { CellValueAction } from '../types';
+import type { CellValueAction } from '../types';
 import { getColumnCellValueActions } from './partition_vis_renderer';
 
 const visParams = createMockPieParams();

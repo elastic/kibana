@@ -8,7 +8,7 @@
  */
 
 import getopts from 'getopts';
-import { ServerlessProjectType } from '@kbn/es';
+import type { ServerlessProjectType } from '@kbn/es';
 
 export const formatCurrentDate = () => {
   const now = new Date();

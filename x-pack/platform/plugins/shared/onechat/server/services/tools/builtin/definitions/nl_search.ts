@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import { naturalLanguageSearch } from '@kbn/onechat-genai-utils';
-import { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const searchDslSchema = z.object({

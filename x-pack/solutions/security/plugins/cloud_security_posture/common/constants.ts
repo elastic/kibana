@@ -10,7 +10,11 @@ import {
   KSPM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-common/constants';
 
-import { AwsCredentialsTypeFieldMap, GcpCredentialsTypeFieldMap, PostureTypes } from './types_old';
+import type {
+  AwsCredentialsTypeFieldMap,
+  GcpCredentialsTypeFieldMap,
+  PostureTypes,
+} from './types_old';
 
 export const CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH = '/internal/cloud_security_posture/';
 
@@ -164,11 +168,5 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
 
-export const ORGANIZATION_ACCOUNT = 'organization-account';
-export const SINGLE_ACCOUNT = 'single-account';
-
 export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
-// Cloud Credentials Template url was implemented in 1.10.0-preview01. See PR - https://github.com/elastic/integrations/pull/9828
-export const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview13';
-
 export const CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION = '1.0.0';

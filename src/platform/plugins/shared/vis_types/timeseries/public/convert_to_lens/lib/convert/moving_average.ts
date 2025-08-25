@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MovingAverageParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { Metric } from '../../../../common/types';
+import type { MovingAverageParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { Metric } from '../../../../common/types';
 
 export const convertToMovingAverageParams = ({ window }: Metric): MovingAverageParams => ({
   window: window ?? 5,

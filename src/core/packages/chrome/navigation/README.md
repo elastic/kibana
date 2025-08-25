@@ -127,7 +127,7 @@ export const navigationItems = {
               id: 'traffic-report',
               label: 'Traffic report',
               href: '/analytics/traffic',
-              external: true, // opens in new tab and shows an "external resource" icon
+              isExternal: true, // opens in new tab and shows an "external resource" icon
             },
           ],
         },

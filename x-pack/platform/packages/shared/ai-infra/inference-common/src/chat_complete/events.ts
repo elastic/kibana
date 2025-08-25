@@ -6,8 +6,8 @@
  */
 
 import type { InferenceTaskEventBase } from '../inference_task';
-import { Deanonymization } from './anonymization';
-import { Message } from './messages';
+import type { Deanonymization } from './anonymization';
+import type { Message } from './messages';
 import type { ToolCallsOf, ToolOptions } from './tools';
 
 /**

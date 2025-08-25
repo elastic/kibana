@@ -9,8 +9,9 @@ import { i18n } from '@kbn/i18n';
 
 import type { ConnectorConfiguration } from '@kbn/search-connectors';
 
-import { HttpSetup } from '@kbn/core/public';
-import { Actions, createApiLogic } from '../api_logic/create_api_logic';
+import type { HttpSetup } from '@kbn/core/public';
+import type { Actions } from '../api_logic/create_api_logic';
+import { createApiLogic } from '../api_logic/create_api_logic';
 
 export interface PostConnectorConfigurationArgs {
   configuration: Record<string, string | number | boolean | null>;

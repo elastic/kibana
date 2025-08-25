@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { noop } from 'lodash';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { VisualizationMap, DatasourceMap } from '../../../types';
