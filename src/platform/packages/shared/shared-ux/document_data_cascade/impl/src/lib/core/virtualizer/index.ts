@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef, useCallback } from 'react';
+import type React from 'react';
+import { useRef, useCallback } from 'react';
 import { type Row } from '@tanstack/react-table';
 import { useVirtualizer, defaultRangeExtractor } from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
 
-interface VirtualizerHelper<G extends GroupNode>
+export interface VirtualizerHelperProps<G extends GroupNode>
   extends Pick<Parameters<typeof useVirtualizer>[0], 'getScrollElement' | 'overscan'> {
   rows: Row<G>[];
   /**
@@ -33,7 +34,7 @@ export const useRowVirtualizerHelper = <G extends GroupNode>({
   stickyGroupRoot,
   rows,
   getScrollElement,
-}: VirtualizerHelper<G>): VirtualizerHelperReturn => {
+}: VirtualizerHelperProps<G>): VirtualizerHelperReturn => {
   const virtualizedRowsSizeCacheRef = useRef<Map<number, number>>(new Map());
   const activeStickyIndexRef = useRef<number | null>(null);
 
