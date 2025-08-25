@@ -58,7 +58,8 @@ export const selectionComparators: StateComparators<
 
 export function initializeESQLControlSelections(
   initialState: ESQLControlState,
-  controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>
+  controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>,
+  setDataLoading: (loading: boolean) => void
 ) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
@@ -93,16 +94,17 @@ export function initializeESQLControlSelections(
   const fetchSubscription = controlFetch$
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
-      switchMap(
-        async ({ timeRange }) =>
-          await getESQLSingleColumnValues({
-            query: esqlQuery$.getValue(),
-            search: dataService.search.search,
-            timeRange,
-          })
-      )
+      switchMap(async ({ timeRange }) => {
+        setDataLoading(true);
+        await getESQLSingleColumnValues({
+          query: esqlQuery$.getValue(),
+          search: dataService.search.search,
+          timeRange,
+        });
+      })
     )
     .subscribe((result) => {
+      setDataLoading(false);
       if (getESQLSingleColumnValues.isSuccess(result)) {
         availableOptions$.next(result.values.map((value) => value));
       }
