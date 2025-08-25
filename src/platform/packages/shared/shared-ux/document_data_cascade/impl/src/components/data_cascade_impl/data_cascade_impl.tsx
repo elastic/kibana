@@ -9,7 +9,7 @@
 
 import React, { Children, isValidElement, useEffect, useRef, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { EuiFlexGroup, EuiFlexItem, EuiAutoSizer, useEuiTheme } from '@elastic/eui';
+import { EuiAutoSizer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { flexRender } from '@tanstack/react-table';
 import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
 import { CascadeRowPrimitive } from './data_cascade_row';
@@ -53,10 +53,11 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   onCascadeGroupingChange,
   size = 'm',
   tableTitleSlot: TableTitleSlot,
-  stickyGroupRoot = false,
   overscan = 10,
   children,
-  allowExpandMultiple = false,
+  enableRowSelection = false,
+  enableStickyGroupHeader = true,
+  allowMultipleRowToggle = false,
 }: DataCascadeImplProps<G, L>) {
   const rowElement = Children.only(children);
 
@@ -84,11 +85,12 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     actions.setInitialState(data);
   }, [data, actions]);
 
-  const table = useTableHelper<G, L>({
-    allowExpandMultiple,
+  const { headerColumns, rows } = useTableHelper<G, L>({
+    enableRowSelection,
+    allowMultipleRowToggle,
     header: (props) =>
       React.createElement(function GroupByHeader({ table: _table }) {
-        const { rows } = _table.getGroupedRowModel();
+        const { rows: tableRows } = _table.getGroupedRowModel();
 
         return (
           <EuiFlexGroup
@@ -97,7 +99,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
             css={styles.cascadeHeaderWrapper}
           >
             <EuiFlexItem>
-              <TableTitleSlot rows={rows} />
+              <TableTitleSlot rows={tableRows} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SelectionDropdown onSelectionChange={onCascadeGroupingChange} />
@@ -114,20 +116,13 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     }),
   });
 
-  const headerColumns = table.getHeaderGroups()[0].headers;
-  const { rows } = table.getRowModel();
-
-  const {
-    activeStickyIndex,
-    rowVirtualizer,
-    virtualizedRowsSizeCache,
-    virtualizedRowComputedTranslateValue,
-  } = useRowVirtualizerHelper<G>({
-    rows,
-    overscan,
-    getScrollElement: () => scrollElementRef.current,
-    stickyGroupRoot,
-  });
+  const { activeStickyIndex, rowVirtualizer, virtualizedRowComputedTranslateValue } =
+    useRowVirtualizerHelper<G>({
+      rows,
+      overscan,
+      getScrollElement: () => scrollElementRef.current,
+      enableStickyGroupHeader,
+    });
 
   return (
     <div css={styles.container}>
@@ -143,17 +138,10 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
               <EuiFlexItem
                 css={styles.cascadeTreeGridHeader}
                 style={getGridHeaderPositioningStyle(virtualizedRowComputedTranslateValue)}
+                data-scrolled={Boolean(rowVirtualizer.scrollOffset ?? 0)}
               >
                 <EuiFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem
-                    css={
-                      (rowVirtualizer.scrollOffset ?? 0) >
-                      // apply border on scrolling a quarter of the first row height
-                      (virtualizedRowsSizeCache.get(0) ?? 0) / 4
-                        ? styles.cascadeTreeGridHeaderScrolled
-                        : {}
-                    }
-                  >
+                  <EuiFlexItem>
                     {headerColumns.map((header) => {
                       return (
                         <React.Fragment key={header.id}>
@@ -163,7 +151,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                     })}
                   </EuiFlexItem>
                   <React.Fragment>
-                    {activeStickyIndex !== null && stickyGroupRoot && (
+                    {activeStickyIndex !== null && enableStickyGroupHeader && (
                       <EuiFlexItem
                         ref={activeStickyRenderSlotRef}
                         css={styles.cascadeTreeGridHeaderStickyRenderSlot}
@@ -191,7 +179,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
                         // CONSIDERATION: maybe use the sticky index as a marker for accessibility announcements
                         const isActiveSticky =
-                          stickyGroupRoot && activeStickyIndex === virtualItem.index;
+                          enableStickyGroupHeader && activeStickyIndex === virtualItem.index;
 
                         virtualizedRowComputedTranslateValue.set(renderIndex, virtualItem.start);
 
