@@ -10,7 +10,7 @@
 /* eslint-disable no-restricted-syntax */
 const { fsEventBus, FS_CONFIG_EVENT } = require('@kbn/security-hardening/fs-event-bus');
 
-const { getSafePath, validateAndSanitizeFileData } = require('./fs_validations');
+const { getSafePath, validateAndSanitizeFileData, isDevOrCI } = require('./fs_validations');
 
 // eslint-disable-next-line no-unused-vars
 let hardeningConfig = null;
@@ -114,7 +114,7 @@ const patchAsyncDualMethod = (target, thisArg, argumentsList) => {
 };
 
 const pathUnsecureMethod = (target, thisArg, argumentsList) => {
-  if (!shouldEnableHardenedFs()) {
+  if (!shouldEnableHardenedFs() || isDevOrCI) {
     return target.apply(thisArg, argumentsList);
   }
 
@@ -131,7 +131,7 @@ const createFsProxy = (fs) => {
   fs.appendFile = new Proxy(fs.appendFile, { apply: patchAsyncSingleMethod });
   fs.createWriteStream = new Proxy(fs.createWriteStream, { apply: patchWriteStream });
 
-  // Methods that we want to block completely
+  // Methods that we want to block completely in runtime
   fs.openSync = new Proxy(fs.openSync, { apply: pathUnsecureMethod });
   fs.symlink = new Proxy(fs.symlink, { apply: pathUnsecureMethod });
   fs.symlinkSync = new Proxy(fs.symlinkSync, { apply: pathUnsecureMethod });
