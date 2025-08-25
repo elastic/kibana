@@ -9,8 +9,10 @@
 
 export interface StartWorkflowExecutionParams {
   workflowRunId: string;
+  spaceId: string;
 }
 
 export interface ResumeWorkflowExecutionParams {
   workflowRunId: string;
+  spaceId: string;
 }

@@ -84,13 +84,15 @@ export class WorkflowsExecutionEnginePlugin
 
           return {
             async run() {
-              const { workflowRunId } = taskInstance.params as StartWorkflowExecutionParams;
+              const { workflowRunId, spaceId } =
+                taskInstance.params as StartWorkflowExecutionParams;
               const [, pluginsStart] = await core.getStartServices();
               const { actions, taskManager } =
                 pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
 
               const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
                 workflowRunId,
+                spaceId,
                 actions,
                 taskManager,
                 esClient,
@@ -119,13 +121,15 @@ export class WorkflowsExecutionEnginePlugin
           const workflowExecutionRepository = this.workflowExecutionRepository;
           return {
             async run() {
-              const { workflowRunId } = taskInstance.params as ResumeWorkflowExecutionParams;
+              const { workflowRunId, spaceId } =
+                taskInstance.params as ResumeWorkflowExecutionParams;
               const [, pluginsStart] = await core.getStartServices();
               const { actions, taskManager } =
                 pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
 
               const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
                 workflowRunId,
+                spaceId,
                 actions,
                 taskManager,
                 esClient,
@@ -175,8 +179,8 @@ export class WorkflowsExecutionEnginePlugin
         taskType: 'workflow:run',
         params: {
           workflowRunId: workflowExecution.id,
-          workflow,
-        },
+          spaceId: workflowExecution.spaceId,
+        } as StartWorkflowExecutionParams,
         state: {
           lastRunAt: null,
           lastRunStatus: null,
@@ -187,7 +191,9 @@ export class WorkflowsExecutionEnginePlugin
       };
 
       await plugins.taskManager.schedule(taskInstance);
-      return workflowExecution.id!;
+      return {
+        workflowExecutionId: workflowExecution.id!,
+      };
     };
 
     return {
@@ -200,6 +206,7 @@ export class WorkflowsExecutionEnginePlugin
 
 async function createContainer(
   workflowRunId: string,
+  spaceId: string,
   actionsPlugin: ActionsPluginStartContract,
   taskManagerPlugin: TaskManagerStartContract,
   esClient: Client,
@@ -208,7 +215,8 @@ async function createContainer(
   workflowExecutionRepository: WorkflowExecutionRepository
 ) {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-    workflowRunId
+    workflowRunId,
+    spaceId
   );
 
   if (!workflowExecution) {
