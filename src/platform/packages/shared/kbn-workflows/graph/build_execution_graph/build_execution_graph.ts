@@ -8,10 +8,9 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
+import { omit } from 'lodash';
+import type { BaseStep, IfStep, ForEachStep, WorkflowYaml, WaitStep } from '../../spec/schema';
 import type {
-  BaseStep,
-  IfStep,
-  ForEachStep,
   EnterIfNode,
   ExitIfNode,
   EnterForeachNode,
@@ -20,10 +19,7 @@ import type {
   ExitConditionBranchNode,
   AtomicGraphNode,
   WaitGraphNode,
-  WorkflowYaml,
-  WaitStep,
-} from '@kbn/workflows';
-import { omit } from 'lodash';
+} from '../../types/execution';
 
 function getNodeId(node: BaseStep): string {
   // TODO: This is a workaround for the fact that some steps do not have an `id` field.
