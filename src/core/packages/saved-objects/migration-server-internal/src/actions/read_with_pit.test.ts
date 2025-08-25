@@ -120,7 +120,16 @@ describe('readWithPit', () => {
     // response.
     const retryableError = new EsErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({
-        body: { error: { type: 'search_phase_execution_exception' } },
+        body: {
+          error: {
+            type: 'search_phase_execution_exception',
+            caused_by: {
+              type: 'search_phase_execution_exception',
+              reason:
+                'Search rejected due to missing shards [.kibana]. Consider using `allow_partial_search_results` setting to bypass this error.',
+            },
+          },
+        },
       })
     );
     const client = elasticsearchClientMock.createInternalClient(

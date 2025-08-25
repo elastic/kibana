@@ -302,7 +302,7 @@
           "\nExports a Playwright configuration specifically for offline evals"
         ],
         "signature": [
-          "({\n  testDir,\n}: { testDir: string; }) => ",
+          "({\n  testDir,\n  repetitions,\n  timeout,\n}: { testDir: string; repetitions?: number | undefined; timeout?: number | undefined; }) => ",
           "PlaywrightTestConfig",
           "<{}, ",
           "EvaluationTestOptions",
@@ -317,7 +317,7 @@
             "id": "def-common.createPlaywrightEvalsConfig.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  testDir,\n}",
+            "label": "{\n  testDir,\n  repetitions,\n  timeout,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
             "deprecated": false,
@@ -333,10 +333,61 @@
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createPlaywrightEvalsConfig.$1.repetitions",
+                "type": "number",
+                "tags": [],
+                "label": "repetitions",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createPlaywrightEvalsConfig.$1.timeout",
+                "type": "number",
+                "tags": [],
+                "label": "timeout",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.createQuantitativeCorrectnessEvaluators",
+        "type": "Function",
+        "tags": [],
+        "label": "createQuantitativeCorrectnessEvaluators",
+        "description": [],
+        "signature": [
+          "() => ",
+          "Evaluator",
+          "<",
+          "Example",
+          ", ",
+          "TaskOutput",
+          ">[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -473,7 +524,7 @@
             "section": "def-common.AvailableConnectorWithId",
             "text": "AvailableConnectorWithId"
           },
-          "; }>"
+          "; repetitions: number; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluate.ts",
         "deprecated": false,
@@ -544,6 +595,28 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.DefaultEvaluators.correctnessAnalysis",
+            "type": "Function",
+            "tags": [],
+            "label": "correctnessAnalysis",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Evaluator",
+              "<",
+              "Example",
+              ", ",
+              "TaskOutput",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
