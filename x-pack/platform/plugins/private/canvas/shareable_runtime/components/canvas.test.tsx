@@ -5,33 +5,38 @@
  * 2.0.
  */
 
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { JestContext } from '../test/context_jest';
-import { getScrubber as scrubber, getPageControlsCenter as center } from '../test/selectors';
 import { Canvas } from './canvas';
 
 jest.mock('../supported_renderers');
 
 describe('<Canvas />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<Canvas />).isEmptyRender());
+    const { container } = render(<Canvas />);
+    expect(container.firstChild).toBeNull();
   });
 
-  let wrapper: ReactWrapper;
+  test('scrubber opens and closes', async () => {
+    const user = userEvent.setup();
 
-  beforeEach(() => {
-    wrapper = mount(
+    render(
       <JestContext source="austin">
         <Canvas />
       </JestContext>
     );
-  });
 
-  test('scrubber opens and closes', () => {
-    expect(scrubber(wrapper).prop('isScrubberVisible')).toEqual(false);
-    center(wrapper).simulate('click');
-    expect(scrubber(wrapper).prop('isScrubberVisible')).toEqual(true);
+    const currentPageButton = screen.getByTestId('pageControlsCurrentPage');
+
+    // Initially scrubber should be hidden
+    const slideContainer = document.querySelector('.slideContainer');
+    const scrubberRoot = slideContainer?.closest('[class*="root"]');
+    expect(scrubberRoot).not.toHaveClass('visible');
+
+    // Click to open scrubber
+    await user.click(currentPageButton);
+    expect(scrubberRoot).toHaveClass('visible');
   });
 });
