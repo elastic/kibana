@@ -165,9 +165,9 @@ module.exports = {
 };
 ```
 
-## Need Merge/Append/Prepend for Your Rule?
+## Need Merge for Your Rule?
 
-If you need merge, append, or prepend strategies for a rule that doesn't have a built-in handler yet, you have two options:
+If you need merge strategy for a rule that doesn't have a built-in handler yet, you have two options:
 
 ### Option 1: Contribute a Built-in Handler (Recommended)
 
@@ -394,7 +394,7 @@ Creates ESLint override configurations that inherit and customize root rules.
   - **`rules`** _(Object, required)_ - Rules to customize. Each key is a rule name, each value can be:
     - **Severity only**: Object with just `severity` property
     - **Configuration object**:
-      - `strategy` _(string)_ - One of: 'replace', 'remove', 'merge', 'append', 'prepend'
+      - `strategy` _(string)_ - One of: 'replace', 'remove', 'merge'
       - `value` _(any)_ - The rule value/options (not needed for 'remove' strategy)
       - `severity` _(string|number, optional)_ - 'error', 'warn', 'off' or 0, 1, 2
       - `customHandler` _(Object, optional)_ - Custom handler with `process` function (consider contributing as built-in instead)
@@ -411,7 +411,7 @@ An array of ESLint override configurations with:
 
 - Error if `childConfigDir` is not provided
 - Error if `rules` is empty or not provided
-- Error if using 'merge', 'append', or 'prepend' without a built-in or custom handler
+- Error if using 'merge' without a built-in or custom handler
 - Error if invalid severity value is provided
 
 ## Strategies Explained
@@ -445,18 +445,6 @@ These require either built-in or custom handlers:
 
 - Combines new configuration with existing
 - Requires rule-specific logic to define how merging works
-- Built-in support for `no-restricted-imports`
-
-#### `append`
-
-- Adds items to the end
-- Requires rule-specific logic
-- Built-in support for `no-restricted-imports`
-
-#### `prepend`
-
-- Adds items to the beginning
-- Requires rule-specific logic
 - Built-in support for `no-restricted-imports`
 
 ## Built-in Rule Handlers
@@ -550,7 +538,7 @@ src/rule_handlers/
 
 Follow the pattern from existing handlers. Key points:
 
-- Handle all strategies (merge, append, prepend, replace, remove)
+- Handle all strategies (merge, replace, remove)
 - Validate inputs
 - Handle edge cases
 - Preserve unrelated configuration
