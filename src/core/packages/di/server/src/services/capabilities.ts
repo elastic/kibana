@@ -7,19 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CapabilitiesProvider } from './src/services/capabilities';
-export {
-  Request,
-  Response,
-  Route,
-  type RouteDefinition,
-  type RouteHandler,
-  Router,
-} from './src/services/http';
-export {
-  type ISavedObjectsClientFactory,
-  SavedObjectsClient,
-  SavedObjectsClientFactory,
-  SavedObjectsTypeRegistry,
-} from './src/services/saved_objects';
-export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';
+import type { ServiceIdentifier } from 'inversify';
+import type { CapabilitiesProvider as ICapabilitiesProvider } from '@kbn/core-capabilities-server';
+
+export const CapabilitiesProvider = Symbol(
+  'CapabilitiesProvider'
+) as ServiceIdentifier<ICapabilitiesProvider>;
