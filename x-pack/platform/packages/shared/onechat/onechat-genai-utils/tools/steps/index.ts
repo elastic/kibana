@@ -18,3 +18,9 @@ export {
 } from './perform_match_search';
 export { executeEsql, type EsqlResponse } from './execute_esql';
 export { listIndices, type ListIndexInfo } from './list_indices';
+export {
+  scoreRelevance,
+  RelevanceScore,
+  type RelevanceCandidate,
+  type RatingWithReason,
+} from './score_relevance';

@@ -9,9 +9,14 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MappingField } from '../utils/mappings';
 
 export interface MatchResult {
+  /** id of the doc */
   id: string;
+  /** index the doc is coming from */
   index: string;
-  highlights: string[];
+  /** raw _source of the doc */
+  content: Record<string, unknown>;
+  /** highlight of searchable text fields */
+  highlights: Record<string, string[]>;
 }
 
 export interface PerformMatchSearchResponse {
@@ -79,10 +84,8 @@ export const performMatchSearch = async ({
     return {
       id: hit._id!,
       index: hit._index!,
-      highlights: Object.entries(hit.highlight ?? {}).reduce((acc, [field, highlights]) => {
-        acc.push(...highlights);
-        return acc;
-      }, [] as string[]),
+      content: hit._source ?? {},
+      highlights: hit.highlight ?? {},
     };
   });
 
