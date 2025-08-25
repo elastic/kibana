@@ -8,4 +8,10 @@
  */
 
 import { MetricsExperiencePlugin } from './plugin';
+export type {
+  MetricsExperienceRepositoryClient,
+  MetricsExperiencePluginSetup,
+  MetricsExperiencePluginStart,
+} from './types';
+
 export const plugin = () => new MetricsExperiencePlugin();

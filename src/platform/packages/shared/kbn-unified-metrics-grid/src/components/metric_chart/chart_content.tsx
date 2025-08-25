@@ -10,13 +10,12 @@
 import { EuiFlexItem, EuiText, EuiLoadingChart } from '@elastic/eui';
 import React from 'react';
 import { TimeSeriesChart } from './time_series_chart';
+import type { ChartData, SeriesData } from '../../hooks/use_metric_data_query';
 
 interface ChartContentProps {
   isLoading: boolean;
   error: Error | null;
-  data:
-    | Array<{ x: number; y: number }>
-    | Array<{ key: string; data: Array<{ x: number; y: number }> }>;
+  data: ChartData[] | SeriesData[];
   metricName: string;
   isSupported: boolean;
   unit?: string;
@@ -27,7 +26,7 @@ interface ChartContentProps {
   displayDensity?: 'normal' | 'compact' | 'row';
 }
 
-export const ChartContent: React.FC<ChartContentProps> = ({
+export const ChartContent = ({
   isLoading,
   error,
   data,
@@ -39,7 +38,7 @@ export const ChartContent: React.FC<ChartContentProps> = ({
   timeRange,
   colorIndex,
   displayDensity = 'normal',
-}) => {
+}: ChartContentProps) => {
   // TODO: replace with value from useEuiTheme OR useKibana
   const colorMode = 'light';
 

@@ -141,10 +141,10 @@ export async function sampleAndProcessMetricFields({
         uniqueDimensionSets.set(cacheKey, extractDimensions(fieldCaps, actualFields));
       }
       field.dimensions = uniqueDimensionSets.get(cacheKey)!;
-      field.no_data = false;
+      field.noData = false;
     } else {
       // No sample documents found - set no_data flag
-      field.no_data = true;
+      field.noData = true;
     }
   }
 

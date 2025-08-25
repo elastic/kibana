@@ -22,7 +22,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { i18n } from '@kbn/i18n';
 import type { UnifiedHistogramBreakdownContext } from '../../types';
-import type { ToolbarSelectorProps, SelectableEntry } from './toolbar_selector';
+import type { SelectableEntry } from './toolbar_selector';
 import { ToolbarSelector, EMPTY_OPTION } from './toolbar_selector';
 
 export interface BreakdownFieldSelectorProps {
@@ -89,8 +89,8 @@ export const BreakdownFieldSelector = ({
     return options;
   }, [fields, breakdown?.field]);
 
-  const onChange = useCallback<NonNullable<ToolbarSelectorProps['onChange']>>(
-    (chosenOption) => {
+  const onChange = useCallback(
+    (chosenOption?: SelectableEntry) => {
       const breakdownField = chosenOption?.value
         ? fields.find((currentField) => currentField.name === chosenOption.value)
         : undefined;
