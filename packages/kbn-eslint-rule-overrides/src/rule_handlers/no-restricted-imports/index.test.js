@@ -74,58 +74,6 @@ describe('noRestrictedImportsHandler', () => {
     });
   });
 
-  describe('WHEN using append strategy', () => {
-    it('SHOULD behave like merge strategy', () => {
-      noRestrictedImportsHandler.process(config, {
-        strategy: 'append',
-        value: ['react-router'],
-        severity: 'warn',
-      });
-
-      expect(mergeRestrictedImports).toHaveBeenCalledWith(config, ['react-router'], 1);
-    });
-  });
-
-  describe('WHEN using prepend strategy', () => {
-    describe('AND WHEN adding new imports', () => {
-      it('SHOULD prepend imports to the beginning of existing paths', () => {
-        noRestrictedImportsHandler.process(config, {
-          strategy: 'prepend',
-          value: ['react-router', 'axios'],
-        });
-
-        const rule = config.overrides[0].rules['no-restricted-imports'];
-        expect(rule[1].paths).toEqual(['react-router', 'axios', 'lodash', 'moment']);
-        expect(rule[1].patterns).toEqual(['@internal/*']);
-      });
-    });
-
-    describe('AND WHEN prepending duplicate imports', () => {
-      it('SHOULD remove duplicates while maintaining order', () => {
-        noRestrictedImportsHandler.process(config, {
-          strategy: 'prepend',
-          value: ['lodash', 'new-lib'],
-        });
-
-        const rule = config.overrides[0].rules['no-restricted-imports'];
-        expect(rule[1].paths).toEqual(['lodash', 'new-lib', 'moment']);
-      });
-    });
-
-    describe('AND WHEN severity is provided', () => {
-      it('SHOULD update the rule severity', () => {
-        noRestrictedImportsHandler.process(config, {
-          strategy: 'prepend',
-          value: ['react-router'],
-          severity: 'warn',
-        });
-
-        const rule = config.overrides[0].rules['no-restricted-imports'];
-        expect(rule[0]).toBe(1);
-      });
-    });
-  });
-
   describe('WHEN using replace strategy', () => {
     describe('AND WHEN providing array value without severity', () => {
       it('SHOULD replace entire rule value', () => {
@@ -250,7 +198,9 @@ describe('noRestrictedImportsHandler', () => {
             strategy: 'unknown',
             value: ['lodash'],
           });
-        }).toThrow("Unknown strategy 'unknown' for no-restricted-imports");
+        }).toThrow(
+          "Unknown strategy 'unknown' for no-restricted-imports rule override. Allowed strategies are only: 'merge', 'replace', and 'remove'."
+        );
       });
     });
 

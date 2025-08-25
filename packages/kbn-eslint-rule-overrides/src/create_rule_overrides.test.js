@@ -115,19 +115,38 @@ describe('createRuleOverrides', () => {
         createRuleOverrides({
           childConfigDir,
           rules: {
-            'no-restricted-imports': ['lodash'],
+            'no-restricted-imports': {
+              strategy: 'merge',
+              value: ['lodash'],
+            },
           },
         });
 
         expect(getRuleHandler).toHaveBeenCalledWith('no-restricted-imports');
         expect(mockHandler.process).toHaveBeenCalledWith(
-          expect.any(Object),
+          {
+            overrides: [
+              {
+                files: ['src/**/*.js'],
+                rules: {
+                  'no-restricted-imports': ['error', { paths: ['lodash'], patterns: [] }],
+                  'no-console': ['warn'],
+                },
+              },
+              {
+                files: ['packages/**/*.ts'],
+                rules: {
+                  'other-rule': ['error'],
+                },
+              },
+            ],
+          },
           { strategy: 'merge', value: ['lodash'], severity: undefined },
-          expect.objectContaining({
+          {
             rootDir: '/project',
             childConfigDir,
             ruleName: 'no-restricted-imports',
-          })
+          }
         );
       });
     });
@@ -270,13 +289,10 @@ describe('normalizeRuleConfig', () => {
   });
 
   describe('WHEN given simple value', () => {
-    it('SHOULD normalize to merge strategy', () => {
-      const result = normalizeRuleConfig(['lodash', 'moment']);
-      expect(result).toEqual({
-        strategy: 'merge',
-        value: ['lodash', 'moment'],
-        severity: undefined,
-      });
+    it('SHOULD throw an error', () => {
+      expect(() => normalizeRuleConfig(['lodash', 'moment'])).toThrow(
+        "Invalid rule configuration object. Expected properties: 'strategy', 'value', 'severity', or 'customHandler'. Got: [\"0\",\"1\"]. Use { severity: 'error' } to change severity, { strategy: 'replace', value: [...] } to replace, { strategy: 'merge', value: [...] } to merge (requires handler), or { strategy: 'remove' } to remove."
+      );
     });
   });
 
@@ -297,15 +313,19 @@ describe('normalizeRuleConfig', () => {
     });
   });
 
-  describe('WHEN given config with missing fields', () => {
-    it('SHOULD use defaults for missing fields', () => {
-      const result = normalizeRuleConfig({ value: ['error'] });
-      expect(result).toEqual({
-        strategy: 'merge',
-        value: ['error'],
-        severity: undefined,
-        customHandler: undefined,
-      });
+  describe('WHEN given value without strategy in config', () => {
+    it('SHOULD error', () => {
+      expect(() => normalizeRuleConfig({ value: ['error'] })).toThrow(
+        "'value' property requires a 'strategy' property. Specify how to apply the value: 'replace', 'merge' (requires handler), etc."
+      );
+    });
+  });
+
+  describe('WHEN given strategy without value in config', () => {
+    it('SHOULD error', () => {
+      expect(() => normalizeRuleConfig({ strategy: 'replace' })).toThrow(
+        "Strategy 'replace' requires a 'value' property. Only 'remove' strategy can be used without a value."
+      );
     });
   });
 
@@ -313,6 +333,7 @@ describe('normalizeRuleConfig', () => {
     it('SHOULD preserve custom handler', () => {
       const handler = { process: jest.fn() };
       const result = normalizeRuleConfig({
+        strategy: 'merge',
         value: ['error'],
         customHandler: handler,
       });
@@ -438,28 +459,6 @@ describe('applyDefaultHandler', () => {
             value: { allow: ['log'] },
           });
         }).toThrow(/Strategy 'merge' requires a custom handler for rule 'no-console'/);
-      });
-    });
-
-    describe('AND WHEN using append strategy without handler', () => {
-      it('SHOULD throw error', () => {
-        expect(() => {
-          applyDefaultHandler(config, 'no-console', {
-            strategy: 'append',
-            value: ['error'],
-          });
-        }).toThrow(/Strategy 'append' requires a custom handler/);
-      });
-    });
-
-    describe('AND WHEN using prepend strategy without handler', () => {
-      it('SHOULD throw error', () => {
-        expect(() => {
-          applyDefaultHandler(config, 'no-console', {
-            strategy: 'prepend',
-            value: ['error'],
-          });
-        }).toThrow(/Strategy 'prepend' requires a custom handler/);
       });
     });
   });

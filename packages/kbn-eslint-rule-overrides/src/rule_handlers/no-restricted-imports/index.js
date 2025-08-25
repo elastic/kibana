@@ -9,22 +9,20 @@
 
 const { mergeRestrictedImports } = require('./utils/merge_restricted_imports');
 
+const severityMap = {
+  off: 0,
+  warn: 1,
+  error: 2,
+  0: 0,
+  1: 1,
+  2: 2,
+};
+
 /**
  * Normalize severity to ESLint format
  */
 function normalizeSeverity(severity) {
-  if (severity === undefined || severity === null) return null;
-
-  const severityMap = {
-    off: 0,
-    warn: 1,
-    error: 2,
-    0: 0,
-    1: 1,
-    2: 2,
-  };
-
-  return severityMap[severity] !== undefined ? severityMap[severity] : null;
+  return severityMap[severity] != null ? severityMap[severity] : null;
 }
 
 /**
@@ -52,15 +50,6 @@ const noRestrictedImportsHandler = {
         mergeRestrictedImports(config, value, normalizedSeverity);
         break;
 
-      case 'append':
-        // Same as merge for restricted imports
-        mergeRestrictedImports(config, value, normalizedSeverity);
-        break;
-
-      case 'prepend':
-        prependRestrictedImports(config, value, normalizedSeverity);
-        break;
-
       case 'replace':
         replaceRestrictedImports(config, value, normalizedSeverity);
         break;
@@ -76,61 +65,12 @@ const noRestrictedImportsHandler = {
         break;
 
       default:
-        throw new Error(`Unknown strategy '${strategy}' for no-restricted-imports`);
+        throw new Error(
+          `Unknown strategy '${strategy}' for no-restricted-imports rule override. Allowed strategies are only: 'merge', 'replace', and 'remove'.`
+        );
     }
   },
 };
-
-/**
- * Prepend restricted imports (add at beginning of paths array)
- */
-function prependRestrictedImports(config, restrictedImports, severity) {
-  if (!restrictedImports) return;
-
-  const overridesWithRule = config.overrides.filter(
-    (override) => override.rules && 'no-restricted-imports' in override.rules
-  );
-
-  for (const override of overridesWithRule) {
-    const rule = override.rules['no-restricted-imports'];
-
-    if (Array.isArray(rule) && rule.length >= 2) {
-      const [currentSeverity, ...rawOptions] = rule;
-      const finalSeverity = severity !== null ? severity : currentSeverity;
-
-      // Get existing config
-      const existingConfig = { paths: [], patterns: [] };
-      for (const opt of rawOptions) {
-        if (typeof opt === 'string' || (typeof opt === 'object' && opt && 'name' in opt)) {
-          existingConfig.paths.push(opt);
-        } else if (typeof opt === 'object' && opt && ('paths' in opt || 'patterns' in opt)) {
-          if (opt.paths) existingConfig.paths.push(...opt.paths);
-          if (opt.patterns) existingConfig.patterns.push(...opt.patterns);
-        }
-      }
-
-      // Remove duplicates from existing that will be prepended
-      const newImports = Array.isArray(restrictedImports) ? restrictedImports : [restrictedImports];
-      const filteredExisting = existingConfig.paths.filter(
-        (existing) =>
-          !newImports.some((newImport) => {
-            const existingName = typeof existing === 'string' ? existing : existing.name;
-            const newName = typeof newImport === 'string' ? newImport : newImport.name;
-            return existingName === newName;
-          })
-      );
-
-      // Prepend new imports
-      override.rules['no-restricted-imports'] = [
-        finalSeverity,
-        {
-          paths: [...newImports, ...filteredExisting],
-          patterns: existingConfig.patterns,
-        },
-      ];
-    }
-  }
-}
 
 /**
  * Replace all restricted imports with new value

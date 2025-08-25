@@ -20,8 +20,8 @@ const rootDir = path.resolve(__dirname, '..', '..', '..');
 
 /**
  * @typedef {Object} RuleOverrideConfig
- * @property {'merge' | 'replace' | 'remove' | 'append' | 'prepend'} [strategy='merge'] - How to apply the rule
- * @property {'error' | 'warn' | 'off' | 0 | 1 | 2} [severity] - Optional severity override (only for merge/replace/append/prepend)
+ * @property {'merge' | 'replace' | 'remove' } [strategy] - Rule application strategy (REQUIRED, except when only changing severity)
+ * @property {'error' | 'warn' | 'off' | 0 | 1 | 2} [severity] - Optional severity override (only for merge/replace)
  * @property {*} value - The rule value/options to apply
  * @property {Function} [customHandler] - Optional custom handler for this specific call
  */
@@ -56,6 +56,10 @@ const rootDir = path.resolve(__dirname, '..', '..', '..');
  *       strategy: 'merge',
  *       severity: 'error',
  *       value: ['lodash', 'moment']
+ *       customHandler: {
+ *       process(config, ruleConfig, context) {
+ *         // config decoration logic here
+ *       }
  *     },
  *     'no-console': {
  *       strategy: 'replace',
@@ -127,14 +131,19 @@ function createRuleOverrides(options = {}) {
  * Normalize rule config to standard format
  */
 function normalizeRuleConfig(ruleConfig) {
-  // If it's not an object, assume it's the value with default merge strategy
-  // This will throw in applyDefaultHandler since merge requires custom handler
-  if (!ruleConfig || typeof ruleConfig !== 'object') {
-    return {
-      strategy: 'merge',
-      value: ruleConfig,
-      severity: undefined,
-    };
+  // Null/undefined is an error
+  if (ruleConfig === null || ruleConfig === undefined) {
+    throw new Error('Rule configuration cannot be null or undefined');
+  }
+
+  // Non-objects are errors - we require explicit config
+  if (typeof ruleConfig !== 'object') {
+    throw new Error(
+      `Rule configuration must be an object. ` +
+        `Use { severity: 'error' } to change severity, ` +
+        `{ strategy: 'replace', value: [...] } to replace, ` +
+        `or { strategy: 'remove' } to remove.`
+    );
   }
 
   // Check if it's our config object format
@@ -145,17 +154,18 @@ function normalizeRuleConfig(ruleConfig) {
     'customHandler' in ruleConfig;
 
   if (!isConfigObject) {
-    // It's an object but not our config format, treat it as the value
-    // This will throw in applyDefaultHandler since merge requires custom handler
-    return {
-      strategy: 'merge',
-      value: ruleConfig,
-      severity: undefined,
-    };
+    throw new Error(
+      `Invalid rule configuration object. ` +
+        `Expected properties: 'strategy', 'value', 'severity', or 'customHandler'. ` +
+        `Got: ${JSON.stringify(Object.keys(ruleConfig))}. ` +
+        `Use { severity: 'error' } to change severity, ` +
+        `{ strategy: 'replace', value: [...] } to replace, ` +
+        `{ strategy: 'merge', value: [...] } to merge (requires handler), ` +
+        `or { strategy: 'remove' } to remove.`
+    );
   }
 
-  // It's our config object format
-  // Special case: if only severity is provided, no strategy needed
+  // Special case: severity-only change
   if ('severity' in ruleConfig && !('strategy' in ruleConfig) && !('value' in ruleConfig)) {
     return {
       strategy: undefined,
@@ -165,8 +175,24 @@ function normalizeRuleConfig(ruleConfig) {
     };
   }
 
+  // Validate: if strategy is provided, value must be provided (except for 'remove')
+  if ('strategy' in ruleConfig && ruleConfig.strategy !== 'remove' && !('value' in ruleConfig)) {
+    throw new Error(
+      `Strategy '${ruleConfig.strategy}' requires a 'value' property. ` +
+        `Only 'remove' strategy can be used without a value.`
+    );
+  }
+
+  // Validate: if value is provided, strategy must be provided
+  if ('value' in ruleConfig && !('strategy' in ruleConfig)) {
+    throw new Error(
+      `'value' property requires a 'strategy' property. ` +
+        `Specify how to apply the value: 'replace', 'merge' (requires handler), etc.`
+    );
+  }
+
   return {
-    strategy: ruleConfig.strategy || 'merge',
+    strategy: ruleConfig.strategy,
     value: ruleConfig.value,
     severity: ruleConfig.severity,
     customHandler: ruleConfig.customHandler,
@@ -197,7 +223,7 @@ function applyDefaultHandler(config, ruleName, ruleConfig) {
   if (!config.overrides) return;
 
   // If only severity is provided (no strategy), just update severity
-  if (!strategy && severity !== undefined && value === undefined) {
+  if (!strategy && severity != null && value == null) {
     for (const override of config.overrides) {
       if (!override.rules || !(ruleName in override.rules)) continue;
 
@@ -235,11 +261,8 @@ function applyDefaultHandler(config, ruleName, ruleConfig) {
         break;
 
       case 'merge':
-      case 'append':
-      case 'prepend':
         throw new Error(
           `Strategy '${strategy}' requires a custom handler for rule '${ruleName}'.\n` +
-            `Only 'severity' (change severity only), 'replace', and 'remove' are supported by default.\n` +
             `To use '${strategy}', provide a customHandler that implements the ${strategy} logic for this specific rule.\n` +
             `Example:\n` +
             `  '${ruleName}': {\n` +
