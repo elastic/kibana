@@ -56,7 +56,7 @@ export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEvents
     const queryStrings = [`(trace.id:"${traceId}" OR (not trace.id:* AND "${traceId}"))`];
 
     if (spanId) {
-      queryStrings.push(`span.id:"${spanId}"`);
+      queryStrings.push(`(span.id:"${spanId}" OR (not span.id* AND "${spanId}"))`);
     }
 
     return {
