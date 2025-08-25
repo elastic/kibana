@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EnterForeachNode } from '@kbn/workflows';
-import { StepImplementation } from '../step_base';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { EnterForeachNode } from '@kbn/workflows';
+import type { StepImplementation } from '../step_base';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
 export class EnterForeachNodeImpl implements StepImplementation {
   constructor(
@@ -22,7 +22,8 @@ export class EnterForeachNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    const foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id);
+    this.wfExecutionRuntimeManager.enterScope();
+    let foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id);
 
     if (!foreachState) {
       await this.wfExecutionRuntimeManager.startStep(this.step.id);
@@ -46,26 +47,27 @@ export class EnterForeachNodeImpl implements StepImplementation {
       );
 
       // Initialize foreach state
-      await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
+      foreachState = {
         items: evaluatedItems,
         item: evaluatedItems[0],
         index: 0,
         total: evaluatedItems.length,
-      });
+      };
     } else {
       // Update items and index if they have changed
       const items = foreachState.items;
       const index = foreachState.index + 1;
       const item = items[index];
       const total = foreachState.total;
-      await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
+      foreachState = {
         items,
         index,
         item,
         total,
-      });
+      };
     }
 
+    await this.wfExecutionRuntimeManager.setStepState(this.step.id, foreachState);
     this.wfExecutionRuntimeManager.goToNextStep();
   }
 

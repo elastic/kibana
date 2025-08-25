@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
-import { MapStoreState } from '../reducers/store';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import type { MapStoreState } from '../reducers/store';
 import {
   getFlyoutDisplay,
   getFlyoutOpenTriggerElement,

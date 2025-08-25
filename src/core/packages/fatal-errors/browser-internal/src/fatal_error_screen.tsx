@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { type Observable, scan } from 'rxjs';
 import type { FatalError } from '@kbn/core-fatal-errors-browser';
 

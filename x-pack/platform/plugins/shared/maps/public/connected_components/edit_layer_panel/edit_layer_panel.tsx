@@ -20,17 +20,18 @@ import {
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FilterEditor } from './filter_editor';
-import { JoinEditor, JoinField } from './join_editor';
+import type { JoinField } from './join_editor';
+import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { LayerSettings } from './layer_settings';
 import { StyleSettings } from './style_settings';
-import { StyleDescriptor, VectorLayerDescriptor } from '../../../common/descriptor_types';
+import type { StyleDescriptor, VectorLayerDescriptor } from '../../../common/descriptor_types';
 import { getData, getCore } from '../../kibana_services';
-import { ILayer } from '../../classes/layers/layer';
+import type { ILayer } from '../../classes/layers/layer';
 import { isVectorLayer } from '../../classes/layers/vector_layer';
-import { OnSourceChangeArgs } from '../../classes/sources/source';
+import type { OnSourceChangeArgs } from '../../classes/sources/source';
 import { isESSource } from '../../classes/sources/es_source';
-import { IField } from '../../classes/fields/field';
+import type { IField } from '../../classes/fields/field';
 import { isLayerGroup } from '../../classes/layers/layer_group';
 import { isSpatialJoin } from '../../classes/joins/is_spatial_join';
 import { SourceDetails } from './source_details';
@@ -41,6 +42,7 @@ export interface Props {
   selectedLayer?: ILayer;
   updateSourceProps: (layerId: string, sourcePropChanges: OnSourceChangeArgs[]) => Promise<void>;
   updateStyleDescriptor: (styleDescriptor: StyleDescriptor) => void;
+  ariaLabelId: string;
 }
 
 interface State {
@@ -217,7 +219,7 @@ export class EditLayerPanel extends Component<Props, State> {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
-                  <h2>{this.state.displayName}</h2>
+                  <h2 id={this.props.ariaLabelId}>{this.state.displayName}</h2>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>

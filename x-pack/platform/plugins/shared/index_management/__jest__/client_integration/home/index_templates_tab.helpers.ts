@@ -7,16 +7,13 @@
 
 import { act } from 'react-dom/test-utils';
 
-import {
-  registerTestBed,
-  TestBed,
-  AsyncTestBedConfig,
-  findTestSubject,
-} from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
 import { TemplateList } from '../../../public/application/sections/home/template_list';
-import { TemplateDeserialized } from '../../../common';
-import { WithAppDependencies, TestSubjects } from '../helpers';
+import type { TemplateDeserialized } from '../../../common';
+import type { TestSubjects } from '../helpers';
+import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {

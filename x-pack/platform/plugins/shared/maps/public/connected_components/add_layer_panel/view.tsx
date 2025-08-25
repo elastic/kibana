@@ -18,8 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FlyoutBody } from './flyout_body';
-import { LayerDescriptor } from '../../../common/descriptor_types';
-import { LayerWizard } from '../../classes/layers';
+import type { LayerDescriptor } from '../../../common/descriptor_types';
+import type { LayerWizard } from '../../classes/layers';
 import {
   type LayerWizardStep,
   type RenderSecondaryActionButtonProps,
@@ -52,6 +52,7 @@ export interface Props {
   enableEditMode: () => void;
   autoOpenLayerWizardId: string;
   clearAutoOpenLayerWizardId: () => void;
+  ariaLabelId: string;
 }
 
 interface State {
@@ -224,7 +225,9 @@ export class AddLayerPanel extends Component<Props, State> {
       <>
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
-            <h2>{this.state.currentStep ? this.state.currentStep.label : ADD_LAYER_STEP_LABEL}</h2>
+            <h2 id={this.props.ariaLabelId}>
+              {this.state.currentStep ? this.state.currentStep.label : ADD_LAYER_STEP_LABEL}
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 

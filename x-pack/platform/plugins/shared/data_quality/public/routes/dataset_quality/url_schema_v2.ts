@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatasetQualityPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
+import type { DatasetQualityPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
 import * as rt from 'io-ts';
 import { deepCompactObject } from '../../../common/utils/deep_compact_object';
 import { datasetQualityUrlSchemaV2 } from '../../../common/url_schema';

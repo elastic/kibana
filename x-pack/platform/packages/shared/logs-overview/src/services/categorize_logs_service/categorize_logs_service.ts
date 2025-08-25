@@ -7,11 +7,12 @@
 
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { createActorContext } from '@xstate5/react';
-import { MachineImplementationsFrom, assign, setup } from 'xstate5';
-import { LogCategory } from '../../types';
+import type { MachineImplementationsFrom } from 'xstate5';
+import { assign, setup } from 'xstate5';
+import type { LogCategory } from '../../types';
 import { categorizeDocuments } from './categorize_documents';
 import { countDocuments } from './count_documents';
-import { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';
+import type { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';
 
 export const categorizeLogsService = setup({
   types: {

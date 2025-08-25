@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { URL } from 'url';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ONE_HOUR = 60 * 60 * 1000;
 const LOG_VIEW_ID = 'testView';

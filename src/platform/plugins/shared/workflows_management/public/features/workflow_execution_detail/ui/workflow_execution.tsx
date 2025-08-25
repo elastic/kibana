@@ -8,9 +8,9 @@
  */
 
 import React, { useEffect, useMemo, useCallback } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,7 +21,9 @@ import {
   EuiToolTip,
   EuiBadge,
 } from '@elastic/eui';
-import { EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
+
+import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
@@ -94,8 +96,12 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
 
     const intervalId = setInterval(() => {
       if (
-        workflowExecution.status === ExecutionStatus.RUNNING ||
-        workflowExecution.status === ExecutionStatus.PENDING
+        ![
+          ExecutionStatus.COMPLETED,
+          ExecutionStatus.FAILED,
+          ExecutionStatus.CANCELLED,
+          ExecutionStatus.SKIPPED,
+        ].includes(workflowExecution.status)
       ) {
         refetch();
         return;
@@ -111,7 +117,11 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     if (!workflowYaml) {
       return null;
     }
-    return parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE)?.data;
+    const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    if (result.error) {
+      return null;
+    }
+    return result.data;
   }, [workflowYaml]);
 
   const executionProps = useMemo(() => {
@@ -235,7 +245,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
           <EuiSpacer size="s" />
           <div css={{ height: '500px' }}>
             <WorkflowVisualEditor
-              workflow={workflowYamlObject as any}
+              workflow={workflowYamlObject as WorkflowYaml}
               stepExecutions={workflowExecution?.stepExecutions}
             />
           </div>

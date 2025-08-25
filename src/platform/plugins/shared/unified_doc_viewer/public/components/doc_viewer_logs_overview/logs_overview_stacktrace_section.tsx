@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { EuiAccordion, EuiHorizontalRule, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React, { forwardRef } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { StacktraceContent } from './sub_components/stacktrace/stacktrace_content';
-import {
-  ScrollableSectionWrapper,
-  ScrollableSectionWrapperApi,
-} from './scrollable_section_wrapper';
+import type { ScrollableSectionWrapperApi } from './scrollable_section_wrapper';
+import { ScrollableSectionWrapper } from './scrollable_section_wrapper';
 
 const stacktraceAccordionTitle = i18n.translate(
   'unifiedDocViewer.docView.logsOverview.accordion.title.stacktrace',

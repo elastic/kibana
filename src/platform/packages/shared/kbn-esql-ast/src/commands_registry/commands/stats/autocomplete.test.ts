@@ -19,11 +19,10 @@ import {
   getFunctionSignaturesByReturnType,
   getLiteralsByType,
 } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import type { FunctionReturnType, FieldType } from '../../../definitions/types';
 import {
   ESQL_NUMBER_TYPES,
-  FunctionReturnType,
-  FieldType,
   FunctionDefinitionTypes,
   ESQL_COMMON_NUMERIC_TYPES,
 } from '../../../definitions/types';

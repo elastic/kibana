@@ -8,7 +8,7 @@
  */
 
 import { Builder } from '../../builder';
-import { ESQLLiteral } from '../../types';
+import type { ESQLLiteral } from '../../types';
 import { ComposerQuery } from '../composer_query';
 import { esql, e } from '../esql';
 

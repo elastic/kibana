@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpHandler } from '@kbn/core/public';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { HttpHandler } from '@kbn/core/public';
+import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 
 export class KnowledgeBaseClient {

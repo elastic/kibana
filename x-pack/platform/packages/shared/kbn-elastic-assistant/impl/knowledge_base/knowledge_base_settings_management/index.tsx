@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiConfirmModal,
@@ -14,22 +15,20 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiSearchBarProps,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
+import type {
   DocumentEntry,
-  DocumentEntryType,
   IndexEntry,
-  IndexEntryType,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { DocumentEntryType, IndexEntryType } from '@kbn/elastic-assistant-common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -58,7 +57,7 @@ import {
 import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
 import { useUpdateKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries';
 import { DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../assistant/settings/translations';
-import { KnowledgeBaseConfig } from '../../assistant/types';
+import type { KnowledgeBaseConfig } from '../../assistant/types';
 import {
   isKnowledgeBaseSetup,
   useKnowledgeBaseStatus,
@@ -433,11 +432,12 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
               entry={selectedEntry as IndexEntry}
               originalEntry={originalEntry as IndexEntry}
               dataViews={dataViews}
+              http={http}
               setEntry={
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
               }
               hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
-              docLink={docLinks.links.securitySolution.aiAssistantKnowledgeBaseIndexEntries}
+              docLink={docLinks.links.securitySolution.aiAssistant.knowledgeBaseIndexEntries}
             />
           )}
         </>

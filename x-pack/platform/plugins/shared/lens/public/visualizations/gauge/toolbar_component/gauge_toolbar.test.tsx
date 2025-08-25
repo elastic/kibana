@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
+import type { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
 import { GaugeToolbar } from '.';
 import type { GaugeVisualizationState } from '../constants';
 import { fireEvent, render, screen } from '@testing-library/react';

@@ -7,12 +7,18 @@
 
 import '../../_index.scss';
 import React, { Component } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiFlyoutResizable } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCallOut,
+  EuiFlyoutResizable,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { Observable } from 'rxjs';
+import type { Filter } from '@kbn/es-query';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { Observable } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { css } from '@emotion/react';
 import { focusFirstFocusable } from '@kbn/presentation-util/src/focus_helpers';
@@ -21,11 +27,12 @@ import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { isScreenshotMode } from '../../kibana_services';
-import { RawValue, RENDER_TIMEOUT } from '../../../common/constants';
+import type { RawValue } from '../../../common/constants';
+import { RENDER_TIMEOUT } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
-import { MapSettings } from '../../../common/descriptor_types';
-import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { ILayer } from '../../classes/layers/layer';
+import type { MapSettings } from '../../../common/descriptor_types';
+import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import type { ILayer } from '../../classes/layers/layer';
 import { AddLayerPanel } from '../add_layer_panel';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { MapSettingsPanel } from '../map_settings_panel';
@@ -275,17 +282,19 @@ const FlyoutPanelWrapper = ({
   onClose: () => void;
   panelRef: React.RefObject<HTMLDivElement>;
 }) => {
+  const ariaLabelId = useGeneratedHtmlId();
   let flyoutPanel = null;
   if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
-    flyoutPanel = <AddLayerPanel />;
+    flyoutPanel = <AddLayerPanel ariaLabelId={ariaLabelId} />;
   } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
-    flyoutPanel = <EditLayerPanel />;
+    flyoutPanel = <EditLayerPanel ariaLabelId={ariaLabelId} />;
   } else if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
-    flyoutPanel = <MapSettingsPanel />;
+    flyoutPanel = <MapSettingsPanel ariaLabelId={ariaLabelId} />;
   }
   if (!flyoutPanel) return null;
   return (
     <EuiFlyoutResizable
+      aria-labelledby={ariaLabelId}
       ref={panelRef}
       type="push"
       size="s"

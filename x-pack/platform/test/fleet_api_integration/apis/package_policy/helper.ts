@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Agent } from 'supertest';
+import type { Agent } from 'supertest';
 
 export async function getInstallationInfo(supertest: Agent, name: string, version: string) {
   const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);

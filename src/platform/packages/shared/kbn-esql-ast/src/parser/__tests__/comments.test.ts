@@ -9,7 +9,7 @@
 
 import { parse } from '..';
 import { EsqlQuery } from '../../query';
-import { ESQLAstRerankCommand } from '../../types';
+import type { ESQLAstRerankCommand } from '../../types';
 import { Walker } from '../../walker';
 
 describe('Comments', () => {

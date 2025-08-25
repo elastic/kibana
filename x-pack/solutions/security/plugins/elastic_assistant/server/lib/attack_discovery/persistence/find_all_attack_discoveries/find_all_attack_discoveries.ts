@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { EsAttackDiscoverySchema } from '../types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { EsAttackDiscoverySchema } from '../types';
 import { transformESSearchToAttackDiscovery } from '../transforms/transforms';
 const MAX_ITEMS = 10000;
 export interface FindAllAttackDiscoveriesParams {

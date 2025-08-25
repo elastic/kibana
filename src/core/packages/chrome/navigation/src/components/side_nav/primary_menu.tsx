@@ -8,7 +8,8 @@
  */
 
 import { css } from '@emotion/react';
-import React, { forwardRef, ForwardedRef, ReactNode, useRef, useImperativeHandle } from 'react';
+import type { ForwardedRef, ReactNode } from 'react';
+import React, { forwardRef, useRef, useImperativeHandle } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
 import { useRovingIndex } from '../../utils/use_roving_index';

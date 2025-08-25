@@ -21,7 +21,7 @@ import { NavigationPanel } from './navigation_panel';
 import { SpatialFiltersPanel } from './spatial_filters_panel';
 import { DisplayPanel } from './display_panel';
 import { CustomIconsPanel } from './custom_icons_panel';
-import { CustomIcon, MapCenter, MapSettings } from '../../../common/descriptor_types';
+import type { CustomIcon, MapCenter, MapSettings } from '../../../common/descriptor_types';
 import { panelStrings } from '../panel_strings';
 
 export interface Props {
@@ -35,6 +35,7 @@ export interface Props {
   updateCustomIcons: (customIcons: CustomIcon[]) => void;
   deleteCustomIcon: (symbolId: string) => void;
   zoom: number;
+  ariaLabelId: string;
 }
 
 export function MapSettingsPanel({
@@ -48,12 +49,13 @@ export function MapSettingsPanel({
   updateCustomIcons,
   deleteCustomIcon,
   zoom,
+  ariaLabelId,
 }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
         <EuiTitle size="s">
-          <h2>
+          <h2 id={ariaLabelId}>
             <FormattedMessage id="xpack.maps.mapSettingsPanel.title" defaultMessage="Settings" />
           </h2>
         </EuiTitle>
