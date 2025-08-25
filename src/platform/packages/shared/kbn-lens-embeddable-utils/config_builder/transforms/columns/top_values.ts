@@ -22,9 +22,6 @@ function getOrderByValue(
   rankBy: LensApiTermsOperation['rank_by'],
   getMetricColumnIdByIndex: (index: number) => string | undefined
 ): TermsIndexPatternColumn['params']['orderBy'] {
-  if (rankBy?.type === 'custom') {
-    return { type: 'custom' };
-  }
   if (rankBy?.type === 'rare') {
     return { type: 'rare', maxDocCount: rankBy.max ?? 1000 };
   }
@@ -33,6 +30,9 @@ function getOrderByValue(
   }
   if (rankBy?.type === 'alphabetical') {
     return { type: 'alphabetical' };
+  }
+  if (rankBy?.type === 'custom') {
+    return { type: 'custom' };
   }
 
   const refId = getMetricColumnIdByIndex(rankBy?.type === 'column' ? rankBy.metric ?? 0 : 0);
@@ -69,12 +69,12 @@ export function fromTermsLensApiToLensState(
     operationType: 'terms',
     sourceField: field,
     customLabel: label != null,
-    label: ofName(field, size),
+    label: label ?? ofName(field, size),
     isBucketed: true,
     dataType: 'string',
     params: {
       secondaryFields,
-      size: size || LENS_TERMS_SIZE_DEFAULT,
+      size: size || LENS_TERMS_SIZE_DEFAULT, // it cannot be 0 (zero)
       accuracyMode: Boolean(increase_accuracy),
       include: includes?.values ?? [],
       includeIsRegex: includes?.as_regex ?? false,
@@ -114,10 +114,10 @@ function getRankByConfig(
   if (params.orderBy.type === 'significant') {
     return { type: 'significant' };
   }
-  // @TODO: fix this type issue
   if (
     params.orderBy.type === 'custom' &&
     params.orderAgg &&
+    // @ts-expect-error
     isColumnOfReferableType(params.orderAgg)
   ) {
     return {
@@ -128,11 +128,16 @@ function getRankByConfig(
     };
   }
   if (params.orderBy.type === 'column') {
-    // @TODO: fix this to use the correct column index
-    return {
-      type: 'column',
-      metric: columns.findIndex((column) => column.id === params.orderBy.columnId!),
-    };
+    const index = columns.findIndex(
+      (column) => params.orderBy.type === 'column' && column.id === params.orderBy.columnId!
+    );
+    if (index > -1) {
+      return {
+        type: 'column',
+        metric: index,
+        direction: params.orderDirection,
+      };
+    }
   }
   return;
 }
@@ -172,6 +177,6 @@ export function fromTermsLensStateToAPI(
           },
         }
       : {}),
-    ...(column.params.orderBy ? getRankByConfig(column.params, columns) : {}),
+    ...(column.params.orderBy ? { rank_by: getRankByConfig(column.params, columns) } : {}),
   };
 }

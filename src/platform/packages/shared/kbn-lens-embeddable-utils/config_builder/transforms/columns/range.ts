@@ -59,7 +59,7 @@ export function fromRangeOrHistogramLensApiToLensState(
   };
 }
 
-export function fromRangeLensStateToAPI(
+export function fromRangeOrHistogramLensStateToAPI(
   column: RangeIndexPatternColumn
 ): LensApiRangeOperation | LensApiHistogramOperation {
   if (column.params.type === 'range') {

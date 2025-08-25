@@ -26,3 +26,8 @@ export function fromFilterLensStateToAPI(filter: Query): LensApiFilterType | und
     language: filter.language as 'kuery' | 'lucene',
   };
 }
+
+export const DEFAULT_FILTER = {
+  query: '*',
+  language: 'kuery' as 'kuery' | 'lucene',
+};

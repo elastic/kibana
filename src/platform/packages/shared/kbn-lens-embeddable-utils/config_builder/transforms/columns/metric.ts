@@ -148,7 +148,7 @@ export function fromMetricAPItoLensState(
   }
   if (isAPIColumnOfType<LensApiMovingAverageOperation>('moving_average', options)) {
     if (isApiColumnOfReferableType(options.of)) {
-      // @ts-ignore
+      // @ts-expect-error
       const [refColumn] = fromMetricAPItoLensState(options.of) as ReferableMetricLensStateColumn[];
       return [
         fromMovingAverageAPItoLensState(options, {
@@ -185,7 +185,7 @@ export function fromMetricAPItoLensState(
   }
   if (isAPIColumnOfType<LensApiDifferencesOperation>('differences', options)) {
     if (isApiColumnOfReferableType(options.of)) {
-      // @ts-ignore
+      // @ts-expect-error
       const [refColumn] = fromMetricAPItoLensState(options.of) as ReferableMetricLensStateColumn[];
       return [
         fromDifferencesAPItoLensState(options, {
@@ -292,7 +292,7 @@ export function getMetricApiColumnFromLensState(
     }
     const refLensStateColumn = columns[options.references[0]];
     const refColumn = getMetricApiColumnFromLensState(
-      // @ts-ignore
+      // @ts-expect-error
       refLensStateColumn,
       columns
     ) as LensApiReferableMetricOperations;
@@ -307,7 +307,7 @@ export function getMetricApiColumnFromLensState(
     }
     const refLensStateColumn = columns[options.references[0]];
     const refColumn = getMetricApiColumnFromLensState(
-      // @ts-ignore
+      // @ts-expect-error
       refLensStateColumn,
       columns
     ) as LensApiReferableMetricOperations;
@@ -322,7 +322,7 @@ export function getMetricApiColumnFromLensState(
     }
     const refLensStateColumn = columns[options.references[0]];
     const refColumn = getMetricApiColumnFromLensState(
-      // @ts-ignore
+      // @ts-expect-error
       refLensStateColumn,
       columns
     ) as LensApiReferableMetricOperations;
@@ -337,7 +337,7 @@ export function getMetricApiColumnFromLensState(
     }
     const refLensStateColumn = columns[options.references[0]];
     const refColumn = getMetricApiColumnFromLensState(
-      // @ts-ignore
+      // @ts-expect-error
       refLensStateColumn,
       columns
     ) as LensApiReferableMetricOperations;

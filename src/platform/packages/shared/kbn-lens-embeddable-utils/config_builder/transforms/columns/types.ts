@@ -25,6 +25,10 @@ import type {
   DerivativeIndexPatternColumn,
   CounterRateIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  FiltersIndexPatternColumn,
+  RangeIndexPatternColumn,
+  TermsIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 
 export type AnyMetricLensStateColumn =
@@ -58,3 +62,11 @@ export type ReferableMetricLensStateColumn =
   | LastValueIndexPatternColumn
   | PercentileIndexPatternColumn
   | PercentileRanksIndexPatternColumn;
+
+export type AnyBucketLensStateColumn =
+  | DateHistogramIndexPatternColumn
+  | FiltersIndexPatternColumn
+  | RangeIndexPatternColumn
+  | TermsIndexPatternColumn;
+
+export type AnyLensStateColumn = AnyMetricLensStateColumn | AnyBucketLensStateColumn;

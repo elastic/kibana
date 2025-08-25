@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromRangeOrHistogramLensApiToLensState, fromRangeLensStateToAPI } from './range';
+import {
+  fromRangeOrHistogramLensApiToLensState,
+  fromRangeOrHistogramLensStateToAPI,
+} from './range';
 import type { RangeIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiRangeOperation, LensApiHistogramOperation } from '../../schema/bucket_ops';
 import {
@@ -91,7 +94,7 @@ describe('Range Transforms', () => {
     });
   });
 
-  describe('fromRangeLensStateToAPI', () => {
+  describe('fromRangeOrHistogramLensStateToAPI', () => {
     it('should transform range configuration', () => {
       const input: RangeIndexPatternColumn = {
         operationType: 'range',
@@ -123,7 +126,7 @@ describe('Range Transforms', () => {
         format: { type: 'number' },
       };
 
-      expect(fromRangeLensStateToAPI(input)).toEqual(expected);
+      expect(fromRangeOrHistogramLensStateToAPI(input)).toEqual(expected);
     });
 
     it('should transform histogram configuration', () => {
@@ -150,7 +153,7 @@ describe('Range Transforms', () => {
         format: { type: 'number', decimals: 0 },
       };
 
-      expect(fromRangeLensStateToAPI(input)).toEqual(expected);
+      expect(fromRangeOrHistogramLensStateToAPI(input)).toEqual(expected);
     });
 
     it('should handle custom labels', () => {
@@ -168,7 +171,7 @@ describe('Range Transforms', () => {
         },
       };
 
-      const result = fromRangeLensStateToAPI(input);
+      const result = fromRangeOrHistogramLensStateToAPI(input);
       expect(result.label).toBe('Price Ranges');
     });
   });

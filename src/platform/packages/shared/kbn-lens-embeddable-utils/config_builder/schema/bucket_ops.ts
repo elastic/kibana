@@ -250,7 +250,7 @@ export const bucketTermsOperationSchema = formatSchema.extends({
   ),
 });
 
-export const bucketFilterOperationSchema = schema.object({
+export const bucketFiltersOperationSchema = schema.object({
   operation: schema.literal('filters'),
   /**
    * Label for the operation
@@ -385,13 +385,13 @@ export const bucketOperationDefinitionSchema = schema.oneOf([
   bucketTermsOperationSchema,
   bucketHistogramOperationSchema,
   bucketRangesOperationSchema,
-  bucketFilterOperationSchema,
+  bucketFiltersOperationSchema,
 ]);
-
-export type LensApiBucketOperations = typeof bucketOperationDefinitionSchema.type;
 
 export type LensApiDateHistogramOperation = typeof bucketDateHistogramOperationSchema.type;
 export type LensApiTermsOperation = typeof bucketTermsOperationSchema.type;
 export type LensApiHistogramOperation = typeof bucketHistogramOperationSchema.type;
 export type LensApiRangeOperation = typeof bucketRangesOperationSchema.type;
-export type LensApiFilterOperation = typeof bucketFilterOperationSchema.type;
+export type LensApiFiltersOperation = typeof bucketFiltersOperationSchema.type;
+
+export type LensApiBucketOperations = LensApiDateHistogramOperation | LensApiTermsOperation | LensApiHistogramOperation | LensApiRangeOperation | LensApiFiltersOperation;

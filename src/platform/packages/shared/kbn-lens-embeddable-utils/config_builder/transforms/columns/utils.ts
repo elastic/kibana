@@ -14,7 +14,12 @@ import {
   LensApiAllMetricOperations,
   LensApiReferableMetricOperations,
 } from '../../schema/metric_ops';
-import { AnyMetricLensStateColumn, ReferableMetricLensStateColumn } from './types';
+import {
+  AnyLensStateColumn,
+  AnyMetricLensStateColumn,
+  ReferableMetricLensStateColumn,
+} from './types';
+import { LensApiAllOperations } from '../../schema';
 
 export const LENS_EMPTY_AS_NULL_DEFAULT_VALUE = false;
 
@@ -62,9 +67,9 @@ export function getLensAPIMetricSharedProps(
   };
 }
 
-export function isAPIColumnOfType<C extends LensApiAllMetricOperations>(
+export function isAPIColumnOfType<C extends LensApiAllOperations>(
   type: C['operation'],
-  column: LensApiAllMetricOperations
+  column: LensApiAllOperations
 ): column is C {
   return column.operation === type;
 }
@@ -91,9 +96,9 @@ export function isApiColumnOfReferableType(
   );
 }
 
-export function isLensStateColumnOfType<C extends AnyMetricLensStateColumn>(
+export function isLensStateColumnOfType<C extends AnyLensStateColumn>(
   type: C['operationType'],
-  column: AnyMetricLensStateColumn
+  column: AnyLensStateColumn
 ): column is C {
   return column.operationType === type;
 }

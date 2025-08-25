@@ -9,6 +9,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { metricStateSchema } from './charts/metric';
+import { LensApiAllMetricOperations } from './metric_ops';
+import { LensApiBucketOperations } from './bucket_ops';
 
 export const lensApiStateSchema = schema.oneOf([metricStateSchema]);
 
@@ -17,3 +19,5 @@ export type LensApiState = typeof lensApiStateSchema.type;
 export type { MetricState } from './charts/metric';
 
 export type NarrowByType<T, U> = T extends { type: U } ? T : never;
+
+export type LensApiAllOperations = LensApiAllMetricOperations | LensApiBucketOperations;

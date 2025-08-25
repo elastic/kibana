@@ -30,7 +30,7 @@ import {
   bucketTermsOperationSchema,
   bucketHistogramOperationSchema,
   bucketRangesOperationSchema,
-  bucketFilterOperationSchema,
+  bucketFiltersOperationSchema,
 } from '../bucket_ops';
 import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 
@@ -228,7 +228,7 @@ export const metricStateSchema = schema.allOf([
         schema.allOf([metricStateBreakdownByOptionsSchema, bucketTermsOperationSchema]),
         schema.allOf([metricStateBreakdownByOptionsSchema, bucketHistogramOperationSchema]),
         schema.allOf([metricStateBreakdownByOptionsSchema, bucketRangesOperationSchema]),
-        schema.allOf([metricStateBreakdownByOptionsSchema, bucketFilterOperationSchema]),
+        schema.allOf([metricStateBreakdownByOptionsSchema, bucketFiltersOperationSchema]),
       ])
     ),
   }),

@@ -10,7 +10,7 @@
 import {
   bucketDateHistogramOperationSchema,
   bucketTermsOperationSchema,
-  bucketFilterOperationSchema,
+  bucketFiltersOperationSchema,
   bucketHistogramOperationSchema,
   bucketRangesOperationSchema,
   bucketOperationDefinitionSchema,
@@ -125,7 +125,7 @@ describe('Bucket Operation Schemas', () => {
         ],
       };
 
-      const validated = bucketFilterOperationSchema.validate(input);
+      const validated = bucketFiltersOperationSchema.validate(input);
       expect(validated).toEqual(input);
     });
   });
