@@ -237,12 +237,17 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     { body, signal, timeout }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
+    const parentSpan = trace.getActiveSpan();
+
     const sanitizedBody = sanitizeRequest(
       this.provider,
       this.url,
       body,
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
+
+    parentSpan?.setAttribute('openai.raw_request', sanitizedBody);
+
     const axiosOptions = getAxiosOptions(this.provider, this.key, false);
 
     try {
@@ -289,7 +294,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
     const parentSpan = trace.getActiveSpan();
-    parentSpan?.setAttribute('openai.raw_request', executeBody);
 
     const executeBody = getRequestWithStreamOption(
       this.provider,
@@ -298,6 +302,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       stream,
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
+
+    parentSpan?.setAttribute('openai.raw_request', executeBody);
 
     const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
     try {
