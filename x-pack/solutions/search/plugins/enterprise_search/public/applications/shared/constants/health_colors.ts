@@ -24,6 +24,8 @@ export const healthColorsMapSelectable = {
   GREEN: 'success',
   yellow: 'warning',
   YELLOW: 'warning',
+  unknown: '',
+  unavailable: '',
 };
 
 export const indexHealthToHealthColor = (health?: HealthStatus | 'unavailable'): IconColor => {

@@ -389,12 +389,12 @@ export abstract class InferenceBase<TInferResponse> {
     };
   }
 
-  protected getDocFromResponse({ doc, error }: estypes.IngestPipelineSimulation) {
+  protected getDocFromResponse({ doc, error }: estypes.IngestSimulateDocumentResult) {
     if (doc === undefined) {
       if (error) {
         // @ts-expect-error Error is now typed in estypes. However, I doubt that it doesn't get the expected HTTP wrapper.
         this.setFinishedWithErrors(error);
-        throw Error(error.reason);
+        throw Error(error.reason ?? undefined); // reason can be null and it's not a valid parameter for Error
       }
 
       throw Error(

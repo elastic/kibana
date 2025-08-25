@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { AnalysisTokenFilter } from '@elastic/elasticsearch/lib/api/types';
+import { AnalysisTokenFilter, AnalysisStopWords } from '@elastic/elasticsearch/lib/api/types';
 
 interface LanguageDataEntry {
   custom_filter_definitions?: object;
   name: string;
   stemmer: string;
-  stop_words: string;
+  stop_words: AnalysisStopWords;
   postpended_filters?: string[];
   prepended_filters?: string[];
 }

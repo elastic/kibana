@@ -31,6 +31,7 @@ const hot: IlmExplainLifecycleLifecycleExplainManaged = {
     version: 1,
     modified_date_in_millis: 1675536751205,
   },
+  skip: true,
 };
 
 const warm = {

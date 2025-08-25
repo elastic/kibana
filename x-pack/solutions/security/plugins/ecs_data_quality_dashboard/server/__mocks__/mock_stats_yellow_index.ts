@@ -22,6 +22,7 @@ export const mockStatsYellowIndex: Record<string, IndicesStatsIndicesStats> = {
       docs: {
         count: 1628343,
         deleted: 0,
+        total_size_in_bytes: 0,
       },
       shard_stats: {
         total_count: 1,
@@ -108,6 +109,7 @@ export const mockStatsYellowIndex: Record<string, IndicesStatsIndicesStats> = {
       fielddata: {
         memory_size_in_bytes: 1080,
         evictions: 0,
+        global_ordinals: { build_time_in_millis: 0 },
       },
       completion: {
         size_in_bytes: 0,
@@ -157,6 +159,7 @@ export const mockStatsYellowIndex: Record<string, IndicesStatsIndicesStats> = {
       docs: {
         count: 1628343,
         deleted: 0,
+        total_size_in_bytes: 0,
       },
       shard_stats: {
         total_count: 1,
@@ -243,6 +246,7 @@ export const mockStatsYellowIndex: Record<string, IndicesStatsIndicesStats> = {
       fielddata: {
         memory_size_in_bytes: 1080,
         evictions: 0,
+        global_ordinals: { build_time_in_millis: 0 },
       },
       completion: {
         size_in_bytes: 0,
@@ -297,6 +301,7 @@ export const mockStatsYellowIndex: Record<string, IndicesStatsIndicesStats> = {
       docs: {
         count: 1630289,
         deleted: 0,
+        total_size_in_bytes: 0,
       },
       shard_stats: {
         total_count: 1,
@@ -383,6 +388,7 @@ export const mockStatsYellowIndex: Record<string, IndicesStatsIndicesStats> = {
       fielddata: {
         memory_size_in_bytes: 1168,
         evictions: 0,
+        global_ordinals: { build_time_in_millis: 0 },
       },
       completion: {
         size_in_bytes: 0,
@@ -432,6 +438,7 @@ export const mockStatsYellowIndex: Record<string, IndicesStatsIndicesStats> = {
       docs: {
         count: 1630289,
         deleted: 0,
+        total_size_in_bytes: 0,
       },
       shard_stats: {
         total_count: 1,
@@ -518,6 +525,7 @@ export const mockStatsYellowIndex: Record<string, IndicesStatsIndicesStats> = {
       fielddata: {
         memory_size_in_bytes: 1168,
         evictions: 0,
+        global_ordinals: { build_time_in_millis: 0 },
       },
       completion: {
         size_in_bytes: 0,
