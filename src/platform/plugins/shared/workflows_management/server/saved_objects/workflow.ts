@@ -8,19 +8,20 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import type { WorkflowStatus, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
 
 export const WORKFLOW_SAVED_OBJECT_TYPE = 'workflow';
 
 export interface WorkflowSavedObjectAttributes {
   name: string;
   description?: string;
-  status: WorkflowStatus;
+  enabled: boolean;
   tags: string[];
   yaml: string;
   definition: WorkflowYaml;
   createdBy: string;
   lastUpdatedBy: string;
+  deleted_at: Date | null;
 }
 
 export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttributes> = {
@@ -48,8 +49,8 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
           },
         },
       },
-      status: {
-        type: 'keyword',
+      enabled: {
+        type: 'boolean',
       },
       tags: {
         type: 'keyword',
@@ -68,6 +69,9 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
       lastUpdatedBy: {
         type: 'keyword',
       },
+      deleted_at: {
+        type: 'date',
+      },
     },
   },
   management: {
@@ -83,6 +87,34 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
   modelVersions: {
     1: {
       changes: [],
+    },
+    2: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            deleted_at: {
+              type: 'date',
+            },
+          },
+        },
+      ],
+    },
+    3: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            enabled: {
+              type: 'boolean' as const,
+            },
+          },
+        },
+        {
+          type: 'mappings_deprecation',
+          deprecatedMappings: ['status'],
+        },
+      ],
     },
   },
 };

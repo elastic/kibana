@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import type { Logger } from '@kbn/logging';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
 import type { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import type { InfraTimerangeInput } from '../../../../common/http_api';
@@ -37,6 +37,7 @@ export const evaluateCondition = async ({
   lookbackSize,
   executionTimestamp,
   logger,
+  schema,
 }: {
   condition: InventoryMetricConditions;
   nodeType: InventoryItemType;
@@ -48,6 +49,7 @@ export const evaluateCondition = async ({
   lookbackSize?: number;
   executionTimestamp: Date;
   logger: Logger;
+  schema?: DataSchemaFormat;
 }): Promise<Record<string, ConditionResult>> => {
   const { metric, customMetric } = condition;
 
@@ -56,7 +58,8 @@ export const evaluateCondition = async ({
     condition,
     nodeType,
     metric,
-    customMetric
+    customMetric,
+    schema
   );
 
   const timerange = {
@@ -70,7 +73,7 @@ export const evaluateCondition = async ({
     timerange.lookbackSize = lookbackSize;
   }
 
-  const currentValues = await getData(
+  const currentValues = await getData({
     esClient,
     nodeType,
     metric,
@@ -81,8 +84,9 @@ export const evaluateCondition = async ({
     condition,
     logger,
     filterQuery,
-    customMetric
-  );
+    customMetric,
+    schema,
+  });
 
   const result = mapValues(currentValues, (value) => {
     return {

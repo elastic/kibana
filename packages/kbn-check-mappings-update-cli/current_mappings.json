@@ -4273,6 +4273,9 @@
         "enabled": false,
         "type": "object"
       },
+      "deleted_at": {
+        "type": "date"
+      },
       "description": {
         "fields": {
           "keyword": {
@@ -4294,8 +4297,8 @@
         },
         "type": "text"
       },
-      "status": {
-        "type": "keyword"
+      "enabled": {
+        "type": "boolean"
       },
       "tags": {
         "type": "keyword"
