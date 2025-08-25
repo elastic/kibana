@@ -10,7 +10,7 @@ import type { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin
 import type { IToasts } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import type { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
-import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { StreamlangStepWithUIAttributesWithCustomIdentifier } from '@kbn/streamlang';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 
@@ -31,7 +31,7 @@ export interface SimulationSearchParams extends Required<QueryState> {
 }
 
 export interface SimulationInput {
-  processors: StreamlangProcessorDefinition[];
+  steps: StreamlangStepWithUIAttributesWithCustomIdentifier[];
   streamName: string;
 }
 
@@ -44,12 +44,12 @@ export type SimulationEvent =
   | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.order'; columns: string[] }
-  | { type: 'processors.add'; processors: StreamlangProcessorDefinition[] }
-  | { type: 'processor.cancel'; processors: StreamlangProcessorDefinition[] }
-  | { type: 'processor.change'; processors: StreamlangProcessorDefinition[] }
-  | { type: 'processor.delete'; processors: StreamlangProcessorDefinition[] }
-  | { type: 'processor.edit'; processors: StreamlangProcessorDefinition[] }
-  | { type: 'processor.save'; processors: StreamlangProcessorDefinition[] }
+  | { type: 'step.add'; steps: StreamlangStepWithUIAttributesWithCustomIdentifier[] }
+  | { type: 'step.cancel'; steps: StreamlangStepWithUIAttributesWithCustomIdentifier[] }
+  | { type: 'step.change'; steps: StreamlangStepWithUIAttributesWithCustomIdentifier[] }
+  | { type: 'step.delete'; steps: StreamlangStepWithUIAttributesWithCustomIdentifier[] }
+  | { type: 'step.edit'; steps: StreamlangStepWithUIAttributesWithCustomIdentifier[] }
+  | { type: 'step.save'; steps: StreamlangStepWithUIAttributesWithCustomIdentifier[] }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
@@ -71,7 +71,7 @@ export interface SimulationContext {
     fieldName?: string;
     direction: 'asc' | 'desc';
   };
-  processors: StreamlangProcessorDefinition[];
+  steps: StreamlangStepWithUIAttributesWithCustomIdentifier[];
   samples: SampleDocumentWithUIAttributes[];
   simulation?: Simulation;
   streamName: string;

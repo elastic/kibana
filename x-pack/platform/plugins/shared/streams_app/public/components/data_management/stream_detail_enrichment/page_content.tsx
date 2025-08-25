@@ -6,14 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiAccordion,
-  EuiButton,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
@@ -30,8 +27,7 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useKibana } from '../../../hooks/use_kibana';
-import { DraggableProcessorListItem } from './processors_list';
-import { SortableList } from './sortable_list';
+import { StepsListItem } from './steps_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { SimulationPlayground } from './simulation_playground';
 import {
@@ -40,7 +36,8 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import { NoProcessorsEmptyPrompt } from './empty_prompts';
+import { NoStepsEmptyPrompt } from './empty_prompts';
+import { AddStepButton } from './add_step_button';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -118,7 +115,7 @@ export function StreamDetailEnrichmentContentImpl() {
                 paddingSize="none"
                 css={verticalFlexCss}
               >
-                <ProcessorsEditor />
+                <StepsEditor />
               </EuiResizablePanel>
               <EuiResizableButton indicator="border" accountForScrollbars="both" />
               <EuiResizablePanel
@@ -147,19 +144,10 @@ export function StreamDetailEnrichmentContentImpl() {
   );
 }
 
-const ProcessorsEditor = React.memo(() => {
+const StepsEditor = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
-  const { addProcessor, reorderProcessors } = useStreamEnrichmentEvents();
-
-  const canAddProcessor = useStreamEnrichmentSelector((state) =>
-    state.can({ type: 'processors.add' })
-  );
-  const canReorderProcessors = useStreamEnrichmentSelector((state) =>
-    state.can({ type: 'processors.reorder', from: Number(), to: Number() })
-  );
-
-  const processorsRefs = useStreamEnrichmentSelector((state) => state.context.processorsRefs);
+  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 
@@ -191,12 +179,11 @@ const ProcessorsEditor = React.memo(() => {
     };
   }, [simulation]);
 
-  const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
-    if (source && destination) {
-      reorderProcessors(source.index, destination.index);
-    }
-  };
-  const hasProcessors = !isEmpty(processorsRefs);
+  const hasSteps = !isEmpty(stepRefs);
+
+  const rootSteps = stepRefs.filter(
+    (stepRef) => stepRef.getSnapshot().context.step.parentId === null
+  );
 
   return (
     <>
@@ -208,48 +195,16 @@ const ProcessorsEditor = React.memo(() => {
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.headingTitle',
                   {
-                    defaultMessage: 'Add and configure processors',
+                    defaultMessage: 'Stream workflow',
                   }
                 )}
               </h2>
             </EuiTitle>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              <EuiText component="p" size="xs">
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle',
-                  {
-                    defaultMessage: 'Reorder processors to change their execution order',
-                  }
-                )}
-              </EuiText>
-              <EuiIconTip
-                size="m"
-                content={i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitleTooltip',
-                  {
-                    defaultMessage:
-                      'The simulation runs only on new processors. If none are being edited, it includes all new ones. If a processor is under edit, it runs only up to that point, any new processors after it are excluded. If there’s a mix of persisted and new processors, the simulation is skipped entirely.',
-                  }
-                )}
-                position="right"
-              />
-            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiButton
-            size="s"
-            iconType="plus"
-            data-test-subj="streamsAppStreamDetailEnrichmentAddProcessorButton"
-            onClick={() => addProcessor()}
-            disabled={!canAddProcessor}
-          >
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.addProcessorButton',
-              { defaultMessage: 'Add processor' }
-            )}
-          </EuiButton>
+          <AddStepButton />
         </EuiFlexGroup>
       </EuiPanel>
-      {hasProcessors ? (
+      {hasSteps ? (
         <EuiPanel
           hasShadow={false}
           borderRadius="none"
@@ -258,22 +213,18 @@ const ProcessorsEditor = React.memo(() => {
             padding: ${euiTheme.size.m};
           `}
         >
-          <SortableList onDragItem={handlerItemDrag}>
-            <EuiTimeline aria-label="Processors list" gutterSize="m">
-              {processorsRefs.map((processorRef, idx) => (
-                <DraggableProcessorListItem
-                  isDragDisabled={!canReorderProcessors}
-                  key={processorRef.id}
-                  idx={idx}
-                  processorRef={processorRef}
-                  processorMetrics={simulation?.processors_metrics[processorRef.id]}
-                />
-              ))}
-            </EuiTimeline>
-          </SortableList>
+          <EuiTimeline aria-label="Steps list" gutterSize="m">
+            {rootSteps.map((stepRef, idx) => (
+              <StepsListItem
+                key={stepRef.id}
+                stepRef={stepRef}
+                processorMetrics={simulation?.processors_metrics[stepRef.id]}
+              />
+            ))}
+          </EuiTimeline>
         </EuiPanel>
       ) : (
-        <NoProcessorsEmptyPrompt />
+        <NoStepsEmptyPrompt />
       )}
       <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
         {!isEmpty(errors.ignoredFields) && (

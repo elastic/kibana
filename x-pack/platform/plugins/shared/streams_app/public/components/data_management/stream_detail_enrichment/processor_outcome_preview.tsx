@@ -40,7 +40,7 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import { isProcessorUnderEdit } from './state_management/processor_state_machine';
+import { isProcessorUnderEdit } from './state_management/steps_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
 import { docViewJson } from './doc_viewer_json';
 import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
@@ -196,13 +196,13 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     (state) => state.context.dataSourcesRefs.length >= 2
   );
   const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
-    const currentProcessorRef = state.context.processorsRefs.find((processorRef) =>
-      isProcessorUnderEdit(processorRef.getSnapshot())
+    const currentProcessorRef = state.context.stepRefs.find((stepRef) =>
+      isProcessorUnderEdit(stepRef.getSnapshot())
     );
 
     if (!currentProcessorRef) return undefined;
 
-    return getSourceField(currentProcessorRef.getSnapshot().context.processor);
+    return getSourceField(currentProcessorRef.getSnapshot().context.step);
   });
 
   const { dependencies } = useKibana();
@@ -250,6 +250,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const grokMode =
     draftProcessor?.processor &&
+    'action' in draftProcessor.processor &&
     draftProcessor.processor.action === 'grok' &&
     !isEmpty(draftProcessor.processor.from) &&
     // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns

@@ -36,8 +36,8 @@ export function useGrokPatternSuggestion() {
   } = useKibana();
 
   const abortController = useAbortController();
-  const processorsWithoutCurrent = useSimulatorSelector((snapshot) =>
-    snapshot.context.processors.slice(0, -1)
+  const stepsWithoutCurrent = useSimulatorSelector((snapshot) =>
+    snapshot.context.steps.slice(0, -1)
   );
   const previewDocsFilter = useSimulatorSelector((snapshot) => snapshot.context.previewDocsFilter);
   const originalSamples = useSimulatorSelector((snapshot) =>
@@ -58,12 +58,12 @@ export function useGrokPatternSuggestion() {
        * If there are processors, we run a partial simulation to get the samples.
        * If there are no processors, we use the original samples previously assigned.
        */
-      if (processorsWithoutCurrent.length > 0) {
+      if (stepsWithoutCurrent.length > 0) {
         const simulation = await simulateProcessing({
           streamsRepositoryClient,
           input: {
             streamName: params.streamName,
-            processors: processorsWithoutCurrent,
+            steps: stepsWithoutCurrent,
             documents: samples,
           },
         });
@@ -112,7 +112,7 @@ export function useGrokPatternSuggestion() {
     },
     [
       abortController,
-      processorsWithoutCurrent,
+      stepsWithoutCurrent,
       previewDocsFilter,
       originalSamples,
       notifications,

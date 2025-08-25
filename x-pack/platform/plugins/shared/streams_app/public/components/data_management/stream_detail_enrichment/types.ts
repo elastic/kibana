@@ -12,6 +12,8 @@ import type {
   GrokProcessor,
   ManualIngestPipelineProcessor,
   SetProcessor,
+  StreamlangWhereBlockWithUIAttributes,
+  WithUiAttributes,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
@@ -20,15 +22,15 @@ import type { ConfigDrivenProcessorFormState } from './processors/config_driven/
  * Processors' types
  */
 
-export type GrokFormState = Omit<GrokProcessor, 'patterns'> & {
+export type GrokFormState = Omit<WithUiAttributes<GrokProcessor>, 'patterns'> & {
   patterns: DraftGrokExpression[];
 };
 
-export type DissectFormState = DissectProcessor;
-export type DateFormState = DateProcessor;
-export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
+export type DissectFormState = WithUiAttributes<DissectProcessor>;
+export type DateFormState = WithUiAttributes<DateProcessor>;
+export type ManualIngestPipelineFormState = WithUiAttributes<ManualIngestPipelineProcessor>;
 
-export type SetFormState = SetProcessor;
+export type SetFormState = WithUiAttributes<SetProcessor>;
 
 export type SpecialisedFormState =
   | GrokFormState
@@ -37,7 +39,9 @@ export type SpecialisedFormState =
   | ManualIngestPipelineFormState
   | SetFormState;
 
+// TODO: Add Where form state
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
+export type WhereBlockFormState = StreamlangWhereBlockWithUIAttributes;
 
 export type ExtractBooleanFields<TInput> = NonNullable<
   TInput extends Record<string, unknown>

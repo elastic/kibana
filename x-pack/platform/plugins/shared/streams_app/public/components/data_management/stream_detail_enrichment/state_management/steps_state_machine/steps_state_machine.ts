@@ -6,53 +6,74 @@
  */
 import type { ActorRefFrom, SnapshotFrom } from 'xstate5';
 import { assign, forwardTo, sendTo, setup } from 'xstate5';
-import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
-import type { ProcessorInput, ProcessorContext, ProcessorEvent, ProcessorResources } from './types';
+import type {
+  StreamlangProcessorDefinitionWithUIAttributes,
+  StreamlangWhereBlockWithUIAttributes,
+} from '@kbn/streamlang';
+import type { ProcessorResources, StepContext, StepEvent, StepInput } from './types';
 
-export type ProcessorActorRef = ActorRefFrom<typeof processorMachine>;
-export type ProcessorActorSnapshot = SnapshotFrom<typeof processorMachine>;
+export type StepActorRef = ActorRefFrom<typeof stepMachine>;
+export type StepActorSnapshot = SnapshotFrom<typeof stepMachine>;
 
-export const processorMachine = setup({
+export const stepMachine = setup({
   types: {
-    input: {} as ProcessorInput,
-    context: {} as ProcessorContext,
-    events: {} as ProcessorEvent,
+    input: {} as StepInput,
+    context: {} as StepContext,
+    events: {} as StepEvent,
   },
   actions: {
     changeProcessor: assign(
       (
         { context },
-        params: { processor: StreamlangProcessorDefinition; resources?: ProcessorResources }
+        params: {
+          step: StreamlangProcessorDefinitionWithUIAttributes;
+          resources?: ProcessorResources;
+        }
       ) => {
         return {
-          processor: {
-            customIdentifier: context.processor.customIdentifier,
-            ...params.processor,
+          step: {
+            ...params.step,
+            customIdentifier: context.step.customIdentifier,
           },
           resources: params.resources,
         };
       }
     ),
+    changeCondition: assign(
+      (
+        { context },
+        params: {
+          step: StreamlangWhereBlockWithUIAttributes;
+        }
+      ) => {
+        return {
+          step: {
+            ...params.step,
+            customIdentifier: context.step.customIdentifier,
+          },
+        };
+      }
+    ),
     resetToPrevious: assign(({ context }) => ({
-      processor: context.previousProcessor,
+      step: context.previousStep,
     })),
     markAsUpdated: assign(({ context }) => ({
-      previousProcessor: context.processor,
+      previousStep: context.step,
       isUpdated: true,
     })),
     forwardEventToParent: forwardTo(({ context }) => context.parentRef),
     forwardChangeEventToParent: sendTo(
       ({ context }) => context.parentRef,
       ({ context }) => ({
-        type: 'processor.change',
-        id: context.processor.customIdentifier!,
+        type: 'step.change',
+        id: context.step.customIdentifier,
       })
     ),
-    notifyProcessorDelete: sendTo(
+    notifyStepDelete: sendTo(
       ({ context }) => context.parentRef,
       ({ context }) => ({
-        type: 'processor.delete',
-        id: context.processor.customIdentifier!,
+        type: 'step.delete',
+        id: context.step.customIdentifier,
       })
     ),
   },
@@ -64,8 +85,8 @@ export const processorMachine = setup({
   id: 'processor',
   context: ({ input }) => ({
     parentRef: input.parentRef,
-    previousProcessor: input.processor,
-    processor: input.processor,
+    previousStep: input.step,
+    step: input.step,
     isNew: input.isNew ?? false,
   }),
   initial: 'unresolved',
@@ -75,14 +96,20 @@ export const processorMachine = setup({
     },
     draft: {
       on: {
-        'processor.save': {
+        'step.save': {
           target: '#configured',
           actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
         },
-        'processor.cancel': '#deleted',
-        'processor.change': {
+        'step.cancel': '#deleted',
+        'step.changeProcessor': {
           actions: [
             { type: 'changeProcessor', params: ({ event }) => event },
+            { type: 'forwardChangeEventToParent' },
+          ],
+        },
+        'step.changeCondition': {
+          actions: [
+            { type: 'changeCondition', params: ({ event }) => event },
             { type: 'forwardChangeEventToParent' },
           ],
         },
@@ -94,7 +121,7 @@ export const processorMachine = setup({
       states: {
         idle: {
           on: {
-            'processor.edit': {
+            'step.edit': {
               target: 'editing',
               actions: [{ type: 'forwardEventToParent' }],
             },
@@ -102,21 +129,28 @@ export const processorMachine = setup({
         },
         editing: {
           on: {
-            'processor.save': {
+            'step.save': {
               target: 'idle',
               actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
             },
-            'processor.cancel': {
+            'step.cancel': {
               target: 'idle',
               actions: [{ type: 'resetToPrevious' }, { type: 'forwardEventToParent' }],
             },
-            'processor.change': {
+            'step.changeProcessor': {
               actions: [
                 { type: 'changeProcessor', params: ({ event }) => event },
                 { type: 'forwardChangeEventToParent' },
               ],
             },
-            'processor.delete': '#deleted',
+            'step.changeCondition': {
+              actions: [
+                { type: 'changeCondition', params: ({ event }) => event },
+                { type: 'forwardChangeEventToParent' },
+              ],
+            },
+
+            'step.delete': '#deleted',
           },
         },
       },
@@ -124,7 +158,7 @@ export const processorMachine = setup({
     deleted: {
       id: 'deleted',
       type: 'final',
-      entry: [{ type: 'notifyProcessorDelete' }],
+      entry: [{ type: 'notifyStepDelete' }],
     },
   },
 });

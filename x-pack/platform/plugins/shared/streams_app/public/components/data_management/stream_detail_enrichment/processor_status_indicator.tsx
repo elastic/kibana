@@ -10,7 +10,7 @@ import { EuiAvatar, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { ProcessorConfigurationProps } from './processors';
+import type { StepConfigurationProps } from './processors';
 import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
@@ -18,29 +18,28 @@ import {
 import { selectWhetherAnyProcessorBeforePersisted } from './state_management/stream_enrichment_state_machine/selectors';
 
 export const ProcessorStatusIndicator = ({
-  processorRef,
+  stepRef,
 }: {
-  processorRef: ProcessorConfigurationProps['processorRef'];
+  stepRef: StepConfigurationProps['stepRef'];
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const isNew = useSelector(processorRef, (snapshot) => snapshot.context.isNew);
+  const isNew = useSelector(stepRef, (snapshot) => snapshot.context.isNew);
 
   const hasSimulation = useSimulatorSelector((snapshot) => Boolean(snapshot.context.simulation));
   const isParticipatingInSimulation = useSimulatorSelector((snapshot) =>
-    snapshot.context.processors.find((p) => p.customIdentifier === processorRef.id)
+    snapshot.context.steps.find((p) => p.customIdentifier === stepRef.id)
   );
   const isSimulationRunning = useSimulatorSelector((snapshot) =>
     snapshot.matches('runningSimulation')
   );
   const isPending = useSimulatorSelector(
     (snapshot) =>
-      snapshot.context.simulation &&
-      !snapshot.context.simulation.processors_metrics[processorRef.id]
+      snapshot.context.simulation && !snapshot.context.simulation.processors_metrics[stepRef.id]
   );
   const isFailing = useSimulatorSelector((snapshot) =>
     Boolean(
-      snapshot.context.simulation?.processors_metrics[processorRef.id]?.errors.some(
+      snapshot.context.simulation?.processors_metrics[stepRef.id]?.errors.some(
         (e) => e.type === 'generic_simulation_failure'
       )
     )

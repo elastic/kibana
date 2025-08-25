@@ -19,7 +19,7 @@ import type {
 } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 
-export type AppendProcessorFormState = AppendProcessor;
+export type AppendProcessorFormState = AppendProcessor & { parentId: string | null };
 
 const defaultFormState: AppendProcessorFormState = {
   action: 'append',
@@ -28,6 +28,7 @@ const defaultFormState: AppendProcessorFormState = {
   allow_duplicates: false,
   where: ALWAYS_CONDITION,
   ignore_failure: false,
+  parentId: null,
 };
 
 const fieldOptions: FieldOptions = {
