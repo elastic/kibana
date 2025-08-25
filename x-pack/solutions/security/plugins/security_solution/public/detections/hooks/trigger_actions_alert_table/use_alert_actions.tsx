@@ -10,7 +10,6 @@ import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -20,6 +19,7 @@ import { FILTER_CLOSED, FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../com
 import * as i18n from '../translations';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
+import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
 
 interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
@@ -28,15 +28,12 @@ interface UseBulkAlertActionItemsArgs {
   from: string;
   /* End Time of the table being passed to the Events Table */
   to: string;
-  /* Sourcerer Scope Id*/
-  scopeId: SourcererScopeName;
   /* filter of the Alerts Query*/
   filters: Filter[];
   refetch?: () => void;
 }
 
 export const useBulkAlertActionItems = ({
-  scopeId,
   filters,
   from,
   to,
@@ -46,6 +43,8 @@ export const useBulkAlertActionItems = ({
   const { startTransaction } = useStartTransaction();
 
   const { addSuccess, addError, addWarning } = useAppToasts();
+
+  const { promptAlertCloseConfirmation } = useAlertCloseInfoModal();
 
   const onAlertStatusUpdateSuccess = useCallback(
     (updated: number, conflicts: number, newStatus: AlertWorkflowStatus) => {
@@ -101,6 +100,10 @@ export const useBulkAlertActionItems = ({
         refresh
       ) => {
         try {
+          if (status === 'closed' && !(await promptAlertCloseConfirmation())) {
+            return;
+          }
+
           let ids: string[] | undefined = items.map((item) => item._id);
           let query: Record<string, unknown> | undefined;
 
@@ -151,6 +154,7 @@ export const useBulkAlertActionItems = ({
       from,
       to,
       refetchProp,
+      promptAlertCloseConfirmation,
     ]
   );
 
