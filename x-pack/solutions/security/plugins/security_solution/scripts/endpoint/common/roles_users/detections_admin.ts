@@ -25,6 +25,7 @@ export const getDetectionsAdmin: () => Omit<Role, 'name'> = () => {
 
             'global_artifact_management_all',
             'trusted_applications_read',
+            'trusted_devices_read',
             'event_filters_read',
             'host_isolation_exceptions_read',
             'blocklist_all',

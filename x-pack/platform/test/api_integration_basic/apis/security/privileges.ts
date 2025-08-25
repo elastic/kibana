@@ -291,6 +291,8 @@ export default function ({ getService }: FtrProviderContext) {
               'read',
               'trusted_applications_all',
               'trusted_applications_read',
+              'trusted_devices_all',
+              'trusted_devices_read',
               'file_operations_all',
               'execute_operations_all',
               'scan_operations_all',

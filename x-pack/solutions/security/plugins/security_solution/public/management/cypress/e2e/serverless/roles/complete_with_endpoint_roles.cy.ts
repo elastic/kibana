@@ -40,11 +40,6 @@ describe(
           { product_line: 'security', product_tier: 'complete' },
           { product_line: 'endpoint', product_tier: 'complete' },
         ],
-        // This is not needed for this test, but it's a good example of
-        // how to enable experimental features in the Cypress tests.
-        // kbnServerArgs: [
-        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify(['featureFlagName'])}`,
-        // ],
       },
     },
   },
@@ -110,6 +105,7 @@ describe(
     describe('for role: t3_analyst', () => {
       const artifactPagesFullAccess = [
         pageById.trustedApps,
+        pageById.trustedDevices,
         pageById.eventFilters,
         pageById.hostIsolationExceptions,
         pageById.blocklist,
@@ -224,6 +220,7 @@ describe(
     describe('for role: rule_author', () => {
       const artifactPagesFullAccess = [
         pageById.trustedApps,
+        pageById.trustedDevices,
         pageById.eventFilters,
         pageById.blocklist,
       ];
@@ -273,6 +270,7 @@ describe(
     describe('for role: soc_manager', () => {
       const artifactPagesFullAccess = [
         pageById.trustedApps,
+        pageById.trustedDevices,
         pageById.eventFilters,
         pageById.blocklist,
         pageById.hostIsolationExceptions,
@@ -319,6 +317,7 @@ describe(
     describe('for role: endpoint_operations_analyst', () => {
       const artifactPagesFullAccess = [
         pageById.trustedApps,
+        pageById.trustedDevices,
         pageById.eventFilters,
         pageById.blocklist,
         pageById.hostIsolationExceptions,
@@ -362,6 +361,7 @@ describe(
       describe(`for role: ${roleName}`, () => {
         const artifactPagesFullAccess = [
           pageById.trustedApps,
+          pageById.trustedDevices,
           pageById.eventFilters,
           pageById.blocklist,
           pageById.hostIsolationExceptions,

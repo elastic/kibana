@@ -9,7 +9,9 @@ import * as ServerlessHeaders from '@kbn/test-suites-xpack-security/security_sol
 import * as EssHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/security_header';
 import { login, ROLE } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
+import type { SiemVersion } from '../../common/constants';
 import { SIEM_VERSIONS } from '../../common/constants';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 describe('Navigation RBAC', () => {
   const isServerless = Cypress.env('IS_SERVERLESS');
@@ -19,7 +21,7 @@ describe('Navigation RBAC', () => {
     ? ServerlessHeaders.ASSETS_PANEL_BTN
     : EssHeaders.SETTINGS_PANEL_BTN;
 
-  const pages = [
+  const allPages = [
     {
       name: 'Endpoints',
       privilegePrefix: 'endpoint_list_',
@@ -34,6 +36,12 @@ describe('Navigation RBAC', () => {
       name: 'Trusted applications',
       privilegePrefix: 'trusted_applications_',
       selector: Selectors.TRUSTED_APPS,
+    },
+    {
+      name: 'Trusted devices',
+      privilegePrefix: 'trusted_devices_',
+      selector: Selectors.TRUSTED_DEVICES,
+      siemVersions: [SECURITY_FEATURE_ID as SiemVersion], // Only available in siemV3
     },
     {
       name: 'Event filters',
@@ -57,9 +65,15 @@ describe('Navigation RBAC', () => {
     },
   ];
 
+  const getPagesForSiemVersion = (siemVersion: SiemVersion) => {
+    return allPages.filter((page) => !page.siemVersions || page.siemVersions.includes(siemVersion));
+  };
+
   describe('ESS - using custom roles', { tags: ['@ess'] }, () => {
     for (const siemVersion of SIEM_VERSIONS) {
       describe(siemVersion, () => {
+        const pages = getPagesForSiemVersion(siemVersion);
+
         describe('NONE access', () => {
           beforeEach(() => {
             login.withCustomKibanaPrivileges({ [siemVersion]: ['all'] });
@@ -126,7 +140,7 @@ describe('Navigation RBAC', () => {
       cy.get(MenuButtonSelector).click();
       cy.get('[data-test-subj~="sideNavPanel-id-securityGroup:assets"]');
 
-      for (const page of pages) {
+      for (const page of allPages) {
         cy.get(page.selector).should('not.exist');
       }
     });
@@ -137,7 +151,7 @@ describe('Navigation RBAC', () => {
       cy.get(MenuButtonSelector).click();
       cy.get('[data-test-subj~="sideNavPanel-id-securityGroup:assets"]');
 
-      for (const page of pages) {
+      for (const page of allPages) {
         cy.get(page.selector);
       }
     });

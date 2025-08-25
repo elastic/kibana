@@ -50,6 +50,8 @@ export const POLICIES = '[data-test-subj="solutionSideNavPanelLink-policy"]';
 
 export const TRUSTED_APPS = '[data-test-subj="solutionSideNavPanelLink-trusted_apps"]';
 
+export const TRUSTED_DEVICES = '[data-test-subj="solutionSideNavPanelLink-trusted_devices"]';
+
 export const EVENT_FILTERS = '[data-test-subj="solutionSideNavPanelLink-event_filters"]';
 
 export const BLOCKLIST = '[data-test-subj="solutionSideNavPanelLink-blocklist"]';
@@ -119,6 +121,7 @@ export const openNavigationPanelFor = (page: string) => {
     }
     case ENDPOINTS:
     case TRUSTED_APPS:
+    case TRUSTED_DEVICES:
     case EVENT_FILTERS:
     case POLICIES:
     case ENDPOINT_EXCEPTIONS:

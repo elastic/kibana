@@ -107,6 +107,7 @@ describe(
           'Automatic TroubleshootingNone',
           'Global Artifact ManagementNone',
           'Trusted ApplicationsNone',
+          'Trusted DevicesNone',
           'Host Isolation ExceptionsNone',
           'BlocklistNone',
           'Event FiltersNone',

@@ -85,6 +85,7 @@ describe.skip(
     describe('for role: t3_analyst', () => {
       const artifactPagesFullAccess = [
         pageById.trustedApps,
+        pageById.trustedDevices,
         pageById.eventFilters,
         pageById.blocklist,
       ];
@@ -159,6 +160,7 @@ describe.skip(
     describe('for role: rule_author', () => {
       const artifactPagesFullAccess = [
         pageById.trustedApps,
+        pageById.trustedDevices,
         pageById.eventFilters,
         pageById.blocklist,
       ];
@@ -202,6 +204,7 @@ describe.skip(
     describe('for role: soc_manager', () => {
       const artifactPagesFullAccess = [
         pageById.trustedApps,
+        pageById.trustedDevices,
         pageById.eventFilters,
         pageById.blocklist,
       ];
@@ -246,6 +249,7 @@ describe.skip(
       describe(`for role: ${roleName}`, () => {
         const artifactPagesFullAccess = [
           pageById.trustedApps,
+          pageById.trustedDevices,
           pageById.eventFilters,
           pageById.blocklist,
         ];
