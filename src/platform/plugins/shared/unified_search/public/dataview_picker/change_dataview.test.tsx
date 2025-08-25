@@ -9,16 +9,31 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
-import { DataViewSelector } from './data_view_selector';
 import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
 import type { DataViewPickerProps } from './data_view_picker';
+import type { DataView } from '@kbn/data-views-plugin/common';
+
+// Mock DOM measurement functions to prevent EUI truncation width errors
+Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+  configurable: true,
+  value: 500,
+});
+
+Object.defineProperty(HTMLElement.prototype, 'scrollWidth', {
+  configurable: true,
+  value: 400,
+});
+
+Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+  configurable: true,
+  value: 500,
+});
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
@@ -37,6 +52,7 @@ describe('DataView component', () => {
     remove: jest.fn(),
     clear: jest.fn(),
   });
+
   const getStorage = (v: boolean) => {
     const storage = createMockStorage();
     storage.get.mockReturnValue(v);
@@ -76,7 +92,9 @@ describe('DataView component', () => {
       </I18nProvider>
     );
   }
+
   let props: DataViewPickerProps;
+
   beforeEach(() => {
     props = {
       currentDataViewId: 'dataview-1',
@@ -90,50 +108,72 @@ describe('DataView component', () => {
     };
   });
 
-  it('should not render the add runtime field menu if addField is not given', async () => {
-    await act(async () => {
-      const component = mount(wrapDataViewComponentInContext(props, true));
-      findTestSubject(component, 'dataview-trigger').simulate('click');
-      expect(component.find('[data-test-subj="indexPattern-add-field"]').length).toBe(0);
-    });
-  });
-
-  it('should render the add runtime field menu if addField is given', async () => {
+  it.each([
+    {
+      description: 'should not render the add runtime field menu if addField is not given',
+      hasAddField: false,
+      expectPresent: false,
+    },
+    {
+      description: 'should render the add runtime field menu if addField is given',
+      hasAddField: true,
+      expectPresent: true,
+    },
+  ])('$description', async ({ hasAddField, expectPresent }) => {
     const addFieldSpy = jest.fn();
-    const component = mount(
-      wrapDataViewComponentInContext({ ...props, onAddField: addFieldSpy }, false)
-    );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    expect(component.find('[data-test-subj="indexPattern-add-field"]').at(0).text()).toContain(
-      'Add a field to this data view'
-    );
-    component.find('[data-test-subj="indexPattern-add-field"]').first().simulate('click');
-    expect(addFieldSpy).toHaveBeenCalled();
+    const testProps = hasAddField ? { ...props, onAddField: addFieldSpy } : props;
+
+    render(wrapDataViewComponentInContext(testProps, !hasAddField));
+
+    await userEvent.click(screen.getByTestId('dataview-trigger'));
+
+    const addFieldButton = screen.queryByTestId('indexPattern-add-field');
+
+    if (expectPresent) {
+      expect(addFieldButton).toBeInTheDocument();
+      expect(addFieldButton).toHaveTextContent('Add a field to this data view');
+      await userEvent.click(addFieldButton!);
+      expect(addFieldSpy).toHaveBeenCalled();
+    } else {
+      expect(addFieldButton).not.toBeInTheDocument();
+    }
   });
 
-  it('should not render the add dataview menu if onDataViewCreated is not given', async () => {
-    await act(async () => {
-      const component = mount(wrapDataViewComponentInContext(props, true));
-      findTestSubject(component, 'dataview-trigger').simulate('click');
-      expect(component.find('[data-test-subj="dataview-create-new"]').length).toBe(0);
-    });
-  });
-
-  it('should render the add dataview menu if onDataViewCreated is given', async () => {
+  it.each([
+    {
+      description: 'should not render the add dataview menu if onDataViewCreated is not given',
+      hasOnDataViewCreated: false,
+      expectPresent: false,
+    },
+    {
+      description: 'should render the add dataview menu if onDataViewCreated is given',
+      hasOnDataViewCreated: true,
+      expectPresent: true,
+    },
+  ])('$description', async ({ hasOnDataViewCreated, expectPresent }) => {
     const addDataViewSpy = jest.fn();
-    const component = mount(
-      wrapDataViewComponentInContext({ ...props, onDataViewCreated: addDataViewSpy }, false)
-    );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    expect(component.find('[data-test-subj="dataview-create-new"]').at(0).text()).toContain(
-      'Create a data view'
-    );
-    component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
-    expect(addDataViewSpy).toHaveBeenCalled();
+    const testProps = hasOnDataViewCreated
+      ? { ...props, onDataViewCreated: addDataViewSpy }
+      : props;
+
+    render(wrapDataViewComponentInContext(testProps, !hasOnDataViewCreated));
+
+    await userEvent.click(screen.getByTestId('dataview-trigger'));
+
+    const createButton = screen.queryByTestId('dataview-create-new');
+
+    if (expectPresent) {
+      expect(createButton).toBeInTheDocument();
+      expect(createButton).toHaveTextContent('Create a data view');
+      await userEvent.click(createButton!);
+      expect(addDataViewSpy).toHaveBeenCalled();
+    } else {
+      expect(createButton).not.toBeInTheDocument();
+    }
   });
 
   it('should properly handle ad hoc data views', async () => {
-    const component = mount(
+    render(
       wrapDataViewComponentInContext(
         {
           ...props,
@@ -149,24 +189,21 @@ describe('DataView component', () => {
         false
       )
     );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    expect(component.find(DataViewSelector).prop('dataViewsList')).toStrictEqual([
-      {
-        id: 'dataview-1',
-        title: 'dataview-1',
-      },
-      {
-        id: 'the-data-view-id',
-        title: 'the-data-view-title',
-        name: 'the-data-view',
-        type: 'default',
-        isAdhoc: true,
-      },
-    ]);
+
+    await userEvent.click(screen.getByTestId('dataview-trigger'));
+
+    // Verify both saved and ad hoc dataviews are visible
+    expect(screen.getAllByRole('option')).toHaveLength(2);
+    expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'the-data-view' })).toBeInTheDocument();
+
+    // Verify the ad hoc data view has the "Temporary" badge
+    expect(screen.getByTestId('dataViewItemTempBadge-the-data-view')).toBeInTheDocument();
+    expect(screen.getByText('Temporary')).toBeInTheDocument();
   });
 
   it('should properly handle ES|QL ad hoc data views', async () => {
-    const component = mount(
+    render(
       wrapDataViewComponentInContext(
         {
           ...props,
@@ -182,24 +219,17 @@ describe('DataView component', () => {
         false
       )
     );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    expect(component.find(DataViewSelector).prop('dataViewsList')).toStrictEqual([
-      {
-        id: 'dataview-1',
-        title: 'dataview-1',
-      },
-      {
-        id: 'the-data-view-esql-id',
-        title: 'the-data-view-esql-title',
-        name: 'the-data-view-esql',
-        type: 'esql',
-        isAdhoc: true,
-      },
-    ]);
+
+    await userEvent.click(screen.getByTestId('dataview-trigger'));
+
+    // Verify that ES|QL ad hoc dataviews are filtered out, only saved dataview should be visible
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'the-data-view-esql' })).not.toBeInTheDocument();
   });
 
   it('should properly handle managed data views', async () => {
-    const component = mount(
+    render(
       wrapDataViewComponentInContext(
         {
           ...props,
@@ -215,33 +245,77 @@ describe('DataView component', () => {
         false
       )
     );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    expect(component.find(DataViewSelector).prop('dataViewsList')).toStrictEqual([
-      {
-        id: 'dataview-1',
-        title: 'dataview-1',
-      },
-      {
-        id: 'the-data-view-id',
-        title: 'the-data-view-title',
-        name: 'the-data-view',
-        type: 'default',
-        isManaged: true,
-      },
-    ]);
+
+    await userEvent.click(screen.getByTestId('dataview-trigger'));
+
+    // Verify both saved and managed dataviews are visible
+    expect(screen.getAllByRole('option')).toHaveLength(2);
+    expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'the-data-view' })).toBeInTheDocument();
+
+    // Verify the managed data view has the "Managed" badge
+    expect(screen.getByTestId('dataViewItemManagedBadge-the-data-view')).toBeInTheDocument();
+    expect(screen.getByText('Managed')).toBeInTheDocument();
+  });
+
+  it('should properly handle both ad hoc and managed data views together', async () => {
+    render(
+      wrapDataViewComponentInContext(
+        {
+          ...props,
+          onDataViewCreated: jest.fn(),
+          savedDataViews: [
+            {
+              id: 'dataview-1',
+              title: 'dataview-1',
+            },
+          ],
+          adHocDataViews: [dataViewMock],
+          managedDataViews: [
+            {
+              ...dataViewMock,
+              id: 'managed-dataview-id',
+              title: 'managed-dataview-title',
+              name: 'managed-dataview',
+            } as unknown as DataView,
+          ],
+        },
+        false
+      )
+    );
+
+    await userEvent.click(screen.getByTestId('dataview-trigger'));
+
+    // Verify all three data views are visible (saved, ad hoc, and managed)
+    expect(screen.getAllByRole('option')).toHaveLength(3);
+    expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'the-data-view' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'managed-dataview' })).toBeInTheDocument();
+
+    // Verify the badges for special types
+    expect(screen.getByTestId('dataViewItemTempBadge-the-data-view')).toBeInTheDocument();
+    expect(screen.getByTestId('dataViewItemManagedBadge-managed-dataview')).toBeInTheDocument();
+    expect(screen.getByText('Temporary')).toBeInTheDocument();
+    expect(screen.getByText('Managed')).toBeInTheDocument();
   });
 
   it('should call onClosePopover when it is given and popover is closed', async () => {
     const onClosePopoverSpy = jest.fn();
     const addDataViewSpy = jest.fn();
-    const component = mount(
+
+    render(
       wrapDataViewComponentInContext(
         { ...props, onClosePopover: onClosePopoverSpy, onDataViewCreated: addDataViewSpy },
         false
       )
     );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
+
+    await userEvent.click(screen.getByTestId('dataview-trigger'));
+
+    expect(screen.getByTestId('dataview-create-new')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('dataview-create-new'));
+
     expect(onClosePopoverSpy).toHaveBeenCalled();
   });
 });
