@@ -28,6 +28,8 @@ interface Props {
   isManaged?: boolean;
   tooltipMessage: string;
   component: ReactElement;
+  id?: string;
+  'aria-describedby'?: string;
 }
 
 /**
@@ -37,15 +39,21 @@ interface Props {
  * @param {boolean} isManaged - Determines if the tooltip should be displayed.
  * @param {string} tooltipMessage - The message to display inside the tooltip.
  * @param {React.ReactElement} component - The component to wrap with the tooltip.
+ * @param {string} id - The id of the wrapped component.
+ * @param {string} 'aria-describedby' - The aria-describedby attribute for the wrapped component.
  */
 export const DisableToolTip: React.FunctionComponent<Props> = ({
   isManaged,
   tooltipMessage,
   component,
-  ...rest
+  id,
+  'aria-describedby': ariaDescribedBy,
 }) => {
-  // Ensures that any additional props (e.g. id, aria-describedby) are forwarded to the wrapped component
-  const componentWithProps = cloneElement(component, { ...rest });
+  // Props 'id' and 'aria-describedby' are passed to the wrapped component for accessibility support, as required by EuiFormRow.
+  const componentWithProps = cloneElement(component, {
+    id,
+    'aria-describedby': ariaDescribedBy,
+  });
 
   return isManaged ? (
     <EuiToolTip content={tooltipMessage} display="block">
