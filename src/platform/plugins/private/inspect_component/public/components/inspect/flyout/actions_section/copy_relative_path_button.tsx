@@ -16,12 +16,12 @@ interface Props {
 }
 
 const COPIED_RELATIVE_PATH = i18n.translate(
-  'kbnInspectComponent.inspectFlyout.linksSection.copyRelativeFilePathCopiedTooltip',
+  'kbnInspectComponent.inspectFlyout.actionsSection.copyRelativeFilePathCopiedTooltip',
   { defaultMessage: 'Relative file path copied' }
 );
 
 const COPY_RELATIVE_PATH = i18n.translate(
-  'kbnInspectComponent.inspectFlyout.linksSection.copyRelativeFilePathActionTooltip',
+  'kbnInspectComponent.inspectFlyout.actionsSection.copyRelativeFilePathActionTooltip',
   { defaultMessage: 'Copy relative file path' }
 );
 

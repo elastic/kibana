@@ -16,7 +16,7 @@ export const ActionsTitle = () => (
     <EuiTitle size="s" data-test-subj="inspectComponentActionsTitle">
       <h3>
         <FormattedMessage
-          id="kbnInspectComponent.inspectFlyout.linksSection.title"
+          id="kbnInspectComponent.inspectFlyout.actionsSection.title"
           defaultMessage="Actions"
         />
       </h3>

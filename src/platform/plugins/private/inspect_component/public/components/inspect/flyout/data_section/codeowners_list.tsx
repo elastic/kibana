@@ -42,7 +42,7 @@ export const CodeownersList = ({ codeowners }: Props) => {
     <>
       <EuiText size="s" css={boldTextCss}>
         <FormattedMessage
-          id="kbnInspectComponent.inspectFlyout.codeownersTitle"
+          id="kbnInspectComponent.inspectFlyout.dataSection.codeownersTitle"
           defaultMessage="Codeowners:"
         />
       </EuiText>

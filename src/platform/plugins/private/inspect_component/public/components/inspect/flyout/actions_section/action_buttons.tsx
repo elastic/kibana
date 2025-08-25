@@ -45,27 +45,27 @@ export const ActionButtons = ({ fileName, lineNumber, columnNumber, relativePath
   const ACTIONS: ActionLink[] = [
     {
       href: GITHUB_LINK,
-      i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubButtonText',
+      i18nId: 'kbnInspectComponent.inspectFlyout.actionsSection.openOnGitHubButtonText',
       icon: 'logoGithub',
       id: 'github',
       label: 'GitHub',
     },
     {
       href: GITHUB_DEV_LINK,
-      i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubDevButtonText',
+      i18nId: 'kbnInspectComponent.inspectFlyout.actionsSection.openOnGitHubDevButtonText',
       icon: 'logoGithub',
       id: 'githubDev',
       label: 'GitHub.dev',
     },
     {
       href: VSCODE_LINK,
-      i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openInVSCodeButtonText',
+      i18nId: 'kbnInspectComponent.inspectFlyout.actionsSection.openInVSCodeButtonText',
       icon: 'code',
       id: 'vscode',
       label: 'VSCode',
     },
     {
-      i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openInWebStormButtonText',
+      i18nId: 'kbnInspectComponent.inspectFlyout.actionsSection.openInWebStormButtonText',
       href: WEBSTORM_LINK,
       icon: 'code',
       id: 'webstorm',
@@ -73,7 +73,7 @@ export const ActionButtons = ({ fileName, lineNumber, columnNumber, relativePath
     },
     {
       href: CURSOR_LINK,
-      i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openInCursorButtonText',
+      i18nId: 'kbnInspectComponent.inspectFlyout.actionsSection.openInCursorButtonText',
       icon: 'code',
       id: 'cursor',
       label: 'Cursor',
@@ -105,7 +105,7 @@ export const ActionButtons = ({ fileName, lineNumber, columnNumber, relativePath
         });
 
         const ariaLabel = i18n.translate(
-          'kbnInspectComponent.inspectFlyout.linksSection.openFileInAriaLabel',
+          'kbnInspectComponent.inspectFlyout.actionsSection.openFileInAriaLabel',
           {
             defaultMessage: 'Open file using {target}',
             values: { target: label },

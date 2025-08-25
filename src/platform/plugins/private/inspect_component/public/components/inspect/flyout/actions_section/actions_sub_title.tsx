@@ -30,7 +30,7 @@ export const ActionsSubTitle = ({ relativePath, baseFileName }: Props) => {
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiText component="div" size="s" data-test-subj="inspectComponentActionsSubtitle">
           <FormattedMessage
-            id="kbnInspectComponent.inspectFlyout.linksSection.subtitle"
+            id="kbnInspectComponent.inspectFlyout.actionsSection.subtitle"
             defaultMessage="Open {baseFileName}"
             values={{
               baseFileName: (

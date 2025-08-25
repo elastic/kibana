@@ -34,7 +34,7 @@ export const ComponentTitle = ({ sourceComponent }: Props) => {
             </EuiCode>
           ) : (
             <FormattedMessage
-              id="kbnInspectComponent.inspectFlyout.componentDataTitle"
+              id="kbnInspectComponent.inspectFlyout.dataSection.componentDataTitle"
               defaultMessage="Data"
             />
           )}

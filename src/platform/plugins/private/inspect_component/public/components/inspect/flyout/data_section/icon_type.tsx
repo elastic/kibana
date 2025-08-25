@@ -27,7 +27,7 @@ export const IconType = ({ iconType }: Props) => {
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
       <EuiText size="s" css={boldTextCss}>
         <FormattedMessage
-          id="kbnInspectComponent.inspectFlyout.iconTypeLabel"
+          id="kbnInspectComponent.inspectFlyout.dataSection.iconTypeLabel"
           defaultMessage="Icon:"
         />
       </EuiText>
@@ -36,7 +36,7 @@ export const IconType = ({ iconType }: Props) => {
           iconType
         ) : (
           <FormattedMessage
-            id="kbnInspectComponent.inspectFlyout.noIconTypeFound"
+            id="kbnInspectComponent.inspectFlyout.dataSection.noIconTypeFound"
             defaultMessage="N/A"
           />
         )}

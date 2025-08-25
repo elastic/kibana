@@ -28,7 +28,7 @@ export const EuiDocsLink = ({ euiData }: Props) => {
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
       <EuiText css={boldTextCss} size="s">
         <FormattedMessage
-          id="kbnInspectComponent.inspectFlyout.euiDocsLabel"
+          id="kbnInspectComponent.inspectFlyout.dataSectioneuiDocsLabel"
           defaultMessage="EUI Docs:"
         />
       </EuiText>
@@ -39,7 +39,7 @@ export const EuiDocsLink = ({ euiData }: Props) => {
       ) : (
         <EuiText size="s">
           <FormattedMessage
-            id="kbnInspectComponent.inspectFlyout.noDocsFound"
+            id="kbnInspectComponent.inspectFlyout.dataSection.noDocsFound"
             defaultMessage="N/A"
           />
         </EuiText>
