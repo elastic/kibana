@@ -31,9 +31,30 @@ export async function getDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
 }
 
 export async function enableDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
-  return apiService.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
+  return retry(() => apiService.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING));
 }
 
 export async function updateDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
-  return apiService.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
+  return retry(() => apiService.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING));
+}
+
+export async function retry<T>(
+  fn: () => Promise<T>,
+  retries = 2,
+  delay = 100,
+  backoff = 1.2
+): Promise<T> {
+  let currentDelay = delay;
+  for (let i = 0; ; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i >= retries - 1) {
+        if (error instanceof Error) throw error;
+        throw new Error(String(error));
+      }
+      await new Promise((resolve) => setTimeout(resolve, currentDelay));
+      currentDelay *= backoff;
+    }
+  }
 }
