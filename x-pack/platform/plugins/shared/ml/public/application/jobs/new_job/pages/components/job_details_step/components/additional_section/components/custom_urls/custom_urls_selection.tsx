@@ -7,11 +7,12 @@
 
 import type { FC } from 'react';
 import React, { useContext } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import { DescriptionVertical } from '../../../../../../../../../data_frame_analytics/common/description_vertical';
 import { useDashboardService } from '../../../../../../../../../services/dashboard_service';
 import { CustomUrls } from '../../../../../../../../../components/custom_urls/custom_urls';
 import { JobCreatorContext } from '../../../../../job_creator_context';
-import { Description } from './description';
 import type { CombinedJob } from '../../../../../../../../../../../common/types/anomaly_detection_jobs';
 
 export const CustomUrlsSelection: FC = () => {
@@ -29,7 +30,17 @@ export const CustomUrlsSelection: FC = () => {
   const dashboardService = useDashboardService();
 
   return (
-    <Description>
+    <DescriptionVertical
+      title={i18n.translate(
+        'xpack.ml.dataframe.analytics.create.detailsStep.additionalSection.customUrls.title',
+        {
+          defaultMessage: 'Custom URLs',
+        }
+      )}
+      descriptionMessageId="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.description"
+      descriptionDefaultMessage="Provide links from anomalies to Kibana dashboards, Discover, or other web pages. {learnMoreLink}"
+      learnMoreLinkMessageId="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.learnMoreLinkText"
+    >
       <CustomUrls
         job={combinedJob}
         jobCustomUrls={jobCreator.customUrls ?? []}
@@ -37,6 +48,6 @@ export const CustomUrlsSelection: FC = () => {
         editMode="modal"
         dashboardService={dashboardService}
       />
-    </Description>
+    </DescriptionVertical>
   );
 };
