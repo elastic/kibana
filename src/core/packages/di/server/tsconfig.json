@@ -20,5 +20,8 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-plugins-server",
     "@kbn/core-di-internal",
+    "@kbn/core-capabilities-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-server",
   ]
 }
