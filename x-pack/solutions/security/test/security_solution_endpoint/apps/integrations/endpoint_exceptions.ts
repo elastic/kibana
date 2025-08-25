@@ -161,6 +161,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await deleteEndpointExceptions();
 
+      await endpointArtifactTestResources.ensureListExists(ENDPOINT_EXCEPTIONS_LIST_DEFINITION);
+
       clearPrefilledEntries = retryOnStale.wrap(async () => {
         const entriesContainer = await testSubjects.find('exceptionEntriesContainer');
 
