@@ -35,10 +35,10 @@ export const useMigrationNameStep = ({
     // localized date and time (e.g., "Wed, 01 Jan 2025 12:00:00 PM")
     const datetime = moment(Date.now()).format('dddd, D MMM YYYY, h:mm:ss A');
 
-    if (currentUserProfile?.user.username) {
-      return `${
-        currentUserProfile.user.full_name ?? currentUserProfile.user.username
-      }'s migration on ${datetime}`;
+    const userName = currentUserProfile?.user.full_name ?? currentUserProfile?.user.username;
+
+    if (userName) {
+      return `${userName}'s migration on ${datetime}`;
     }
 
     return `Migration created on ${datetime}`;
