@@ -6,8 +6,78 @@
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { getDatasourceId } from '@kbn/visualization-utils';
-import type { VisualizeEditorContext, Suggestion } from '../types';
-import type { TypedLensByValueInput } from '../react_embeddable/types';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
+import { isEqual } from 'lodash';
+import type { VisualizeEditorContext, Suggestion, IndexPatternRef } from '../types';
+import type { TypedLensByValueInput, TypedLensSerializedState } from '../react_embeddable/types';
+import type { TextBasedPrivateState } from '../datasources/form_based/esql_layer/types';
+
+const datasourceHasIndexPatternRefs = (
+  unknownDatasource: unknown
+): unknownDatasource is TextBasedPrivateState => {
+  return Boolean(
+    unknownDatasource &&
+      (unknownDatasource as TextBasedPrivateState)?.indexPatternRefs !== undefined
+  );
+};
+
+/**
+ * Injects the ESQL query into the lens layers. This is used to keep the query in sync with the lens layers.
+ * @param attributes, the current lens attributes
+ * @param query, the new query to inject
+ * @returns the new lens attributes with the query injected
+ */
+export const injectESQLQueryIntoLensLayers = (
+  attributes: TypedLensSerializedState['attributes'],
+  query: AggregateQuery,
+  suggestion: Suggestion
+) => {
+  const datasourceId = getDatasourceId(attributes.state.datasourceStates);
+
+  // if the datasource is formBased, we should not fix the query
+  if (!datasourceId || datasourceId === 'formBased') {
+    return attributes;
+  }
+
+  if (!attributes.state.datasourceStates[datasourceId]) {
+    return attributes;
+  }
+
+  const indexPattern = getIndexPatternFromESQLQuery(query.esql);
+
+  // Find matching index pattern reference from suggestion
+  let indexPatternRef: IndexPatternRef | undefined;
+  if (datasourceHasIndexPatternRefs(suggestion.datasourceState)) {
+    const suggestionRefs = suggestion.datasourceState.indexPatternRefs;
+    indexPatternRef = suggestionRefs?.find((ref) => ref.title === indexPattern);
+  }
+
+  const datasourceState = structuredClone(attributes.state.datasourceStates[datasourceId]);
+
+  // Update each layer with the new query and index pattern if needed
+  if (datasourceState?.layers) {
+    Object.values(datasourceState.layers).forEach((layer) => {
+      if (!isEqual(layer.query, query)) {
+        layer.query = query;
+        const index = indexPatternRef?.id ?? layer.index;
+        if (index) {
+          layer.index = index;
+        }
+      }
+    });
+  }
+  return {
+    ...attributes,
+    state: {
+      ...attributes.state,
+      datasourceStates: {
+        ...attributes.state.datasourceStates,
+        [datasourceId]: datasourceState,
+      },
+    },
+  };
+};
 
 /**
  * Returns the suggestion updated with external visualization state for ES|QL charts
@@ -27,10 +97,7 @@ export function mergeSuggestionWithVisContext({
   visAttributes: TypedLensByValueInput['attributes'];
   context: VisualizeFieldContext | VisualizeEditorContext;
 }): Suggestion {
-  if (
-    visAttributes.visualizationType !== suggestion.visualizationId ||
-    !('textBasedColumns' in context)
-  ) {
+  if (!('textBasedColumns' in context)) {
     return suggestion;
   }
 
@@ -41,29 +108,40 @@ export function mergeSuggestionWithVisContext({
   if (!datasourceId || datasourceId === 'formBased') {
     return suggestion;
   }
+
   const datasourceState = Object.assign({}, visAttributes.state.datasourceStates[datasourceId]);
 
-  // should be based on same columns
-  if (
-    !datasourceState?.layers ||
-    Object.values(datasourceState?.layers).some(
-      (layer) =>
-        layer.columns?.some(
-          (c: { fieldName: string }) =>
-            !context?.textBasedColumns?.find((col) => col.id === c.fieldName)
-        ) || layer.columns?.length !== context?.textBasedColumns?.length
-    )
-  ) {
+  // Verify that all layer columns exist in the query result
+  if (!datasourceState?.layers) {
     return suggestion;
   }
+
+  const hasInvalidColumns = Object.values(datasourceState.layers).some((layer) =>
+    layer.columns?.some(
+      (column: { fieldName: string }) =>
+        !context?.textBasedColumns?.find((contextCol) => contextCol.id === column.fieldName)
+    )
+  );
+
+  if (hasInvalidColumns) {
+    return suggestion;
+  }
+
   const layerIds = Object.keys(datasourceState.layers);
+
+  // Update attributes with current query if available
+  const updatedVisAttributes =
+    context && 'query' in context && context.query
+      ? injectESQLQueryIntoLensLayers(visAttributes, context.query, suggestion)
+      : visAttributes;
+
   try {
     return {
-      title: visAttributes.title,
-      visualizationId: visAttributes.visualizationType,
-      visualizationState: visAttributes.state.visualization,
+      title: updatedVisAttributes.title,
+      visualizationId: updatedVisAttributes.visualizationType,
+      visualizationState: updatedVisAttributes.state.visualization,
       keptLayerIds: layerIds,
-      datasourceState,
+      datasourceState: updatedVisAttributes.state.datasourceStates[datasourceId],
       datasourceId,
       columns: suggestion.columns,
       changeType: suggestion.changeType,
