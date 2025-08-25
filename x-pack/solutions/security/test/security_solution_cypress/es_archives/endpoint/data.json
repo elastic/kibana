@@ -59,7 +59,7 @@
         "name": "siem-kibana"
       },
       "agent": {
-        "type": "auditbeat",
+        "type": "endpoint",
         "version": "8.1.0",
         "ephemeral_id": "f6df090f-656a-4a79-a6a1-0c8671c9752d",
         "id": "0ebd469b-c164-4734-00e6-96d018098dc7",

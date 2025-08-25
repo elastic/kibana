@@ -11,8 +11,9 @@ import type {
   IndexAutocompleteItem,
   InferenceEndpointAutocompleteItem,
   ESQLControlVariable,
+  ESQLSourceResult,
 } from '@kbn/esql-types';
-import { ESQLLicenseType } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation } from '../types';
 import type { FieldType, SupportedDataType } from '../definitions/types';
@@ -126,7 +127,7 @@ export interface ICommandCallbacks {
   getByType?: GetColumnsByTypeFn;
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
   getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
 }
 
 export interface ICommandContext {
@@ -228,20 +229,13 @@ export enum Location {
   COMPLETION = 'completion',
 }
 
-export interface ESQLSourceResult {
-  name: string;
-  hidden: boolean;
-  title?: string;
-  dataStreams?: Array<{ name: string; title?: string }>;
-  type?: string;
-}
-
 const commandOptionNameToLocation: Record<string, Location> = {
   eval: Location.EVAL,
   where: Location.WHERE,
   row: Location.ROW,
   sort: Location.SORT,
   stats: Location.STATS,
+  inlinestats: Location.STATS,
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,

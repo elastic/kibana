@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { Writable } from '@kbn/utility-types';
 import type { MapAttributes } from '../content_management';
-import { JoinDescriptor, LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
+import type { JoinDescriptor, LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 import { SOURCE_TYPES } from '../constants';
 
 // enforce type property on joins. It's possible older saved-objects do not have this correctly filled in
@@ -33,15 +34,17 @@ export function addTypeToTermJoin({ attributes }: { attributes: MapAttributes })
     if (!vectorLayer.joins) {
       return;
     }
-    vectorLayer.joins.forEach((join: Partial<JoinDescriptor>) => {
-      if (!join.right) {
-        return;
-      }
+    vectorLayer.joins.forEach(
+      (join: Partial<JoinDescriptor & { right: Writable<JoinDescriptor['right']> }>) => {
+        if (!join.right) {
+          return;
+        }
 
-      if (typeof join.right.type === 'undefined') {
-        join.right.type = SOURCE_TYPES.ES_TERM_SOURCE;
+        if (typeof join.right.type === 'undefined') {
+          join.right.type = SOURCE_TYPES.ES_TERM_SOURCE;
+        }
       }
-    });
+    );
   });
 
   return {

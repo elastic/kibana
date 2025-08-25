@@ -9,7 +9,7 @@
 
 import dedent from 'dedent';
 
-import { TemplateContext } from '../template_context';
+import type { TemplateContext } from '../template_context';
 
 function generator({
   imageTag,

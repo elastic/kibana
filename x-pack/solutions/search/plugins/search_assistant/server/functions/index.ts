@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RegistrationCallback } from '@kbn/observability-ai-assistant-plugin/server';
+import type { RegistrationCallback } from '@kbn/observability-ai-assistant-plugin/server';
 
 export const registerFunctions: (isServerless: boolean) => RegistrationCallback =
   (isServerless: boolean) =>

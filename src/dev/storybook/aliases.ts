@@ -37,6 +37,7 @@ export const storybookAliases = {
     'src/platform/plugins/shared/chart_expressions/expression_partition_vis/.storybook',
   expression_tagcloud:
     'src/platform/plugins/shared/chart_expressions/expression_tagcloud/.storybook',
+  failure_store_modal: 'x-pack/platform/packages/shared/kbn-failure-store-modal/.storybook',
   fleet: 'x-pack/platform/plugins/shared/fleet/.storybook',
   grouping: 'src/platform/packages/shared/kbn-grouping/.storybook',
   home: 'src/platform/plugins/shared/home/.storybook',

@@ -1991,6 +1991,21 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.GENERIC_ENTITY_INDEX_ENRICH_POLICY",
+        "type": "string",
+        "tags": [],
+        "label": "GENERIC_ENTITY_INDEX_ENRICH_POLICY",
+        "description": [],
+        "signature": [
+          "\"entity_store_field_retention_generic_<space>_v1.0.0\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.IndexStatus",
         "type": "Type",
         "tags": [],

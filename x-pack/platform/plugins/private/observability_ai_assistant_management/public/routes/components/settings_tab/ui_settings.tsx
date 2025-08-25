@@ -17,7 +17,7 @@ import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
-import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
+import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
 import { useEditableSettings } from '../../../hooks/use_editable_settings';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';

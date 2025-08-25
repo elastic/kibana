@@ -33,23 +33,23 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { ConfigurationFormItems } from './configuration/configuration_form_items';
 import * as LABELS from '../translations';
 import { CHAT_COMPLETION_TASK_TYPE, DEFAULT_TASK_TYPE, internalProviderKeys } from '../constants';
-import { Config, ConfigEntryView } from '../types/types';
-import { TaskTypeOption } from '../utils/helpers';
+import type { Config, ConfigEntryView } from '../types/types';
+import type { TaskTypeOption } from '../utils/helpers';
+import { buttonCss, accordionCss } from './inference_service_form_fields';
 
-// Custom trigger button CSS
-const buttonCss = css`
-  &:hover {
-    text-decoration: none;
-  }
-`;
+const taskTypeConfig = {
+  validations: [
+    {
+      validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Task type')),
+      isBlocking: true,
+    },
+  ],
+};
 
 interface AdditionalOptionsFieldsProps {
   config: Config;
-  optionalProviderFormFields: ConfigEntryView[];
-  onSetProviderConfigEntry: (key: string, value: unknown) => Promise<void>;
   onTaskTypeOptionsSelect: (taskType: string, provider?: string) => void;
   selectedTaskType?: string;
   taskTypeOptions: TaskTypeOption[];
@@ -60,9 +60,7 @@ interface AdditionalOptionsFieldsProps {
 export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = ({
   config,
   taskTypeOptions,
-  optionalProviderFormFields,
   selectedTaskType,
-  onSetProviderConfigEntry,
   onTaskTypeOptionsSelect,
   isEdit,
   allowContextWindowLength,
@@ -161,17 +159,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             />
           </EuiText>
           <EuiSpacer size="m" />
-          <UseField
-            path="config.taskType"
-            config={{
-              validations: [
-                {
-                  validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Task type')),
-                  isBlocking: true,
-                },
-              ],
-            }}
-          >
+          <UseField path="config.taskType" config={taskTypeConfig}>
             {(field) => {
               const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -216,13 +204,9 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
   return (
     <EuiAccordion
       id="inferenceAdditionalOptions"
-      data-test-subj="inference-endpoint-additional-options"
+      data-test-subj="inference-endpoint-additional-settings"
       buttonProps={{ css: buttonCss }}
-      css={css`
-        .euiAccordion__triggerWrapper {
-          display: inline-flex;
-        }
-      `}
+      css={accordionCss}
       element="fieldset"
       arrowDisplay="right"
       arrowProps={{
@@ -231,51 +215,21 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
       buttonElement="button"
       borders="none"
       buttonContent={
-        <EuiTextColor color={euiTheme.colors.primary}>
+        <EuiTextColor
+          color={euiTheme.colors.primary}
+          data-test-subj="inference-endpoint-additional-settings-button"
+        >
           <FormattedMessage
-            id="xpack.inferenceEndpointUICommon.components.additionalInfo.additionalOptionsLabel"
-            defaultMessage="Additional options"
+            id="xpack.inferenceEndpointUICommon.components.additionalInfo.additionalSettingsLabel"
+            defaultMessage="Additional settings"
           />
         </EuiTextColor>
       }
-      initialIsOpen={true}
+      initialIsOpen={false}
     >
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
-        {optionalProviderFormFields.length > 0 ? (
-          <>
-            {internalProviderKeys.includes(config.provider) ? null : (
-              <>
-                <EuiTitle size="xxs" data-test-subj="provider-optional-settings-label">
-                  <h4>
-                    <FormattedMessage
-                      id="xpack.inferenceEndpointUICommon.components.additionalInfo.providerOptionalSettingsLabel"
-                      defaultMessage="Service settings"
-                    />
-                  </h4>
-                </EuiTitle>
-                <EuiText color="subdued" size="xs">
-                  <FormattedMessage
-                    id="xpack.inferenceEndpointUICommon.components.additionalInfo.providerOptionalSettingsHelpLabel"
-                    defaultMessage="Configure the inference provider. These settings are optional provider settings."
-                  />
-                </EuiText>
-                <EuiSpacer size="m" />
-              </>
-            )}
-            <ConfigurationFormItems
-              isLoading={false}
-              direction="column"
-              items={optionalProviderFormFields}
-              setConfigEntry={onSetProviderConfigEntry}
-              isEdit={isEdit}
-            />
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
-
         {contextWindowLengthSettings}
-
         {taskTypeSettings}
         <EuiSpacer size="m" />
         <EuiTitle size="xxs" data-test-subj="task-type-details-label">

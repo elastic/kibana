@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
-import { EsWorkflowStepExecution, ExecutionStatus, WorkflowYaml } from '@kbn/workflows';
-import { Handle, Node, Position } from '@xyflow/react';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
+import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
+import type { Node } from '@xyflow/react';
+import { Handle, Position } from '@xyflow/react';
 import React from 'react';
-import { flowNodeTypes, NodeType } from '../lib/get_layouted_nodes_and_edges';
+import type { NodeType } from '../lib/get_layouted_nodes_and_edges';
+import { flowNodeTypes } from '../lib/get_layouted_nodes_and_edges';
 
-const triggerNodeTypes = [
-  'triggers.elastic.manual',
-  'triggers.elastic.detectionRule',
-  'triggers.elastic.scheduled',
-];
+const triggerNodeTypes = ['manual', 'alert', 'scheduled'];
 const actionNodeTypes = ['console', 'slack', 'delay', 'inference.unified_inference'];
 
 function getNodeIcon(nodeType: string, color: string) {
@@ -32,11 +32,11 @@ function getNodeIcon(nodeType: string, color: string) {
       return <EuiIcon type="logoSlack" color={color} />;
     case 'inference.unified_inference':
       return <EuiIcon type="sparkles" color={color} />;
-    case 'triggers.elastic.manual':
+    case 'manual':
       return <EuiIcon type="accessibility" color={color} />;
-    case 'triggers.elastic.detectionRule':
+    case 'alert':
       return <EuiIcon type="warning" color={color} />;
-    case 'triggers.elastic.scheduled':
+    case 'scheduled':
       return <EuiIcon type="clock" color={color} />;
     case 'delay':
       return <EuiIcon type="clock" color={color} />;
@@ -137,7 +137,7 @@ export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
         css={{
           width: '100%',
           height: '100%',
-          backgroundColor: '#fff',
+          backgroundColor: euiTheme.colors.backgroundBasePlain,
           borderRadius: '8px',
           padding: '8px 12px',
           boxShadow:
@@ -163,7 +163,7 @@ export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
                   css={{
                     fontSize: '14px',
                     fontWeight: 'bold',
-                    color: '#374151',
+                    color: euiTheme.colors.textHeading,
                     lineHeight: '1.25',
                     display: 'flex',
                     alignItems: 'center',
@@ -182,7 +182,7 @@ export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
                 <div
                   css={{
                     fontSize: '12px',
-                    color: '#6b7280',
+                    color: euiTheme.colors.textSubdued,
                   }}
                 >
                   {node.data.stepType}

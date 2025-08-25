@@ -7,22 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PureComponent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { PureComponent } from 'react';
 import { isEmpty } from 'lodash';
 import classNames from 'classnames';
 
 import useRafState from 'react-use/lib/useRafState';
-import { UseEuiTheme, euiShadow, euiShadowFlat } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiShadow, euiShadowFlat } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EmotionStyles, useMemoCss } from '../use_memo_css';
-import { QuerySuggestion } from '../autocomplete';
+import type { EmotionStyles } from '../use_memo_css';
+import { useMemoCss } from '../use_memo_css';
+import type { QuerySuggestion } from '../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 import {
   SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE,
   SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET,
   SUGGESTIONS_LIST_REQUIRED_WIDTH,
 } from './constants';
-import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
+import type { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 import { onRaf, shallowEqual } from '../utils';
 
 interface SuggestionsComponentProps {

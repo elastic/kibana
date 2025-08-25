@@ -6,8 +6,8 @@
  */
 
 import pLimit from 'p-limit';
-import { ToolingLog } from '@kbn/tooling-log';
-import { ScriptInferenceClient } from '../util/kibana_client';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ScriptInferenceClient } from '../util/kibana_client';
 import type { ExtractionOutput } from './extract_doc_entries';
 import { createDocumentationPagePrompt, rewriteFunctionPagePrompt } from './prompts';
 import { bindOutput } from './utils/output_executor';

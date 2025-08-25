@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
-import { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
+import type { ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useRef, useEffect, useCallback } from 'react';

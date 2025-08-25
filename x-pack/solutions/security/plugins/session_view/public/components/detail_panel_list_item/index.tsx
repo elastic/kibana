@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, ReactNode } from 'react';
-import { EuiText, EuiTextProps } from '@elastic/eui';
-import { CSSObject } from '@emotion/react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
+import type { EuiTextProps } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
+import type { CSSObject } from '@emotion/react';
 import { useStyles } from './styles';
 
 interface DetailPanelListItemDeps {

@@ -8,11 +8,13 @@
 import { FIELDS_BROWSER_BTN } from '../../../screens/rule_details';
 import { getNewRule } from '../../../objects/rule';
 import {
+  ALERT_RENDERER_HOST_NAME,
   EVENT_SUMMARY_ALERT_RENDERER_CONTENT,
   EVENT_SUMMARY_COLUMN,
-  ALERT_RENDERER_HOST_NAME,
-  SHOW_TOP_N_HEADER,
   HOVER_ACTIONS,
+  SHOW_TOP_N_DROPDOWN,
+  SHOW_TOP_N_DROPDOWN_ALERT_OPTION,
+  SHOW_TOP_N_HEADER,
 } from '../../../screens/alerts';
 import {
   DATA_GRID_COLUMN_ORDER_BTN,
@@ -43,20 +45,18 @@ describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
     waitForAlerts();
   });
 
-  // skipping as this test is also failing on main (see https://github.com/elastic/security-team/issues/10874)
-  // Looks like the height of the new table isn't being properly calculated. Making the table full screen shows the rows appropriately
-  it.skip('should show Event Summary column correctly', () => {
+  it('should show Event Summary column correctly', () => {
     cy.get(EVENT_SUMMARY_COLUMN).should('be.visible');
     cy.get(EVENT_SUMMARY_ALERT_RENDERER_CONTENT).should('be.visible');
   });
 
-  // skipping as this test is also failing on main (see https://github.com/elastic/security-team/issues/10874)
-  // Looks like the height of the new table isn't being properly calculated. Making the table full screen shows the rows appropriately
-  it.skip('should show TopN in Event Summary column', () => {
+  it('should show TopN in Event Summary column', () => {
     showHoverActionsEventRenderedView(ALERT_RENDERER_HOST_NAME);
     cy.get(HOVER_ACTIONS.SHOW_TOP).trigger('click');
-    cy.get(TOP_N_ALERT_HISTOGRAM).should('be.visible');
     cy.get(SHOW_TOP_N_HEADER).first().should('have.text', 'Top host.name');
+    cy.get(SHOW_TOP_N_DROPDOWN).click();
+    cy.get(SHOW_TOP_N_DROPDOWN_ALERT_OPTION).click();
+    cy.get(TOP_N_ALERT_HISTOGRAM).should('be.visible');
     cy.get(XY_CHART).should('be.visible');
     cy.get(TOP_N_CONTAINER_CLOSE_BTN).trigger('click');
     cy.get(XY_CHART).should('not.exist');

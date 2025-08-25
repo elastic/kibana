@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { tagsCacheMock } from '../services/tags/tags_cache.mock';
 import { createTagReference, createSavedObject, createTag } from '../../common/test_utils';

@@ -10,10 +10,8 @@
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { CreatedObject, SavedObject } from '@kbn/core-saved-objects-server';
-import {
-  LEGACY_URL_ALIAS_TYPE,
-  LegacyUrlAlias,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { extractErrors } from './extract_errors';
 import type { ImportStateMap } from './types';

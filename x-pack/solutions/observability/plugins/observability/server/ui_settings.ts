@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core/types';
+import type { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 import { observabilityFeatureId, ProgressiveLoadingQuality } from '../common';
 import {
@@ -32,6 +32,7 @@ import {
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
   searchExcludedDataTiers,
+  enableDiagnosticMode,
 } from '../common/ui_settings_keys';
 
 /**
@@ -415,6 +416,21 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     schema: schema.arrayOf(
       schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
     ),
+    requiresPageReload: false,
+    solutionViews: ['classic', 'oblt'],
+    technicalPreview: true,
+  },
+  [enableDiagnosticMode]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableDiagnosticMode', {
+      defaultMessage: 'Enable diagnostic mode',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableDiagnosticModeDescription', {
+      defaultMessage:
+        'Enable diagnostic mode for debugging and troubleshooting capabilities. Currently available only in the Service map view.',
+    }),
+    schema: schema.boolean(),
     requiresPageReload: false,
     solutionViews: ['classic', 'oblt'],
     technicalPreview: true,
