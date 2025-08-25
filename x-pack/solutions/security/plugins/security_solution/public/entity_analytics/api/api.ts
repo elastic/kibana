@@ -6,6 +6,10 @@
  */
 
 import { useMemo } from 'react';
+import type {
+  RiskScoreSummaryPostRequestBody,
+  RiskScoreSummaryPostResponse,
+} from '../../../common/api/entity_analytics/risk_engine/risk_score_summary.gen';
 import type { PrivMonPrivilegesResponse } from '../../../common/api/entity_analytics/privilege_monitoring/privileges.gen';
 import type {
   CreateEntitySourceResponse,
@@ -459,7 +463,15 @@ export const useEntityAnalyticsRoutes = () => {
         body: JSON.stringify(params),
       });
 
+    const fetchRiskScoreAiSummary = (params: RiskScoreSummaryPostRequestBody) =>
+      http.fetch<RiskScoreSummaryPostResponse>('/internal/risk_score/risk_summary', {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+
     return {
+      fetchRiskScoreAiSummary,
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
       initRiskEngine,
