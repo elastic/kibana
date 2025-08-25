@@ -35,7 +35,7 @@ export interface Props {
   updateCustomIcons: (customIcons: CustomIcon[]) => void;
   deleteCustomIcon: (symbolId: string) => void;
   zoom: number;
-  ariaLabelId: string;
+  ariaLabelId?: string;
 }
 
 export function MapSettingsPanel({

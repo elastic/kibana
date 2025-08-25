@@ -42,7 +42,7 @@ export interface Props {
   selectedLayer?: ILayer;
   updateSourceProps: (layerId: string, sourcePropChanges: OnSourceChangeArgs[]) => Promise<void>;
   updateStyleDescriptor: (styleDescriptor: StyleDescriptor) => void;
-  ariaLabelId: string;
+  ariaLabelId?: string;
 }
 
 interface State {

@@ -52,7 +52,7 @@ export interface Props {
   enableEditMode: () => void;
   autoOpenLayerWizardId: string;
   clearAutoOpenLayerWizardId: () => void;
-  ariaLabelId: string;
+  ariaLabelId?: string;
 }
 
 interface State {
