@@ -499,6 +499,7 @@ export class ClusterClientAdapter<
         ? { sort: sort.map((s) => ({ [s.sort_field]: { order: s.sort_order } })) as estypes.Sort }
         : {}),
     };
+
     try {
       const {
         hits: { hits, total },

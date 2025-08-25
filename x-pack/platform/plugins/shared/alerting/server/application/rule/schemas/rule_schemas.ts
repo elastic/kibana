@@ -150,6 +150,12 @@ export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
 
+export const lastGapAutoFillSchema = schema.object({
+  checkTime: schema.string(),
+  status: schema.oneOf([schema.literal('success'), schema.literal('failure')]),
+  errorMessage: schema.maybe(schema.string()),
+});
+
 /**
  * Unsanitized (domain) rule schema, used by internal rules clients
  */
@@ -191,6 +197,7 @@ export const ruleDomainSchema = schema.object({
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
   artifacts: schema.maybe(artifactsSchema),
+  lastGapAutoFill: schema.maybe(schema.nullable(lastGapAutoFillSchema)),
 });
 
 /**
@@ -233,4 +240,5 @@ export const ruleSchema = schema.object({
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
   artifacts: schema.maybe(artifactsSchema),
+  lastGapAutoFill: schema.maybe(schema.nullable(lastGapAutoFillSchema)),
 });
