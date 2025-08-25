@@ -31,14 +31,14 @@
       "ruleRegistry",
       "files",
       "contentManagement",
-      "uiActions"
+      "uiActions",
+      "spaces"
     ],
     "optionalPlugins": [
       "cloud",
       "home",
       "taskManager",
       "usageCollection",
-      "spaces",
       "serverless"
     ],
     "requiredBundles": [

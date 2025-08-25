@@ -114,6 +114,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
+        spaceId: 'default',
         'service.name': ['test-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',
@@ -177,6 +178,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
+        spaceId: 'default',
         'service.name': ['test-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',
@@ -238,6 +240,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
+        spaceId: 'default',
         'service.name': ['test-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',

@@ -18,6 +18,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { CasePlugin } from './plugin';
 import type { ConfigType } from './config';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
@@ -66,6 +67,7 @@ describe('Cases Plugin', () => {
       licensing: licensingMock.createSetup(),
       usageCollection: usageCollectionPluginMock.createSetupContract(),
       features: featuresPluginMock.createSetup(),
+      spaces: spacesMock.createSetup(),
     };
 
     pluginsStart = {
@@ -77,6 +79,7 @@ describe('Cases Plugin', () => {
       notifications: notificationsMock.createStart(),
       ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
       taskManager: taskManagerMock.createStart(),
+      spaces: spacesMock.createStart(),
     };
   });
 

@@ -36,6 +36,7 @@ describe('getAllForOwners', () => {
     const args: GetAllForOwnersArgs = {
       owners: ['observability'],
       context: {
+        spaceId: 'default',
         'service.name': ['my-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',

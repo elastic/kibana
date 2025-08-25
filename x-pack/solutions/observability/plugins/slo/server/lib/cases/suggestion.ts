@@ -32,7 +32,7 @@ export function getSLOByServiceName(
           description: 'Suggest SLOs operating on the same service.',
         },
         handler: async ({
-          context: { 'service.name': serviceNames },
+          context: { 'service.name': serviceNames, spaceId },
           request,
         }: {
           context: SuggestionContext;
@@ -61,6 +61,9 @@ export function getSLOByServiceName(
                     terms: {
                       'slo.groupings.service.name': serviceNames,
                     },
+                  },
+                  {
+                    term: { spaceId },
                   },
                 ],
                 must_not: [

@@ -14,37 +14,41 @@ jest.mock('../../../common', () => ({
   },
 }));
 
-const createCoreStartMock = (hits: Record<string, unknown>[] = []): CoreStart =>
-  ({
-    elasticsearch: {
-      client: {
-        asScoped: jest.fn().mockReturnValue({
-          asCurrentUser: {
-            search: jest.fn().mockResolvedValue({ hits: { hits } }),
-          },
-        }),
-      },
-    },
-  } as unknown as CoreStart);
+const mockSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
 
 const loggerMock = { debug: jest.fn() } as unknown as Logger;
+const coreStart = {
+  elasticsearch: {
+    client: {
+      asScoped: jest.fn().mockReturnValue({
+        asCurrentUser: {
+          search: (...args: unknown[]) => mockSearch(...args),
+        },
+      }),
+    },
+  },
+} as unknown as CoreStart;
 
 describe('getSLOByServiceName', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('returns empty suggestions when service.name is missing', async () => {
-    const coreStart = createCoreStartMock();
     const handler = getSLOByServiceName(coreStart, loggerMock).handlers.searchSLOByServiceName
       .handler;
 
     const res = await handler({
-      context: {},
+      context: { spaceId: 'default' },
       request: {} as KibanaRequest,
     });
 
+    expect(mockSearch).not.toHaveBeenCalled();
     expect(res).toEqual({ suggestions: [] });
   });
 
   test('builds a suggestion for each returned SLO', async () => {
-    const coreStart = createCoreStartMock([
+    const hits = [
       {
         _source: {
           slo: {
@@ -67,14 +71,47 @@ describe('getSLOByServiceName', () => {
           status: 'VIOLATED',
         },
       },
-    ]);
+    ];
+    mockSearch.mockResolvedValue({ hits: { hits } });
 
     const handler = getSLOByServiceName(coreStart, loggerMock).handlers.searchSLOByServiceName
       .handler;
 
     const res = await handler({
-      context: { 'service.name': ['synth-service-0', 'synth-service-1'] },
+      context: { spaceId: 'default', 'service.name': ['synth-service-0', 'synth-service-1'] },
       request: {} as KibanaRequest,
+    });
+
+    expect(mockSearch).toHaveBeenCalledWith({
+      index: '.slo-observability.summary-v3*',
+      size: 10,
+      sort: [{ summaryUpdatedAt: { order: 'desc' } }],
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: { 'slo.groupings.service.name': ['synth-service-0', 'synth-service-1'] },
+            },
+            { term: { spaceId: 'default' } },
+          ],
+          must_not: [
+            {
+              term: {
+                status: {
+                  value: 'NO_DATA',
+                },
+              },
+            },
+            {
+              term: {
+                isTempDoc: {
+                  value: true,
+                },
+              },
+            },
+          ],
+        },
+      },
     });
 
     expect(res.suggestions).toHaveLength(2);
