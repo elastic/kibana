@@ -20,6 +20,7 @@ export const connectorTypes: string[] = [
   '.servicenow-sir',
   '.servicenow-itom',
   '.jira',
+  '.jira-service-management',
   '.teams',
   '.torq',
   '.opsgenie',

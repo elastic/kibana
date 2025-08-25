@@ -72,6 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.index',
         'actions:.inference',
         'actions:.jira',
+        'actions:.jira-service-management',
         'actions:.microsoft_defender_endpoint',
         'actions:.observability-ai-assistant',
         'actions:.opsgenie',
