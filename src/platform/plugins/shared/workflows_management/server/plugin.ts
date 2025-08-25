@@ -130,33 +130,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           },
         },
       });
-
-      // plugins.taskManager.registerTaskDefinitions({
-      //   'workflow:run': {
-      //     title: 'Run Workflow',
-      //     description: 'Executes a workflow immediately',
-      //     timeout: '5m',
-      //     maxAttempts: 1,
-      //     createTaskRunner: ({ taskInstance }) => {
-      //       return {
-      //         async run() {
-      //           // Get dependencies when the task actually runs
-      //           const [, pluginsStart] = await core.getStartServices();
-      //           const { workflowsExecutionEngine } =
-      //             pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
-
-      //           return workflowsExecutionEngine.executeWorkflow(
-      //             taskInstance.params.workflow,
-      //             taskInstance.params.context
-      //           );
-      //         },
-      //         async cancel() {
-      //           // Cancel function for the task
-      //         },
-      //       };
-      //     },
-      //   },
-      // });
     }
 
     // Register saved object types
