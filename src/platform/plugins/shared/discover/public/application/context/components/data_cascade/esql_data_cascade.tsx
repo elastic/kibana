@@ -24,8 +24,8 @@ import {
   EuiText,
   EuiBadge,
   EuiBasicTable,
-  EuiButtonIcon,
   type HorizontalAlignment,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -157,7 +157,6 @@ export const ESQLDataCascade = ({
       })}
     >
       <DataCascade<ESQLDataGroupNode>
-        stickyGroupRoot
         data={initialData.map((datum) => ({
           id: datum.id,
           ...datum.flattened,
@@ -224,24 +223,12 @@ export const ESQLDataCascade = ({
             })
           }
           rowHeaderActions={({ row }) => [
-            <EuiButtonIcon
-              aria-label={i18n.translate('discover.esql_data_cascade.grouping.expand', {
-                defaultMessage: 'Expand {groupValue} group',
-                values: {
-                  groupValue: row.original[cascadeGroups[row.depth]] as string,
-                },
-              })}
-              iconType="expand"
-            />,
-            <EuiButtonIcon
-              aria-label={i18n.translate('discover.esql_data_cascade.grouping.more_options', {
-                defaultMessage: 'Select More options',
-                values: {
-                  groupValue: row.original[cascadeGroups[row.depth]] as string,
-                },
-              })}
-              iconType="boxesVertical"
-            />,
+            <EuiButtonEmpty iconSide="right" iconType="arrowDown" flush="right">
+              <FormattedMessage
+                id="discover.esql_data_cascade.row.action.take_action"
+                defaultMessage="Take Action"
+              />
+            </EuiButtonEmpty>,
           ]}
           onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
         >

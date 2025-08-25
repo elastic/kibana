@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowCellPrimitiveProps } from '../types';
 import {
   getCascadeRowNodePath,
@@ -21,6 +21,7 @@ import {
   useDataCascadeState,
   useDataCascadeActions,
 } from '../../../store_provider';
+import { cascadeRowCellStyles } from './cascade_row_cell.styles';
 
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({
   children,
@@ -28,10 +29,13 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   row,
   size,
 }: CascadeRowCellPrimitiveProps<G, L>) {
+  const { euiTheme } = useEuiTheme();
   const { leafNodes, currentGroupByColumns } = useDataCascadeState<G, L>();
   const actions = useDataCascadeActions<G, L>();
   const hasPendingRequest = useRef<boolean>(false);
   const [isPendingRowLeafDataFetch, setRowLeafDataFetch] = useState<boolean>(false);
+
+  const styles = useMemo(() => cascadeRowCellStyles(euiTheme), [euiTheme]);
 
   const nodePath = useMemo(
     () => getCascadeRowNodePath(currentGroupByColumns, row),
@@ -102,7 +106,12 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          React.createElement(children, { data: leafData })
+          <div className={styles.cellWrapper}>
+            {React.createElement(children, {
+              data: leafData,
+              key: leafCacheKey,
+            })}
+          </div>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

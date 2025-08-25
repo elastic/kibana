@@ -9,7 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
 import { flexRender } from '../../../lib/core/table';
 import {
@@ -24,6 +31,7 @@ import {
   rootRowAttribute,
   childRowAttribute,
 } from './cascade_row.styles';
+import { CascadeRowActions } from './components/cascade_row_actions';
 
 /**
  * @internal
@@ -91,13 +99,15 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     });
   }, [fetchGroupNodeData]);
 
-  const onCascadeRowClick = useCallback(() => {
+  const onCascadeRowToggle = useCallback(() => {
     rowToggleFn();
     if (isGroupNode) {
       // can expand here denotes it still has some nesting, hence we need to fetch the data for the sub-rows
       fetchCascadeRowGroupNodeData();
     }
   }, [fetchCascadeRowGroupNodeData, isGroupNode, rowToggleFn]);
+
+  const onCascadeRowExpand = useCallback(() => {}, []);
 
   /**
    * @description required ARIA props to ensure proper accessibility tree gets generated
@@ -143,14 +153,42 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
             justifyContent="spaceBetween"
           >
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType={isRowExpanded ? 'arrowDown' : 'arrowRight'}
-                onClick={onCascadeRowClick}
-                aria-label={i18n.translate('sharedUXPackages.dataCascade.removeRowButtonLabel', {
-                  defaultMessage: 'expand row',
-                })}
-                data-test-subj={`expand-row-${rowInstance.id}-button`}
-              />
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem>
+                  <EuiCheckbox
+                    id={'dataCascadeSelectRowCheckbox'}
+                    indeterminate={rowInstance.getIsSomeSelected()}
+                    checked={rowInstance.getIsSelected()}
+                    onChange={rowInstance.getToggleSelectedHandler()}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonIcon
+                    iconType="expand"
+                    onClick={onCascadeRowExpand}
+                    aria-label={i18n.translate(
+                      'sharedUXPackages.dataCascade.expandRowButtonLabel',
+                      {
+                        defaultMessage: 'expand row',
+                      }
+                    )}
+                    data-test-subj={`expand-row-${rowInstance.id}-button`}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonIcon
+                    iconType={isRowExpanded ? 'arrowUp' : 'arrowDown'}
+                    onClick={onCascadeRowToggle}
+                    aria-label={i18n.translate(
+                      'sharedUXPackages.dataCascade.toggleRowButtonLabel',
+                      {
+                        defaultMessage: 'toggle row',
+                      }
+                    )}
+                    data-test-subj={`toggle-row-${rowInstance.id}-button`}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup direction="row">
@@ -164,13 +202,15 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
                     alignItems="center"
                     justifyContent="flexEnd"
                   >
-                    {rowHeaderMetaSlots?.({ row: rowInstance })
-                      .map((metaSlot, index) => (
+                    <React.Fragment>
+                      {rowHeaderMetaSlots?.({ row: rowInstance }).map((metaSlot, index) => (
                         <EuiFlexItem css={styles.rowHeaderSlotWrapper} key={index} grow>
                           {metaSlot}
                         </EuiFlexItem>
-                      ))
-                      .concat([
+                      ))}
+                    </React.Fragment>
+                    <React.Fragment>
+                      {!!rowHeaderActions?.length && (
                         <EuiFlexItem
                           key="actions"
                           css={[
@@ -181,13 +221,13 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
                           ]}
                           grow={false}
                         >
-                          <EuiFlexGroup alignItems="center" key="cascade-row-actions">
-                            {rowHeaderActions?.({ row: rowInstance }).map((action, index) => (
-                              <EuiFlexItem key={index}>{action}</EuiFlexItem>
-                            ))}
-                          </EuiFlexGroup>
-                        </EuiFlexItem>,
-                      ])}
+                          <CascadeRowActions<G>
+                            rowHeaderActions={rowHeaderActions}
+                            rowInstance={rowInstance}
+                          />
+                        </EuiFlexItem>
+                      )}
+                    </React.Fragment>
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -196,12 +236,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
         </EuiFlexItem>
         <React.Fragment>
           {!isGroupNode && isRowExpanded && hasAllParentsExpanded && (
-            <EuiFlexItem
-              role="gridcell"
-              style={{
-                padding: `0 calc(${euiTheme.size[size]} * ${rowInstance.depth})`,
-              }}
-            >
+            <EuiFlexItem role="gridcell">
               {rowInstance.getVisibleCells().map((cell) => (
                 <React.Fragment key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
