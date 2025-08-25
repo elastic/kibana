@@ -10,6 +10,7 @@ import { EuiCallOut, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { ConversationSharedState, getSharedIcon } from '../share_conversation/utils';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
   SHARED_CONVERSATION_CALLOUT,
@@ -37,14 +38,14 @@ const SharedConversationOwnerCalloutComponent: React.FC<{
     () =>
       isGloballyShared
         ? {
-            icon: 'globe',
+            icon: getSharedIcon(ConversationSharedState.Shared),
             title: i18n.CONVERSATION_SHARED_TITLE,
             description: i18n.OWNERSHIP_CALLOUT,
           }
         : {
-            icon: 'users',
-            title: i18n.CONVERSATION_SHARED_SELECTED_TITLE,
-            description: i18n.OWNERSHIP_CALLOUT_SELECTED,
+            icon: getSharedIcon(ConversationSharedState.Restricted),
+            title: i18n.CONVERSATION_RESTRICTED_TITLE,
+            description: i18n.OWNERSHIP_CALLOUT_RESTRICTED,
           },
     [isGloballyShared]
   );

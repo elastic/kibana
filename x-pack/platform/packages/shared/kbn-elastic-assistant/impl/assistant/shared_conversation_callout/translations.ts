@@ -14,7 +14,7 @@ export const CONVERSATION_SHARED_TITLE = i18n.translate(
   }
 );
 
-export const CONVERSATION_SHARED_SELECTED_TITLE = i18n.translate(
+export const CONVERSATION_RESTRICTED_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.ownership.titleSelected',
   {
     defaultMessage: 'This conversation is shared with selected team members.',
@@ -35,7 +35,7 @@ export const OWNERSHIP_CALLOUT = i18n.translate(
   }
 );
 
-export const OWNERSHIP_CALLOUT_SELECTED = i18n.translate(
+export const OWNERSHIP_CALLOUT_RESTRICTED = i18n.translate(
   'xpack.elasticAssistant.assistant.ownership.calloutSelected',
   {
     defaultMessage: `Any further edits you do to this conversation will be shared with the selected team members.`,

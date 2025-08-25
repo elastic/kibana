@@ -61,7 +61,7 @@ const SharedConversationCalloutComponent: React.FC<Props> = ({
     () => getSharedIcon(getConversationSharedState(selectedConversation)),
     [selectedConversation]
   );
-  return localStorageShowConversation ? (
+  return localStorageShowConversation && selectedConversation ? (
     <EuiCallOut
       data-test-subj="sharedConversationCallout"
       css={css`
