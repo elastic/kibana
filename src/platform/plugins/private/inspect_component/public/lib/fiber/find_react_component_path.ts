@@ -10,7 +10,7 @@
 import type { DebugSource, ReactFiberNode } from './types';
 import { COMPONENT_PATH_IGNORED_TYPES } from '../constants';
 import { getFiberType } from './get_fiber_type';
-import { getFiberFromDomNode } from './get_fiber_from_dom_node';
+import { getFiberFromDomElement } from './get_fiber_from_dom_element';
 
 /**
  * Result of {@link findReactComponentPath}.
@@ -23,19 +23,20 @@ interface FindReactComponentPathResult {
 }
 
 /**
- * Find React component path from DOM node.
- * @param {HTMLElement | SVGElement} node The DOM node.
+ * Find React component path from DOM element.
+ * @param {HTMLElement | SVGElement} domElement The DOM element.
  * @return {FindReactComponentPathResult | undefined} The component path and source component name, or undefined if it cannot be determined.
  */
 export const findReactComponentPath = (
-  node: HTMLElement | SVGElement
+  domElement: HTMLElement | SVGElement
 ): FindReactComponentPathResult | undefined => {
   const path: string[] = [];
   let source: DebugSource | null | undefined;
-  let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;
+  let current: HTMLElement | null =
+    domElement instanceof HTMLElement ? domElement : domElement.parentElement;
 
   while (current && source !== null) {
-    const fiber = getFiberFromDomNode(current);
+    const fiber = getFiberFromDomElement(current);
 
     if (fiber) {
       let fiberCursor: ReactFiberNode | null | undefined = fiber;
@@ -82,8 +83,8 @@ export const findReactComponentPath = (
   let restItems = rest;
 
   /**
-   * React will always include the literal DOM node rendered, even if it's a component, (e.g. EuiPanel > div).
-   * Trim off the DOM node if we have a literal component.
+   * React will always include the literal DOM element rendered, even if it's a component, (e.g. EuiPanel > div).
+   * Trim off the DOM element if we have a literal component.
    */
   if (rest.length > 1 && /^[a-z]/.test(rest[rest.length - 1])) {
     restItems = rest.slice(0, -1);

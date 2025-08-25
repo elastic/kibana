@@ -7,70 +7,70 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getFiberFromDomNode } from './get_fiber_from_dom_node';
+import { getFiberFromDomElement } from './get_fiber_from_dom_element';
 import type { ReactFiberNode } from './types';
 
-describe('getFiberFromDomNode', () => {
-  it('should return undefined when node is null', () => {
-    expect(getFiberFromDomNode(null)).toBeUndefined();
+describe('getFiberFromDomElement', () => {
+  it('should return null when DOM element is null', () => {
+    expect(getFiberFromDomElement(null)).toBeNull();
   });
 
-  it('should return undefined when node does not have a fiber key', () => {
-    const mockNode = document.createElement('div');
+  it('should return undefined when DOM element does not have a fiber key', () => {
+    const mockElement = document.createElement('div');
 
-    const result = getFiberFromDomNode(mockNode);
+    const result = getFiberFromDomElement(mockElement);
 
     expect(result).toBeUndefined();
   });
 
   it('should return the fiber node when fiber key exists', () => {
     const mockFiberNode = { tag: 5, type: 'div' } as unknown as ReactFiberNode;
-    const mockNode = document.createElement('div');
+    const mockElement = document.createElement('div');
 
     const fiberKey = '__reactFiber$abcdef';
-    Object.defineProperty(mockNode, fiberKey, {
+    Object.defineProperty(mockElement, fiberKey, {
       value: mockFiberNode,
       enumerable: true,
     });
 
-    const result = getFiberFromDomNode(mockNode);
+    const result = getFiberFromDomElement(mockElement);
 
     expect(result).toBe(mockFiberNode);
   });
 
   it('should find the correct fiber key when multiple keys exist', () => {
     const mockFiberNode = { tag: 5, type: 'div' } as unknown as ReactFiberNode;
-    const mockNode = document.createElement('div');
+    const mockElement = document.createElement('div');
 
-    Object.defineProperty(mockNode, 'regularProperty', {
+    Object.defineProperty(mockElement, 'regularProperty', {
       value: 'test',
       enumerable: true,
     });
 
     const fiberKey = '__reactFiber$abcdef';
 
-    Object.defineProperty(mockNode, fiberKey, {
+    Object.defineProperty(mockElement, fiberKey, {
       value: mockFiberNode,
       enumerable: true,
     });
 
-    const result = getFiberFromDomNode(mockNode);
+    const result = getFiberFromDomElement(mockElement);
 
     expect(result).toBe(mockFiberNode);
   });
 
   it('should work with SVG elements', () => {
     const mockFiberNode = { tag: 5, type: 'circle' } as unknown as ReactFiberNode;
-    const mockNode = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    const mockElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 
     const fiberKey = '__reactFiber$abcdef';
 
-    Object.defineProperty(mockNode, fiberKey, {
+    Object.defineProperty(mockElement, fiberKey, {
       value: mockFiberNode,
       enumerable: true,
     });
 
-    const result = getFiberFromDomNode(mockNode);
+    const result = getFiberFromDomElement(mockElement);
 
     expect(result).toBe(mockFiberNode);
   });

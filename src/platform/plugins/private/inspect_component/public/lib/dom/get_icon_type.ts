@@ -10,14 +10,14 @@
 import { EUI_DATA_ICON_TYPE } from '../constants';
 
 /**
- * Get the EUI icon type from a DOM node.
+ * Get the EUI icon type from a DOM element.
  * It checks if the target is an SVG element or looks for an SVG child element.
- * @param {HTMLElement | SVGElement} target The DOM node to check.
+ * @param {HTMLElement | SVGElement} domElement The DOM element to check.
  * @return {string | undefined} The EUI icon type, or undefined if not found.
  */
-export const getIconType = (target: HTMLElement | SVGElement): string | undefined => {
-  if (target instanceof SVGElement) {
-    return target.getAttribute(EUI_DATA_ICON_TYPE) || undefined;
+export const getIconType = (domElement: HTMLElement | SVGElement): string | undefined => {
+  if (domElement instanceof SVGElement) {
+    return domElement.getAttribute(EUI_DATA_ICON_TYPE) || undefined;
   }
-  return target.querySelector('svg')?.getAttribute(EUI_DATA_ICON_TYPE) || undefined;
+  return domElement.querySelector('svg')?.getAttribute(EUI_DATA_ICON_TYPE) || undefined;
 };

@@ -8,18 +8,19 @@
  */
 
 import type { DebugSource, ReactFiberNode } from './types';
-import { getFiberFromDomNode } from './get_fiber_from_dom_node';
+import { getFiberFromDomElement } from './get_fiber_from_dom_element';
 
 /**
  * Find the nearest _debugSource by traversing up the DOM and React Fiber tree.
- * @param {HTMLElement | SVGElement} node The DOM node.
+ * @param {HTMLElement | SVGElement} domElement The DOM element.
  * @return {DebugSource | undefined} The debug source information, or undefined if not found.
  */
-export const findDebugSource = (node: HTMLElement | SVGElement): DebugSource | undefined => {
-  let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;
+export const findDebugSource = (domElement: HTMLElement | SVGElement): DebugSource | undefined => {
+  let current: HTMLElement | null =
+    domElement instanceof HTMLElement ? domElement : domElement.parentElement;
 
   while (current) {
-    const fiber = getFiberFromDomNode(current);
+    const fiber = getFiberFromDomElement(current);
     if (fiber) {
       let fiberCursor: ReactFiberNode | null | undefined = fiber;
       while (fiberCursor) {

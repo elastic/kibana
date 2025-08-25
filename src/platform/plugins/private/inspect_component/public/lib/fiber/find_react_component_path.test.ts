@@ -8,16 +8,16 @@
  */
 
 import { findReactComponentPath } from './find_react_component_path';
-import { getFiberFromDomNode } from './get_fiber_from_dom_node';
+import { getFiberFromDomElement } from './get_fiber_from_dom_element';
 import { getFiberType } from './get_fiber_type';
 import type { DebugSource, ReactFiberNode } from './types';
 import { COMPONENT_PATH_IGNORED_TYPES } from '../constants';
 
-jest.mock('./get_fiber_from_dom_node');
+jest.mock('./get_fiber_from_dom_element');
 jest.mock('./get_fiber_type');
 
-const mockGetFiberFromDomNode = getFiberFromDomNode as jest.MockedFunction<
-  typeof getFiberFromDomNode
+const mockGetFiberFromDomElement = getFiberFromDomElement as jest.MockedFunction<
+  typeof getFiberFromDomElement
 >;
 const mockGetFiberType = getFiberType as jest.MockedFunction<typeof getFiberType>;
 
@@ -26,19 +26,19 @@ describe('findReactComponentPath', () => {
     jest.clearAllMocks();
   });
 
-  it('should return undefined when no components are found', () => {
-    mockGetFiberFromDomNode.mockReturnValue(undefined);
+  it('should return null when no components are found', () => {
+    mockGetFiberFromDomElement.mockReturnValue(null);
 
     const element = document.createElement('div');
     const result = findReactComponentPath(element);
 
     expect(result).toBeUndefined();
-    expect(mockGetFiberFromDomNode).toHaveBeenCalledWith(element);
+    expect(mockGetFiberFromDomElement).toHaveBeenCalledWith(element);
   });
 
   it('should return single component when only one is found', () => {
     const mockFiber = { _debugOwner: null, _debugSource: undefined } as ReactFiberNode;
-    mockGetFiberFromDomNode.mockReturnValue(mockFiber);
+    mockGetFiberFromDomElement.mockReturnValue(mockFiber);
     mockGetFiberType.mockReturnValue('TestComponent');
 
     const element = document.createElement('div');
@@ -60,7 +60,7 @@ describe('findReactComponentPath', () => {
       _debugOwner: mockChildFiber,
       _debugSource: debugSource,
     } as ReactFiberNode;
-    mockGetFiberFromDomNode.mockReturnValue(mockParentFiber);
+    mockGetFiberFromDomElement.mockReturnValue(mockParentFiber);
 
     mockGetFiberType.mockReturnValueOnce('ParentComponent').mockReturnValueOnce('ChildComponent');
 
@@ -82,7 +82,7 @@ describe('findReactComponentPath', () => {
       _debugOwner: mockChildFiber,
       _debugSource: undefined,
     } as ReactFiberNode;
-    mockGetFiberFromDomNode.mockReturnValue(mockParentFiber);
+    mockGetFiberFromDomElement.mockReturnValue(mockParentFiber);
 
     mockGetFiberType
       .mockReturnValueOnce(COMPONENT_PATH_IGNORED_TYPES[0] + 'Wrapper')
@@ -99,7 +99,7 @@ describe('findReactComponentPath', () => {
 
   it('should handle SVG elements correctly', () => {
     const mockFiber = { _debugOwner: null, _debugSource: undefined } as ReactFiberNode;
-    mockGetFiberFromDomNode.mockReturnValue(mockFiber);
+    mockGetFiberFromDomElement.mockReturnValue(mockFiber);
     mockGetFiberType.mockReturnValue('SVGComponent');
 
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -112,10 +112,10 @@ describe('findReactComponentPath', () => {
       sourceComponent: 'SVGComponent',
       path: null,
     });
-    expect(mockGetFiberFromDomNode).toHaveBeenCalledWith(parentElement);
+    expect(mockGetFiberFromDomElement).toHaveBeenCalledWith(parentElement);
   });
 
-  it('should trim DOM nodes at the end of the path', () => {
+  it('should trim DOM elements at the end of the path', () => {
     const mockButtonFiber = {
       _debugOwner: null,
       _debugSource: undefined,
@@ -129,7 +129,7 @@ describe('findReactComponentPath', () => {
       _debugSource: undefined,
     } as ReactFiberNode;
 
-    mockGetFiberFromDomNode.mockReturnValue(mockParentFiber);
+    mockGetFiberFromDomElement.mockReturnValue(mockParentFiber);
 
     mockGetFiberType
       .mockReturnValueOnce('ParentComponent')

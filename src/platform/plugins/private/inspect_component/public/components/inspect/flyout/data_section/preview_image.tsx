@@ -13,9 +13,10 @@ import { EuiImage, EuiSkeletonRectangle, EuiCard, EuiSpacer } from '@elastic/eui
 import domtoimage from 'dom-to-image-more';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { findDomElementForUserComponent } from '../../../../lib/fiber/find_dom_element_for_user_component';
 
 interface Props {
-  element: HTMLElement | SVGElement;
+  targetDomElement?: HTMLElement | SVGElement;
 }
 
 const PREVIEW_ALT_TEXT = i18n.translate(
@@ -35,7 +36,7 @@ const PREVIEW_BADGE_LABEL = i18n.translate(
 /**
  * The PreviewImage component is responsible for rendering a preview of a given HTML or SVG element.
  */
-export const PreviewImage = ({ element }: Props) => {
+export const PreviewImage = ({ targetDomElement }: Props) => {
   const [screenshot, setScreenshot] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,7 +55,7 @@ export const PreviewImage = ({ element }: Props) => {
   `;
 
   useEffect(() => {
-    const generateScreenshot = async () => {
+    const generateScreenshot = async (element: HTMLElement) => {
       try {
         if (element instanceof SVGElement) {
           const svgData = new XMLSerializer().serializeToString(element);
@@ -87,9 +88,19 @@ export const PreviewImage = ({ element }: Props) => {
       }
     };
 
-    generateScreenshot();
-  }, [element]);
+    if (targetDomElement) {
+      const domElement = findDomElementForUserComponent(targetDomElement);
+      if (!domElement) {
+        setIsLoading(false);
+        return;
+      }
+      generateScreenshot(domElement);
+    }
+  }, [targetDomElement]);
 
+  if (!targetDomElement) {
+    return null;
+  }
   return (
     <>
       <EuiSkeletonRectangle

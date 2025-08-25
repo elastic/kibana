@@ -22,7 +22,8 @@ export interface DebugSource {
 }
 
 /**
- * The subset of React Fiber node properties we care about.
+ * The subset of React Fiber node properties we care about, extended
+ * for DOM traversal and fiber tree navigation.
  */
 export interface ReactFiberNode {
   /** The type of the React element represented by this Fiber node. */
@@ -33,4 +34,12 @@ export interface ReactFiberNode {
   _debugSource?: DebugSource;
   /** The Fiber node that created this node. */
   _debugOwner?: ReactFiberNode | null;
+  /** The actual DOM element for host components, or component instance for class components. */
+  stateNode?: HTMLElement | null;
+  /** First child Fiber node. */
+  child?: ReactFiberNode | null;
+  /** Next sibling Fiber node. */
+  sibling?: ReactFiberNode | null;
+  /** Parent Fiber node. */
+  return?: ReactFiberNode | null;
 }
