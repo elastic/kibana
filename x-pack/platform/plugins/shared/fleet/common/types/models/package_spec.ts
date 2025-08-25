@@ -60,6 +60,7 @@ export type PackageSpecCategory =
   | 'analytics_engine'
   | 'application_observability'
   | 'app_search'
+  | 'asset_inventory'
   | 'auditd'
   | 'authentication'
   | 'aws'
