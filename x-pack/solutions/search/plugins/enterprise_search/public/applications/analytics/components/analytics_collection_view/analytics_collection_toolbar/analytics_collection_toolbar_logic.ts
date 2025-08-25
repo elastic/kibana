@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { RefreshInterval } from '@kbn/data-plugin/common';
+import type { RefreshInterval } from '@kbn/data-plugin/common';
 
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 
 import { KibanaLogic } from '../../../../shared/kibana/kibana_logic';
 

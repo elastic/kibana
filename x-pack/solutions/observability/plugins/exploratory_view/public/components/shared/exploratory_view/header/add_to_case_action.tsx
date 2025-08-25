@@ -10,14 +10,11 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import {
-  CasesDeepLinkId,
-  generateCaseViewPath,
-  GetAllCasesSelectorModalProps,
-} from '@kbn/cases-plugin/public';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { GetAllCasesSelectorModalProps } from '@kbn/cases-plugin/public';
+import { CasesDeepLinkId, generateCaseViewPath } from '@kbn/cases-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
-import { ObservabilityAppServices } from '../../../../application/types';
+import type { ObservabilityAppServices } from '../../../../application/types';
 import { useAddToCase } from '../hooks/use_add_to_case';
 import { parseRelativeDate } from '../components/date_range_picker';
 

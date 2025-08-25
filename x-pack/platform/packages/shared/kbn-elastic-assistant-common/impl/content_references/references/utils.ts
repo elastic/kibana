@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { BaseMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
 import { knowledgeBaseReference } from '.';
-import { ContentReference, DocumentEntry } from '../../schemas';
-import { ContentReferenceBlock, ContentReferenceId, ContentReferencesStore } from '../types';
+import type { ContentReference, DocumentEntry } from '../../schemas';
+import type { ContentReferenceBlock, ContentReferenceId, ContentReferencesStore } from '../types';
 
 /**
  * Returns "Arid2" from "{reference(Arid2)}"

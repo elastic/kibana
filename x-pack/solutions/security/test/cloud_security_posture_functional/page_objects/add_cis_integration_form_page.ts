@@ -34,9 +34,9 @@ const TEST_IDS = {
   AGENTLESS_STATUS_BADGE: 'agentlessStatusBadge',
   CREATE_AGENT_POLICY_NAME_FIELD: 'createAgentPolicyNameField',
   CREDENTIALS_JSON_SECRET_PANEL: 'credentials_json_secret_panel_test_id',
-  GCP_POLICY_OPTION_TEST_ID: 'cisGcpTestId',
-  AWS_POLICY_OPTION_TEST_ID: 'cisAwsTestId',
-  AZURE_POLICY_OPTION_TEST_ID: 'cisAzureTestId',
+  GCP_POLICY_OPTION_TEST_ID: 'cloudSetupGcpTestId',
+  AWS_POLICY_OPTION_TEST_ID: 'cloudSetupAwsTestId',
+  AZURE_POLICY_OPTION_TEST_ID: 'cloudSetupAzureTestId',
   INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID: 'agentPolicyFormSystemMonitoringCheckbox',
 } as const;
 

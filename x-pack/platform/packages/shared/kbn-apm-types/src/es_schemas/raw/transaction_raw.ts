@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { APMBaseDoc } from './apm_base_doc';
-import { Cloud } from './fields/cloud';
-import { Container } from './fields/container';
-import { EventOutcome } from './fields/event_outcome';
-import { Host } from './fields/host';
-import { Http } from './fields/http';
-import { Kubernetes } from './fields/kubernetes';
-import { Page } from './fields/page';
-import { Process } from './fields/process';
-import { Service } from './fields/service';
-import { TimestampUs } from './fields/timestamp_us';
-import { Url } from './fields/url';
-import { User } from './fields/user';
-import { UserAgent } from './fields/user_agent';
-import { Faas } from './fields/faas';
-import { SpanLink } from './fields/span_links';
-import { Server } from './fields/server';
+import type { APMBaseDoc } from './apm_base_doc';
+import type { Cloud } from './fields/cloud';
+import type { Container } from './fields/container';
+import type { EventOutcome } from './fields/event_outcome';
+import type { Host } from './fields/host';
+import type { Http } from './fields/http';
+import type { Kubernetes } from './fields/kubernetes';
+import type { Page } from './fields/page';
+import type { Process } from './fields/process';
+import type { Service } from './fields/service';
+import type { TimestampUs } from './fields/timestamp_us';
+import type { Url } from './fields/url';
+import type { User } from './fields/user';
+import type { UserAgent } from './fields/user_agent';
+import type { Faas } from './fields/faas';
+import type { SpanLink } from './fields/span_links';
+import type { Server } from './fields/server';
 
 interface Processor {
   name: 'transaction';

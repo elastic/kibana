@@ -7,8 +7,8 @@
 
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { getConversationWithNewMessage } from './get_conversation_with_new_message';
-import { ConversationResponse, Message, Replacements } from '@kbn/elastic-assistant-common';
-import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
+import type { ConversationResponse, Message, Replacements } from '@kbn/elastic-assistant-common';
+import type { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import type { Logger } from '@kbn/logging';
 
 describe('getConversationWithNewMessage', () => {

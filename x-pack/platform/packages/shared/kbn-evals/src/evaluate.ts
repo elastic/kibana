@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import { times } from 'lodash';
+import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import {
   getConnectorModel,
   type BoundInferenceClient,
-  InferenceConnectorType,
   getConnectorFamily,
   getConnectorProvider,
-  InferenceConnector,
-  Model,
 } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
 import { test as base } from '@kbn/scout';
-import { HttpHandler } from '@kbn/core/public';
-import { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import type { HttpHandler } from '@kbn/core/public';
+import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getPhoenixConfig } from './utils/get_phoenix_config';
 import { KibanaPhoenixClient } from './kibana_phoenix_client/client';
-import { EvaluationTestOptions } from './config/create_playwright_eval_config';
+import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
-import { DefaultEvaluators } from './types';
+import type { DefaultEvaluators } from './types';
 import { reportModelScore } from './utils/report_model_score';
 import { createConnectorFixture } from './utils/create_connector_fixture';
+import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 
 /**
  * Test type for evaluations. Loads an inference client and a
@@ -40,6 +40,7 @@ export const evaluate = base.extend<
     fetch: HttpHandler;
     connector: AvailableConnectorWithId;
     evaluationConnector: AvailableConnectorWithId;
+    repetitions: number;
   }
 >({
   fetch: [
@@ -92,7 +93,7 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   phoenixClient: [
-    async ({ log, connector }, use) => {
+    async ({ log, connector, repetitions }, use) => {
       const config = getPhoenixConfig();
 
       const inferenceConnector: InferenceConnector = {
@@ -118,13 +119,26 @@ export const evaluate = base.extend<
         runId: process.env.TEST_RUN_ID!,
       });
 
-      await use(phoenixClient);
+      // Temporary: wraps Phoenix client to handle repetitions until native support is added (see https://github.com/Arize-ai/phoenix/issues/3584)
+      const repetitionAwarePhoenixClient = {
+        ...phoenixClient,
+        runExperiment: async (experimentConfig: any, evaluators: any) => {
+          const experiments = await Promise.all(
+            times(repetitions, () => phoenixClient.runExperiment(experimentConfig, evaluators))
+          );
+
+          return repetitions === 1 ? experiments[0] : experiments;
+        },
+      } as KibanaPhoenixClient;
+
+      await use(repetitionAwarePhoenixClient);
 
       await reportModelScore({
         phoenixClient,
         log,
         model,
         experiments: await phoenixClient.getRanExperiments(),
+        repetitions,
       });
     },
     {
@@ -145,11 +159,25 @@ export const evaluate = base.extend<
             log,
           });
         },
+        correctnessAnalysis: () => {
+          return createCorrectnessAnalysisEvaluator({
+            inferenceClient: evaluatorInferenceClient,
+            log,
+          });
+        },
       };
       await use(evaluators);
     },
     {
       scope: 'worker',
     },
+  ],
+  repetitions: [
+    async ({}, use, testInfo) => {
+      // Get repetitions from test options (set in playwright config)
+      const repetitions = (testInfo.project.use as any).repetitions || 1;
+      await use(repetitions);
+    },
+    { scope: 'worker' },
   ],
 });

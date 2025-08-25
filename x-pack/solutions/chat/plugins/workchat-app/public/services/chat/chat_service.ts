@@ -8,9 +8,10 @@
 import { defer, catchError, throwError } from 'rxjs';
 import { isSSEError } from '@kbn/sse-utils';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import { HttpSetup } from '@kbn/core/public';
-import { ChatEvent } from '../../../common/chat_events';
-import { createChatError, ChatErrorCode } from '../../../common/errors';
+import type { HttpSetup } from '@kbn/core/public';
+import type { ChatEvent } from '../../../common/chat_events';
+import type { ChatErrorCode } from '../../../common/errors';
+import { createChatError } from '../../../common/errors';
 
 interface ConverseParams {
   conversationId?: string;

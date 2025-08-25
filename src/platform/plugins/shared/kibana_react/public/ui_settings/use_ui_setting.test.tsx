@@ -12,7 +12,7 @@ import * as ReactDOM from 'react-dom';
 import { act, Simulate } from 'react-dom/test-utils';
 import { useGlobalUiSetting$, useUiSetting$ } from './use_ui_setting';
 import { createKibanaReactContext } from '../context';
-import { KibanaServices } from '../context/types';
+import type { KibanaServices } from '../context/types';
 import { Subject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import useObservable from 'react-use/lib/useObservable';

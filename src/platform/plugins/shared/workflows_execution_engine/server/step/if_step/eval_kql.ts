@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromKueryExpression, KueryNode } from '@kbn/es-query';
-import {
-  KqlLiteralNode,
-  KQL_NODE_TYPE_WILDCARD,
-  KqlFunctionNode,
-} from '@kbn/es-query/src/kuery/node_types';
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression } from '@kbn/es-query';
+import type { KqlLiteralNode, KqlFunctionNode } from '@kbn/es-query/src/kuery/node_types';
+import { KQL_NODE_TYPE_WILDCARD } from '@kbn/es-query/src/kuery/node_types';
 
 export function evaluateKql(kql: string, context: Record<string, any>): boolean {
   const kqlAst = fromKueryExpression(kql);

@@ -9,7 +9,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useConversationsUpdater } from './use_conversations_updater';
 import { useAssistantContext } from '../../../assistant_context';
 import { bulkUpdateConversations } from '../../api/conversations/bulk_update_actions_conversations';
-import { Conversation } from '../../../..';
+import type { Conversation } from '../../../..';
 import { deleteAllConversations } from '../../api/conversations/delete_all_conversations';
 
 jest.mock('../../../assistant_context');

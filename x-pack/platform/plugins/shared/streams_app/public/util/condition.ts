@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import {
-  isAlwaysCondition,
-  type AlwaysCondition,
-  type BinaryFilterCondition,
-  type Condition,
-  NeverCondition,
-} from '@kbn/streams-schema';
+import type { AlwaysCondition, Condition, ShorthandBinaryFilterCondition } from '@kbn/streamlang';
+import { ALWAYS_CONDITION, isAlwaysCondition } from '@kbn/streamlang';
+
 import { cloneDeep, isEqual } from 'lodash';
 
-export const EMPTY_EQUALS_CONDITION: BinaryFilterCondition = Object.freeze({
+export const EMPTY_EQUALS_CONDITION: ShorthandBinaryFilterCondition = Object.freeze({
   field: '',
-  operator: 'eq',
-  value: '',
+  eq: '',
 });
-
-export const ALWAYS_CONDITION: AlwaysCondition = Object.freeze({ always: {} });
-
-export const NEVER_CONDITION: NeverCondition = Object.freeze({ never: {} });
 
 export function alwaysToEmptyEquals<T extends Condition>(condition: T): Exclude<T, AlwaysCondition>;
 

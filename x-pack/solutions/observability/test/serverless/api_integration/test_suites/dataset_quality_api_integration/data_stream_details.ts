@@ -8,8 +8,8 @@
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import type { InternalRequestHeader, RoleCredentials } from '../../services';
-import { DatasetQualityApiClient } from './common/dataset_quality_api_supertest';
-import { DatasetQualityFtrContextProvider } from './common/services';
+import type { DatasetQualityApiClient } from './common/dataset_quality_api_supertest';
+import type { DatasetQualityFtrContextProvider } from './common/services';
 
 export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const datasetQualityApiClient: DatasetQualityApiClient = getService('datasetQualityApiClient');
@@ -46,8 +46,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/194599
-  describe.skip('gets the data stream details', () => {
+  describe('gets the data stream details', () => {
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
 

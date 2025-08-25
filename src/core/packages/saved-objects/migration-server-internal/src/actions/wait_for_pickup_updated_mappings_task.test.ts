@@ -12,7 +12,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
 import * as Either from 'fp-ts/Either';
-import { TaskCompletedWithRetriableError } from './wait_for_task';
+import type { TaskCompletedWithRetriableError } from './wait_for_task';
 
 jest.mock('./catch_retryable_es_client_errors', () => {
   const { catchRetryableEsClientErrors: actualImplementation } = jest.requireActual(

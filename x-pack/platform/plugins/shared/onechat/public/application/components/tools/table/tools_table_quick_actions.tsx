@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React from 'react';
 import { useToolsActions } from '../../../context/tools_table_provider';
 import { labels } from '../../../utils/i18n';

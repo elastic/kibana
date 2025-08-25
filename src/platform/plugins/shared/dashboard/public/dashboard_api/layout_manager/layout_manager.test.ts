@@ -8,14 +8,14 @@
  */
 
 import { initializeLayoutManager } from './layout_manager';
-import { initializeTrackPanel } from '../track_panel';
+import type { initializeTrackPanel } from '../track_panel';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import {
+import type {
   HasLibraryTransforms,
   PhaseEvent,
   PublishingSubject,
-  initializeTitleManager,
 } from '@kbn/presentation-publishing';
+import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('uuid', () => ({

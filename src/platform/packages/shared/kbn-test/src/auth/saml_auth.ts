@@ -9,15 +9,17 @@
 
 import { setTimeout as delay } from 'timers/promises';
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
-import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosResponse } from 'axios';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
 import util from 'util';
 import * as cheerio from 'cheerio';
-import { Cookie, parse as parseCookie } from 'tough-cookie';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
 import { randomInt } from 'crypto';
 import { isValidUrl } from './helper';
-import {
+import type {
   CloudSamlSessionParams,
   CreateSamlSessionParams,
   LocalSamlSessionParams,
@@ -229,9 +231,19 @@ export const createSAMLResponse = async (params: SAMLResponseValueParams) => {
     value = $('input').attr('value');
   } catch (err) {
     if (err.isAxiosError) {
-      log.error(
-        `Create SAML Response failed with status code ${err?.response?.status}: ${err?.response?.data}`
-      );
+      const requestId = err?.response?.headers?.['x-request-id'] || 'not found';
+      const responseStatus = err?.response?.status;
+      let logMessage = `Create SAML Response (${location}) failed with status code ${responseStatus}: ${err?.response?.data}`;
+
+      // If response is 3XX, also log the Location header from response
+      if (responseStatus >= 300 && responseStatus < 400) {
+        const locationHeader = err?.response?.headers?.location || 'not found';
+        logMessage += `.\nLocation: ${locationHeader}`;
+      }
+
+      logMessage += `.\nX-Request-ID: ${requestId}`;
+
+      log.error(logMessage);
     }
   }
 

@@ -8,8 +8,8 @@ import expect from '@kbn/expect';
 import type { GetBenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { createPackagePolicy } from '../helper';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { RoleCredentials } from '../../../services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
