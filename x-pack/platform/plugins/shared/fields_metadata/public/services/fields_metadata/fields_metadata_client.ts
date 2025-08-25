@@ -39,7 +39,14 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
       return this.cache.get(params) as FindFieldsMetadataResponsePayload;
     }
 
-    const query = findFieldsMetadataRequestQueryRT.encode(params);
+    // Convert FieldName[] to string[] for the encoder
+    // - TypeScript interface allows FieldName[] (which can include numbers)
+    // - Runtime encoder expects string[] only
+    const encodableParams = {
+      ...params,
+      fieldNames: params.fieldNames?.map((name) => String(name)),
+    };
+    const query = findFieldsMetadataRequestQueryRT.encode(encodableParams);
 
     const response = await this.http
       .get(FIND_FIELDS_METADATA_URL, { query, version: '1' })
