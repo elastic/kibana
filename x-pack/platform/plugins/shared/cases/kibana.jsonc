@@ -19,6 +19,7 @@
       "alerting",
       "actions",
       "data",
+      "dataViews",
       "embeddable",
       "lens",
       "licensing",
@@ -45,7 +46,8 @@
       "esUiShared",
       "kibanaReact",
       "kibanaUtils",
-      "savedObjectsFinder"
+      "savedObjectsFinder",
+      "unifiedDocViewer"
     ],
     "extraPublicDirs": [
       "common",

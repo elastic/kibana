@@ -95,7 +95,12 @@
     "@kbn/dev-utils",
     "@kbn/tooling-log",
     "@kbn/page-attachment-schema",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/data-views-plugin",
+    "@kbn/unified-data-table",
+    "@kbn/cell-actions",
+    "@kbn/discover-utils",
+    "@kbn/unified-doc-viewer-plugin"
   ],
   "exclude": ["target/**/*"]
 }
