@@ -46,5 +46,7 @@ export function resolverFields(schema: ResolverSchema): Array<{ field: string }>
   if (schema.agentId) {
     filter.push({ field: schema.agentId });
   }
+  filter.push({ field: 'process.command_line' });
+
   return filter;
 }
