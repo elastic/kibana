@@ -11,10 +11,10 @@ import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { findAttackDiscoveriesRoute } from './find_attack_discoveries';
 import * as helpers from '../../helpers';
 import { hasReadAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
+import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 import { getMockAttackDiscoveryFindResponse } from '../../../__mocks__/attack_discovery_find_response';
 import { mockAuthenticatedUser } from '../../../__mocks__/mock_authenticated_user';
 import { requestContextMock } from '../../../__mocks__/request_context';
-import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 
 const mockAttackDiscoveryFindResponse = getMockAttackDiscoveryFindResponse();
 

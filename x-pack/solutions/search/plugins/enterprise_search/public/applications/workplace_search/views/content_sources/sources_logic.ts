@@ -96,9 +96,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     contentSources: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeSources: (_, { contentSources }) => contentSources,
-        // @ts-expect-error upgrade typescript v5.1.6
         onSetSearchability: (contentSources, { sourceId, searchable }) =>
           updateSourcesOnToggle(contentSources, sourceId, searchable),
       },
@@ -106,9 +104,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     privateContentSources: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeSources: (_, { privateContentSources }) => privateContentSources || [],
-        // @ts-expect-error upgrade typescript v5.1.6
         onSetSearchability: (privateContentSources, { sourceId, searchable }) =>
           updateSourcesOnToggle(privateContentSources, sourceId, searchable),
       },
@@ -116,14 +112,12 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     serviceTypes: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeSources: (_, { serviceTypes }) => serviceTypes || [],
       },
     ],
     permissionsModal: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setAddedSource: (_, data) => data,
         resetPermissionsModal: () => null,
       },
@@ -138,10 +132,8 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     serverStatuses: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setServerSourceStatuses: (_, sources) => {
           const serverStatuses = {} as ServerStatuses;
-          // @ts-expect-error upgrade typescript v5.1.6
           sources.forEach((source) => {
             serverStatuses[source.id as string] = source.status.status;
           });

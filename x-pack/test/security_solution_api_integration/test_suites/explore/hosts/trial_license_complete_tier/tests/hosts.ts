@@ -39,11 +39,14 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     before(async () => {
       supertest = await utils.createSuperTest();
       bsearch = await utils.createBsearch();
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts');
     });
 
     after(
-      async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts')
+      async () =>
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts'
+        )
     );
 
     it('Make sure that we get Hosts Table data', async () => {

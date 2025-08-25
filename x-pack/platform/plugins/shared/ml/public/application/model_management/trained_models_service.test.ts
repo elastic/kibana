@@ -39,6 +39,7 @@ describe('TrainedModelsService', () => {
       task_parameters: {
         model_id: 'deploy-model',
         model_bytes: 1000,
+        // @ts-expect-error typescript upgrade v5.4.5
         allocation_id: 'test-allocation',
         priority: 'normal',
         number_of_allocations: 1,
@@ -47,7 +48,6 @@ describe('TrainedModelsService', () => {
         deployment_id: 'my-deployment-id',
         cache_size: '1mb',
       },
-      // @ts-expect-error `node_count` not available in the types. Is it removed?
       node_count: 1,
       routing_table: {
         'node-1': {

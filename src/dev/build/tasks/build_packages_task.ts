@@ -10,15 +10,15 @@
 import Path from 'path';
 import * as Fsp from 'fs/promises';
 
-import { runBazel } from '@kbn/bazel-runner';
 import * as Peggy from '@kbn/peggy';
 import { asyncForEach } from '@kbn/std';
-import { withFastAsyncTransform, TransformConfig } from '@kbn/babel-transform';
+import { TransformConfig, withFastAsyncTransform } from '@kbn/babel-transform';
 import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
-
-import { Task, scanCopy, write, deleteAll } from '../lib';
+import { REPO_ROOT } from '@kbn/repo-info';
+import execa, { StdioOption } from 'execa';
+import { deleteAll, scanCopy, Task, write } from '../lib';
 import type { Record } from '../lib/fs_records';
 import { fleetBuildTasks } from './fleet';
 
@@ -100,25 +100,16 @@ function excludeDirsByName(name: string) {
 }
 
 export const BuildPackages: Task = {
-  description: 'Building distributable versions of Bazel packages',
+  description: 'Building distributable versions of packages',
   async run(config, log, build) {
     const packages = config.getDistPackagesFromRepo();
     const pkgFileMap = new PackageFileMap(packages, await getRepoFiles());
 
-    log.info(`Building Bazel artifacts which are necessary for the build`);
-    await runBazel(
-      [
-        'build',
-        '//src/platform/packages/private/kbn-ui-shared-deps-npm:shared_built_assets',
-        '//src/platform/packages/private/kbn-ui-shared-deps-src:shared_built_assets',
-        '//src/platform/packages/shared/kbn-monaco:target_workers',
-        '--show_result=1',
-        '--define=dist=true',
-      ],
-      {
-        logPrefix: '   │     ',
-      }
-    );
+    log.info(`Building webpack artifacts which are necessary for the build`);
+    await buildWebpackBundles({
+      quiet: false,
+      dist: true,
+    });
 
     const transformConfig: TransformConfig = {
       disableSourceMaps: true,
@@ -227,7 +218,8 @@ export const BuildPackages: Task = {
           ) {
             await scanCopy({
               source: config.resolveFromRepo(
-                'bazel-bin',
+                'target',
+                'build',
                 pkg.normalizedRepoRelativeDir,
                 'shared_built_assets'
               ),
@@ -240,7 +232,8 @@ export const BuildPackages: Task = {
           if (pkg.manifest.id === '@kbn/monaco') {
             await scanCopy({
               source: config.resolveFromRepo(
-                'bazel-bin',
+                'target',
+                'build',
                 pkg.normalizedRepoRelativeDir,
                 'target_workers'
               ),
@@ -313,3 +306,12 @@ export const BuildPackages: Task = {
     });
   },
 };
+
+export async function buildWebpackBundles({ quiet, dist }: { quiet: boolean; dist: boolean }) {
+  const options = [quiet ? ['--quiet'] : [], dist ? ['--dist'] : []].flat();
+  const stdio: StdioOption[] = quiet
+    ? ['ignore', 'pipe', 'pipe']
+    : ['inherit', 'inherit', 'inherit'];
+
+  await execa('yarn', ['kbn', 'build-shared', ...options], { cwd: REPO_ROOT, stdio });
+}

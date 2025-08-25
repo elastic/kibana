@@ -74,14 +74,18 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load(auditbeatArchivePath);
       await executeSetupModuleRequest({ module: mlModuleName, rspCode: 200, supertest });
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
+      );
       await deleteAllAnomalies(log, es);
       await stopAllManualRuns(supertest);
     });
 
     after(async () => {
       await esArchiver.load(auditbeatArchivePath);
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
+      );
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -132,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
         const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlertsAfter2ManualRuns.hits.hits.length).toEqual(2);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits).toHaveLength(2);
       });
 
       it('does not alert if the manual run overlaps with a previous scheduled rule execution', async () => {

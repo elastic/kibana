@@ -20,6 +20,7 @@ import {
   installPrebuiltRulesPackageByVersion,
 } from '../../../../../utils';
 import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
+import { MOCK_PKG_VERSION } from '../../configs/edge_cases/ess_air_gapped_with_bundled_packages.config';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -32,14 +33,14 @@ export default ({ getService }: FtrProviderContext): void => {
   /* attempt to install it from the local file system. The API response from EPM provides
   /* us with the information of whether the package was installed from the registry or
   /* from a package that was bundled with Kibana */
-  describe('@ess @serverless @skipInServerlessMKI Install bundled package', () => {
+  describe('@ess @serverless @skipInServerlessMKI Bundled package', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
       await deletePrebuiltRulesFleetPackage({ es, supertest, retryService: retry, log });
     });
 
-    it('should list `security_detection_engine` as a bundled fleet package in the `fleet_package.json` file', async () => {
+    it('lists `security_detection_engine` as a bundled fleet package in the `fleet_package.json` file', async () => {
       const configFilePath = path.resolve(REPO_ROOT, 'fleet_packages.json');
       const fleetPackages = await fs.readFile(configFilePath, 'utf8');
       const parsedFleetPackages: PackageSpecManifest[] = JSON5.parse(fleetPackages);
@@ -49,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    it('should install prebuilt rules from the package that comes bundled with Kibana', async () => {
+    it('installs prebuilt rules from the package that comes bundled with Kibana', async () => {
       // Verify that status is empty before package installation
       const statusBeforePackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
@@ -59,14 +60,14 @@ export default ({ getService }: FtrProviderContext): void => {
       const bundledInstallResponse = await installPrebuiltRulesPackageByVersion(
         es,
         supertest,
-        '99.0.0',
+        MOCK_PKG_VERSION,
         retry
       );
 
       // As opposed to "registry"
       expect(bundledInstallResponse._meta.install_source).toBe('bundled');
 
-      // Refresh ES indices to avoid race conditions between write and reading of indeces
+      // Refresh ES indices to avoid race conditions between write and reading of indices
       // See implementation utility function at x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/rules/prebuilt_rules/install_prebuilt_rules_fleet_package.ts
       await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 

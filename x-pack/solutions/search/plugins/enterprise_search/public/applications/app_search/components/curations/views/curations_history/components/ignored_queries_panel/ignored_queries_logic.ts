@@ -65,7 +65,6 @@ export const IgnoredQueriesLogic = kea<MakeLogicType<IgnoredQueriesValues, Ignor
     ignoredQueries: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onIgnoredQueriesLoad: (_, { ignoredQueries }) => ignoredQueries,
       },
     ],
@@ -78,9 +77,7 @@ export const IgnoredQueriesLogic = kea<MakeLogicType<IgnoredQueriesValues, Ignor
         },
       },
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onIgnoredQueriesLoad: (_, { meta }) => meta,
-        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],

@@ -26,8 +26,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.securityCommon.cleanTransformUsers();
       await transform.securityCommon.cleanTransformRoles();
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
 
       await transform.testResources.resetKibanaTimeZone();
     });

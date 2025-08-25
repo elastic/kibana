@@ -21,8 +21,7 @@ import {
 
 import { ExceptionListSoSchema } from '../schemas/saved_objects';
 
-const entryType = t.union([entry, entriesNested]);
-type EntryType = t.TypeOf<typeof entryType>;
+type EntryType = t.TypeOf<typeof entry> | t.TypeOf<typeof entriesNested>;
 
 const migrateEntry = (entryToMigrate: EntryType): EntryType => {
   const newEntry = entryToMigrate;

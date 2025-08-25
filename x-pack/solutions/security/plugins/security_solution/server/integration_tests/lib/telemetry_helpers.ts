@@ -16,6 +16,7 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { asyncForEach } from '@kbn/std';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import {
   createExceptionList,
@@ -23,8 +24,8 @@ import {
   deleteExceptionList,
   deleteExceptionListItem,
 } from '@kbn/lists-plugin/server/services/exception_lists';
-import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { getAgentPolicySavedObjectType } from '@kbn/fleet-plugin/server/services/agent_policy';
 
 import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
 
@@ -54,6 +55,11 @@ const endpointMetricsIndex = '.ds-metrics-endpoint.metrics-1';
 const endpointMetricsMetadataIndex = '.ds-metrics-endpoint.metadata-1';
 const endpointMetricsPolicyIndex = '.ds-metrics-endpoint.policy-1';
 const prebuiltRulesIndex = '.alerts-security.alerts';
+
+const logger = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
 
 export function getTelemetryTasks(
   spy: jest.SpyInstance<
@@ -260,7 +266,7 @@ export async function createAgentPolicy(
     enabled: true,
     policy_id: 'policy-elastic-agent-on-cloud',
     policy_ids: ['policy-elastic-agent-on-cloud'],
-    package: { name: 'endpoint', title: 'Elastic Endpoint', version: '8.11.1' },
+    package: { name: 'endpoint', title: 'Elastic Endpoint', version: '8.15.1' },
     inputs: [
       {
         config: {
@@ -283,14 +289,38 @@ export async function createAgentPolicy(
     ],
   };
 
-  await soClient.create<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id }).catch(() => {});
-  await packagePolicyService
-    .create(soClient, esClient, packagePolicy, {
-      id,
-      spaceId: 'default',
-      bumpRevision: false,
-    })
-    .catch(() => {});
+  const agentPolicyType = await getAgentPolicySavedObjectType();
+  await soClient.get<unknown>(agentPolicyType, id).catch(async (e) => {
+    try {
+      return await soClient.create<unknown>(agentPolicyType, {}, { id });
+    } catch {
+      logger.error(`>> Error searching for agent: ${e}`);
+      throw Error(`>> Error searching for agent: ${e}`);
+    }
+  });
+  // sometimes we can get an error from epr, e.g.
+  // 503 Service Temporarily Unavailable' error response from package registry at https://epr.elastic.co/package/endpoint/8.15.1/
+  // in case of error, retry up to 1 min, waiting 10 secs between attempts
+  // more info: https://github.com/elastic/kibana/issues/231535
+  await eventually(
+    async () => {
+      await packagePolicyService.get(soClient, id).catch(async () => {
+        try {
+          return await packagePolicyService.create(soClient, esClient, packagePolicy, {
+            id,
+            spaceId: 'default',
+            bumpRevision: false,
+            force: true,
+          });
+        } catch (e) {
+          logger.error(`>> Error creating package policy: ${e}`);
+          throw Error(`>> Error creating package policy: ${e}`);
+        }
+      });
+    },
+    60000,
+    10000
+  );
 }
 
 export async function createMockedExceptionList(so: SavedObjectsServiceStart) {

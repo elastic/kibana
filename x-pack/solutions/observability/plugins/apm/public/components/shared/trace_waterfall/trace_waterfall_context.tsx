@@ -9,12 +9,13 @@ import React, { createContext, useContext, useMemo } from 'react';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
-import type { TraceWaterfallItem } from './use_trace_waterfall';
+import { TraceDataState, type TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
 import type { IWaterfallGetRelatedErrorsHref } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
-interface TraceWaterfallContextProps {
+export interface TraceWaterfallContextProps {
   duration: number;
+  traceState: TraceDataState;
   traceWaterfall: TraceWaterfallItem[];
   rootItem?: TraceItem;
   margin: { left: number; right: number };
@@ -30,6 +31,7 @@ interface TraceWaterfallContextProps {
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   duration: 0,
+  traceState: TraceDataState.Empty,
   traceWaterfall: [],
   rootItem: undefined,
   margin: { left: 0, right: 0 },
@@ -62,7 +64,7 @@ export function TraceWaterfallContextProvider({
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable: boolean;
 }) {
-  const { duration, traceWaterfall, maxDepth, rootItem } = useTraceWaterfall({
+  const { duration, traceWaterfall, maxDepth, rootItem, traceState } = useTraceWaterfall({
     traceItems,
   });
 
@@ -74,6 +76,7 @@ export function TraceWaterfallContextProvider({
   return (
     <TraceWaterfallContext.Provider
       value={{
+        traceState,
         duration,
         rootItem,
         traceWaterfall,

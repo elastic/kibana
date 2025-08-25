@@ -119,7 +119,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       let dataViewId = '';
 
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.loadIfNeeded(
+          'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+        );
         const res = await createLogStashDataView(supertest);
         dataViewId = res.data_view.id;
 
@@ -130,7 +132,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       after(async () => {
         await cases.api.deleteAllCases();
         await deleteLogStashDataView(supertest, dataViewId);
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       });
 
       it('renders a persistable attachment type correctly', async () => {
@@ -148,7 +150,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       let dataViewId = '';
 
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.loadIfNeeded(
+          'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+        );
         const res = await createLogStashDataView(supertest);
         dataViewId = res.data_view.id;
 
@@ -178,7 +182,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       after(async () => {
         await cases.api.deleteAllCases();
         await deleteLogStashDataView(supertest, dataViewId);
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       });
 
       it('renders multiple attachment types correctly', async () => {
@@ -364,9 +368,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const myDashboardName = `My-dashboard-${uuidv4()}`;
 
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.loadIfNeeded(
+          'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+        );
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
 
         await common.navigateToApp('dashboard');
@@ -388,9 +394,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await listingTable.checkListingSelectAllCheckbox();
         await listingTable.clickDeleteSelected();
 
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
 
         await cases.api.deleteAllCases();

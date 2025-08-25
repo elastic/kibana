@@ -94,12 +94,11 @@ export async function executeNerRule({
             async (span) => {
               try {
                 const docs = batch.map((text) => ({ text_field: text }));
-
                 span?.setAttribute('input.value', JSON.stringify(docs));
                 const response = await esClient.ml.inferTrainedModel({
                   model_id: rule.modelId,
                   docs,
-                  timeout: '30s',
+                  timeout: `${rule.timeoutSeconds ?? 30}s`,
                 });
 
                 span?.setAttribute('output.value', JSON.stringify(response.inference_results));
@@ -107,9 +106,13 @@ export async function executeNerRule({
                 return response.inference_results;
               } catch (error) {
                 span?.recordException(error);
-                throw new Error(`Inference failed for NER model '${rule.modelId}'`, {
-                  cause: error,
-                });
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                throw new Error(
+                  `Inference failed for NER model '${rule.modelId}': ${errorMessage}`,
+                  {
+                    cause: error,
+                  }
+                );
               }
             }
           )

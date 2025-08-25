@@ -43,12 +43,16 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('siem legacy indices exist', () => {
       beforeEach(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/signals/legacy_signals_index'
+        );
         await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/signals/legacy_signals_index'
+        );
         await deleteAllAlerts(supertest, log, es);
       });
 
@@ -72,13 +76,13 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('multiple spaces', () => {
         beforeEach(async () => {
           await esArchiver.load(
-            'x-pack/test/functional/es_archives/signals/legacy_signals_index_non_default_space'
+            'x-pack/solutions/security/test/fixtures/es_archives/signals/legacy_signals_index_non_default_space'
           );
         });
 
         afterEach(async () => {
           await esArchiver.unload(
-            'x-pack/test/functional/es_archives/signals/legacy_signals_index_non_default_space'
+            'x-pack/solutions/security/test/fixtures/es_archives/signals/legacy_signals_index_non_default_space'
           );
         });
 

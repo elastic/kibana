@@ -388,7 +388,7 @@ export const getDeletedMonitorOrLocationSummary = ({
   params?: StatusRuleParams;
 }) => {
   const config = staleConfigs[recoveredAlertId];
-  const monitorInfo = 'monitorInfo' in config ? config.monitorInfo : config.ping;
+  const monitorInfo = 'monitorInfo' in config ? config.monitorInfo : config.latestPing;
   const monitorSummary = getMonitorSummary({
     monitorInfo,
     reason: 'recovered',
@@ -462,7 +462,7 @@ export const getUpMonitorRecoverySummary = ({
 
   const upConfig = upConfigs[recoveredAlertId];
   const isUp = Boolean(upConfig) || false;
-  const ping = upConfig.ping;
+  const ping = upConfig.latestPing;
 
   const monitorSummary = getMonitorSummary({
     monitorInfo: ping,

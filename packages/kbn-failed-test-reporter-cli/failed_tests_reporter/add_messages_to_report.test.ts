@@ -46,7 +46,7 @@ it('rewrites ftr reports with minimal changes', async () => {
       {
         name: 'maps app  maps loaded from sample data ecommerce "before all" hook',
         classname:
-          'Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js',
+          'Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js',
         message: 'foo bar',
       },
     ],
@@ -63,7 +63,7 @@ it('rewrites ftr reports with minimal changes', async () => {
      ‹?xml version="1.0" encoding="utf-8"?›
      ‹testsuites name="ftr" timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71" command-line="node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts"›
        ‹testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71" command-line="node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts"›
-         ‹testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js" time="154.378" owners="elastic/kibana-presentation"›
+         ‹testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js" time="154.378" owners="elastic/kibana-presentation"›
     -      ‹system-out›
     -        ‹![CDATA[[00:00:00]       │
     +      ‹system-out›Failed Tests Reporter:
@@ -88,7 +88,7 @@ it('rewrites ftr reports with minimal changes', async () => {
     +    at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)
            ‹/failure›
          ‹/testcase›
-         ‹testcase name="maps app &quot;after all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps" time="0.179" metadata-json="{&quot;messages&quot;:[&quot;foo&quot;],&quot;screenshots&quot;:[{&quot;name&quot;:&quot;failure[dashboard app using current data dashboard snapshots compare TSVB snapshot]&quot;,&quot;url&quot;:&quot;https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+7.x/1632/kibana-oss-tests/test/functional/screenshots/failure/dashboard%20app%20using%20current%20data%20dashboard%20snapshots%20compare%20TSVB%20snapshot.png&quot;}]}" owners="elastic/kibana-presentation"›
+         ‹testcase name="maps app &quot;after all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps" time="0.179" metadata-json="{&quot;messages&quot;:[&quot;foo&quot;],&quot;screenshots&quot;:[{&quot;name&quot;:&quot;failure[dashboard app using current data dashboard snapshots compare TSVB snapshot]&quot;,&quot;url&quot;:&quot;https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+7.x/1632/kibana-oss-tests/test/functional/screenshots/failure/dashboard%20app%20using%20current%20data%20dashboard%20snapshots%20compare%20TSVB%20snapshot.png&quot;}]}" owners="elastic/kibana-presentation"›
            ‹system-out›
     -        ‹![CDATA[[00:00:00]       │
     +        [00:00:00]       │

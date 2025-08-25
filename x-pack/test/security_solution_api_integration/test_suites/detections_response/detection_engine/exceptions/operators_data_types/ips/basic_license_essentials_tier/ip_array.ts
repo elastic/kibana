@@ -34,11 +34,15 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@serverless @serverlessQA @ess Rule exception operators for data type ip array', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/ip_as_array');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/ip_as_array'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/ip_as_array');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/ip_as_array'
+      );
     });
 
     beforeEach(async () => {

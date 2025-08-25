@@ -94,13 +94,17 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.load(auditbeatArchivePath);
         await setupMlModulesWithRetry({ module: mlModuleName, retry, supertest });
         await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
+        );
         await deleteAllAnomalies(log, es);
       });
 
       after(async () => {
         await esArchiver.load(auditbeatArchivePath);
-        await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
+        );
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
@@ -390,7 +394,7 @@ export default ({ getService }: FtrProviderContext) => {
               sort: [ALERT_ORIGINAL_TIME],
             });
 
-            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts).toHaveLength(1);
             expect(previewAlerts[0]._source).toEqual(
               expect.objectContaining({
                 [ALERT_SUPPRESSION_TERMS]: [
@@ -430,7 +434,7 @@ export default ({ getService }: FtrProviderContext) => {
               sort: [ALERT_ORIGINAL_TIME],
             });
 
-            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts).toHaveLength(1);
             expect(previewAlerts[0]._source).toEqual(
               expect.objectContaining({
                 [ALERT_SUPPRESSION_TERMS]: [
@@ -479,7 +483,7 @@ export default ({ getService }: FtrProviderContext) => {
             sort: [ALERT_ORIGINAL_TIME],
           });
 
-          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts).toHaveLength(1);
           expect(previewAlerts[0]._source).toEqual(
             expect.objectContaining({
               [ALERT_SUPPRESSION_TERMS]: [
@@ -534,7 +538,7 @@ export default ({ getService }: FtrProviderContext) => {
             sort: [ALERT_SUPPRESSION_DOCS_COUNT],
           });
 
-          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts).toHaveLength(2);
           expect(previewAlerts[0]._source).toEqual(
             expect.objectContaining({
               [ALERT_SUPPRESSION_TERMS]: [
@@ -609,7 +613,7 @@ export default ({ getService }: FtrProviderContext) => {
             sort: [ALERT_ORIGINAL_TIME],
           });
 
-          expect(previewAlerts.length).toEqual(3);
+          expect(previewAlerts).toHaveLength(3);
           expect(previewAlerts[0]._source).toEqual(
             expect.objectContaining({
               'user.name': ['irrelevant'],
@@ -824,7 +828,7 @@ export default ({ getService }: FtrProviderContext) => {
             sort: [ALERT_ORIGINAL_TIME],
           });
 
-          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts).toHaveLength(1);
           expect(previewAlerts[0]._source).toEqual(
             expect.objectContaining({
               [ALERT_SUPPRESSION_TERMS]: [
@@ -874,7 +878,7 @@ export default ({ getService }: FtrProviderContext) => {
             sort: [ALERT_ORIGINAL_TIME],
           });
 
-          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts).toHaveLength(2);
           expect(previewAlerts[0]._source).toEqual(
             expect.objectContaining({
               [ALERT_SUPPRESSION_TERMS]: [
@@ -1077,7 +1081,7 @@ export default ({ getService }: FtrProviderContext) => {
               sort: [ALERT_ORIGINAL_TIME],
             });
 
-            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts).toHaveLength(1);
             expect(previewAlerts[0]._source).toEqual(
               expect.objectContaining({
                 [ALERT_SUPPRESSION_TERMS]: [
@@ -1100,13 +1104,19 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('with enrichments', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
-          await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+          await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
         });
 
         after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
-          await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
+          );
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
         });
 
         beforeEach(async () => {

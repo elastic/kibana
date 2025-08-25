@@ -24,7 +24,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
 
       await ml.testResources.resetKibanaTimeZone();
     });

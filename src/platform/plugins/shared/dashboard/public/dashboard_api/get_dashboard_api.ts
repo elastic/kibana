@@ -96,8 +96,8 @@ export function getDashboardApi({
     creationOptions
   );
   const unsavedChangesManager = initializeUnsavedChangesManager({
-    viewModeManager,
-    creationOptions,
+    viewMode$: viewModeManager.api.viewMode$,
+    storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
     controlGroupManager,
     lastSavedState: savedObjectResult?.dashboardInput ?? DEFAULT_DASHBOARD_STATE,
     layoutManager,

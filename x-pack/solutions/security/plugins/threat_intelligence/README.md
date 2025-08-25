@@ -68,7 +68,7 @@ see the file in order to adjust the amount of indicators generated. The default 
 
 ### Running locally
 
-Cypress tests are integrated with the Security Solution ones. Please refer to https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/cypress/README.md for more information
+Cypress tests are integrated with the Security Solution ones. Please refer to https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/test/security_solution_cypress/cypress/README.md for more information
 
 ## FAQ
 

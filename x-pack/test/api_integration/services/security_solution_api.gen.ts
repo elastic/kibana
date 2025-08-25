@@ -420,7 +420,7 @@ If a record already exists for the specified entity, that record is overwritten 
     /**
       * Create a new detection rule.
 > warn
-> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
@@ -672,8 +672,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .send(props.body as object);
     },
     /**
-     * Download a file from an endpoint.
-     */
+      * Download a file from an endpoint. 
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+      */
     endpointFileDownload(props: EndpointFileDownloadProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
@@ -687,8 +691,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get information for the specified file using the file ID.
-     */
+      * Get information for the specified file using the file ID.
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+      */
     endpointFileInfo(props: EndpointFileInfoProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
@@ -1323,7 +1331,7 @@ finalize it.
 - The `Content-Type: multipart/form-data` HTTP header.
 - A link to the `.ndjson` file containing the rules.
 > warn
-> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 > info
@@ -1468,7 +1476,7 @@ providing you with the most current and effective threat detection capabilities.
 
 The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 > warn
-> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
@@ -1498,7 +1506,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
 The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
 > warn
-> When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
@@ -1827,7 +1835,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 
 The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 > warn
-> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 

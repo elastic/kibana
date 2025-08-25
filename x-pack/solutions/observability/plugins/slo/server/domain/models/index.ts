@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export * from './common';
+export type * from './common';
 export { Duration, DurationUnit, toDurationUnit, toMomentUnitOfTime } from '@kbn/slo-schema';
-export * from './error_budget';
-export * from './indicators';
-export * from './slo';
+export type * from './error_budget';
+export type * from './indicators';
+export type * from './slo';
 export * from './time_window';

@@ -58,10 +58,14 @@ export default ({ getService }: FtrProviderContext): void => {
       createdMigrations = [];
 
       legacySignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/signals/legacy_signals_index'
+        )
       );
       outdatedSignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/signals/outdated_signals_index'
+        )
       );
       await createAlertsIndex(supertest, log);
     });
@@ -79,8 +83,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
       }
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
-      await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/signals/outdated_signals_index'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/signals/legacy_signals_index'
+      );
       await deleteMigrations({
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),

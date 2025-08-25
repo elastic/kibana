@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
     const expectedQuery = 'airline: A* and responsetime > 5';
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded(indexPatternName, '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();

@@ -55,16 +55,13 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
     engines: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onEnginesLoad: (_, { results }) => results,
       },
     ],
     enginesMeta: [
       DEFAULT_META,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onEnginesLoad: (_, { meta }) => meta,
-        // @ts-expect-error upgrade typescript v5.1.6
         onEnginesPagination: (state, { page }) => updateMetaPageIndex(state, page),
       },
     ],
@@ -78,16 +75,13 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
     metaEngines: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onMetaEnginesLoad: (_, { results }) => results,
       },
     ],
     metaEnginesMeta: [
       DEFAULT_META,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onMetaEnginesLoad: (_, { meta }) => meta,
-        // @ts-expect-error upgrade typescript v5.1.6
         onMetaEnginesPagination: (state, { page }) => updateMetaPageIndex(state, page),
       },
     ],

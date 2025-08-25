@@ -61,7 +61,6 @@ export const CurationsSettingsLogic = kea<
         mode: 'manual',
       },
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onCurationsSettingsLoad: (_, { curationsSettings }) => curationsSettings,
       },
     ],

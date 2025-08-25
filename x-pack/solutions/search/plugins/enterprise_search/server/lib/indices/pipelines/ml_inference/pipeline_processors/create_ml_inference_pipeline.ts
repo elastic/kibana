@@ -80,6 +80,7 @@ export const createMlInferencePipeline = async (
     pipelineByName = await esClient.ingest.getPipeline({
       id: inferencePipelineGeneratedName,
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // Silently swallow error
   }

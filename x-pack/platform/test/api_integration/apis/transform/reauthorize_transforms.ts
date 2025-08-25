@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
     }
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       const apiKeyForTransformUsers =

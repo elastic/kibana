@@ -92,6 +92,7 @@ export function jobsQueryFactory(
                     bool: {
                       should: [
                         { term: { space_id: spaceId } },
+                        { term: { 'space_id.keyword': spaceId } },
                         // also show all reports created before space_id was added
                         { bool: { must_not: { exists: { field: 'space_id' } } } },
                       ],

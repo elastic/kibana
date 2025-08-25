@@ -55,13 +55,17 @@ export default ({ getService }: FtrProviderContext) => {
   describe.skip('@ess @serverless Get Rule Execution Results', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alias'
+      );
       await createAlertsIndex(supertest, log);
     });
 
     after(async () => {
       await esArchiver.unload(auditbeatPath);
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alias'
+      );
       await deleteAllAlerts(supertest, log, es);
     });
 

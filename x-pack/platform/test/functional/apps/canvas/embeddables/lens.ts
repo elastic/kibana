@@ -15,8 +15,8 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const archives = {
-    es: 'x-pack/test/functional/es_archives/canvas/logstash_lens',
-    kbn: 'x-pack/test/functional/fixtures/kbn_archiver/canvas/lens',
+    es: 'x-pack/platform/test/fixtures/es_archives/canvas/logstash_lens',
+    kbn: 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/lens',
   };
 
   describe('lens in canvas', function () {

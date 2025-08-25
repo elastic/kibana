@@ -13,6 +13,7 @@ import {
   installPrebuiltRulesAndTimelines,
 } from '../../../../../utils';
 import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
+import { NUM_OF_RULE_IN_MOCK_LARGE_PKG } from '../../configs/edge_cases/ess_air_gapped_with_bundled_large_package.config';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -50,7 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       expect(statusAfterPackageInstallation).toMatchObject({
-        rules_installed: 750,
+        rules_installed: NUM_OF_RULE_IN_MOCK_LARGE_PKG,
         rules_not_installed: 0,
         rules_not_updated: 0,
       });

@@ -16,7 +16,14 @@
     "../../../../typings/**/*",
     "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
   ],
-  "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
+  "exclude": [
+    "target/**/*",
+    "*/plugins/**/*",
+    "plugins/**/*",
+    "security_solution_cypress/cypress/**/*",
+    "*/packages/**/*",
+    "*/*/packages/**/*",
+  ],
   "kbn_references": [
     "@kbn/test",
     "@kbn/expect",
@@ -46,5 +53,9 @@
     "@kbn/cypress-test-helper",
     "@kbn/fleet-plugin",
     "@kbn/core-saved-objects-server",
+    "@kbn/session-view-plugin",
+    "@kbn/repo-info",
+    "@kbn/es-archiver",
+    "@kbn/kubernetes-security-plugin",
   ]
 }

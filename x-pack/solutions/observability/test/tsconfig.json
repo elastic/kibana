@@ -16,7 +16,11 @@
     "../../../../typings/**/*",
     "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
   ],
-  "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
+  "exclude": [
+    "target/**/*",
+    "*/plugins/**/*",
+    "plugins/**/*"
+  ],
   "kbn_references": [
     "@kbn/test",
     "@kbn/expect",
@@ -91,5 +95,8 @@
     "@kbn/observability-ai-assistant-app-plugin",
     "@kbn/dev-utils",
     "@kbn/observability-onboarding-plugin",
+    "@kbn/data-quality-plugin",
+    "@kbn/observability-logs-explorer-plugin",
+    "@kbn/logs-explorer-plugin",
   ]
 }
