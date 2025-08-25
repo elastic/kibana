@@ -122,12 +122,6 @@ export function runJestAll() {
           setupFilesAfterEnv,
         };
 
-        const isolatedRetryRunConfig = {
-          ...initialConfig,
-          ...defaultJestConfig,
-          runInBand: true,
-        };
-
         const hash = objectHash(initialConfig);
 
         const dir = Path.join(dataDir, hash);
@@ -135,16 +129,12 @@ export function runJestAll() {
         await Fs.promises.mkdir(dir, { recursive: true });
 
         const initialRunConfigFilepath = Path.join(dir, `jest.config.initial.json`);
-        const isolatedRetryRunConfigFilepath = Path.join(dir, `jest.config.isolated_retries.json`);
 
-        await Promise.all([
-          Fs.promises.writeFile(initialRunConfigFilepath, JSON.stringify(initialRunConfig), 'utf8'),
-          Fs.promises.writeFile(
-            isolatedRetryRunConfigFilepath,
-            JSON.stringify(isolatedRetryRunConfig),
-            'utf8'
-          ),
-        ]);
+        await Fs.promises.writeFile(
+          initialRunConfigFilepath,
+          JSON.stringify(initialRunConfig),
+          'utf8'
+        );
 
         // Set up environment for Jest
         if (SCOUT_REPORTER_ENABLED) {
@@ -167,26 +157,27 @@ export function runJestAll() {
         } catch (firstAttemptError) {
           log.warning('First attempt failed, retrying without retries...');
 
-          // Second attempt without retry setup using the pre-created isolated retry config
+          // Second attempt without retries
           try {
-            log.info(`Running Jest without retries for ${isolatedRetryRunConfigFilepath}...`);
+            log.info(`Running Jest without retries for ${initialRunConfigFilepath}...`);
             await execa(
               'node',
               [
                 Path.join(REPO_ROOT, 'scripts/jest'),
                 '--config',
-                isolatedRetryRunConfigFilepath,
+                initialRunConfigFilepath,
                 '--onlyFailures',
+                '--runInBand',
               ],
               {
                 stdio: 'inherit',
                 env: SCOUT_REPORTER_ENABLED
-                  ? { ...process.env, JEST_CONFIG_PATH: isolatedRetryRunConfigFilepath }
+                  ? { ...process.env, JEST_CONFIG_PATH: initialRunConfigFilepath }
                   : process.env,
               }
             );
           } catch (secondAttemptError) {
-            log.error(`Both attempts failed for ${isolatedRetryRunConfigFilepath}`);
+            log.error(`Both attempts failed for ${initialRunConfigFilepath}`);
             throw secondAttemptError;
           }
         }

@@ -7,16 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { REPO_ROOT } = require('@kbn/repo-info');
-
-/** @type {import('jest').Config} */
-const config = {
-  rootDir: REPO_ROOT,
-  maxWorkers: '50%',
-  collectCoverage: false,
-  passWithNoTests: true,
-  reporters: ['jest-silent-reporter'],
-  testSequencer: require.resolve('./test_sequencer'),
-};
-
-module.exports = config;
+export async function isolateFailures() {}
