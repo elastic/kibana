@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowExecution } from './workflow_execution';
+export { WorkflowExecutionDetail } from './ui/workflow_execution_detail';

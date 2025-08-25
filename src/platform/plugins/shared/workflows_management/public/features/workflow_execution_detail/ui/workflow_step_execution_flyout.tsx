@@ -122,6 +122,7 @@ export const WorkflowStepExecutionFlyout = ({
       paddingSize="none"
       type="push"
       size="s"
+      pushMinBreakpoint="xl"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup

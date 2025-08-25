@@ -114,10 +114,11 @@ export function WorkflowYAMLValidationErrors({
               width: '100%',
               padding: `${euiTheme.size.m} 0`,
               color: euiTheme.colors.textParagraph,
+              flexWrap: 'nowrap !important',
             }}
           >
             <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-            <EuiFlexItem>{buttonContent}</EuiFlexItem>
+            <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>{buttonContent}</EuiFlexItem>
           </EuiFlexGroup>
         }
         arrowDisplay={validationErrors?.length === 0 ? 'none' : 'left'}
