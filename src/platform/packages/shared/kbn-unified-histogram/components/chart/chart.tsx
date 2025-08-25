@@ -29,7 +29,9 @@ import type { TimeRange } from '@kbn/es-query';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { estypes } from '@elastic/elasticsearch';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramSuggestionContext,
@@ -90,6 +92,8 @@ export interface UnifiedHistogramChartProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   columns?: DatatableColumn[];
+  esqlVariables?: ESQLControlVariable[];
+  controlsState?: ControlPanelsState<ESQLControlState>;
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -118,6 +122,7 @@ export function UnifiedHistogramChart({
   onTotalHitsChange,
   onChartLoad,
   columns,
+  controlsState,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = useObservable(
@@ -427,6 +432,7 @@ export function UnifiedHistogramChart({
           onSave={() => {}}
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}
+          controlsInput={controlsState}
         />
       )}
       {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (

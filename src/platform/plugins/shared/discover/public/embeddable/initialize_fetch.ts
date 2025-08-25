@@ -9,7 +9,7 @@
 
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
-
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { KibanaExecutionContext } from '@kbn/core/types';
 import {
   buildDataTableRecordList,
@@ -127,7 +127,18 @@ export function initializeFetch({
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
 
-  const fetchSubscription = combineLatest([fetch$(api), api.savedSearch$, api.dataViews$])
+  const esqlVariables$ = apiPublishesESQLVariables(api.parentApi)
+    ? api.parentApi.esqlVariables$
+    : undefined;
+
+  const observables = [
+    fetch$(api),
+    api.savedSearch$,
+    api.dataViews$,
+    ...(esqlVariables$ ? [esqlVariables$] : []),
+  ] as const;
+
+  const fetchSubscription = combineLatest(observables)
     .pipe(
       tap(() => {
         // abort any in-progress requests
@@ -136,7 +147,8 @@ export function initializeFetch({
           abortController = undefined;
         }
       }),
-      switchMap(async ([fetchContext, savedSearch, dataViews]) => {
+      switchMap(async (values) => {
+        const [fetchContext, savedSearch, dataViews, esqlVariables] = values;
         const dataView = dataViews?.length ? dataViews[0] : undefined;
         setBlockingError(undefined);
         if (!dataView || !savedSearch.searchSource) {
@@ -192,6 +204,7 @@ export function initializeFetch({
               data: discoverServices.data,
               expressions: discoverServices.expressions,
               scopedProfilesManager,
+              esqlVariables,
             });
             return {
               columnsMeta: result.esqlQueryColumns

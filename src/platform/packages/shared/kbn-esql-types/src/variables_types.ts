@@ -74,3 +74,11 @@ export const apiPublishesESQLVariables = (
     unknownApi && (unknownApi as PublishesESQLVariables)?.esqlVariables$ !== undefined
   );
 };
+
+interface HasVariableName {
+  variableName: string;
+}
+
+export const controlHasVariableName = (controlState: unknown): controlState is HasVariableName => {
+  return Boolean(controlState && (controlState as HasVariableName)?.variableName !== undefined);
+};
