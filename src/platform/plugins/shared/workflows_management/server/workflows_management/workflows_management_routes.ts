@@ -28,7 +28,7 @@ export function defineRoutes(
     {
       path: '/api/workflows/stats',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -43,7 +43,8 @@ export function defineRoutes(
     },
     async (context, request, response) => {
       try {
-        const stats = await api.getWorkflowStats();
+        const spaceId = spaces.getSpaceId(request);
+        const stats = await api.getWorkflowStats(spaceId);
 
         return response.ok({ body: stats || {} });
       } catch (error) {
@@ -60,7 +61,7 @@ export function defineRoutes(
     {
       path: '/api/workflows/aggs',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -76,7 +77,8 @@ export function defineRoutes(
     async (context, request, response) => {
       try {
         const { fields } = request.query as { fields: string[] };
-        const aggs = await api.getWorkflowAggs(fields);
+        const spaceId = spaces.getSpaceId(request);
+        const aggs = await api.getWorkflowAggs(fields, spaceId);
 
         return response.ok({ body: aggs || {} });
       } catch (error) {
@@ -93,7 +95,7 @@ export function defineRoutes(
     {
       path: '/api/workflows/{id}',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -137,7 +139,7 @@ export function defineRoutes(
     {
       path: '/api/workflows/search',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -184,7 +186,7 @@ export function defineRoutes(
     {
       path: '/api/workflows',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -218,7 +220,7 @@ export function defineRoutes(
     {
       path: '/api/workflows/{id}',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -262,7 +264,7 @@ export function defineRoutes(
       path: '/api/workflows/{id}',
 
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -299,7 +301,7 @@ export function defineRoutes(
     {
       path: '/api/workflows',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -336,7 +338,7 @@ export function defineRoutes(
     {
       path: '/api/workflows/{id}/run',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -383,7 +385,7 @@ export function defineRoutes(
     {
       path: '/api/workflows/{id}/clone',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -423,6 +425,9 @@ export function defineRoutes(
   router.post(
     {
       path: '/api/workflows/test',
+      options: {
+        tags: ['api', 'workflows'],
+      },
       security: {
         authz: {
           requiredPrivileges: ['all'],
@@ -464,7 +469,7 @@ export function defineRoutes(
     {
       path: '/api/workflowExecutions',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -502,7 +507,7 @@ export function defineRoutes(
     {
       path: '/api/workflowExecutions/{workflowExecutionId}',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -544,6 +549,9 @@ export function defineRoutes(
   router.get(
     {
       path: '/api/workflowExecutions/{workflowExecutionId}/logs',
+      options: {
+        tags: ['api', 'workflows'],
+      },
       security: {
         authz: {
           requiredPrivileges: ['all'],
