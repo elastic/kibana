@@ -12,6 +12,8 @@ import type { StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { OptionsListControlState } from '../../../../common/options_list';
 import type { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
+import { BehaviorSubject } from 'rxjs';
+import { pick } from 'lodash';
 
 function areSelectedOptionsEqual(
   a: OptionsListSelection[] | undefined,
@@ -40,6 +42,10 @@ export type SelectionsState = Pick<
 >;
 
 export function initializeSelectionsManager(initialState: SelectionsState) {
+  const draftSelections$ = new BehaviorSubject<SelectionsState>(
+    pick(initialState, ['exclude', 'existsSelected', 'selectedOptions'])
+  );
+
   const selectionsManager = initializeStateManager<SelectionsState>(
     {
       ...initialState,
@@ -56,6 +62,7 @@ export function initializeSelectionsManager(initialState: SelectionsState) {
       hasInitialSelections: Boolean(
         initialState.selectedOptions?.length || initialState.existsSelected
       ),
+      draftSelections$,
     },
   };
 }

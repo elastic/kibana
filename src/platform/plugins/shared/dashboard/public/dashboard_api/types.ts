@@ -109,7 +109,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesSavedObjectId &
   PublishesESQLVariables &
   PublishesSearchSession &
-  PublishesSettings &
+  PublishesSettings<['autoApplyFilters$']> &
   PublishesUnifiedSearch &
   PublishesViewMode &
   PublishesWritableViewMode &

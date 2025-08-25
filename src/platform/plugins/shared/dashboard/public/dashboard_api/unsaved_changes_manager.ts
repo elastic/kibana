@@ -68,7 +68,7 @@ export function initializeUnsavedChangesManager({
       for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
         const childApi = layoutManager.api.children$.value[uuid];
         if (!hasUnsavedChanges || !childApi || !apiHasSerializableState(childApi)) continue;
-
+        console.log({ childApi });
         layoutManager.internalApi.setChildState(uuid, childApi.serializeState());
       }
     }),

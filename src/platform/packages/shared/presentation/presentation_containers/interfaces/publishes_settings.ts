@@ -9,12 +9,25 @@
 
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 
+// export interface PublishesSettings<Settings extends ReadonlyArray<string> = ReadonlyArray<string>> {
+//   settings: {
+//     [K in Settings[number]]: PublishingSubject<boolean | undefined>;
+//   };
+// }
+
 export interface PublishesSettings {
   settings: Record<string, PublishingSubject<boolean | undefined>>;
 }
 
 export const apiPublishesSettings = (
-  unknownApi: null | unknown
+  unknownApi: null | unknown,
+  settings?: string[]
 ): unknownApi is PublishesSettings => {
-  return Boolean(unknownApi && typeof (unknownApi as PublishesSettings)?.settings === 'object');
+  return Boolean(
+    unknownApi &&
+      typeof (unknownApi as PublishesSettings)?.settings === 'object' &&
+      ((settings ?? []) as string[]).every((setting) => {
+        return Boolean((unknownApi as PublishesSettings).settings[setting]);
+      })
+  );
 };

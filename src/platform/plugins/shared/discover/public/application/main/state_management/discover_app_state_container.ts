@@ -44,6 +44,7 @@ import type { DiscoverSavedSearchContainer } from './discover_saved_search_conta
 import type { InternalStateStore, TabActionInjector } from './redux';
 import { internalStateActions } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
+import { of } from 'rxjs';
 
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
   /**
@@ -307,6 +308,7 @@ export const getDiscoverAppStateContainer = ({
     }
 
     // syncs `_a` portion of url with query services
+    console.log(enhancedAppContainer);
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       data.query,
       enhancedAppContainer,

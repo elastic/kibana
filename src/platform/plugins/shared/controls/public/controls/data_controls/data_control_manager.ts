@@ -7,6 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
+import {
+  BehaviorSubject,
+  combineLatest,
+  combineLatestWith,
+  filter,
+  of,
+  switchMap,
+  tap,
+  type Observable,
+} from 'rxjs';
+
 import type { Reference } from '@kbn/content-management-utils';
 import {
   DATA_VIEW_SAVED_OBJECT_TYPE,
@@ -15,10 +27,11 @@ import {
 } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { apiPublishesSettings } from '@kbn/presentation-containers';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
-import { BehaviorSubject, combineLatest, switchMap, tap, type Observable } from 'rxjs';
+
 import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import { defaultControlComparators, defaultControlDefaultValues } from '../default_control_manager';
@@ -167,9 +180,42 @@ export const initializeDataControlManager = async <EditorState extends object = 
     const initialDataView = await initialDataViewPromise;
     initialFilter = getInitialFilter(initialDataView);
   }
+
   const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(
     initialFilter ? [initialFilter] : undefined
   );
+  const unappliedFilters$ = new BehaviorSubject<Filter[] | undefined>(appliedFilters$.getValue());
+  const hasDraftFilters$ = new BehaviorSubject<boolean>(false);
+  console.log(parentApi);
+
+  const autoApplyFiltersSubscription = unappliedFilters$
+    .pipe(
+      combineLatestWith(
+        apiPublishesSettings(parentApi, ['autoApplyFilters$', 'hasDraftFilters$'])
+          ? parentApi.settings.autoApplyFilters$
+          : of<boolean | undefined>(undefined)
+      ),
+      tap(() => {
+        // console.log('NEXT TRUE', unappliedFilters$.getValue(), appliedFilters$.getValue());
+        hasDraftFilters$.next(!deepEqual(unappliedFilters$.getValue(), appliedFilters$.getValue()));
+      }),
+      filter(([filters, autoApplyFilters]) => Boolean(autoApplyFilters))
+    )
+    .subscribe(([filters, autoApplyFilters]) => {
+      // console.log('NEXT', unappliedFilters$.getValue());
+      appliedFilters$.next(filters);
+      if (hasDraftFilters$.getValue()) hasDraftFilters$.next(false);
+    });
+
+  const commitFilters = () => {
+    const published = appliedFilters$.getValue();
+    const unpublished = unappliedFilters$.getValue();
+    if (!deepEqual(published, unpublished)) {
+      appliedFilters$.next(unpublished);
+    }
+    // console.log('commitFilters');
+    hasDraftFilters$.next(false);
+  };
 
   return {
     api: {
@@ -182,14 +228,18 @@ export const initializeDataControlManager = async <EditorState extends object = 
       field$,
       fieldFormatter,
       onEdit,
-      appliedFilters$,
       defaultTitle$,
       getTypeDisplayName: () => typeDisplayName,
       isEditingEnabled: () => true,
+
+      commitFilters,
+      appliedFilters$,
+      hasDraftFilters$,
     },
     cleanup: () => {
       dataViewIdSubscription.unsubscribe();
       fieldNameSubscription.unsubscribe();
+      autoApplyFiltersSubscription.unsubscribe();
     },
     internalApi: {
       extractReferences: (referenceNameSuffix: string) => {
@@ -203,7 +253,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       },
       onSelectionChange: () => {},
       setOutputFilter: (newFilter: Filter | undefined) => {
-        appliedFilters$.next(newFilter ? [newFilter] : undefined);
+        unappliedFilters$.next(newFilter ? [newFilter] : undefined);
       },
     },
     anyStateChange$: dataControlStateManager.anyStateChange$,
