@@ -9,9 +9,7 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
   SearchTotalHits,
-  MsearchRequestItem,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { BoolQuery } from '@kbn/es-query';
 import {
   ALERT_END,
   ALERT_INSTANCE_ID,
@@ -19,7 +17,6 @@ import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
   ALERT_START,
-  ALERT_UUID,
   EVENT_ACTION,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -32,8 +29,6 @@ import type {
   GetAlertsQueryParams,
   GetQueryByExecutionUuidParams,
   GetQueryByTimeRangeParams,
-  GetQueryByScopedQueriesParams,
-  GetMaintenanceWindowAlertsQueryParams,
   SearchResult,
 } from '../types';
 import type { SummarizedAlertsChunk } from '../..';
@@ -46,8 +41,6 @@ enum AlertTypes {
   ONGOING,
   RECOVERED,
 }
-
-export const RUNTIME_MAINTENANCE_WINDOW_ID_FIELD = 'runtime_maintenance_window_id';
 
 const getLifecycleAlertsQueryByExecutionUuid = ({
   executionUuid,
@@ -288,76 +281,6 @@ const getQueryByTimeRange = ({
   };
 };
 
-export const getQueryByScopedQueries = ({
-  executionUuid,
-  ruleId,
-  action,
-  maintenanceWindows,
-  maxAlertLimit,
-}: GetQueryByScopedQueriesParams): MsearchRequestItem[] => {
-  const filters: QueryDslQueryContainer[] = [
-    {
-      term: {
-        [ALERT_RULE_EXECUTION_UUID]: executionUuid,
-      },
-    },
-    {
-      term: {
-        [ALERT_RULE_UUID]: ruleId,
-      },
-    },
-  ];
-
-  if (action) {
-    filters.push({
-      term: {
-        [EVENT_ACTION]: action,
-      },
-    });
-  }
-
-  const searches: MsearchRequestItem[] = [];
-
-  maintenanceWindows.forEach(({ id, scopedQuery }) => {
-    if (!scopedQuery) {
-      return;
-    }
-
-    const scopedQueryFilter = generateAlertsFilterDSL(
-      {
-        query: scopedQuery as AlertsFilter['query'],
-      },
-      {
-        analyzeWildcard: true,
-      }
-    )[0] as { bool: BoolQuery };
-
-    searches.push({});
-    searches.push({
-      query: {
-        bool: {
-          ...scopedQueryFilter.bool,
-          filter: [...(scopedQueryFilter.bool?.filter || []), ...filters],
-        },
-      },
-      runtime_mappings: {
-        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: {
-          script: {
-            source: `emit('${id}');`,
-          },
-          type: 'keyword',
-        },
-      },
-      fields: [ALERT_UUID, RUNTIME_MAINTENANCE_WINDOW_ID_FIELD],
-      _source: false,
-      size: maxAlertLimit,
-      track_total_hits: true,
-    });
-  });
-
-  return searches;
-};
-
 const generateAlertsFilterDSL = (
   alertsFilter: AlertsFilter,
   options?: { analyzeWildcard?: boolean }
@@ -514,25 +437,4 @@ const getContinualAlertsQuery = ({
   return queryBody;
 };
 
-const getMaintenanceWindowAlertsQuery = ({
-  executionUuid,
-  ruleId,
-  action,
-  maintenanceWindows,
-  maxAlertLimit,
-}: GetMaintenanceWindowAlertsQueryParams): MsearchRequestItem[] => {
-  return getQueryByScopedQueries({
-    executionUuid,
-    ruleId,
-    action,
-    maintenanceWindows,
-    maxAlertLimit,
-  });
-};
-
-export {
-  getHitsWithCount,
-  getLifecycleAlertsQueries,
-  getContinualAlertsQuery,
-  getMaintenanceWindowAlertsQuery,
-};
+export { getHitsWithCount, getLifecycleAlertsQueries, getContinualAlertsQuery };

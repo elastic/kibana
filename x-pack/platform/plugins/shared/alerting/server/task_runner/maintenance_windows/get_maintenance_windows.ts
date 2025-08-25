@@ -19,40 +19,6 @@ interface GetMaintenanceWindowsOpts {
   ruleTypeCategory: string;
 }
 
-interface FilterMaintenanceWindowsOpts {
-  maintenanceWindows: MaintenanceWindow[];
-  withScopedQuery: boolean;
-}
-
-export const filterMaintenanceWindows = ({
-  maintenanceWindows,
-  withScopedQuery,
-}: FilterMaintenanceWindowsOpts): MaintenanceWindow[] => {
-  const filteredMaintenanceWindows = maintenanceWindows.filter(({ scopedQuery }) => {
-    if (withScopedQuery && scopedQuery) {
-      return true;
-    } else if (!withScopedQuery && !scopedQuery) {
-      return true;
-    }
-
-    return false;
-  });
-
-  return filteredMaintenanceWindows;
-};
-
-export const filterMaintenanceWindowsIds = ({
-  maintenanceWindows,
-  withScopedQuery,
-}: FilterMaintenanceWindowsOpts): string[] => {
-  const filteredMaintenanceWindows = filterMaintenanceWindows({
-    maintenanceWindows,
-    withScopedQuery,
-  });
-
-  return filteredMaintenanceWindows.map(({ id }) => id);
-};
-
 export const getMaintenanceWindows = async (
   opts: GetMaintenanceWindowsOpts
 ): Promise<MaintenanceWindow[]> => {

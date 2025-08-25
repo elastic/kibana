@@ -40,6 +40,7 @@ import {
   createOrUpdateIlmPolicy,
   createOrUpdateComponentTemplate,
   getIndexTemplate,
+  getMWIndexTemplate,
   createOrUpdateIndexTemplate,
   createConcreteWriteIndex,
   installWithTimeout,
@@ -491,6 +492,36 @@ export class AlertsService implements IAlertsService {
         logger: this.options.logger,
         timeoutMs,
       });
+    }
+
+    if (indexTemplateAndPattern.alias === '.alerts-stack.alerts-default') {
+      try {
+        // Install the MW percolate index
+        await createOrUpdateIndexTemplate({
+          logger: this.options.logger,
+          esClient,
+          template: getMWIndexTemplate({
+            componentTemplateRefs,
+            ilmPolicyName: DEFAULT_ALERTS_ILM_POLICY_NAME,
+            indexPatterns: indexTemplateAndPattern,
+            kibanaVersion: this.options.kibanaVersion,
+            namespace,
+            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            dataStreamAdapter: this.dataStreamAdapter,
+          }),
+        });
+
+        await esClient.indices.create({
+          index: '.alerts-mw-queries-000001',
+          aliases: {
+            ['.alerts-mw-queries']: {
+              is_write_index: true,
+            },
+          },
+        });
+      } catch (error) {
+        console.log('There was an error creating MW indices:', error);
+      }
     }
   }
 

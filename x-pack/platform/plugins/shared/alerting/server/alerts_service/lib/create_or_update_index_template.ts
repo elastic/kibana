@@ -95,6 +95,46 @@ export const getIndexTemplate = ({
   };
 };
 
+export const getMWIndexTemplate = ({
+  kibanaVersion,
+  namespace,
+}: GetIndexTemplateOpts): IndicesPutIndexTemplateRequest => {
+  const indexMetadata: Metadata = {
+    kibana: {
+      version: kibanaVersion,
+    },
+    managed: true,
+    namespace,
+  };
+
+  return {
+    name: '.alerts-mw-queries-index-template',
+    index_patterns: ['.alerts-mw-queries-*'],
+    composed_of: [
+      // '.alerts-ecs-mappings',
+      '.alerts-stack.alerts-mappings',
+      '.alerts-framework-mappings',
+    ],
+    template: {
+      settings: {
+        auto_expand_replicas: '0-1',
+        hidden: true,
+        'index.mapping.ignore_malformed': true,
+      },
+      mappings: {
+        dynamic: false,
+        _meta: indexMetadata,
+        properties: {
+          query: {
+            type: 'percolator',
+          },
+        },
+      },
+    },
+    _meta: indexMetadata,
+  };
+};
+
 interface CreateOrUpdateIndexTemplateOpts {
   logger: Logger;
   esClient: ElasticsearchClient;

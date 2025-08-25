@@ -11,6 +11,7 @@ import type {
   SavedObjectsServiceStart,
   SecurityServiceStart,
   UiSettingsServiceStart,
+  ElasticsearchServiceStart,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { MaintenanceWindowClient } from './maintenance_window_client';
@@ -21,6 +22,7 @@ export interface MaintenanceWindowClientFactoryOpts {
   savedObjectsService: SavedObjectsServiceStart;
   securityService: SecurityServiceStart;
   uiSettings: UiSettingsServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
 }
 
 export class MaintenanceWindowClientFactory {
@@ -29,6 +31,7 @@ export class MaintenanceWindowClientFactory {
   private savedObjectsService!: SavedObjectsServiceStart;
   private securityService!: SecurityServiceStart;
   private uiSettings!: UiSettingsServiceStart;
+  private elasticsearch!: ElasticsearchServiceStart;
 
   public initialize(options: MaintenanceWindowClientFactoryOpts) {
     if (this.isInitialized) {
@@ -39,6 +42,7 @@ export class MaintenanceWindowClientFactory {
     this.savedObjectsService = options.savedObjectsService;
     this.securityService = options.securityService;
     this.uiSettings = options.uiSettings;
+    this.elasticsearch = options.elasticsearch;
   }
 
   private createMaintenanceWindowClient(request: KibanaRequest, withAuth: boolean) {
@@ -47,6 +51,7 @@ export class MaintenanceWindowClientFactory {
       includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
       ...(withAuth ? {} : { excludedExtensions: [SECURITY_EXTENSION_ID] }),
     });
+    const esClient = this.elasticsearch.client.asInternalUser;
 
     const uiSettingClient = this.uiSettings.asScopedToClient(savedObjectsClient);
 
@@ -54,6 +59,7 @@ export class MaintenanceWindowClientFactory {
       logger: this.logger,
       savedObjectsClient,
       uiSettings: uiSettingClient,
+      esClient,
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
         return user?.username ?? null;
