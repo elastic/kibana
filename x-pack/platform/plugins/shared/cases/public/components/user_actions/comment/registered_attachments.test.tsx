@@ -13,7 +13,7 @@ import type {
   CommonAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
-import { AttachmentTypeRegistry } from '../../../../common/registry';
+import { AttachmentRegistry } from '../../../../common/registry';
 import { getMockBuilderArgs } from '../mock';
 import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
 
@@ -32,7 +32,7 @@ const getLazyComponent = () =>
 describe('createRegisteredAttachmentUserActionBuilder', () => {
   const attachmentTypeId = 'test';
   const builderArgs = getMockBuilderArgs();
-  const registry = new AttachmentTypeRegistry<AttachmentType<CommonAttachmentViewProps>>(
+  const registry = new AttachmentRegistry<AttachmentType<CommonAttachmentViewProps>>(
     'test-registry'
   );
 
