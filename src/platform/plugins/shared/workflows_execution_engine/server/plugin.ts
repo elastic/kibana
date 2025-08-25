@@ -41,6 +41,7 @@ import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logg
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 import type { ResumeWorkflowExecutionParams } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import { workflowExecutionLoop } from './workflow_execution_loop';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -210,12 +211,8 @@ async function createContainer(
 
   const contextManager = new WorkflowContextManager({
     spaceId: workflowExecution.spaceId,
-    workflowRunId: workflowExecution.id,
     workflow: workflowExecution.workflowDefinition,
     event: workflowExecution.context.event,
-    logger,
-    workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
-    esClient,
     workflowExecutionGraph,
     workflowExecutionRuntime: workflowRuntime,
   });
@@ -240,40 +237,4 @@ async function createContainer(
     workflowTaskManager,
     nodesFactory,
   };
-}
-
-async function workflowExecutionLoop(
-  workflowRuntime: WorkflowExecutionRuntimeManager,
-  workflowLogger: WorkflowEventLogger,
-  nodesFactory: StepFactory
-) {
-  while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
-    const currentNode = workflowRuntime.getCurrentStep();
-    const step = nodesFactory.create(currentNode as any);
-
-    try {
-      await step.run();
-    } catch (error) {
-      // If an unhandled error occurs in a step, the workflow execution is terminated
-      workflowLogger.logError(
-        `Error executing step ${currentNode.id} (${currentNode.name}): ${error.message}`
-      );
-      await workflowRuntime.setStepResult(currentNode.id, {
-        output: null,
-        error: String(error),
-      });
-      await workflowRuntime.finishStep(currentNode.id);
-      break;
-    } finally {
-      try {
-        await workflowRuntime.saveState(); // Ensure state is updated after each step
-      } catch (error) {
-        workflowLogger.logError(
-          `Error saving state after step ${currentNode.id} (${currentNode.name}): ${error.message}`
-        );
-      }
-
-      await workflowLogger.flushEvents();
-    }
-  }
 }
