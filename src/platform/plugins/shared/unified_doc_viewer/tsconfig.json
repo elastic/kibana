@@ -54,8 +54,7 @@
     "@kbn/object-utils",
     "@kbn/es-query",
     "@kbn/css-utils",
-    "@kbn/storybook",
-    "@kbn/saved-search-component"
+    "@kbn/storybook"
   ],
   "exclude": ["target/**/*"]
 }
