@@ -7,6 +7,9 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
+import { type DataView } from '@kbn/data-views-plugin/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import { lastValueFrom } from 'rxjs';
 import type { CaseCustomField, User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
@@ -659,4 +662,42 @@ export const getSimilarCases = async ({
   );
 
   return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
+};
+
+export const searchEvents = async (
+  signal: AbortSignal | undefined,
+  dataView: DataView | undefined,
+  parameters: {
+    caseId: string;
+    columns: string[];
+    eventIds: string[];
+  }
+) => {
+  if (!dataView) {
+    throw new Error('data view is not defined');
+  }
+
+  const { data } = KibanaServices.get();
+
+  const response = await lastValueFrom(
+    data.search.search({
+      params: {
+        index: dataView.getIndexPattern(),
+        body: {
+          query: {
+            ids: {
+              values: parameters.eventIds,
+            },
+          },
+        },
+        fields: parameters.columns,
+      },
+    })
+  );
+
+  if (signal?.aborted) {
+    throw new AbortError();
+  }
+
+  return response;
 };

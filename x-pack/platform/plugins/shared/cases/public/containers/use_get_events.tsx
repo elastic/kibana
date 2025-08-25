@@ -6,13 +6,12 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import type { IEsSearchResponse } from '@kbn/search-types';
 import { type DataView } from '@kbn/data-views-plugin/public';
-import { useToasts, KibanaServices } from '../common/lib/kibana';
-import type { ServerError } from '../types';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import { useToasts } from '../common/lib/kibana';
 import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
+import { searchEvents } from './api';
 
 export const useGetEvents = (
   dataView: DataView | undefined,
@@ -29,47 +28,16 @@ export const useGetEvents = (
       ...parameters.eventIds,
       ...parameters.columns,
     ]),
-    ({ signal }) => {
-      const { data } = KibanaServices.get();
-
-      const observable = data.search.search({
-        params: {
-          index: dataView?.getIndexPattern(),
-          body: {
-            query: {
-              ids: {
-                values: parameters.eventIds,
-              },
-            },
-          },
-          fields: parameters.columns,
-        },
-      });
-
-      return new Promise<IEsSearchResponse>((resolve, reject) => {
-        observable.subscribe((results) => {
-          if (results.isPartial) {
-            return;
-          }
-
-          if (signal?.aborted) {
-            return reject(new AbortError());
-          }
-
-          return resolve(results);
-        });
-      });
-    },
+    ({ signal }) => searchEvents(signal, dataView, parameters),
     {
-      onError: (error: ServerError) => {
-        if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            {
-              title: i18n.ERROR_TITLE,
-            }
-          );
+      onError: (error: Error) => {
+        if (error instanceof AbortError) {
+          return;
         }
+
+        toasts.addError(error, {
+          title: i18n.ERROR_TITLE,
+        });
       },
     }
   );
