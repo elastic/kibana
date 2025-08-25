@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { EuiIcon, EuiSwitch } from '@elastic/eui';
+import React from 'react';
+
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { BuildFlavor } from '@kbn/config';
 import type {
@@ -15,6 +18,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DeveloperToolbarStart } from '@kbn/developer-toolbar-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +34,7 @@ import type {
 } from '@kbn/security-plugin-types-public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { UserProfilesProvider, useUpdateUserProfile } from '@kbn/user-profile-components';
 
 import { accountManagementApp, UserProfileAPIClient } from './account_management';
 import { AnalyticsService } from './analytics';
@@ -62,6 +67,7 @@ export interface PluginStartDependencies {
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
   cloud?: CloudStart;
+  developerToolbar?: DeveloperToolbarStart;
 }
 
 export class SecurityPlugin
@@ -190,7 +196,7 @@ export class SecurityPlugin
 
   public start(
     core: CoreStart,
-    { management, share }: PluginStartDependencies
+    { management, share, developerToolbar }: PluginStartDependencies
   ): SecurityPluginStart {
     const { application, http, notifications } = core;
     const { anonymousPaths } = http;
@@ -217,32 +223,84 @@ export class SecurityPlugin
     }
 
     this.analyticsService.start({ http: core.http });
+    const userProfilesApi = {
+      getCurrent: this.securityApiClients.userProfiles.getCurrent.bind(
+        this.securityApiClients.userProfiles
+      ),
+      bulkGet: this.securityApiClients.userProfiles.bulkGet.bind(
+        this.securityApiClients.userProfiles
+      ),
+      suggest: this.securityApiClients.userProfiles.suggest.bind(
+        this.securityApiClients.userProfiles
+      ),
+      update: this.securityApiClients.userProfiles.update.bind(
+        this.securityApiClients.userProfiles
+      ),
+      partialUpdate: this.securityApiClients.userProfiles.partialUpdate.bind(
+        this.securityApiClients.userProfiles
+      ),
+      userProfile$: this.securityApiClients.userProfiles.userProfile$,
+      userProfileLoaded$: this.securityApiClients.userProfiles.userProfileLoaded$,
+      enabled$: this.securityApiClients.userProfiles.enabled$,
+    };
+
+    if (developerToolbar) {
+      function ThemeSwitcher() {
+        const { update, userProfileData } = useUpdateUserProfile({
+          pageReloadChecker: (previous, next) => {
+            // If the dark mode setting changes, we need to reload the page to apply the new theme
+            return (
+              previous?.userSettings?.darkMode !== next.userSettings?.darkMode ||
+              (previous === undefined && next.userSettings?.darkMode !== 'light')
+            );
+          },
+        });
+        const isDark = userProfileData?.userSettings?.darkMode === 'dark';
+        const isLight = userProfileData?.userSettings?.darkMode === 'light';
+
+        return (
+          <>
+            <EuiIcon
+              type={isDark ? 'moon' : isLight ? 'sun' : 'contrast'}
+              size={'m'}
+              style={{ marginRight: 4 }}
+            />
+            <EuiSwitch
+              showLabel={false}
+              label={'Switch Dark/Light Theme'}
+              checked={isDark}
+              onChange={async () => {
+                await update({
+                  userSettings: {
+                    darkMode: isDark ? 'light' : 'dark',
+                  },
+                });
+                location.reload();
+              }}
+              compressed
+            />
+          </>
+        );
+      }
+
+      developerToolbar.registerAction({
+        id: 'theme-switcher',
+        children: (
+          <UserProfilesProvider userProfileApiClient={userProfilesApi} notifySuccess={() => {}}>
+            <ThemeSwitcher />
+          </UserProfilesProvider>
+        ),
+        priority: 10,
+        tooltip: 'Switch Dark/Light Theme',
+      });
+    }
 
     return {
       uiApi: getUiApi({ core }),
       navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
       authz: this.authz as AuthorizationServiceStart,
-      userProfiles: {
-        getCurrent: this.securityApiClients.userProfiles.getCurrent.bind(
-          this.securityApiClients.userProfiles
-        ),
-        bulkGet: this.securityApiClients.userProfiles.bulkGet.bind(
-          this.securityApiClients.userProfiles
-        ),
-        suggest: this.securityApiClients.userProfiles.suggest.bind(
-          this.securityApiClients.userProfiles
-        ),
-        update: this.securityApiClients.userProfiles.update.bind(
-          this.securityApiClients.userProfiles
-        ),
-        partialUpdate: this.securityApiClients.userProfiles.partialUpdate.bind(
-          this.securityApiClients.userProfiles
-        ),
-        userProfile$: this.securityApiClients.userProfiles.userProfile$,
-        userProfileLoaded$: this.securityApiClients.userProfiles.userProfileLoaded$,
-        enabled$: this.securityApiClients.userProfiles.enabled$,
-      },
+      userProfiles: userProfilesApi,
     };
   }
 
