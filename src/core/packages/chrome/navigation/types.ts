@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+
+export type BadgeType = 'beta' | 'techPreview';
 
 export interface SecondaryMenuItem {
   'data-test-subj'?: string;
-  external?: boolean;
+  badgeType?: BadgeType;
   href: string;
   id: string;
+  isExternal?: boolean;
   label: string;
 }
 
@@ -25,12 +28,14 @@ export interface SecondaryMenuSection {
 
 export interface MenuItem {
   'data-test-subj'?: string;
+  badgeType?: BadgeType;
   href: string;
   iconType: IconType;
   id: string;
   label: string;
   sections?: SecondaryMenuSection[];
 }
+
 export interface NavigationStructure {
   footerItems: MenuItem[];
   primaryItems: MenuItem[];

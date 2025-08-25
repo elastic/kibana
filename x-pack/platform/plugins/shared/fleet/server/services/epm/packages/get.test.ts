@@ -183,48 +183,25 @@ describe('When using EPM `get` services', () => {
         },
       ];
       soClient.find.mockImplementation(async ({ page = 1, perPage = 20 }) => {
-        let savedObjectsResponse: typeof savedObjects;
-
-        switch (page) {
-          case 1:
-            savedObjectsResponse = [savedObjects[0]];
-            break;
-          case 2:
-            savedObjectsResponse = savedObjects.slice(1);
-            break;
-          default:
-            savedObjectsResponse = [];
-        }
-
         return {
           page,
           per_page: perPage,
-          total: 1500,
-          saved_objects: savedObjectsResponse,
+          total: 4,
+          saved_objects: savedObjects,
         };
       });
     });
 
     it('should query and paginate SO using package name as filter', async () => {
       await getPackageUsageStats({ savedObjectsClient: soClient, pkgName: 'system' });
-      expect(soClient.find).toHaveBeenNthCalledWith(1, {
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        perPage: 1000,
-        page: 1,
-        filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: system`,
-      });
-      expect(soClient.find).toHaveBeenNthCalledWith(2, {
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        perPage: 1000,
-        page: 2,
-        filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: system`,
-      });
-      expect(soClient.find).toHaveBeenNthCalledWith(3, {
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        perPage: 1000,
-        page: 3,
-        filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: system`,
-      });
+      expect(soClient.find).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          perPage: 10000,
+          filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: system`,
+        })
+      );
     });
 
     it('should return count of unique agent policies', async () => {
@@ -232,6 +209,7 @@ describe('When using EPM `get` services', () => {
         await getPackageUsageStats({ savedObjectsClient: soClient, pkgName: 'system' })
       ).toEqual({
         agent_policy_count: 3,
+        package_policy_count: 4,
       });
     });
   });
@@ -1127,6 +1105,62 @@ owner: elastic`,
           },
         ],
       });
+    });
+
+    it('should throw a not found error if package contains only excluded data streams type', async () => {
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          excludeDataStreamTypes: ['metrics'],
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
+        name: 'nginx',
+        version: '1.0.0',
+      } as RegistryPackage);
+      const packageInfo = {
+        name: 'nginx',
+        version: '1.0.0',
+        assets: [],
+        data_streams: [
+          {
+            dataset: 'nginx.stubstatus',
+            type: 'metrics',
+            namespace: 'default',
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'nginx',
+            inputs: [
+              {
+                type: 'nginx/metrics',
+              },
+              {
+                type: 'logfile',
+              },
+            ],
+          },
+        ],
+      } as unknown as RegistryPackage;
+      MockRegistry.fetchInfo.mockResolvedValue(packageInfo);
+      MockRegistry.getPackage.mockResolvedValue({
+        paths: [],
+        assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+        packageInfo,
+      });
+
+      await expect(
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'nginx',
+          pkgVersion: '1.0.0',
+        })
+      ).rejects.toThrowError(PackageNotFoundError);
     });
 
     it('should do nothing if no excluded data streams', async () => {

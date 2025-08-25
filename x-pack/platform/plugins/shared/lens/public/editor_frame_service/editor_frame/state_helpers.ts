@@ -6,16 +6,16 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { Ast } from '@kbn/interpreter';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { Ast } from '@kbn/interpreter';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
   type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
@@ -34,7 +34,7 @@ import type {
   SuggestionRequest,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
-import { LensDocument } from '../../persistence';
+import type { LensDocument } from '../../persistence';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
 import type { DatasourceState, DatasourceStates, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';

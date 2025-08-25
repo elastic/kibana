@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
 
-import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
-import { DurationDistributionChartData } from '@kbn/apm-ui-shared';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
+import type { DurationDistributionChartData } from '@kbn/apm-ui-shared';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { HistogramItem } from '@kbn/apm-types-shared';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';

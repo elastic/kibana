@@ -15,7 +15,10 @@ import type {
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import { isSupportedConnector } from '@kbn/inference-common';
-import { getDefaultAIConnectorSetting } from '@kbn/security-solution-plugin/server/ui_settings';
+import {
+  getDefaultAIConnectorSetting,
+  getDefaultValueReportSettings,
+} from '@kbn/security-solution-plugin/server/ui_settings';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
@@ -103,9 +106,10 @@ export class SecuritySolutionServerlessPlugin
               (connector: Connector) => isSupportedConnector(connector)
             );
             const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
-            if (defaultAIConnectorSetting !== null) {
-              coreSetup.uiSettings.register(defaultAIConnectorSetting);
-            }
+            coreSetup.uiSettings.register({
+              ...(defaultAIConnectorSetting !== null ? defaultAIConnectorSetting : {}),
+              ...getDefaultValueReportSettings(),
+            });
           } catch (error) {
             this.logger.error(`Error registering default AI connector: ${error}`);
           }

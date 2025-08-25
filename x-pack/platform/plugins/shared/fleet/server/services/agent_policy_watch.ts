@@ -7,7 +7,7 @@
 
 import type { Subscription } from 'rxjs';
 import type { Logger, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import pRetry from 'p-retry';
 

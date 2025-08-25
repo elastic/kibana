@@ -16,7 +16,6 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
 }));
 
 const defaultProps = {
-  attackAlertIds: ['id1', 'id2'],
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-02T00:00:00.000Z',
   minutesPerAlert: 5,
@@ -36,7 +35,6 @@ describe('TimeSavedMetric', () => {
         'data-test-subj': 'time-saved-metric',
         timerange: { from: defaultProps.from, to: defaultProps.to },
         id: expect.stringContaining('TimeSavedMetricQuery-metric'),
-        extraOptions: expect.objectContaining({ filters: expect.any(Array) }),
       }),
       {}
     );

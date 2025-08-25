@@ -6,8 +6,8 @@
  */
 
 import crypto from 'crypto';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import {
-  RequestHandlerContext,
   type CoreSetup,
   type CoreStart,
   type Logger,

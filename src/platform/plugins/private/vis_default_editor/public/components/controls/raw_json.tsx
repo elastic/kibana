@@ -15,7 +15,7 @@ import { XJsonLang } from '@kbn/monaco';
 import { CodeEditor } from '@kbn/code-editor';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 function RawJsonParamEditor({
   showValidation,

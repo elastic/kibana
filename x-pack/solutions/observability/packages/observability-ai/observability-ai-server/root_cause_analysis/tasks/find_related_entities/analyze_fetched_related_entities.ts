@@ -12,10 +12,10 @@ import type {
 } from '@kbn/ai-tools';
 import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import { dateRangeQuery, kqlQuery } from '@kbn/es-query';
-import { InferenceClient } from '@kbn/inference-common';
-import { Logger } from '@kbn/logging';
+import type { InferenceClient } from '@kbn/inference-common';
+import type { Logger } from '@kbn/logging';
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { chunk, isEmpty, isEqual } from 'lodash';
 import pLimit from 'p-limit';
 import {
@@ -27,8 +27,8 @@ import { chunkOutputCalls } from '../../util/chunk_output_calls';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
 import { toBlockquote } from '../../util/to_blockquote';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
-import { RelatedEntityKeywordSearch } from './write_keyword_searches_for_related_entities';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { RelatedEntityKeywordSearch } from './write_keyword_searches_for_related_entities';
 
 export interface RelatedEntityFromSearchResults {
   entity: { [x: string]: string };

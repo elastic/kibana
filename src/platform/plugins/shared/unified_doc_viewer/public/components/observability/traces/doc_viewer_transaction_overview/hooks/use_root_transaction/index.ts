@@ -18,7 +18,7 @@ import {
   TRANSACTION_DURATION_FIELD,
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 

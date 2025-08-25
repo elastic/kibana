@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
+import type { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { anonymizeMessages } from './anonymize_messages';
-import {
+import type {
   AnonymizationRule,
   AssistantMessage,
   Message,
-  MessageRole,
   UserMessage,
 } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
 import { getEntityMask } from './get_entity_mask';
 import { RegexWorkerService } from './regex_worker_service';
-import { AnonymizationWorkerConfig } from '../../config';
+import type { AnonymizationWorkerConfig } from '../../config';
 const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),

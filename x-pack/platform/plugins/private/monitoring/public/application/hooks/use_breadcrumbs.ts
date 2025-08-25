@@ -7,8 +7,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import createContainer from 'constate';
-import { History } from 'history';
-import { Observable } from 'rxjs';
+import type { History } from 'history';
+import type { Observable } from 'rxjs';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface Crumb {

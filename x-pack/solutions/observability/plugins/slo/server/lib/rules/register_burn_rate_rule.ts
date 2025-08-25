@@ -6,9 +6,9 @@
  */
 
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import { IBasePath, Logger } from '@kbn/core/server';
-import { IRuleDataService } from '@kbn/rule-registry-plugin/server';
-import { CustomThresholdLocators } from '@kbn/observability-plugin/server';
+import type { IBasePath, Logger } from '@kbn/core/server';
+import type { IRuleDataService } from '@kbn/rule-registry-plugin/server';
+import type { CustomThresholdLocators } from '@kbn/observability-plugin/server';
 import { sloBurnRateRuleType } from './slo_burn_rate';
 
 export function registerBurnRateRule(

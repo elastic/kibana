@@ -35,7 +35,7 @@ import { timefilterControl } from './timefilterControl';
 import { heatmap } from './heatmap';
 import { pieVis } from './pie_vis';
 
-import { SetupInitializer } from '../../plugin';
+import type { SetupInitializer } from '../../plugin';
 
 export const viewSpecs = [
   dropdownControl,

@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
   EuiSelectable,
-  EuiSelectableOption,
-  EuiSelectableProps,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';

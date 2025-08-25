@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Anonymization } from '@kbn/inference-common';
+import type { Anonymization } from '@kbn/inference-common';
 
 /**
  * AnonymizationRecord are named strings that will be anonymized
@@ -29,4 +29,14 @@ export interface AnonymizationRecord {
 export interface AnonymizationState {
   records: Array<Record<string, string>>;
   anonymizations: Anonymization[];
+}
+
+export interface DetectedMatch {
+  recordIndex: number;
+  recordKey: string;
+  start: number;
+  end: number;
+  matchValue: string;
+  class_name: string;
+  ruleIndex: number;
 }

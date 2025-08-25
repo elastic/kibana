@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Params } from '../types';
+import type { Params } from '../types';
 import { append } from '../pipeline/append';
 
 export function stats<TQuery extends string, TParams extends Params<TQuery>>(

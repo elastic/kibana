@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Optional } from 'utility-types';
-import { IKbnPalette, KbnPaletteType } from './types';
+import type { Optional } from 'utility-types';
+import type { IKbnPalette, KbnPaletteType } from './types';
 
 export type KbnBasePaletteConfig = Optional<
   Pick<IKbnPalette, 'id' | 'name' | 'tag' | 'colorCount' | 'legacy' | 'aliases' | 'standalone'>,
