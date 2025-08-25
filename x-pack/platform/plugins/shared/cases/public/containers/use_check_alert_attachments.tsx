@@ -37,7 +37,7 @@ export const useCheckAlertAttachments = ({
     selectedAlerts,
     cases.map(({ id }) => id)
   );
-  console.log('use test query!',cases, useTestQueryRes, typeof useTestQueryRes);
+  console.log('use test query!', cases, useTestQueryRes, typeof useTestQueryRes);
   const findActionsForCasesResult = useFindCasesUserActions(
     cases.map((caseInfo) => ({
       caseId: caseInfo.id,

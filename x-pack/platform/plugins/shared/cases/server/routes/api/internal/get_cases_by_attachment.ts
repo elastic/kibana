@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { createCasesRoute } from '../create_cases_route';
 import { INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL } from '../../../../common/constants';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
