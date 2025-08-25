@@ -37,6 +37,15 @@ const TitleItem = styled(EuiDescriptionListTitle)`
   }
 `;
 
+const formatPageLoadValue = (val: number) => {
+  const valInMs = val / 1000;
+  if (valInMs > 1000) {
+    return (valInMs / 1000).toFixed(2) + ' sec';
+  }
+
+  return (valInMs / 1000).toFixed(0) + ' ms';
+};
+
 function MapToolTipComponent({
   closeTooltip,
   features = [],
@@ -46,15 +55,6 @@ function MapToolTipComponent({
 
   const [regionName, setRegionName] = useState<string>(featureId as string);
   const [pageLoadDuration, setPageLoadDuration] = useState<string>('');
-
-  const formatPageLoadValue = (val: number) => {
-    const valInMs = val / 1000;
-    if (valInMs > 1000) {
-      return (valInMs / 1000).toFixed(2) + ' sec';
-    }
-
-    return (valInMs / 1000).toFixed(0) + ' ms';
-  };
 
   useEffect(() => {
     const loadRegionInfo = async () => {
@@ -77,7 +77,7 @@ function MapToolTipComponent({
       }
     };
     loadRegionInfo();
-  });
+  }, [layerId, loadFeatureProperties, mbProperties]);
 
   return (
     <EuiOutsideClickDetector
