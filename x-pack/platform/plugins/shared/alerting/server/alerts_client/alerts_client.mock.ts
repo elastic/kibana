@@ -22,6 +22,7 @@ const createAlertsClientMock = () => {
       getSummarizedAlerts: jest.fn(),
       factory: jest.fn(),
       client: jest.fn(),
+      updatePersistedAlertsWithMaintenanceWindowIds: jest.fn(),
     };
   });
 };
