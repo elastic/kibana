@@ -120,6 +120,9 @@ export const createHandler =
     let esIncomingMessage: IncomingMessage;
 
     // Use the requested host if provided, otherwise use the first configured host
+    log.error(`#################################`);
+    log.error(`Using Elasticsearch host: ${requestHost} | ${JSON.stringify(hosts)}`);
+    log.error(`#################################`);
     const host = requestHost || hosts[0];
     try {
       const uri = toURL(host, path);
