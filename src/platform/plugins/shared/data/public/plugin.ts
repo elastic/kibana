@@ -207,7 +207,6 @@ export class DataPublicPlugin
       },
       datatableUtilities,
       fieldFormats,
-      indexPatterns: dataViews,
       dataViews,
       query,
       search,
