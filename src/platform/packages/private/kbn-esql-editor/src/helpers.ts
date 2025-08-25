@@ -9,7 +9,8 @@
 
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { UseEuiTheme, euiShadow } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { CoreStart } from '@kbn/core/public';

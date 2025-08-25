@@ -11,7 +11,7 @@ import { EuiCard, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { reactRouterNavigate } from '../../../../../shared_imports';
-import { DeprecationSource } from '../../../../../../common/types';
+import type { DeprecationSource } from '../../../../../../common/types';
 import { getDeprecationsUpperLimit } from '../../../../lib/utils';
 import { LoadingIssuesError } from './loading_issues_error';
 import { NoDeprecationIssues } from './no_deprecation_issues';

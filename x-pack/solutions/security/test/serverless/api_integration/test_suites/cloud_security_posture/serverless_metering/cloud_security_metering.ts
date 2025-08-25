@@ -10,13 +10,14 @@ import {
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
 } from '@kbn/cloud-security-posture-common';
-import * as http from 'http';
+import type * as http from 'http';
 import { createPackagePolicy } from '../helper';
 import { EsIndexDataProvider } from '../utils';
 import { getMockFindings } from './mock_data';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../services';
-import { UsageRecord, getInterceptedRequestPayload, setupMockServer } from './mock_usage_server';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { RoleCredentials } from '../../../services';
+import type { UsageRecord } from './mock_usage_server';
+import { getInterceptedRequestPayload, setupMockServer } from './mock_usage_server';
 
 export default function (providerContext: FtrProviderContext) {
   const mockUsageApiApp = setupMockServer();

@@ -6,11 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { ChatCompletionMessageParam } from 'openai/resources';
+import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
+import type { ChatCompletionMessageParam } from 'openai/resources';
 import { last } from 'lodash';
-import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
+import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import type { LlmProxy } from '../../utils/create_llm_proxy';
+import { createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { installProductDoc, uninstallProductDoc } from '../../utils/product_doc_base';

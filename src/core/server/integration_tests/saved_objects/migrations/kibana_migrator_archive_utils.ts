@@ -15,8 +15,8 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 const execPromise = promisify(exec);
 
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   defaultKibanaIndex,
   getKibanaMigratorTestKit,

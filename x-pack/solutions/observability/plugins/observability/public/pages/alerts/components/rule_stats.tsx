@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { RulesParams } from '../../../locators/rules';
+import type { RulesParams } from '../../../locators/rules';
 
 export interface RuleStatsState {
   total: number;

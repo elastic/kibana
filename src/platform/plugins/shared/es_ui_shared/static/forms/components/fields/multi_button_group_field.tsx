@@ -8,9 +8,11 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup, EuiButtonGroupOptionProps, EuiFormRow } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import type { FieldHook } from '../../hook_form_lib';
+import { getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 export interface MultiButtonGroupFieldValue {
   [id: string]: boolean;

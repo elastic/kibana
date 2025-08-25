@@ -9,7 +9,7 @@
 
 import { getMockProperty, mockSchema } from './test_helpers';
 import { convertUrlProperties } from './convert_url_properties';
-import { SpecificationTypes } from '../types';
+import type { SpecificationTypes } from '../types';
 
 describe('convertUrlProperties', () => {
   it('converts builtin types', () => {

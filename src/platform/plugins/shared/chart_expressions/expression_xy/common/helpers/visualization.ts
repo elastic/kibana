@@ -9,7 +9,7 @@
 
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { XScaleTypes } from '../constants';
-import { CommonXYDataLayerConfigResult } from '../types';
+import type { CommonXYDataLayerConfigResult } from '../types';
 
 export function isTimeChart(layers: CommonXYDataLayerConfigResult[]) {
   return layers.every<CommonXYDataLayerConfigResult>(

@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  Message,
-  MessageRole,
-  ToolChoiceType,
-  ToolSchemaType,
-  type ToolOptions,
-} from '@kbn/inference-common';
+import type { Message, ToolSchemaType } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType, type ToolOptions } from '@kbn/inference-common';
 import type { ToolChoice as ConverseBedRockToolChoice } from '@aws-sdk/client-bedrock-runtime';
 
 export const toolChoiceToConverse = (

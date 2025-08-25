@@ -14,11 +14,11 @@ import type {
   SearchEmbeddableSerializedState,
   SearchEmbeddableApi,
 } from '@kbn/discover-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { SavedSearchComponentProps } from '../types';
+import type { SavedSearchComponentProps } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
 const TIMESTAMP_FIELD = '@timestamp';

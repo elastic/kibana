@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CodeEditorProps, CodeEditor } from '@kbn/code-editor';
+import type { CodeEditorProps } from '@kbn/code-editor';
+import { CodeEditor } from '@kbn/code-editor';
 import { monaco } from '@kbn/monaco';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { combineLatest } from 'rxjs';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { debounce } from 'lodash';
-import { DraftGrokExpression, GrokCollection } from '../models';
+import type { DraftGrokExpression, GrokCollection } from '../models';
 import { semanticNameLabel, patternNameLabel, typeNameLabel } from './constants';
 import { colourToClassName } from './utils';
 
@@ -50,8 +51,8 @@ export const SampleInput = ({
 
   // Monaco doesn't support dynamic inline styles, so we need to generate static styles.
   const colourPaletteStyles = useMemo(() => {
-    return grokCollection.getColourPaletteStyles();
-  }, [grokCollection]);
+    return grokCollection.getColourPaletteStyles(eui.euiTheme);
+  }, [eui.euiTheme, grokCollection]);
 
   useEffect(() => {
     const subscription = combineLatest(

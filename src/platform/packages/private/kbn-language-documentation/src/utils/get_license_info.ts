@@ -6,8 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { LicenseType } from '@kbn/licensing-types';
-import { CommandDefinition, FunctionDefinition, LicenseInfo, MultipleLicenseInfo } from '../types';
+import type { LicenseType } from '@kbn/licensing-types';
+import type {
+  CommandDefinition,
+  FunctionDefinition,
+  LicenseInfo,
+  MultipleLicenseInfo,
+} from '../types';
 import { aggregateLicensesFromSignatures } from './aggregate_licenses_from_signatures';
 
 /**

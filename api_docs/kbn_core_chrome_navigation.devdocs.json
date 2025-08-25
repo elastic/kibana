@@ -153,6 +153,21 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.MenuItem.badgeType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "badgeType",
+            "description": [],
+            "signature": [
+              "BadgeType",
+              " | undefined"
+            ],
+            "path": "src/core/packages/chrome/navigation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
             "id": "def-public.MenuItem.href",
             "type": "string",
             "tags": [],
@@ -396,13 +411,14 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-navigation",
-            "id": "def-public.SecondaryMenuItem.external",
+            "id": "def-public.SecondaryMenuItem.badgeType",
             "type": "CompoundType",
             "tags": [],
-            "label": "external",
+            "label": "badgeType",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "BadgeType",
+              " | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,
@@ -426,6 +442,20 @@
             "tags": [],
             "label": "id",
             "description": [],
+            "path": "src/core/packages/chrome/navigation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.SecondaryMenuItem.isExternal",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isExternal",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -566,7 +596,23 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-navigation",
+        "id": "def-public.BadgeType",
+        "type": "Type",
+        "tags": [],
+        "label": "BadgeType",
+        "description": [],
+        "signature": [
+          "\"beta\" | \"techPreview\""
+        ],
+        "path": "src/core/packages/chrome/navigation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import {
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type {
   Plugin,
   CoreSetup,
   CoreStart,
@@ -14,14 +14,14 @@ import {
   Logger,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { mlSavedObjectType } from '@kbn/upgrade-assistant-pkg-server';
-import { ReindexServiceServerPluginStart } from '@kbn/reindex-service-plugin/server';
+import type { ReindexServiceServerPluginStart } from '@kbn/reindex-service-plugin/server';
 import type { DataSourceExclusions, FeatureSet } from '../common/types';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
@@ -29,7 +29,7 @@ import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { registerRoutes } from './routes/register_routes';
 import { handleEsError } from './shared_imports';
-import { RouteDependencies } from './types';
+import type { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
 import { defaultExclusions } from './lib/data_source_exclusions';
 

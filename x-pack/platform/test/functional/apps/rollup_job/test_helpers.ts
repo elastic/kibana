@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Client from '@elastic/elasticsearch/lib/client';
+import type Client from '@elastic/elasticsearch/lib/client';
 
 export const MOCK_ROLLUP_INDEX_NAME = 'mock-rollup-index';
 

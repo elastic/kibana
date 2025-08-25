@@ -11,11 +11,11 @@ import {
   ToolType,
   type AgentDefinition,
   type ToolSelection,
-  allToolsSelectionWildcard,
+  defaultAgentToolIds,
 } from '@kbn/onechat-common';
 import { useOnechatServices } from '../use_onechat_service';
 import { useOnechatAgentById } from './use_agent_by_id';
-import { useOnechatTools } from '../tools/use_tools';
+import { useToolsService } from '../tools/use_tools';
 import { queryKeys } from '../../query_keys';
 
 export type AgentEditState = Omit<AgentDefinition, 'type'>;
@@ -23,7 +23,7 @@ export type AgentEditState = Omit<AgentDefinition, 'type'>;
 const defaultToolSelection: ToolSelection[] = [
   {
     type: ToolType.builtin,
-    tool_ids: [allToolsSelectionWildcard],
+    tool_ids: [...defaultAgentToolIds],
   },
 ];
 
@@ -50,7 +50,11 @@ export function useAgentEdit({
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
 
-  const { tools, isLoading: toolsLoading, error: toolsError } = useOnechatTools();
+  const {
+    tools,
+    isLoading: toolsLoading,
+    error: toolsError,
+  } = useToolsService({ includeSystemTools: true });
 
   const { agent, isLoading: agentLoading, error: agentError } = useOnechatAgentById(agentId || '');
 

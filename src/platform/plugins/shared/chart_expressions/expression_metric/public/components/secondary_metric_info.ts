@@ -13,7 +13,7 @@ import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/commo
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { VisParams } from '@kbn/visualizations-plugin/common';
 
-import { FormatOverrides } from './helpers';
+import type { FormatOverrides } from './helpers';
 
 export interface TrendConfig {
   showIcon: boolean;

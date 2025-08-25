@@ -8,14 +8,14 @@
  */
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { omit } from 'lodash';
 import { EuiFlyoutBody } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
 import { EsqlControlType, VariableNamePrefix } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { monaco } from '@kbn/monaco';
-import { omit } from 'lodash';
+import type { monaco } from '@kbn/monaco';
 import { ValueControlForm } from './value_control_form';
 import { Header, ControlType, VariableName, Footer } from './shared_form_components';
 import { IdentifierControlForm } from './identifier_control_form';
