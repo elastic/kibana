@@ -7,9 +7,10 @@
 
 import { useCallback } from 'react';
 import { useUpdateRule } from '@kbn/response-ops-rule-form/src/common/hooks';
-import { UpdateRuleBody } from '@kbn/response-ops-rule-form/src/common/apis';
-import { Rule, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { IHttpFetchError } from '@kbn/core/public';
+import type { UpdateRuleBody } from '@kbn/response-ops-rule-form/src/common/apis';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import type { IHttpFetchError } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useState } from 'react';
 import type { RelatedDashboard } from '@kbn/observability-schema';

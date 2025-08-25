@@ -9,24 +9,21 @@ jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_indices_state_check', () => 
   esIndicesStateCheck: jest.fn(),
 }));
 import { BehaviorSubject } from 'rxjs';
-import { TransportResult } from '@elastic/elasticsearch';
-import { Logger } from '@kbn/core/server';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import {
-  ReindexOperation,
-  ReindexSavedObject,
-  ReindexStatus,
-  ReindexStep,
-} from '@kbn/upgrade-assistant-pkg-common';
+import type { ReindexOperation, ReindexSavedObject } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import { getMockVersionInfo } from '../__fixtures__/version';
 import { esIndicesStateCheck, type Version } from '@kbn/upgrade-assistant-pkg-server';
 
-import { ReindexService, reindexServiceFactory } from './reindex_service';
+import type { ReindexService } from './reindex_service';
+import { reindexServiceFactory } from './reindex_service';
 
 const versionMock = {
   getMajorVersion: jest.fn().mockReturnValue(8),

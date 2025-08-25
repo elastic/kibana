@@ -8,7 +8,7 @@
  */
 
 import { FeaturesRegistry } from '../../../common';
-import { DiscoverFeature } from './types';
+import type { DiscoverFeature } from './types';
 
 export class DiscoverFeaturesService {
   private registry: FeaturesRegistry<DiscoverFeature> = new FeaturesRegistry();

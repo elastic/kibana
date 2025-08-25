@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps, useState } from 'react';
+import type { ComponentProps } from 'react';
+import React, { useState } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRestorableStateProvider } from './restorable_state_provider';

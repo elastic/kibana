@@ -7,18 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { YAMLParseError, parseDocument } from 'yaml';
+import type { Scalar } from 'yaml';
+import { YAMLParseError, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
-import _ from 'lodash';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { getContextForPath } from '../../../features/workflow_context/lib/get_context_for_path';
-import { MUSTACHE_REGEX_GLOBAL, UNFINISHED_MUSTACHE_REGEX_GLOBAL } from './regex';
+import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
+import {
+  MUSTACHE_REGEX_GLOBAL,
+  PROPERTY_PATH_REGEX,
+  UNFINISHED_MUSTACHE_REGEX_GLOBAL,
+} from '../../../../common/lib/regex';
+import { getSchemaAtPath, getZodTypeName, parsePath } from '../../../../common/lib/zod_utils';
 
 export interface LineParseResult {
   fullKey: string;
-  matchType: 'at-trigger' | 'mustache-complete' | 'mustache-unfinished' | null;
+  pathSegments: string[] | null;
+  matchType: 'at' | 'bracket-unfinished' | 'mustache-complete' | 'mustache-unfinished' | null;
   match: RegExpMatchArray | null;
 }
 
@@ -35,9 +41,11 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   // Try @ trigger first (e.g., "@const" or "@steps.step1")
   const atMatch = [...lineUpToCursor.matchAll(/@(?<key>\S+?)?\.?(?=\s|$)/g)].pop();
   if (atMatch) {
+    const fullKey = cleanKey(atMatch.groups?.key ?? '');
     return {
-      fullKey: cleanKey(atMatch.groups?.key ?? ''),
-      matchType: 'at-trigger',
+      fullKey,
+      pathSegments: parsePath(fullKey),
+      matchType: 'at',
       match: atMatch,
     };
   }
@@ -45,8 +53,10 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   // Try unfinished mustache (e.g., "{{ consts.api" at end of line)
   const unfinishedMatch = [...lineUpToCursor.matchAll(UNFINISHED_MUSTACHE_REGEX_GLOBAL)].pop();
   if (unfinishedMatch) {
+    const fullKey = cleanKey(unfinishedMatch.groups?.key ?? '');
     return {
-      fullKey: cleanKey(unfinishedMatch.groups?.key ?? ''),
+      fullKey,
+      pathSegments: parsePath(fullKey),
       matchType: 'mustache-unfinished',
       match: unfinishedMatch,
     };
@@ -55,8 +65,10 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   // Try complete mustache (e.g., "{{ consts.apiUrl }}")
   const completeMatch = [...lineUpToCursor.matchAll(MUSTACHE_REGEX_GLOBAL)].pop();
   if (completeMatch) {
+    const fullKey = cleanKey(completeMatch.groups?.key ?? '');
     return {
-      fullKey: cleanKey(completeMatch.groups?.key ?? ''),
+      fullKey,
+      pathSegments: parsePath(fullKey),
       matchType: 'mustache-complete',
       match: completeMatch,
     };
@@ -64,45 +76,50 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
 
   return {
     fullKey: '',
+    pathSegments: [],
     matchType: null,
     match: null,
   };
 }
 
-export function getDetail(fullKey: string, insertText: string) {
-  if (insertText.endsWith('output')) {
-    return 'Step output';
-  }
-  if (insertText.includes('steps')) {
-    return 'State of previous steps';
-  }
-  if (insertText.includes('consts')) {
-    return 'Workflow constants';
-  }
-  return undefined;
-}
-
 export function getSuggestion(
-  fullKey: string,
   key: string,
   context: monaco.languages.CompletionContext,
-  range: monaco.IRange
+  range: monaco.IRange,
+  scalarType: Scalar.Type | null,
+  shouldBeQuoted: boolean,
+  type: string,
+  description?: string
 ): monaco.languages.CompletionItem {
-  const isAt = ['@'].includes(context.triggerCharacter ?? '');
+  let keyToInsert = key;
+  const isAt = context.triggerCharacter === '@';
+  const keyCouldAccessedByDot = PROPERTY_PATH_REGEX.test(key);
+  const removeDot = isAt || !keyCouldAccessedByDot;
+
+  if (!keyCouldAccessedByDot) {
+    // we need to use opposite quote type if we are in a string
+    const q = scalarType === 'QUOTE_DOUBLE' ? "'" : '"';
+    keyToInsert = `[${q}${key}${q}]`;
+  }
+
+  let insertText = keyToInsert;
+  let insertTextRules = monaco.languages.CompletionItemInsertTextRule.None;
+  if (isAt) {
+    insertText = `{{ ${key}$0 }}`;
+    insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+  }
+  if (shouldBeQuoted) {
+    insertText = `"${insertText}"`;
+  }
   // $0 is the cursor position
-  const insertText = isAt ? `{{ ${key}$0 }}` : key;
   return {
     label: key,
-    kind: ['steps', 'consts', 'secrets'].includes(key)
-      ? monaco.languages.CompletionItemKind.Folder
-      : monaco.languages.CompletionItemKind.Field,
+    kind: monaco.languages.CompletionItemKind.Field,
     range,
     insertText,
-    detail: getDetail(fullKey, insertText),
-    insertTextRules: isAt
-      ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-      : monaco.languages.CompletionItemInsertTextRule.None,
-    additionalTextEdits: isAt
+    detail: `${type}` + (description ? `: ${description}` : ''),
+    insertTextRules,
+    additionalTextEdits: removeDot
       ? [
           {
             // remove the @
@@ -123,7 +140,7 @@ export function getCompletionItemProvider(
   workflowYamlSchema: z.ZodSchema
 ): monaco.languages.CompletionItemProvider {
   return {
-    triggerCharacters: ['@', '.', '{'],
+    triggerCharacters: ['@', '.'],
     provideCompletionItems: (model, position, completionContext) => {
       try {
         const { lineNumber } = position;
@@ -150,22 +167,54 @@ export function getCompletionItemProvider(
         }
         const workflowGraph = getWorkflowGraph(result.data);
         const path = getCurrentPath(yamlDocument, absolutePosition);
-        let context = getContextForPath(result.data, workflowGraph, path);
+        const yamlNode = yamlDocument.getIn(path, true);
+        const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
+        // if we are in a plain scalar which starts with { or @, we need to add quotes otherwise template expression will break yaml
+        const shouldBeQuoted =
+          isScalar(yamlNode) &&
+          scalarType === 'PLAIN' &&
+          ((yamlNode?.value as string)?.startsWith('{') ||
+            (yamlNode?.value as string)?.startsWith('@'));
+
+        let context: z.ZodType = getContextSchemaForPath(result.data, workflowGraph, path);
 
         const lineUpToCursor = line.substring(0, position.column - 1);
         const parseResult = parseLineForCompletion(lineUpToCursor);
-        let scopedContext = context;
+        const lastPathSegment = lineUpToCursor.endsWith('.')
+          ? null
+          : parseResult.pathSegments?.pop() ?? null;
 
         if (parseResult.fullKey) {
-          scopedContext = _.get(context, parseResult.fullKey);
-          if (typeof scopedContext === 'object' && scopedContext !== null) {
-            context = scopedContext;
+          const schemaAtPath = getSchemaAtPath(context, parseResult.fullKey, { partial: true });
+          if (schemaAtPath) {
+            context = schemaAtPath;
           }
         }
 
-        Object.keys(context).forEach((key) => {
-          suggestions.push(getSuggestion(parseResult.fullKey, key, completionContext, range));
-        });
+        // currently, we only suggest properties for objects
+        if (!(context instanceof z.ZodObject)) {
+          return {
+            suggestions: [],
+          };
+        }
+
+        for (const [key, currentSchema] of Object.entries(context.shape) as [string, z.ZodType][]) {
+          if (lastPathSegment && !key.startsWith(lastPathSegment)) {
+            return;
+          }
+          const propertyTypeName = getZodTypeName(currentSchema);
+          suggestions.push(
+            getSuggestion(
+              key,
+              completionContext,
+              range,
+              scalarType,
+              shouldBeQuoted,
+              propertyTypeName,
+              currentSchema?.description
+            )
+          );
+        }
 
         return {
           suggestions,

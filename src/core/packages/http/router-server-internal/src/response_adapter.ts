@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   ResponseObject as HapiResponseObject,
   ResponseToolkit as HapiResponseToolkit,
 } from '@hapi/hapi';
 import typeDetect from 'type-detect';
 import Boom from '@hapi/boom';
 import * as stream from 'stream';
-import {
-  ElasticsearchErrorDetails,
-  isResponseError as isElasticsearchResponseError,
-} from '@kbn/es-errors';
-import { HttpResponsePayload, ResponseError, ResponseErrorAttributes } from '@kbn/core-http-server';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import { isResponseError as isElasticsearchResponseError } from '@kbn/es-errors';
+import type {
+  HttpResponsePayload,
+  ResponseError,
+  ResponseErrorAttributes,
+} from '@kbn/core-http-server';
 import { KibanaResponse } from './response';
 
 function setHeaders(response: HapiResponseObject, headers: Record<string, string | string[]> = {}) {

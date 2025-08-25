@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import v8, { HeapInfo } from 'v8';
+import type { HeapInfo } from 'v8';
+import v8 from 'v8';
 import { mockEventLoopDelayMonitor, mockEventLoopUtilizationMonitor } from './process.test.mocks';
 import { ProcessMetricsCollector } from './process';
 import apm from 'elastic-apm-node';

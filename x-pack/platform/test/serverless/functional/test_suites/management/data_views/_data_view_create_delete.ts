@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // TODO: Loading this from `es_archives` in `test_serverless`
       // instead since minor modifications were required
       await esArchiver.loadIfNeeded(
-        'x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern'
+        'x-pack/platform/test/serverless/fixtures/es_archives/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // instead since minor modifications were required
 
       await esArchiver.unload(
-        'x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern'
+        'x-pack/platform/test/serverless/fixtures/es_archives/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'

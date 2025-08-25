@@ -8,7 +8,7 @@
 import React from 'react';
 import { ExecutedStep } from './executed_step';
 import { render } from '../../lib/helper/rtl_helpers';
-import { JourneyStep } from '../../../../common/runtime_types/ping';
+import type { JourneyStep } from '../../../../common/runtime_types/ping';
 
 describe('ExecutedStep', () => {
   let step: JourneyStep;

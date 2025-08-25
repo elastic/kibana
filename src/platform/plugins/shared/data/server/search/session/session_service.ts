@@ -9,7 +9,7 @@
 
 import { notFound } from '@hapi/boom';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
-import {
+import type {
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -23,17 +23,17 @@ import type { AuthenticatedUser } from '@kbn/core/server';
 import { defer } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import { debounce } from 'lodash';
-import {
-  ENHANCED_ES_SEARCH_STRATEGY,
-  SEARCH_SESSION_TYPE,
+import type {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionsFindResponse,
   SearchSessionStatusResponse,
 } from '../../../common';
-import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
+import { ENHANCED_ES_SEARCH_STRATEGY, SEARCH_SESSION_TYPE } from '../../../common';
+import type { ISearchSessionService } from '../..';
+import { NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
-import { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
+import type { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
 import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {

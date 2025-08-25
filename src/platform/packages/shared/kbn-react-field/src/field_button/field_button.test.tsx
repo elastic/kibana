@@ -10,7 +10,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FieldButton, FieldButtonProps } from './field_button';
+import type { FieldButtonProps } from './field_button';
+import { FieldButton } from './field_button';
 
 const noop = () => {};
 

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { defer, switchMap, Observable } from 'rxjs';
-import { Span } from '@opentelemetry/api';
+import type { Observable } from 'rxjs';
+import { defer, switchMap } from 'rxjs';
+import type { Span } from '@opentelemetry/api';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
