@@ -6,9 +6,7 @@
  */
 
 import { AppStatus } from '@kbn/core-application-browser';
-import {
-  OBSERVABILITY_LOGS_EXPLORER_APP_ID,
-} from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   type SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
