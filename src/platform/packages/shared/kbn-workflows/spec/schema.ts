@@ -266,6 +266,7 @@ export const WorkflowSchema = z.object({
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 
 export const WorkflowContextSchema = z.object({
+  spaceId: z.string(),
   workflowRunId: z.string(),
   event: z.any().optional(),
   consts: z.record(z.string(), z.any()).optional(),
