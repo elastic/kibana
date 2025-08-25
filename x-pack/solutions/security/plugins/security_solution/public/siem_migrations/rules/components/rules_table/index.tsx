@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';

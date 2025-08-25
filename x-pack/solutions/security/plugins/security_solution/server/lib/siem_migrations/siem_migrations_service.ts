@@ -10,16 +10,16 @@ import { ReplaySubject, type Subject } from 'rxjs';
 import type { ConfigType } from '../../config';
 import {
   type SiemRuleMigrationsClient,
-  type RuleMigrationsCreateClientParams,
   SiemRuleMigrationsService,
 } from './rules/siem_rule_migrations_service';
 
 import type { SiemMigrationsSetupParams } from './types';
 import {
   type SiemDashboardMigrationsClient,
-  type DashboardMigrationsCreateClientParams,
   SiemDashboardMigrationsService,
 } from './dashboards/siem_dashboard_migration_service';
+import type { DashboardMigrationsCreateClientParams } from './dashboards/types';
+import type { RuleMigrationsCreateClientParams } from './rules/types';
 
 export class SiemMigrationsService {
   private pluginStop$: Subject<void>;
@@ -33,7 +33,6 @@ export class SiemMigrationsService {
       kibanaVersion,
       config.siemRuleMigrations?.elserInferenceId
     );
-
     this.dashboardsService = new SiemDashboardMigrationsService(
       logger,
       kibanaVersion,
@@ -44,10 +43,10 @@ export class SiemMigrationsService {
   setup(params: SiemMigrationsSetupParams) {
     if (!this.config.experimentalFeatures.siemMigrationsDisabled) {
       this.rulesService.setup({ ...params, pluginStop$: this.pluginStop$ });
-    }
 
-    if (this.config.experimentalFeatures.automaticDashboardsMigration) {
-      this.dashboardsService.setup({ ...params, pluginStop$: this.pluginStop$ });
+      if (this.config.experimentalFeatures.automaticDashboardsMigration) {
+        this.dashboardsService.setup({ ...params, pluginStop$: this.pluginStop$ });
+      }
     }
   }
 

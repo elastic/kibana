@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect.objectContaining({
           status: 'interrupted',
           id: migrationId,
-          rules: {
+          items: {
             total,
             pending,
             processing,
@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect.objectContaining({
           status: 'interrupted',
           id: migrationId1,
-          rules: {
+          items: {
             total: 42,
             pending: 4,
             processing: 3,
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect.objectContaining({
           status: 'interrupted',
           id: migrationId2,
-          rules: {
+          items: {
             total: 28,
             pending: 2,
             processing: 5,
@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
               result: { full: 4, partial: 5, untranslatable: 1 },
               installable: 4,
               prebuilt: 0,
-              missing_index: completed,
+              missing_index: 0,
             },
             failed,
           },

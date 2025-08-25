@@ -33,7 +33,7 @@ export class RuleMigrationsRetriever {
   public readonly prebuiltRules: PrebuiltRulesRetriever;
 
   constructor(migrationId: string, clients: RuleMigrationsRetrieverClients) {
-    this.resources = new RuleResourceRetriever(migrationId, clients.data);
+    this.resources = new RuleResourceRetriever(migrationId, clients.data.resources);
     this.integrations = new IntegrationRetriever(clients);
     this.prebuiltRules = new PrebuiltRulesRetriever(clients);
   }

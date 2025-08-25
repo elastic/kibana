@@ -12,7 +12,7 @@ import type {
   AggregationsStringTermsBucket,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { MigrationTaskStatusEnum } from '../../../../../common/siem_migrations/model/common.gen';
+import { MigrationTaskStatusEnum } from '../../../../../common/siem_migrations/model/migration.gen';
 import type { SplunkOriginalDashboardExport } from '../../../../../common/siem_migrations/model/vendor/dashboards/splunk.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
@@ -100,7 +100,7 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataB
 
     return {
       id: migrationId,
-      dashboards: {
+      items: {
         total: this.getTotalHits(result),
         ...this.statusAggCounts(aggs.status as AggregationsStringTermsAggregate),
       },
