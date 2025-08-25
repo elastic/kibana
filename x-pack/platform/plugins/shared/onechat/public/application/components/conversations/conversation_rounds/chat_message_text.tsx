@@ -6,7 +6,6 @@
  */
 
 import { css } from '@emotion/css';
-import classNames from 'classnames';
 import React, { useMemo } from 'react';
 import {
   EuiCodeBlock,
@@ -20,41 +19,21 @@ import {
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
-import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
-import { ChartType } from '@kbn/visualization-utils';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
-import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
-import { esqlLanguagePlugin, loadingCursorPlugin, toolResultPlugin } from './markdown_plugins';
+import {
+  Cursor,
+  esqlLanguagePlugin,
+  getToolResultHandler,
+  loadingCursorPlugin,
+  toolResultPlugin,
+} from './markdown_plugins';
 
 interface Props {
   content: string;
   steps: ConversationRoundStep[];
 }
-
-const cursorCss = css`
-  @keyframes blink {
-    0% {
-      opacity: 0;
-    }
-    50% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
-  animation: blink 1s infinite;
-  width: 10px;
-  height: 16px;
-  vertical-align: middle;
-  display: inline-block;
-  background: rgba(0, 0, 0, 0.25);
-`;
-
-const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
 
 /**
  * Component handling markdown support to the assistant's responses.
@@ -65,7 +44,6 @@ export function ChatMessageText({ content, steps }: Props) {
     overflow-wrap: anywhere;
   `;
 
-  // const conversationRounds = useConversationRounds();
   const { pluginsStart } = useOnechatServices();
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
@@ -125,37 +103,10 @@ export function ChatMessageText({ content, steps }: Props) {
           </EuiTableRowCell>
         );
       },
-      toolresult: (props) => {
-        const { resultId, chartType } = props;
-
-        if (!resultId) {
-          return <p>Visualization requires a tool result ID.</p>;
-        }
-
-        const toolResult = steps
-          .filter((s) => s.type === 'tool_call')
-          .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
-          .find((r) => r.ui?.toolResultId === resultId && r.type === 'tabular_data') as
-          | TabularDataResult
-          | undefined;
-
-        if (!toolResult) {
-          return <p>Unable to find visualization for tool result ID: {resultId}</p>;
-        }
-
-        const { esqlQuery, esqlResult } = toolResult.data;
-
-        return (
-          <VisualizeESQL
-            lens={pluginsStart.lens}
-            dataViews={pluginsStart.dataViews}
-            uiActions={pluginsStart.uiActions}
-            esqlQuery={esqlQuery}
-            esqlResult={esqlResult}
-            preferredChartType={(chartType as ChartType | undefined) || ChartType.Line}
-          />
-        );
-      },
+      toolresult: getToolResultHandler({
+        pluginsStart,
+        steps,
+      }),
     };
 
     return {
@@ -167,7 +118,7 @@ export function ChatMessageText({ content, steps }: Props) {
       ],
       processingPluginList: processingPlugins,
     };
-  }, [pluginsStart.dataViews, pluginsStart.lens, pluginsStart.uiActions, steps]);
+  }, [pluginsStart, steps]);
 
   return (
     <EuiText size="s" className={containerClassName}>

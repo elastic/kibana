@@ -7,6 +7,14 @@
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import type { Node } from 'unist';
 import { visit } from 'unist-util-visit';
+import { css } from '@emotion/css';
+import classNames from 'classnames';
+import React from 'react';
+import { ChartType } from '@kbn/visualization-utils';
+import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ConversationRoundStep } from '@kbn/onechat-common';
+import type { OnechatStartDependencies } from '../../../../types';
+import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 
 export const toolResultPlugin = () => {
   return (tree: Node) => {
@@ -32,8 +40,49 @@ export const toolResultPlugin = () => {
   };
 };
 
-const CURSOR = ` ᠎  `;
+export function getToolResultHandler({
+  pluginsStart,
+  steps,
+}: {
+  pluginsStart: OnechatStartDependencies;
+  steps: ConversationRoundStep[];
+}) {
+  return (props: any) => {
+    const { resultId, chartType } = props;
 
+    if (!resultId) {
+      return <p>Visualization requires a tool result ID.</p>;
+    }
+
+    console.log('Looking for tool result ID:', resultId, 'in steps:', steps);
+
+    const toolResult = steps
+      .filter((s) => s.type === 'tool_call')
+      .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
+      .find((r) => r.ui?.toolResultId === resultId && r.type === 'tabular_data') as
+      | TabularDataResult
+      | undefined;
+
+    if (!toolResult) {
+      return <p>Unable to find visualization for tool result ID: {resultId}</p>;
+    }
+
+    const { esqlQuery, esqlResult } = toolResult.data;
+
+    return (
+      <VisualizeESQL
+        lens={pluginsStart.lens}
+        dataViews={pluginsStart.dataViews}
+        uiActions={pluginsStart.uiActions}
+        esqlQuery={esqlQuery}
+        esqlResult={esqlResult}
+        preferredChartType={(chartType as ChartType | undefined) || ChartType.Line}
+      />
+    );
+  };
+}
+
+const CURSOR = ` ᠎  `;
 export const loadingCursorPlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {
     if ('children' in node) {
@@ -67,6 +116,29 @@ export const loadingCursorPlugin = () => {
     visitor(tree);
   };
 };
+
+const cursorCss = css`
+  @keyframes blink {
+    0% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  animation: blink 1s infinite;
+  width: 10px;
+  height: 16px;
+  vertical-align: middle;
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.25);
+`;
+
+export const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
 
 export const esqlLanguagePlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {
