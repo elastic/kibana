@@ -6,11 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-const { once } = require('lodash');
-
-const logOnce = once(() => {
-  console.log('-- DEFER REWRITES ACTIVE --');
-});
 
 /**
  * @fileoverview Babel plugin to lazify top-level CommonJS requires (post ESM → CJS).
@@ -509,8 +504,6 @@ module.exports = function lazyRequirePlugin(babel) {
           if (state.opts.enabled === false || !!process.env.KBN_DISABLE_DEFER_REQUIRES) {
             return;
           }
-
-          logOnce();
 
           // Fast bail if there are no top-level variable declarations.
           const varDecls = programPath.get('body').filter((p) => p.isVariableDeclaration());
