@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { cons } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 import type { InfraWaffleMapOptions } from '../../../../../common/inventory/types';
 import { AssetDetails } from '../../../../../components/asset_details';
 import { getAssetDetailsFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
@@ -20,6 +21,7 @@ interface Props {
   options?: Pick<InfraWaffleMapOptions, 'groupBy' | 'metric'>;
   isAutoReloading?: boolean;
   refreshInterval?: number;
+  preferredSchema?: DataSchemaFormat | null;
 }
 
 const ONE_HOUR = 60 * 60 * 1000;
@@ -33,6 +35,7 @@ export const AssetDetailsFlyout = ({
   options,
   refreshInterval,
   isAutoReloading = false,
+  preferredSchema,
 }: Props) => {
   const dateRange = useMemo(() => {
     // forces relative dates when auto-refresh is active
@@ -46,6 +49,8 @@ export const AssetDetailsFlyout = ({
           to: new Date(currentTime).toISOString(),
         };
   }, [currentTime, isAutoReloading]);
+
+  console.log('AssetDetailsFlyout preferredSchema:', preferredSchema);
 
   return (
     <AssetDetails
@@ -71,6 +76,7 @@ export const AssetDetailsFlyout = ({
         isPaused: !isAutoReloading,
         interval: refreshInterval,
       }}
+      preferredSchema={preferredSchema}
     />
   );
 };

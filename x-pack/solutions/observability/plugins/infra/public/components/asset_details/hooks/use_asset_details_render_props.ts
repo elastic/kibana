@@ -17,7 +17,7 @@ import { isPending } from '../../../hooks/use_fetcher';
 
 export type UseAssetDetailsRenderProps = Pick<
   AssetDetailsProps,
-  'entityId' | 'entityName' | 'entityType' | 'overrides' | 'renderMode'
+  'entityId' | 'entityName' | 'entityType' | 'overrides' | 'renderMode' | 'preferredSchema'
 >;
 
 export function useAssetDetailsRenderProps(props: UseAssetDetailsRenderProps) {
@@ -32,9 +32,15 @@ export function useAssetDetailsRenderProps(props: UseAssetDetailsRenderProps) {
     return timeRangeMetadata.preferredSchema;
   }, [timeRangeMetadata]);
 
+  const contextSchema = props.preferredSchema ? props.preferredSchema : urlState?.preferredSchema;
+  const selectedSchema =
+    timeRangeMetadata?.schemas && timeRangeMetadata?.schemas.length > 1 && contextSchema
+      ? contextSchema
+      : schema;
+
   useEffect(() => {
-    updateTopbarMenuVisibilityBySchema(schema);
-  }, [schema, updateTopbarMenuVisibilityBySchema]);
+    updateTopbarMenuVisibilityBySchema(selectedSchema);
+  }, [selectedSchema, updateTopbarMenuVisibilityBySchema]);
 
   const isLoadingTimeRangeMetadata = isPending(status);
 
@@ -49,7 +55,7 @@ export function useAssetDetailsRenderProps(props: UseAssetDetailsRenderProps) {
       name: entityName || urlState?.name || metadata?.name || '',
       type: entityType,
     },
-    schema,
+    schema: selectedSchema,
     loading,
   };
 }
