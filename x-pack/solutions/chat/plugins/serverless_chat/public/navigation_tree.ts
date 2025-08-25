@@ -35,6 +35,9 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             },
           },
           {
+            link: 'workflows',
+          },
+          {
             link: 'workchat:agents',
             spaceBefore: 'l',
           },
