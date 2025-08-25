@@ -48,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
           index_pattern: {
             title,
           },
+          managed: false,
         });
       const id = response1.body.index_pattern.id;
       const response2 = await supertestWithoutAuth

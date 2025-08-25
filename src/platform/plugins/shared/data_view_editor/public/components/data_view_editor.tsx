@@ -25,6 +25,8 @@ export const DataViewEditor = ({
   requireTimestampField = false,
   editData,
   allowAdHocDataView,
+  onDuplicate,
+  isDuplicatingManaged,
   getDataViewHelpText,
 }: DataViewEditorPropsWithServices) => {
   const { Provider: KibanaReactContextProvider } =
@@ -45,6 +47,8 @@ export const DataViewEditor = ({
           requireTimestampField={requireTimestampField}
           editData={editData}
           allowAdHocDataView={allowAdHocDataView}
+          onDuplicate={onDuplicate}
+          isDuplicatingManaged={isDuplicatingManaged}
           getDataViewHelpText={getDataViewHelpText}
         />
       </EuiFlyout>

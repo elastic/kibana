@@ -301,7 +301,7 @@ export interface PersistenceAPI {
   create: (
     attributes: DataViewAttributes,
     // SavedObjectsCreateOptions
-    options: { id?: string; initialNamespaces?: string[]; overwrite?: boolean }
+    options: { id?: string; initialNamespaces?: string[]; overwrite?: boolean; managed?: boolean }
   ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
@@ -385,6 +385,7 @@ export type TypeMeta = {
 export enum DataViewType {
   DEFAULT = 'default',
   ROLLUP = 'rollup',
+  MANAGED = 'managed',
 }
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
@@ -557,6 +558,10 @@ export type DataViewSpec = {
    * Allow hidden and system indices when loading field list
    */
   allowHidden?: boolean;
+  /**
+   * Whether the data view is managed by the application.
+   */
+  managed?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

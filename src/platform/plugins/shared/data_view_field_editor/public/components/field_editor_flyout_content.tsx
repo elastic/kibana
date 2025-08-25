@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -38,6 +39,13 @@ const i18nTexts = {
   saveButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutSaveButtonLabel', {
     defaultMessage: 'Save',
   }),
+  disabledSaveButtonTooltip: i18n.translate(
+    'indexPatternFieldEditor.editor.flyoutDisabledSaveButtonTooltip',
+    {
+      defaultMessage:
+        'Fields cannot be edited on managed data views. Duplicate the data view in order to make changes.',
+    }
+  ),
 };
 
 const defaultModalVisibility = {
@@ -267,16 +275,18 @@ const FieldEditorFlyoutContentComponent = ({
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="primary"
-                    onClick={onClickSave}
-                    data-test-subj="fieldSaveButton"
-                    fill
-                    disabled={hasErrors}
-                    isLoading={isSavingField || isSubmitting}
-                  >
-                    {i18nTexts.saveButtonLabel}
-                  </EuiButton>
+                  <EuiToolTip content={dataView.managed && i18nTexts.disabledSaveButtonTooltip}>
+                    <EuiButton
+                      color="primary"
+                      onClick={onClickSave}
+                      data-test-subj="fieldSaveButton"
+                      fill
+                      disabled={hasErrors || dataView.managed}
+                      isLoading={isSavingField || isSubmitting}
+                    >
+                      {i18nTexts.saveButtonLabel}
+                    </EuiButton>
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </>

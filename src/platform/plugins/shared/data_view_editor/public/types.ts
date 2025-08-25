@@ -72,6 +72,14 @@ export interface DataViewEditorProps {
    */
   showManagementLink?: boolean;
   /**
+   * if editing a managed data view and onDuplicate is defined, a duplicate button is shown
+   */
+  onDuplicate?: () => void;
+  /**
+   * if editing a managed data view and onDuplicate is defined, a duplicate button is shown
+   */
+  isDuplicatingManaged?: boolean;
+  /**
    * Optional callback to get help text based on the active data view
    */
   getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
@@ -140,6 +148,7 @@ export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'>
 export interface TimestampOption {
   display: string;
   fieldName?: string;
+  isDisabled?: boolean;
 }
 
 export interface MatchedIndicesSet {

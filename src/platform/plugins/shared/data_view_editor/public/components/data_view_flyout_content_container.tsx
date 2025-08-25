@@ -25,6 +25,8 @@ const DataViewFlyoutContentContainer = ({
   editData,
   allowAdHocDataView,
   showManagementLink,
+  onDuplicate,
+  isDuplicatingManaged = false,
   getDataViewHelpText,
 }: DataViewEditorProps) => {
   const {
@@ -52,7 +54,7 @@ const DataViewFlyoutContentContainer = ({
   const onSaveClick = async (dataViewSpec: DataViewSpec, persist: boolean = true) => {
     try {
       let saveResponse;
-      if (editData) {
+      if (editData && !editData.managed && !isDuplicatingManaged) {
         const { name = '', timeFieldName, title = '', allowHidden = false } = dataViewSpec;
         editData.setIndexPattern(title);
         editData.name = name;
@@ -101,6 +103,8 @@ const DataViewFlyoutContentContainer = ({
       showManagementLink={showManagementLink}
       allowAdHoc={allowAdHocDataView || false}
       dataViewEditorService={dataViewEditorService}
+      onDuplicate={onDuplicate}
+      isDuplicatingManaged={isDuplicatingManaged}
       getDataViewHelpText={getDataViewHelpText}
     />
   );

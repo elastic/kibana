@@ -57,7 +57,7 @@ const sorting = {
 const securityDataView = i18n.translate(
   'indexPatternManagement.indexPatternTable.badge.securityDataViewTitle',
   {
-    defaultMessage: 'Security Data View',
+    defaultMessage: 'Security Solution',
   }
 );
 
@@ -245,7 +245,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
           </EuiLink>
           {dataView?.id?.indexOf(securitySolution) === 0 && (
             <>
-              &emsp;<EuiBadge>{securityDataView}</EuiBadge>
+              &emsp;<EuiBadge color="accent">{securityDataView}</EuiBadge>
             </>
           )}
           {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
