@@ -32,13 +32,14 @@ export const useMigrationNameStep = ({
       return undefined; // profile is still loading
     }
 
-    const datetime = moment(Date.now()).format('llll'); // localized date and time (e.g., "Wed, 01 Jan 2025 12:00 PM")
+    // localized date and time (e.g., "Wed, 01 Jan 2025 12:00:00 PM")
+    const datetime = moment(Date.now()).format('dddd, D MMM YYYY, h:mm:ss A');
 
     if (currentUserProfile?.user.username) {
-      return `${currentUserProfile.user.username}'s migration at ${datetime}`;
+      return `${currentUserProfile.user.username}'s migration on ${datetime}`;
     }
 
-    return `Migration created at ${datetime}`;
+    return `Migration created on ${datetime}`;
   }, [storedMigrationName, currentUserProfile?.user.username, isLoading]);
 
   return {
