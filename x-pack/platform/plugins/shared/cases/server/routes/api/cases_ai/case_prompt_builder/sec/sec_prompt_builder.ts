@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { buildBaseCaseSummaryPrompt } from '../base/base_case_summary_prompt';
 import { CasePromptBuilder } from '../prompt_builder';
 
 export class SecurityPromptBuilder extends CasePromptBuilder {
-  buildSummary(): string {
-    const basePrompt = buildBaseCaseSummaryPrompt(this.caseData);
-    const secPrompt = '';
-    return `${basePrompt}${secPrompt}`;
+  protected getOpeningInstructions() {
+    return `Create a structured summary of this case.\n\n`;
+  }
+
+  protected getAnalysisInstructions(): string {
+    return '';
   }
 }

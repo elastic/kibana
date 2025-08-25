@@ -47,6 +47,8 @@ import type {
   CasesMetricsResponse,
   SingleCaseMetricsResponse,
   CasesSimilarResponse,
+  CaseSummaryResponse,
+  InferenceConnectorsResponse,
 } from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
@@ -186,6 +188,9 @@ export interface FilterOptions extends SystemFilterOptions {
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
 export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFeature.MTTR>;
+
+export type CaseSummary = CaseSummaryResponse;
+export type InferenceConnectors = InferenceConnectorsResponse;
 
 /**
  * If you add a new value here and you want to support it on the URL

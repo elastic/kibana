@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { MessageRole } from '@kbn/inference-common';
+import moment from 'moment';
 import { INTERNAL_CASE_SUMMARY_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -52,7 +53,10 @@ export const getCaseSummaryRoute = createCasesRoute({
       });
 
       return response.ok({
-        body: chatResponse?.content,
+        body: {
+          content: chatResponse?.content,
+          generatedAt: chatResponse?.content ? moment().toISOString() : undefined,
+        },
       });
     } catch (error) {
       throw createCaseError({

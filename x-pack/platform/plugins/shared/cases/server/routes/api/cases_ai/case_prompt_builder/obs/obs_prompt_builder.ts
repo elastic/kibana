@@ -5,14 +5,28 @@
  * 2.0.
  */
 
-import { buildBaseCaseSummaryPrompt } from '../base/base_case_summary_prompt';
-import { buildObsCaseSummaryPrompt } from './obs_case_summary_prompt';
+import { buildCaseActivityPrompt } from './obs_case_activity_prompt';
 import { CasePromptBuilder } from '../prompt_builder';
 
 export class ObservabilityPromptBuilder extends CasePromptBuilder {
-  buildSummary(): string {
-    const basePrompt = buildBaseCaseSummaryPrompt(this.caseData);
-    const obsPrompt = buildObsCaseSummaryPrompt(this.caseData);
-    return `${basePrompt}${obsPrompt}`;
+  protected getOpeningInstructions() {
+    return `You are an expert Site Reliability Engineer (SRE) specialized in incident investigation.
+  Create a structured summary of the following case for your fellow Site Reliability Engineers.\n\n`;
+  }
+
+  protected override getAdditionalContext(): string {
+    return buildCaseActivityPrompt(this.caseData);
+  }
+
+  protected getAnalysisInstructions(): string {
+    return `## Analysis Instructions\n
+  Provide a concise summary in 3-4 sentences without any title that includes:\n
+  1. The core issue or incident being reported\n
+  2. The potential impact or severity level\n
+  3. Any relevant patterns\n
+  4. Any Synthetics monitors attached\n
+  Apart from that, provide following numbers in bullet points: Alerts and SLOs, only if they are available in the format of <alerts_count> Alerts.\n
+  Suggest next steps for investigation.\n\n
+  Addiontial instructions: Focus on investigation related details and avoid referring to specific users.\n\n`;
   }
 }

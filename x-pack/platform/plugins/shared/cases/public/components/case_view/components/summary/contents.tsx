@@ -12,10 +12,9 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
   EuiMarkdownFormat,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,8 +23,10 @@ export interface CaseSummaryContentsProps {
   title: string;
   onToggle: (isOpen: boolean) => void;
   isOpen: boolean;
-  summary: string;
-  summaryGeneratedAt: string;
+  summary?: {
+    content?: string;
+    generatedAt?: string;
+  };
   error: Error | null;
   loading?: boolean;
 }
@@ -35,17 +36,25 @@ export const CaseSummaryContents: React.FC<CaseSummaryContentsProps> = ({
   onToggle,
   isOpen,
   summary,
-  summaryGeneratedAt,
   error,
   loading,
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const summaryDateTime = useMemo(() => {
+    if (!summary) return;
+
+    return {
+      date: moment(summary.generatedAt).format('MMM DD, yyyy'),
+      time: moment(summary.generatedAt).format('HH:mm'),
+    };
+  }, [summary]);
+
+  const extraProps = { css: { alignSelf: 'flex-start' } };
 
   return (
     <EuiPanel hasBorder hasShadow={false}>
       <EuiAccordion
         id="caseSummaryContainer"
-        arrowProps={{ css: { alignSelf: 'flex-start' } }}
+        arrowProps={extraProps}
         buttonContent={
           <EuiFlexGroup wrap responsive={false} gutterSize="m" data-test-subj="caseSummaryButton">
             <EuiFlexItem grow={false}>
@@ -58,15 +67,12 @@ export const CaseSummaryContents: React.FC<CaseSummaryContentsProps> = ({
                   <h5>{title}</h5>
                 </EuiText>
               </EuiFlexGroup>
-              {isOpen && (
-                <EuiText size="xs" css={{ color: euiTheme.colors.textSubdued }}>
+              {isOpen && summary && summaryDateTime && (
+                <EuiText size="xs" color="subdued">
                   <FormattedMessage
                     id="xpack.cases.caseSummary.description"
                     defaultMessage="Generated on {date} at {time}"
-                    values={{
-                      date: moment(summaryGeneratedAt).format('MMM DD, yyyy'),
-                      time: moment(summaryGeneratedAt).format('HH:mm'),
-                    }}
+                    values={summaryDateTime}
                   />
                 </EuiText>
               )}
@@ -78,14 +84,27 @@ export const CaseSummaryContents: React.FC<CaseSummaryContentsProps> = ({
         onToggle={onToggle}
       >
         <EuiSpacer size="m" />
-        {!error && (
+        {summary?.content && (
           <EuiPanel
             hasBorder={false}
             hasShadow={false}
             color="subdued"
             data-test-subj="caseSummaryResponse"
           >
-            <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>
+            <EuiMarkdownFormat textSize="s">{summary.content}</EuiMarkdownFormat>
+          </EuiPanel>
+        )}
+        {error && (
+          <EuiPanel
+            hasBorder={false}
+            hasShadow={false}
+            color="danger"
+            data-test-subj="caseSummaryResponseError"
+          >
+            <FormattedMessage
+              id="xpack.cases.caseSummary.error"
+              defaultMessage="Error fetching case summary"
+            />
           </EuiPanel>
         )}
       </EuiAccordion>
