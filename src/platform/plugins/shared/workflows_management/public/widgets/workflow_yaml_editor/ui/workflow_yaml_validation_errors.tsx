@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiIcon,
@@ -17,8 +18,9 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   useEuiTheme,
-  useEuiFontSize,
+  euiFontSize,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { YamlValidationError } from '../model/types';
 
 const severityOrder = ['error', 'warning', 'info'];
@@ -32,8 +34,8 @@ export function WorkflowYAMLValidationErrors({
   validationErrors: YamlValidationError[] | null;
   onErrorClick?: (error: YamlValidationError) => void;
 }) {
+  const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
-  const smallFontSize = useEuiFontSize('s').fontSize;
   const accordionId = useGeneratedHtmlId({ prefix: 'wf-yaml-editor-validation-errors' });
   let icon: React.ReactNode | null = null;
   let buttonContent: React.ReactNode | null = null;
@@ -90,64 +92,27 @@ export function WorkflowYAMLValidationErrors({
   });
 
   return (
-    <div
-      css={{
-        width: '100%',
-        minHeight: '48px',
-        padding: `0 ${euiTheme.size.m}`,
-        zIndex: 1000,
-        borderTop: `1px solid ${euiTheme.colors.lightShade}`,
-        position: 'fixed',
-        bottom: 0,
-        backgroundColor: euiTheme.colors.backgroundBasePlain,
-      }}
-    >
+    <div css={styles.container}>
       <EuiAccordion
         id={accordionId}
         key={validationErrors?.length}
         data-testid="wf-yaml-editor-validation-errors-list"
         buttonContent={
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            css={{
-              width: '100%',
-              padding: `${euiTheme.size.m} 0`,
-              color: euiTheme.colors.textParagraph,
-              flexWrap: 'nowrap !important',
-            }}
-          >
+          <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
             <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-            <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>{buttonContent}</EuiFlexItem>
+            <EuiFlexItem css={styles.buttonContentText}>{buttonContent}</EuiFlexItem>
           </EuiFlexGroup>
         }
         arrowDisplay={validationErrors?.length === 0 ? 'none' : 'left'}
         initialIsOpen={validationErrors !== null && validationErrors.length > 0}
         isDisabled={validationErrors?.length === 0}
       >
-        <div
-          css={{
-            maxHeight: '200px',
-            overflow: 'auto',
-            padding: `${euiTheme.size.s} 0`,
-            borderTop: `1px solid ${euiTheme.colors.lightShade}`,
-          }}
-        >
+        <div css={styles.accordionContent}>
           <EuiFlexGroup direction="column" gutterSize="s">
             {sortedValidationErrors?.map((error, index) => (
               <EuiFlexItem
                 key={`${error.lineNumber}-${error.column}-${error.message}-${index}-${error.severity}`}
-                css={{
-                  fontSize: smallFontSize,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'flex-start',
-                  gap: euiTheme.size.s,
-                  '&:hover': {
-                    textDecoration: 'underline',
-                  },
-                }}
+                css={styles.validationErrorRow}
                 onClick={() => onErrorClick?.(error)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
@@ -158,7 +123,7 @@ export function WorkflowYAMLValidationErrors({
                 role="button"
                 tabIndex={0}
               >
-                <EuiFlexItem grow={false} css={{ minWidth: '3rem', display: 'block' }}>
+                <EuiFlexItem grow={false} css={styles.validationErrorLineNumber}>
                   <b>{error.lineNumber}</b>:{error.column}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -178,10 +143,7 @@ export function WorkflowYAMLValidationErrors({
                         : 'primary'
                     }
                     size="s"
-                    css={css`
-                      margin-top: 0.125rem;
-                      flex-shrink: 0;
-                    `}
+                    css={styles.validationErrorIcon}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -195,3 +157,55 @@ export function WorkflowYAMLValidationErrors({
     </div>
   );
 }
+
+const componentStyles = {
+  container: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      minHeight: '48px',
+      padding: `0 ${euiTheme.size.m}`,
+      zIndex: 1000,
+      borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+    }),
+  buttonContent: ({ euiTheme }: UseEuiTheme) => css`
+    width: 100%;
+    padding: ${euiTheme.size.m} 0;
+    color: ${euiTheme.colors.textParagraph};
+    flex-wrap: nowrap !important;
+  `,
+  buttonContentText: css({
+    whiteSpace: 'nowrap',
+  }),
+  accordionContent: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      maxHeight: '200px',
+      overflow: 'auto',
+      padding: `${euiTheme.size.s} 0`,
+      borderTop: `1px solid ${euiTheme.colors.lightShade}`,
+    }),
+  validationErrorRow: (euiThemeContext: UseEuiTheme) =>
+    css({
+      fontSize: euiFontSize(euiThemeContext, 's').fontSize,
+      cursor: 'pointer',
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: euiThemeContext.euiTheme.size.s,
+      '&:hover': {
+        textDecoration: 'underline',
+      },
+    }),
+  validationErrorLineNumber: css({
+    minWidth: '3rem',
+    display: 'block',
+  }),
+  validationErrorIcon: css({
+    marginTop: '0.125rem',
+    flexShrink: 0,
+  }),
+};

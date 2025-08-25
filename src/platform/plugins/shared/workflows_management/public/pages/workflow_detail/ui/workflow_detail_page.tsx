@@ -31,11 +31,11 @@ const WorkflowYAMLEditor = React.lazy(() =>
   }))
 );
 
-// const WorkflowVisualEditor = React.lazy(() =>
-//   import('../../features/workflow_visual_editor/ui').then((module) => ({
-//     default: module.WorkflowVisualEditor,
-//   }))
-// );
+const WorkflowVisualEditor = React.lazy(() =>
+  import('../../../features/workflow_visual_editor').then((module) => ({
+    default: module.WorkflowVisualEditor,
+  }))
+);
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const styles = useMemoCss(componentStyles);
@@ -189,7 +189,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   }
 
   return (
-    <>
+    <div css={styles.pageContainer}>
       <WorkflowDetailHeader
         name={workflow?.name}
         isLoading={isLoadingWorkflow}
@@ -212,19 +212,33 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             <WorkflowExecutionList workflowId={workflow?.id ?? null} />
           </EuiFlexItem>
         )}
-        <EuiFlexItem css={styles.workflowEditorColumn}>
-          <React.Suspense fallback={<EuiLoadingSpinner />}>
-            <WorkflowYAMLEditor
-              workflowId={workflow?.id ?? 'unknown'}
-              filename={`${workflow?.id ?? 'unknown'}.yaml`}
-              value={workflowYaml}
-              onChange={(v) => handleChange(v ?? '')}
-              lastUpdatedAt={workflow?.lastUpdatedAt}
-              hasChanges={hasChanges}
-              highlightStep={selectedStepId}
-              stepExecutions={execution?.stepExecutions}
-            />
-          </React.Suspense>
+        <EuiFlexItem css={styles.workflowMainColumn}>
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem css={styles.workflowYamlEditorColumn}>
+              <React.Suspense fallback={<EuiLoadingSpinner />}>
+                <WorkflowYAMLEditor
+                  workflowId={workflow?.id ?? 'unknown'}
+                  filename={`${workflow?.id ?? 'unknown'}.yaml`}
+                  value={workflowYaml}
+                  onChange={(v) => handleChange(v ?? '')}
+                  lastUpdatedAt={workflow?.lastUpdatedAt}
+                  hasChanges={hasChanges}
+                  highlightStep={selectedStepId}
+                  stepExecutions={execution?.stepExecutions}
+                />
+              </React.Suspense>
+            </EuiFlexItem>
+            {isVisualEditorEnabled && workflow && (
+              <EuiFlexItem css={styles.workflowVisualEditorColumn}>
+                <React.Suspense fallback={<EuiLoadingSpinner />}>
+                  <WorkflowVisualEditor
+                    workflowYaml={workflowYaml}
+                    workflowExecutionId={selectedExecutionId}
+                  />
+                </React.Suspense>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
         {selectedExecutionId && (
           <EuiFlexItem css={styles.stepExecutionListColumn}>
@@ -249,11 +263,16 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           onClose={() => setTestWorkflowModalOpen(false)}
         />
       )}
-    </>
+    </div>
   );
 }
 
 const componentStyles = {
+  pageContainer: css({
+    display: 'flex',
+    flexDirection: 'column',
+    flex: '1 1 auto',
+  }),
   container: css`
     flex: 1;
     height: 100%;
@@ -268,10 +287,20 @@ const componentStyles = {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       borderRight: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
-  workflowEditorColumn: css({
+  workflowMainColumn: css({
     flex: 1,
     overflow: 'hidden',
   }),
+  workflowYamlEditorColumn: css({
+    flex: 1,
+    overflow: 'hidden',
+  }),
+  workflowVisualEditorColumn: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: 1,
+      overflow: 'hidden',
+      borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
+    }),
   stepExecutionListColumn: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexBasis: '275px',
