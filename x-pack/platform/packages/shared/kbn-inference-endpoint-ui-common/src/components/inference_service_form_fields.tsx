@@ -279,6 +279,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           provider: newProvider?.service,
           providerConfig: defaultProviderConfig,
           inferenceId,
+          contextWindowLength: '',
         },
         secrets: {
           providerSecrets: defaultProviderSecrets,
