@@ -33,7 +33,11 @@ describe('deleteModalMsg', () => {
 
     renderComponent(deleteModalMsg({ views, hasSpaces: false, relationships }));
 
-    expect(screen.getByText(/Data views are deleted from every space/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Deleting a data view affects every saved object that uses it, and it is deleted from every space it is shared in/i
+      )
+    ).toBeInTheDocument();
     expect(screen.getByText(/You'll permanently delete 1 data view/i)).toBeInTheDocument();
     expect(screen.getByText(/Test Data View/)).toBeInTheDocument();
   });
