@@ -13,6 +13,7 @@ export {
   builtInToolIdPrefix,
   builtinToolIds,
   builtinTags,
+  defaultAgentToolIds,
   isReservedToolId,
   isBuiltInToolId,
   type ByIdsToolSelection,
@@ -31,6 +32,13 @@ export {
   EsqlToolFieldType,
   idRegexp,
   activeToolsCountWarningThreshold,
+  ToolResultType,
+  type ToolResult,
+  type ErrorResult,
+  type QueryResult,
+  type ResourceResult,
+  type TabularDataResult,
+  type OtherResult,
 } from './tools';
 export {
   OnechatErrorCode,

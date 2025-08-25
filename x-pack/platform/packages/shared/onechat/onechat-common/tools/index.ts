@@ -12,6 +12,7 @@ export {
   builtinTags,
   builtInToolIdPrefix,
   activeToolsCountWarningThreshold,
+  defaultAgentToolIds,
 } from './constants';
 export {
   type ByIdsToolSelection,
@@ -32,3 +33,12 @@ export {
   type EsqlToolDefinitionWithSchema,
   isEsqlTool,
 } from './esql';
+export {
+  ToolResultType,
+  type ToolResult,
+  type ErrorResult,
+  type QueryResult,
+  type ResourceResult,
+  type TabularDataResult,
+  type OtherResult,
+} from './tool_result';
