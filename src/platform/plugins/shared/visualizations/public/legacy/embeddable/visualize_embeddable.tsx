@@ -521,7 +521,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
 
     div.setAttribute('data-test-subj', 'visualizationLoader');
-    div.setAttribute('data-shared-item', '');
 
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
     this.subscriptions.push(this.handler.data$.subscribe(this.onContainerData));

@@ -488,7 +488,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
             data-render-complete={hasRendered}
             data-title={dataTitle}
             data-description={api.description$?.getValue() ?? ''}
-            data-shared-item
           >
             {/* Replicate the loading state for the expression renderer to avoid FOUC  */}
             <EuiFlexGroup css={{ height: '100%' }} justifyContent="center" alignItems="center">
