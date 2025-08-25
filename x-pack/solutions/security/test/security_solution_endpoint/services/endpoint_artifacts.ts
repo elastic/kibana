@@ -15,7 +15,6 @@ import {
   ENDPOINT_ARTIFACT_LISTS,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
-  ENDPOINT_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import type { Response } from 'superagent';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
@@ -63,6 +62,17 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
 
         return res;
       };
+    }
+
+    async deleteList(
+      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+      supertest: TestAgent = this.supertest
+    ): Promise<void> {
+      await supertest
+        .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .then(this.getHttpResponseFailureHandler([404]));
     }
 
     async ensureListExists(
@@ -184,7 +194,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
     }
 
     async createArtifact(
-      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number] | typeof ENDPOINT_LIST_ID,
+      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
       overrides: Partial<CreateExceptionListItemSchema> = {},
       options?: ArtifactCreateOptions
     ): Promise<ArtifactTestData> {
@@ -201,7 +211,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
         case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
           return this.createHostIsolationException(overrides, options);
         }
-        case ENDPOINT_LIST_ID: {
+        case ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id: {
           return this.createEndpointException(overrides, options);
         }
         default:
