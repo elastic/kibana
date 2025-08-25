@@ -16,13 +16,13 @@ export type RoutingStatus = z.infer<typeof RoutingStatus>;
 export interface RoutingDefinition {
   destination: string;
   where: Condition;
-  status: RoutingStatus;
+  status?: RoutingStatus;
 }
 
 export const routingDefinitionSchema: z.Schema<RoutingDefinition> = z.object({
   destination: NonEmptyString,
   where: conditionSchema,
-  status: RoutingStatus,
+  status: RoutingStatus.optional(),
 });
 
 export const routingDefinitionListSchema: z.Schema<RoutingDefinition[]> =
