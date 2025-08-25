@@ -64,10 +64,7 @@ export class ApmSystem {
     this.addHttpRequestNormalization(apm);
     this.addRouteChangeNormalization(apm);
 
-    init({
-      ...apmConfig,
-      logLevel: 'debug',
-    });
+    init(apmConfig);
     // hold page load transaction blocks a transaction implicitly created by init.
     this.holdPageLoadTransaction(apm);
 

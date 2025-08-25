@@ -170,6 +170,7 @@ describe('ApmSystem', () => {
             hostname: 'mykibanadomain.com',
             port: '5601',
           },
+          addEventListener: jest.fn(),
         }));
       });
 
