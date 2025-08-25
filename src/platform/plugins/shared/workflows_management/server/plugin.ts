@@ -131,32 +131,32 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
         },
       });
 
-      plugins.taskManager.registerTaskDefinitions({
-        'workflow:run': {
-          title: 'Run Workflow',
-          description: 'Executes a workflow immediately',
-          timeout: '5m',
-          maxAttempts: 1,
-          createTaskRunner: ({ taskInstance }) => {
-            return {
-              async run() {
-                // Get dependencies when the task actually runs
-                const [, pluginsStart] = await core.getStartServices();
-                const { workflowsExecutionEngine } =
-                  pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
+      // plugins.taskManager.registerTaskDefinitions({
+      //   'workflow:run': {
+      //     title: 'Run Workflow',
+      //     description: 'Executes a workflow immediately',
+      //     timeout: '5m',
+      //     maxAttempts: 1,
+      //     createTaskRunner: ({ taskInstance }) => {
+      //       return {
+      //         async run() {
+      //           // Get dependencies when the task actually runs
+      //           const [, pluginsStart] = await core.getStartServices();
+      //           const { workflowsExecutionEngine } =
+      //             pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
 
-                return workflowsExecutionEngine.executeWorkflow(
-                  taskInstance.params.workflow,
-                  taskInstance.params.context
-                );
-              },
-              async cancel() {
-                // Cancel function for the task
-              },
-            };
-          },
-        },
-      });
+      //           return workflowsExecutionEngine.executeWorkflow(
+      //             taskInstance.params.workflow,
+      //             taskInstance.params.context
+      //           );
+      //         },
+      //         async cancel() {
+      //           // Cancel function for the task
+      //         },
+      //       };
+      //     },
+      //   },
+      // });
     }
 
     // Register saved object types
@@ -180,6 +180,11 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
         .getStartServices()
         .then(([coreStart]) => coreStart.savedObjects.getUnsafeInternalClient());
 
+    const getWorkflowExecutionEngine = () =>
+      core
+        .getStartServices()
+        .then(([, pluginsStart]) => (pluginsStart as any).workflowsExecutionEngine);
+
     this.workflowsService = new WorkflowsService(
       esClientPromise,
       this.logger,
@@ -189,7 +194,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       WORKFLOWS_EXECUTION_LOGS_INDEX,
       this.config.logging.console
     );
-    this.api = new WorkflowsManagementApi(this.workflowsService);
+    this.api = new WorkflowsManagementApi(this.workflowsService, null, getWorkflowExecutionEngine);
     this.spaces = plugins.spaces?.spacesService;
 
     // Register server side APIs

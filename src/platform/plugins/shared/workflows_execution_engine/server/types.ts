@@ -20,7 +20,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow(
     workflow: WorkflowExecutionEngineModel,
     context: Record<string, any>
-  ): Promise<void>;
+  ): Promise<string>;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
