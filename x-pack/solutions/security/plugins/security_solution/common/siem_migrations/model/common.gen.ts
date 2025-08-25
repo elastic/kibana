@@ -17,7 +17,6 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
-import { SiemMigrationResourceBase } from './common.gen';
 
 /**
  * The GenAI connector id to use.

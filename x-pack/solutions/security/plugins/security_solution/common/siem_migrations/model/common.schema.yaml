@@ -118,7 +118,7 @@ components:
     SiemMigrationResource:
       description: The rule migration resource document object.
       allOf:
-        - $ref: './common.schema.yaml#/components/schemas/SiemMigrationResourceBase'
+        - $ref: '#/components/schemas/SiemMigrationResourceBase'
         - $ref: '#/components/schemas/SiemMigrationResourceContent'
           x-modify: partial
         - type: object
