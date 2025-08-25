@@ -1354,5 +1354,63 @@ describe('GET role', () => {
         },
       }
     );
+
+    getRoleTest('returns exportable roles', {
+      name: 'first_role',
+      query: { exportable: true },
+      apiResponse: () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application: 'kibana-.kibana',
+              privileges: ['feature_alpha.read'],
+              resources: ['*'],
+            },
+          ],
+          run_as: [],
+          metadata: { _reserved: true },
+          transient_metadata: { enabled: true },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: {
+          metadata: { _reserved: true },
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          kibana: [{ base: [], feature: { alpha: ['read'] }, spaces: ['*'] }],
+        },
+      },
+    });
+
+    getRoleTest('correctly handles replaced privileges when trying to get exportable', {
+      name: 'first_role',
+      query: { exportable: true, replaceDeprecatedPrivileges: true },
+      apiResponse: () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application: 'kibana-.kibana',
+              privileges: ['feature_alpha.read'],
+              resources: ['*'],
+            },
+          ],
+          run_as: [],
+          metadata: { _reserved: true },
+          transient_metadata: { enabled: true },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: {
+          metadata: { _reserved: true },
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          kibana: [{ base: [], feature: { beta: ['read', 'sub_beta'] }, spaces: ['*'] }],
+        },
+      },
+    });
   });
 });

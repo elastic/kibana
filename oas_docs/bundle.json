@@ -44832,6 +44832,15 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "description": "If `true`, the resulting output from the API can be used to re-import the role.",
+            "in": "query",
+            "name": "exportable",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {

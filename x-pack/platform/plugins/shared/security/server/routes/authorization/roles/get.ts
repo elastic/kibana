@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { omit } from 'lodash';
 
 import { schema } from '@kbn/config-schema';
 import { AuthzDisabled } from '@kbn/core-security-server';
@@ -54,6 +55,14 @@ export function defineGetRolesRoutes({
                     },
                   })
                 ),
+                exportable: schema.maybe(
+                  schema.boolean({
+                    meta: {
+                      description:
+                        'If `true`, the resulting output from the API can be used to re-import the role.',
+                    },
+                  })
+                ),
               })
             ),
           },
@@ -78,19 +87,31 @@ export function defineGetRolesRoutes({
           const elasticsearchRole = elasticsearchRoles[request.params.name];
 
           if (elasticsearchRole) {
-            return response.ok({
-              body: transformElasticsearchRoleToRole({
-                features,
-                subFeaturePrivilegeIterator,
-                // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
-                elasticsearchRole,
-                name: request.params.name,
-                application: authz.applicationName,
-                logger,
-                replaceDeprecatedKibanaPrivileges:
-                  request.query?.replaceDeprecatedPrivileges ?? false,
-              }),
+            const exportable = request.query?.exportable ?? false;
+            const transformedRole = transformElasticsearchRoleToRole({
+              features,
+              subFeaturePrivilegeIterator,
+              // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
+              elasticsearchRole,
+              name: request.params.name,
+              application: authz.applicationName,
+              logger,
+              replaceDeprecatedKibanaPrivileges:
+                request.query?.replaceDeprecatedPrivileges ?? false,
             });
+
+            if (exportable) {
+              return response.ok({
+                body: omit(transformedRole, [
+                  '_transform_error',
+                  '_unrecognized_applications',
+                  'name',
+                  'transient_metadata',
+                ]),
+              });
+            }
+
+            return response.ok({ body: transformedRole });
           }
 
           return response.notFound();

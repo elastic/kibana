@@ -633,6 +633,65 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(filteredResults.length).to.eql(0);
       });
+
+      it('should create role from exportable role', async () => {
+        await es.security.putRole({
+          name: 'role_to_query',
+          cluster: ['manage'],
+          indices: [
+            {
+              names: ['logstash-*'],
+              privileges: ['read', 'view_index_metadata'],
+              allow_restricted_indices: false,
+            },
+          ],
+          applications: [
+            {
+              application: 'kibana-.kibana',
+              privileges: ['read'],
+              resources: ['*'],
+            },
+            {
+              application: 'kibana-.kibana',
+              privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+              resources: ['space:marketing', 'space:sales'],
+            },
+            {
+              application: 'logstash-default',
+              privileges: ['logstash-privilege'],
+              resources: ['*'],
+            },
+          ],
+          run_as: ['watcher_user'],
+          metadata: {
+            foo: 'test-metadata',
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        });
+        const getUnexportableRole = await supertest
+          .get('/api/security/role/role_to_query')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        await supertest
+          .put('/api/security/role/role_to_query_unexportable')
+          .send(getUnexportableRole.body)
+          .set('kbn-xsrf', 'xxx')
+          .expect(400);
+
+        const getRole = await supertest
+          .get('/api/security/role/role_to_query?exportable=true')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        await supertest
+          .put('/api/security/role/role_to_query2')
+          .send(getRole.body)
+          .set('kbn-xsrf', 'xxx')
+          .expect(204);
+      });
     });
   });
 }
