@@ -194,12 +194,9 @@ function visitRetryStep(graph: graphlib.Graph, previousStep: any, currentStep: R
   };
 
   let previousNodeToLink: any = enterRetryNode;
-  retryNestedSteps.forEach((step: any) => {
-    const currentNode = visitAbstractStep(graph, previousNodeToLink, step);
-    graph.setNode(getNodeId(currentNode), currentNode);
-    graph.setEdge(getNodeId(previousNodeToLink), getNodeId(currentNode));
-    previousNodeToLink = currentNode;
-  });
+  retryNestedSteps.forEach(
+    (step: any) => (previousNodeToLink = visitAbstractStep(graph, previousNodeToLink, step))
+  );
 
   graph.setNode(exitRetryNode.id, exitRetryNode);
   graph.setEdge(getNodeId(previousNodeToLink), exitRetryNode.id);
