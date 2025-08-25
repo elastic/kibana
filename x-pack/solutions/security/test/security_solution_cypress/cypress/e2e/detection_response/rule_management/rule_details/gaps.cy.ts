@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -47,6 +48,10 @@ describe(
     },
   },
   function () {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     before(() => {
       login();
       deleteAlertsAndRules();

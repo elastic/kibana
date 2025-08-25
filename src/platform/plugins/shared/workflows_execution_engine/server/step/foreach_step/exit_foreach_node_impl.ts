@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExitForeachNode } from '@kbn/workflows';
-import { StepImplementation } from '../step_base';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { ExitForeachNode } from '@kbn/workflows';
+import type { StepImplementation } from '../step_base';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 
 export class ExitForeachNodeImpl implements StepImplementation {
   constructor(
@@ -20,6 +20,7 @@ export class ExitForeachNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
+    this.wfExecutionRuntimeManager.exitScope();
     const foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.startNodeId);
 
     if (!foreachState) {

@@ -6,8 +6,8 @@
  */
 
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { TopAlert } from '../../..';
-import { CustomThresholdAlertFields, CustomThresholdRuleTypeParams } from '../types';
+import type { TopAlert } from '../../..';
+import type { CustomThresholdAlertFields, CustomThresholdRuleTypeParams } from '../types';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type CustomThresholdRule = Rule<CustomThresholdRuleTypeParams>;

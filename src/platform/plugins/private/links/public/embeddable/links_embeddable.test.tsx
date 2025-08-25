@@ -13,10 +13,11 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { setStubKibanaServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { EuiThemeProvider } from '@elastic/eui';
 import { getLinksEmbeddableFactory } from './links_embeddable';
-import { LINKS_EMBEDDABLE_TYPE, LinksEmbeddableState } from '../../common';
+import type { LinksEmbeddableState } from '../../common';
+import { LINKS_EMBEDDABLE_TYPE } from '../../common';
 import type { Link } from '../../server';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { LinksApi, LinksParentApi, ResolvedLink } from '../types';
+import type { LinksApi, LinksParentApi, ResolvedLink } from '../types';
 import { linksClient } from '../content_management';
 import { getMockLinksParentApi } from '../mocks';
 

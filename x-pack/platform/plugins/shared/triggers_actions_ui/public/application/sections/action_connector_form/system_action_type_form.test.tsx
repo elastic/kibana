@@ -8,7 +8,7 @@ import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SystemActionTypeForm } from './system_action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionType, GenericValidationResult, ActionParamsProps } from '../../../types';
+import type { ActionType, GenericValidationResult, ActionParamsProps } from '../../../types';
 import { EuiButton } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { I18nProvider } from '@kbn/i18n-react';

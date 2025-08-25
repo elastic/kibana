@@ -26,6 +26,7 @@ import { useNavigateToIntegrationsPage } from '../../hooks/alert_summary/use_nav
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useKibana } from '../../../common/lib/kibana';
 
 jest.mock('../../../common/components/search_bar', () => ({
   // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
@@ -34,6 +35,7 @@ jest.mock('../../../common/components/search_bar', () => ({
 jest.mock('../alerts_table/alerts_grouping', () => ({
   GroupedAlertsTable: () => <div />,
 }));
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../hooks/alert_summary/use_navigate_to_integrations_page');
 jest.mock('../../hooks/alert_summary/use_integration_last_alert_ingested');
 jest.mock('../../../common/hooks/use_experimental_features');
@@ -49,10 +51,6 @@ const packages: PackageListItem[] = [
     version: '',
   },
 ];
-const ruleResponse = {
-  rules: [],
-  isLoading: false,
-};
 
 describe('<Wrapper />', () => {
   describe('when the newDataViewPickerEnabled feature flag is not enabled', () => {
@@ -66,7 +64,7 @@ describe('<Wrapper />', () => {
         loading: true,
       });
 
-      render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
+      render(<Wrapper packages={packages} />);
 
       await waitFor(() => {
         expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
@@ -85,7 +83,7 @@ describe('<Wrapper />', () => {
         useEffect: jest.fn((f) => f()),
       }));
 
-      render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
+      render(<Wrapper packages={packages} />);
 
       expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
@@ -94,6 +92,11 @@ describe('<Wrapper />', () => {
     });
 
     it('should render the content if the dataView is created correctly', async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          data: { query: { filterManager: { getFilters: jest.fn().mockReturnValue([]) } } },
+        },
+      });
       (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(jest.fn());
       (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue({
         isLoading: true,
@@ -111,7 +114,7 @@ describe('<Wrapper />', () => {
 
       render(
         <TestProviders>
-          <Wrapper packages={packages} ruleResponse={ruleResponse} />
+          <Wrapper packages={packages} />
         </TestProviders>
       );
 
@@ -135,7 +138,7 @@ describe('<Wrapper />', () => {
         status: 'loading',
       });
 
-      render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
+      render(<Wrapper packages={packages} />);
 
       await waitFor(() => {
         expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
@@ -154,7 +157,7 @@ describe('<Wrapper />', () => {
         useEffect: jest.fn((f) => f()),
       }));
 
-      render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
+      render(<Wrapper packages={packages} />);
 
       expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
@@ -163,6 +166,11 @@ describe('<Wrapper />', () => {
     });
 
     it('should render the content if the dataView is created correctly', async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          data: { query: { filterManager: { getFilters: jest.fn().mockReturnValue([]) } } },
+        },
+      });
       (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(jest.fn());
       (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue({
         isLoading: true,
@@ -180,7 +188,7 @@ describe('<Wrapper />', () => {
 
       render(
         <TestProviders>
-          <Wrapper packages={packages} ruleResponse={ruleResponse} />
+          <Wrapper packages={packages} />
         </TestProviders>
       );
 

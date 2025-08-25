@@ -6,7 +6,7 @@
  */
 
 import { castArray, sortBy, uniq } from 'lodash';
-import { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
 import type { DocumentAnalysis } from './document_analysis';
 

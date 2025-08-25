@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import { isRootStreamDefinition } from '@kbn/streams-schema';
 import { RootStreamEmptyPrompt } from './empty_prompts';
 
 const StreamDetailEnrichmentContent = dynamic(() =>

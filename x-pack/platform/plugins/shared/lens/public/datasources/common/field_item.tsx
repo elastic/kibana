@@ -9,7 +9,7 @@ import React, { useCallback, useState, useMemo, lazy, Suspense } from 'react';
 import { EuiText, EuiButton, EuiPopoverFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
 import {
   type AddFieldFilterHandler,
@@ -25,7 +25,7 @@ import {
 import { Draggable } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { type DatatableColumn } from '@kbn/expressions-plugin/common';
-import { DatasourceDataPanelProps } from '../../types';
+import type { DatasourceDataPanelProps } from '../../types';
 import type { IndexPattern, IndexPatternField } from '../../types';
 import type { LensAppServices } from '../../app_plugin/types';
 import { APP_ID, DOCUMENT_FIELD_NAME } from '../../../common/constants';

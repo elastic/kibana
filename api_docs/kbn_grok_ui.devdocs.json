@@ -545,12 +545,31 @@
             "label": "getColourPaletteStyles",
             "description": [],
             "signature": [
-              "() => Record<string, { backgroundColor: string; cursor: string; }>"
+              "(euiTheme: ",
+              "EuiThemeComputed",
+              "<{}>) => Record<string, { backgroundColor: string; color: string; cursor: string; }>"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokCollection.getColourPaletteStyles.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "euiTheme",
+                "description": [],
+                "signature": [
+                  "EuiThemeComputed",
+                  "<{}>"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {

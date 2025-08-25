@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Message, MessageContent } from '@kbn/inference-common';
-import { AnonymizationRecord } from './types';
+import type { Message, MessageContent } from '@kbn/inference-common';
+import type { AnonymizationRecord } from './types';
 
 export function messageFromAnonymizationRecords(map: AnonymizationRecord): Message {
   const anonymizableMessage = map;

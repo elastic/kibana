@@ -8,13 +8,13 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { ISessionsClient } from '../../../..';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ISessionsClient } from '../../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
-import { SearchUsageCollector } from '../../../collectors';
+import type { SearchUsageCollector } from '../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import { Flyout } from './flyout';
 
@@ -38,6 +38,7 @@ export function openSearchSessionsFlyout({
       notifications: coreStart.notifications,
       application: coreStart.application,
       usageCollector,
+      featureFlags: coreStart.featureFlags,
     });
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext(coreStart);
 

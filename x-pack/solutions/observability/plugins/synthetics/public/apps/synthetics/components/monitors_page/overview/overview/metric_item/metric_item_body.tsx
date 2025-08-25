@@ -8,43 +8,49 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { MonitorTypeBadge } from '../../../../common/components/monitor_type_badge';
 import * as labels from '../../../management/monitor_list_table/labels';
-import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
 export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
   const tags = monitor.tags;
   const history = useHistory();
 
+  const typeBadge = (
+    <MonitorTypeBadge
+      monitorType={monitor.type}
+      ariaLabel={labels.getFilterForTypeMessage(monitor.type)}
+      onClick={() => {
+        history.push({
+          search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,
+        });
+      }}
+    />
+  );
+  if (tags.length === 0) {
+    return (
+      <>
+        <EuiSpacer size="xs" />
+        {typeBadge}
+      </>
+    );
+  }
+
   return (
     <>
       <EuiSpacer size="xs" />
-      <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <MonitorTypeBadge
-            monitorType={monitor.type}
-            ariaLabel={labels.getFilterForTypeMessage(monitor.type)}
-            onClick={() => {
-              history.push({
-                search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,
-              });
-            }}
-          />
-        </EuiFlexItem>
-        {(tags ?? []).length > 0 && (
-          <EuiFlexItem grow={false}>
-            <TagsList
-              color="default"
-              tags={tags}
-              disableExpand={true}
-              onClick={(tag) => {
-                history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
-              }}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      {(tags ?? []).length > 0 && (
+        <TagsList
+          prependChildren={<EuiFlexItem grow={false}>{typeBadge}</EuiFlexItem>}
+          color="default"
+          tags={tags}
+          disableExpand={true}
+          onClick={(tag) => {
+            history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
+          }}
+        />
+      )}
     </>
   );
 };
