@@ -7,20 +7,21 @@
 
 import { recurse } from 'cypress-recurse';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { login } from '../../tasks/login';
 import {
   ADD_PACK_HEADER_BUTTON,
   ADD_QUERY_BUTTON,
-  SAVE_PACK_BUTTON,
-  FLYOUT_SAVED_QUERY_SAVE_BUTTON,
   customActionEditSavedQuerySelector,
-  POLICY_SELECT_COMBOBOX,
-  EDIT_PACK_HEADER_BUTTON,
-  SAVED_QUERY_DROPDOWN_SELECT,
-  UPDATE_PACK_BUTTON,
-  TABLE_ROWS,
-  formFieldInputSelector,
-  FLYOUT_SAVED_QUERY_CANCEL_BUTTON,
   customActionRunSavedQuerySelector,
+  EDIT_PACK_HEADER_BUTTON,
+  FLYOUT_SAVED_QUERY_CANCEL_BUTTON,
+  FLYOUT_SAVED_QUERY_SAVE_BUTTON,
+  formFieldInputSelector,
+  POLICY_SELECT_COMBOBOX,
+  SAVE_PACK_BUTTON,
+  SAVED_QUERY_DROPDOWN_SELECT,
+  TABLE_ROWS,
+  UPDATE_PACK_BUTTON,
 } from '../../screens/packs';
 import { API_VERSIONS } from '../../../common/constants';
 import { navigateTo } from '../../tasks/navigation';
@@ -34,9 +35,8 @@ import {
 } from '../../tasks/integrations';
 import { DEFAULT_POLICY } from '../../screens/fleet';
 import { getIdFormField, LIVE_QUERY_EDITOR } from '../../screens/live_query';
-import { loadSavedQuery, cleanupSavedQuery, cleanupPack, loadPack } from '../../tasks/api_fixtures';
+import { cleanupPack, cleanupSavedQuery, loadPack, loadSavedQuery } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
-import { ServerlessRoleName } from '../../support/roles';
 
 describe(
   'Packs - Create and Edit',
@@ -101,7 +101,7 @@ describe(
     });
 
     beforeEach(() => {
-      cy.login(ServerlessRoleName.SOC_MANAGER);
+      login();
       navigateTo('/app/osquery');
     });
 
@@ -129,7 +129,7 @@ describe(
         const packName = 'ResultType' + generateRandomStringName(1)[0];
 
         cy.contains('Packs').click();
-        cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
+        cy.getBySel(ADD_PACK_HEADER_BUTTON).first().click();
         cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
 
         cy.getBySel(ADD_QUERY_BUTTON).click();
@@ -258,7 +258,7 @@ describe(
       it('should add a pack from a saved query', () => {
         cy.contains('Packs').click();
 
-        cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
+        cy.getBySel(ADD_PACK_HEADER_BUTTON).first().click();
         cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
         cy.get(formFieldInputSelector('description')).type(`Pack description{downArrow}{enter}`);
         cy.getBySel(POLICY_SELECT_COMBOBOX).type(`${DEFAULT_POLICY} {downArrow}{enter}`);

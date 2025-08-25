@@ -7,14 +7,15 @@
 
 import { find } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { login } from '../../tasks/login';
 import {
   ADD_PACK_HEADER_BUTTON,
   EDIT_PACK_HEADER_BUTTON,
-  SAVE_PACK_BUTTON,
+  formFieldInputSelector,
   POLICY_SELECT_COMBOBOX,
+  SAVE_PACK_BUTTON,
   TABLE_ROWS,
   UPDATE_PACK_BUTTON,
-  formFieldInputSelector,
 } from '../../screens/packs';
 import { API_VERSIONS } from '../../../common/constants';
 import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
@@ -31,12 +32,12 @@ import {
   closeModalIfVisible,
   closeToastIfVisible,
   generateRandomStringName,
-  interceptPackId,
   interceptAgentPolicyId,
+  interceptPackId,
 } from '../../tasks/integrations';
 import { DEFAULT_POLICY, OSQUERY_POLICY } from '../../screens/fleet';
 import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
-import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
+import { cleanupAgentPolicy, cleanupPack } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
@@ -53,7 +54,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       let REMOVING_PACK: string;
 
       beforeEach(() => {
-        cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
+        login();
         AGENT_POLICY_NAME = `PackTest` + generateRandomStringName(1)[0];
         REMOVING_PACK = 'removing-pack' + generateRandomStringName(1)[0];
       });
@@ -107,16 +108,18 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   );
 
   describe('Load prebuilt packs', { tags: ['@ess', '@serverless'] }, () => {
+    const PREBUILD_PACK_NAME = 'it-compliance';
+
     afterEach(() => {
       cleanupAllPrebuiltPacks();
     });
-    const PREBUILD_PACK_NAME = 'it-compliance';
 
     describe('', () => {
       beforeEach(() => {
-        cy.login(ServerlessRoleName.SOC_MANAGER);
+        login();
         navigateTo('/app/osquery/packs');
       });
+
       it('should load prebuilt packs', () => {
         cy.contains('Load Elastic prebuilt packs').click();
         cy.contains('Load Elastic prebuilt packs').should('not.exist');
@@ -150,6 +153,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains('Add Query').should('not.exist');
         cy.get('.euiTableRowCell--hasActions').should('not.exist');
       });
+
       it('should be able to delete prebuilt pack and add it again', () => {
         cy.contains(PREBUILD_PACK_NAME).click();
         cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
@@ -187,7 +191,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('Global packs', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
-      cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
+      login(ServerlessRoleName.PLATFORM_ENGINEER);
       navigateTo('/app/osquery/packs');
     });
 

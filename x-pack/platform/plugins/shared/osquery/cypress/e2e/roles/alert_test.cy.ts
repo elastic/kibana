@@ -7,9 +7,9 @@
 
 import { waitForAlertsToPopulate } from '@kbn/cypress-test-helper/src/services/alerting_services';
 import { disableNewFeaturesTours } from '../../tasks/navigation';
-import { initializeDataViews } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';
-import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
+import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
 describe('Alert Test', { tags: ['@ess'] }, () => {
@@ -17,7 +17,6 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
   let ruleId: string;
 
   before(() => {
-    initializeDataViews();
     loadRule().then((data) => {
       ruleName = data.name;
       ruleId = data.id;
@@ -26,7 +25,7 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
 
   describe('t1_analyst role', () => {
     beforeEach(() => {
-      cy.login(ServerlessRoleName.T1_ANALYST);
+      login(ServerlessRoleName.T1_ANALYST);
 
       cy.visit('/app/security/rules', {
         onBeforeLoad: (win) => disableNewFeaturesTours(win),
