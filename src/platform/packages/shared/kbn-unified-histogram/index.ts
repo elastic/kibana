@@ -12,6 +12,7 @@ export type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
   UnifiedHistogramVisContext,
+  ChartSectionConfiguration,
 } from './types';
 export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
 
@@ -19,7 +20,14 @@ export {
   UnifiedBreakdownFieldSelector,
   type BreakdownFieldSelectorProps,
 } from './components/chart/lazy';
-export { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './components/chart';
+export {
+  UnifiedHistogramChart,
+  type UnifiedHistogramChartProps,
+  ChartSectionTemplate,
+  ToolbarSelector,
+  type ToolbarSelectorProps,
+  type SelectableEntry,
+} from './components/chart';
 export { UnifiedHistogramLayout, type UnifiedHistogramLayoutProps } from './components/layout';
 
 export {
