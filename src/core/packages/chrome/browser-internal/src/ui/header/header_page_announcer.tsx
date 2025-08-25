@@ -12,12 +12,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiSkipLink, EuiLiveAnnouncer, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
 
 import type { HeaderProps } from './header';
 
 const DEFAULT_BRAND = 'Elastic'; // This may need to be DRYed out with https://github.com/elastic/kibana/blob/main/src/core/packages/rendering/server-internal/src/views/template.tsx#L35
 const SEPARATOR = ' - ';
+
+const fallbackContentQueries = [
+  'main', // Ideal target for all plugins using KibanaPageTemplate
+  '[role="main"]', // Fallback for plugins using deprecated EuiPageContent
+  '.kbnAppWrapper', // Last-ditch fallback for all plugins regardless of page template
+];
 
 export const HeaderPageAnnouncer: FC<{
   breadcrumbs$: HeaderProps['breadcrumbs$'];
@@ -87,7 +92,7 @@ export const HeaderPageAnnouncer: FC<{
         buttonRef={skipLinkRef}
         position="fixed"
         destinationId=""
-        fallbackDestination={MAIN_CONTENT_SELECTORS}
+        fallbackDestination={fallbackContentQueries}
         overrideLinkBehavior
         data-test-subj="skipToMainButton"
         role="button"
