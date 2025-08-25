@@ -9,10 +9,10 @@
 
 const path = require('path');
 const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
+const createTransformerConfig = require('./transformer_config');
 
 // Base transformer from babel-jest
-const baseTransformer = babelJest.default.createTransformer(transformerConfig);
+const baseTransformer = babelJest.default.createTransformer(createTransformerConfig());
 
 // Normalize the Jest config JSON string used in hashing:
 // - resolve rootDir to absolute
