@@ -14,24 +14,27 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { registerInspectComponentRoutes } from './routes/routes';
 import type { ConfigSchema } from './config';
 
 export class InspectComponentPluginServer implements Plugin {
   private readonly logger: Logger;
-  private readonly isDevMode: boolean;
+  private readonly isDev: boolean;
   private readonly isEnabled: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     const { enabled } = initializerContext.config.get<ConfigSchema>();
     this.logger = initializerContext.logger.get();
-    this.isDevMode = initializerContext.env.mode.dev;
+    this.isDev = initializerContext.env.mode.dev;
     this.isEnabled = enabled;
   }
 
   public setup(core: CoreSetup) {
-    if (this.isDevMode && this.isEnabled) {
-      registerInspectComponentRoutes({ httpService: core.http, logger: this.logger });
+    if (this.isDev) {
+      import('./routes/routes').then(({ registerInspectComponentRoutes }) => {
+        if (this.isEnabled) {
+          registerInspectComponentRoutes({ httpService: core.http, logger: this.logger });
+        }
+      });
     }
 
     return {};

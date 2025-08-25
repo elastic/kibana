@@ -9,18 +9,16 @@
 
 import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { InspectButton } from './components/inspect/inspect_button';
 import type { ConfigSchema } from '../server/config';
 
 export class InspectComponentPluginPublic implements Plugin {
-  private readonly isDevMode: boolean;
+  private readonly isDev: boolean;
   private readonly isEnabled: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     const { enabled } = initializerContext.config.get<ConfigSchema>();
     this.isEnabled = enabled;
-    this.isDevMode = initializerContext.env.mode.dev;
+    this.isDev = initializerContext.env.mode.dev;
   }
 
   public setup(_core: CoreSetup) {
@@ -28,10 +26,17 @@ export class InspectComponentPluginPublic implements Plugin {
   }
 
   public start(core: CoreStart) {
-    if (this.isDevMode && this.isEnabled) {
-      core.chrome.navControls.registerRight({
-        order: 1002,
-        mount: toMountPoint(<InspectButton core={core} />, core.rendering),
+    if (this.isDev) {
+      Promise.all([
+        import('./components/inspect/inspect_button'),
+        import('@kbn/react-kibana-mount').then((m) => ({ toMountPoint: m.toMountPoint })),
+      ]).then(([{ InspectButton }, { toMountPoint }]) => {
+        if (this.isEnabled) {
+          core.chrome.navControls.registerRight({
+            order: 1002,
+            mount: toMountPoint(<InspectButton core={core} />, core.rendering),
+          });
+        }
       });
     }
     return {};
