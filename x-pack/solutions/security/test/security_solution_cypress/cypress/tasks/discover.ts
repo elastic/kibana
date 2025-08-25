@@ -17,7 +17,6 @@ import {
   GET_DISCOVER_COLUMN_TOGGLE_BTN,
   GET_DISCOVER_FIELD_BROWSER_FIELD_DETAILS_BUTTON,
   GET_DISCOVER_FIELD_BROWSER_POPOVER_FIELD_ADD_BUTTON,
-  TIMELINE_DISCOVER_TAB,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
 
@@ -94,19 +93,18 @@ export const submitDiscoverSearchBar = () => {
 };
 
 const searchForField = (fieldId: string) => {
-  cy.get(DISCOVER_FIELD_SEARCH).filter(':visible').type(fieldId);
+  cy.get(DISCOVER_FIELD_SEARCH).filter(':visible');
+  cy.get(DISCOVER_FIELD_SEARCH).type(fieldId);
 };
 
 export const clearFieldSearch = () => {
   cy.get(DISCOVER_FIELD_SEARCH).filter(':visible').clear();
 };
 
-export const addFieldToTable = (fieldId: string) => {
-  searchForField(fieldId);
-
-  cy.get(TIMELINE_DISCOVER_TAB).within(() => {
-    cy.get(GET_DISCOVER_FIELD_BROWSER_FIELD_DETAILS_BUTTON(fieldId)).should('exist');
-    cy.get(GET_DISCOVER_FIELD_BROWSER_FIELD_DETAILS_BUTTON(fieldId)).click();
+export const addFieldToTable = (fieldId: string, container: string) => {
+  cy.get(container).within(() => {
+    searchForField(fieldId);
+    cy.get(GET_DISCOVER_FIELD_BROWSER_FIELD_DETAILS_BUTTON(fieldId)).eq(0).click();
   });
   cy.get(GET_DISCOVER_FIELD_BROWSER_POPOVER_FIELD_ADD_BUTTON(fieldId)).should('exist');
   cy.get(GET_DISCOVER_FIELD_BROWSER_POPOVER_FIELD_ADD_BUTTON(fieldId)).click();
