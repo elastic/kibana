@@ -10,7 +10,7 @@ import React, { useEffect, useMemo } from 'react';
 import { ExpressionWrapper } from '../expression_wrapper';
 import type { LensInternalApi, LensApi } from '../types';
 import { UserMessages } from '../user_messages/container';
-import { useMessages, useDispatcher } from './hooks';
+import { useMessages } from './hooks';
 import { getViewMode } from '../helper';
 import { addLog } from '../logger';
 
@@ -52,9 +52,6 @@ export function LensEmbeddableComponent({
     return onUnmount;
   }, [api, onUnmount]);
 
-  // take care of dispatching the event from the DOM node
-  const rootRef = useDispatcher(hasRendered, api);
-
   // Publish the data attributes only if avaialble/visible
   const title = useMemo(
     () =>
@@ -77,7 +74,6 @@ export function LensEmbeddableComponent({
       {...title}
       {...description}
       data-shared-item
-      ref={rootRef}
     >
       {expressionParams == null || blockingErrors.length ? null : (
         <ExpressionWrapper {...expressionParams} />
