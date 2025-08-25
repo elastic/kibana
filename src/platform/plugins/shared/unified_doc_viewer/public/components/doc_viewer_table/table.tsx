@@ -7,59 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import useWindowSize from 'react-use/lib/useWindowSize';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type {
-  EuiDataGridProps,
-  EuiDataGridCellPopoverElementProps,
-  EuiSwitchEvent,
-  RenderCellValue,
-} from '@elastic/eui';
+import type { EuiDataGridProps, EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiSelectableMessage,
-  EuiDataGrid,
   EuiI18n,
-  EuiText,
-  EuiCallOut,
-  useResizeObserver,
+  EuiSelectableMessage,
+  EuiSpacer,
   EuiSwitch,
-  type UseEuiTheme,
   euiFontSize,
+  useResizeObserver,
+  type UseEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
-  SHOW_MULTIFIELDS,
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  getShouldShowFieldHandler,
-  usePager,
-  getVisibleColumns,
-  canPrependTimeFieldColumn,
-} from '@kbn/discover-utils';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SHOW_MULTIFIELDS,
+  canPrependTimeFieldColumn,
+  getShouldShowFieldHandler,
+  getVisibleColumns,
+} from '@kbn/discover-utils';
+import { i18n } from '@kbn/i18n';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React, { useCallback, useMemo, useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useWindowSize from 'react-use/lib/useWindowSize';
 
 import { getUnifiedDocViewerServices } from '../../plugin';
-import {
-  getFieldCellActions,
-  getFieldValueCellActions,
-  getFilterExistsDisabledWarning,
-  getFilterInOutPairDisabledWarning,
-} from './table_cell_actions';
 import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
+import { CustomTable, PAGE_SIZE_OPTIONS } from './custom_table';
+import { FieldRow } from './field_row';
 import type { TableFiltersProps } from './table_filters';
 import { LOCAL_STORAGE_KEY_SEARCH_TERM, TableFilters, useTableFilters } from './table_filters';
-import { TableCell } from './table_cell';
-import { getPinColumnControl } from './get_pin_control';
-import { FieldRow } from './field_row';
 
 interface ItemsEntry {
   pinnedRows: FieldRow[];
@@ -67,9 +51,6 @@ interface ItemsEntry {
   allFields: TableFiltersProps['allFields'];
 }
 
-const MIN_NAME_COLUMN_WIDTH = 150;
-const MAX_NAME_COLUMN_WIDTH = 350;
-const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
@@ -78,22 +59,6 @@ export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedField
 
 export const GRID_COLUMN_FIELD_NAME = 'name';
 export const GRID_COLUMN_FIELD_VALUE = 'value';
-
-const GRID_PROPS: Pick<EuiDataGridProps, 'columnVisibility' | 'rowHeightsOptions' | 'gridStyle'> = {
-  columnVisibility: {
-    visibleColumns: ['name', 'value'],
-    setVisibleColumns: () => null,
-  },
-  rowHeightsOptions: { defaultHeight: 'auto' },
-  gridStyle: {
-    border: 'horizontal',
-    stripes: true,
-    rowHover: 'highlight',
-    header: 'underline',
-    cellPadding: 'm',
-    fontSize: 's',
-  },
-};
 
 const getPinnedFields = (dataViewId: string, storage: Storage): string[] => {
   const pinnedFieldsEntry = storage.get(PINNED_FIELDS_KEY);
@@ -134,8 +99,6 @@ export interface DocViewerTableProps extends DocViewRenderProps {
     dataGridHeader?: boolean;
     filterBar?: boolean;
   };
-  customRenderCellValue?: RenderCellValue;
-  customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
 }
 
 export const DocViewerTable = ({
@@ -155,8 +118,6 @@ export const DocViewerTable = ({
     dataGridHeader: true,
     filterBar: true,
   },
-  customRenderCellValue,
-  customRenderCellPopover,
   fieldNames = [],
 }: DocViewerTableProps) => {
   const styles = useMemoCss(
@@ -164,7 +125,7 @@ export const DocViewerTable = ({
   );
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, storage, uiSettings, toasts } = getUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
@@ -184,19 +145,6 @@ export const DocViewerTable = ({
   );
 
   const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
-
-  const onToggleColumn = useMemo(() => {
-    if (!onRemoveColumn || !onAddColumn || !columns) {
-      return undefined;
-    }
-    return (field: string) => {
-      if (columns.includes(field)) {
-        onRemoveColumn(field);
-      } else {
-        onAddColumn(field);
-      }
-    };
-  }, [onRemoveColumn, onAddColumn, columns]);
 
   const onTogglePinned = useCallback(
     (field: string) => {
@@ -346,76 +294,17 @@ export const DocViewerTable = ({
   );
 
   const rows = useMemo(() => [...pinnedRows, ...restRows], [pinnedRows, restRows]);
-
-  const leadingControlColumns = useMemo(() => {
-    return [getPinColumnControl({ rows, onTogglePinned })];
-  }, [rows, onTogglePinned]);
-
-  const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
-    initialPageSize: getPageSize(storage),
-    totalItems: rows.length,
-  });
-  const showPagination = totalPages !== 0;
+  const initialPageSize = getPageSize(storage);
 
   const onChangePageSize = useCallback(
     (newPageSize: number) => {
       updatePageSize(newPageSize, storage);
-      changePageSize(newPageSize);
     },
-    [changePageSize, storage]
-  );
-
-  const pagination = useMemo(() => {
-    return showPagination
-      ? {
-          onChangeItemsPerPage: onChangePageSize,
-          onChangePage: changePageIndex,
-          pageIndex: curPageIndex,
-          pageSize,
-          pageSizeOptions: PAGE_SIZE_OPTIONS,
-        }
-      : undefined;
-  }, [showPagination, curPageIndex, pageSize, onChangePageSize, changePageIndex]);
-
-  const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn }),
-    [rows, isEsqlMode, filter, onToggleColumn]
-  );
-  const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
-    [rows, isEsqlMode, toasts, filter]
+    [storage]
   );
 
   useWindowSize(); // trigger re-render on window resize to recalculate the grid container height
   const { width: containerWidth } = useResizeObserver(containerRef);
-
-  const gridColumns: EuiDataGridProps['columns'] = useMemo(
-    () => [
-      {
-        id: GRID_COLUMN_FIELD_NAME,
-        displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.name', {
-          defaultMessage: 'Field',
-        }),
-        initialWidth: Math.min(
-          Math.max(Math.round(containerWidth * 0.3), MIN_NAME_COLUMN_WIDTH),
-          MAX_NAME_COLUMN_WIDTH
-        ),
-        actions: false,
-        visibleCellActions: 3,
-        cellActions: fieldCellActions,
-      },
-      {
-        id: GRID_COLUMN_FIELD_VALUE,
-        displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.value', {
-          defaultMessage: 'Value',
-        }),
-        actions: false,
-        visibleCellActions: 3,
-        cellActions: fieldValueCellActions,
-      },
-    ],
-    [fieldCellActions, fieldValueCellActions, containerWidth]
-  );
 
   const onHideNullValuesChange = useCallback(
     (e: EuiSwitchEvent) => {
@@ -429,50 +318,6 @@ export const DocViewerTable = ({
       setShowOnlySelectedFields(e.target.checked);
     },
     [setShowOnlySelectedFields]
-  );
-
-  const renderCellValue: EuiDataGridProps['renderCellValue'] = useCallback(
-    ({ rowIndex, columnId, isDetails }) => {
-      return (
-        <TableCell
-          searchTerm={tableFiltersProps.searchTerm}
-          rows={rows}
-          rowIndex={rowIndex}
-          columnId={columnId}
-          isDetails={isDetails}
-          onFindSearchTermMatch={availableFeatures.filterBar ? onFindSearchTermMatch : undefined}
-        />
-      );
-    },
-    [rows, tableFiltersProps.searchTerm, onFindSearchTermMatch, availableFeatures.filterBar]
-  );
-
-  const renderCellPopover = useCallback(
-    (props: EuiDataGridCellPopoverElementProps) => {
-      const { columnId, children, cellActions, rowIndex } = props;
-      const row = rows[rowIndex];
-
-      let warningMessage: string | undefined;
-      if (columnId === GRID_COLUMN_FIELD_VALUE) {
-        warningMessage = getFilterInOutPairDisabledWarning(row, filter);
-      } else if (columnId === GRID_COLUMN_FIELD_NAME) {
-        warningMessage = getFilterExistsDisabledWarning(row, filter);
-      }
-
-      return (
-        <>
-          <EuiText size="s">{children}</EuiText>
-          {cellActions}
-          {Boolean(warningMessage) && (
-            <div>
-              <EuiSpacer size="xs" />
-              <EuiCallOut title={warningMessage} color="warning" size="s" />
-            </div>
-          )}
-        </>
-      );
-    },
-    [rows, filter]
   );
 
   const containerHeight = containerRef
@@ -566,23 +411,21 @@ export const DocViewerTable = ({
         </EuiSelectableMessage>
       ) : (
         <EuiFlexItem grow={Boolean(containerHeight)} css={styles.fieldsGridWrapper}>
-          <EuiDataGrid
-            key={`fields-table-${hit.id}`}
-            {...GRID_PROPS}
-            aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
-              defaultMessage: 'Field values',
-            })}
-            className="kbnDocViewer__fieldsGrid"
-            css={styles.fieldsGrid}
-            columns={gridColumns}
-            toolbarVisibility={false}
-            rowCount={rows.length}
-            renderCellValue={customRenderCellValue ? customRenderCellValue : renderCellValue}
-            renderCellPopover={
-              customRenderCellPopover ? customRenderCellPopover : renderCellPopover
-            }
-            pagination={pagination}
-            leadingControlColumns={availableFeatures.pinColumn ? leadingControlColumns : undefined}
+          <CustomTable
+            id={`fields-table-${hit.id}`}
+            containerWidth={containerWidth}
+            rows={rows}
+            isEsqlMode={isEsqlMode}
+            filter={filter}
+            onAddColumn={onAddColumn}
+            onRemoveColumn={onRemoveColumn}
+            columns={columns}
+            onFindSearchTermMatch={onFindSearchTermMatch}
+            searchTerm={tableFiltersProps.searchTerm}
+            initialPageSize={initialPageSize}
+            onChangePageSize={onChangePageSize}
+            pinnedFields={pinnedFields}
+            onTogglePinned={onTogglePinned}
           />
         </EuiFlexItem>
       )}
@@ -590,7 +433,7 @@ export const DocViewerTable = ({
   );
 };
 
-const componentStyles = ({ hideDataGridHeader }: { hideDataGridHeader: boolean }) => {
+const componentStyles = () => {
   return {
     fieldsGridWrapper: ({ euiTheme }: UseEuiTheme) =>
       css({
@@ -604,70 +447,6 @@ const componentStyles = ({ hideDataGridHeader }: { hideDataGridHeader: boolean }
           },
         },
       }),
-    fieldsGrid: (themeContext: UseEuiTheme) => {
-      const { euiTheme } = themeContext;
-      const { fontSize } = euiFontSize(themeContext, 's');
-
-      return css({
-        '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
-          borderTop: 'none',
-        },
-
-        '&.euiDataGrid--headerUnderline .euiDataGridHeader': {
-          borderBottom: euiTheme.border.thin,
-        },
-
-        '& [data-gridcell-column-id="name"] .euiDataGridRowCell__content': {
-          paddingTop: 0,
-          paddingBottom: 0,
-        },
-
-        '& [data-gridcell-column-id="pin_field"] .euiDataGridRowCell__content': {
-          padding: `calc(${euiTheme.size.xs} / 2) 0 0 ${euiTheme.size.xs}`,
-        },
-
-        '.kbnDocViewer__fieldName': {
-          padding: euiTheme.size.xs,
-          paddingLeft: 0,
-          lineHeight: euiTheme.font.lineHeightMultiplier,
-
-          '.euiDataGridRowCell__popover &': {
-            fontSize,
-          },
-        },
-
-        '.kbnDocViewer__fieldName_icon': {
-          paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
-          lineHeight: euiTheme.font.lineHeightMultiplier,
-        },
-
-        '.kbnDocViewer__fieldName_multiFieldBadge': {
-          margin: `${euiTheme.size.xs} 0`,
-          fontWeight: euiTheme.font.weight.regular,
-          fontFamily: euiTheme.font.family,
-        },
-
-        '.kbnDocViewer__fieldsGrid__pinAction': {
-          opacity: 0,
-        },
-
-        '& [data-gridcell-column-id="pin_field"]:focus-within': {
-          '.kbnDocViewer__fieldsGrid__pinAction': {
-            opacity: 1,
-          },
-        },
-
-        '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
-          opacity: 1,
-        },
-        ...(hideDataGridHeader
-          ? {
-              '.euiDataGridHeader': { height: '20px' }, // use euiTheme variable
-              '.euiDataGridHeaderCell': { display: 'none' },
-            }
-          : {}),
-      });
-    },
     noFieldsFound: css({
       minHeight: 300,
     }),
