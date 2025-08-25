@@ -27,8 +27,8 @@ import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
-import { useAgentDelete } from '../../../hooks/agents/use_agent_delete';
 import { ToolsSelection } from './tools_selection';
+import { DeleteAgentButton } from './delete_agent_button';
 
 export interface AgentFormProps {
   editingAgentId?: string;
@@ -71,26 +71,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId }) => {
       text: formatOnechatErrorMessage(err),
     });
   };
-
-  const { deleteAgent, isDeleting } = useAgentDelete({
-    onSuccess: () => {
-      notifications.toasts.addSuccess(
-        i18n.translate('xpack.onechat.agents.deleteSuccessMessage', {
-          defaultMessage: 'Agent deleted successfully',
-        })
-      );
-      navigateToOnechatUrl(appPaths.agents.list);
-    },
-    onError: (err: Error) => {
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.onechat.agents.deleteErrorMessage', {
-          defaultMessage: 'Failed to delete agent',
-        }),
-        text: formatOnechatErrorMessage(err),
-      });
-    },
-  });
-
   const {
     state: agentState,
     isLoading,
@@ -157,7 +137,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId }) => {
     submit(data);
   };
 
-  const isFormDisabled = isLoading || isSubmitting || isDeleting;
+  const isFormDisabled = isLoading || isSubmitting;
 
   return (
     <FormProvider {...formMethods}>
@@ -313,19 +293,12 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId }) => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+          {/*
+          Only show delete button if in edit mode and we have access to the DeleteAgentProvider
+          */}
           {!isCreateMode && (
             <EuiFlexItem grow={false}>
-              <EuiButton
-                color="danger"
-                iconType="trash"
-                onClick={() => deleteAgent(editingAgentId!)}
-                disabled={isFormDisabled}
-                isLoading={isDeleting}
-              >
-                {i18n.translate('xpack.onechat.agents.form.deleteButton', {
-                  defaultMessage: 'Delete',
-                })}
-              </EuiButton>
+              <DeleteAgentButton agentId={editingAgentId} isDisabled={isFormDisabled} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

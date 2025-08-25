@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import { AgentsList } from './agents_list';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
+import { DeleteAgentProvider } from '../../../context/delete_agent_context';
 
 export const OnechatAgents = () => {
   const { euiTheme } = useEuiTheme();
@@ -35,21 +36,23 @@ export const OnechatAgents = () => {
     </EuiButton>,
   ];
   return (
-    <KibanaPageTemplate>
-      <KibanaPageTemplate.Header
-        css={headerStyles}
-        pageTitle={i18n.translate('xpack.onechat.agents.title', {
-          defaultMessage: 'Agents',
-        })}
-        description={i18n.translate('xpack.onechat.agents.description', {
-          defaultMessage:
-            'Agents are AI assistants that use tools to answer questions, take action, or support workflows.',
-        })}
-        rightSideItems={headerButtons}
-      />
-      <KibanaPageTemplate.Section>
-        <AgentsList />
-      </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+    <DeleteAgentProvider>
+      <KibanaPageTemplate>
+        <KibanaPageTemplate.Header
+          css={headerStyles}
+          pageTitle={i18n.translate('xpack.onechat.agents.title', {
+            defaultMessage: 'Agents',
+          })}
+          description={i18n.translate('xpack.onechat.agents.description', {
+            defaultMessage:
+              'Agents are AI assistants that use tools to answer questions, take action, or support workflows.',
+          })}
+          rightSideItems={headerButtons}
+        />
+        <KibanaPageTemplate.Section>
+          <AgentsList />
+        </KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
+    </DeleteAgentProvider>
   );
 };

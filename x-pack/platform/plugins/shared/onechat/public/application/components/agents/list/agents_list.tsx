@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import type {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
@@ -27,8 +27,8 @@ import { oneChatDefaultAgentId, type AgentDefinition } from '@kbn/onechat-common
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { AgentDeleteModal } from './agent_delete_modal';
 import { searchParamNames } from '../../../search_param_names';
+import { useDeleteAgent } from '../../../context/delete_agent_context';
 
 const columnNames = {
   name: i18n.translate('xpack.onechat.agents.nameColumn', { defaultMessage: 'Name' }),
@@ -57,14 +57,7 @@ const actionLabels = {
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useOnechatAgents();
   const { createOnechatUrl } = useNavigation();
-
-  const [deletingAgent, setDeletingAgent] = useState<AgentDefinition | null>(null);
-  const openDeleteModal = useCallback((agent: AgentDefinition) => {
-    setDeletingAgent(agent);
-  }, []);
-  const closeDeleteModal = useCallback(() => {
-    setDeletingAgent(null);
-  }, []);
+  const { deleteAgent } = useDeleteAgent();
 
   const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(() => {
     const agentAvatar: EuiTableComputedColumnType<AgentDefinition> = {
@@ -147,7 +140,7 @@ export const AgentsList: React.FC = () => {
                       if (agent.id === oneChatDefaultAgentId) {
                         return;
                       }
-                      openDeleteModal(agent);
+                      deleteAgent({ agent });
                     }}
                     color="danger"
                   >
@@ -164,7 +157,7 @@ export const AgentsList: React.FC = () => {
     };
 
     return [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
-  }, [createOnechatUrl, openDeleteModal]);
+  }, [createOnechatUrl, deleteAgent]);
 
   const errorMessage = useMemo(
     () =>
@@ -182,29 +175,26 @@ export const AgentsList: React.FC = () => {
   }, [agents]);
 
   return (
-    <>
-      <EuiInMemoryTable
-        items={agents}
-        itemId={(agent) => agent.id}
-        columns={columns}
-        sorting={true}
-        selection={{ selectable: (agent) => agent.id !== oneChatDefaultAgentId }}
-        search={{
-          box: { incremental: true },
-          filters: [
-            {
-              type: 'field_value_selection',
-              name: 'Labels',
-              multiSelect: 'and',
-              options: labelOptions,
-            },
-          ],
-        }}
-        loading={isLoading}
-        error={errorMessage}
-        responsiveBreakpoint={false}
-      />
-      <AgentDeleteModal agent={deletingAgent} onClose={closeDeleteModal} />
-    </>
+    <EuiInMemoryTable
+      items={agents}
+      itemId={(agent) => agent.id}
+      columns={columns}
+      sorting={true}
+      selection={{ selectable: (agent) => agent.id !== oneChatDefaultAgentId }}
+      search={{
+        box: { incremental: true },
+        filters: [
+          {
+            type: 'field_value_selection',
+            name: 'Labels',
+            multiSelect: 'and',
+            options: labelOptions,
+          },
+        ],
+      }}
+      loading={isLoading}
+      error={errorMessage}
+      responsiveBreakpoint={false}
+    />
   );
 };
