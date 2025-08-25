@@ -69,6 +69,7 @@ export class WaitStepImpl implements StepImplementation {
     const resumeExecutionTask = await this.workflowTaskManager.scheduleResumeTask({
       runAt,
       workflowRunId: workflowExecution.id,
+      spaceId: workflowExecution.spaceId,
     });
     this.workflowLogger.logDebug(
       `Scheduled resume execution task for wait step "${this.node.id}" with ID ${
