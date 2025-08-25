@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useSelector } from '@xstate/react';
 import type { OnRefreshProps } from '@elastic/eui';
 import { DEFAULT_DATEPICKER_REFRESH } from '../../common/constants';
@@ -143,10 +143,6 @@ export const useDatasetQualityDetailsState = () => {
     failureStoreUpdating: state.matches('initializing.failureStoreUpdate.updating'),
   }));
 
-  const failureStoreUpdateResult = useSelector(service, (state) =>
-    'failureStoreUpdate' in state.context ? state.context.failureStoreUpdate : undefined
-  );
-
   const isQualityIssueFlyoutOpen = useSelector(service, (state) =>
     state.matches('initializing.qualityIssueFlyout.open')
   );
@@ -175,26 +171,15 @@ export const useDatasetQualityDetailsState = () => {
     }) => {
       service.send({
         type: 'UPDATE_FAILURE_STORE',
-        failureStoreEnabled,
-        customRetentionPeriod,
-      });
-    },
-    [service]
-  );
-
-  // Refresh when failure store update completes successfully
-  useEffect(() => {
-    if (failureStoreUpdateResult?.result && !failureStoreUpdateResult?.error) {
-      service.send({
-        type: 'UPDATE_TIME_RANGE',
-        timeRange: {
-          from: timeRange.from,
-          to: timeRange.to,
-          refresh: { ...DEFAULT_DATEPICKER_REFRESH, value: timeRange.refresh.value },
+        data: {
+          ...dataStreamDetails,
+          hasFailureStore: failureStoreEnabled,
+          customRetentionPeriod,
         },
       });
-    }
-  }, [failureStoreUpdateResult, service, timeRange]);
+    },
+    [dataStreamDetails, service]
+  );
 
   const hasFailureStore = Boolean(dataStreamDetails?.hasFailureStore);
   const canShowFailureStoreInfo = canUserReadFailureStore && hasFailureStore;
@@ -230,6 +215,5 @@ export const useDatasetQualityDetailsState = () => {
     isQualityIssueFlyoutOpen,
     defaultRetentionPeriod,
     customRetentionPeriod,
-    failureStoreUpdateResult,
   };
 };

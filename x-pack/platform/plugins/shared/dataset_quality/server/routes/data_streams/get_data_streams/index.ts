@@ -10,16 +10,14 @@ import { FAILURE_STORE_PRIVILEGE } from '../../../../common/constants';
 import { streamPartsToIndexPattern } from '../../../../common/utils';
 import type { DataStreamType } from '../../../../common/types';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
-import { getDataStreamDefaultRetentionPeriod } from '../get_data_streams_default_retention_period';
 
 export async function getDataStreams(options: {
   esClient: ElasticsearchClient;
   types?: DataStreamType[];
   datasetQuery?: string;
   uncategorisedOnly?: boolean;
-  esClientInternalUser: ElasticsearchClient;
 }) {
-  const { esClient, types = [], datasetQuery, uncategorisedOnly, esClientInternalUser } = options;
+  const { esClient, types = [], datasetQuery, uncategorisedOnly } = options;
 
   const datasetNames = datasetQuery
     ? [datasetQuery]
@@ -65,10 +63,6 @@ export async function getDataStreams(options: {
       )
     : {};
 
-  const defaultRetentionPeriod = await getDataStreamDefaultRetentionPeriod({
-    esClient: esClientInternalUser,
-  });
-
   const mappedDataStreams = filteredDataStreams.map((dataStream) => ({
     name: dataStream.name,
     integration: dataStream._meta?.package?.name,
@@ -79,7 +73,6 @@ export async function getDataStreams(options: {
       canReadFailureStore: dataStreamsPrivileges[dataStream.name][FAILURE_STORE_PRIVILEGE],
     },
     hasFailureStore: dataStream.failure_store?.enabled,
-    defaultRetentionPeriod,
     // @ts-expect-error
     customRetentionPeriod: dataStream.failure_store?.lifecycle?.data_retention,
   }));

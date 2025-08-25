@@ -43,6 +43,7 @@ import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_strea
 import { updateFieldLimit } from './update_field_limit';
 import { getDataStreamsCreationDate } from './get_data_streams_creation_date';
 import { updateFailureStore } from './update_failure_store';
+import { getDataStreamDefaultRetentionPeriod } from './get_data_streams_default_retention_period';
 
 const datasetTypesPrivilegesRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/types_privileges',
@@ -108,13 +109,11 @@ const statsRoute = createDatasetQualityServerRoute({
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const esClientAsSecondaryAuthUser = coreContext.elasticsearch.client.asSecondaryAuthUser;
-    const esClientInternalUser = coreContext.elasticsearch.client.asInternalUser;
 
     const { dataStreams, datasetUserPrivileges } = await getDataStreams({
       esClient,
       ...params.query,
       uncategorisedOnly: false,
-      esClientInternalUser,
     });
 
     const privilegedDataStreams = dataStreams.filter((dataStream) => {
@@ -478,19 +477,21 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client;
-    const esClientInternalUser = coreContext.elasticsearch.client.asInternalUser;
 
     const isServerless = (await getEsCapabilities()).serverless;
+
+    const defaultRetentionPeriod = await getDataStreamDefaultRetentionPeriod({
+      esClient: esClient.asSecondaryAuthUser,
+    });
     const dataStreamDetails = await getDataStreamDetails({
       esClient,
       dataStream,
       start,
       end,
       isServerless,
-      esClientInternalUser,
     });
 
-    return dataStreamDetails;
+    return { ...dataStreamDetails, defaultRetentionPeriod };
   },
 });
 

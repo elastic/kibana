@@ -61,16 +61,6 @@ export interface FieldLimit {
   error?: boolean;
 }
 
-export interface FailureStoreUpdate {
-  params?: {
-    dataStream: string;
-    failureStoreEnabled: boolean;
-    customRetentionPeriod?: string;
-  };
-  result?: UpdateFailureStoreResponse;
-  error?: boolean;
-}
-
 export interface WithDefaultControllerState {
   dataStream: string;
   qualityIssues: QualityIssuesTableConfig;
@@ -88,7 +78,6 @@ export interface WithDefaultControllerState {
   };
   isNonAggregatable?: boolean;
   fieldLimit?: FieldLimit;
-  failureStoreUpdate?: FailureStoreUpdate;
 }
 
 export interface WithDataStreamDetails {
@@ -297,8 +286,7 @@ export type DatasetQualityDetailsControllerEvent =
     }
   | {
       type: 'UPDATE_FAILURE_STORE';
-      failureStoreEnabled: boolean;
-      customRetentionPeriod?: string;
+      dataStreamsDetails: DataStreamDetails;
     }
   | DoneInvokeEvent<NonAggregatableDatasets>
   | DoneInvokeEvent<DataStreamDetails>

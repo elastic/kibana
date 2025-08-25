@@ -20,7 +20,6 @@ import type {
   FailedDocsErrorsResponse,
   NonAggregatableDatasets,
   UpdateFieldLimitResponse,
-  UpdateFailureStoreResponse,
 } from '../../../common/api_types';
 import { indexNameToDataStreamParts } from '../../../common/utils';
 import type { IDataStreamDetailsClient } from '../../services/data_stream_details';
@@ -541,7 +540,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                   on: {
                     UPDATE_FAILURE_STORE: {
                       target: 'updating',
-                      actions: ['storeFailureStoreUpdateParams'],
+                      actions: ['storeDataStreamDetails'],
                     },
                   },
                 },
@@ -550,15 +549,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     src: 'updateFailureStore',
                     onDone: {
                       target: 'idle',
-                      actions: [
-                        'storeFailureStoreUpdateResponse',
-                        'notifyUpdateFailureStoreSuccess',
-                        'raiseForceDataStreamDetailsRefresh',
-                      ],
+                      actions: ['notifyUpdateFailureStoreSuccess', 'raiseForceTimeRangeRefresh'],
                     },
                     onError: {
                       target: 'idle',
-                      actions: ['storeFailureStoreUpdateError', 'notifyUpdateFailureStoreFailed'],
+                      actions: ['notifyUpdateFailureStoreFailed', 'raiseForceTimeRangeRefresh'],
                     },
                   },
                 },
@@ -740,45 +735,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
           fieldLimit: undefined,
         })),
         raiseForceTimeRangeRefresh: raise('UPDATE_TIME_RANGE'),
-        storeFailureStoreUpdateParams: assign((_, event) => {
-          return 'failureStoreEnabled' in event
-            ? {
-                failureStoreUpdate: {
-                  params: {
-                    dataStream: '',
-                    failureStoreEnabled: event.failureStoreEnabled,
-                    customRetentionPeriod: event.customRetentionPeriod,
-                  },
-                },
-              }
-            : {};
-        }),
-        storeFailureStoreUpdateResponse: assign(
-          (context, event: DoneInvokeEvent<UpdateFailureStoreResponse>) => {
-            return 'data' in event
-              ? {
-                  failureStoreUpdate: {
-                    ...context.failureStoreUpdate,
-                    result: event.data,
-                    error: false,
-                  },
-                }
-              : {};
-          }
-        ),
-        storeFailureStoreUpdateError: assign((context) => {
-          return {
-            failureStoreUpdate: {
-              ...context.failureStoreUpdate,
-              error: true,
-            },
-          };
-        }),
-        raiseForceDataStreamDetailsRefresh: (context) =>
-          raise({
-            type: 'UPDATE_TIME_RANGE',
-            timeRange: context.timeRange,
-          } as DatasetQualityDetailsControllerEvent),
       },
       guards: {
         checkIfActionForbidden: (_, event) => {
@@ -1038,14 +994,14 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
       },
       updateFailureStore: (context) => {
         if (
-          'failureStoreUpdate' in context &&
-          context.failureStoreUpdate &&
-          context.failureStoreUpdate.params
+          'dataStreamDetails' in context &&
+          context.dataStreamDetails &&
+          context.dataStreamDetails.hasFailureStore
         ) {
           return dataStreamDetailsClient.updateFailureStore({
             dataStream: context.dataStream,
-            failureStoreEnabled: context.failureStoreUpdate.params.failureStoreEnabled,
-            customRetentionPeriod: context.failureStoreUpdate.params.customRetentionPeriod,
+            failureStoreEnabled: context.dataStreamDetails.hasFailureStore,
+            customRetentionPeriod: context.dataStreamDetails.customRetentionPeriod,
           });
         }
 

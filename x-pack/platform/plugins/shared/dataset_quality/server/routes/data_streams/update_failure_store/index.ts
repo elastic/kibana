@@ -23,17 +23,14 @@ export async function updateFailureStore({
   isServerless: boolean;
 }): Promise<UpdateFailureStoreResponse> {
   try {
-    return await esClient.transport.request(
+    return await esClient.indices.putDataStreamOptions(
       {
-        method: 'PUT',
-        path: `/_data_stream/${dataStream}/_options`,
-        body: {
-          failure_store: {
-            enabled: failureStoreEnabled,
-            lifecycle: {
-              data_retention: customRetentionPeriod || null,
-              ...(isServerless ? {} : { enabled: !!customRetentionPeriod }),
-            },
+        name: dataStream,
+        failure_store: {
+          enabled: failureStoreEnabled,
+          lifecycle: {
+            data_retention: customRetentionPeriod,
+            ...(isServerless ? {} : { enabled: !!customRetentionPeriod }),
           },
         },
       },

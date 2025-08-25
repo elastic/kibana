@@ -21,5 +21,4 @@ export async function getDataStreamDefaultRetentionPeriod({
   const persistentDSRetention = persistent?.data_streams?.lifecycle?.retention?.failures_default;
   const defaultsDSRetention = defaults?.data_streams?.lifecycle?.retention?.failures_default;
   return persistentDSRetention ?? defaultsDSRetention ?? DEFAULT_RETENTION_PERIOD;
-  return DEFAULT_RETENTION_PERIOD;
 }

@@ -62,8 +62,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Index logs for synth.no-fs dataset
         getLogsForDataset({ to, count: 5, dataset: noFailureStoreDatasetName }),
       ]);
-
-      await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
     after(async () => {
@@ -76,77 +74,115 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await synthtrace.deleteCustomPipeline('synth.2@pipeline');
     });
 
-    it('should show "No failure store" card when failure store is disabled', async () => {
-      const { datasetQualityDetailsSummaryCardNoFailureStore } =
-        PageObjects.datasetQuality.testSubjectSelectors;
-      await PageObjects.datasetQuality.navigateToDetails({
-        dataStream: noFailureStoreDataStreamName,
+    describe('without failure store permissions', () => {
+      before(async () => {
+        await PageObjects.svlCommonPage.loginAsViewer();
       });
-      await new Promise((resolve) => setTimeout(resolve, 10000));
 
-      await testSubjects.existOrFail(datasetQualityDetailsSummaryCardNoFailureStore);
-      const failedDocsCard = await testSubjects.getVisibleText(
-        datasetQualityDetailsSummaryCardNoFailureStore
-      );
-      expect(failedDocsCard).to.contain('No failure store');
+      it('should show "No failure store" card when failure store is disabled', async () => {
+        const { datasetQualityDetailsSummaryCardNoFailureStore } =
+          PageObjects.datasetQuality.testSubjectSelectors;
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: noFailureStoreDataStreamName,
+        });
+
+        await testSubjects.existOrFail(datasetQualityDetailsSummaryCardNoFailureStore);
+        const failedDocsCard = await testSubjects.getVisibleText(
+          datasetQualityDetailsSummaryCardNoFailureStore
+        );
+        expect(failedDocsCard).to.contain('No failure store');
+      });
+
+      it('should show "No failure store" card when failure store is enabled', async () => {
+        const { datasetQualityDetailsSummaryCardNoFailureStore } =
+          PageObjects.datasetQuality.testSubjectSelectors;
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: failureStoreDataStreamName,
+        });
+
+        await testSubjects.existOrFail(datasetQualityDetailsSummaryCardNoFailureStore);
+        const failedDocsCard = await testSubjects.getVisibleText(
+          datasetQualityDetailsSummaryCardNoFailureStore
+        );
+        expect(failedDocsCard).to.contain('No failure store');
+      });
     });
 
-    it('should open failure store modal and save new config', async () => {
-      const {
-        datasetQualityDetailsSummaryCardFailedDocuments,
-        datasetQualityDetailsSummaryCardNoFailureStore,
-        datasetQualityDetailsEnableFailureStoreButton,
-        editFailureStoreModal,
-        failureStoreModalSaveButton,
-        enableFailureStoreToggle,
-      } = PageObjects.datasetQuality.testSubjectSelectors;
+    describe('with failure store permissions', () => {
+      before(async () => {
+        await PageObjects.svlCommonPage.loginAsAdmin();
+      });
+      it('should show "No failure store" card when failure store is disabled', async () => {
+        const { datasetQualityDetailsSummaryCardNoFailureStore } =
+          PageObjects.datasetQuality.testSubjectSelectors;
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: noFailureStoreDataStreamName,
+        });
 
-      await PageObjects.datasetQuality.navigateToDetails({
-        dataStream: noFailureStoreDataStreamName,
+        await testSubjects.existOrFail(datasetQualityDetailsSummaryCardNoFailureStore);
+        const failedDocsCard = await testSubjects.getVisibleText(
+          datasetQualityDetailsSummaryCardNoFailureStore
+        );
+        expect(failedDocsCard).to.contain('No failure store');
       });
 
-      await testSubjects.existOrFail(datasetQualityDetailsSummaryCardNoFailureStore);
-      await testSubjects.missingOrFail(datasetQualityDetailsSummaryCardFailedDocuments);
+      it('should open failure store modal and save new config', async () => {
+        const {
+          datasetQualityDetailsSummaryCardFailedDocuments,
+          datasetQualityDetailsSummaryCardNoFailureStore,
+          datasetQualityDetailsEnableFailureStoreButton,
+          editFailureStoreModal,
+          failureStoreModalSaveButton,
+          enableFailureStoreToggle,
+        } = PageObjects.datasetQuality.testSubjectSelectors;
 
-      await testSubjects.click(datasetQualityDetailsEnableFailureStoreButton);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: noFailureStoreDataStreamName,
+        });
 
-      await testSubjects.existOrFail(editFailureStoreModal);
+        await testSubjects.existOrFail(datasetQualityDetailsSummaryCardNoFailureStore);
+        await testSubjects.missingOrFail(datasetQualityDetailsSummaryCardFailedDocuments);
 
-      const saveModalButton = await testSubjects.find(failureStoreModalSaveButton);
-      expect(await saveModalButton.isEnabled()).to.be(false);
+        await testSubjects.click(datasetQualityDetailsEnableFailureStoreButton);
 
-      await testSubjects.click(enableFailureStoreToggle);
+        await testSubjects.existOrFail(editFailureStoreModal);
 
-      expect(await saveModalButton.isEnabled()).to.be(true);
+        const saveModalButton = await testSubjects.find(failureStoreModalSaveButton);
+        expect(await saveModalButton.isEnabled()).to.be(false);
 
-      await testSubjects.click(failureStoreModalSaveButton);
+        await testSubjects.click(enableFailureStoreToggle);
 
-      await testSubjects.missingOrFail(editFailureStoreModal);
+        expect(await saveModalButton.isEnabled()).to.be(true);
 
-      await testSubjects.existOrFail(datasetQualityDetailsSummaryCardFailedDocuments);
+        await testSubjects.click(failureStoreModalSaveButton);
 
-      await testSubjects.missingOrFail(datasetQualityDetailsSummaryCardNoFailureStore);
+        await testSubjects.missingOrFail(editFailureStoreModal);
 
-      const failedDocsCard = await testSubjects.getVisibleText(
-        datasetQualityDetailsSummaryCardFailedDocuments
-      );
-      expect(failedDocsCard).to.contain('Failed documents');
-    });
+        await testSubjects.existOrFail(datasetQualityDetailsSummaryCardFailedDocuments);
 
-    it('should show failed docs count when failure store is enabled', async () => {
-      await PageObjects.datasetQuality.navigateToDetails({
-        dataStream: failureStoreDataStreamName,
+        await testSubjects.missingOrFail(datasetQualityDetailsSummaryCardNoFailureStore);
+
+        const failedDocsCard = await testSubjects.getVisibleText(
+          datasetQualityDetailsSummaryCardFailedDocuments
+        );
+        expect(failedDocsCard).to.contain('Failed documents');
       });
 
-      await testSubjects.existOrFail(
-        PageObjects.datasetQuality.testSubjectSelectors
-          .datasetQualityDetailsSummaryCardFailedDocuments
-      );
-      const failedDocsCard = await testSubjects.getVisibleText(
-        PageObjects.datasetQuality.testSubjectSelectors
-          .datasetQualityDetailsSummaryCardFailedDocuments
-      );
-      expect(failedDocsCard).to.not.contain('No failure store');
+      it('should show failed docs count when failure store is enabled', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: failureStoreDataStreamName,
+        });
+
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors
+            .datasetQualityDetailsSummaryCardFailedDocuments
+        );
+        const failedDocsCard = await testSubjects.getVisibleText(
+          PageObjects.datasetQuality.testSubjectSelectors
+            .datasetQualityDetailsSummaryCardFailedDocuments
+        );
+        expect(failedDocsCard).to.not.contain('No failure store');
+      });
     });
   });
 }
