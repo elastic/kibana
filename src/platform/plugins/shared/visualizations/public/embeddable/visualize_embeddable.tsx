@@ -17,7 +17,6 @@ import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { dispatchRenderComplete } from '../legacy/embeddable/render_complete_dispatcher';
 import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   apiHasDisableTriggers,
@@ -39,6 +38,7 @@ import { get, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
+import { dispatchRenderComplete } from '../legacy/embeddable/render_complete_dispatcher';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { getInspector, getUiActions, getUsageCollection } from '../services';

@@ -12,8 +12,8 @@ import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
-import { RenderCompleteDispatcher } from './render_complete_dispatcher';
 import type { Adapters } from '@kbn/inspector-plugin/public';
+import { RenderCompleteDispatcher } from './render_complete_dispatcher';
 import type {
   EmbeddableError,
   EmbeddableInput,
