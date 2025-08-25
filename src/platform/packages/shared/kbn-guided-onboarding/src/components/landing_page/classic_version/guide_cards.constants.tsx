@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ReactNode } from 'react';
-import { GuideId } from '../../../..';
-import { GuideCardSolutions } from './guide_cards';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { GuideId } from '../../../..';
+import type { GuideCardSolutions } from './guide_cards';
 
 export interface GuideCardConstants {
   solution: GuideCardSolutions;
@@ -30,22 +31,6 @@ export interface GuideCardConstants {
 }
 
 export const guideCards: GuideCardConstants[] = [
-  {
-    solution: 'search',
-    icon: 'database',
-    title: (
-      <FormattedMessage
-        id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
-        defaultMessage="Search across databases {lineBreak} and business systems"
-        values={{
-          lineBreak: <br />,
-        }}
-      />
-    ),
-    guideId: 'databaseSearch',
-    telemetryId: 'onboarding--search--database',
-    order: 1,
-  },
   {
     solution: 'security',
     icon: 'securitySignal',

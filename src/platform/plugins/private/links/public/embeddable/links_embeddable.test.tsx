@@ -12,35 +12,29 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { setStubKibanaServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { EuiThemeProvider } from '@elastic/eui';
-import { deserializeState, getLinksEmbeddableFactory } from './links_embeddable';
-import { Link } from '../../common/content_management';
-import { CONTENT_ID } from '../../common';
+import { getLinksEmbeddableFactory } from './links_embeddable';
+import type { LinksEmbeddableState } from '../../common';
+import { LINKS_EMBEDDABLE_TYPE } from '../../common';
+import type { Link } from '../../server';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import {
-  LinksApi,
-  LinksByReferenceSerializedState,
-  LinksByValueSerializedState,
-  LinksParentApi,
-  LinksSerializedState,
-  ResolvedLink,
-} from '../types';
+import type { LinksApi, LinksParentApi, ResolvedLink } from '../types';
 import { linksClient } from '../content_management';
 import { getMockLinksParentApi } from '../mocks';
 
-const getLinks: () => Link[] = () => [
+const getLinks = (): Link[] => [
   {
     id: '001',
     order: 0,
     type: 'dashboardLink',
     label: '',
-    destinationRefName: 'link_001_dashboard',
+    destination: '999',
   },
   {
     id: '002',
     order: 1,
     type: 'dashboardLink',
     label: 'Dashboard 2',
-    destinationRefName: 'link_002_dashboard',
+    destination: '888',
   },
   {
     id: '003',
@@ -93,21 +87,11 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
   },
 ];
 
-const references = [
-  {
-    id: '999',
-    name: 'link_001_dashboard',
-    type: 'dashboard',
-  },
-  {
-    id: '888',
-    name: 'link_002_dashboard',
-    type: 'dashboard',
-  },
-];
-
 jest.mock('../lib/resolve_links', () => {
   return {
+    serializeResolvedLinks: (resolvedLinks: ResolvedLink[]) => {
+      return resolvedLinks.map(({ title, description, error, ...linkToSave }) => linkToSave);
+    },
     resolveLinks: jest.fn().mockResolvedValue(getResolvedLinks()),
   };
 });
@@ -117,27 +101,20 @@ jest.mock('../content_management', () => {
     linksClient: {
       create: jest.fn().mockResolvedValue({ item: { id: '333' } }),
       update: jest.fn().mockResolvedValue({ item: { id: '123' } }),
-      get: jest.fn((savedObjectId) => {
-        return Promise.resolve({
-          item: {
-            id: savedObjectId,
-            attributes: {
-              title: 'links 001',
-              description: 'some links',
-              links: getLinks(),
-              layout: 'vertical',
-            },
-            references,
-          },
-          meta: {
-            aliasTargetId: '123',
-            outcome: 'exactMatch',
-            aliasPurpose: 'sharing',
-            sourceId: savedObjectId,
-          },
-        });
-      }),
     },
+  };
+});
+
+jest.mock('../content_management/load_from_library', () => {
+  return {
+    loadFromLibrary: jest.fn((savedObjectId) => {
+      return Promise.resolve({
+        title: 'links 001',
+        description: 'some links',
+        links: getLinks(),
+        layout: 'vertical',
+      });
+    }),
   };
 });
 
@@ -149,8 +126,8 @@ const renderEmbeddable = (
 ) => {
   return render(
     <EuiThemeProvider>
-      <EmbeddableRenderer<LinksSerializedState, LinksApi>
-        type={CONTENT_ID}
+      <EmbeddableRenderer<LinksEmbeddableState, LinksApi>
+        type={LINKS_EMBEDDABLE_TYPE}
         onApiAvailable={jest.fn()}
         getParentApi={jest.fn().mockReturnValue(parent)}
         {...overrides}
@@ -164,46 +141,18 @@ describe('getLinksEmbeddableFactory', () => {
 
   beforeAll(() => {
     const embeddable = embeddablePluginMock.createSetupContract();
-    embeddable.registerReactEmbeddableFactory(CONTENT_ID, async () => {
+    embeddable.registerReactEmbeddableFactory(LINKS_EMBEDDABLE_TYPE, async () => {
       return factory;
     });
     setStubKibanaServices();
   });
 
   describe('by reference embeddable', () => {
-    const byRefState = {
-      rawState: {
-        title: 'my links',
-        description: 'just a few links',
-        hidePanelTitles: false,
-      } as LinksByReferenceSerializedState,
-      references: [
-        {
-          id: '123',
-          name: 'savedObjectRef',
-          type: 'links',
-        },
-      ],
-    };
-
-    const expectedRuntimeState = {
-      defaultTitle: 'links 001',
-      defaultDescription: 'some links',
-      layout: 'vertical',
-      links: getResolvedLinks(),
-      description: 'just a few links',
+    const parent = getMockLinksParentApi({
       title: 'my links',
-      savedObjectId: '123',
+      description: 'just a few links',
       hidePanelTitles: false,
-    };
-
-    const parent = getMockLinksParentApi(byRefState.rawState, byRefState.references);
-
-    test('deserializeState', async () => {
-      const deserializedState = await deserializeState(byRefState);
-      expect(deserializedState).toEqual({
-        ...expectedRuntimeState,
-      });
+      savedObjectId: '123',
     });
 
     test('component renders', async () => {
@@ -222,14 +171,8 @@ describe('getLinksEmbeddableFactory', () => {
             title: 'my links',
             description: 'just a few links',
             hidePanelTitles: false,
+            savedObjectId: '123',
           },
-          references: [
-            {
-              id: '123',
-              name: 'savedObjectRef',
-              type: 'links',
-            },
-          ],
         });
         expect(await api.canUnlinkFromLibrary()).toBe(true);
         expect(api.defaultTitle$?.value).toBe('links 001');
@@ -248,49 +191,21 @@ describe('getLinksEmbeddableFactory', () => {
             title: 'my links',
             description: 'just a few links',
             hidePanelTitles: false,
-            attributes: {
-              description: 'some links',
-              title: 'links 001',
-              links: getLinks(),
-              layout: 'vertical',
-            },
+            links: getLinks(),
+            layout: 'vertical',
           },
-          references,
         });
       });
     });
   });
 
   describe('by value embeddable', () => {
-    const byValueState = {
-      rawState: {
-        attributes: {
-          links: getLinks(),
-          layout: 'horizontal',
-        },
-        description: 'just a few links',
-        title: 'my links',
-        hidePanelTitles: true,
-      } as LinksByValueSerializedState,
-      references,
-    };
-
-    const expectedRuntimeState = {
-      defaultTitle: undefined,
-      defaultDescription: undefined,
-      layout: 'horizontal',
-      links: getResolvedLinks(),
+    const parent = getMockLinksParentApi({
       description: 'just a few links',
       title: 'my links',
-      savedObjectId: undefined,
       hidePanelTitles: true,
-    };
-
-    const parent = getMockLinksParentApi(byValueState.rawState, byValueState.references);
-
-    test('deserializeState', async () => {
-      const deserializedState = await deserializeState(byValueState);
-      expect(deserializedState).toEqual({ ...expectedRuntimeState, layout: 'horizontal' });
+      links: getLinks(),
+      layout: 'horizontal',
     });
 
     test('component renders', async () => {
@@ -310,12 +225,9 @@ describe('getLinksEmbeddableFactory', () => {
             title: 'my links',
             description: 'just a few links',
             hidePanelTitles: true,
-            attributes: {
-              links: getLinks(),
-              layout: 'horizontal',
-            },
+            links: getLinks(),
+            layout: 'horizontal',
           },
-          references,
         });
 
         expect(await api.canLinkToLibrary()).toBe(true);
@@ -334,7 +246,6 @@ describe('getLinksEmbeddableFactory', () => {
             links: getLinks(),
             layout: 'horizontal',
           },
-          options: { references },
         });
         expect(newId).toBe('333');
         expect(api.getSerializedStateByReference(newId)).toEqual({
@@ -342,14 +253,8 @@ describe('getLinksEmbeddableFactory', () => {
             title: 'my links',
             description: 'just a few links',
             hidePanelTitles: true,
+            savedObjectId: '333',
           },
-          references: [
-            {
-              id: '333',
-              name: 'savedObjectRef',
-              type: 'links',
-            },
-          ],
         });
       });
     });

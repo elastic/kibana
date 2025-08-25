@@ -1,0 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { WorkflowsPlugin } from './plugin';
+
+// This exports static code and TypeScript types,
+// as well as, Kibana Platform `plugin()` initializer.
+export function plugin() {
+  return new WorkflowsPlugin();
+}
+export type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
+
+// for use in workflows example plugin. TODO: revisit, maybe move to shared package.
+export type { WorkflowExecutionProps } from './features/workflow_execution_detail/ui/workflow_execution';
+export { WorkflowExecutionLazy as WorkflowExecution } from './features/workflow_execution_detail/ui/workflow_execution.lazy';

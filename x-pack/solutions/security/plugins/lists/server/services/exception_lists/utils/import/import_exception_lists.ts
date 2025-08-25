@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ImportExceptionListSchemaDecoded } from '@kbn/securitysolution-io-ts-list-types';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ImportExceptionListSchemaDecoded } from '@kbn/securitysolution-io-ts-list-types';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
+import type { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
 
 import { getAllListTypes } from './find_all_exception_list_types';
 import { sortExceptionListsToUpdateOrCreate } from './sort_exception_lists_to_create_update';

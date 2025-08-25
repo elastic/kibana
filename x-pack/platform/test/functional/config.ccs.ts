@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archiver';
 import { RemoteEsProvider } from './services/remote_es/remote_es';
 
@@ -15,13 +15,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
 
-    // testFiles: [
-    //   require.resolve('@kbn/test-suites-xpack-platform/functional/apps/canvas'),
-    //   require.resolve('./apps/lens/group1'),
-    //   require.resolve('./apps/remote_clusters/ccs/remote_clusters_index_management_flow'),
-    //   require.resolve('./apps/rollup_job'),
-    //   require.resolve('@kbn/test-suites-xpack-platform/functional/apps/ml/anomaly_detection_jobs'),
-    // ],
+    testFiles: [
+      require.resolve('./apps/canvas'),
+      require.resolve('./apps/lens/group1'),
+      require.resolve('./apps/remote_clusters/ccs/remote_clusters_index_management_flow'),
+      require.resolve('./apps/rollup_job'),
+      require.resolve('./apps/ml/anomaly_detection_jobs'),
+    ],
 
     junit: {
       reportName: 'X-Pack CCS Tests',

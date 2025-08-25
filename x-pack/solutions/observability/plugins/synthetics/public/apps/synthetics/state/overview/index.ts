@@ -6,7 +6,8 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { MonitorOverviewState, overviewViews } from './models';
+import type { MonitorOverviewState } from './models';
+import { overviewViews } from './models';
 
 import {
   setFlyoutConfig,

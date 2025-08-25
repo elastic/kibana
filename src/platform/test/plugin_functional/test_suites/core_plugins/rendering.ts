@@ -11,7 +11,7 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 
 import '@kbn/core-provider-plugin/types';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 declare global {
   interface Window {
@@ -319,12 +319,15 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.ml.nlp.modelDeployment.vCPURange.high.max (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.high.min (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.high.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.high.maxThreads (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.low.max (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.low.min (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.low.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.low.maxThreads (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.medium.max (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.medium.min (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.medium.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.medium.maxThreads (number)',
         'xpack.osquery.actionEnabled (boolean?)',
         'xpack.remote_clusters.ui.enabled (boolean?)',
         'xpack.ingest_pipelines.enableManageProcessors (boolean?|never)',
@@ -381,8 +384,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
+        'xpack.observabilityShared.unsafe.investigativeExperienceEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
+        'xpack.genAiSettings.showAiBreadcrumb (boolean?)',
+        'xpack.genAiSettings.showSpacesIntegration (boolean?)',
         /**
          * Rule form V2 feature flags
          */

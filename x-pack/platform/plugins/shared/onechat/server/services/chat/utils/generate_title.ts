@@ -5,12 +5,36 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
+import { defer, shareReplay, switchMap } from 'rxjs';
 import { z } from '@kbn/zod';
-import { BaseMessageLike } from '@langchain/core/messages';
+import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { ElasticGenAIAttributes, withInferenceSpan } from '@kbn/inference-tracing';
-import type { ConversationRound, RoundInput } from '@kbn/onechat-common';
+import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
+import type { Conversation, ConversationRound, RoundInput } from '@kbn/onechat-common';
 import { conversationToLangchainMessages } from '../../agents/modes/utils';
+
+export const generateTitle$ = ({
+  chatModel,
+  conversation$,
+  nextInput,
+}: {
+  chatModel: InferenceChatModel;
+  conversation$: Observable<Conversation>;
+  nextInput: RoundInput;
+}): Observable<string> => {
+  return conversation$.pipe(
+    switchMap((conversation) => {
+      return defer(async () =>
+        generateConversationTitle({
+          previousRounds: conversation.rounds,
+          nextInput,
+          chatModel,
+        })
+      ).pipe(shareReplay());
+    })
+  );
+};
 
 export const generateConversationTitle = async ({
   previousRounds,
@@ -21,8 +45,9 @@ export const generateConversationTitle = async ({
   nextInput: RoundInput;
   chatModel: InferenceChatModel;
 }) => {
-  return withInferenceSpan(
-    { name: 'generate_title', [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' },
+  return withActiveInferenceSpan(
+    'GenerateTitle',
+    { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
     async (span) => {
       const structuredModel = chatModel.withStructuredOutput(
         z.object({

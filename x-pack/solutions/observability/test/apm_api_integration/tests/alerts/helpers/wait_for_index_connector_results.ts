@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { APM_ACTION_VARIABLE_INDEX } from './constants';

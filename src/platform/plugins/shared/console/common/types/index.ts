@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './models';
-export * from './plugin_config';
-export * from './autocomplete_definitions';
+export type * from './models';
+export type * from './plugin_config';
+export type * from './autocomplete_definitions';

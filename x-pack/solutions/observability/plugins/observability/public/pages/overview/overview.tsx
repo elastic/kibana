@@ -22,6 +22,8 @@ import {
   useFetcher,
 } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect, useMemo } from 'react';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { LoadingObservability } from '../../components/loading_observability';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useHasData } from '../../hooks/use_has_data';
@@ -35,11 +37,8 @@ import { NewsFeed } from './components/news_feed/news_feed';
 import { ObservabilityOnboardingCallout } from './components/observability_onboarding_callout';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useKibana } from '../../utils/kibana_react';
-import {
-  DataContextApps,
-  HasDataMap,
-  appLabels,
-} from '../../context/has_data_context/has_data_context';
+import type { DataContextApps, HasDataMap } from '../../context/has_data_context/has_data_context';
+import { appLabels } from '../../context/has_data_context/has_data_context';
 
 export function OverviewPage() {
   const {
@@ -47,7 +46,13 @@ export function OverviewPage() {
     observabilityAIAssistant,
     kibanaVersion,
     serverless: isServerless,
+    share,
   } = useKibana().services;
+
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
+  const onboardingHref = onboardingLocator?.useUrl({});
 
   const { ObservabilityPageTemplate } = usePluginContext();
   const { euiTheme } = useEuiTheme();
@@ -215,7 +220,12 @@ export function OverviewPage() {
             </p>
           }
           actions={
-            <EuiButton data-test-subj="o11yOverviewPageAddDataButton" color="primary" fill>
+            <EuiButton
+              data-test-subj="o11yOverviewPageAddDataButton"
+              color="primary"
+              fill
+              href={onboardingHref}
+            >
               {i18n.translate('xpack.observability.overview.emptyState.action', {
                 defaultMessage: 'Add data',
               })}

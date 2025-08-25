@@ -28,7 +28,7 @@ import {
   buildSavedPlaygroundFromForm,
   validatePlaygroundName,
 } from '../../utils/saved_playgrounds';
-import { SavedPlaygroundForm } from '../../types';
+import type { SavedPlaygroundForm } from '../../types';
 import { useSavePlayground } from '../../hooks/use_save_playground';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -39,19 +39,19 @@ function makePlaygroundName(name?: string) {
         values: { name },
       })
     : i18n.translate('xpack.searchPlayground.savedPlayground.defaultName', {
-        defaultMessage: 'New Playground',
+        defaultMessage: 'New RAG Playground',
       });
 }
 
 export interface SavePlaygroundModalProps {
   playgroundName?: string;
   saveAs?: boolean;
-  navigateToNewPlayground: (id: string) => void;
+  onNavigateToNewPlayground: (id: string) => void;
   onClose: () => void;
 }
 
 export const SavePlaygroundModal = ({
-  navigateToNewPlayground,
+  onNavigateToNewPlayground,
   playgroundName,
   saveAs,
   onClose,
@@ -82,13 +82,24 @@ export const SavePlaygroundModal = ({
         onSuccess: (data) => {
           onClose();
           reset(newPlayground);
-          navigateToNewPlayground(data._meta.id);
+          notifications.toasts.addSuccess({
+            title: i18n.translate('xpack.searchPlayground.savedPlayground.saveSuccess.title', {
+              defaultMessage: 'RAG playground saved',
+            }),
+            text: i18n.translate('xpack.searchPlayground.savedPlayground.saveSuccess.text', {
+              defaultMessage: '{name} was saved.',
+              values: {
+                name: newPlayground.name,
+              },
+            }),
+          });
+          onNavigateToNewPlayground(data._meta.id);
         },
         onError: (error) => {
           const errorMessage = getErrorMessage(error);
           notifications.toasts.addError(error instanceof Error ? error : new Error(errorMessage), {
             title: i18n.translate('xpack.searchPlayground.savedPlayground.saveError.title', {
-              defaultMessage: 'Error saving playground',
+              defaultMessage: 'Error saving RAG playground',
             }),
             toastMessage: errorMessage,
           });
@@ -96,7 +107,15 @@ export const SavePlaygroundModal = ({
         },
       });
     },
-    [navigateToNewPlayground, onClose, name, getValues, reset, notifications.toasts, savePlayground]
+    [
+      onNavigateToNewPlayground,
+      onClose,
+      name,
+      getValues,
+      reset,
+      notifications.toasts,
+      savePlayground,
+    ]
   );
   const isInvalid = nameError !== null;
 
@@ -112,12 +131,12 @@ export const SavePlaygroundModal = ({
           {saveAs ? (
             <FormattedMessage
               id="xpack.searchPlayground.savedPlayground.savePlaygroundModal.title"
-              defaultMessage="Save playground as"
+              defaultMessage="Save RAG playground as"
             />
           ) : (
             <FormattedMessage
               id="xpack.searchPlayground.savedPlayground.savePlaygroundModal.title"
-              defaultMessage="Save playground"
+              defaultMessage="Save RAG playground"
             />
           )}
         </EuiModalHeaderTitle>

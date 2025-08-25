@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { Ref } from 'react';
-import {
-  ShapeDrawer,
+import type { Ref } from 'react';
+import React from 'react';
+import type {
   ShapeRef,
   ShapeDrawerComponentProps,
-  getShape,
 } from '../../../../public/components/shape_drawer';
+import { ShapeDrawer, getShape } from '../../../../public/components/shape_drawer';
 
 export const ShapeDrawerComponent = React.forwardRef(
   (props: ShapeDrawerComponentProps, ref: Ref<ShapeRef>) => (

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
 
@@ -27,13 +27,13 @@ export default function (providerContext: FtrProviderContext) {
       await fleetAndAgents.setup();
     });
     beforeEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
     });
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     async function verifyActionResult(agentCount: number) {

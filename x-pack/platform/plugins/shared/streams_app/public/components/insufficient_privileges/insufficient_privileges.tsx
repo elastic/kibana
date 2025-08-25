@@ -6,17 +6,9 @@
  */
 
 import React from 'react';
-import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiPopover,
-  EuiToolTip,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiButtonIconPropsForButton,
-} from '@elastic/eui';
+import type { EuiButtonIconProps, EuiButtonIconPropsForButton } from '@elastic/eui';
+import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
 
 const insufficientPrivilegesText = i18n.translate('xpack.streams.insufficientPrivilegesMessage', {
   defaultMessage: "You don't have sufficient privileges to access this information.",
@@ -37,46 +29,20 @@ export const PrivilegesWarningIconWrapper = ({
   popoverCss?: EuiButtonIconProps['css'];
   children: React.ReactNode;
 }) => {
-  const [isPopoverOpen, togglePopover] = useToggle(false);
-
-  const handleButtonClick = togglePopover;
-
   if (hasPrivileges) {
     return <>{children}</>;
   }
 
-  return mode === 'popover' ? (
-    <EuiPopover
-      css={popoverCss}
-      attachToAnchor={true}
-      anchorPosition="downCenter"
-      button={
-        <EuiButtonIcon
-          data-test-subj={`streamsInsufficientPrivileges-${title}`}
-          aria-label={insufficientPrivilegesText}
-          title={insufficientPrivilegesText}
-          iconType="warning"
-          color={iconColor}
-          onClick={handleButtonClick}
-        />
-      }
-      isOpen={isPopoverOpen}
-      closePopover={togglePopover}
+  return (
+    <TooltipOrPopoverIcon
+      dataTestSubj={`streamsInsufficientPrivileges-${title}`}
+      title={insufficientPrivilegesText}
+      mode={mode}
+      icon="warning"
+      iconColor={iconColor}
+      popoverCss={popoverCss}
     >
-      {insufficientPrivilegesText}
-    </EuiPopover>
-  ) : (
-    <EuiToolTip content={insufficientPrivilegesText}>
-      <EuiFlexGroup alignItems="center">
-        <EuiIcon
-          data-test-subj={`streamsInsufficientPrivileges-${title}`}
-          aria-label={insufficientPrivilegesText}
-          title={insufficientPrivilegesText}
-          type="warning"
-          color={iconColor}
-        />
-        {children}
-      </EuiFlexGroup>
-    </EuiToolTip>
+      {children}
+    </TooltipOrPopoverIcon>
   );
 };

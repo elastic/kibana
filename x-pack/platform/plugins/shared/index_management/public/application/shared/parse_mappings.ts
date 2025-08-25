@@ -6,7 +6,7 @@
  */
 
 import { extractMappingsDefinition } from '../components/mappings_editor/lib';
-import { MappingsEditorParsedMetadata } from '../components/mappings_editor/mappings_editor';
+import type { MappingsEditorParsedMetadata } from '../components/mappings_editor/mappings_editor';
 
 interface MappingsDefinition {
   [key: string]: any;

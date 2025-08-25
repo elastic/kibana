@@ -9,7 +9,6 @@ import { useCallback, useState } from 'react';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { inputsModel } from '../../../../common/store';
-import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 
 interface UseExceptionFlyoutProps {
   refetch?: inputsModel.Refetch;
@@ -33,26 +32,20 @@ export const useExceptionFlyout = ({
   onRuleChange,
   isActiveTimelines,
 }: UseExceptionFlyoutProps): UseExceptionFlyout => {
-  const { setAllTourStepsHidden } = useTourContext();
   const [openAddExceptionFlyout, setOpenAddExceptionFlyout] = useState<boolean>(false);
   const [exceptionFlyoutType, setExceptionFlyoutType] = useState<ExceptionListTypeEnum | null>(
     null
   );
 
-  const onAddExceptionTypeClick = useCallback(
-    (exceptionListType?: ExceptionListTypeEnum): void => {
-      setExceptionFlyoutType(exceptionListType ?? null);
-      setAllTourStepsHidden(true);
-      setOpenAddExceptionFlyout(true);
-    },
-    [setAllTourStepsHidden]
-  );
+  const onAddExceptionTypeClick = useCallback((exceptionListType?: ExceptionListTypeEnum): void => {
+    setExceptionFlyoutType(exceptionListType ?? null);
+    setOpenAddExceptionFlyout(true);
+  }, []);
 
   const onAddExceptionCancel = useCallback(() => {
     setExceptionFlyoutType(null);
-    setAllTourStepsHidden(false);
     setOpenAddExceptionFlyout(false);
-  }, [setAllTourStepsHidden]);
+  }, []);
 
   const onAddExceptionConfirm = useCallback(
     (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => {
@@ -62,10 +55,9 @@ export const useExceptionFlyout = ({
       if (onRuleChange != null && didRuleChange) {
         onRuleChange();
       }
-      setAllTourStepsHidden(false);
       setOpenAddExceptionFlyout(false);
     },
-    [refetch, isActiveTimelines, onRuleChange, setAllTourStepsHidden]
+    [refetch, isActiveTimelines, onRuleChange]
   );
 
   return {

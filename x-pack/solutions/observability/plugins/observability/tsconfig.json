@@ -128,6 +128,10 @@
     "@kbn/esql",
     "@kbn/apm-synthtrace-client",
     "@kbn/scout-oblt",
+    "@kbn/content-management-content-editor",
+    "@kbn/saved-objects-tagging-plugin",
+    "@kbn/page-attachment-schema",
+    "@kbn/licensing-types"
   ],
   "exclude": ["target/**/*"]
 }

@@ -20,9 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { GuideState } from '../../../types';
-import { GuideCardConstants } from './guide_cards.constants';
-import { GuideCardsProps } from './guide_cards';
+import type { GuideState } from '../../../types';
+import type { GuideCardConstants } from './guide_cards.constants';
+import type { GuideCardsProps } from './guide_cards';
 
 const getProgressLabel = (guideState: GuideState | undefined): string | undefined => {
   if (!guideState) {

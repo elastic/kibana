@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { NamespaceSelector } from './namespace_selector';
 
 describe('NamespaceSelector', () => {
@@ -14,38 +15,37 @@ describe('NamespaceSelector', () => {
     namespaces: ['default', 'namespace1', 'namespace2'],
     onNamespaceChange: jest.fn(),
   };
-  it('renders correctly', () => {
-    const { getByTestId } = render(<NamespaceSelector {...mockProps} />);
-    expect(getByTestId('namespace-selector')).toBeInTheDocument();
-    expect(getByTestId('namespace-selector-dropdown-button')).toHaveTextContent('namespace2');
+
+  beforeEach(() => {
+    mockProps.onNamespaceChange.mockClear();
+  });
+  it('renders correctly with the active namespace', () => {
+    render(<NamespaceSelector {...mockProps} />);
+    const button = screen.getByTestId('namespace-selector-dropdown-button');
+    expect(button).toHaveTextContent('namespace2'); // Correct: Checks for the active namespace
   });
 
-  it('opens the popover on button click', async () => {
-    const { getByTestId } = render(<NamespaceSelector {...mockProps} />);
-    const button = getByTestId('namespace-selector-dropdown-button');
-    button.click();
-    await waitFor(() => {
-      expect(getByTestId('namespace-selector-menu')).toBeVisible();
-      expect(getByTestId('namespace-selector-menu')).toHaveTextContent('default');
-      expect(getByTestId('namespace-selector-menu')).toHaveTextContent('namespace1');
-      expect(getByTestId('namespace-selector-menu')).toHaveTextContent('namespace2');
-    });
+  it('opens the popover on button click and displays namespace options', async () => {
+    render(<NamespaceSelector {...mockProps} />);
+    const button = screen.getByTestId('namespace-selector-dropdown-button');
+    await userEvent.click(button);
+
+    expect(await screen.findByTestId('namespace-selector-menu-item-default')).toBeVisible();
+    expect(screen.getByTestId('namespace-selector-menu-item-namespace1')).toBeVisible();
+    expect(screen.getByTestId('namespace-selector-menu-item-namespace2')).toBeVisible();
   });
 
-  it('calls onNamespaceChange when a namespace is selected', async () => {
-    const { getByTestId } = render(<NamespaceSelector {...mockProps} />);
-    const button = getByTestId('namespace-selector-dropdown-button');
-    button.click();
+  it('calls onNamespaceChange when a different namespace is selected', async () => {
+    render(<NamespaceSelector {...mockProps} />);
+    const button = screen.getByTestId('namespace-selector-dropdown-button');
+    await userEvent.click(button);
 
-    await waitFor(() => {
-      expect(getByTestId('namespace-selector-menu')).toBeVisible();
-    });
-
-    const namespace1 = getByTestId('namespace-selector-menu-item-namespace1');
-    namespace1.click();
+    const namespace1Option = await screen.findByTestId('namespace-selector-menu-item-namespace1');
+    await userEvent.click(namespace1Option);
 
     await waitFor(() => {
       expect(mockProps.onNamespaceChange).toHaveBeenCalledWith('namespace1');
+      expect(mockProps.onNamespaceChange).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -55,9 +55,10 @@ describe('NamespaceSelector', () => {
       activeNamespace: 'default-disabled',
       namespaces: ['default-disabled'],
     };
-    const { getByTestId } = render(<NamespaceSelector {...propsWithSingleNamespace} />);
-    const button = getByTestId('namespace-selector-dropdown-button');
+    render(<NamespaceSelector {...propsWithSingleNamespace} />);
+    const button = screen.getByTestId('namespace-selector-dropdown-button');
+
     expect(button).toBeDisabled();
-    expect(button).toHaveTextContent('Namespace: default-disabled');
+    expect(button).toHaveTextContent('default-disabled');
   });
 });

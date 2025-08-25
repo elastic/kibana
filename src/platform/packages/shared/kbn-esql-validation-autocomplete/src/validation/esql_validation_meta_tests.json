@@ -283,7 +283,8 @@
     {
       "query": "from index | drop ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Unknown column []"
       ],
       "warning": []
     },
@@ -607,20 +608,6 @@
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
       ],
       "warning": []
-    },
-    {
-      "query": "from a_index | eval textField = 5",
-      "error": [],
-      "warning": [
-        "Column [textField] of type text has been overwritten as new type: integer"
-      ]
-    },
-    {
-      "query": "from a_index | eval doubleField = \"5\"",
-      "error": [],
-      "warning": [
-        "Column [doubleField] of type double has been overwritten as new type: keyword"
-      ]
     },
     {
       "query": "from a_index | eval round(doubleField) + 1 | eval `round(doubleField) + 1` + 1 | keep ```round(doubleField) + 1`` + 1`",

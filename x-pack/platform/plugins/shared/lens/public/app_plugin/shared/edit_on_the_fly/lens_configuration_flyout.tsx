@@ -322,7 +322,7 @@ export function LensEditConfigurationFlyout({
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
         isSaveable={isSaveable}
-        isScrollable={false}
+        isScrollable
         language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
@@ -341,6 +341,13 @@ export function LensEditConfigurationFlyout({
               flex: 1;
               flex-direction: column;
             }
+            .euiAccordion-isOpen {
+              .euiAccordion__childWrapper {
+                // Override euiAccordion__childWrapper blockSize only when ES|QL mode is enabled
+                block-size: auto ${textBasedMode ? '!important' : ''};
+                flex: 1;
+              }
+            }
             .euiAccordion__childWrapper {
               ${euiScrollBarStyles(euiTheme)}
               overflow-y: auto !important;
@@ -349,11 +356,6 @@ export function LensEditConfigurationFlyout({
               margin-left: -${euiThemeVars.euiFormMaxWidth};
               > * {
                 pointer-events: auto;
-              }
-
-              .euiAccordion-isOpen & {
-                block-size: auto !important;
-                flex: 1;
               }
             }
             .lnsIndexPatternDimensionEditor-advancedOptions {
@@ -366,7 +368,18 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          <div ref={editorContainer} />
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              css={css`
+                > * {
+                  flex-grow: 0;
+                }
+              `}
+              gutterSize="none"
+              direction="column"
+              ref={editorContainer}
+            />
+          </EuiFlexItem>
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
@@ -382,9 +395,8 @@ export function LensEditConfigurationFlyout({
                 <EuiTitle
                   size="xxs"
                   css={css`
-                padding: 2px;
-              }
-            `}
+                    padding: 2px;
+                  `}
                 >
                   <h5>
                     {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {

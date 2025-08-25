@@ -21,12 +21,13 @@ import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/regis
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
-import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
+import type { DecodedCloudId } from '../common/decode_cloud_id';
+import { decodeCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
 import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 import { defineRoutes } from './routes';
-import { CloudRequestHandlerContext } from './routes/types';
+import type { CloudRequestHandlerContext } from './routes/types';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE, setupSavedObjects } from './saved_objects';
 import { persistTokenCloudData } from './cloud_data';
 

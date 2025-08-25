@@ -347,7 +347,7 @@ export const getSections = ({
       {
         key: 'serviceMap',
         title: i18n.translate('xpack.apm.transactionActionMenu.serviceMap.title', {
-          defaultMessage: 'Service Map',
+          defaultMessage: 'Service map',
         }),
         subtitle: i18n.translate('xpack.apm.transactionActionMenu.serviceMap.subtitle', {
           defaultMessage: 'View service map filtered by this trace.',

@@ -10,7 +10,8 @@
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { EuiThemeProvider, EuiThemeProviderProps } from '@elastic/eui';
+import type { EuiThemeProviderProps } from '@elastic/eui';
+import { EuiThemeProvider } from '@elastic/eui';
 
 // @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
 import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nested';

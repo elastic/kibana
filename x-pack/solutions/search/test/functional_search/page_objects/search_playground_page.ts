@@ -6,7 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
+
+const SAVE_PLAYGROUND_EXTENDED_TIMEOUT = 15000;
 
 export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -14,6 +16,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
   const browser = getService('browser');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
+  const toasts = getService('toasts');
   const selectIndex = async () => {
     await testSubjects.existOrFail('addDataSourcesButton');
     await testSubjects.click('addDataSourcesButton');
@@ -87,7 +90,83 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       const selectedModeText = await testSubjects.getAttribute('page-mode-select', 'value');
       expect(selectedModeText?.toLowerCase()).to.be(mode);
     },
+    PlaygroundListPage: {
+      async expectPlaygroundListPageComponentsToExist() {
+        await testSubjects.existOrFail('playgroundsListPage');
+      },
+      async expectNewPlaygroundButtonExists() {
+        await testSubjects.existOrFail('newPlaygroundButton');
+      },
+      async clickNewPlaygroundButton() {
+        await testSubjects.existOrFail('newPlaygroundButton');
+        await testSubjects.click('newPlaygroundButton');
+      },
+      async expectPlaygroundToExistInTable(name: string) {
+        await testSubjects.existOrFail('playgroundsTable');
+        const links = await testSubjects.findAll('*playground-link');
+        expect(links.length).to.be.greaterThan(0, 'Playground links should exist');
+        let playgroundLink;
+        for (const link of links) {
+          const linkText = await link.getVisibleText();
+          if (linkText === name) {
+            playgroundLink = link;
+            break;
+          }
+        }
+        expect(playgroundLink).not.to.equal(
+          undefined,
+          `Playground link with name "${name}" should exist`
+        );
+      },
+      async expectPlaygroundNotToExistInTable(name: string) {
+        await testSubjects.existOrFail('playgroundsTable');
+        const links = await testSubjects.findAll('*playground-link');
+        expect(links.length).to.be.greaterThan(0, 'Playground links should exist');
+        let playgroundLink;
+        for (const link of links) {
+          const linkText = await link.getVisibleText();
+          if (linkText === name) {
+            playgroundLink = link;
+            break;
+          }
+        }
+        expect(playgroundLink).to.equal(
+          undefined,
+          `Playground link with name "${name}" should not exist`
+        );
+      },
+      async openPlaygroundFromTableByName(name: string) {
+        await testSubjects.existOrFail('playgroundsTable');
+        const links = await testSubjects.findAll('*playground-link');
+        expect(links.length).to.be.greaterThan(0, 'Playground links should exist');
+        let playgroundLink;
+        for (const link of links) {
+          const linkText = await link.getVisibleText();
+          if (linkText === name) {
+            playgroundLink = link;
+            break;
+          }
+        }
+        expect(playgroundLink).not.to.equal(
+          undefined,
+          `Playground link with name "${name}" should exist`
+        );
+        await playgroundLink!.click();
+      },
+      async clickPlaygroundDeleteTableAction() {
+        await testSubjects.existOrFail('playgroundsListTableDeleteActionButton');
+        const deleteActions = await testSubjects.findAll('playgroundsListTableDeleteActionButton');
+        expect(deleteActions.length).to.be.equal(
+          1,
+          'Expect only 1 saved playground to test delete'
+        );
+        await testSubjects.click('playgroundsListTableDeleteActionButton');
+      },
+    },
     PlaygroundStartChatPage: {
+      async expectPlaygroundSetupPage() {
+        await testSubjects.existOrFail('setupPage');
+      },
       async expectPlaygroundStartChatPageComponentsToExist() {
         await testSubjects.existOrFail('setupPage');
         await testSubjects.existOrFail('connectLLMButton');
@@ -204,6 +283,18 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
       async expectShowSuccessLLMText() {
         await testSubjects.existOrFail('successConnectLLMText');
+      },
+      async expectAndCloseSuccessLLMText() {
+        await testSubjects.existOrFail('successConnectLLMText');
+        await toasts.dismissIfExists();
+      },
+
+      async expectAddDataSourcesButtonExists() {
+        await testSubjects.existOrFail('addDataSourcesButton');
+      },
+      async clickAddDataSourcesButton() {
+        await testSubjects.existOrFail('addDataSourcesButton');
+        await testSubjects.click('addDataSourcesButton');
       },
     },
     PlaygroundChatPage: {
@@ -349,6 +440,12 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('chatMode');
       },
 
+      async runQueryInQueryMode(queryText: string) {
+        await testSubjects.existOrFail('searchPlaygroundChatQuestionFieldText');
+        await testSubjects.setValue('searchPlaygroundChatQuestionFieldText', queryText);
+        await testSubjects.click('RunElasticsearchQueryButton');
+      },
+
       async expectEditContextOpens(
         indexName: string = 'basic_index',
         expectedSelectedFields: string[] = ['baz']
@@ -400,6 +497,40 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await browser.closeCurrentWindow();
         await browser.switchTab(0);
       },
+
+      async expectSaveButtonToExist() {
+        await testSubjects.existOrFail('playground-save-button');
+      },
+      async expectSaveButtonToBeDisabled() {
+        await testSubjects.existOrFail('playground-save-button');
+        expect(await testSubjects.isEnabled('playground-save-button')).to.equal(
+          false,
+          'Playground save button should be disabled'
+        );
+      },
+      async expectSaveButtonToBeEnabled() {
+        await testSubjects.existOrFail('playground-save-button');
+        expect(await testSubjects.isEnabled('playground-save-button')).to.equal(
+          true,
+          'Playground save button should be enabled'
+        );
+      },
+
+      async savePlayground(name: string) {
+        await testSubjects.existOrFail('playground-save-button');
+        await testSubjects.click('playground-save-button');
+        await testSubjects.existOrFail('save-playground-modal');
+        await testSubjects.existOrFail('searchPlaygroundSavePlaygroundModalFieldText');
+
+        const nameInput = await testSubjects.find('searchPlaygroundSavePlaygroundModalFieldText');
+        await nameInput.clearValueWithKeyboard();
+        await nameInput.type(name);
+        await testSubjects.existOrFail('searchPlaygroundSavePlaygroundModalSaveButton');
+        await testSubjects.click('searchPlaygroundSavePlaygroundModalSaveButton');
+        await testSubjects.missingOrFail('save-playground-modal', {
+          timeout: SAVE_PLAYGROUND_EXTENDED_TIMEOUT,
+        });
+      },
     },
     PlaygroundStartSearchPage: {
       async expectPlaygroundStartSearchPageComponentsToExist() {
@@ -446,26 +577,17 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async selectPageMode(mode: 'chatMode' | 'queryMode', playgroundId?: string) {
         await testSubjects.existOrFail(mode);
         await testSubjects.click(mode);
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).contain('/app/search_playground/');
+        if (playgroundId) {
+          expect(currentUrl).contain(`/app/search_playground/p/${playgroundId}/`);
+        }
         switch (mode) {
           case 'queryMode':
-            expect(await browser.getCurrentUrl()).contain(
-              playgroundId
-                ? `/app/search_playground/p/${playgroundId}/search/query`
-                : '/app/search_playground/search/query'
-            );
+            expect(currentUrl).contain('/query');
             break;
           case 'chatMode':
-            const url = await browser.getCurrentUrl();
-            expect(url).contain(
-              playgroundId
-                ? `/app/search_playground/p/${playgroundId}/search`
-                : '/app/search_playground/search'
-            );
-            expect(url).not.contain(
-              playgroundId
-                ? `/app/search_playground/p/${playgroundId}/search/query`
-                : '/app/search_playground/search/query'
-            );
+            expect(currentUrl).not.contain('/query');
             break;
         }
       },
@@ -483,14 +605,14 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async runQueryInQueryMode(queryText: string) {
         await testSubjects.existOrFail('searchPlaygroundSearchModeFieldText');
-        await testSubjects.setValue('searchPlaygroundSearchModeFieldText', `${queryText}`);
+        await testSubjects.setValue('searchPlaygroundSearchModeFieldText', queryText);
         await testSubjects.click('RunElasticsearchQueryButton');
       },
       async expectFieldToBeSelected(fieldName: string) {
-        await testSubjects.existOrFail(`field-${fieldName}-true`);
+        await testSubjects.existOrFail(`field-${fieldName}-true`, { timeout: 5000 });
       },
       async expectFieldNotToBeSelected(fieldName: string) {
-        await testSubjects.existOrFail(`field-${fieldName}-false`);
+        await testSubjects.existOrFail(`field-${fieldName}-false`, { timeout: 5000 });
       },
       async clickFieldSwitch(fieldName: string, selected: boolean) {
         await testSubjects.existOrFail(`field-${fieldName}-${selected}`);
@@ -567,6 +689,16 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
     },
     SavedPlaygroundPage: {
+      SaveExtendedTimeout: SAVE_PLAYGROUND_EXTENDED_TIMEOUT,
+      async expectAndCloseSavedPlaygroundToast() {
+        const toastTitle = await toasts.getTitleAndDismiss();
+        expect(toastTitle).to.equal('RAG playground saved');
+      },
+      async getPlaygroundIdFromUrl() {
+        const url = await browser.getCurrentUrl();
+        const match = url.match(/\/p\/([^\/]+)\/?/);
+        return match ? match[1] : undefined;
+      },
       async expectPlaygroundNameHeader(name: string) {
         await testSubjects.existOrFail('playgroundName');
         const nameTitle = await testSubjects.find('playgroundName');
@@ -595,23 +727,79 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectUnSavedChangesBadegeExists() {
         await testSubjects.existOrFail('playground-unsaved-changes-badge');
       },
-      async expectUnSavedChangesBadegeNotExists() {
-        await testSubjects.missingOrFail('playground-unsaved-changes-badge');
+      async expectUnSavedChangesBadegeNotExists(timeout?: number) {
+        await testSubjects.missingOrFail('playground-unsaved-changes-badge', { timeout });
       },
       async expectSavedPlaygroundButtonToExist() {
         await testSubjects.existOrFail('saved-playground-save-button');
       },
       async expectSavedPlaygroundButtonToBeEnabled() {
         await testSubjects.existOrFail('saved-playground-save-button');
-        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.be(true);
+        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.equal(
+          true,
+          'Playground save button should be enabled'
+        );
       },
       async expectSavedPlaygroundButtonToBeDisabled() {
         await testSubjects.existOrFail('saved-playground-save-button');
-        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.be(false);
+        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.equal(
+          false,
+          'Playground save button should be disabled'
+        );
       },
       async clickSavedPlaygroundSaveButton() {
         await testSubjects.existOrFail('saved-playground-save-button');
         await testSubjects.click('saved-playground-save-button');
+      },
+      async expectSavedPlaygroundOptionsExists() {
+        await testSubjects.existOrFail('moreOptionsActionButton');
+        await testSubjects.click('saved-playground-save-button');
+      },
+      async openSavedPlaygroundOptions() {
+        await testSubjects.existOrFail('moreOptionsActionButton');
+        await testSubjects.click('moreOptionsActionButton');
+        await testSubjects.existOrFail('moreOptionsContextMenu');
+      },
+      async expectPlaygroundSaveAsOptionExists() {
+        await testSubjects.existOrFail('moreOptionsSavePlaygroundAs');
+      },
+      async clickPlaygroundSaveAsOption() {
+        await testSubjects.existOrFail('moreOptionsSavePlaygroundAs');
+        await testSubjects.click('moreOptionsSavePlaygroundAs');
+      },
+      async expectPlaygroundSaveAsModalExists() {
+        await testSubjects.existOrFail('save-playground-modal');
+      },
+      async savePlaygroundAs(name: string) {
+        await testSubjects.existOrFail('save-playground-modal');
+        await testSubjects.existOrFail('searchPlaygroundSavePlaygroundModalFieldText');
+
+        const nameInput = await testSubjects.find('searchPlaygroundSavePlaygroundModalFieldText');
+        await nameInput.clearValueWithKeyboard();
+        await nameInput.type(name);
+        await testSubjects.existOrFail('searchPlaygroundSavePlaygroundModalSaveButton');
+        await testSubjects.click('searchPlaygroundSavePlaygroundModalSaveButton');
+        await testSubjects.missingOrFail('save-playground-modal', {
+          timeout: SAVE_PLAYGROUND_EXTENDED_TIMEOUT,
+        });
+      },
+      async expectPlaygroundDeleteOptionExists() {
+        await testSubjects.existOrFail('moreOptionsDeletePlayground');
+      },
+      async clickPlaygroundDeleteOption() {
+        await testSubjects.existOrFail('moreOptionsDeletePlayground');
+        await testSubjects.click('moreOptionsDeletePlayground');
+      },
+      async expectDeletePlaygroundModalExists() {
+        await testSubjects.existOrFail('deletePlaygroundActionModal');
+      },
+      async confirmDeletePlaygroundInModal() {
+        await testSubjects.existOrFail('deletePlaygroundActionModal');
+        await testSubjects.existOrFail('confirmModalConfirmButton');
+        await testSubjects.click('confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deletePlaygroundActionModal', {
+          timeout: SAVE_PLAYGROUND_EXTENDED_TIMEOUT,
+        });
       },
     },
   };

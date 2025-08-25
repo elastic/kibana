@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggTypesRegistry, AggTypesRegistrySetup } from './agg_types_registry';
+import type { AggTypesRegistrySetup } from './agg_types_registry';
+import { AggTypesRegistry } from './agg_types_registry';
 import type { BucketAggType } from './buckets/bucket_agg_type';
 import type { MetricAggType } from './metrics/metric_agg_type';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';

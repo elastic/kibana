@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiTokensObject } from '@elastic/eui';
+import type { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
   [key: string]: any;
@@ -557,6 +557,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiDataGridCell.focusTrapExitPrompt',
       { defaultMessage: 'Exited cell content.' }
     ),
+    'euiDataGridCell.focusTrapEnteredExitPrompt': i18n.translate(
+      'core.euiDataGridCell.focusTrapEnteredExitPrompt',
+      {
+        defaultMessage: 'Press the Escape key to exit the cell.',
+      }
+    ),
     'euiDataGridCellActions.expandButtonTitle': i18n.translate(
       'core.euiDataGridCellActions.expandButtonTitle',
       {
@@ -787,11 +793,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
       }
     ),
-    'euiFlyout.screenReaderFixedHeaders': i18n.translate(
-      'core.euiFlyout.screenReaderFixedHeaders',
+    'euiFlyout.screenReaderFocusTrapShards': i18n.translate(
+      'core.euiFlyout.screenReaderFocusTrapShards',
       {
-        defaultMessage:
-          'You can still continue tabbing through the page headers in addition to the dialog.',
+        defaultMessage: 'You can still continue tabbing through other global page landmarks.',
       }
     ),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
@@ -878,12 +883,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiMark.highlightEnd': i18n.translate('core.euiMark.highlightEnd', {
       defaultMessage: 'highlight end',
     }),
-    'euiMarkdownEditorFooter.closeButton': i18n.translate(
-      'core.euiMarkdownEditorFooter.closeButton',
-      {
-        defaultMessage: 'Close',
-      }
-    ),
     'euiMarkdownEditorFooter.uploadingFiles': i18n.translate(
       'core.euiMarkdownEditorFooter.uploadingFiles',
       {
@@ -913,45 +912,51 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Show errors',
       }
     ),
-    'euiMarkdownEditorFooter.showMarkdownHelp': i18n.translate(
-      'core.euiMarkdownEditorFooter.showMarkdownHelp',
-      {
-        defaultMessage: 'Show markdown help',
-      }
-    ),
     'euiMarkdownEditorFooter.errorsTitle': i18n.translate(
       'core.euiMarkdownEditorFooter.errorsTitle',
       {
         defaultMessage: 'Errors',
       }
     ),
-    'euiMarkdownEditorFooter.syntaxTitle': i18n.translate(
-      'core.euiMarkdownEditorFooter.syntaxTitle',
-      {
-        defaultMessage: 'Syntax help',
-      }
-    ),
-    'euiMarkdownEditorFooter.mdSyntaxLink': i18n.translate(
-      'core.euiMarkdownEditorFooter.mdSyntaxLink',
+    'euiMarkdownEditorHelpButton.mdSyntaxLink': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.mdSyntaxLink',
       {
         defaultMessage: 'GitHub flavored markdown',
       }
     ),
-    'euiMarkdownEditorFooter.syntaxModalDescriptionPrefix': i18n.translate(
-      'core.euiMarkdownEditorFooter.syntaxModalDescriptionPrefix',
+    'euiMarkdownEditorHelpButton.syntaxTitle': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.syntaxTitle',
+      {
+        defaultMessage: 'Syntax help',
+      }
+    ),
+    'euiMarkdownEditorHelpButton.showMarkdownHelp': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.showMarkdownHelp',
+      {
+        defaultMessage: 'Show markdown help',
+      }
+    ),
+    'euiMarkdownEditorHelpButton.syntaxModalDescriptionPrefix': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.syntaxModalDescriptionPrefix',
       {
         defaultMessage: 'This editor uses',
       }
     ),
-    'euiMarkdownEditorFooter.syntaxModalDescriptionSuffix': i18n.translate(
-      'core.euiMarkdownEditorFooter.syntaxModalDescriptionSuffix',
+    'euiMarkdownEditorHelpButton.syntaxModalDescriptionSuffix': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.syntaxModalDescriptionSuffix',
       {
         defaultMessage:
           'You can also utilize these additional syntax plugins to add rich content to your text.',
       }
     ),
-    'euiMarkdownEditorFooter.syntaxPopoverDescription': i18n.translate(
-      'core.euiMarkdownEditorFooter.syntaxPopoverDescription',
+    'euiMarkdownEditorHelpButton.closeButton': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.closeButton',
+      {
+        defaultMessage: 'Close',
+      }
+    ),
+    'euiMarkdownEditorHelpButton.syntaxPopoverDescription': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.syntaxPopoverDescription',
       {
         defaultMessage: 'This editor uses',
       }

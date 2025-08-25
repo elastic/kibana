@@ -6,6 +6,7 @@
  */
 
 import { validateThresholdBase } from '../../../../../utils/request_validation/threshold';
+import { validateThreatMapping } from '../../../../../utils/request_validation/indicator_match';
 import type { PatchRuleRequestBody } from './patch_rule_route.gen';
 
 /**
@@ -17,6 +18,7 @@ export const validatePatchRuleRequestBody = (rule: PatchRuleRequestBody): string
     ...validateTimelineId(rule),
     ...validateTimelineTitle(rule),
     ...validateThreshold(rule),
+    ...validateThreatMapping(rule),
   ];
 };
 

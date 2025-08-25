@@ -75,17 +75,18 @@ export const PrivilegedUserMonitoring = ({
         )}
         {callout && !dismissCallout && (
           <EuiCallOut
+            data-test-subj="privilegedUserMonitoringOnboardingCallout"
             title={
               callout.userCount > 0 ? (
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.userCountCallout.title"
-                  defaultMessage="Privileged user monitoring successfully set up: {userCount, plural, one {# user added} other {# users added}}"
+                  defaultMessage="Privileged user monitoring set up: {userCount, plural, one {# user added} other {# users added}}"
                   values={{ userCount: callout.userCount }}
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.noUserCallout.Title"
-                  defaultMessage="Privileged user monitoring successfully set up"
+                  defaultMessage="Privileged user monitoring set up"
                 />
               )
             }
@@ -97,15 +98,15 @@ export const PrivilegedUserMonitoring = ({
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.callout.description"
                 defaultMessage={
-                  'Your privileged users data source has been successfully added. Now you can start monitoring the privileged users activity to detect potential threats before they escalate or cause damage. You can always update your list of privileged users, add or change their data source in settings.'
+                  'Your data source has been added. You can now start monitoring privileged user activity to detect potential threats before they escalate or cause damage. You can always update your list of privileged users from the data source settings.'
                 }
               />
             </p>
 
             <EuiButton iconType="gear" color="success" fill size="s" onClick={onManageUserClicked}>
               <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.callout.manageUsersButton"
-                defaultMessage="Manage users"
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.callout.manageDataSources"
+                defaultMessage="Manage data sources"
               />
             </EuiButton>
           </EuiCallOut>

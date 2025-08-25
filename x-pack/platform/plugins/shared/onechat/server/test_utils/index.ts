@@ -32,3 +32,10 @@ export {
   type AgentClientMock,
   type MockedAgent,
 } from './agents';
+export {
+  createConversationClientMock,
+  createConversationServiceMock,
+  createEmptyConversation,
+  type ConversationServiceMock,
+  type ConversationClientMock,
+} from './conversations';

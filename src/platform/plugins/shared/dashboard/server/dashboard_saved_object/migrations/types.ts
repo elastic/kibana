@@ -9,8 +9,8 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { GridData } from '../schema/v2';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type { GridData } from '../schema/v2';
 
 export interface DashboardPanelMap810 {
   [key: string]: DashboardPanelState810;

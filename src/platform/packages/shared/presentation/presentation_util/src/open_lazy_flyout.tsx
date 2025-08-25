@@ -26,11 +26,9 @@ interface LoadContentArgs {
 
 interface OpenLazyFlyoutParams {
   core: CoreStart;
-  loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
-  flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string };
   parentApi?: unknown;
-  triggerId?: string;
-  uuid?: string;
+  loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
+  flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string; focusedPanelId?: string };
 }
 
 /**
@@ -50,13 +48,13 @@ interface OpenLazyFlyoutParams {
  * @param params.flyoutProps - Optional props passed to `openFlyout` (e.g. size, className, etc).
  *                             Supports `OverlayFlyoutOpenOptions`.
  * @param params.parentApi - Optional parent API to track opened overlays (e.g. dashboardsApi).
- * @param params.triggerId - Optional DOM element ID to focus when the flyout closes.
- * @param params.uuid - Optional ID for the related panel on the dashboard (used by overlay tracking).
  *
  * @returns A handle to the opened flyout (`OverlayRef`).
  */
 export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
-  const { core, parentApi, loadContent, flyoutProps, uuid, triggerId } = params;
+  const { core, parentApi, loadContent, flyoutProps: allFlyoutProps } = params;
+  const { focusedPanelId, triggerId, ...flyoutProps } = allFlyoutProps ?? {};
+
   const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
@@ -100,7 +98,7 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
       ...flyoutProps,
     }
   );
-  overlayTracker?.openOverlay(flyoutRef, { focusedPanelId: uuid });
+  overlayTracker?.openOverlay(flyoutRef, { focusedPanelId });
   return flyoutRef;
 };
 

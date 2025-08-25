@@ -7,21 +7,14 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
-  EuiBadge,
-  EuiBadgeGroup,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiCallOutProps,
-  EuiFlexGroup,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiCallOutProps } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/react';
 import { getPercentageFormatter } from '../../../../util/formatters';
-import { ProcessorMetrics } from '../state_management/simulation_state_machine';
+import type { ProcessorMetrics } from '../state_management/simulation_state_machine';
 
 type ProcessorMetricBadgesProps = ProcessorMetrics;
 
@@ -39,7 +32,7 @@ export const ProcessorMetricBadges = ({
   const failedRate = failed_rate > 0 ? formatter.format(failed_rate) : null;
 
   return (
-    <EuiBadgeGroup gutterSize="xs">
+    <EuiFlexGroup gutterSize="none" alignItems="center">
       {parsedRate && (
         <EuiBadge
           color="hollow"
@@ -68,7 +61,7 @@ export const ProcessorMetricBadges = ({
       )}
       {failedRate && (
         <EuiBadge
-          color="hollow"
+          color="danger"
           iconType="warning"
           title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.failedRate', {
             defaultMessage: '{failedRate} of the sampled documents were not parsed due to an error',
@@ -93,7 +86,7 @@ export const ProcessorMetricBadges = ({
           })}
         </EuiBadge>
       )}
-    </EuiBadgeGroup>
+    </EuiFlexGroup>
   );
 };
 

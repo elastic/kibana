@@ -234,7 +234,13 @@
             "text": "ESQLCallbacks"
           },
           " | undefined) => () => Promise<",
-          "ESQLSourceResult",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLSourceResult",
+            "text": "ESQLSourceResult"
+          },
           "[]>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
@@ -453,7 +459,13 @@
             "description": [],
             "signature": [
               "CallbackFn<{}, ",
-              "ESQLSourceResult",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLSourceResult",
+                "text": "ESQLSourceResult"
+              },
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
@@ -698,6 +710,48 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ESQLCallbacks.getLicense",
+            "type": "Function",
+            "tags": [],
+            "label": "getLicense",
+            "description": [],
+            "signature": [
+              "(() => Promise<Pick<",
+              {
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.ILicense",
+                "text": "ILicense"
+              },
+              ", \"hasAtLeast\"> | undefined>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ESQLCallbacks.getActiveProduct",
+            "type": "Function",
+            "tags": [],
+            "label": "getActiveProduct",
+            "description": [],
+            "signature": [
+              "(() => ",
+              "PricingProduct",
+              " | undefined) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],

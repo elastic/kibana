@@ -10,8 +10,10 @@ import { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
-import { StatefulStreamsAppRouter, useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { StreamsFeatures, useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import type { StreamsFeatures } from '../../hooks/use_streams_privileges';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { RedirectTo } from '../redirect_to';
 import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
@@ -91,7 +93,7 @@ export function StreamDetailView() {
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {key}
             <EuiBadgeGroup gutterSize="s">
-              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+              {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
               <LifecycleBadge lifecycle={definition.effective_lifecycle} />
             </EuiBadgeGroup>
           </EuiFlexGroup>

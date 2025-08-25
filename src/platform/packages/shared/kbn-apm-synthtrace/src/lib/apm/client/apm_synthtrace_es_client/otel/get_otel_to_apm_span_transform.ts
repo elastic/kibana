@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmOtelFields, SpanKind } from '@kbn/apm-synthtrace-client';
+import type { ApmOtelFields, SpanKind } from '@kbn/apm-synthtrace-client';
 import { Transform } from 'stream';
 
 const kindToProcessorEvent: Record<SpanKind, 'transaction' | 'span'> = {

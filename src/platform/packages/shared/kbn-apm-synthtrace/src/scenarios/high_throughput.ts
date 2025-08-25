@@ -8,8 +8,9 @@
  */
 
 import { random } from 'lodash';
-import { apm, Instance, ApmFields } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+import type { Instance, ApmFields } from '@kbn/apm-synthtrace-client';
+import { apm } from '@kbn/apm-synthtrace-client';
+import type { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 

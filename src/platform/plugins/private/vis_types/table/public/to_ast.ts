@@ -8,9 +8,10 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
-import { TableVisParams } from '../common';
-import { TableExpressionFunctionDefinition } from './table_vis_fn';
+import type { SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { getVisSchemas } from '@kbn/visualizations-plugin/public';
+import type { TableVisParams } from '../common';
+import type { TableExpressionFunctionDefinition } from './table_vis_fn';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });

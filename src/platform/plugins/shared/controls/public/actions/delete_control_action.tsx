@@ -26,8 +26,9 @@ import {
 } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 
-import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { CONTROL_GROUP_TYPE } from '../../common';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { ACTION_DELETE_CONTROL } from './constants';
 import { confirmDeleteControl } from '../common';
 
@@ -41,7 +42,7 @@ export const compatibilityCheck = (api: unknown | null): api is DeleteControlAct
       apiHasUniqueId(api) &&
       apiHasParentApi(api) &&
       apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
+      apiIsOfType(api.parentApi, CONTROLS_GROUP_TYPE) &&
       apiIsPresentationContainer(api.parentApi)
   );
 

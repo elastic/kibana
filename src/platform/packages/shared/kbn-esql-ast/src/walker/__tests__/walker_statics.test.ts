@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Builder } from '../../builder';
 import { parse } from '../../parser';
+import { BasicPrettyPrinter } from '../../pretty_print';
 import { EsqlQuery } from '../../query';
-import { ESQLAstRerankCommand } from '../../types';
+import type { ESQLAstRerankCommand } from '../../types';
 import { Walker } from '../walker';
 
 describe('Walker static methods', () => {
@@ -534,6 +536,79 @@ describe('Walker static methods', () => {
         },
         {
           type: 'query',
+        },
+      ]);
+    });
+  });
+
+  describe('Walker.replace()', () => {
+    test('can replace a node with another node', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM index | WHERE a == 123');
+      const newNode = Builder.expression.literal.integer(456);
+      Walker.replace(ast, { type: 'literal', value: 123 }, newNode);
+
+      expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 456');
+    });
+
+    test('can find node by predicate function', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM index | EVAL a = "x" | WHERE a == 123 | LIMIT 10');
+      const newNode = Builder.expression.literal.integer(456);
+      Walker.replace(ast, (n) => (n as any).value === 123, newNode);
+
+      expect(BasicPrettyPrinter.print(ast)).toBe(
+        'FROM index | EVAL a = "x" | WHERE a == 456 | LIMIT 10'
+      );
+    });
+
+    test('replaces only the first found node', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM index | WHERE a == 123 AND b > 123');
+      const newNode = Builder.expression.literal.integer(456);
+
+      Walker.replace(ast, { type: 'literal', value: 123 }, newNode);
+
+      expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 456 AND b > 123');
+
+      Walker.replace(ast, { type: 'literal', value: 123 }, newNode);
+
+      expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 456 AND b > 456');
+    });
+
+    test('returns replaced node', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM index | WHERE a == 123');
+      const newNode = Builder.expression.literal.integer(456);
+      const replaced = Walker.replace(ast, { type: 'literal', value: 123 }, newNode);
+
+      expect(replaced).toMatchObject({
+        type: 'literal',
+        value: 456,
+      });
+    });
+  });
+
+  describe('Walker.replaceAll()', () => {
+    test('replaces all instances of a match', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM index | WHERE a == 123 AND b > 123');
+      const newNode = Builder.expression.literal.integer(456);
+
+      Walker.replaceAll(ast, { type: 'literal', value: 123 }, newNode);
+
+      expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 456 AND b > 456');
+    });
+
+    test('returns list of updated nodes', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM index | WHERE a == 123 AND b > 123');
+      const newNode = Builder.expression.literal.integer(456);
+
+      const updatedNodes = Walker.replaceAll(ast, { type: 'literal', value: 123 }, newNode);
+
+      expect(updatedNodes).toMatchObject([
+        {
+          type: 'literal',
+          value: 456,
+        },
+        {
+          type: 'literal',
+          value: 456,
         },
       ]);
     });

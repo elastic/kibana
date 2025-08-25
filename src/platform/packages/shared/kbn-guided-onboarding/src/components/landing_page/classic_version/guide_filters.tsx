@@ -12,7 +12,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui'
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { GuideCardSolutions } from './guide_cards';
+import type { GuideCardSolutions } from './guide_cards';
 
 const filterButtonCss = css`
   border-radius: 20px !important;
@@ -63,19 +63,6 @@ export const GuideFilters = ({ activeFilter, setActiveFilter, application }: Gui
           <FormattedMessage
             id="guidedOnboardingPackage.gettingStarted.guideFilter.all.buttonLabel"
             defaultMessage="All"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          onClick={onSelectFilter}
-          data-filter-id="search"
-          color="text"
-          css={[filterButtonCss, activeFilter === 'search' && activeFilterFill]}
-        >
-          <FormattedMessage
-            id="guidedOnboardingPackage.gettingStarted.guideFilter.search.buttonLabel"
-            defaultMessage="Elasticsearch"
           />
         </EuiButton>
       </EuiFlexItem>

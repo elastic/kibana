@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CodeEditor, CodeEditorProps, monaco } from '@kbn/code-editor';
+import type { CodeEditorProps, monaco } from '@kbn/code-editor';
+import { CodeEditor } from '@kbn/code-editor';
 import React, { useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { DraftGrokExpression, GrokCollection } from '../models';

@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { FAILURE_STORE_PRIVILEGE } from '../../../../common/constants';
 import { streamPartsToIndexPattern } from '../../../../common/utils';
-import { DataStreamType } from '../../../../common/types';
+import type { DataStreamType } from '../../../../common/types';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 
 export async function getDataStreams(options: {
@@ -30,10 +30,14 @@ export async function getDataStreams(options: {
 
   const datasetUserPrivileges = await datasetQualityPrivileges.getDatasetPrivileges(
     esClient,
-    datasetNames.join(',')
+    datasetNames
   );
 
-  if (!datasetUserPrivileges.canMonitor) {
+  const canMonitor = Object.values(datasetUserPrivileges.datasetsPrivilages).some(
+    (privileges) => privileges.canMonitor
+  );
+
+  if (!canMonitor) {
     return {
       dataStreams: [],
       datasetUserPrivileges,
@@ -74,5 +78,28 @@ export async function getDataStreams(options: {
   return {
     dataStreams: mappedDataStreams,
     datasetUserPrivileges,
+  };
+}
+
+export async function getDatasetTypesPrivileges(options: {
+  esClient: ElasticsearchClient;
+  types: DataStreamType[];
+}) {
+  const { esClient, types } = options;
+
+  const datasetNames = types.map((type) =>
+    streamPartsToIndexPattern({
+      typePattern: type,
+      datasetPattern: '*-*',
+    })
+  );
+
+  const { datasetsPrivilages } = await datasetQualityPrivileges.getDatasetPrivileges(
+    esClient,
+    datasetNames
+  );
+
+  return {
+    datasetsPrivilages,
   };
 }

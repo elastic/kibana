@@ -16,11 +16,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
+import type { LensRootStore } from '../../../state_management';
 import {
   makeConfigureStore,
-  LensRootStore,
   loadInitial,
   initExisting,
   initEmpty,
@@ -116,7 +116,7 @@ const MaybeWrapper = ({
       size="s"
       hideCloseButton
       css={css`
-        clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
+        clip-path: none; // need to override the eui-flyout clip-path for dnd outside of the flyout
       `}
     >
       {children}

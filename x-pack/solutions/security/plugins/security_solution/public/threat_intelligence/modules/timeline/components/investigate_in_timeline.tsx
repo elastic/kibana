@@ -21,7 +21,6 @@ export interface InvestigateInTimelineProps {
   /**
    * Click event to close the popover in the parent component
    */
-  // eslint-disable-next-line react/no-unused-prop-types
   onClick?: () => void;
   /**
    * Used for unit and e2e tests.

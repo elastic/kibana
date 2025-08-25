@@ -87,6 +87,26 @@ export const InfraMetadataAgentRT = rt.partial({
   policy: rt.string,
 });
 
+export const InfraMetadataResourceRT = rt.partial({
+  attributes: rt.partial({
+    host: rt.partial({
+      ip: rt.string,
+      name: rt.string,
+    }),
+    agent: rt.partial({}),
+    cloud: rt.partial({
+      provider: rt.string,
+      resource: rt.partial({
+        id: rt.string,
+      }),
+    }),
+    os: rt.partial({
+      name: rt.string,
+      version: rt.string,
+    }),
+  }),
+});
+
 export const InfraMetadataInfoRT = rt.partial({
   cloud: InfraMetadataCloudRT,
   host: InfraMetadataHostRT,
@@ -104,6 +124,7 @@ export const InfraMetadataInfoResponseRT = rt.partial({
   host: InfraMetadataHostRT,
   container: InfraMetadataContainerRT,
   agent: InfraMetadataAgentRT,
+  resource: InfraMetadataResourceRT,
   timestamp: rt.string,
 });
 

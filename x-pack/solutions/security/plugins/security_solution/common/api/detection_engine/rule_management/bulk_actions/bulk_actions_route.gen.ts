@@ -117,9 +117,11 @@ export const BulkActionBase = z.object({
    * Query to filter rules.
    */
   query: z.string().optional(),
-  /**
-   * Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
-   */
+  /** 
+      * Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+Only valid when query property is undefined.
+ 
+      */
   ids: z.array(z.string()).min(1).optional(),
   /**
    * Gaps range start, valid only when query is provided

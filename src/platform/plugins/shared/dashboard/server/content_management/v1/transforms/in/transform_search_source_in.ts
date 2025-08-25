@@ -7,11 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardAttributes } from '../../types';
+import { extractReferences } from '@kbn/data-plugin/common';
+import type { DashboardAttributes } from '../../types';
+import { logger } from '../../../../kibana_services';
 
 export function transformSearchSourceIn(
-  kibanaSavedObjectMeta: DashboardAttributes['kibanaSavedObjectMeta']
+  kibanaSavedObjectMeta?: DashboardAttributes['kibanaSavedObjectMeta']
 ) {
+  if (!kibanaSavedObjectMeta || !kibanaSavedObjectMeta.searchSource) {
+    return { searchSourceJSON: '{}', references: [] };
+  }
   const { searchSource } = kibanaSavedObjectMeta;
-  return { searchSourceJSON: JSON.stringify(searchSource ?? {}) };
+
+  try {
+    // Extract references expects an object with singular `filter` and `query`.
+    // But `DashboardState` uses plural `filters` and singular `query`.
+    const [extractedState, references] = extractReferences({
+      filter: searchSource.filters,
+      query: searchSource.query,
+    });
+    return { searchSourceJSON: JSON.stringify(extractedState), references };
+  } catch (error) {
+    // If the references can not be extracted, we log a warning
+    // and return the original searchSource stringified.
+    logger.warn(`Unable to transform filter and query state on save. Error: ${error.message}`);
+    return { searchSourceJSON: JSON.stringify(searchSource), references: [] };
+  }
 }

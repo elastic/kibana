@@ -33,6 +33,10 @@ export interface RunAgentParams {
    */
   onEvent?: RunAgentOnEventFn;
   /**
+   * Optional signal to abort the execution of the agent.
+   */
+  abortSignal?: AbortSignal;
+  /**
    * The request that initiated that run.
    */
   request: KibanaRequest;
@@ -51,11 +55,11 @@ export type RunAgentOnEventFn = (event: ChatAgentEvent) => void;
 export type ScopedRunnerRunAgentParams = Omit<RunAgentParams, 'request'>;
 
 /**
- * Public onechat API to execute a tools.
+ * Public onechat API to execute an agent.
  */
 export type RunAgentFn = (params: RunAgentParams) => Promise<RunAgentReturn>;
 
 /**
- * Public onechat API to execute a tools.
+ * Public onechat API to execute an agent.
  */
 export type ScopedRunAgentFn = (params: ScopedRunnerRunAgentParams) => Promise<RunAgentReturn>;

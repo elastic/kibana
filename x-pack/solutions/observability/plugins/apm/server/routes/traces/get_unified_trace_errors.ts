@@ -7,19 +7,17 @@
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
-  ERROR_MESSAGE,
   EXCEPTION_MESSAGE,
   EXCEPTION_TYPE,
-  PROCESSOR_EVENT,
   SPAN_ID,
-  STATUS_CODE,
   TRACE_ID,
+  OTEL_EVENT_NAME,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getApmTraceError } from './get_trace_items';
+import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 
 export interface UnifiedTraceErrors {
   apmErrors: Awaited<ReturnType<typeof getApmTraceError>>;
@@ -29,87 +27,91 @@ export interface UnifiedTraceErrors {
 
 export async function getUnifiedTraceErrors({
   apmEventClient,
+  logsClient,
   end,
   start,
   traceId,
 }: {
   apmEventClient: APMEventClient;
+  logsClient: LogsClient;
   traceId: string;
   start: number;
   end: number;
 }): Promise<UnifiedTraceErrors> {
-  const [apmErrors, unprocessedOtelError] = await Promise.all([
+  const [apmErrors, unprocessedOtelErrors] = await Promise.all([
     getApmTraceError({ apmEventClient, traceId, start, end }),
-    getUnprocessedOtelErrors({ apmEventClient, traceId, start, end }),
+    getUnprocessedOtelErrors({ logsClient, traceId, start, end }),
   ]);
 
   return {
     apmErrors,
-    unprocessedOtelErrors: unprocessedOtelError,
-    totalErrors: apmErrors.length + unprocessedOtelError.length,
+    unprocessedOtelErrors,
+    totalErrors: apmErrors.length + unprocessedOtelErrors.length,
   };
 }
 
-export const optionalFields = asMutableArray([
-  SPAN_ID,
-  ERROR_MESSAGE,
-  EXCEPTION_TYPE,
-  EXCEPTION_MESSAGE,
-] as const);
+export const requiredFields = asMutableArray([SPAN_ID] as const);
+export const optionalFields = asMutableArray([EXCEPTION_TYPE, EXCEPTION_MESSAGE] as const);
+
+interface OtelError {
+  span: {
+    id: string;
+  };
+  exception?: {
+    type: string;
+    message: string;
+  };
+}
 
 async function getUnprocessedOtelErrors({
-  apmEventClient,
+  logsClient,
   end,
   start,
   traceId,
 }: {
-  apmEventClient: APMEventClient;
+  logsClient: LogsClient;
   traceId: string;
   start: number;
   end: number;
 }) {
-  const response = await apmEventClient.search(
-    'get_unprocessed_errors_docs',
-    {
-      apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction, ProcessorEvent.error] },
-      track_total_hits: false,
-      size: 1000,
-      query: {
-        bool: {
-          must: [
-            {
-              bool: {
-                filter: [...rangeQuery(start, end), ...termQuery(TRACE_ID, traceId)],
-                must_not: existsQuery(PROCESSOR_EVENT),
-                should: [
-                  ...termQuery(STATUS_CODE, 'Error'),
-                  ...existsQuery(ERROR_MESSAGE),
-                  ...existsQuery(EXCEPTION_TYPE),
-                  ...existsQuery(EXCEPTION_MESSAGE),
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
+  const response = await logsClient.search({
+    query: {
+      bool: {
+        filter: [...rangeQuery(start, end), ...termQuery(TRACE_ID, traceId)],
+        should: [
+          ...termQuery(OTEL_EVENT_NAME, 'exception'),
+          ...existsQuery(EXCEPTION_TYPE),
+          ...existsQuery(EXCEPTION_MESSAGE),
+        ],
+        minimum_should_match: 1,
       },
-      fields: optionalFields,
     },
-    { skipProcessorEventFilter: true }
-  );
-
-  return response.hits.hits.map((hit) => {
-    const event = unflattenKnownApmEventFields(hit.fields);
-
-    return {
-      id: event.span?.id,
-      error: {
-        message: event.error?.message,
-        exception: {
-          type: event.exception?.type,
-          message: event.exception?.message,
-        },
-      },
-    };
+    fields: [...requiredFields, ...optionalFields],
   });
+
+  return response.hits.hits
+    .map((hit) => {
+      const event = unflattenKnownApmEventFields(hit.fields, requiredFields) as
+        | OtelError
+        | undefined;
+      if (!event) return null;
+
+      return {
+        id: event.span?.id,
+        error: {
+          exception: {
+            type: event.exception?.type,
+            message: event.exception?.message,
+          },
+        },
+      };
+    })
+    .filter(
+      (
+        doc
+      ): doc is {
+        id: string;
+        error: { exception: { type: string | undefined; message: string | undefined } };
+      } => !!doc
+    );
 }

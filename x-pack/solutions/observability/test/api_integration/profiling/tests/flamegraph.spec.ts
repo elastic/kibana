@@ -6,10 +6,10 @@
  */
 
 import { getRoutePaths } from '@kbn/profiling-plugin/common';
-import { BaseFlameGraph } from '@kbn/profiling-utils';
+import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import { sortBy } from 'lodash';
 import { getBettertest } from '../common/bettertest';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 import { loadProfilingData, setupProfiling } from '../utils/profiling_data';
 
 const profilingRoutePaths = getRoutePaths();
@@ -27,11 +27,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const end = new Date('2023-03-17T01:00:30.000Z').getTime();
 
   registry.when('Flamegraph api', { config: 'cloud' }, () => {
-    before(async () => {
-      await setupProfiling(bettertest, log);
-      await loadProfilingData(es, log);
-    });
-
     describe('With data', () => {
       let flamegraph: BaseFlameGraph;
       before(async () => {

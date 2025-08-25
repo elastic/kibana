@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 import type { TaskInstance } from '@kbn/task-manager-plugin/server';

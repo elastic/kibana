@@ -85,9 +85,11 @@ export const OtelKubernetesPanel: React.FC = () => {
 
   const elasticEndpointVarName = isServerless ? 'elastic_otlp_endpoint' : 'elastic_endpoint';
   const valuesFileSubfolder = isServerless ? '/managed_otlp' : '';
+  const valuesFileName =
+    !isServerless || metricsOnboardingEnabled ? 'values.yaml' : 'logs-values.yaml';
 
   const otelKubeStackValuesFileUrl = data
-    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack${valuesFileSubfolder}/values.yaml`
+    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack${valuesFileSubfolder}/${valuesFileName}`
     : '';
   const namespace = 'opentelemetry-operator-system';
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
@@ -139,7 +141,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
                 <p>
                   <FormattedMessage
                     id="xpack.observability_onboarding.otelKubernetesPanel.injectAutoinstrumentationLibrariesForLabel"
-                    defaultMessage="Install the OpenTelemetry Operator using the kube-stack Helm chart and the provided values file. For automatic certificate renewal, we recommend installing the {link}, and customize the values.yaml file before the installation as described {doc}."
+                    defaultMessage="Install the OpenTelemetry Operator using the kube-stack Helm chart and the provided values file. Compatible with Helm up to version 8.14. For automatic certificate renewal, we recommend installing the {link}, and customize the values.yaml file before the installation as described {doc}."
                     values={{
                       link: (
                         <EuiLink
@@ -439,7 +441,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                             label: i18n.translate(
                               'xpack.observability_onboarding.otelKubernetesPanel.servicesLabel',
                               {
-                                defaultMessage: 'Explore Service Inventory',
+                                defaultMessage: 'Explore Service inventory',
                               }
                             ),
                             href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',

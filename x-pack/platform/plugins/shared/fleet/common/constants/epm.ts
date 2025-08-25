@@ -74,6 +74,7 @@ export const autoUpdatePackages = [
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+  FLEET_CLOUD_SECURITY_ASSET_PACKAGE,
 ];
 
 export const HIDDEN_API_REFERENCE_PACKAGES = [
@@ -86,6 +87,7 @@ export const autoUpgradePoliciesPackages = [
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+  FLEET_CLOUD_SECURITY_ASSET_PACKAGE,
 ];
 
 export const agentAssetTypes = {
@@ -116,3 +118,5 @@ export const displayedAssetTypes: DisplayedAssetTypes = [
 ];
 
 export const displayedAssetTypesLookup = new Set<string>(displayedAssetTypes);
+
+export const OTEL_COLLECTOR_INPUT_TYPE = 'otelcol';

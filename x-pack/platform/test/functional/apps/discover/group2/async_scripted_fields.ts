@@ -7,7 +7,7 @@
 
 // Tests for scripted field in default distribution where async search is used
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -32,9 +32,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/kibana_scripted_fields_on_logstash'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/kibana_scripted_fields_on_logstash'
       );
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await security.testUser.setRoles(['test_logstash_reader', 'global_discover_read']);
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await kibanaServer.uiSettings.update({
@@ -46,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function afterAll() {
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({});
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.restoreDefaults();
     });

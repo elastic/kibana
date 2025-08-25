@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
   IngestStreamLifecycle,
   IngestStreamLifecycleDSL,
   IngestStreamLifecycleDisabled,
   IngestStreamLifecycleILM,
-  isDslLifecycle,
-  isIlmLifecycle,
-  isInheritLifecycle,
 } from '@kbn/streams-schema';
-import { IndicesSimulateTemplateTemplate } from '@elastic/elasticsearch/lib/api/types';
-import { omit } from 'lodash';
+import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
+import type { IndicesSimulateTemplateTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -35,6 +32,12 @@ interface UpdateOrRolloverDataStreamOptions {
   esClient: ElasticsearchClient;
   name: string;
   logger: Logger;
+}
+
+interface UpdateDefaultIngestPipelineOptions {
+  esClient: ElasticsearchClient;
+  name: string;
+  pipeline: string | undefined;
 }
 
 export async function upsertDataStream({ esClient, name, logger }: DataStreamManagementOptions) {
@@ -63,64 +66,33 @@ export async function deleteDataStream({ esClient, name, logger }: DeleteDataStr
   }
 }
 
-export async function updateOrRolloverDataStream({
+export async function rolloverDataStream({
   esClient,
   name,
   logger,
 }: UpdateOrRolloverDataStreamOptions) {
+  await retryTransientEsErrors(() => esClient.indices.rollover({ alias: name, lazy: true }), {
+    logger,
+  });
+}
+
+export async function updateDefaultIngestPipeline({
+  esClient,
+  name,
+  pipeline,
+}: UpdateDefaultIngestPipelineOptions) {
   const dataStreams = await esClient.indices.getDataStream({ name });
   for (const dataStream of dataStreams.data_streams) {
-    // simulate index and try to patch the write index
-    // if that doesn't work, roll it over
-    const simulatedIndex = await esClient.indices.simulateIndexTemplate({
-      name,
-    });
     const writeIndex = dataStream.indices.at(-1);
     if (!writeIndex) {
       continue;
     }
-    try {
-      // Apply blocklist to avoid changing settings we don't want to
-      const simulatedIndexSettings = omit(simulatedIndex.template.settings, [
-        'index.codec',
-        'index.mapping.ignore_malformed',
-        'index.mode',
-        'index.logsdb.sort_on_host_name',
-      ]);
-
-      await retryTransientEsErrors(
-        () =>
-          Promise.all([
-            esClient.indices.putMapping({
-              index: writeIndex.index_name,
-              properties: simulatedIndex.template.mappings.properties,
-            }),
-            esClient.indices.putSettings({
-              index: writeIndex.index_name,
-              settings: simulatedIndexSettings,
-            }),
-          ]),
-        {
-          logger,
-        }
-      );
-    } catch (error: any) {
-      if (
-        typeof error.message !== 'string' ||
-        !error.message.includes('illegal_argument_exception')
-      ) {
-        throw error;
-      }
-      try {
-        await retryTransientEsErrors(() => esClient.indices.rollover({ alias: dataStream.name }), {
-          logger,
-        });
-        logger.debug(() => `Rolled over data stream: ${dataStream.name}`);
-      } catch (rolloverError: any) {
-        logger.error(`Error rolling over data stream: ${error.message}`);
-        throw error;
-      }
-    }
+    await esClient.indices.putSettings({
+      index: writeIndex.index_name,
+      settings: {
+        'index.default_pipeline': pipeline,
+      },
+    });
   }
 }
 

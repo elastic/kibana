@@ -312,6 +312,84 @@
       },
       {
         "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.ESQLSourceResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLSourceResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLSourceResult.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLSourceResult.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLSourceResult.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLSourceResult.dataStreams",
+            "type": "Array",
+            "tags": [],
+            "label": "dataStreams",
+            "description": [],
+            "signature": [
+              "{ name: string; title?: string | undefined; }[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLSourceResult.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
         "id": "def-common.IndexAutocompleteItem",
         "type": "Interface",
         "tags": [],

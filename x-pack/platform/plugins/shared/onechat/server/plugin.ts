@@ -55,6 +55,7 @@ export class OnechatPlugin
       router,
       coreSetup,
       logger: this.logger,
+      pluginsSetup,
       getInternalServices: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {

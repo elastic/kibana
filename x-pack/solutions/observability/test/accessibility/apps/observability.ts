@@ -6,7 +6,7 @@
  */
 
 // a11y tests for spaces, space selection and space creation and feature controls
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'infraHome']);
@@ -19,7 +19,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // https://github.com/elastic/kibana/issues/141724
   describe.skip('Observability UI', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
       await PageObjects.common.navigateToApp('observability');
     });
 

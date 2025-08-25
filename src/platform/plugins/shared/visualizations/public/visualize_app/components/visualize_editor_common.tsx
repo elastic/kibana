@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EventEmitter } from 'events';
-import React, { RefObject, useCallback, useEffect } from 'react';
+import type { EventEmitter } from 'events';
+import type { RefObject } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiBreakpoint, EuiScreenReaderOnly, type UseEuiTheme } from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -21,7 +22,7 @@ import { ExperimentalVisInfo } from './experimental_vis_info';
 import { urlFor } from '../..';
 import { getUISettings } from '../../services';
 import { VizChartWarning } from './viz_chart_warning';
-import {
+import type {
   SavedVisInstance,
   VisualizeAppState,
   VisualizeServices,
@@ -71,6 +72,30 @@ const visEditorCommonStyles = {
     z-index: 0;
     ${flexParentStyle};
   `,
+  visType: (euiThemeContext: UseEuiTheme) =>
+    css({
+      '&.visEditor--timelion': {
+        '.visEditorSidebar__timelionOptions': {
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: 'column',
+        },
+      },
+      '&.visEditor--vega': {
+        '.visEditorSidebar__config': {
+          padding: 0,
+          display: 'flex',
+          flexDirection: 'row',
+          overflow: 'hidden',
+
+          minHeight: `calc(${euiThemeContext.euiTheme.size.base} * 15)`,
+
+          [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+            maxHeight: `calc(${euiThemeContext.euiTheme.size.base} * 15)`,
+          },
+        },
+      },
+    }),
 };
 
 interface VisualizeEditorCommonProps {
@@ -177,7 +202,7 @@ export const VisualizeEditorCommon = ({
   return (
     <div
       className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}
-      css={styles.base}
+      css={[styles.base, styles.visType]}
     >
       {visInstance && appState && currentAppState && (
         <VisualizeTopNav

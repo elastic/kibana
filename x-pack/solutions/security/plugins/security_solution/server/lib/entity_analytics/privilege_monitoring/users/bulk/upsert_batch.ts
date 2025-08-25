@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { separate } from 'fp-ts/Array';
+import { uniqBy } from 'lodash';
 import type { Batch, BulkPrivMonUser, BulkBatchProcessingResults, Options } from './types';
 
 export const bulkUpsertBatch =
@@ -16,7 +17,7 @@ export const bulkUpsertBatch =
     const { left: parsingErrors, right: users } = separate(batch.uploaded);
     const res = await esClient.bulk<BulkPrivMonUser>({
       index,
-      operations: users.flatMap((u) => {
+      operations: uniqBy(users, (u) => u.username).flatMap((u) => {
         const id = batch.existingUsers[u.username];
         const timestamp = new Date().toISOString();
 

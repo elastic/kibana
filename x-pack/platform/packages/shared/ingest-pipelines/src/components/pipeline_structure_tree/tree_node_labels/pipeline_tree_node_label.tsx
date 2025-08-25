@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink } from '@elastic/eui';
+import type { EuiFlexItemProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -13,14 +14,12 @@ interface PipelineTreeNodeLabelProps {
   pipelineName: string;
   isManaged: boolean;
   isDeprecated: boolean;
-  setSelected: () => void;
 }
 
 export const PipelineTreeNodeLabel = ({
   pipelineName,
   isManaged,
   isDeprecated,
-  setSelected,
 }: PipelineTreeNodeLabelProps) => {
   return (
     <EuiFlexGroup
@@ -29,18 +28,16 @@ export const PipelineTreeNodeLabel = ({
       css={{ width: '350px' }}
       alignItems="center"
       data-test-subj={`pipelineTreeNode-${pipelineName}`}
+      responsive={false}
     >
-      <EuiFlexItem grow={8}>
-        <EuiLink
-          color="text"
-          onClick={setSelected}
-          data-test-subj={`pipelineTreeNodeLink-${pipelineName}`}
-        >
-          {pipelineName}
-        </EuiLink>
+      <EuiFlexItem
+        grow={(10 - Number(isDeprecated) - Number(isManaged)) as EuiFlexItemProps['grow']}
+        css={{ textAlign: 'left' }}
+      >
+        {pipelineName}
       </EuiFlexItem>
       {isManaged && (
-        <EuiFlexItem grow={true} data-test-subj={`pipelineTreeNode-${pipelineName}-managedIcon`}>
+        <EuiFlexItem grow={1} data-test-subj={`pipelineTreeNode-${pipelineName}-managedIcon`}>
           <EuiIconTip
             content={i18n.translate(
               'ingestPipelines.pipelineStructureTree.treeNodeManagedTooltip',
@@ -53,7 +50,7 @@ export const PipelineTreeNodeLabel = ({
         </EuiFlexItem>
       )}
       {isDeprecated && (
-        <EuiFlexItem grow={true} data-test-subj={`pipelineTreeNode-${pipelineName}-deprecatedIcon`}>
+        <EuiFlexItem grow={1} data-test-subj={`pipelineTreeNode-${pipelineName}-deprecatedIcon`}>
           <EuiIconTip
             content={i18n.translate(
               'ingestPipelines.pipelineStructureTree.treeNodeDeprecatedTooltip',

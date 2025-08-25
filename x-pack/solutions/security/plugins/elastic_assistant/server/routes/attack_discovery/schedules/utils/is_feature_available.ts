@@ -6,9 +6,9 @@
  */
 
 import { ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
-import { AwaitedProperties } from '@kbn/utility-types';
+import type { AwaitedProperties } from '@kbn/utility-types';
 
-import { ElasticAssistantRequestHandlerContext } from '../../../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 
 export const isFeatureAvailable = async (
   context: AwaitedProperties<Pick<ElasticAssistantRequestHandlerContext, 'core'>>
