@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReportParamsGetter, ReportParamsGetterOptions } from '../../types';
-import { JobParamsProviderOptions } from '../share_context_menu';
+import type { ReportParamsGetter, ReportParamsGetterOptions } from '../../types';
+import type { JobParamsProviderOptions } from '../share_context_menu';
 
 const getBaseParams = (objectType: string) => {
   const el = document.querySelector('[data-shared-items-container]');

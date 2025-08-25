@@ -12,8 +12,8 @@ import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { ShareContext, ExportShare } from '@kbn/share-plugin/public';
-import { ExportGenerationOpts } from '@kbn/share-plugin/public/types';
+import type { ShareContext, ExportShare } from '@kbn/share-plugin/public';
+import type { ExportGenerationOpts } from '@kbn/share-plugin/public/types';
 import type {
   ReportingSharingData,
   JobParamsProviderOptions,
