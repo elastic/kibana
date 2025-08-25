@@ -75,10 +75,7 @@ export function updateFlyout(display: FLYOUT_STATE) {
             requestAnimationFrame(() => triggerElement.focus());
           }
         }
-        dispatch({
-          type: UPDATE_FLYOUT,
-          display,
-        });
+
         break;
       case FLYOUT_STATE.LAYER_PANEL:
         const selectedLayerId = getSelectedLayerId(getState());
@@ -96,6 +93,10 @@ export function updateFlyout(display: FLYOUT_STATE) {
         });
         break;
     }
+    dispatch({
+      type: UPDATE_FLYOUT,
+      display,
+    });
   };
 }
 export function openMapSettings() {
