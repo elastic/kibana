@@ -24,6 +24,5 @@
     "@kbn/code-editor",
     "@kbn/i18n",
     "@kbn/object-utils",
-    "@kbn/kibana-utils-plugin",
   ]
 }
