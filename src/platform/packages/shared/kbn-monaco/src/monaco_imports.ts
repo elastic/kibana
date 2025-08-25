@@ -20,6 +20,7 @@ import 'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperation
 import 'monaco-editor/esm/vs/editor/contrib/linesOperations/browser/linesOperations.js'; // Needed for enabling shortcuts of removing/joining/moving lines
 import 'monaco-editor/esm/vs/editor/contrib/folding/browser/folding.js'; // Needed for folding
 import 'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController.js'; // Needed for suggestions
+import 'monaco-editor/esm/vs/editor/contrib/inlineCompletions/browser/inlineCompletions.contribution.js'; // Needed for inline completions
 import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hover.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints.js'; // Needed for signature
 import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/browser/bracketMatching.js'; // Needed for brackets matching highlight
