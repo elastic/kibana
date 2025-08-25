@@ -36,11 +36,18 @@ export const useMigrationNameStep = ({
     const datetime = moment(Date.now()).format('dddd, D MMM YYYY, h:mm:ss A');
 
     if (currentUserProfile?.user.username) {
-      return `${currentUserProfile.user.username}'s migration on ${datetime}`;
+      return `${
+        currentUserProfile.user.full_name ?? currentUserProfile.user.username
+      }'s migration on ${datetime}`;
     }
 
     return `Migration created on ${datetime}`;
-  }, [storedMigrationName, currentUserProfile?.user.username, isLoading]);
+  }, [
+    storedMigrationName,
+    currentUserProfile?.user.username,
+    currentUserProfile?.user.full_name,
+    isLoading,
+  ]);
 
   return {
     title: i18n.MIGRATION_NAME_INPUT_TITLE,
