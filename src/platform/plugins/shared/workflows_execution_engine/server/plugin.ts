@@ -40,7 +40,10 @@ import { WorkflowContextManager } from './workflow_context_manager/workflow_cont
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
-import type { ResumeWorkflowExecutionParams } from './workflow_task_manager/types';
+import type {
+  ResumeWorkflowExecutionParams,
+  StartWorkflowExecutionParams,
+} from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { workflowExecutionLoop } from './workflow_execution_loop';
 
@@ -81,13 +84,13 @@ export class WorkflowsExecutionEnginePlugin
 
           return {
             async run() {
-              const { workflowExecutionId } = taskInstance.params as any; // TODO: define type
+              const { workflowRunId } = taskInstance.params as StartWorkflowExecutionParams; // TODO: define type
               const [, pluginsStart] = await core.getStartServices();
               const { actions, taskManager } =
                 pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
 
               const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
-                workflowExecutionId,
+                workflowRunId,
                 actions,
                 taskManager,
                 esClient,
