@@ -39,18 +39,42 @@ export const PreviewImage = ({ element }: Props) => {
   const [screenshot, setScreenshot] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  const WIDTH = 280;
-  const HEIGHT = 224;
+  const CARD_WIDTH = 280;
+  const CARD_HEIGHT = 224;
+  /**
+   * IMAGE_SIZE is used to set the size of the EuiImage component.
+   * Without it, the image would overflow the card in which it is contained.
+   */
+  const IMAGE_SIZE = 200;
 
   const cardCss = css`
-    width: ${WIDTH}px;
-    height: ${HEIGHT}px;
+    width: ${CARD_WIDTH}px;
+    height: ${CARD_HEIGHT}px;
     margin: 0 auto;
   `;
 
   useEffect(() => {
     const generateScreenshot = async () => {
       try {
+        if (element instanceof SVGElement) {
+          const svgData = new XMLSerializer().serializeToString(element);
+          const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(svgBlob);
+
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width || CARD_WIDTH;
+            canvas.height = img.height || CARD_HEIGHT;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0);
+            setScreenshot(canvas.toDataURL('image/png'));
+            URL.revokeObjectURL(url);
+          };
+          img.src = url;
+          return;
+        }
+
         setIsLoading(true);
         const elementRect = element.getBoundingClientRect();
         const elementWidth = elementRect.width;
@@ -95,11 +119,10 @@ export const PreviewImage = ({ element }: Props) => {
       <EuiSkeletonRectangle
         isLoading={isLoading}
         contentAriaLabel={PREVIEW_ALT_TEXT}
-        width={WIDTH}
-        height={HEIGHT}
+        width={CARD_WIDTH}
+        height={CARD_HEIGHT}
         borderRadius="none"
         data-test-subj="inspectFlyoutPreviewImage"
-        css={cardCss}
       >
         <EuiCard
           title=""
@@ -109,7 +132,7 @@ export const PreviewImage = ({ element }: Props) => {
           css={cardCss}
           paddingSize="xs"
         >
-          <EuiImage alt={PREVIEW_ALT_TEXT} src={screenshot} size={200} hasShadow={false} />
+          <EuiImage alt={PREVIEW_ALT_TEXT} src={screenshot} size={IMAGE_SIZE} hasShadow={false} />
         </EuiCard>
       </EuiSkeletonRectangle>
       <EuiSpacer size="l" />
