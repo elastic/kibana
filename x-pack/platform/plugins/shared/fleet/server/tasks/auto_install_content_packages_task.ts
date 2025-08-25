@@ -305,7 +305,7 @@ export class AutoInstallContentPackagesTask {
         : '';
     const query = `FROM logs-*,metrics-*,traces-* 
       | KEEP @timestamp, data_stream.dataset 
-      | WHERE @timestamp > NOW() - ${this.intervalToEsql(this.taskInterval)} 
+      | WHERE @timestamp > NOW() - 15 minutes 
       | STATS COUNT(*) BY data_stream.dataset ${whereClause}`;
     const response = await esClient.esql.query({ query });
     this.logger.info(`[AutoInstallContentPackagesTask] ESQL query took: ${response.took}ms`);
@@ -315,12 +315,6 @@ export class AutoInstallContentPackagesTask {
       `[AutoInstallContentPackagesTask] Found datasets with data: ${datasetsWithData.join(', ')}`
     );
     return datasetsWithData;
-  }
-
-  private intervalToEsql(interval: string): string {
-    const value = parseInt(interval, 10);
-    const unit = interval.includes('h') ? 'hours' : interval.includes('m') ? 'minutes' : 'seconds';
-    return `${value} ${unit}`;
   }
 
   private async getContentPackagesDiscoveryMap(prerelease: boolean): Promise<DiscoveryMap> {

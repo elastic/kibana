@@ -175,7 +175,7 @@ describe('AutoInstallContentPackagesTask', () => {
       expect(esClient.esql.query).toHaveBeenCalledWith({
         query: `FROM logs-*,metrics-*,traces-* 
       | KEEP @timestamp, data_stream.dataset 
-      | WHERE @timestamp > NOW() - 10 minutes 
+      | WHERE @timestamp > NOW() - 15 minutes 
       | STATS COUNT(*) BY data_stream.dataset `,
       });
     });
@@ -202,7 +202,7 @@ describe('AutoInstallContentPackagesTask', () => {
       expect(esClient.esql.query).toHaveBeenCalledWith({
         query: `FROM logs-*,metrics-*,traces-* 
       | KEEP @timestamp, data_stream.dataset 
-      | WHERE @timestamp > NOW() - 10 minutes 
+      | WHERE @timestamp > NOW() - 15 minutes 
       | STATS COUNT(*) BY data_stream.dataset | WHERE data_stream.dataset NOT IN ("system.test")`,
       });
     });
