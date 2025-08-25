@@ -10,8 +10,9 @@ import {
   createQuantitativeCorrectnessEvaluators,
   type DefaultEvaluators,
   type KibanaPhoenixClient,
+  type EvaluationDataset,
+  createQuantitativeGroundednessEvaluator,
 } from '@kbn/evals';
-import type { EvaluationDataset } from '@kbn/evals/src/types';
 import type { OnechatEvaluationChatClient } from './chat_client';
 
 interface DatasetExample extends Example {
@@ -77,10 +78,22 @@ export function createEvaluateDataset({
             correctnessAnalysis = correctnessResult.metadata;
           }
 
+          let groundednessAnalysis = null;
+          if (!response.errors?.length) {
+            const groundednessResult = await evaluators.groundednessAnalysis().evaluate({
+              input,
+              expected: output,
+              output: response,
+              metadata,
+            });
+            groundednessAnalysis = groundednessResult.metadata;
+          }
+
           return {
             errors: response.errors,
             messages: response.messages,
             correctnessAnalysis,
+            groundednessAnalysis,
           };
         },
       },
@@ -102,6 +115,7 @@ export function createEvaluateDataset({
           },
         },
         ...createQuantitativeCorrectnessEvaluators(),
+        createQuantitativeGroundednessEvaluator(),
       ]
     );
   };

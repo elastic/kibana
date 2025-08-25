@@ -10,3 +10,5 @@ export type { EvaluationCriterion } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
+export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
+export type { EvaluationDataset } from './src/types';
