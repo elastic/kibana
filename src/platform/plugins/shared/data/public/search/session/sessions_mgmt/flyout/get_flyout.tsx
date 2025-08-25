@@ -38,6 +38,7 @@ export function openSearchSessionsFlyout({
       notifications: coreStart.notifications,
       application: coreStart.application,
       usageCollector,
+      featureFlags: coreStart.featureFlags,
     });
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext(coreStart);
 

@@ -41,6 +41,7 @@ import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logg
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 import type { ResumeWorkflowExecutionParams } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import { workflowExecutionLoop } from './workflow_execution_loop';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -77,11 +78,13 @@ export class WorkflowsExecutionEnginePlugin
           const workflowExecutionRepository = this.workflowExecutionRepository;
           return {
             async run() {
-              const { workflowRunId } = taskInstance.params as ResumeWorkflowExecutionParams;
+              const { workflowRunId, spaceId } =
+                taskInstance.params as ResumeWorkflowExecutionParams;
               const [, pluginsStart] = await core.getStartServices();
 
               const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
                 workflowRunId,
+                spaceId,
                 (pluginsStart as any).actions,
                 (pluginsStart as any).taskManager,
                 esClient,
@@ -115,6 +118,7 @@ export class WorkflowsExecutionEnginePlugin
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
         id: workflowRunId,
+        spaceId: context.spaceId,
         workflowId: workflow.id,
         workflowDefinition: workflow.definition,
         context,
@@ -130,6 +134,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
         workflowRunId,
+        context.spaceId,
         plugins.actions,
         plugins.taskManager,
         this.esClient,
@@ -154,6 +159,7 @@ export class WorkflowsExecutionEnginePlugin
 
 async function createContainer(
   workflowRunId: string,
+  spaceId: string,
   actionsPlugin: ActionsPluginStartContract,
   taskManagerPlugin: TaskManagerStartContract,
   esClient: Client,
@@ -162,7 +168,8 @@ async function createContainer(
   workflowExecutionRepository: WorkflowExecutionRepository
 ) {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-    workflowRunId
+    workflowRunId,
+    spaceId
   );
 
   if (!workflowExecution) {
@@ -203,12 +210,9 @@ async function createContainer(
   });
 
   const contextManager = new WorkflowContextManager({
-    workflowRunId: workflowExecution.id,
+    spaceId: workflowExecution.spaceId,
     workflow: workflowExecution.workflowDefinition,
     event: workflowExecution.context.event,
-    logger,
-    workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
-    esClient,
     workflowExecutionGraph,
     workflowExecutionRuntime: workflowRuntime,
   });
@@ -233,40 +237,4 @@ async function createContainer(
     workflowTaskManager,
     nodesFactory,
   };
-}
-
-async function workflowExecutionLoop(
-  workflowRuntime: WorkflowExecutionRuntimeManager,
-  workflowLogger: WorkflowEventLogger,
-  nodesFactory: StepFactory
-) {
-  while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
-    const currentNode = workflowRuntime.getCurrentStep();
-    const step = nodesFactory.create(currentNode as any);
-
-    try {
-      await step.run();
-    } catch (error) {
-      // If an unhandled error occurs in a step, the workflow execution is terminated
-      workflowLogger.logError(
-        `Error executing step ${currentNode.id} (${currentNode.name}): ${error.message}`
-      );
-      await workflowRuntime.setStepResult(currentNode.id, {
-        output: null,
-        error: String(error),
-      });
-      await workflowRuntime.finishStep(currentNode.id);
-      break;
-    } finally {
-      try {
-        await workflowRuntime.saveState(); // Ensure state is updated after each step
-      } catch (error) {
-        workflowLogger.logError(
-          `Error saving state after step ${currentNode.id} (${currentNode.name}): ${error.message}`
-        );
-      }
-
-      await workflowLogger.flushEvents();
-    }
-  }
 }
