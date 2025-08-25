@@ -8,9 +8,10 @@
  */
 
 import { functionWrapper } from './utils';
-import { ExecutionContext } from '../../../execution/types';
-import { Datatable } from '../../../expression_types/specs/datatable';
-import { overallMetric, OverallMetricArgs } from '../overall_metric';
+import type { ExecutionContext } from '../../../execution/types';
+import type { Datatable } from '../../../expression_types/specs/datatable';
+import type { OverallMetricArgs } from '../overall_metric';
+import { overallMetric } from '../overall_metric';
 
 describe('interpreter/functions#overall_metric', () => {
   const fn = functionWrapper(overallMetric);

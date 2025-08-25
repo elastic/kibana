@@ -9,19 +9,15 @@
 
 import type { ComponentType, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import {
-  EuiContextMenuPanelDescriptor,
-  type EuiCodeProps,
-  type EuiIconProps,
-  type EuiFlyoutProps,
-} from '@elastic/eui';
-import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { type EuiCodeProps, type EuiIconProps, type EuiFlyoutProps } from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { ILicense } from '@kbn/licensing-types';
 import type { Capabilities } from '@kbn/core/public';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
-import { AnonymousAccessServiceContract } from '../common/anonymous_access';
+import type { AnonymousAccessServiceContract } from '../common/anonymous_access';
 
 export interface ShareRegistryApiStart {
   capabilities: Capabilities;

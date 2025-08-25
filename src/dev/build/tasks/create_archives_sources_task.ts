@@ -9,9 +9,11 @@
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { removePackagesFromPackageMap } from '@kbn/repo-packages';
-import { KibanaSolution, KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import { resolve, join } from 'path';
-import { scanCopy, Task, deleteAll, copyAll, Platform } from '../lib';
+import { scanCopy, deleteAll, copyAll } from '../lib';
+import type { Task, Platform } from '../lib';
 import { getNodeDownloadInfo } from './nodejs';
 
 export const CreateArchivesSources: Task = {

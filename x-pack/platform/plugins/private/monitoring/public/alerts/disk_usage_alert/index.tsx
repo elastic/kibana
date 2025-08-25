@@ -13,11 +13,10 @@ import {
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
 import type { MonitoringConfig } from '../../types';
-import {
-  LazyExpression,
-  LazyExpressionProps,
-} from '../components/param_details_form/lazy_expression';
-import { MonitoringAlertTypeParams, validate } from '../components/param_details_form/validation';
+import type { LazyExpressionProps } from '../components/param_details_form/lazy_expression';
+import { LazyExpression } from '../components/param_details_form/lazy_expression';
+import type { MonitoringAlertTypeParams } from '../components/param_details_form/validation';
+import { validate } from '../components/param_details_form/validation';
 
 export function createDiskUsageAlertType(
   config: MonitoringConfig

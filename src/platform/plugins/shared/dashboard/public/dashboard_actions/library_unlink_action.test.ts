@@ -8,7 +8,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { UnlinkFromLibraryAction, UnlinkPanelFromLibraryActionApi } from './library_unlink_action';
+import type { UnlinkPanelFromLibraryActionApi } from './library_unlink_action';
+import { UnlinkFromLibraryAction } from './library_unlink_action';
 
 describe('AddToLibraryAction', () => {
   const action = new UnlinkFromLibraryAction();

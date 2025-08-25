@@ -14,7 +14,7 @@ import {
 } from './pings';
 import { createGetDynamicSettingsRoute, createPostDynamicSettingsRoute } from './dynamic_settings';
 import { createGetSnapshotCount } from './snapshot';
-import { UMRestApiRouteFactory } from './types';
+import type { UMRestApiRouteFactory } from './types';
 import {
   createGetMonitorDetailsRoute,
   createMonitorListRoute,

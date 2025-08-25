@@ -10,7 +10,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { GuideCards, GuideCardsProps } from './guide_cards';
+import type { GuideCardsProps } from './guide_cards';
+import { GuideCards } from './guide_cards';
 
 const defaultProps: GuideCardsProps = {
   activateGuide: jest.fn(),

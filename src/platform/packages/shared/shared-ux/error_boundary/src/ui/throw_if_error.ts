@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
 /**
  * This component allows errors to be caught outside of a render tree, and re-thrown within a render tree

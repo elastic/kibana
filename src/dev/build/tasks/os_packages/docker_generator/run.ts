@@ -11,12 +11,13 @@ import { access, link, unlink, chmod } from 'fs';
 import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { write, copyAll, mkdirp, exec, Config, Build, Solution } from '../../../lib';
+import { write, copyAll, mkdirp, exec } from '../../../lib';
+import type { Config, Build, Solution } from '../../../lib';
 import * as dockerTemplates from './templates';
-import { TemplateContext } from './template_context';
+import type { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
 
 const accessAsync = promisify(access);

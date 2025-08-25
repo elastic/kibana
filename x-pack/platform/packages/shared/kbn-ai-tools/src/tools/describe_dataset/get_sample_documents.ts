@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslFieldAndFormat, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslFieldAndFormat, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 

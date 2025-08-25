@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import {
+import type { HttpSetup } from '@kbn/core/public';
+import type {
   ReindexStatusResponse,
   ReindexOperation,
   ReindexOperationCancelResponse,
-  UA_BASE_PATH,
 } from '@kbn/upgrade-assistant-pkg-common';
+import { UA_BASE_PATH } from '@kbn/upgrade-assistant-pkg-common';
 import { sendRequest } from '@kbn/es-ui-shared-plugin/public';
 
 export class ReindexService {

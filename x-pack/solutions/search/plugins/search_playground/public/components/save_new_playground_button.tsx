@@ -12,7 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../hooks/use_kibana';
 import { LOCAL_STORAGE_KEY as PLAYGROUND_SESSION_LOCAL_STORAGE_KEY } from '../providers/unsaved_form_provider';
-import { PlaygroundForm, PlaygroundPageMode } from '../types';
+import type { PlaygroundForm } from '../types';
+import { PlaygroundPageMode } from '../types';
 import { hasSavedPlaygroundFormErrors } from '../utils/saved_playgrounds';
 import { SavePlaygroundModal } from './saved_playground/save_playground_modal';
 

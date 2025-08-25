@@ -7,11 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import {
-  isSupportedConnector,
-  connectorToInference,
-  InferenceConnector,
-} from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { isSupportedConnector, connectorToInference } from '@kbn/inference-common';
 
 export const getConnectorList = async ({
   actions,

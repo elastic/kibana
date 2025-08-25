@@ -256,6 +256,7 @@ export const GetLimitedPackagesResponseSchema = schema.object({
 export const GetStatsResponseSchema = schema.object({
   response: schema.object({
     agent_policy_count: schema.number(),
+    package_policy_count: schema.number(),
   }),
 });
 

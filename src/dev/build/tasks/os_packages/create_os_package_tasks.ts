@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Solution, Task } from '../../lib';
+import type { Solution, Task } from '../../lib';
 import { runFpm } from './run_fpm';
 import { runDockerGenerator } from './docker_generator';
 import { createOSPackageKibanaYML } from './create_os_package_kibana_yml';

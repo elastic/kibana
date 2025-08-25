@@ -667,9 +667,7 @@ describe('ES|QL query generation', () => {
       });
     });
 
-    // This works on the Kibana UI but times out via the /chat/complete API
-    // See trace: https://35-187-109-62.sslip.io/projects/UHJvamVjdDo5/traces/630f92adcb3620295794180f71ccb37a?selectedSpanNodeId=U3BhbjozODYxNTQ%3D
-    it.skip('enriches login logs with user metadata using a lookup join', async () => {
+    it('enriches login logs with user metadata using a lookup join', async () => {
       await evaluateEsqlQuery({
         question:
           "Assume user login data is logs-auth_service-*. The event action for user login is `login`. Generate an example query to fetch successful logins today and for each successful login, show the user's full name and department. The user meta data is in the users_metadata index.",
@@ -868,7 +866,7 @@ describe('ES|QL query generation', () => {
         expected: [
           `FROM main
           | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
-          `FROM main 
+          `FROM main
           | LOOKUP JOIN suspicious_users ON user_id`,
         ],
         execute: false,

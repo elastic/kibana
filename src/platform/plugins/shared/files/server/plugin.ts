@@ -15,7 +15,7 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 
-import { AnalyticsServiceStart } from '@kbn/core/server';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { PLUGIN_ID } from '../common/constants';
 import {
   setFileKindsRegistry,
@@ -34,7 +34,8 @@ import type {
 
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes, registerFileKindRoutes } from './routes';
-import { Counters, registerUsageCollector } from './usage';
+import type { Counters } from './usage';
+import { registerUsageCollector } from './usage';
 import * as DefaultImageKind from '../common/default_image_file_kind';
 
 export class FilesPlugin

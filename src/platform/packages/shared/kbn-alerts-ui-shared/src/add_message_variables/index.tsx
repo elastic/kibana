@@ -8,6 +8,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -21,7 +22,6 @@ import {
   EuiFlexItem,
   EuiPopoverFooter,
   EuiToolTip,
-  EuiSelectableOption,
 } from '@elastic/eui';
 import type { ActionVariable } from '@kbn/alerting-types';
 import { TruncatedText } from './truncated_text';

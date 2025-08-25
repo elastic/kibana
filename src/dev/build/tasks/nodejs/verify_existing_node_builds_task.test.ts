@@ -14,7 +14,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createAnyInstanceSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 
-import { Config, Platform } from '../../lib';
+import type { Platform } from '../../lib';
+import { Config } from '../../lib';
 import { VerifyExistingNodeBuilds } from './verify_existing_node_builds_task';
 
 jest.mock('./node_shasums');

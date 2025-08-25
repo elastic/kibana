@@ -12,7 +12,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
-import { AlertsSearchBarProps, AlertsSearchBar } from '@kbn/alerts-ui-shared';
+import type { AlertsSearchBarProps } from '@kbn/alerts-ui-shared';
+import { AlertsSearchBar } from '@kbn/alerts-ui-shared';
 import { getAction } from '../common/test_utils/actions_test_utils';
 import { RuleActionsAlertsFilter } from './rule_actions_alerts_filter';
 

@@ -11,10 +11,11 @@ import React from 'react';
 
 import { EuiThemeProvider } from '@elastic/eui';
 import { useBatchedPublishingSubjects as mockUseBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { RenderResult, act, getByLabelText, render, screen, waitFor } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { act, getByLabelText, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { DashboardState } from '../../../common';
+import type { DashboardState } from '../../../common';
 import {
   DashboardContext,
   useDashboardApi as mockUseDashboardApi,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Message } from '@kbn/inference-common';
+import type { Message } from '@kbn/inference-common';
 import { isEmpty } from 'lodash';
 import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
-import { AnonymizationRecord } from './types';
+import type { AnonymizationRecord } from './types';
 
 export function messageToAnonymizationRecords(message: Message): AnonymizationRecord {
   const anonymizableMessage = getAnonymizableMessageParts(message);
