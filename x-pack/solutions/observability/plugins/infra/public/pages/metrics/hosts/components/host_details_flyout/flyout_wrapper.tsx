@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { AssetDetails } from '../../../../../components/asset_details';
@@ -14,9 +15,10 @@ import { hostDetailsTabs } from '../../../../../common/asset_details_config/asse
 export interface Props {
   node: HostNodeRow;
   closeFlyout: () => void;
+  preferredSchema?: DataSchemaFormat | null;
 }
 
-export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
+export const FlyoutWrapper = ({ node: { name }, closeFlyout, preferredSchema }: Props) => {
   const { parsedDateRange } = useUnifiedSearchContext();
 
   return (
@@ -36,6 +38,7 @@ export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
         mode: 'flyout',
         closeFlyout,
       }}
+      preferredSchema={preferredSchema}
     />
   );
 };
