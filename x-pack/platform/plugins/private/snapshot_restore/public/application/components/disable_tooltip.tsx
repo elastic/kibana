@@ -6,7 +6,7 @@
  */
 
 import type { ReactElement } from 'react';
-import React from 'react';
+import React, { cloneElement } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -24,30 +24,33 @@ export const MANAGED_POLICY_TOOLTIP_MESSAGE = i18n.translate(
   }
 );
 
-interface Props {
-  isManaged?: boolean;
-  tooltipMessage: string;
-  component: ReactElement;
-}
-
 /**
  * Component that wraps a given component (disabled field) with a tooltip if a repository
  * or policy is managed (isManaged === true).
- *
- * @param {boolean} isManaged - Determines if the tooltip should be displayed.
- * @param {string} tooltipMessage - The message to display inside the tooltip.
- * @param {React.ReactElement} component - The component to wrap with the tooltip.
  */
-export const DisableToolTip: React.FunctionComponent<Props> = ({
-  isManaged,
-  tooltipMessage,
-  component,
-}) => {
+export interface Props {
+  /** Determines if the tooltip should be displayed.
+   *  @optional
+   */
+  isManaged?: boolean;
+  /** The message to display inside the tooltip. */
+  tooltipMessage: string;
+  /** The component to wrap with the tooltip. */
+  children: ReactElement;
+}
+
+export const DisableToolTip = ({ isManaged, tooltipMessage, children, ...props }: Props) => {
+  // Ensures that any additional props passed down by EuiFormRow (e.g. id, aria-describedby) are forwarded to the wrapped component
+  const childrenWithProps = cloneElement(children, {
+    ...props,
+    ...children.props,
+  });
+
   return isManaged ? (
     <EuiToolTip content={tooltipMessage} display="block">
-      {component}
+      {childrenWithProps}
     </EuiToolTip>
   ) : (
-    component
+    childrenWithProps
   );
 };
