@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/eslint-rule-overrides",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}
