@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import rehypeRaw from 'rehype-raw';
-import rehypeSanitize from 'rehype-sanitize';
-import { defaultSchema } from 'hast-util-sanitize';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
-import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React, { useMemo } from 'react';
-import type { Node } from 'unist';
 import {
   EuiCodeBlock,
   EuiTable,
@@ -28,11 +23,11 @@ import {
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
 // import { vizLanguagePlugin } from './markdown_plugins/viz_code_block';
-import { cloneDeep } from 'lodash';
+import { type PluggableList } from 'unified';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
-import { type PluggableList } from 'unified';
+import { esqlLanguagePlugin, loadingCursorPlugin, toolResultPlugin } from './markdown_plugins';
 
 interface Props {
   content: string;
@@ -61,71 +56,6 @@ const cursorCss = css`
 
 const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
 
-const CURSOR = ` ᠎  `;
-
-const loadingCursorPlugin = () => {
-  const visitor = (node: Node, parent?: Parent) => {
-    if ('children' in node) {
-      const nodeAsParent = node as Parent;
-      nodeAsParent.children.forEach((child) => {
-        visitor(child, nodeAsParent);
-      });
-    }
-
-    if (node.type !== 'text' && node.type !== 'inlineCode' && node.type !== 'code') {
-      return;
-    }
-
-    const textNode = node as Text | InlineCode | Code;
-
-    const indexOfCursor = textNode.value.indexOf(CURSOR);
-    if (indexOfCursor === -1) {
-      return;
-    }
-
-    textNode.value = textNode.value.replace(CURSOR, '');
-
-    const indexOfNode = parent!.children.indexOf(textNode);
-    parent!.children.splice(indexOfNode + 1, 0, {
-      type: 'cursor' as Text['type'],
-      value: CURSOR,
-    });
-  };
-
-  return (tree: Node) => {
-    visitor(tree);
-  };
-};
-
-const esqlLanguagePlugin = () => {
-  const visitor = (node: Node, parent?: Parent) => {
-    if ('children' in node) {
-      const nodeAsParent = node as Parent;
-      nodeAsParent.children.forEach((child) => {
-        visitor(child, nodeAsParent);
-      });
-    }
-
-    if (node.type === 'code' && node.lang === 'esql') {
-      node.type = 'esql';
-    } else if (node.type === 'code') {
-      // switch to type that allows us to control rendering
-      node.type = 'codeBlock';
-    }
-  };
-
-  return (tree: Node) => {
-    visitor(tree);
-  };
-};
-
-const customSchema = cloneDeep(defaultSchema);
-customSchema.tagNames = [...(defaultSchema.tagNames ?? []), 'toolresult'];
-customSchema.attributes = {
-  ...defaultSchema.attributes,
-  toolresult: ['result-id', 'chart-type'],
-};
-
 /**
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
@@ -146,9 +76,7 @@ export function ChatMessageText({ content }: Props) {
     const [rehypeToReactPlugin, rehypeToReactOptions] = defaultProcessingPlugins[1];
 
     const processingPlugins = [
-      [remarkToRehypePlugin, { ...remarkToRehypeOptions, allowDangerousHtml: true }], // enabling custom html elements. Must use `rehypeSanitize` to sanitize html afterwards
-      [rehypeRaw], // use rehypeRaw to parse raw HTML strings (necessary for rendering `<toolresult />`)
-      [rehypeSanitize, customSchema], // sanitize after parsing raw HTML (important!)
+      [remarkToRehypePlugin, remarkToRehypeOptions],
       [rehypeToReactPlugin, rehypeToReactOptions],
     ] as PluggableList;
 
@@ -198,7 +126,7 @@ export function ChatMessageText({ content }: Props) {
         );
       },
       toolresult: (props) => {
-        const { 'result-id': resultId, 'chart-type': chartType } = props;
+        const { resultId, chartType } = props;
 
         if (!resultId) {
           return <p>Visualization requires a tool result ID.</p>;
@@ -235,7 +163,7 @@ export function ChatMessageText({ content }: Props) {
       parsingPluginList: [
         loadingCursorPlugin,
         esqlLanguagePlugin,
-        // vizLanguagePlugin,
+        toolResultPlugin,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,

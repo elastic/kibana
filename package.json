@@ -1392,6 +1392,7 @@
     "typescript-fsa-reducers": "^1.2.2",
     "unidiff": "^1.0.4",
     "unified": "9.2.2",
+    "unist-util-visit": "^5.0.0",
     "use-resize-observer": "^9.1.0",
     "usng.js": "^0.4.5",
     "utility-types": "^3.10.0",
