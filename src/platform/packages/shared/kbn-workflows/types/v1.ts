@@ -32,8 +32,6 @@ export interface EsWorkflowExecution {
   status: ExecutionStatus;
   context: Record<string, string>;
   workflowDefinition: WorkflowYaml;
-  /** Serialized graphlib.Graph */
-  executionGraph?: any;
   currentNodeId?: string; // The node currently being executed
   stack: string[];
   createdAt: string;
@@ -202,11 +200,10 @@ export interface WorkflowListDto {
   };
   results: WorkflowListItemDto[];
 }
-export interface WorkflowExecutionEngineModel
-  extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition'> {
-  /** Serialized graphlib.Graph */
-  executionGraph?: any;
-}
+export type WorkflowExecutionEngineModel = Pick<
+  EsWorkflow,
+  'id' | 'name' | 'enabled' | 'definition'
+>;
 
 export interface WorkflowListItemAction {
   isPrimary?: boolean;
