@@ -9,7 +9,11 @@
 
 export { getSavedSearchUrl, getSavedSearchFullPathUrl } from './saved_searches_url';
 export { fromSavedSearchAttributes } from './saved_searches_utils';
-export { extractTabs, extractTabsBackfillFn } from './service/extract_tabs';
+export {
+  extractTabs,
+  extractTabsBackfillFn,
+  removeTopLevelTabAttributes,
+} from './service/extract_tabs';
 
 export type {
   DiscoverGridSettings,
