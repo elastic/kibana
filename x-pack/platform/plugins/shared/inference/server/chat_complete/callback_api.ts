@@ -14,7 +14,6 @@ import {
   getConnectorProvider,
   type ChatCompleteCompositeResponse,
   MessageRole,
-  isInferenceRequestAbortedError,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import { defer, forkJoin, from, identity, share, switchMap, throwError } from 'rxjs';
@@ -179,15 +178,7 @@ export function createChatCompleteCallbackApi({
                       })
                     );
                 }
-              ).pipe(
-                retryWithExponentialBackoff({
-                  maxRetry: 2, // Fewer retries for network errors
-                  backoffMultiplier: retryConfiguration.backoffMultiplier,
-                  initialDelay: retryConfiguration.initialDelay,
-                  errorFilter: isInferenceRequestAbortedError,
-                }),
-                deanonymizeMessage(anonymization)
-              );
+              ).pipe(deanonymizeMessage(anonymization));
             })
           );
         })
