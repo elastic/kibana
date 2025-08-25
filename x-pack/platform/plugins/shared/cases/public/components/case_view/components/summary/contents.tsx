@@ -72,7 +72,10 @@ export const CaseSummaryContents: React.FC<CaseSummaryContentsProps> = ({
                   <FormattedMessage
                     id="xpack.cases.caseSummary.description"
                     defaultMessage="Generated on {date} at {time}"
-                    values={summaryDateTime}
+                    values={{
+                      date: summaryDateTime.date,
+                      time: summaryDateTime.time,
+                    }}
                   />
                 </EuiText>
               )}
