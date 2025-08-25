@@ -15,9 +15,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Builtin Tools API', () => {
     describe('DELETE /api/chat/tools/.nl_search', () => {
-      it('should return 400 error when attempting to delete any builtin system tool', async () => {
-        // todo: tidy this up; avoiding .researcher_agent tool
-        for (const toolId of Object.values(builtinToolIds).slice(0, -1) as string[]) {
+      it('should return 400 error when attempting to delete any read-only builtin system tool', async () => {
+        for (const toolId of Object.values(builtinToolIds) as string[]) {
+          if (toolId === '.researcher_agent') {
+            continue;
+          }
           const response = await supertest
             .delete(`/api/chat/tools/${toolId}`)
             .set('kbn-xsrf', 'kibana')
