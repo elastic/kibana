@@ -31,6 +31,7 @@ const streamRelationshipSchema = z.object({
 export interface Group {
   owner: string;
   tier: 1 | 2 | 3 | 4;
+  metadata: Record<string, string>;
   tags: string[];
   runbook_links: string[];
   documentation_links: string[];
@@ -43,6 +44,7 @@ export const Group: Validation<unknown, Group> = validation(
   z.object({
     owner: z.string(),
     tier: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+    metadata: z.record(z.string()),
     tags: z.array(z.string()),
     runbook_links: z.array(z.string()),
     documentation_links: z.array(z.string()),

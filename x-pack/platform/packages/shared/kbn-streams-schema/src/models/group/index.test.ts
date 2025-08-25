@@ -16,6 +16,7 @@ describe('GroupStream', () => {
         group: {
           owner: 'test_user',
           tier: 1,
+          metadata: {},
           tags: [],
           documentation_links: [],
           repository_links: [],
@@ -62,6 +63,7 @@ describe('GroupStream', () => {
           group: {
             owner: 'test_user',
             tier: 1,
+            metadata: {},
             tags: [],
             documentation_links: [],
             repository_links: [],
@@ -121,6 +123,7 @@ describe('GroupStream', () => {
           group: {
             owner: 'test_user',
             tier: 1,
+            metadata: {},
             tags: [],
             documentation_links: [],
             repository_links: [],

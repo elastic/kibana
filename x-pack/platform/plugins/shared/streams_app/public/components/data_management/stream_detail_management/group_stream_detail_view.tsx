@@ -6,11 +6,22 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import { EuiButton, EuiDescriptionList, EuiLink, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiButton,
+  EuiCodeBlock,
+  EuiConfirmModal,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
+import React, { useState } from 'react';
 import type { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
+import { useAbortController } from '@kbn/react-hooks';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { GroupStreamModificationFlyout } from '../../group_stream_modification_flyout/group_stream_modification_flyout';
@@ -30,6 +41,7 @@ export const GroupStreamDetailView = ({
     },
     core,
   } = useKibana();
+  const router = useStreamsAppRouter();
 
   const streamsListFetch = useStreamsAppFetch(
     async ({ signal }) => {
@@ -42,6 +54,9 @@ export const GroupStreamDetailView = ({
   );
 
   const overlayRef = React.useRef<OverlayRef | null>(null);
+  const { signal } = useAbortController();
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   function openGroupStreamModificationFlyout(existingStream?: Streams.GroupStream.Definition) {
     overlayRef.current?.close();
@@ -61,6 +76,35 @@ export const GroupStreamDetailView = ({
       ),
       { size: 's' }
     );
+  }
+
+  function deleteGroupStream() {
+    streamsRepositoryClient
+      .fetch('DELETE /api/streams/{name} 2023-10-31', {
+        params: { path: { name: definition.stream.name } },
+        signal,
+      })
+      .then(() => {
+        core.notifications.toasts.addSuccess(
+          i18n.translate('xpack.streams.groupStreamDetailView.deleteSuccessToastMessage', {
+            defaultMessage: '{name} was deleted',
+            values: { name: definition.stream.name },
+          })
+        );
+        router.push('/', {
+          path: {},
+          query: {},
+        });
+      })
+      .catch((error) => {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.streams.groupStreamDetailView.deleteErrorToastMessage', {
+            defaultMessage: 'Failed to delete {name}',
+            values: { name: definition.stream.name },
+          }),
+        });
+      })
+      .finally(() => setShowDeleteModal(false));
   }
 
   const stream = definition.stream;
@@ -102,6 +146,23 @@ export const GroupStreamDetailView = ({
       description: stream.group.tier,
     },
     {
+      title: i18n.translate('xpack.streams.groupStreamDetailView.metadataLabel', {
+        defaultMessage: 'Metadata',
+      }),
+      description:
+        Object.keys(stream.group.metadata).length === 0 ? (
+          i18n.translate('xpack.streams.groupStreamDetailView.noMetadataLabel', {
+            defaultMessage: 'None',
+          })
+        ) : (
+          <EuiCodeBlock>
+            {Object.entries(stream.group.metadata)
+              .map(([key, value]) => `${key}: ${value}`)
+              .join('\n')}
+          </EuiCodeBlock>
+        ),
+    },
+    {
       title: i18n.translate('xpack.streams.groupStreamDetailView.tagsLabel', {
         defaultMessage: 'Tags',
       }),
@@ -135,15 +196,55 @@ export const GroupStreamDetailView = ({
     <div>
       <EuiDescriptionList textStyle="reverse" listItems={meta} />
       <EuiSpacer size="m" />
-      <EuiButton
-        onClick={() => {
-          openGroupStreamModificationFlyout(stream);
-        }}
-      >
-        {i18n.translate('xpack.streams.groupStreamDetailView.editButtonLabel', {
-          defaultMessage: 'Edit',
-        })}
-      </EuiButton>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            onClick={() => {
+              openGroupStreamModificationFlyout(stream);
+            }}
+          >
+            {i18n.translate('xpack.streams.groupStreamDetailView.editButtonLabel', {
+              defaultMessage: 'Edit',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton color="danger" onClick={() => setShowDeleteModal(true)}>
+            {i18n.translate('xpack.streams.groupStreamDetailView.deleteButtonLabel', {
+              defaultMessage: 'Delete',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {showDeleteModal && (
+        <EuiConfirmModal
+          aria-label={i18n.translate('xpack.streams.groupStreamDetailView.deleteModalAriaLabel', {
+            defaultMessage: 'Delete {name}?',
+            values: { name: stream.name },
+          })}
+          title={i18n.translate('xpack.streams.groupStreamDetailView.deleteModalTitle', {
+            defaultMessage: 'Delete {name}?',
+            values: { name: stream.name },
+          })}
+          onCancel={() => setShowDeleteModal(false)}
+          onConfirm={deleteGroupStream}
+          cancelButtonText={i18n.translate(
+            'xpack.streams.groupStreamDetailView.deleteModalCancelButton',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.streams.groupStreamDetailView.deleteModalConfirmButton',
+            {
+              defaultMessage: 'Delete',
+            }
+          )}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+        />
+      )}
     </div>
   );
 };

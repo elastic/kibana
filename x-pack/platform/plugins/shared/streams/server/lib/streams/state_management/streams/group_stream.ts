@@ -127,7 +127,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
           isValid: false,
           errors: [
             new Error(
-              `Group stream${this.name} has a relationship to ${relationship.name} which was not found`
+              `Group stream ${this.name} has a relationship to ${relationship.name} which was not found`
             ),
           ],
         };

@@ -15,6 +15,9 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -42,6 +45,7 @@ export function GroupStreamModificationFlyout({
     name: existingStream?.name ?? '',
     description: existingStream?.description ?? '',
     owner: existingStream?.group.owner ?? '',
+    metadata: existingStream?.group.metadata ?? {},
     tier: existingStream?.group.tier.toString() ?? '1',
     ...splitRelationships(existingStream),
   });
@@ -162,6 +166,7 @@ export function GroupStreamModificationFlyout({
                   formData.tier,
                   10
                 ) as Streams.GroupStream.Definition['group']['tier'],
+                metadata: formData.metadata,
                 tags,
                 runbook_links: runbookLinks,
                 documentation_links: documentationLinks,
@@ -268,6 +273,12 @@ export function GroupStreamModificationFlyout({
             ]}
           />
         </EuiFormRow>
+        <MetadataSubForm
+          onChange={(metadata) => {
+            setFormData({ ...formData, metadata });
+          }}
+          value={formData.metadata}
+        />
         <EuiFormRow
           label={i18n.translate('xpack.streams.groupStreamModificationFlyout.tagsLabel', {
             defaultMessage: 'Tags',
@@ -475,6 +486,117 @@ export function GroupStreamModificationFlyout({
         </EuiButton>
       </EuiModalBody>
     </>
+  );
+}
+
+function MetadataSubForm({
+  onChange,
+  value,
+}: {
+  value: Record<string, string>;
+  onChange: (value: Record<string, string>) => void;
+}) {
+  const [pairs, setPairs] = React.useState<{ key: string; value: string }[]>(
+    Object.entries(value).map(([key, val]) => ({ key, value: val }))
+  );
+
+  const handlePairChange = (index: number, field: 'key' | 'value', fieldValue: string) => {
+    const newPairs = pairs.map((pair, i) =>
+      i === index ? { ...pair, [field]: fieldValue } : pair
+    );
+    setPairs(newPairs);
+
+    const metadata = Object.fromEntries(
+      newPairs.filter((pair) => pair.key && pair.value).map((pair) => [pair.key, pair.value])
+    );
+    onChange(metadata);
+  };
+
+  const handleAddPair = () => {
+    setPairs([...pairs, { key: '', value: '' }]);
+  };
+
+  const handleRemovePair = (index: number) => {
+    const newPairs = pairs.filter((_, i) => i !== index);
+    setPairs(newPairs);
+
+    const metadata = Object.fromEntries(
+      newPairs.filter((pair) => pair.key && pair.value).map((pair) => [pair.key, pair.value])
+    );
+    onChange(metadata);
+  };
+
+  return (
+    <EuiFormRow
+      label={
+        <>
+          {i18n.translate('xpack.streams.groupStreamModificationFlyout.metadataLabel', {
+            defaultMessage: 'Metadata',
+          })}
+          <EuiButtonIcon
+            iconType="plusInCircle"
+            aria-label={i18n.translate(
+              'xpack.streams.groupStreamModificationFlyout.addMetadataButtonLabel',
+              {
+                defaultMessage: 'Add',
+              }
+            )}
+            onClick={handleAddPair}
+          />
+        </>
+      }
+    >
+      <>
+        {pairs.map((pair, index) => (
+          <>
+            <EuiFlexGroup key={index} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={2}>
+                <EuiFieldText
+                  placeholder={i18n.translate(
+                    'xpack.streams.groupStreamModificationFlyout.metadataKeyPlaceholder',
+                    {
+                      defaultMessage: 'Key',
+                    }
+                  )}
+                  value={pair.key}
+                  onChange={(e) => handlePairChange(index, 'key', e.target.value)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={3}>
+                <EuiFieldText
+                  placeholder={i18n.translate(
+                    'xpack.streams.groupStreamModificationFlyout.metadataValuePlaceholder',
+                    {
+                      defaultMessage: 'Value',
+                    }
+                  )}
+                  value={pair.value}
+                  onChange={(e) => handlePairChange(index, 'value', e.target.value)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  aria-label={i18n.translate(
+                    'xpack.streams.groupStreamModificationFlyout.removeMetadataButtonLabel',
+                    {
+                      defaultMessage: 'Remove',
+                    }
+                  )}
+                  onClick={() => handleRemovePair(index)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        ))}
+        {pairs.length === 0 &&
+          i18n.translate('xpack.streams.groupStreamModificationFlyout.noMetadataLabel', {
+            defaultMessage: 'No metadata added',
+          })}
+      </>
+    </EuiFormRow>
   );
 }
 
