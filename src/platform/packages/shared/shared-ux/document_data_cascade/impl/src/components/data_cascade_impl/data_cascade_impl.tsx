@@ -7,23 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  type ComponentProps,
-  Children,
-  isValidElement,
-  useEffect,
-  useRef,
-  useMemo,
-} from 'react';
+import React, { Children, isValidElement, useEffect, useRef, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiAutoSizer, useEuiTheme } from '@elastic/eui';
-import { flexRender, type Row } from '@tanstack/react-table';
+import { flexRender } from '@tanstack/react-table';
 import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
-import { CascadeRowPrimitive, type CascadeRowPrimitiveProps } from './data_cascade_row';
-import {
-  CascadeRowCellPrimitive,
-  type CascadeRowCellPrimitiveProps,
-} from './data_cascade_row_cell';
+import { CascadeRowPrimitive } from './data_cascade_row';
+import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
 import { useDataCascadeActions, type GroupNode, type LeafNode } from '../../store_provider';
 import { useTableHelper } from '../../lib/core/table';
 import {
@@ -32,50 +22,13 @@ import {
   getGridRowPositioningStyle,
 } from '../../lib/core/virtualizer';
 import { dataCascadeImplStyles, relativePosition, overflowYAuto } from './data_cascade_impl.styles';
-
-export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = Pick<
-  CascadeRowCellPrimitiveProps<G, L>,
-  'onCascadeLeafNodeExpanded' | 'children'
->;
-
-export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
-  CascadeRowPrimitiveProps<G, L>,
-  'onCascadeGroupNodeExpanded' | 'rowHeaderMetaSlots' | 'rowHeaderTitleSlot' | 'rowHeaderActions'
-> & {
-  /**
-   * Child element for the cascade row.
-   */
-  children: React.ReactElement<DataCascadeRowCellProps<G, L>>;
-};
-
-export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
-  extends Pick<Parameters<typeof useRowVirtualizerHelper>[0], 'overscan'> {
-  /**
-   * The data to be displayed in the cascade. It should be an array of group nodes.
-   */
-  data: G[];
-  /**
-   * Callback function that is called when the group by selection changes.
-   */
-  onCascadeGroupingChange: ComponentProps<typeof SelectionDropdown>['onSelectionChange'];
-  /**
-   * The spacing size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
-   */
-  size?: CascadeRowPrimitiveProps<G, L>['size'];
-  /**
-   * Slot for the table title.
-   */
-  tableTitleSlot: React.FC<{ rows: Array<Row<G>> }>;
-  /**
-   * Whether to cause the group root to stick to the top of the viewport.
-   */
-  stickyGroupRoot?: boolean;
-  /**
-   * Whether to allow multiple group rows to be expanded at the same time, default is false.
-   */
-  allowExpandMultiple?: boolean;
-  children: React.ReactElement<DataCascadeRowProps<G, L>>;
-}
+import type {
+  DataCascadeImplProps,
+  DataCascadeRowProps,
+  DataCascadeRowCellProps,
+  CascadeRowCellPrimitiveProps,
+  CascadeRowPrimitiveProps,
+} from './types';
 
 /**
  * @description Public Component for rendering a data cascade row cell
@@ -131,39 +84,34 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     actions.setInitialState(data);
   }, [data, actions]);
 
-  const { table } = useTableHelper<G, L>({
+  const table = useTableHelper<G, L>({
     allowExpandMultiple,
-    columns: (columnsHelper) => [
-      columnsHelper.display({
-        id: 'groupBy',
-        header: (props) =>
-          React.createElement(function GroupByHeader({ table: _table }) {
-            const { rows } = _table.getGroupedRowModel();
+    header: (props) =>
+      React.createElement(function GroupByHeader({ table: _table }) {
+        const { rows } = _table.getGroupedRowModel();
 
-            return (
-              <EuiFlexGroup
-                justifyContent="spaceBetween"
-                alignItems="center"
-                css={styles.cascadeHeaderWrapper}
-              >
-                <EuiFlexItem>
-                  <TableTitleSlot rows={rows} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <SelectionDropdown onSelectionChange={onCascadeGroupingChange} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            );
-          }, props),
-        cell: React.memo((props) => {
-          return React.createElement<CascadeRowCellPrimitiveProps<G, L>>(CascadeRowCellPrimitive, {
-            size,
-            ...props,
-            ...rowElement.props.children.props,
-          });
-        }),
-      }),
-    ],
+        return (
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="center"
+            css={styles.cascadeHeaderWrapper}
+          >
+            <EuiFlexItem>
+              <TableTitleSlot rows={rows} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SelectionDropdown onSelectionChange={onCascadeGroupingChange} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }, props),
+    rowCell: React.memo((props) => {
+      return React.createElement<CascadeRowCellPrimitiveProps<G, L>>(CascadeRowCellPrimitive, {
+        size,
+        ...props,
+        ...rowElement.props.children.props,
+      });
+    }),
   });
 
   const headerColumns = table.getHeaderGroups()[0].headers;
