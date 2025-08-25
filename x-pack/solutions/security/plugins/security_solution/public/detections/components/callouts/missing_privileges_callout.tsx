@@ -7,12 +7,15 @@
 
 import React, { memo, useMemo } from 'react';
 import hash from 'object-hash';
-import type { CallOutMessage } from '../../../../common/components/callouts';
-import { CallOutSwitcher } from '../../../../common/components/callouts';
+import type { CallOutMessage } from '../../../common/components/callouts';
+import { CallOutSwitcher } from '../../../common/components/callouts';
 import * as i18n from './translations';
-import { useMissingPrivileges } from './use_missing_privileges';
+import { useMissingPrivileges } from '../../hooks/alerts/use_missing_privileges';
 
-const MissingPrivilegesCallOutComponent = () => {
+/**
+ * Callout that displays a Callout when the user has missing privileges.
+ */
+export const MissingPrivilegesCallOut = memo(() => {
   const missingPrivileges = useMissingPrivileges();
 
   const MissingPrivilegesMessage: CallOutMessage | null = useMemo(() => {
@@ -44,6 +47,6 @@ const MissingPrivilegesCallOutComponent = () => {
       <CallOutSwitcher namespace="detections" condition={true} message={MissingPrivilegesMessage} />
     )
   );
-};
+});
 
-export const MissingPrivilegesCallOut = memo(MissingPrivilegesCallOutComponent);
+MissingPrivilegesCallOut.displayName = 'MissingPrivilegesCallOut';

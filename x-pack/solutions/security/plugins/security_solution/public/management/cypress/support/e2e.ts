@@ -106,5 +106,5 @@ Cypress.on('uncaught:exception', () => false);
 before(() => {
   login(ROLE.soc_manager);
   loadPage('/app/security/alerts');
-  cy.getByTestSubj('manage-alert-detection-rules').should('exist');
+  cy.getByTestSubj('alerts-page-manage-alert-detection-rules').should('exist');
 });
