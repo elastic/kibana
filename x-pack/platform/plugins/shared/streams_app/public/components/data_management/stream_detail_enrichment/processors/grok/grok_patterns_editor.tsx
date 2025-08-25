@@ -31,6 +31,7 @@ import { useStreamEnrichmentSelector } from '../../state_management/stream_enric
 import { SortableList } from '../../sortable_list';
 import type { GrokFormState } from '../../types';
 import { useAIFeatures } from './use_ai_features';
+import { useResizeCheckerUtils } from '../../../../../hooks/use_resize_checker_utils';
 
 const GrokPatternAISuggestions = dynamic(() =>
   import('./grok_pattern_suggestion').then((mod) => ({ default: mod.GrokPatternAISuggestions }))
@@ -157,6 +158,7 @@ const DraggablePatternInput = ({
   onChange,
   onRemove,
 }: DraggablePatternInputProps) => {
+  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
   return (
     <EuiDraggable
       index={idx}
@@ -187,6 +189,8 @@ const DraggablePatternInput = ({
                 grokCollection={grokCollection}
                 dataTestSubj="streamsAppPatternExpression"
                 onChange={onChange}
+                onEditorMount={(editor, divElement) => setupResizeChecker(divElement, editor)}
+                onEditorWillUnmount={() => destroyResizeChecker()}
               />
             </EuiFlexItem>
             {onRemove && (

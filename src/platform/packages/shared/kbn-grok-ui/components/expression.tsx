@@ -12,7 +12,6 @@ import { CodeEditor } from '@kbn/code-editor';
 import React, { useRef, useState, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { DraftGrokExpression, GrokCollection } from '../models';
-import { useResizeCheckerUtils } from '../hooks';
 
 export const Expression = ({
   grokCollection,
@@ -20,12 +19,16 @@ export const Expression = ({
   onChange,
   height = '100px',
   dataTestSubj,
+  onEditorMount,
+  onEditorWillUnmount,
 }: {
   grokCollection: GrokCollection;
   draftGrokExpression: DraftGrokExpression;
   onChange?: (expression: DraftGrokExpression) => void;
   height?: CodeEditorProps['height'];
   dataTestSubj?: string;
+  onEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor, divElement: HTMLDivElement) => void;
+  onEditorWillUnmount?: () => void;
 }) => {
   const [suggestionProvider] = useState(() => {
     return grokCollection.getSuggestionProvider();
@@ -35,18 +38,19 @@ export const Expression = ({
 
   const grokEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const divRef = useRef<HTMLDivElement | null>(null);
-  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
 
   const onGrokEditorMount: CodeEditorProps['editorDidMount'] = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
     grokEditorRef.current = editor;
-    if (divRef.current) {
-      setupResizeChecker(divRef.current, editor);
+    if (onEditorMount && divRef.current) {
+      onEditorMount(editor, divRef.current);
     }
-  }, [setupResizeChecker]);
+  }, [onEditorMount]);
 
   const onGrokEditorWillUnmount: CodeEditorProps['editorWillUnmount'] = useCallback(() => {
-    destroyResizeChecker();
-  }, [destroyResizeChecker]);
+    if (onEditorWillUnmount) {
+      onEditorWillUnmount();
+    }
+  }, [onEditorWillUnmount]);
 
   const onGrokEditorChange: CodeEditorProps['onChange'] = (value) => {
     draftGrokExpression.updateExpression(value);
