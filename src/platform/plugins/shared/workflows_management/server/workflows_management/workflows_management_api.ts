@@ -22,6 +22,7 @@ import type {
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import type { SchedulerService } from '../scheduler/scheduler_service';
@@ -91,7 +92,8 @@ export interface GetStepLogsParams {
 export class WorkflowsManagementApi {
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private schedulerService: SchedulerService | null = null
+    private schedulerService: SchedulerService | null = null,
+    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
   ) {}
 
   public setSchedulerService(schedulerService: SchedulerService) {
@@ -162,7 +164,13 @@ export class WorkflowsManagementApi {
     if (!this.schedulerService) {
       throw new Error('Scheduler service not set');
     }
-    return await this.schedulerService.runWorkflow(workflow, spaceId, inputs);
+    const context = {
+      ...inputs,
+      spaceId,
+    };
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
+    return executeResponse.workflowExecutionId;
   }
 
   public async testWorkflow(
@@ -182,17 +190,21 @@ export class WorkflowsManagementApi {
     }
 
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
-
-    return await this.schedulerService.runWorkflow(
+    const context = {
+      ...inputs,
+      spaceId,
+    };
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       {
         id: 'test-workflow',
         name: workflowToCreate.name,
         enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
       },
-      spaceId,
-      inputs
+      context
     );
+    return executeResponse.workflowExecutionId;
   }
 
   public async getWorkflowExecutions(
