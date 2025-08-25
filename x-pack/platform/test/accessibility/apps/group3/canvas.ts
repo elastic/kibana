@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Canvas Accessibility', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default'
       );
       await canvas.goToListingPage();
     });

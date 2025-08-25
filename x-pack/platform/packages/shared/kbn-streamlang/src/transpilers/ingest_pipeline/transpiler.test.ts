@@ -6,8 +6,8 @@
  */
 
 import { transpile } from '.';
-import { StreamlangDSL } from '../../../types/streamlang';
-import {
+import type { StreamlangDSL } from '../../../types/streamlang';
+import type {
   RenameProcessor,
   SetProcessor,
   GrokProcessor,

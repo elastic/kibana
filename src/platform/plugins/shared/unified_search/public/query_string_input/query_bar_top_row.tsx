@@ -10,7 +10,8 @@
 import dateMath from '@kbn/datemath';
 import classNames from 'classnames';
 import { css } from '@emotion/react';
-import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
@@ -24,26 +25,23 @@ import { ESQLLangEditor, type ESQLEditorProps } from '@kbn/esql/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle } from 'lodash';
+import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
-  EuiFieldText,
   usePrettyDuration,
-  EuiIconProps,
-  OnRefreshProps,
   useIsWithinBreakpoints,
   EuiSuperUpdateButton,
   EuiToolTip,
   EuiButton,
   EuiButtonIcon,
   useEuiTheme,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
+import { getQueryLog } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { PersistedLog } from '@kbn/data-plugin/public';
+import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
@@ -51,7 +49,8 @@ import { QueryStringInput } from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
-import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
+import type { DataViewPickerProps } from '../dataview_picker';
+import { DataViewPicker } from '../dataview_picker';
 import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
@@ -753,7 +752,7 @@ export const QueryBarTopRow = React.memo(
       return (
         <EuiFlexItem
           grow={!shouldShowDatePickerAsBadge()}
-          style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
+          style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 300, maxWidth: '100%' }}
         >
           <EuiFlexGroup gutterSize="s" responsive={false}>
             {filterButtonGroup}

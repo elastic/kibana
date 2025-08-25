@@ -54,7 +54,10 @@ export const registerSiemRuleMigrationsStartRoute = (
               retry,
             } = req.body;
 
-            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'rules'
+            );
             try {
               const ctx = await context.resolve([
                 'core',

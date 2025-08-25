@@ -8,7 +8,7 @@
  */
 
 import { stringify } from 'querystring';
-import { Env, IConfigService } from '@kbn/config';
+import type { Env, IConfigService } from '@kbn/config';
 import { schema, ValidationError } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
@@ -425,9 +425,21 @@ export class CoreAppsService {
     });
   }
 
-  // After the package is built and bootstrap extracts files to bazel-bin,
+  // After the package is built and bootstrap extracts files to target/build,
   // assets are exposed at the root of the package and in the package's node_modules dir
   private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot, uiPlugins: UiPlugins) {
+    // Expose @elastic/charts' pre-compiled CSS themes
+    // Referenced in `getThemeStylesheetPaths` in src/core/packages/rendering/server-internal/src/render_utils.ts
+    core.http.registerStaticDir(
+      // We're only interested in exposing 'theme_dark.css' and 'theme_light.css',
+      // but this route cannot be limited to a file (not even a pattern like `{file}.css`).
+      // We don't think that it's too risky because @elastic/charts is a public code.
+      // Still, it's limited to the root dir (missing * in the pattern) for extra security.
+      core.http.staticAssets.prependServerPath(`/ui/charts/{file}`),
+      fromRoot(`node_modules/@elastic/charts/dist/`)
+    );
+    // });
+
     /**
      * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
      * Eventually we only want to serve from the sha scoped path

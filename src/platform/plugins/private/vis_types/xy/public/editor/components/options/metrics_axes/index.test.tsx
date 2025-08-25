@@ -12,12 +12,12 @@ import { mount, shallow } from 'enzyme';
 
 import { Position } from '@elastic/charts';
 
-import { IAggConfig, IAggType } from '@kbn/data-plugin/public';
+import type { IAggConfig, IAggType } from '@kbn/data-plugin/public';
 
 import { ChartType } from '../../../../../common';
-import { VisParams, SeriesParam, ValueAxis } from '../../../../types';
+import type { VisParams, SeriesParam, ValueAxis } from '../../../../types';
 import MetricsAxisOptions from '.';
-import { ValidationVisOptionsProps } from '../../common';
+import type { ValidationVisOptionsProps } from '../../common';
 import { ValueAxesPanel } from './value_axes_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
 import { defaultValueAxisId, valueAxis, seriesParam, categoryAxis } from './mocks';

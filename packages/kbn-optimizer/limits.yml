@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  aiAssistantManagementSelection: 6069
+  aiAssistantManagementSelection: 6917
   aiops: 19890
   alerting: 28395
   apm: 38573
@@ -21,11 +21,12 @@ pageLoadAssetSize:
   contentConnectors: 33036
   contentManagement: 8350
   controls: 13000
-  core: 533948
+  core: 602071
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
   dashboardEnhanced: 12500
+  dashboardMarkdown: 5134
   data: 453742
   dataQuality: 10387
   datasetQuality: 27203
@@ -66,6 +67,7 @@ pageLoadAssetSize:
   filesManagement: 5270
   fileUpload: 16910
   fleet: 187942
+  genAiSettings: 4981
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
@@ -99,6 +101,7 @@ pageLoadAssetSize:
   maps: 45917
   mapsEms: 6767
   metricsDataAccess: 49711
+  metricsExperience: 10000
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
@@ -120,6 +123,7 @@ pageLoadAssetSize:
   productDocBase: 3058
   productIntercept: 9860
   profiling: 20716
+  reindexService: 2781
   remoteClusters: 10170
   reporting: 58600
   rollup: 12709
@@ -180,7 +184,7 @@ pageLoadAssetSize:
   visDefaultEditor: 35092
   visTypeGauge: 13006
   visTypeHeatmap: 12457
-  visTypeMarkdown: 9000
+  visTypeMarkdown: 8817
   visTypeMetric: 11966
   visTypePie: 9939
   visTypeTable: 18999
@@ -197,4 +201,4 @@ pageLoadAssetSize:
   wciSalesforce: 8506
   workchatApp: 12411
   workchatFramework: 5706
-  workflowsManagement: 475041
+  workflowsManagement: 5768

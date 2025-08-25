@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Server as NodeHttpServer } from 'http';
-import { Server as NodeTlsServer } from 'https';
+import type { Server as NodeHttpServer } from 'http';
+import type { Server as NodeTlsServer } from 'https';
 import tls from 'tls';
 
 export function isServerTLS(server: NodeHttpServer): server is NodeTlsServer {

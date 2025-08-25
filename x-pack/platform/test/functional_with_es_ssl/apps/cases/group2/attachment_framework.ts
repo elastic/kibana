@@ -7,22 +7,24 @@
 
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  ExternalReferenceStorageType,
-  AttachmentType,
+import type {
   Case,
   ExternalReferenceAttachmentPayload,
   PersistableStateAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
+import {
+  ExternalReferenceStorageType,
+  AttachmentType,
+} from '@kbn/cases-plugin/common/types/domain';
 import { expect } from 'expect';
-import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
+import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   deleteAllCaseItems,
   findAttachments,
   findCaseUserActions,
   findCases,
 } from '../../../../cases_api_integration/common/lib/api';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ = 'embeddablePanelAction-embeddable_addToExistingCase';
 
@@ -372,7 +374,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'x-pack/platform/test/fixtures/es_archives/logstash_functional'
         );
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
 
         await common.navigateToApp('dashboard');
@@ -396,7 +398,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
 
         await cases.api.deleteAllCases();

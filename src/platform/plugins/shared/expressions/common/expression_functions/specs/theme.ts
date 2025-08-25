@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { ExpressionFunctionDefinition } from '../types';
+import type { ExpressionFunctionDefinition } from '../types';
 
 interface Arguments {
   variable: string;

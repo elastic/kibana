@@ -5,10 +5,9 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { Filter } from '@kbn/es-query';
-
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type { ThreatListDoc, ThreatListItem } from './types';
 
 export const getThreatMappingMock = (): ThreatMapping => {

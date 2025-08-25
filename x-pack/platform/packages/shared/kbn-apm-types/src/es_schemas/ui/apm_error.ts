@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ErrorRaw } from '../raw/error_raw';
-import { Agent } from './fields/agent';
+import type { ErrorRaw } from '../raw/error_raw';
+import type { Agent } from './fields/agent';
 
 export interface APMError extends ErrorRaw {
   agent: Agent;

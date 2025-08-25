@@ -212,7 +212,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]and_badge.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]and_badge.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]entry_delete_button.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]entry_item.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]index.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]list_item.test.tsx/,
@@ -454,5 +453,6 @@ module.exports = {
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_py[\/\\]elasticsearch_py_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_ruby[\/\\]elasticsearch_ruby_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]sample[\/\\]sample_client_readme.tsx/,
+    /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]workflows_management[\/\\]public[\/\\]widgets[\/\\]workflow_search_field[\/\\]ui[\/\\]workflow_search_field.tsx/,
   ],
 };

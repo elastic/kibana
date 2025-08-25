@@ -61,6 +61,7 @@ describe('getGraph', () => {
         { id: 'event2', isAlert: false },
       ],
       indexPatterns: ['pattern1', 'pattern2'],
+      spaceId: 'testSpace',
       esQuery: { bool: { must: [{ match_phrase: { field: 'value' } }] } },
     });
     expect(parseRecords).toHaveBeenCalledWith(mockLogger, fakeFetchResult.records, 10);
@@ -91,7 +92,7 @@ describe('getGraph', () => {
 
     expect(fetchGraph).toHaveBeenCalledWith(
       expect.objectContaining({
-        indexPatterns: ['logs-*'],
+        indexPatterns: [`.alerts-security.alerts-defaultSpace`, 'logs-*'],
       })
     );
   });

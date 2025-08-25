@@ -24,8 +24,8 @@ import {
 
 import { SettingsGroup } from './settings_group';
 import { SettingsFormRow } from './settings_form_row';
-import { DevToolsSettings } from '../../../services';
-import { EsHostService } from '../../lib';
+import type { DevToolsSettings } from '../../../services';
+import type { EsHostService } from '../../lib';
 
 const DEBOUNCE_DELAY = 500;
 const ON_LABEL = i18n.translate('console.settingsPage.onLabel', { defaultMessage: 'On' });

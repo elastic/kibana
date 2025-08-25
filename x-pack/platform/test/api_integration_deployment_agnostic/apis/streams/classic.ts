@@ -7,12 +7,9 @@
 
 import expect from '@kbn/expect';
 import { Streams } from '@kbn/streams-schema';
-import { isNotFoundError } from '@kbn/es-errors';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { fetchDocument, indexDocument, putStream } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -51,7 +48,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
         },
       });
@@ -70,17 +69,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: [
-                  {
-                    grok: {
-                      if: { always: {} },
-                      field: 'message',
+                processing: {
+                  steps: [
+                    {
+                      action: 'grok',
+                      where: { always: {} },
+                      from: 'message',
                       patterns: [
                         '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                       ],
                     },
-                  },
-                ],
+                  ],
+                },
+
                 classic: {},
               },
             },
@@ -117,17 +118,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
-          processing: [
-            {
-              grok: {
-                field: 'message',
+          processing: {
+            steps: [
+              {
+                action: 'grok' as const,
+                from: 'message',
                 patterns: [
                   '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                 ],
-                if: { always: {} },
+                where: { always: {} },
               },
-            },
-          ],
+            ],
+          },
           classic: {},
         },
       });
@@ -173,7 +175,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: [],
+                processing: {
+                  steps: [],
+                },
                 classic: {},
               },
             },
@@ -242,6 +246,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
+        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: FIRST_STREAM_NAME,
+            },
+          },
+        });
+
+        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: SECOND_STREAM_NAME,
+            },
+          },
+        });
+
+        await esClient.ingest.deletePipeline({
+          id: `${TEMPLATE_NAME}-pipeline`,
+        });
+
         await esClient.indices.deleteIndexTemplate({
           name: TEMPLATE_NAME,
         });
@@ -259,17 +283,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [
-                {
-                  grok: {
-                    if: { always: {} },
-                    field: 'message',
+              processing: {
+                steps: [
+                  {
+                    action: 'grok',
+                    where: { always: {} },
+                    from: 'message',
                     patterns: [
                       '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                     ],
                   },
-                },
-              ],
+                ],
+              },
               classic: {},
             },
           },
@@ -280,7 +305,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         const template = templateResponse.index_templates[0];
         expect(template.index_template.template?.settings?.index?.default_pipeline).to.equal(
-          'my-shared-template-pipeline'
+          `${TEMPLATE_NAME}-pipeline`
         );
 
         const pipelineResponse = await esClient.ingest.getPipeline({
@@ -289,6 +314,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
         expect(pipeline._meta?.managed_by).to.eql('streams');
         expect(pipeline.processors?.[0].pipeline?.name).to.eql('mytest-first@stream.processing');
+      });
+
+      it('Executes processing using the newly created ingest pipeline', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: '2023-01-01T00:00:10.000Z error test',
+        };
+        const response = await indexDocument(esClient, FIRST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+
+        const result = await fetchDocument(esClient, FIRST_STREAM_NAME, response._id);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: '2023-01-01T00:00:10.000Z error test',
+          inner_timestamp: '2023-01-01T00:00:10.000Z',
+          message2: 'test',
+          log: {
+            level: 'error',
+          },
+        });
       });
 
       it('updates the ingest pipeline when the second stream is created', async () => {
@@ -303,17 +348,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [
-                {
-                  grok: {
-                    if: { always: {} },
-                    field: 'message',
+              processing: {
+                steps: [
+                  {
+                    action: 'grok',
+                    where: { always: {} },
+                    from: 'message',
                     patterns: [
                       '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                     ],
                   },
-                },
-              ],
+                ],
+              },
               classic: {},
             },
           },
@@ -329,11 +375,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
 
-      it('updates the ingest pipeline when one of the streams is deleted', async () => {
-        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
-          params: {
-            path: {
-              name: FIRST_STREAM_NAME,
+      it('updates the ingest pipeline when the processing is removed from the first stream', async () => {
+        await putStream(apiClient, FIRST_STREAM_NAME, {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: {
+                steps: [],
+              },
+              classic: {},
             },
           },
         });
@@ -345,11 +398,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(pipeline.processors?.[0].pipeline?.name).to.eql('mytest-second@stream.processing');
       });
 
-      it('deletes the ingest pipeline and restores the template when both streams are deleted', async () => {
-        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
-          params: {
-            path: {
-              name: SECOND_STREAM_NAME,
+      it('clears the pipeline when processing is removed from the second stream', async () => {
+        await putStream(apiClient, SECOND_STREAM_NAME, {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              classic: {},
             },
           },
         });
@@ -359,112 +417,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         const template = templateResponse.index_templates[0];
         expect(template.index_template.template?.settings?.index?.default_pipeline).to.equal(
-          undefined
+          `${TEMPLATE_NAME}-pipeline`
         );
 
-        try {
-          await esClient.ingest.getPipeline({
-            id: `${TEMPLATE_NAME}-pipeline`,
-          });
-          throw new Error('Expected to throw due to missing pipeline');
-        } catch (error) {
-          expect(isNotFoundError(error)).to.eql(true);
-        }
-      });
-    });
-
-    describe('Classic stream without pipeline', () => {
-      const TEMPLATE_NAME = 'mytemplate';
-      const DATA_STREAM_NAME = 'mytest-abc';
-
-      before(async () => {
-        await esClient.indices.putIndexTemplate({
-          name: TEMPLATE_NAME,
-          index_patterns: ['mytest*'],
-          priority: 1000,
-          template: {
-            lifecycle: {
-              data_retention: '7d',
-            },
-          },
-          data_stream: {
-            allow_custom_routing: false,
-            hidden: false,
-          },
+        const pipelineResponse = await esClient.ingest.getPipeline({
+          id: `${TEMPLATE_NAME}-pipeline`,
         });
-
-        await esClient.indices.createDataStream({
-          name: DATA_STREAM_NAME,
-        });
-      });
-
-      after(async () => {
-        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
-          params: {
-            path: {
-              name: DATA_STREAM_NAME,
-            },
-          },
-        });
-
-        await esClient.indices.deleteIndexTemplate({
-          name: TEMPLATE_NAME,
-        });
-      });
-
-      it('Allows adding processing to classic streams without pipeline', async () => {
-        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
-          params: {
-            path: {
-              name: DATA_STREAM_NAME,
-            },
-            body: {
-              queries: [],
-              dashboards: [],
-              stream: {
-                description: '',
-                ingest: {
-                  lifecycle: { inherit: {} },
-                  processing: [
-                    {
-                      grok: {
-                        if: { always: {} },
-                        field: 'message',
-                        patterns: [
-                          '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-                        ],
-                      },
-                    },
-                  ],
-                  classic: {},
-                },
-              },
-            },
-          },
-        });
-
-        expect(putResponse.status).to.eql(200);
-        expect(putResponse.body).to.have.property('acknowledged', true);
-      });
-
-      it('Executes processing on classic streams without pipeline', async () => {
-        const doc = {
-          '@timestamp': '2024-01-01T00:00:10.000Z',
-          message: '2023-01-01T00:00:10.000Z error test',
-        };
-        const response = await indexDocument(esClient, DATA_STREAM_NAME, doc);
-        expect(response.result).to.eql('created');
-
-        const result = await fetchDocument(esClient, DATA_STREAM_NAME, response._id);
-        expect(result._source).to.eql({
-          '@timestamp': '2024-01-01T00:00:10.000Z',
-          message: '2023-01-01T00:00:10.000Z error test',
-          inner_timestamp: '2023-01-01T00:00:10.000Z',
-          message2: 'test',
-          log: {
-            level: 'error',
-          },
-        });
+        const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
+        expect(pipeline.processors).to.eql([]);
       });
     });
 
@@ -490,7 +450,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: [],
+                  processing: { steps: [] },
                   classic: {},
                 },
               },

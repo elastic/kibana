@@ -11,7 +11,7 @@ import type { Run, Example } from 'langsmith/schemas';
 import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AuthenticatedUser } from '@kbn/core/server';
-import type { SiemMigrationsClientDependencies } from '../../common/types';
+import type { RuleMigrationsClientDependencies } from '../types';
 
 // Mock dependencies
 jest.mock('langsmith/evaluation', () => ({
@@ -34,7 +34,7 @@ describe('RuleMigrationTaskEvaluator', () => {
   let abortController: AbortController;
 
   const mockLogger = loggerMock.create();
-  const mockDependencies: jest.Mocked<SiemMigrationsClientDependencies> = {
+  const mockDependencies: jest.Mocked<RuleMigrationsClientDependencies> = {
     rulesClient: {},
     savedObjectsClient: {},
     inferenceClient: {},
@@ -42,7 +42,7 @@ describe('RuleMigrationTaskEvaluator', () => {
       get: jest.fn().mockResolvedValue({ id: 'test-connector-id', name: 'Test Connector' }),
     },
     telemetry: {},
-  } as unknown as SiemMigrationsClientDependencies;
+  } as unknown as RuleMigrationsClientDependencies;
 
   const mockUser = {} as unknown as AuthenticatedUser;
 

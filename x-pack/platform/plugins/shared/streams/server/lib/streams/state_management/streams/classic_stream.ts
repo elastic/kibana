@@ -154,7 +154,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
   // This is to enable us to clean up any pipeline Streams creates when it is no longer needed
   protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
-    if (this._definition.ingest.processing.length > 0) {
+    if (this._definition.ingest.processing.steps.length > 0) {
       actions.push(...(await this.createUpsertPipelineActions()));
     }
     if (!isInheritLifecycle(this.getLifecycle())) {
@@ -187,11 +187,11 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     startingStateStream: ClassicStream
   ): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
-    if (this._changes.processing && this._definition.ingest.processing.length > 0) {
+    if (this._changes.processing && this._definition.ingest.processing.steps.length > 0) {
       actions.push(...(await this.createUpsertPipelineActions()));
     }
 
-    if (this._changes.processing && this._definition.ingest.processing.length === 0) {
+    if (this._changes.processing && this._definition.ingest.processing.steps.length === 0) {
       const streamManagedPipelineName = getProcessingPipelineName(this._definition.name);
       actions.push({
         type: 'delete_ingest_pipeline',
@@ -286,9 +286,15 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
           name: this._definition.name,
         },
       },
+      {
+        type: 'delete_queries',
+        request: {
+          name: this._definition.name,
+        },
+      },
     ];
 
-    if (this._definition.ingest.processing.length > 0) {
+    if (this._definition.ingest.processing.steps.length > 0) {
       const streamManagedPipelineName = getProcessingPipelineName(this._definition.name);
       actions.push({
         type: 'delete_ingest_pipeline',

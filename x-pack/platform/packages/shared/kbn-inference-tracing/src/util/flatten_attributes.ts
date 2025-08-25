@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AttributeValue } from '@opentelemetry/api';
+import type { AttributeValue } from '@opentelemetry/api';
 import { isArray, isPlainObject } from 'lodash';
 
 export function flattenAttributes(

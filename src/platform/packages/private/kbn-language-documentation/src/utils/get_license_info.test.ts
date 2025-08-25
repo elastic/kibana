@@ -7,22 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition } from '../types';
-import { getLicenseInfo } from './get_license_info';
+import type { FunctionDefinition } from '../types';
+import { getLicenseInfoForFunctions } from './get_license_info';
 
 describe('getLicenseInfo', () => {
   test('should returns top-level license if present', () => {
     const fn: FunctionDefinition = {
-      license: 'PLATINUM',
+      name: 'test_function',
+      snapshot_only: false,
+      type: 'function',
+      titleName: 'Test Function',
+      operator: '-',
+      preview: false,
       signatures: [],
+      license: 'platinum',
     };
 
-    const result = getLicenseInfo(fn);
+    const result = getLicenseInfoForFunctions(fn);
 
     expect(result).toEqual({
       licenses: [
         {
-          name: 'PLATINUM',
+          name: 'platinum',
           isSignatureSpecific: false,
           paramsWithLicense: [],
         },
@@ -33,14 +39,16 @@ describe('getLicenseInfo', () => {
 
   test('should returns undefined if no license exists', () => {
     const fn: FunctionDefinition = {
-      signatures: [
-        {
-          params: [{ name: 'x', type: 'string' }],
-        },
-      ],
+      name: 'test_function_no_license',
+      snapshot_only: false,
+      type: 'string',
+      titleName: 'Test Function No License',
+      operator: '-',
+      preview: false,
+      signatures: [],
     };
 
-    const result = getLicenseInfo(fn);
+    const result = getLicenseInfoForFunctions(fn);
 
     expect(result).toBeUndefined();
   });

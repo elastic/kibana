@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ChatCompleteResponse,
   ChatCompletionEvent,
   PromptAPI,
@@ -15,7 +15,7 @@ import {
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { defer, from, lastValueFrom, throwError } from 'rxjs';
 import type { HttpHandler } from '@kbn/core/public';
-import { PromptRequestBody } from '../http_apis';
+import type { PromptRequestBody } from '../http_apis';
 import { retryWithExponentialBackoff } from '../utils/retry_with_exponential_backoff';
 import { getRetryFilter } from '../utils/error_retry_filter';
 import { combineSignal } from '../utils/combine_signal';

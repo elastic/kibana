@@ -7,14 +7,13 @@
 
 import { EuiResizableContainer, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ConversationRound } from '@kbn/onechat-common';
-import { useConversation } from '../../hooks/use_conversation';
-import { useSendMessageMutation } from '../../hooks/use_send_message_mutation';
+import React, { useEffect, useRef } from 'react';
+import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
+import { useConversationId } from '../../hooks/use_conversation_id';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -25,9 +24,8 @@ const conversationContainerStyles = css`
 `;
 
 export const Conversation: React.FC<{}> = () => {
-  const { conversation, conversationId, hasActiveConversation } = useConversation();
-  const [message, setMessage] = useState<string>('');
-  const { sendMessage, isResponseLoading, error, pendingMessage, retry } = useSendMessageMutation();
+  const conversationId = useConversationId();
+  const hasActiveConversation = useHasActiveConversation();
 
   const scrollContainerStyles = css`
     overflow-y: auto;
@@ -44,22 +42,6 @@ export const Conversation: React.FC<{}> = () => {
     setStickToBottom(true);
   }, [conversationId, setStickToBottom]);
 
-  const errorRound: ConversationRound | null = useMemo(() => {
-    if (error && pendingMessage) {
-      return {
-        input: { message: pendingMessage },
-        response: { message: '' },
-        steps: [],
-      };
-    }
-    return null;
-  }, [error, pendingMessage]);
-
-  const displayRounds = useMemo(() => {
-    const baseRounds = conversation?.rounds ?? [];
-    return errorRound ? [...baseRounds, errorRound] : baseRounds;
-  }, [conversation?.rounds, errorRound]);
-
   return (
     <EuiResizableContainer direction="vertical" css={conversationContainerStyles}>
       {(EuiResizablePanel, EuiResizableButton) => {
@@ -69,14 +51,7 @@ export const Conversation: React.FC<{}> = () => {
               <EuiResizablePanel initialSize={80}>
                 <div css={scrollContainerStyles}>
                   <div ref={scrollContainerRef}>
-                    <ConversationRounds
-                      rounds={displayRounds}
-                      isResponseLoading={isResponseLoading}
-                      error={error}
-                      onRetry={() => {
-                        retry();
-                      }}
-                    />
+                    <ConversationRounds />
                   </div>
                 </div>
               </EuiResizablePanel>
@@ -90,14 +65,7 @@ export const Conversation: React.FC<{}> = () => {
             <EuiResizableButton />
             <EuiResizablePanel initialSize={20} minSize="20%">
               <ConversationInputForm
-                message={message}
-                setMessage={setMessage}
                 onSubmit={() => {
-                  if (isResponseLoading || !message.trim()) {
-                    return;
-                  }
-                  sendMessage({ message });
-                  setMessage('');
                   setStickToBottom(true);
                 }}
               />

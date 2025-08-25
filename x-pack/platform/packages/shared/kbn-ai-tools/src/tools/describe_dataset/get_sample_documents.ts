@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { QueryDslFieldAndFormat, SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { kqlQuery, rangeQuery } from './queries';
+import type { QueryDslFieldAndFormat, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 
 export function getSampleDocuments({
   esClient,
@@ -26,7 +26,7 @@ export function getSampleDocuments({
   timeout = '5s',
 }: {
   esClient: ElasticsearchClient;
-  index: string;
+  index: string | string[];
   start: number;
   end: number;
   kql?: string;
@@ -43,7 +43,7 @@ export function getSampleDocuments({
       timeout,
       query: {
         bool: {
-          must: [...kqlQuery(kql), ...rangeQuery(start, end)],
+          must: [...kqlQuery(kql), ...dateRangeQuery(start, end)],
           should: [
             {
               function_score: {

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
 import { last, omit, pick, take } from 'lodash';
+import type { Observable, OperatorFunction } from 'rxjs';
 import {
   catchError,
   concat,
@@ -15,28 +16,22 @@ import {
   from,
   isObservable,
   map,
-  Observable,
   of,
-  OperatorFunction,
   shareReplay,
   switchMap,
   throwError,
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
+import type { Message, CompatibleJSONSchema, MessageAddEvent } from '../../../../common';
 import {
-  CompatibleJSONSchema,
+  CONTEXT_FUNCTION_NAME,
   createFunctionNotFoundError,
-  Message,
-  MessageAddEvent,
   MessageRole,
   StreamingChatResponseEventType,
 } from '../../../../common';
-import {
-  createFunctionLimitExceededError,
-  MessageOrChatEvent,
-} from '../../../../common/conversation_complete';
-import { Instruction } from '../../../../common/types';
+import type { MessageOrChatEvent } from '../../../../common/conversation_complete';
+import { createFunctionLimitExceededError } from '../../../../common/conversation_complete';
+import type { Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import type { ChatFunctionClient } from '../../chat_function_client';
@@ -70,11 +65,11 @@ function executeFunctionAndCatchError({
   connectorId: string;
   simulateFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
-  // hide token count events from functions to prevent them from
-  // having to deal with it as well
+  return withExecuteToolSpan(name, { tool: { input: args } }, (span) => {
+    // hide token count events from functions to prevent them from
+    // having to deal with it as well
 
-  const executeFunctionResponse$ = from(
-    withExecuteToolSpan({ name, input: args }, () =>
+    const executeFunctionResponse$ = from(
       functionClient.executeFunction({
         name,
         chat: (operationName, params) => {
@@ -90,47 +85,49 @@ function executeFunctionAndCatchError({
         connectorId,
         simulateFunctionCalling,
       })
-    )
-  );
+    );
 
-  return executeFunctionResponse$.pipe(
-    catchError((error) => {
-      logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
-      // We want to catch the error only when a promise occurs
-      // if it occurs in the Observable, we cannot easily recover
-      // from it because the function may have already emitted
-      // values which could lead to an invalid conversation state,
-      // so in that case we let the stream fail.
-      return of(createServerSideFunctionResponseError({ name, error }));
-    }),
-    switchMap((response) => {
-      if (isObservable(response)) {
-        return response;
-      }
+    return executeFunctionResponse$.pipe(
+      catchError((error) => {
+        span?.recordException(error);
+        logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
+        // We want to catch the error only when a promise occurs
+        // if it occurs in the Observable, we cannot easily recover
+        // from it because the function may have already emitted
+        // values which could lead to an invalid conversation state,
+        // so in that case we let the stream fail.
+        return of(createServerSideFunctionResponseError({ name, error }));
+      }),
+      switchMap((response) => {
+        if (isObservable(response)) {
+          return response;
+        }
 
-      // is messageAdd event
-      if ('type' in response) {
-        return of(response);
-      }
+        // is messageAdd event
+        if ('type' in response) {
+          return of(response);
+        }
 
-      const encoded = encode(JSON.stringify(response.content || {}));
+        const encoded = encode(JSON.stringify(response.content || {}));
 
-      const exceededTokenLimit = encoded.length >= MAX_FUNCTION_RESPONSE_TOKEN_COUNT;
+        const exceededTokenLimit = encoded.length >= MAX_FUNCTION_RESPONSE_TOKEN_COUNT;
 
-      return of(
-        createFunctionResponseMessage({
-          name,
-          content: exceededTokenLimit
-            ? {
-                message: 'Function response exceeded the maximum length allowed and was truncated',
-                truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
-              }
-            : response.content,
-          data: response.data,
-        })
-      );
-    })
-  );
+        return of(
+          createFunctionResponseMessage({
+            name,
+            content: exceededTokenLimit
+              ? {
+                  message:
+                    'Function response exceeded the maximum length allowed and was truncated',
+                  truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
+                }
+              : response.content,
+            data: response.data,
+          })
+        );
+      })
+    );
+  });
 }
 
 function getFunctionOptions({

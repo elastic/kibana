@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiModal,
   EuiModalHeader,
@@ -15,17 +16,17 @@ import {
   EuiButton,
   EuiFlexItem,
   EuiFlexGroup,
+  useGeneratedHtmlId,
   EuiComboBox,
   EuiFormRow,
   EuiText,
   EuiSpacer,
   EuiCallOut,
   EuiLoadingSpinner,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 
 interface Alert {
@@ -58,6 +59,7 @@ export function WorkflowEventModal({
 }) {
   const { services } = useKibana();
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [alertsLoading, setAlertsLoading] = useState(false);
@@ -237,9 +239,14 @@ export function WorkflowEventModal({
   };
 
   return (
-    <EuiModal onClose={onClose} maxWidth={1400} style={{ width: '1200px' }}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      onClose={onClose}
+      maxWidth={1400}
+      style={{ width: '1200px' }}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Run Workflow</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>Run Workflow</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiFlexGroup direction="column" gutterSize="l">

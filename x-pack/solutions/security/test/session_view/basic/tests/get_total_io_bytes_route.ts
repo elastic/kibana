@@ -10,7 +10,7 @@ import {
   CURRENT_API_VERSION,
   GET_TOTAL_IO_BYTES_ROUTE,
 } from '@kbn/session-view-plugin/common/constants';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_INDEX = 'logs-endpoint.events.process*';
 const MOCK_SESSION_START_TIME = '2022-05-08T13:44:00.13Z';

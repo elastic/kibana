@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
-import { ESQLLicenseType } from '@kbn/esql-types';
-import {
+import type { LicenseType } from '@kbn/licensing-types';
+import type {
   ESQLAstItem,
   ESQLCommand,
   ESQLFunction,
@@ -19,17 +19,15 @@ import {
 } from '../../../types';
 import { isAssignment, isInlineCast } from '../../../ast/is';
 import { getMessageFromId, errors, getFunctionDefinition, getColumnForASTNode } from '..';
-import {
+import type {
   FunctionParameter,
-  FunctionDefinitionTypes,
   FunctionDefinition,
   FunctionParameterType,
   ReasonTypes,
 } from '../../types';
-import {
-  ICommandCallbacks,
-  getLocationFromCommandOrOptionName,
-} from '../../../commands_registry/types';
+import { FunctionDefinitionTypes } from '../../types';
+import type { ICommandCallbacks } from '../../../commands_registry/types';
+import { getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
 import { buildFunctionLookup, printFunctionSignature } from '../functions';
 import {
   getSignaturesWithMatchingArity,
@@ -37,15 +35,10 @@ import {
   getParamAtPosition,
 } from '../expressions';
 import { isArrayType } from '../operators';
-import {
-  compareTypesWithLiterals,
-  doesLiteralMatchParameterType,
-  inKnownTimeInterval,
-} from '../literals';
+import { doesLiteralMatchParameterType } from '../literals';
 import { getQuotedColumnName, getColumnExists } from '../columns';
 import {
   isLiteral,
-  isTimeInterval,
   isFunctionExpression,
   isColumn,
   isList,
@@ -53,7 +46,7 @@ import {
   isParamLiteral,
   isParametrized,
 } from '../../../ast/is';
-import { ICommandContext } from '../../../commands_registry/types';
+import type { ICommandContext } from '../../../commands_registry/types';
 
 export function getAllArrayValues(arg: ESQLAstItem) {
   const values: string[] = [];
@@ -65,7 +58,7 @@ export function getAllArrayValues(arg: ESQLAstItem) {
       if (subArg.type === 'literal') {
         values.push(String(subArg.value));
       }
-      if (isColumn(subArg) || isTimeInterval(subArg)) {
+      if (isColumn(subArg)) {
         values.push(subArg.name);
       }
       if (subArg.type === 'function') {
@@ -99,9 +92,6 @@ export function getAllArrayTypes(
           userDefinedColumns: context.userDefinedColumns,
         });
         types.push(hit?.type || 'unsupported');
-      }
-      if (subArg.type === 'timeInterval') {
-        types.push('time_duration');
       }
       if (subArg.type === 'function') {
         if (isSupportedFunction(subArg.name, parentCommand).supported) {
@@ -163,9 +153,6 @@ export function checkFunctionArgMatchesDefinition(
           bothStringTypes(parameterType, signature.returnType)
       );
     }
-  }
-  if (arg.type === 'timeInterval') {
-    return parameterType === 'time_duration' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
     const hit = getColumnForASTNode(arg, {
@@ -530,9 +517,7 @@ export function validateFunction({
             const arg = enrichedArgs[idx];
 
             if (isLiteral(arg)) {
-              return (
-                dataType === arg.literalType || compareTypesWithLiterals(dataType, arg.literalType)
-              );
+              return dataType === arg.literalType;
             }
             return false; // Non-literal arguments don't match
           })
@@ -658,35 +643,7 @@ function validateFunctionLiteralArg(
       );
     }
   }
-  if (isTimeInterval(argument)) {
-    // check first if it's a valid interval string
-    if (!inKnownTimeInterval(argument.unit)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownInterval',
-          values: {
-            value: argument.unit,
-          },
-          locations: argument.location,
-        })
-      );
-    } else {
-      if (!checkFunctionArgMatchesDefinition(argument, parameter, context, parentCommand)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'wrongArgumentType',
-            values: {
-              name: astFunction.name,
-              argType: parameter.type as string,
-              value: argument.name,
-              givenType: 'duration',
-            },
-            locations: argument.location,
-          })
-        );
-      }
-    }
-  }
+
   return messages;
 }
 
@@ -871,7 +828,7 @@ export function isSupportedFunction(
 
 function validateFunctionLicense(
   fn: ESQLFunction,
-  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: LicenseType) => boolean) | undefined
 ): ESQLMessage[] {
   const fnDefinition = getFunctionDefinition(fn.name);
 
@@ -882,7 +839,7 @@ function validateFunctionLicense(
   const { license } = fnDefinition;
 
   if (!!hasMinimumLicenseRequired && license) {
-    if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as ESQLLicenseType)) {
+    if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as LicenseType)) {
       return [
         getMessageFromId({
           messageId: 'licenseRequired',
@@ -918,7 +875,7 @@ function validateFunctionLicense(
 function validateSignatureLicense(
   fn: ESQLFunction,
   matchingSignatures: FunctionDefinition['signatures'],
-  hasMinimumLicenseRequired: (minimumLicenseRequired: ESQLLicenseType) => boolean,
+  hasMinimumLicenseRequired: (minimumLicenseRequired: LicenseType) => boolean,
   context: ICommandContext,
   parentCommand: string
 ): ESQLMessage[] {
@@ -944,7 +901,7 @@ function validateSignatureLicense(
   const hasValidLicense = relevantSignatures.some(
     (signature) =>
       signature.license &&
-      hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as ESQLLicenseType)
+      hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType)
   );
 
   if (hasValidLicense) {

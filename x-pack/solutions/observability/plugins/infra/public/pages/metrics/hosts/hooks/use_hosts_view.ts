@@ -15,7 +15,7 @@
 import { useMemo } from 'react';
 import createContainer from 'constate';
 import type { BoolQuery } from '@kbn/es-query';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
@@ -26,15 +26,15 @@ import type {
 } from '../../../../../common/http_api';
 import type { StringDateRange } from './use_unified_search_url_state';
 
-const HOST_TABLE_METRICS: InfraEntityMetricType[] = [
+const COMMON_HOST_METRICS: InfraEntityMetricType[] = [
   'cpuV2',
   'diskSpaceUsage',
   'memory',
   'memoryFree',
   'normalizedLoad1m',
-  'rxV2',
-  'txV2',
 ];
+const HOST_TABLE_METRICS: InfraEntityMetricType[] = [...COMMON_HOST_METRICS, 'rxV2', 'txV2'];
+const OTEL_HOSTS_TABLE_METRICS: InfraEntityMetricType[] = [...COMMON_HOST_METRICS];
 
 const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
 
@@ -51,7 +51,7 @@ export const useHostsView = () => {
           dateRange: parsedDateRange,
           esQuery: buildQuery(),
           limit: searchCriteria.limit,
-          schema: searchCriteria?.preferredSchema || DataSchemaFormat.ECS,
+          schema: searchCriteria?.preferredSchema || 'ecs',
         })
       ),
     [buildQuery, parsedDateRange, searchCriteria.limit, searchCriteria.preferredSchema]
@@ -107,7 +107,7 @@ const createInfraMetricsRequest = ({
   query: esQuery,
   from: dateRange.from,
   to: dateRange.to,
-  metrics: HOST_TABLE_METRICS,
+  metrics: schema === 'semconv' ? OTEL_HOSTS_TABLE_METRICS : HOST_TABLE_METRICS,
   limit,
   schema,
 });

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { SolutionView, Space } from '@kbn/spaces-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');

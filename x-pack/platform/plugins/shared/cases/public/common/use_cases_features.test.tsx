@@ -11,8 +11,8 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { CasesContextFeatures } from '../../common/ui';
 import { useCasesFeatures } from './use_cases_features';
 import { TestProviders } from './mock/test_providers';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
-import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
 import { CaseMetricsFeature } from '../../common/types/api';
 
 describe('useCasesFeatures', () => {

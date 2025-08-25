@@ -14,7 +14,6 @@ import * as i18n from './translations';
 import { TimeSavedMetric } from './time_saved_metric';
 
 interface Props {
-  attackAlertIds: string[];
   hoursSaved: number;
   hoursSavedCompare: number;
   from: string;
@@ -24,7 +23,6 @@ interface Props {
 
 export const TimeSaved: React.FC<Props> = ({
   minutesPerAlert,
-  attackAlertIds,
   hoursSaved,
   hoursSavedCompare,
   from,
@@ -41,12 +39,7 @@ export const TimeSaved: React.FC<Props> = ({
       hasShadow={false}
       paddingSize="none"
     >
-      <TimeSavedMetric
-        attackAlertIds={attackAlertIds}
-        minutesPerAlert={minutesPerAlert}
-        from={from}
-        to={to}
-      />
+      <TimeSavedMetric minutesPerAlert={minutesPerAlert} from={from} to={to} />
       <ComparePercentageBadge
         description={i18n.TIME_SAVED_DESC}
         positionForLens

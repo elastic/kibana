@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import type { FunctionDefinition } from '@kbn/esql-ast';
+import { FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
@@ -797,7 +798,7 @@ describe('function validation', () => {
                   optional: false,
                 },
               ],
-              license: 'PLATINUM',
+              license: 'platinum',
               returnType: 'keyword',
             },
             {
@@ -808,12 +809,12 @@ describe('function validation', () => {
                   optional: false,
                 },
               ],
-              license: 'PLATINUM',
+              license: 'platinum',
               returnType: 'keyword',
             },
           ],
           locationsAvailable: [Location.STATS, Location.STATS_BY],
-          license: 'PLATINUM',
+          license: 'platinum',
         },
         {
           type: FunctionDefinitionTypes.AGG,
@@ -838,7 +839,7 @@ describe('function validation', () => {
                   optional: false,
                 },
               ],
-              license: 'PLATINUM',
+              license: 'platinum',
               returnType: 'cartesian_shape',
             },
           ],

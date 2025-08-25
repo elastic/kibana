@@ -6,13 +6,14 @@
  */
 import { z } from '@kbn/zod';
 import { IngestBase, IngestBaseStream } from './base';
-import {
-  ClassicIngestStreamEffectiveLifecycle,
-  classicIngestStreamEffectiveLifecycleSchema,
-} from './lifecycle';
-import { ElasticsearchAssets, elasticsearchAssetsSchema } from './common';
-import { Validation, validation } from '../validation/validation';
-import { ModelValidation, modelValidation } from '../validation/model_validation';
+import type { ClassicIngestStreamEffectiveLifecycle } from './lifecycle';
+import { classicIngestStreamEffectiveLifecycleSchema } from './lifecycle';
+import type { ElasticsearchAssets } from './common';
+import { elasticsearchAssetsSchema } from './common';
+import type { Validation } from '../validation/validation';
+import { validation } from '../validation/validation';
+import type { ModelValidation } from '../validation/model_validation';
+import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
 
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -74,3 +75,14 @@ export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Mode
     ),
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
   });
+
+// Optimized implementation for Definition check - the fallback is a zod-based check
+ClassicStream.Definition.is = (
+  stream: BaseStream.Model['Definition']
+): stream is ClassicStream.Definition =>
+  Boolean(
+    'ingest' in stream &&
+      typeof stream.ingest === 'object' &&
+      stream.ingest &&
+      'classic' in stream.ingest
+  );

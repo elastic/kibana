@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { MachineImplementationsFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { LogCategory } from '../../types';
+import { createActorContext } from '@xstate5/react';
+import type { MachineImplementationsFrom } from 'xstate5';
+import { assign, setup } from 'xstate5';
+import type { LogCategory } from '../../types';
 import { categorizeDocuments } from './categorize_documents';
 import { countDocuments } from './count_documents';
-import { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';
+import type { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';
 
 export const categorizeLogsService = setup({
   types: {
@@ -237,6 +239,8 @@ export const categorizeLogsService = setup({
     samplingProbability: context.samplingProbability,
   }),
 });
+
+export const CategorizeLogsServiceContext = createActorContext(categorizeLogsService);
 
 export const createCategorizeLogsServiceImplementations = ({
   search,

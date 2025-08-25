@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';

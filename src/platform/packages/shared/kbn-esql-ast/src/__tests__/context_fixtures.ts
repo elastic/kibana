@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { IndexAutocompleteItem, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type { IndexAutocompleteItem, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import type {
   ESQLFieldWithMetadata,
   ESQLPolicy,
@@ -204,6 +204,10 @@ export const mockContext: ICommandContext = {
   timeSeriesSources: timeseriesIndices,
   inferenceEndpoints,
   histogramBarTarget: 50,
+  activeProduct: {
+    type: 'observability',
+    tier: 'complete',
+  },
 };
 
 export const getMockCallbacks = (): ICommandCallbacks => {
@@ -214,5 +218,6 @@ export const getMockCallbacks = (): ICommandCallbacks => {
       .mockResolvedValue(expectedFields.map((name) => ({ label: name, text: name }))),
     getSuggestedUserDefinedColumnName: jest.fn(),
     getColumnsForQuery: jest.fn(),
+    hasMinimumLicenseRequired: jest.fn().mockReturnValue(true),
   };
 };

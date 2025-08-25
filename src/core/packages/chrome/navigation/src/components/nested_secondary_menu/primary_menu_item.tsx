@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps, FC, ReactNode, useCallback } from 'react';
+import type { ComponentProps, FC, ReactNode } from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 
@@ -15,10 +16,10 @@ import { SideNav } from '../side_nav';
 import { useNestedMenu } from './use_nested_menu';
 
 export interface PrimaryMenuItemProps
-  extends Omit<ComponentProps<typeof SideNav.PrimaryMenuItem>, 'children' | 'isCurrent'> {
+  extends Omit<ComponentProps<typeof SideNav.PrimaryMenuItem>, 'children' | 'isActive'> {
   children: ReactNode;
   hasSubmenu?: boolean;
-  isCurrent?: boolean;
+  isActive?: boolean;
   isCollapsed: boolean;
   onClick?: () => void;
   submenuPanelId?: string;
@@ -27,7 +28,7 @@ export interface PrimaryMenuItemProps
 export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
   children,
   hasSubmenu = false,
-  isCurrent = false,
+  isActive = false,
   onClick,
   submenuPanelId,
   ...props
@@ -59,7 +60,7 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
 
   return (
     <div css={wrapperStyle}>
-      <SideNav.PrimaryMenuItem horizontal isCurrent={isCurrent} onClick={handleClick} {...props}>
+      <SideNav.PrimaryMenuItem isHorizontal isActive={isActive} onClick={handleClick} {...props}>
         {children}
       </SideNav.PrimaryMenuItem>
       {hasSubmenu && (
