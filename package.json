@@ -595,6 +595,7 @@
     "@kbn/graph-plugin": "link:x-pack/platform/plugins/private/graph",
     "@kbn/grid-example-plugin": "link:examples/grid_example",
     "@kbn/grid-layout": "link:src/platform/packages/private/kbn-grid-layout",
+    "@kbn/grok-heuristics": "link:x-pack/platform/packages/shared/kbn-grok-heuristics",
     "@kbn/grok-ui": "link:src/platform/packages/shared/kbn-grok-ui",
     "@kbn/grokdebugger-plugin": "link:x-pack/platform/plugins/private/grokdebugger",
     "@kbn/grouping": "link:src/platform/packages/shared/kbn-grouping",

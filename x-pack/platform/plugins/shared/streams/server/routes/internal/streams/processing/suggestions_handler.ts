@@ -16,6 +16,7 @@ import {
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { cloneDeep, get } from 'lodash';
+import { unwrapPatternDefinitions } from '@kbn/grok-heuristics';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import { convertEcsFieldsToOtel } from './convert_ecs_fields_to_otel';
 import { getLogGroups, getVariedSamples, sortByProbability } from './get_log_groups';
@@ -411,7 +412,7 @@ async function suggestAndValidateGrokProcessor({
   }
 
   // NOTE: Inline patterns until we support custom pattern definitions in Streamlang
-  grokProcessor.grok.patterns = inlineGrokPatterns(grokProcessor.grok);
+  grokProcessor.grok.patterns = unwrapPatternDefinitions(grokProcessor.grok);
 
   const simulationResult = await simulateProcessing({
     params: {
@@ -463,38 +464,4 @@ ${JSON.stringify(
     grokProcessor: grokProcessor.grok,
     simulationResult,
   };
-}
-
-function inlineGrokPatterns(grokProcessor: GrokProcessor['grok']): string[] {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { patterns, pattern_definitions } = grokProcessor;
-  const patternDefs = pattern_definitions as Record<string, string>;
-
-  if (!patternDefs || Object.keys(patternDefs).length === 0) {
-    return patterns;
-  }
-
-  // Recursively inline a single pattern
-  function inlinePattern(pattern: string, seen: Set<string> = new Set()): string {
-    // Match %{PATTERN_NAME} or %{PATTERN_NAME:field}
-    return pattern.replace(/%{([A-Z0-9_]+)(:[^}]*)?}/g, (match, key, fieldName) => {
-      if (patternDefs && patternDefs[key]) {
-        if (seen.has(key)) {
-          // Prevent infinite recursion on cyclic definitions
-          return match;
-        }
-        seen.add(key);
-        const inlined = inlinePattern(patternDefs[key], seen);
-        seen.delete(key);
-        if (fieldName) {
-          // Named capture group
-          return `(?<${fieldName.substring(1)}>${inlined})`;
-        }
-        return `(${inlined})`;
-      }
-      return match; // Leave as is if not in patternDefs
-    });
-  }
-
-  return patterns.map((pattern) => inlinePattern(pattern));
 }
