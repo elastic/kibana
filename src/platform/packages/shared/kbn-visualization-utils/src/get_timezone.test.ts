@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment-timezone';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { getTimeZone } from './get_timezone';
 
 describe('getTimeZone', () => {
@@ -28,7 +28,6 @@ describe('getTimeZone', () => {
     expect(
       getTimeZone({
         get: () => 'Browser',
-        isDefault: () => true,
       } as unknown as IUiSettingsClient)
     ).toEqual('America/New_York');
   });
@@ -38,7 +37,6 @@ describe('getTimeZone', () => {
     expect(
       getTimeZone({
         get: () => timezone,
-        isDefault: () => false,
       } as unknown as IUiSettingsClient)
     ).toEqual(timezone);
   });

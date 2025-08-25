@@ -60,11 +60,20 @@ export * from './actions_connector/post_actions_connector_execute_route.gen';
 
 // Knowledge Base Schemas
 export * from './knowledge_base/crud_kb_route.gen';
-export * from './knowledge_base/get_knowledge_base_indices_route.gen';
 export * from './knowledge_base/entries/bulk_crud_knowledge_base_entries_route.gen';
 export * from './knowledge_base/entries/common_attributes.gen';
 export * from './knowledge_base/entries/crud_knowledge_base_entries_route.gen';
 export * from './knowledge_base/entries/find_knowledge_base_entries_route.gen';
 
+export * from './anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+export * from './anonymization_fields/find_anonymization_fields_route.gen';
+
+export * from './prompts/bulk_crud_prompts_route.gen';
 export * from './prompts/find_prompts_route.gen';
+
+export * from './alert_summary/bulk_crud_alert_summary_route.gen';
+export * from './alert_summary/find_alert_summary_route.gen';
+
+export * from './security_ai_prompts/find_prompts_route.gen';
+
 export { PromptResponse, PromptTypeEnum } from './prompts/bulk_crud_prompts_route.gen';

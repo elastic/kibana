@@ -13,7 +13,7 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
-import { SyntheticsRouteWrapper } from './routes/types';
+import type { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   syntheticsRoute,
@@ -105,6 +105,9 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           },
         });
       } catch (e) {
+        if (isKibanaResponse(e)) {
+          return e;
+        }
         if (e.statusCode === 403) {
           const privileges = await checkIndicesReadPrivileges(syntheticsEsClient);
           if (!privileges.has_all_requested) {
@@ -115,8 +118,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
               },
             });
           }
+        } else if (e.statusCode >= 500) {
+          server.logger.error(e);
+        } else {
+          server.logger.debug(e);
         }
-        server.logger.error(e);
         throw e;
       }
     });

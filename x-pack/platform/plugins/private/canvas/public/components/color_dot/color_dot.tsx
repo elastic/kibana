@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import tinycolor from 'tinycolor2';
+import chroma from 'chroma-js';
 
 interface Props {
   /** Nodes to display within the dot.  Should fit within the constraints. */
@@ -17,10 +18,9 @@ interface Props {
 }
 
 export const ColorDot: FC<Props> = ({ value, children }) => {
-  const tc = tinycolor(value);
   let style = {};
 
-  if (tc.isValid()) {
+  if (chroma.valid(value)) {
     style = { background: value };
   }
 

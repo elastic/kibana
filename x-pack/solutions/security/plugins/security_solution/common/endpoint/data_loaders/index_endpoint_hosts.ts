@@ -37,14 +37,12 @@ import {
   deleteIndexedFleetAgents,
   indexFleetAgentForHost,
 } from './index_fleet_agent';
-import type {
-  DeleteIndexedEndpointFleetActionsResponse,
-  IndexedEndpointAndFleetActionsForHostResponse,
-} from './index_endpoint_fleet_actions';
 import {
   buildIEndpointAndFleetActionsBulkOperations,
   deleteIndexedEndpointAndFleetActions,
   type IndexEndpointAndFleetActionsForHostOptions,
+  type DeleteIndexedEndpointFleetActionsResponse,
+  type IndexedEndpointAndFleetActionsForHostResponse,
 } from './index_endpoint_fleet_actions';
 
 import type {
@@ -465,8 +463,6 @@ export const indexEndpointHostForPolicy = async ({
   logger.verbose(`Agent policy:\n${JSON.stringify(agentPolicy, null, 2)}`);
 
   const timestamp = Date.now() - 3.6e6; // Subtract 1 hour
-  // hostMetadataDoc['@timestamp'] = timestamp;
-  // hostMetadataDoc.event.created = timestamp;
 
   const docOverrides: DeepPartial<HostMetadataInterface> = merge({
     '@timestamp': timestamp,

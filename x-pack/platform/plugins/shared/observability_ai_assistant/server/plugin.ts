@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  DEFAULT_APP_CATEGORIES,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
@@ -19,9 +14,9 @@ import { ApiPrivileges } from '@kbn/core-security-server';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
-import { ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
+import type { ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
 import { ObservabilityAIAssistantService } from './service';
-import {
+import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
   ObservabilityAIAssistantPluginSetupDependencies,
@@ -29,11 +24,8 @@ import {
 } from './types';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
-import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
-import { populateMissingSemanticTextFieldMigration } from './service/startup_migrations/populate_missing_semantic_text_field_migration';
-import { updateExistingIndexAssets } from './service/startup_migrations/create_or_update_index_assets';
-
+import { runStartupMigrations } from './service/startup_migrations/run_startup_migrations';
 export class ObservabilityAIAssistantPlugin
   implements
     Plugin<
@@ -52,7 +44,6 @@ export class ObservabilityAIAssistantPlugin
     this.isDev = context.env.mode.dev;
     this.logger = context.logger.get();
     this.config = context.config.get<ObservabilityAIAssistantConfig>();
-    initLangtrace();
   }
   public setup(
     core: CoreSetup<
@@ -130,19 +121,11 @@ export class ObservabilityAIAssistantPlugin
     }));
 
     // Update existing index assets (mappings, templates, etc). This will not create assets if they do not exist.
-    updateExistingIndexAssets({ logger: this.logger, core })
-      .then(() =>
-        populateMissingSemanticTextFieldMigration({
-          core,
-          logger: this.logger,
-          config: this.config,
-        })
-      )
-      .catch((e) =>
-        this.logger.error(
-          `Error during knowledge base migration in AI Assistant plugin startup: ${e.message}`
-        )
-      );
+    runStartupMigrations({
+      core,
+      logger: this.logger,
+      config: this.config,
+    }).catch((e) => this.logger.error(`Error while running startup migrations: ${e.message}`));
 
     service.register(registerFunctions);
 

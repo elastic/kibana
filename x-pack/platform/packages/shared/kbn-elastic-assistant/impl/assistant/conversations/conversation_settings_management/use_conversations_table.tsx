@@ -7,17 +7,26 @@
 
 import React, { useCallback } from 'react';
 
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiBadge, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiLink } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { Conversation } from '../../../assistant_context/types';
-import { AIConnector } from '../../../connectorland/connector_selector';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { Conversation } from '../../../assistant_context/types';
+import type { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';
 import { getConversationApiConfig } from '../../use_conversation/helpers';
 import * as i18n from './translations';
 import { useInlineActions } from '../../common/components/assistant_settings_management/inline_actions';
+import { InputCheckbox, PageSelectionCheckbox } from './table_selection_checkbox';
+import type {
+  ConversationTableItem,
+  HandlePageChecked,
+  HandlePageUnchecked,
+  HandleRowChecked,
+  HandleRowUnChecked,
+} from './types';
 
 const emptyConversations = {};
 
@@ -29,26 +38,68 @@ export interface GetConversationsListParams {
   defaultConnector?: AIConnector;
 }
 
-export type ConversationTableItem = Conversation & {
-  connectorTypeTitle?: string | null;
-  systemPromptTitle?: string | null;
-};
+interface GetColumnsParams {
+  conversationOptions: ConversationTableItem[];
+  deletedConversationsIds: string[];
+  excludedIds: string[];
+  handlePageChecked: HandlePageChecked;
+  handlePageUnchecked: HandlePageUnchecked;
+  handleRowChecked: HandleRowChecked;
+  handleRowUnChecked: HandleRowUnChecked;
+  isDeleteEnabled: (conversation: ConversationTableItem) => boolean;
+  isEditEnabled: (conversation: ConversationTableItem) => boolean;
+  isExcludedMode: boolean;
+  onDeleteActionClicked: (conversation: ConversationTableItem) => void;
+  onEditActionClicked: (conversation: ConversationTableItem) => void;
+  totalItemCount: number;
+}
 
 export const useConversationsTable = () => {
   const getActions = useInlineActions<ConversationTableItem>();
   const getColumns = useCallback(
     ({
+      conversationOptions,
+      deletedConversationsIds,
+      excludedIds,
+      handlePageChecked,
+      handlePageUnchecked,
+      handleRowChecked,
+      handleRowUnChecked,
       isDeleteEnabled,
       isEditEnabled,
+      isExcludedMode,
       onDeleteActionClicked,
       onEditActionClicked,
-    }: {
-      isDeleteEnabled: (conversation: ConversationTableItem) => boolean;
-      isEditEnabled: (conversation: ConversationTableItem) => boolean;
-      onDeleteActionClicked: (conversation: ConversationTableItem) => void;
-      onEditActionClicked: (conversation: ConversationTableItem) => void;
-    }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
+      totalItemCount,
+    }: GetColumnsParams): Array<EuiBasicTableColumn<ConversationTableItem>> => {
       return [
+        {
+          field: '',
+          name: (
+            <PageSelectionCheckbox
+              conversationOptions={conversationOptions}
+              deletedConversationsIds={deletedConversationsIds}
+              excludedIds={excludedIds}
+              isExcludedMode={isExcludedMode}
+              handlePageChecked={handlePageChecked}
+              handlePageUnchecked={handlePageUnchecked}
+              totalItemCount={totalItemCount}
+            />
+          ),
+          render: (conversation: ConversationTableItem) => (
+            <InputCheckbox
+              conversation={conversation}
+              deletedConversationsIds={deletedConversationsIds}
+              excludedIds={excludedIds}
+              isExcludedMode={isExcludedMode}
+              handleRowChecked={handleRowChecked}
+              handleRowUnChecked={handleRowUnChecked}
+              totalItemCount={totalItemCount}
+            />
+          ),
+          width: '70px',
+          sortable: false,
+        },
         {
           name: i18n.CONVERSATIONS_TABLE_COLUMN_TITLE,
           render: (conversation: ConversationTableItem) => (

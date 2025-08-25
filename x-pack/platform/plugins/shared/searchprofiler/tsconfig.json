@@ -25,6 +25,8 @@
     "@kbn/code-editor",
     "@kbn/monaco",
     "@kbn/ui-theme",
+    "@kbn/css-utils",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

@@ -6,27 +6,17 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import classNames from 'classnames';
-import { PaletteOutput } from '@kbn/coloring';
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { RawValue } from '@kbn/data-plugin/common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
 import { getContrastColor } from '../../../shared_components/coloring/utils';
-import { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-
-import { isLensRange } from '../../../utils';
-
-const getParsedValue = (v: unknown) => {
-  if (v == null || typeof v === 'number') {
-    return v;
-  }
-  if (isLensRange(v)) {
-    return v.toString();
-  }
-  return String(v);
-};
+import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
@@ -42,8 +32,8 @@ export const createGridCell = (
 ) => {
   return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, handleFilterClick } = useContext(DataContext);
-    const rawRowValue = table?.rows[rowIndex]?.[columnId];
-    const rowValue = getParsedValue(rawRowValue);
+    const formatter = formatters[columnId];
+    const rawValue: RawValue = table?.rows[rowIndex]?.[columnId];
     const colIndex = columnConfig.columns.findIndex(({ columnId: id }) => id === columnId);
     const {
       oneClickFilter,
@@ -52,13 +42,13 @@ export const createGridCell = (
       colorMapping,
     } = columnConfig.columns[colIndex] ?? {};
     const filterOnClick = oneClickFilter && handleFilterClick;
-    const content = formatters[columnId]?.convert(rawRowValue, filterOnClick ? 'text' : 'html');
+    const content = formatter?.convert(rawValue, filterOnClick ? 'text' : 'html');
     const currentAlignment = alignments?.get(columnId);
 
     useEffect(() => {
       let colorSet = false;
       if (colorMode !== 'none' && (palette || colorMapping)) {
-        const color = getCellColor(columnId, palette, colorMapping)(rowValue);
+        const color = getCellColor(columnId, palette, colorMapping)(rawValue);
 
         if (color) {
           const style = { [colorMode === 'cell' ? 'backgroundColor' : 'color']: color };
@@ -82,7 +72,7 @@ export const createGridCell = (
           });
         };
       }
-    }, [rowValue, columnId, setCellProps, colorMode, palette, colorMapping, isExpanded]);
+    }, [rawValue, columnId, setCellProps, colorMode, palette, colorMapping, isExpanded]);
 
     if (filterOnClick) {
       return (
@@ -95,7 +85,7 @@ export const createGridCell = (
         >
           <EuiLink
             onClick={() => {
-              handleFilterClick?.(columnId, rawRowValue, colIndex, rowIndex);
+              handleFilterClick?.(columnId, rawValue, colIndex, rowIndex);
             }}
           >
             {content}

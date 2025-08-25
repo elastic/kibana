@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import React, { type ReactNode } from 'react';
+import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
 
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -17,9 +17,9 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { RuleDefinition } from './rule_definition';
-import { RuleType } from '@kbn/alerting-types';
-import { RuleTypeModel } from '../common/types';
-import { RuleSettingsFlappingFormProps } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_form';
+import type { RuleType } from '@kbn/alerting-types';
+import type { RuleTypeModel } from '../common/types';
+import type { RuleSettingsFlappingFormProps } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_form';
 import { ALERT_FLAPPING_DETECTION_TITLE } from '../translations';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -111,6 +111,8 @@ const plugins = {
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
 
 const mockOnChange = jest.fn();
+
+const render = (toRender: ReactNode) => rtlRender(toRender, { wrapper: IntlProvider });
 
 describe('Rule Definition', () => {
   beforeEach(() => {

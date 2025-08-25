@@ -11,6 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { omit } from 'lodash';
+import { esIndicesStateCheck } from '@kbn/upgrade-assistant-pkg-server';
 import type { CorrectiveAction, EnrichedDeprecationInfo } from '../../../common/types';
 import {
   convertFeaturesToIndicesArray,
@@ -21,7 +22,6 @@ import {
   getCorrectiveAction,
   isFrozenDeprecation,
 } from './get_corrective_actions';
-import { esIndicesStateCheck } from '../es_indices_state_check';
 
 /**
  * Remove once the these keys are added to the `MigrationDeprecationsResponse` type
@@ -30,6 +30,7 @@ interface EsDeprecations extends MigrationDeprecationsResponse {
   templates: Record<string, MigrationDeprecationsDeprecation[]>;
   ilm_policies: Record<string, MigrationDeprecationsDeprecation[]>;
 }
+type DeprecationLevel = 'none' | 'info' | 'warning' | 'critical';
 
 export interface BaseDeprecation {
   index?: string;
@@ -37,7 +38,7 @@ export interface BaseDeprecation {
   details?: string;
   message: string;
   url: string;
-  isCritical: boolean;
+  level: DeprecationLevel;
   metadata?: EsMetadata;
   resolveDuringUpgrade: boolean;
   // these properties apply to index_settings deprecations only
@@ -64,7 +65,7 @@ const createBaseDeprecation = (
     details,
     message,
     url,
-    isCritical: level === 'critical',
+    level,
     metadata: metadata as EsMetadata,
     resolveDuringUpgrade,
   };
@@ -203,7 +204,7 @@ const excludeDeprecation = (
   ) {
     return true;
   } else if (
-    deprecation.isCritical &&
+    deprecation.level === 'critical' &&
     deprecation.type === 'index_settings' &&
     deprecation.isFrozenIndex &&
     correctiveAction?.type === 'reindex'

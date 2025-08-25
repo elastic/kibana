@@ -11,7 +11,8 @@ import type { DeprecationsServiceStart } from '@kbn/core/public';
 
 import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../service.mock';
-import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
+import type { KibanaTestBed } from '../kibana_deprecations.helpers';
+import { setupKibanaPage } from '../kibana_deprecations.helpers';
 
 describe('Kibana deprecations - Deprecations table', () => {
   let testBed: KibanaTestBed;
@@ -81,12 +82,14 @@ describe('Kibana deprecations - Deprecations table', () => {
       const { actions, table } = testBed;
 
       // Show only critical deprecations
-      await actions.searchBar.clickCriticalFilterButton();
+      await actions.searchBar.openStatusFilterDropdown();
+      await actions.searchBar.filterByTitle('Critical');
       const { rows: criticalRows } = table.getMetaData('kibanaDeprecationsTable');
       expect(criticalRows.length).toEqual(mockedCriticalKibanaDeprecations.length);
 
       // Show all deprecations
-      await actions.searchBar.clickCriticalFilterButton();
+      await actions.searchBar.openStatusFilterDropdown();
+      await actions.searchBar.filterByTitle('Critical');
       const { rows: allRows } = table.getMetaData('kibanaDeprecationsTable');
       expect(allRows.length).toEqual(mockedKibanaDeprecations.length);
     });
@@ -95,7 +98,7 @@ describe('Kibana deprecations - Deprecations table', () => {
       const { table, actions } = testBed;
 
       await actions.searchBar.openTypeFilterDropdown();
-      await actions.searchBar.filterByConfigType();
+      await actions.searchBar.filterByTitle('Config');
 
       const { rows: configRows } = table.getMetaData('kibanaDeprecationsTable');
 

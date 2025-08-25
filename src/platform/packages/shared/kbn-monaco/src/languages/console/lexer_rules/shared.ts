@@ -14,7 +14,7 @@ import {
   painlessLanguageAttributes,
 } from './nested_painless';
 import { buildEsqlRules, buildEsqlStartRule, esqlLanguageAttributes } from './nested_esql';
-import { monaco } from '../../../..';
+import type { monaco } from '../../../..';
 import { globals } from '../../../common/lexer_rules';
 import { buildXjsonRules } from '../../xjson/lexer_rules/xjson';
 
@@ -111,7 +111,9 @@ xjsonRules.json_root = [
   // @ts-expect-error include a rule to start painless highlighting
   buildPainlessStartRule(),
   // @ts-expect-error include a rule to start esql highlighting
-  buildEsqlStartRule(),
+  buildEsqlStartRule(false),
+  // @ts-expect-error include a rule to start esql highlighting
+  buildEsqlStartRule(true),
   ...xjsonRules.json_root,
 ];
 

@@ -57,73 +57,78 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
-    useKibana: () => ({
-      services: {
-        uiSettings: {
-          get: jest.fn().mockImplementation((key) => {
-            const get = (k: 'dateFormat' | 'timepicker:quickRanges') => {
-              const x = {
-                dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
-                'timepicker:quickRanges': [
-                  {
-                    from: 'now/d',
-                    to: 'now/d',
-                    display: 'Today',
-                  },
-                  {
-                    from: 'now/w',
-                    to: 'now/w',
-                    display: 'This week',
-                  },
-                  {
-                    from: 'now-15m',
-                    to: 'now',
-                    display: 'Last 15 minutes',
-                  },
-                  {
-                    from: 'now-30m',
-                    to: 'now',
-                    display: 'Last 30 minutes',
-                  },
-                  {
-                    from: 'now-1h',
-                    to: 'now',
-                    display: 'Last 1 hour',
-                  },
-                  {
-                    from: 'now-24h',
-                    to: 'now',
-                    display: 'Last 24 hours',
-                  },
-                  {
-                    from: 'now-7d',
-                    to: 'now',
-                    display: 'Last 7 days',
-                  },
-                  {
-                    from: 'now-30d',
-                    to: 'now',
-                    display: 'Last 30 days',
-                  },
-                  {
-                    from: 'now-90d',
-                    to: 'now',
-                    display: 'Last 90 days',
-                  },
-                  {
-                    from: 'now-1y',
-                    to: 'now',
-                    display: 'Last 1 year',
-                  },
-                ],
+    useKibana: () => {
+      const originalUseKibana = original.useKibana();
+      return {
+        ...originalUseKibana,
+        services: {
+          ...originalUseKibana.services,
+          uiSettings: {
+            get: jest.fn().mockImplementation((key) => {
+              const get = (k: 'dateFormat' | 'timepicker:quickRanges') => {
+                const x = {
+                  dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+                  'timepicker:quickRanges': [
+                    {
+                      from: 'now/d',
+                      to: 'now/d',
+                      display: 'Today',
+                    },
+                    {
+                      from: 'now/w',
+                      to: 'now/w',
+                      display: 'This week',
+                    },
+                    {
+                      from: 'now-15m',
+                      to: 'now',
+                      display: 'Last 15 minutes',
+                    },
+                    {
+                      from: 'now-30m',
+                      to: 'now',
+                      display: 'Last 30 minutes',
+                    },
+                    {
+                      from: 'now-1h',
+                      to: 'now',
+                      display: 'Last 1 hour',
+                    },
+                    {
+                      from: 'now-24h',
+                      to: 'now',
+                      display: 'Last 24 hours',
+                    },
+                    {
+                      from: 'now-7d',
+                      to: 'now',
+                      display: 'Last 7 days',
+                    },
+                    {
+                      from: 'now-30d',
+                      to: 'now',
+                      display: 'Last 30 days',
+                    },
+                    {
+                      from: 'now-90d',
+                      to: 'now',
+                      display: 'Last 90 days',
+                    },
+                    {
+                      from: 'now-1y',
+                      to: 'now',
+                      display: 'Last 1 year',
+                    },
+                  ],
+                };
+                return x[k];
               };
-              return x[k];
-            };
-            return get(key);
-          }),
+              return get(key);
+            }),
+          },
         },
-      },
-    }),
+      };
+    },
   };
 });
 
@@ -941,19 +946,19 @@ describe('Response actions history', () => {
         });
       });
 
-      it('should display pending output if action is not complete yet', () => {
+      it('should display pending output if action is not complete yet', async () => {
         action.isCompleted = false;
         const { getByTestId } = render();
-        getByTestId(`${testPrefix}-expand-button`).click();
+        await user.click(getByTestId(`${testPrefix}-expand-button`));
 
         expect(getByTestId(`${testPrefix}-details-tray-output`)).toHaveTextContent(
           OUTPUT_MESSAGES.isPending('upload')
         );
       });
 
-      it('should display output for single agent', () => {
+      it('should display output for single agent', async () => {
         const { getByTestId } = render();
-        getByTestId(`${testPrefix}-expand-button`).click();
+        await user.click(getByTestId(`${testPrefix}-expand-button`));
 
         expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
           'upload completed successfully' +
@@ -962,7 +967,7 @@ describe('Response actions history', () => {
         );
       });
 
-      it('should display output for multiple agents', () => {
+      it('should display output for multiple agents', async () => {
         action.agents.push('agent-b');
         action.hosts['agent-b'] = {
           name: 'host b',
@@ -983,7 +988,8 @@ describe('Response actions history', () => {
         };
 
         const { getByTestId } = render();
-        getByTestId(`${testPrefix}-expand-button`).click();
+
+        await user.click(getByTestId(`${testPrefix}-expand-button`));
 
         expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
           'upload completed successfully' +

@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiCallOut } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiCallOut, useEuiTheme } from '@elastic/eui';
 
-import { SolutionName, ProjectID, Project } from '../../../common';
-import { ProjectListItem, Props as ProjectListItemProps } from './project_list_item';
+import { css } from '@emotion/react';
+import type { SolutionName, ProjectID, Project } from '../../../common';
+import type { Props as ProjectListItemProps } from './project_list_item';
+import { ProjectListItem } from './project_list_item';
 
 import { LabsStrings } from '../../i18n';
 
@@ -40,6 +42,7 @@ const EmptyList = ({ solutions }: { solutions?: SolutionName[] }) => {
 
 export const ProjectList = (props: Props) => {
   const { solutions, projects, onStatusChange } = props;
+  const styles = useStyles();
 
   const items = Object.values(projects)
     .map((project) => {
@@ -53,7 +56,7 @@ export const ProjectList = (props: Props) => {
       }
 
       return (
-        <li key={project.id}>
+        <li key={project.id} css={styles}>
           <ProjectListItem project={project} onStatusChange={onStatusChange} />
         </li>
       );
@@ -65,4 +68,29 @@ export const ProjectList = (props: Props) => {
       {items.length > 0 ? <ul>{items}</ul> : <EmptyList solutions={solutions} />}
     </EuiFlexGroup>
   );
+};
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return css({
+      position: 'relative',
+      padding: `${euiTheme.size.m} ${euiTheme.size.xs}`,
+      background: euiTheme.colors.emptyShade,
+      minWidth: '500px',
+      '&:first-child': {
+        paddingTop: 0,
+      },
+      '&:not(:first-child):after': {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        left: 0,
+        height: '1px',
+        background: euiTheme.colors.lightShade,
+        content: '""',
+      },
+    });
+  }, [euiTheme]);
+  return styles;
 };

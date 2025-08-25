@@ -16,119 +16,122 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { useEffect } from 'react';
-import { useAsyncSample } from '../../../hooks/queries/use_async_sample';
-import { useTimefilter } from '../../../hooks/use_timefilter';
-import { useDebounced } from '../../../util/use_debounce';
+import React from 'react';
 import { AssetImage } from '../../asset_image';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { PreviewMatches } from './preview_matches';
 import {
-  selectCurrentRule,
+  selectPreviewDocuments,
+  useStreamSamplesSelector,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
 
-  const isIdle = routingSnapshot.matches({ ready: 'idle' });
-  const isCreatingNewRule = routingSnapshot.matches({ ready: 'creatingNewRule' });
-  const isEditingRule = routingSnapshot.matches({ ready: 'editingRule' });
-  const isReorideringRules = routingSnapshot.matches({ ready: 'reorderingRules' });
-
-  const condition = isCreatingNewRule ? selectCurrentRule(routingSnapshot.context).if : undefined;
-  const definition = routingSnapshot.context.definition;
-
-  const debouncedCondition = useDebounced(condition, 300);
-
-  const { timeState, timeState$ } = useTimefilter();
-
-  const {
-    isLoadingDocuments,
-    documents,
-    documentsError,
-    refresh,
-    approximateMatchingPercentage,
-    isLoadingDocumentCounts,
-    documentCountsError,
-  } = useAsyncSample({
-    condition: debouncedCondition,
-    start: timeState.start,
-    end: timeState.end,
-    size: 100,
-    streamDefinition: definition,
-  });
-
-  const hasDocuments = !isEmpty(documents);
-
-  useEffect(() => {
-    const subscription = timeState$.subscribe({
-      next: ({ kind }) => {
-        if (kind === 'override') {
-          refresh();
-        }
-      },
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [timeState$, refresh]);
-
   let content;
 
-  if (isIdle) {
-    content = (
-      <EuiEmptyPrompt
-        icon={<AssetImage />}
-        titleSize="s"
-        title={
-          <h2>
-            {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageEmpty', {
-              defaultMessage: 'Your preview will appear here',
-            })}
-          </h2>
-        }
-        body={i18n.translate(
-          'xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription',
-          {
+  if (routingSnapshot.matches({ ready: 'idle' })) {
+    content = <IdlePanel />;
+  } else if (
+    routingSnapshot.matches({ ready: 'editingRule' }) ||
+    routingSnapshot.matches({ ready: 'reorderingRules' })
+  ) {
+    content = <EditingPanel />;
+  } else if (routingSnapshot.matches({ ready: 'creatingNewRule' })) {
+    content = <RuleCreationPanel />;
+  }
+
+  return (
+    <>
+      <EuiFlexItem grow={false} data-test-subj="routingPreviewPanel">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
+          <EuiFlexGroup component="span" gutterSize="s" alignItems="center">
+            <EuiIcon type="inspect" />
+            <strong>
+              {i18n.translate('xpack.streams.streamDetail.preview.header', {
+                defaultMessage: 'Data Preview',
+              })}
+            </strong>
+          </EuiFlexGroup>
+          <StreamsAppSearchBar showDatePicker />
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiSpacer size="s" />
+      <EuiFlexItem grow>{content}</EuiFlexItem>
+    </>
+  );
+}
+
+const IdlePanel = () => (
+  <EuiEmptyPrompt
+    icon={<AssetImage type="yourPreviewWillAppearHere" />}
+    titleSize="s"
+    title={
+      <h2>
+        {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageEmpty', {
+          defaultMessage: 'Your preview will appear here',
+        })}
+      </h2>
+    }
+    body={i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription', {
+      defaultMessage:
+        'Create a new child stream to see what will be routed to it based on the conditions',
+    })}
+  />
+);
+
+const EditingPanel = () => (
+  <EuiEmptyPrompt
+    icon={<AssetImage />}
+    titleSize="s"
+    title={
+      <h2>
+        {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessage', {
+          defaultMessage: 'Preview is not available while editing or reordering streams',
+        })}
+      </h2>
+    }
+    body={
+      <>
+        <p>
+          {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
             defaultMessage:
-              'Create a new child stream to see what will be routed to it based on the conditions',
-          }
-        )}
-      />
-    );
-  } else if (isEditingRule || isReorideringRules) {
-    content = (
-      <EuiEmptyPrompt
-        icon={<AssetImage />}
-        titleSize="s"
-        title={
-          <h2>
-            {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessage', {
-              defaultMessage: 'Preview is not available while editing or reordering streams',
-            })}
-          </h2>
-        }
-        body={
-          <>
-            <p>
-              {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
-                defaultMessage:
-                  'You will find here the result from the conditions you have made once you save the changes',
-              })}
-            </p>
-            <p>
-              {i18n.translate('xpack.streams.streamDetail.preview.editPreviewReorderingWarning', {
-                defaultMessage:
-                  'Additionally, you will not be able to edit existing streams while reordering them, you should save or cancel your changes first.',
-              })}
-            </p>
-          </>
-        }
-      />
-    );
-  } else if (isCreatingNewRule && isLoadingDocuments && !hasDocuments) {
+              'Once you save your changes, the results of your conditions will appear here.',
+          })}
+        </p>
+        <p>
+          {i18n.translate('xpack.streams.streamDetail.preview.editPreviewReorderingWarning', {
+            defaultMessage:
+              'Additionally, you will not be able to edit existing streams while reordering them, you should save or cancel your changes first.',
+          })}
+        </p>
+      </>
+    }
+  />
+);
+
+const RuleCreationPanel = () => {
+  const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
+  const isLoadingDocuments = samplesSnapshot.matches({ fetching: { documents: 'loading' } });
+  const isUpdating =
+    samplesSnapshot.matches('debouncingCondition') ||
+    samplesSnapshot.matches({ fetching: { documents: 'loading' } });
+  const isLoadingDocumentCounts = samplesSnapshot.matches({
+    fetching: { documentCounts: 'loading' },
+  });
+  const { documentsError, approximateMatchingPercentage, approximateMatchingPercentageError } =
+    samplesSnapshot.context;
+
+  const documents = useStreamSamplesSelector((snapshot) =>
+    selectPreviewDocuments(snapshot.context)
+  );
+  const hasDocuments = !isEmpty(documents);
+
+  let content: React.ReactNode | null = null;
+
+  if (isLoadingDocuments && !hasDocuments) {
     content = (
       <EuiEmptyPrompt
         icon={<EuiLoadingLogo logo="logoLogging" size="xl" />}
@@ -146,7 +149,7 @@ export function PreviewPanel() {
         })}
       />
     );
-  } else if (isCreatingNewRule && documentsError) {
+  } else if (documentsError) {
     content = (
       <EuiEmptyPrompt
         icon={<AssetImage type="noResults" />}
@@ -162,7 +165,7 @@ export function PreviewPanel() {
         body={documentsError.message}
       />
     );
-  } else if (isCreatingNewRule && !hasDocuments) {
+  } else if (!hasDocuments) {
     content = (
       <EuiEmptyPrompt
         icon={<AssetImage type="noResults" />}
@@ -176,18 +179,18 @@ export function PreviewPanel() {
         }
       />
     );
-  } else if (isCreatingNewRule && hasDocuments) {
+  } else if (hasDocuments) {
     content = (
-      <EuiFlexItem grow>
+      <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <PreviewMatches
               approximateMatchingPercentage={approximateMatchingPercentage}
-              error={documentCountsError}
+              error={approximateMatchingPercentageError}
               isLoading={isLoadingDocumentCounts}
             />
           </EuiFlexItem>
-          <PreviewTable documents={documents ?? []} />
+          <PreviewTable documents={documents} />
         </EuiFlexGroup>
       </EuiFlexItem>
     );
@@ -195,22 +198,8 @@ export function PreviewPanel() {
 
   return (
     <>
-      <EuiFlexItem grow={false}>
-        {isLoadingDocuments && <EuiProgress size="xs" color="accent" position="absolute" />}
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexGroup component="span" gutterSize="s" alignItems="center">
-            <EuiIcon type="inspect" />
-            <strong>
-              {i18n.translate('xpack.streams.streamDetail.preview.header', {
-                defaultMessage: 'Data Preview',
-              })}
-            </strong>
-          </EuiFlexGroup>
-          <StreamsAppSearchBar showDatePicker />
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiSpacer size="s" />
-      <EuiFlexItem grow>{content}</EuiFlexItem>
+      {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
+      {content}
     </>
   );
-}
+};

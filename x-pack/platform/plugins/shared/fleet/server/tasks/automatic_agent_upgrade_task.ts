@@ -31,7 +31,7 @@ import type {
   FleetServerAgentMetadata,
 } from '../../common/types';
 
-import { agentPolicyService, appContextService } from '../services';
+import { agentPolicyService, appContextService, licenseService } from '../services';
 import {
   fetchAllAgentsByKuery,
   getAgentsByKuery,
@@ -41,10 +41,10 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../common/services';
 
 export const TYPE = 'fleet:automatic-agent-upgrade-task';
-export const VERSION = '1.0.1';
+export const VERSION = '1.0.2';
 const TITLE = 'Fleet Automatic agent upgrades';
 const SCOPE = ['fleet'];
-const INTERVAL = '30m';
+const DEFAULT_INTERVAL = '30m';
 const TIMEOUT = '10m';
 const AGENT_POLICIES_BATCHSIZE = 500;
 const AGENTS_BATCHSIZE = 10000;
@@ -52,10 +52,16 @@ const MIN_AGENTS_FOR_ROLLOUT = 10;
 const MIN_UPGRADE_DURATION_SECONDS = 600;
 type AgentWithDefinedVersion = Agent & { agent: FleetServerAgentMetadata };
 
+interface AutomaticAgentUpgradeTaskConfig {
+  taskInterval?: string;
+  retryDelays?: string[];
+}
+
 interface AutomaticAgentUpgradeTaskSetupContract {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
   logFactory: LoggerFactory;
+  config: AutomaticAgentUpgradeTaskConfig;
 }
 
 interface AutomaticAgentUpgradeTaskStartContract {
@@ -72,11 +78,14 @@ export class AutomaticAgentUpgradeTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private abortController = new AbortController();
-  private retryDelays: string[] = [];
+  private taskInterval: string;
+  private retryDelays: string[];
 
   constructor(setupContract: AutomaticAgentUpgradeTaskSetupContract) {
-    const { core, taskManager, logFactory } = setupContract;
+    const { core, taskManager, logFactory, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
+    this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
+    this.retryDelays = config.retryDelays ?? AUTO_UPGRADE_DEFAULT_RETRIES;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -103,7 +112,7 @@ export class AutomaticAgentUpgradeTask {
     }
 
     this.wasStarted = true;
-    this.logger.info(`[AutomaticAgentUpgradeTask] Started with interval of [${INTERVAL}]`);
+    this.logger.info(`[AutomaticAgentUpgradeTask] Started with interval of [${this.taskInterval}]`);
 
     try {
       await taskManager.ensureScheduled({
@@ -111,7 +120,7 @@ export class AutomaticAgentUpgradeTask {
         taskType: TYPE,
         scope: SCOPE,
         schedule: {
-          interval: INTERVAL,
+          interval: this.taskInterval,
         },
         state: {},
         params: { version: VERSION },
@@ -129,6 +138,12 @@ export class AutomaticAgentUpgradeTask {
     if (!appContextService.getExperimentalFeatures().enableAutomaticAgentUpgrades) {
       this.logger.debug(
         '[AutomaticAgentUpgradeTask] Aborting runTask: automatic upgrades feature is disabled'
+      );
+      return;
+    }
+    if (!licenseService.isEnterprise()) {
+      this.logger.debug(
+        '[AutomaticAgentUpgradeTask] Aborting runTask: automatic upgrades feature requires at least Enterprise license'
       );
       return;
     }
@@ -150,8 +165,6 @@ export class AutomaticAgentUpgradeTask {
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
-    this.retryDelays =
-      appContextService.getConfig()?.autoUpgrades?.retryDelays ?? AUTO_UPGRADE_DEFAULT_RETRIES;
 
     try {
       await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient);
@@ -186,6 +199,7 @@ export class AutomaticAgentUpgradeTask {
       kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:false AND ${AGENT_POLICY_SAVED_OBJECT_TYPE}.required_versions:*`,
       perPage: AGENT_POLICIES_BATCHSIZE,
       fields: ['id', 'required_versions'],
+      spaceId: '*',
     });
     for await (const agentPolicyPageResults of agentPolicyFetcher) {
       this.logger.debug(
@@ -369,6 +383,9 @@ export class AutomaticAgentUpgradeTask {
 
     numberOfAgentsForUpgrade -= numberOfRetriedAgents;
     if (numberOfAgentsForUpgrade <= 0) {
+      this.logger.debug(
+        `[AutomaticAgentUpgradeTask] Number of agents ${numberOfAgentsForUpgrade}: no candidate agents found for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
+      );
       return;
     }
 
@@ -454,6 +471,7 @@ export class AutomaticAgentUpgradeTask {
         await sendAutomaticUpgradeAgentsActions(soClient, esClient, {
           agents: agentsReadyForRetry,
           version,
+          spaceIds: agentPolicy.space_ids,
           ...this.getUpgradeDurationSeconds(agentsReadyForRetry.length),
         });
       }
@@ -516,6 +534,7 @@ export class AutomaticAgentUpgradeTask {
       await sendAutomaticUpgradeAgentsActions(soClient, esClient, {
         agents: agentsForUpgrade,
         version,
+        spaceIds: agentPolicy.space_ids,
         ...this.getUpgradeDurationSeconds(agentsForUpgrade.length),
       });
     }

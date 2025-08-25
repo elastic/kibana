@@ -5,28 +5,31 @@
  * 2.0.
  */
 
-import {
-  CustomPaletteParams,
-  CUSTOM_PALETTE,
-  PaletteRegistry,
-  PaletteOutput,
-  getOverridePaletteStops,
-} from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteRegistry, PaletteOutput } from '@kbn/coloring';
+import { CUSTOM_PALETTE, getOverridePaletteStops } from '@kbn/coloring';
 import type {
   TrendlineExpressionFunctionDefinition,
   MetricVisExpressionFunctionDefinition,
 } from '@kbn/expression-metric-vis-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
 import { hasIcon } from '@kbn/visualization-ui-components';
-import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
-import { CollapseExpressionFunction } from '../../../common/expressions/defs/collapse/types';
-import { DatasourceLayers } from '../../types';
+import type { ThemeServiceStart } from '@kbn/core/public';
+import type { CollapseArgs, CollapseFunction } from '../../../common/expressions';
+import type { CollapseExpressionFunction } from '../../../common/expressions/defs/collapse/types';
+import type { DatasourceLayers } from '../../types';
 import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
-import { MetricVisualizationState } from './types';
+import type { MetricVisualizationState } from './types';
 import { metricStateDefaults } from './constants';
+import {
+  getColorMode,
+  getDefaultConfigForMode,
+  getPrefixSelected,
+  getTrendPalette,
+  getSecondaryDynamicTrendBaselineValue,
+} from './helpers';
 import { getAccessorType } from '../../shared_components';
 
 // TODO - deduplicate with gauges?
@@ -96,7 +99,8 @@ export const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricVisualizationState,
   datasourceLayers: DatasourceLayers,
-  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {},
+  theme: ThemeServiceStart
 ): Ast | null => {
   if (!state.metricAccessor) {
     return null;
@@ -149,11 +153,39 @@ export const toExpression = (
     : undefined;
 
   const trendlineExpression = getTrendlineExpression(state, datasourceExpressionsByLayers);
+  const { isNumeric: isNumericType } = getAccessorType(datasource, state.secondaryMetricAccessor);
+
+  const secondaryDynamicColorMode = getColorMode(state.secondaryTrend, isNumericType);
+
+  // replace the secondary prefix if a dynamic coloring with primary metric baseline is picked
+  const secondaryPrefixConfig = getPrefixSelected(state, {
+    defaultPrefix: '',
+    colorMode: secondaryDynamicColorMode,
+    isPrimaryMetricNumeric: isMetricNumeric,
+  });
+
+  const secondaryTrendConfig =
+    state.secondaryTrend?.type === secondaryDynamicColorMode
+      ? state.secondaryTrend
+      : getDefaultConfigForMode(secondaryDynamicColorMode);
 
   const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
     metric: state.metricAccessor,
     secondaryMetric: state.secondaryMetricAccessor,
-    secondaryPrefix: state.secondaryPrefix,
+    secondaryPrefix:
+      secondaryPrefixConfig.mode === 'custom' ? secondaryPrefixConfig.label : state.secondaryPrefix,
+    secondaryColor: secondaryTrendConfig.type === 'static' ? secondaryTrendConfig.color : undefined,
+    secondaryTrendVisuals:
+      secondaryTrendConfig.type === 'dynamic' ? secondaryTrendConfig.visuals : undefined,
+    secondaryTrendBaseline:
+      secondaryTrendConfig.type === 'dynamic'
+        ? getSecondaryDynamicTrendBaselineValue(isMetricNumeric, secondaryTrendConfig.baselineValue)
+        : undefined,
+    secondaryTrendPalette: getTrendPalette(
+      secondaryDynamicColorMode,
+      secondaryTrendConfig,
+      theme.getTheme()
+    ),
     max: state.maxAccessor,
     breakdownBy:
       state.breakdownByAccessor && !canCollapseBy ? state.breakdownByAccessor : undefined,
@@ -166,7 +198,7 @@ export const toExpression = (
     valuesTextAlign: state.valuesTextAlign ?? metricStateDefaults.valuesTextAlign,
     iconAlign: state.iconAlign ?? metricStateDefaults.iconAlign,
     valueFontSize: state.valueFontMode ?? metricStateDefaults.valueFontMode,
-    color: state.color || getDefaultColor(state, isMetricNumeric),
+    color: state.color ?? getDefaultColor(state, isMetricNumeric),
     icon: hasIcon(state.icon) ? state.icon : undefined,
     palette:
       isMetricNumeric && state.palette?.params

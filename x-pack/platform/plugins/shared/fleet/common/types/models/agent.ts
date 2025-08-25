@@ -41,7 +41,8 @@ export type AgentActionType =
   | 'UPDATE_TAGS'
   | 'REQUEST_DIAGNOSTICS'
   | 'POLICY_CHANGE'
-  | 'INPUT_ACTION';
+  | 'INPUT_ACTION'
+  | 'MIGRATE';
 
 export type AgentUpgradeStateType =
   | 'UPG_REQUESTED'
@@ -147,6 +148,7 @@ export interface Agent extends AgentBase {
   packages: string[];
   sort?: any[];
   metrics?: AgentMetrics;
+  last_known_status?: AgentStatus;
 }
 
 export interface CurrentUpgrade {
@@ -370,6 +372,11 @@ export interface FleetServerAgent {
    * Namespaces
    */
   namespaces?: string[];
+
+  /**
+   * The last known agent status
+   */
+  last_known_status?: AgentStatus;
 }
 
 /**

@@ -11,18 +11,19 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { faker } from '@faker-js/faker';
 import { act } from 'react-dom/test-utils';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DatatableComponent } from './table_basic';
 import type { DatatableProps } from '../../../../common/expressions';
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
-import { DatatableRenderProps } from './types';
-import { PaletteOutput } from '@kbn/coloring';
+import type { DatatableRenderProps } from './types';
+import type { PaletteOutput } from '@kbn/coloring';
 import { getTransposeId } from '@kbn/transpose-utils';
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import { DataGridDensity } from '@kbn/unified-data-table';
 
 jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
   const mod = jest.requireActual('../../../shared_components/coloring/get_cell_color_fn');
@@ -760,6 +761,61 @@ describe('DatatableComponent', () => {
           ['3', 'red'],
         ]);
       });
+    });
+  });
+
+  describe('gridStyle', () => {
+    it('should apply default grid style when density is not provided', () => {
+      renderDatatableComponent();
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-m-fontSize-m/);
+    });
+    it('should apply normal grid style when density is normal', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.NORMAL,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-m-fontSize-m/);
+    });
+    it('should apply compact grid style when density is compact', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.COMPACT,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-s-fontSize-s/);
+    });
+    it('should apply expanded grid style when density is expanded', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.EXPANDED,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-l-fontSize-l/);
+    });
+    it('should update grid style when density changes', () => {
+      const { rerender } = renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.NORMAL,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-m-fontSize-m/);
+      rerender({
+        args: {
+          ...args,
+          density: DataGridDensity.COMPACT,
+        },
+      });
+      expect(table).toHaveClass(/cellPadding-s-fontSize-s/);
     });
   });
 });

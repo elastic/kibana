@@ -25,7 +25,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import {
   uiMetricService,
   UIM_ML_SNAPSHOT_UPGRADE_CLICK,
@@ -33,8 +33,8 @@ import {
 } from '../../../../lib/ui_metric';
 import { useAppContext } from '../../../../app_context';
 import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
-import { MlSnapshotContext } from './context';
-import { SnapshotState } from './use_snapshot_state';
+import type { MlSnapshotContext } from './context';
+import type { SnapshotState } from './use_snapshot_state';
 
 export interface FixSnapshotsFlyoutProps extends MlSnapshotContext {
   deprecation: EnrichedDeprecationInfo;
@@ -187,7 +187,7 @@ export const FixSnapshotsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge isCritical={deprecation.isCritical} isResolved={isResolved} />
+        <DeprecationBadge level={deprecation.level} isResolved={isResolved} />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="mlSnapshotDetailsFlyoutTitle">{i18nTexts.flyoutTitle}</h2>

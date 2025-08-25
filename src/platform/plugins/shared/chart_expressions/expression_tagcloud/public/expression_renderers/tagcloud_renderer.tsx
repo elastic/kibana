@@ -13,16 +13,23 @@ import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  createPerformanceTracker,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_TYPES,
+} from '@kbn/ebt-tools';
+
 import {
   type ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
 
-import { ExpressionTagcloudRendererDependencies } from '../plugin';
-import { TagcloudRendererConfig } from '../../common/types';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { ExpressionTagcloudRendererDependencies } from '../plugin';
+import type { TagcloudRendererConfig } from '../../common/types';
 import { EXPRESSION_NAME } from '../../common';
 
 export const strings = {
@@ -50,6 +57,13 @@ export const tagcloudRenderer: (
   help: strings.getHelpDescription(),
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    const performanceTracker = createPerformanceTracker({
+      type: PERFORMANCE_TRACKER_TYPES.PANEL,
+      subType: EXPRESSION_NAME,
+    });
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
+
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -57,6 +71,8 @@ export const tagcloudRenderer: (
     });
 
     const renderComplete = () => {
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
+
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
       const visualizationType = extractVisualizationType(executionContext);
@@ -83,12 +99,8 @@ export const tagcloudRenderer: (
     handlers.event(chartSizeEvent);
 
     const palettesRegistry = await plugins.charts.palettes.getPalettes();
-    let isDarkMode = false;
-    plugins.charts.theme.darkModeEnabled$
-      .subscribe((val) => {
-        isDarkMode = val.darkMode;
-      })
-      .unsubscribe();
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
     render(
       <KibanaRenderContextProvider {...core}>
@@ -108,7 +120,7 @@ export const tagcloudRenderer: (
                 fireEvent={handlers.event}
                 syncColors={config.syncColors}
                 overrides={config.overrides}
-                isDarkMode={isDarkMode}
+                isDarkMode={useKibanaIsDarkMode()}
               />
             </VisualizationContainer>
           )}

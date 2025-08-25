@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
+import type { Reference } from '@kbn/content-management-utils';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { VisParams } from '../../../common';
+import type { VisParams } from '../../../common';
 
 const isControlsVis = (visType: string) => visType === 'input_control_vis';
 
 export const extractControlsReferences = (
   visType: string,
   visParams: VisParams,
-  references: SavedObjectReference[] = [],
+  references: Reference[] = [],
   prefix: string = 'control'
 ) => {
   if (isControlsVis(visType)) {
@@ -38,7 +38,7 @@ export const extractControlsReferences = (
 export const injectControlsReferences = (
   visType: string,
   visParams: VisParams,
-  references: SavedObjectReference[]
+  references: Reference[]
 ) => {
   if (isControlsVis(visType)) {
     (visParams.controls ?? []).forEach((control: Record<string, string>) => {

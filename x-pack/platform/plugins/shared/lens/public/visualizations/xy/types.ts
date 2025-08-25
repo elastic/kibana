@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { $Values } from '@kbn/utility-types';
+import type { $Values } from '@kbn/utility-types';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type {
   LegendConfig,
@@ -20,8 +20,12 @@ import type {
   IconPosition,
   FillStyle,
   YAxisConfig,
+  PointVisibility,
 } from '@kbn/expression-xy-plugin/common';
-import { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type {
+  EventAnnotationConfig,
+  EventAnnotationGroupConfig,
+} from '@kbn/event-annotation-common';
 import {
   IconChartArea,
   IconChartLine,
@@ -36,7 +40,7 @@ import {
 } from '@kbn/chart-icons';
 import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
 
-import { CollapseFunction } from '../../../common/expressions';
+import type { CollapseFunction } from '../../../common/expressions';
 import type { VisualizationType } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
 
@@ -96,6 +100,9 @@ export interface XYDataLayerConfig {
   simpleView?: boolean;
   yConfig?: YConfig[];
   splitAccessor?: string;
+  /**
+   * @deprecated use `colorMapping` config
+   */
   palette?: PaletteOutput;
   collapseFn?: CollapseFunction;
   xScaleType?: XScaleType;
@@ -173,6 +180,7 @@ export interface XYState {
   minBarHeight?: number;
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;
+  pointVisibility?: PointVisibility;
 }
 
 export type State = XYState;

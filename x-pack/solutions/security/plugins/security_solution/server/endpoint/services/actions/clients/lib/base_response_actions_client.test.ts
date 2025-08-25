@@ -293,7 +293,8 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(getActionDetailsByIdMock).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        'one'
+        'one',
+        { bypassSpaceValidation: false }
       );
     });
   });
@@ -328,6 +329,7 @@ describe('ResponseActionsClientImpl base class', () => {
         case_ids: undefined,
         hosts: undefined,
         parameters: undefined,
+        // @ts-expect-error TS2322 due to type overload
         file: undefined,
       };
 
@@ -343,10 +345,20 @@ describe('ResponseActionsClientImpl base class', () => {
           input_type: 'endpoint',
           type: 'INPUT_ACTION',
         },
-        // @ts-expect-error missing `agent.policy`, which will only be present if space awareness is enabled
         agent: {
           id: ['one'],
+          policy: [
+            {
+              agentId: 'one',
+              agentPolicyId: expect.any(String),
+              elasticAgentId: 'one',
+              integrationPolicyId: expect.any(String),
+            },
+          ],
         },
+        originSpaceId: 'default',
+        tags: [],
+        meta: undefined,
         user: {
           id: 'foo',
         },
@@ -510,7 +522,19 @@ describe('ResponseActionsClientImpl base class', () => {
               input_type: 'endpoint',
               type: 'INPUT_ACTION',
             },
-            agent: { id: ['one'] },
+            agent: {
+              id: ['one'],
+              policy: [
+                {
+                  agentId: 'one',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: 'one',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
+            },
+            originSpaceId: 'default',
+            tags: [],
             meta: { one: 1 },
             user: { id: 'foo' },
           });
@@ -557,11 +581,6 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     describe('Telemetry', () => {
-      beforeEach(() => {
-        // @ts-expect-error
-        endpointAppContextService.experimentalFeatures.responseActionsTelemetryEnabled = true;
-      });
-
       it('should send action creation success telemetry for manual actions', async () => {
         await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
 

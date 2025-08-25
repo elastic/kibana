@@ -8,13 +8,13 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { RerankParams, TextEmbeddingParams } from '../../../common/inference/types';
+import type { RerankParams, TextEmbeddingParams } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import {
   INFERENCE_CONNECTOR_ID,
   INFERENCE_CONNECTOR_TITLE,
 } from '../../../common/inference/constants';
-import { InferenceActionParams, InferenceConnector } from './types';
+import type { InferenceActionParams, InferenceConnector } from './types';
 
 interface ValidationErrors {
   subAction: string[];
@@ -31,8 +31,14 @@ export function getConnectorType(): InferenceConnector {
     iconClass: 'sparkles',
     isExperimental: true,
     selectMessage: i18n.translate('xpack.stackConnectors.components.inference.selectMessageText', {
-      defaultMessage: 'Use the Elastic Managed LLM for your chat and RAG use cases.',
+      defaultMessage: 'Send requests to AI providers such as Amazon Bedrock, OpenAI and more.',
     }),
+    selectMessagePreconfigured: i18n.translate(
+      'xpack.stackConnectors.components.inference.selectMessagePreconfiguredText',
+      {
+        defaultMessage: 'Use the Elastic Managed LLM for your chat and RAG use cases.',
+      }
+    ),
     actionTypeTitle: INFERENCE_CONNECTOR_TITLE,
     validateParams: async (
       actionParams: InferenceActionParams
@@ -106,5 +112,6 @@ export function getConnectorType(): InferenceConnector {
     },
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
+    actionReadOnlyExtraComponent: lazy(() => import('./usage_cost_message')),
   };
 }

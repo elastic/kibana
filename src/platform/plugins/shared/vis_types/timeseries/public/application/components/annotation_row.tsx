@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useCallback, useMemo, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCode,
-  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,12 +25,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Query } from '@kbn/es-query';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { css } from '@emotion/react';
 import { getDataViewsStart } from '../../services';
 
 import { AddDeleteButtons } from './add_delete_buttons';
 import { ColorPicker } from './color_picker';
 import { FieldSelect } from './aggs/field_select';
-import { IndexPatternSelect, IndexPatternSelectProps } from './lib/index_pattern_select';
+import type { IndexPatternSelectProps } from './lib/index_pattern_select';
+import { IndexPatternSelect } from './lib/index_pattern_select';
 import { QueryBarWrapper } from './query_bar_wrapper';
 import { YesNo } from './yes_no';
 import {
@@ -48,6 +51,17 @@ const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
 const INDEX_PATTERN_KEY = 'index_pattern';
 const TIME_FIELD_KEY = 'time_field';
+
+const useEditorStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return css({
+      marginBottom: euiTheme.size.base,
+      padding: euiTheme.size.s,
+    });
+  }, [euiTheme]);
+  return styles;
+};
 
 export interface AnnotationRowProps {
   annotation: Annotation;
@@ -77,6 +91,7 @@ export const AnnotationRow = ({
   const [fetchedIndex, setFetchedIndex] = useState<IndexPatternSelectProps['fetchedIndex']>(null);
 
   const { euiTheme } = useEuiTheme();
+  const editorStyles = useEditorStyles();
 
   useEffect(() => {
     const updateFetchedIndex = async (index: IndexPatternValue) => {
@@ -133,7 +148,7 @@ export const AnnotationRow = ({
   );
 
   return (
-    <div className="tvbAnnotationsEditor" key={model.id}>
+    <div className="tvbAnnotationsEditor" key={model.id} css={editorStyles}>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
           <ColorPicker disableTrash={true} onChange={onChange} name="color" value={model.color} />

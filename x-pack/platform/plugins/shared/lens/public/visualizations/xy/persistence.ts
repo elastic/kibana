@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
-import { cloneDeep } from 'lodash';
 
-import { LegendValue } from '@elastic/charts';
 import { layerTypes } from '../../../common/layer_types';
-import { AnnotationGroups } from '../../types';
-import {
+import type { AnnotationGroups } from '../../types';
+import type {
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
@@ -83,19 +81,17 @@ export type XYPersistedState = Omit<XYState, 'layers'> & {
   valuesInLegend?: boolean;
 };
 
-export function convertToRuntime(
+export function convertPersistedState(
   state: XYPersistedState,
   annotationGroups?: AnnotationGroups,
-  references?: SavedObjectReference[]
+  references?: Reference[]
 ) {
-  let newState = cloneDeep(injectReferences(state, annotationGroups, references));
-  newState = convertToLegendStats(newState);
-  return newState;
+  return structuredClone(injectReferences(state, annotationGroups, references));
 }
 
 export function convertToPersistable(state: XYState) {
   const persistableState: XYPersistedState = state;
-  const savedObjectReferences: SavedObjectReference[] = [];
+  const references: Reference[] = [];
   const persistableLayers: XYPersistedLayerConfig[] = [];
 
   persistableState.layers.forEach((layer) => {
@@ -107,7 +103,7 @@ export function convertToPersistable(state: XYState) {
     // a by value annotation layer can be persisted with some config tweak
     if (!isByReferenceAnnotationsLayer(layer)) {
       const { indexPatternId, ...persistableLayer } = layer;
-      savedObjectReferences.push({
+      references.push({
         type: 'index-pattern',
         id: indexPatternId,
         name: getLayerReferenceName(layer.layerId),
@@ -121,7 +117,7 @@ export function convertToPersistable(state: XYState) {
 
     // make this id stable so that it won't retrigger all the time a change diff
     const referenceName = `ref-${layer.layerId}`;
-    savedObjectReferences.push({
+    references.push({
       type: EVENT_ANNOTATION_GROUP_TYPE,
       id: layer.annotationGroupId,
       name: referenceName,
@@ -156,13 +152,13 @@ export function convertToPersistable(state: XYState) {
     };
     persistableLayers.push(persistableLayer);
 
-    savedObjectReferences.push({
+    references.push({
       type: 'index-pattern',
       id: layer.indexPatternId,
       name: getLayerReferenceName(layer.layerId),
     });
   });
-  return { savedObjectReferences, state: { ...persistableState, layers: persistableLayers } };
+  return { references, state: { ...persistableState, layers: persistableLayers } };
 }
 
 export const isPersistedAnnotationsLayer = (
@@ -187,7 +183,7 @@ function needsInjectReferences(state: XYPersistedState | XYState): state is XYPe
 function injectReferences(
   state: XYPersistedState,
   annotationGroups?: AnnotationGroups,
-  references?: SavedObjectReference[]
+  references?: Reference[]
 ): XYState {
   if (!references || !references.length) {
     return state as XYState;
@@ -256,7 +252,7 @@ function injectReferences(
               ...commonProps,
               ignoreGlobalFilters: annotationGroup.ignoreGlobalFilters,
               indexPatternId: annotationGroup.indexPatternId,
-              annotations: cloneDeep(annotationGroup.annotations),
+              annotations: structuredClone(annotationGroup.annotations),
             };
           } else {
             // a linked by-value layer gets settings from visualization state while
@@ -265,7 +261,7 @@ function injectReferences(
               ...commonProps,
               ignoreGlobalFilters: persistedLayer.ignoreGlobalFilters,
               indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
-              annotations: cloneDeep(persistedLayer.annotations),
+              annotations: structuredClone(persistedLayer.annotations),
               cachedMetadata: persistedLayer.cachedMetadata,
             };
           }
@@ -275,26 +271,4 @@ function injectReferences(
       })
       .filter(nonNullable),
   };
-}
-
-function convertToLegendStats(state: XYState & { valuesInLegend?: unknown }) {
-  if ('valuesInLegend' in state) {
-    const valuesInLegend = state.valuesInLegend;
-    delete state.valuesInLegend;
-    const result: XYState = {
-      ...state,
-      legend: {
-        ...state.legend,
-        legendStats: [
-          ...new Set([
-            ...(valuesInLegend ? [LegendValue.CurrentAndLastValue] : []),
-            ...(state.legend.legendStats || []),
-          ]),
-        ],
-      },
-    };
-
-    return result;
-  }
-  return state;
 }

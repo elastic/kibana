@@ -13,24 +13,22 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { getTimeZone } from '@kbn/visualization-utils';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  ChartSizeEvent,
-  extractContainerType,
-  extractVisualizationType,
-} from '@kbn/chart-expressions-common';
+  createPerformanceTracker,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_TYPES,
+} from '@kbn/ebt-tools';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
-import { UseEuiTheme } from '@elastic/eui';
-import { MultiFilterEvent } from '../../common/types';
-import { ExpressionHeatmapPluginStart } from '../plugin';
-import {
-  EXPRESSION_HEATMAP_NAME,
-  HeatmapExpressionProps,
-  FilterEvent,
-  BrushEvent,
-} from '../../common';
+import type { UseEuiTheme } from '@elastic/eui';
+import type { MultiFilterEvent } from '../../common/types';
+import type { ExpressionHeatmapPluginStart } from '../plugin';
+import type { HeatmapExpressionProps, FilterEvent, BrushEvent } from '../../common';
+import { EXPRESSION_HEATMAP_NAME } from '../../common';
 import {
   getDatatableUtilities,
   getFormatService,
@@ -62,6 +60,13 @@ export const heatmapRenderer: (
   }),
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    const performanceTracker = createPerformanceTracker({
+      type: PERFORMANCE_TRACKER_TYPES.PANEL,
+      subType: EXPRESSION_HEATMAP_NAME,
+    });
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
+
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -78,6 +83,8 @@ export const heatmapRenderer: (
     };
 
     const renderComplete = () => {
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
+
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
       const visualizationType = extractVisualizationType(executionContext);
@@ -111,6 +118,8 @@ export const heatmapRenderer: (
     const timeZone = getTimeZone(getUISettings());
     const { HeatmapComponent } = await import('../components/heatmap_component');
     const { isInteractive } = handlers;
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
     render(
       <KibanaRenderContextProvider {...core}>

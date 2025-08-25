@@ -12,16 +12,18 @@ import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { hasNoParams } from '../../formatters/formatting_utils';
 import { formatLocation } from '../../../../common/utils/location_formatter';
-import {
+import type {
   BrowserFields,
-  ConfigKey,
   CommonFields,
   MonitorTypeEnum,
   Locations,
   ProjectMonitor,
+  MonitorFields,
+} from '../../../../common/runtime_types';
+import {
+  ConfigKey,
   ScheduleUnit,
   SourceType,
-  MonitorFields,
   type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import {
@@ -101,6 +103,9 @@ export const getNormalizeCommonFields = ({
     // picking out keys specifically, so users can't add arbitrary fields
     [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
     [ConfigKey.LABELS]: monitor.fields || defaultFields[ConfigKey.LABELS],
+    [ConfigKey.MAINTENANCE_WINDOWS]:
+      monitor.maintenanceWindows || defaultFields[ConfigKey.MAINTENANCE_WINDOWS],
+    [ConfigKey.KIBANA_SPACES]: monitor.spaces || defaultFields[ConfigKey.KIBANA_SPACES],
     ...(monitor[ConfigKey.APM_SERVICE_NAME] && {
       [ConfigKey.APM_SERVICE_NAME]: monitor[ConfigKey.APM_SERVICE_NAME],
     }),

@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -26,11 +26,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('displays the a11y overlay', async () => {
-      await PageObjects.console.pressEscape();
-
       await retry.try(async () => {
+        // Press Escape to open a11y overlay
+        await PageObjects.console.pressEscape();
+        await PageObjects.console.sleepForDebouncePeriod(500);
+
         const isOverlayVisible = await PageObjects.console.isA11yOverlayVisible();
         expect(isOverlayVisible).to.be(true);
+
+        // Press Enter to re-focus on editor
+        await PageObjects.console.pressEnter();
       });
     });
 

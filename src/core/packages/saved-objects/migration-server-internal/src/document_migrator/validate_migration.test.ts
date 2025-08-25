@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { validateTypeMigrations } from './validate_migrations';
 
 describe('validateTypeMigrations', () => {
@@ -147,14 +147,14 @@ describe('validateTypeMigrations', () => {
         const type = createType({
           name: 'foo',
           migrations: {
-            '8.11.0': jest.fn(),
+            '8.10.0': jest.fn(),
           },
         });
 
         expect(() =>
-          validate({ type, kibanaVersion: '8.11.0' })
+          validate({ type, kibanaVersion: '8.10.0' })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Migration for type foo for version 8.11.0 registered after globalSwitchToModelVersionAt (8.10.0)"`
+          `"Migration for type foo for version 8.10.0 registered after globalSwitchToModelVersionAt (8.10.0)"`
         );
       });
 
@@ -213,6 +213,7 @@ describe('validateTypeMigrations', () => {
       const type = createType({
         name: 'foo',
         modelVersions: {
+          // @ts-expect-error
           '1.1': someModelVersion,
         },
       });

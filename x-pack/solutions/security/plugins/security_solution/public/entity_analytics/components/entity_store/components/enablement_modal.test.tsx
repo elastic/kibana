@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { EntityStoreEnablementModalProps } from './enablement_modal';
 import { EntityStoreEnablementModal } from './enablement_modal';
@@ -88,9 +87,9 @@ const missingRiskEnginePrivileges: RiskEngineMissingPrivilegesResponse = {
   },
 };
 
-const renderComponent = async (props: EntityStoreEnablementModalProps = defaultProps) => {
-  await act(async () => {
-    return render(<EntityStoreEnablementModal {...props} />, { wrapper: TestProviders });
+const renderComponent = (props: EntityStoreEnablementModalProps = defaultProps) => {
+  return render(<EntityStoreEnablementModal {...props} />, {
+    wrapper: TestProviders,
   });
 };
 
@@ -170,9 +169,7 @@ describe('EntityStoreEnablementModal', () => {
 
     it('should not show entity engine missing privileges warning when no missing privileges', () => {
       renderComponent();
-      expect(
-        screen.queryByTestId('callout-missing-entity-store-privileges')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('callout-missing-privileges-callout')).not.toBeInTheDocument();
     });
 
     it('should not show risk engine missing privileges warning when no missing privileges', () => {
@@ -195,7 +192,7 @@ describe('EntityStoreEnablementModal', () => {
 
     it('should show entity engine missing privileges warning when missing privileges', () => {
       renderComponent();
-      expect(screen.getByTestId('callout-missing-entity-store-privileges')).toBeInTheDocument();
+      expect(screen.getByTestId('callout-missing-privileges-callout')).toBeInTheDocument();
     });
 
     it('should show risk engine missing privileges warning when missing privileges', () => {
@@ -216,7 +213,7 @@ describe('EntityStoreEnablementModal', () => {
 
     it('should disabled the "enable" button', async () => {
       renderComponent();
-      expect(screen.getByTestId('callout-missing-entity-store-privileges')).toBeInTheDocument();
+      expect(screen.getByTestId('callout-missing-privileges-callout')).toBeInTheDocument();
 
       const enableButton = screen.getByRole('button', { name: /Enable/i });
       expect(enableButton).toBeDisabled();

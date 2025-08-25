@@ -6,7 +6,7 @@
  */
 
 import type { DoneInvokeEvent } from 'xstate';
-import {
+import type {
   Dashboard,
   DataStreamDetails,
   DataStreamRolloverResponse,
@@ -21,8 +21,8 @@ import {
   QualityIssue,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
-import { IntegrationType } from '../../../common/data_stream_details';
-import { TableCriteria, TimeRangeConfig } from '../../../common/types';
+import type { IntegrationType } from '../../../common/data_stream_details';
+import type { TableCriteria, TimeRangeConfig } from '../../../common/types';
 import type { FailedDocsErrorSortField, QualityIssueSortField } from '../../hooks';
 
 export type QualityIssueType = QualityIssue['type'];
@@ -175,6 +175,7 @@ export type DatasetQualityDetailsControllerTypeState =
         | 'initializing.dataStreamSettings.doneFetchingQualityIssues'
         | 'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields'
         | 'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.errorFetchingDegradedFields'
+        | 'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.pending'
         | 'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.fetchingFailedDocs'
         | 'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.errorFetchingFailedDocs';
       context: WithDefaultControllerState & WithDataStreamSettings;

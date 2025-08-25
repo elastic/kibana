@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, debounceTime, skip } from 'rxjs';
-import { AnyPublishingSubject, PublishingSubject, UnwrapPublishingSubjectTuple } from './types';
+import type {
+  AnyPublishingSubject,
+  PublishingSubject,
+  UnwrapPublishingSubjectTuple,
+} from './types';
 
 const hasSubjectsArrayChanged = (
   subjectsA: AnyPublishingSubject[],
@@ -25,6 +29,8 @@ const hasSubjectsArrayChanged = (
 };
 
 /**
+ * @deprecated use useBatchedPublishingSubjects instead.
+ *
  * Batches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.
  * Use when `subjects` may not be defined on initial component render.
  *
@@ -59,7 +65,7 @@ export const useBatchedOptionalPublishingSubjects = <
   /**
    * Subscribe to all subjects and update the latest values when any of them change.
    */
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isFirstRender.current) {
       setLatestPublishedValues(unwrapPublishingSubjectArray(subjectsToUse));
     } else {

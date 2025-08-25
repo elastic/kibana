@@ -6,12 +6,13 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { RouteComponentProps, useHistory } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { getListPath } from '../../services/navigation';
-import { Pipeline } from '../../../../common/types';
+import type { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import { PipelineForm } from '../../components';
 import { useRedirectToPathOrRedirectPath } from '../../hooks';
@@ -109,7 +110,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
             flush="right"
             href={services.documentation.getCreatePipelineUrl()}
             target="_blank"
-            iconType="help"
+            iconType="question"
             data-test-subj="documentationLink"
           >
             <FormattedMessage

@@ -59,9 +59,7 @@ export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitFunctionCallExpression'> &
       VisitorInput<Methods, 'visitLiteralExpression'> &
       VisitorInput<Methods, 'visitListLiteralExpression'> &
-      VisitorInput<Methods, 'visitTimeIntervalLiteralExpression'> &
       VisitorInput<Methods, 'visitInlineCastExpression'> &
-      VisitorInput<Methods, 'visitRenameExpression'> &
       VisitorInput<Methods, 'visitOrderExpression'> &
       VisitorInput<Methods, 'visitIdentifierExpression'> &
       VisitorInput<Methods, 'visitMapExpression'> &
@@ -79,9 +77,7 @@ export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitFunctionCallExpression'>
   | VisitorOutput<Methods, 'visitLiteralExpression'>
   | VisitorOutput<Methods, 'visitListLiteralExpression'>
-  | VisitorOutput<Methods, 'visitTimeIntervalLiteralExpression'>
   | VisitorOutput<Methods, 'visitInlineCastExpression'>
-  | VisitorOutput<Methods, 'visitRenameExpression'>
   | VisitorOutput<Methods, 'visitOrderExpression'>
   | VisitorOutput<Methods, 'visitIdentifierExpression'>
   | VisitorOutput<Methods, 'visitMapExpression'>
@@ -113,6 +109,7 @@ export type CommandVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitEnrichCommand'> &
       VisitorInput<Methods, 'visitMvExpandCommand'> &
       VisitorInput<Methods, 'visitJoinCommand'> &
+      VisitorInput<Methods, 'visitRerankCommand'> &
       VisitorInput<Methods, 'visitChangePointCommand'>
 >;
 
@@ -142,7 +139,9 @@ export type CommandVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitEnrichCommand'>
   | VisitorOutput<Methods, 'visitMvExpandCommand'>
   | VisitorOutput<Methods, 'visitJoinCommand'>
-  | VisitorOutput<Methods, 'visitChangePointCommand'>;
+  | VisitorOutput<Methods, 'visitRerankCommand'>
+  | VisitorOutput<Methods, 'visitChangePointCommand'>
+  | VisitorOutput<Methods, 'visitCompletionCommand'>;
 
 export interface VisitorMethods<
   Visitors extends VisitorMethods = any,
@@ -179,13 +178,21 @@ export interface VisitorMethods<
   visitEnrichCommand?: Visitor<contexts.EnrichCommandVisitorContext<Visitors, Data>, any, any>;
   visitMvExpandCommand?: Visitor<contexts.MvExpandCommandVisitorContext<Visitors, Data>, any, any>;
   visitJoinCommand?: Visitor<contexts.JoinCommandVisitorContext<Visitors, Data>, any, any>;
+  visitRerankCommand?: Visitor<contexts.RerankCommandVisitorContext<Visitors, Data>, any, any>;
   visitChangePointCommand?: Visitor<
     contexts.ChangePointCommandVisitorContext<Visitors, Data>,
     any,
     any
   >;
   visitForkCommand?: Visitor<contexts.ForkCommandVisitorContext<Visitors, Data>, any, any>;
+  visitCompletionCommand?: Visitor<
+    contexts.CompletionCommandVisitorContext<Visitors, Data>,
+    any,
+    any
+  >;
+  visitSampleCommand?: Visitor<contexts.SampleCommandVisitorContext<Visitors, Data>, any, any>;
   visitCommandOption?: Visitor<contexts.CommandOptionVisitorContext<Visitors, Data>, any, any>;
+  visitFuseCommand?: Visitor<contexts.FuseCommandVisitorContext<Visitors, Data>, any, any>;
   visitExpression?: Visitor<contexts.ExpressionVisitorContext<Visitors, Data>, any, any>;
   visitSourceExpression?: Visitor<
     contexts.SourceExpressionVisitorContext<Visitors, Data>,
@@ -212,18 +219,8 @@ export interface VisitorMethods<
     any,
     any
   >;
-  visitTimeIntervalLiteralExpression?: Visitor<
-    contexts.TimeIntervalLiteralExpressionVisitorContext<Visitors, Data>,
-    any,
-    any
-  >;
   visitInlineCastExpression?: Visitor<
     contexts.InlineCastExpressionVisitorContext<Visitors, Data>,
-    any,
-    any
-  >;
-  visitRenameExpression?: Visitor<
-    contexts.RenameExpressionVisitorContext<Visitors, Data>,
     any,
     any
   >;
@@ -260,8 +257,6 @@ export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQ
   ? 'visitLiteralExpression'
   : Node extends ast.ESQLList
   ? 'visitListLiteralExpression'
-  : Node extends ast.ESQLTimeInterval
-  ? 'visitTimeIntervalLiteralExpression'
   : Node extends ast.ESQLInlineCast
   ? 'visitInlineCastExpression'
   : Node extends ast.ESQLIdentifier

@@ -5,7 +5,7 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
-.buildkite/scripts/copy_es_snapshot_cache.sh
+.buildkite/scripts/setup_es_snapshot_cache.sh
 
 echo --- Capture OAS snapshot
 cmd="node scripts/capture_oas_snapshot \
@@ -20,7 +20,7 @@ cmd="node scripts/capture_oas_snapshot \
   --include-path /api/dashboards \
   --include-path /api/saved_objects/_import \
   --include-path /api/saved_objects/_export \
-  --include-path /api/alerting/maintenance_window"
+  --include-path /api/maintenance_window"
 if is_pr && ! is_auto_commit_disabled; then
   cmd="$cmd --update"
 fi

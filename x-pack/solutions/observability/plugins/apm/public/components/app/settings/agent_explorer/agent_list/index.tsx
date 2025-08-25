@@ -162,12 +162,7 @@ export function getAgentsColumns({
                     defaultMessage: 'Latest Agent Version',
                   })}
                   &nbsp;
-                  <EuiIcon
-                    size="s"
-                    color="subdued"
-                    type="questionInCircle"
-                    className="eui-alignCenter"
-                  />
+                  <EuiIcon size="s" color="subdued" type="question" className="eui-alignCenter" />
                 </>
               </EuiToolTip>
             ),

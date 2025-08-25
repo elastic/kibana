@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 
 const MY_EMBEDDABLE_TYPE = 'myEmbeddableType';
 const MY_SAVED_OBJECT_TYPE = 'mySavedObjectType';
@@ -16,10 +16,15 @@ const APP_ICON = 'logoKibana';
 export const registerMyEmbeddableSavedObject = (embeddableSetup: EmbeddableSetup) =>
   embeddableSetup.registerAddFromLibraryType({
     onAdd: (container, savedObject) => {
-      container.addNewPanel({
-        panelType: MY_EMBEDDABLE_TYPE,
-        initialState: savedObject.attributes,
-      });
+      container.addNewPanel(
+        {
+          panelType: MY_EMBEDDABLE_TYPE,
+          serializedState: {
+            rawState: savedObject.attributes,
+          },
+        },
+        true // shows a toast and scrolls to panel
+      );
     },
     savedObjectType: MY_SAVED_OBJECT_TYPE,
     savedObjectName: 'Some saved object',

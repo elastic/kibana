@@ -89,7 +89,7 @@
                 "section": "def-server.APMEventESSearchRequest",
                 "text": "APMEventESSearchRequest"
               },
-              ">(operationName: string, params: TParams) => Promise<TypedSearchResponse<TParams>>"
+              ">(operationName: string, params: TParams, options?: { skipProcessorEventFilter?: boolean | undefined; } | undefined) => Promise<TypedSearchResponse<TParams>>"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
@@ -124,6 +124,33 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "apmDataAccess",
+                "id": "def-server.APMEventClient.search.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "apmDataAccess",
+                    "id": "def-server.APMEventClient.search.$3.skipProcessorEventFilter",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "skipProcessorEventFilter",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -687,7 +714,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -1089,27 +1116,27 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "; knnSearch: { (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "KnnSearchResponse",
-              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "TODO",
+              ">; (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "KnnSearchResponse",
-              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "TODO",
+              ", unknown>>; (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "KnnSearchResponse",
-              "<TDocument>>; }; license: ",
+              "TODO",
+              ">; }; license: ",
               "default",
               "; logstash: ",
               "default",
@@ -1471,6 +1498,8 @@
               "default",
               "; ssl: ",
               "default",
+              "; streams: ",
+              "default",
               "; synonyms: ",
               "default",
               "; tasks: ",
@@ -1701,28 +1730,6 @@
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apmDataAccess",
-            "id": "def-server.DocumentSourcesRequest.enableServiceTransactionMetrics",
-            "type": "boolean",
-            "tags": [],
-            "label": "enableServiceTransactionMetrics",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apmDataAccess",
-            "id": "def-server.DocumentSourcesRequest.enableContinuousRollups",
-            "type": "boolean",
-            "tags": [],
-            "label": "enableContinuousRollups",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1932,7 +1939,7 @@
         "label": "ApmDataAccessServices",
         "description": [],
         "signature": [
-          "{ getDocumentSources: ({ enableContinuousRollups, enableServiceTransactionMetrics, end, kuery, start, }: Omit<",
+          "{ getDocumentSources: ({ end, kuery, start }: Omit<",
           {
             "pluginId": "apmDataAccess",
             "scope": "server",
@@ -2108,7 +2115,7 @@
               "section": "def-server.ApmDataAccessServicesParams",
               "text": "ApmDataAccessServicesParams"
             },
-            ") => { getDocumentSources: ({ enableContinuousRollups, enableServiceTransactionMetrics, end, kuery, start, }: Omit<",
+            ") => { getDocumentSources: ({ end, kuery, start }: Omit<",
             {
               "pluginId": "apmDataAccess",
               "scope": "server",

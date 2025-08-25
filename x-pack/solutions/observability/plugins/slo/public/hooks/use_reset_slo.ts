@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ResetSLOResponse } from '@kbn/slo-schema';
+import type { ResetSLOResponse } from '@kbn/slo-schema';
 import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
@@ -23,19 +23,10 @@ export function useResetSlo() {
 
   return useMutation<ResetSLOResponse, ServerError, { id: string; name: string }>(
     ['resetSlo'],
-    ({ id, name }) => {
-      try {
-        return sloClient.fetch('POST /api/observability/slos/{id}/_reset 2023-10-31', {
-          params: { path: { id } },
-        });
-      } catch (error) {
-        return Promise.reject(
-          i18n.translate('xpack.slo.slo.reset.errorMessage', {
-            defaultMessage: 'Failed to reset {name} (id: {id}), something went wrong: {error}',
-            values: { error: String(error), name, id },
-          })
-        );
-      }
+    ({ id }) => {
+      return sloClient.fetch('POST /api/observability/slos/{id}/_reset 2023-10-31', {
+        params: { path: { id } },
+      });
     },
     {
       onError: (error, { name, id }) => {

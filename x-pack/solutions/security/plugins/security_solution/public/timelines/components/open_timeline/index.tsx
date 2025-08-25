@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
 
@@ -35,20 +35,20 @@ import type {
   ActionTimelineToShow,
   DeleteTimelines,
   EuiSearchBarQuery,
+  OnCreateRuleFromTimeline,
+  OnDeleteOneTimeline,
   OnDeleteSelected,
   OnOpenTimeline,
   OnQueryChange,
   OnSelectionChange,
   OnTableChange,
   OnTableChangeParams,
-  OpenTimelineProps,
   OnToggleOnlyFavorites,
-  OpenTimelineResult,
   OnToggleShowNotes,
-  OnDeleteOneTimeline,
-  OnCreateRuleFromTimeline,
+  OpenTimelineProps,
+  OpenTimelineResult,
 } from './types';
-import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
@@ -58,7 +58,7 @@ import { useStartTransaction } from '../../../common/lib/apm/use_start_transacti
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../../store/defaults';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -164,13 +164,17 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       useSourcererDataView(SourcererScopeName.timeline);
     const { newDataViewPickerEnabled } = useEnableExperimental();
 
-    const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
+    const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
     const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
-    const dataViewId = newDataViewPickerEnabled ? experimentalDataView?.id || '' : oldDataViewId;
-    const selectedPatterns = newDataViewPickerEnabled
-      ? experimentalSelectedPatterns
-      : oldSelectedPatterns;
+    const dataViewId = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalDataView.id || '' : oldDataViewId),
+      [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
+    );
+    const selectedPatterns = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
+      [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+    );
 
     const {
       customTemplateTimelineCount,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { SelectIndicesFlyout } from './select_indices_flyout';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
@@ -118,7 +119,7 @@ describe('SelectIndicesFlyout', () => {
     );
 
     // Simulate typing into the search input field
-    const searchInput = getByPlaceholderText('Filter options');
+    const searchInput = getByPlaceholderText('Search');
     fireEvent.change(searchInput, { target: { value: 'filteredIndex' } });
 
     fireEvent.click(getByTestId('sourceIndex-3'));

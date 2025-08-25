@@ -21,6 +21,11 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 export type EntityTypeEnum = typeof EntityType.enum;
 export const EntityTypeEnum = EntityType.enum;
 
+export type BaseECSEntityField = z.infer<typeof BaseECSEntityField>;
+export const BaseECSEntityField = z.enum(['user', 'host', 'service', 'entity']);
+export type BaseECSEntityFieldEnum = typeof BaseECSEntityField.enum;
+export const BaseECSEntityFieldEnum = BaseECSEntityField.enum;
+
 export type IndexPattern = z.infer<typeof IndexPattern>;
 export const IndexPattern = z.string();
 
@@ -111,7 +116,7 @@ export const EngineComponentStatus = z.object({
   installed: z.boolean(),
   metadata: Metadata.optional(),
   resource: EngineComponentResource,
-  health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
+  health: z.enum(['green', 'yellow', 'red', 'unavailable', 'unknown']).optional(),
   errors: z
     .array(
       z.object({

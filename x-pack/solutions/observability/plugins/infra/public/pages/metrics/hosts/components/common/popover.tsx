@@ -8,8 +8,15 @@
 import React, { useCallback } from 'react';
 import { EuiPopover, EuiIcon } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
+import { i18n } from '@kbn/i18n';
 
-export const Popover = ({ children }: { children: React.ReactNode }) => {
+export const Popover = ({
+  buttonAriaLabelText,
+  children,
+}: {
+  buttonAriaLabelText?: string;
+  children: React.ReactNode;
+}) => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
   const onButtonClick = useCallback(
@@ -25,8 +32,21 @@ export const Popover = ({ children }: { children: React.ReactNode }) => {
     <EuiPopover
       panelPaddingSize="s"
       button={
-        <button onClick={onButtonClick} data-test-subj="hostsViewTableColumnPopoverButton">
-          <EuiIcon type="questionInCircle" />
+        <button
+          aria-label={
+            buttonAriaLabelText
+              ? i18n.translate('xpack.infra.hostsViewPage.popoverInfoIconButtonAriaLabelWithText', {
+                  defaultMessage: '{buttonAriaLabelText} info button',
+                  values: { buttonAriaLabelText },
+                })
+              : i18n.translate('xpack.infra.hostsViewPage.popoverInfoIconButtonAriaLabel', {
+                  defaultMessage: 'info button',
+                })
+          }
+          onClick={onButtonClick}
+          data-test-subj="hostsViewTableColumnPopoverButton"
+        >
+          <EuiIcon type="question" />
         </button>
       }
       isOpen={isPopoverOpen}

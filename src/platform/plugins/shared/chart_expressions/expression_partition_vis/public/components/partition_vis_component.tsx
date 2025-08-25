@@ -8,33 +8,29 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
-import {
-  Chart,
+import type {
   Datum,
   LayerValue,
-  Partition,
-  Position,
-  Settings,
   TooltipProps,
-  TooltipType,
   SeriesIdentifier,
   PartitionElementEvent,
   SettingsProps,
-  Tooltip,
   TooltipValue,
 } from '@elastic/charts';
+import { Chart, Partition, Position, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { LegendToggle, ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { LegendToggle } from '@kbn/charts-plugin/public';
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import {
+import type {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
@@ -43,6 +39,7 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { useKbnPalettes } from '@kbn/palettes';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -57,7 +54,6 @@ import {
   LegendColorPickerWrapperContext,
   getLayers,
   getLegendActions,
-  canFilter,
   getFilterClickData,
   getFilterEventData,
   getPartitionTheme,
@@ -77,7 +73,7 @@ import {
   partitionVisContainerWithToggleStyleFactory,
 } from './partition_vis_component.styles';
 import { filterOutConfig } from '../utils/filter_out_config';
-import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
+import type { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
 import { getMultiFilterCells } from '../utils/filter_helpers';
 
 declare global {
@@ -95,6 +91,7 @@ export type PartitionVisComponentProps = Omit<
   visParams: PartitionVisParams;
   uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
+  hasCompatibleActions: IInterpreterRenderHandlers['hasCompatibleActions'];
   renderComplete: IInterpreterRenderHandlers['done'];
   interactive: boolean;
   chartsThemeService: ChartsPluginSetup['theme'];
@@ -303,7 +300,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     },
   });
 
-  const isDarkMode = props.chartsThemeService.useDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const layers = useMemo(
     () =>
       getLayers(
@@ -340,13 +337,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     () =>
       interactive
         ? getLegendActions(
-            canFilter,
+            props.hasCompatibleActions,
             getLegendActionEventData(visData),
             handleLegendAction,
             columnCellValueActions,
             visParams,
             visData,
-            services.data.actions,
             services.fieldFormats
           )
         : undefined,
@@ -355,10 +351,10 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       getLegendActionEventData,
       handleLegendAction,
       interactive,
-      services.data.actions,
       services.fieldFormats,
       visData,
       visParams,
+      props.hasCompatibleActions,
     ]
   );
 

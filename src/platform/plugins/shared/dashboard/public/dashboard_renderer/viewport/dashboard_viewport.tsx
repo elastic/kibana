@@ -10,20 +10,19 @@
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiPortal } from '@elastic/eui';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
-import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-} from '@kbn/controls-plugin/public';
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { DashboardGrid } from '../grid';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
+import { DashboardGrid } from '../grid';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 
 export const DashboardViewport = ({
@@ -39,7 +38,7 @@ export const DashboardViewport = ({
     dashboardTitle,
     description,
     expandedPanelId,
-    panels,
+    layout,
     viewMode,
     useMargins,
     fullScreenMode,
@@ -48,7 +47,7 @@ export const DashboardViewport = ({
     dashboardApi.title$,
     dashboardApi.description$,
     dashboardApi.expandedPanelId$,
-    dashboardApi.panels$,
+    dashboardInternalApi.layout$,
     dashboardApi.viewMode$,
     dashboardApi.settings.useMargins$,
     dashboardApi.fullScreenMode$
@@ -57,12 +56,20 @@ export const DashboardViewport = ({
     dashboardApi.setFullScreenMode(false);
   }, [dashboardApi]);
 
-  const panelCount = useMemo(() => {
-    return Object.keys(panels).length;
-  }, [panels]);
+  const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
+    const panels = Object.values(layout.panels);
+    const visiblePanels = panels.filter(({ gridData }) => {
+      return !dashboardInternalApi.isSectionCollapsed(gridData.sectionId);
+    });
+    return {
+      panelCount: panels.length,
+      visiblePanelCount: visiblePanels.length,
+      sectionCount: Object.keys(layout.sections).length,
+    };
+  }, [layout, dashboardInternalApi]);
 
-  const classes = classNames({
-    dshDashboardViewport: true,
+  const classes = classNames('dshDashboardViewport', {
+    'dshDashboardViewport--empty': panelCount === 0 && sectionCount === 0,
     'dshDashboardViewport--print': viewMode === 'print',
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
@@ -97,31 +104,28 @@ export const DashboardViewport = ({
   }, [dashboard]);
   */
 
+  const styles = useMemoCss(dashboardViewportStyles);
+
   return (
     <div
       className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--defaultBg': !useMargins,
         'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
+      css={styles.wrapper}
     >
       {viewMode !== 'print' ? (
         <div className={hasControls ? 'dshDashboardViewport-controls' : ''}>
-          <ReactEmbeddableRenderer<
-            ControlGroupSerializedState,
-            ControlGroupRuntimeState,
-            ControlGroupApi
-          >
+          <EmbeddableRenderer<object, ControlGroupApi>
             key={dashboardApi.uuid}
             hidePanelChrome={true}
             panelProps={{ hideLoader: true }}
-            type={CONTROL_GROUP_TYPE}
-            maybeId={'control_group'}
+            type={CONTROLS_GROUP_TYPE}
+            maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
             getParentApi={() => {
               return {
                 ...dashboardApi,
                 reload$: dashboardInternalApi.controlGroupReload$,
-                getSerializedStateForChild: dashboardInternalApi.getSerializedStateForControlGroup,
-                getRuntimeStateForChild: dashboardInternalApi.getRuntimeStateForControlGroup,
               };
             }}
             onApiAvailable={(api) => dashboardInternalApi.setControlGroupApi(api)}
@@ -133,16 +137,57 @@ export const DashboardViewport = ({
           <ExitFullScreenButton onExit={onExit} toggleChrome={!dashboardApi.isEmbeddedExternally} />
         </EuiPortal>
       )}
-      {panelCount === 0 && <DashboardEmptyScreen />}
       <div
         className={classes}
+        css={styles.viewport}
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}
-        data-shared-items-count={panelCount}
+        data-shared-items-count={visiblePanelCount}
+        data-test-subj={'dshDashboardViewport'}
       >
-        <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
+        {panelCount === 0 && sectionCount === 0 ? (
+          <DashboardEmptyScreen />
+        ) : (
+          <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
+        )}
       </div>
     </div>
   );
+};
+
+const dashboardViewportStyles = {
+  wrapper: ({ euiTheme }: UseEuiTheme) => ({
+    flex: 'auto',
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    width: '100%',
+    '&.dshDashboardViewportWrapper--defaultBg': {
+      backgroundColor: euiTheme.colors.emptyShade,
+    },
+    '.dshDashboardViewport-controls': {
+      margin: `0 ${euiTheme.size.s}`,
+      paddingTop: euiTheme.size.s,
+    },
+  }),
+  viewport: {
+    width: '100%',
+    '&.dshDashboardViewport--empty': {
+      height: '100%',
+    },
+    '&.dshDashboardViewport--panelExpanded': {
+      flex: 1,
+    },
+    '&.dshDashboardViewport--print': {
+      '.kbnGrid': {
+        display: 'block !important',
+      },
+      '.kbnGridSectionHeader, .kbnGridSectionFooter': {
+        display: 'none',
+      },
+      '.kbnGridPanel': {
+        height: '100% !important',
+      },
+    },
+  },
 };

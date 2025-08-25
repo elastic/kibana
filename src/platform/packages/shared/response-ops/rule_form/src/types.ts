@@ -24,6 +24,7 @@ import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type {
   MinimumScheduleInterval,
   Rule,
@@ -38,7 +39,7 @@ import type {
   RuleUiAction,
 } from './common/types';
 
-export * from './common/types';
+export type * from './common/types';
 
 export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   name: Rule<Params>['name'];
@@ -52,6 +53,7 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   throttle?: Rule<Params>['throttle'];
   ruleTypeId?: Rule<Params>['ruleTypeId'];
   flapping?: Rule<Params>['flapping'];
+  artifacts?: Rule<Params>['artifacts'];
 }
 
 export interface RuleFormPlugins {
@@ -70,6 +72,7 @@ export interface RuleFormPlugins {
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   fieldsMetadata: FieldsMetadataPublicStart;
+  contentManagement?: ContentManagementPublicStart;
 }
 
 export interface RuleFormState<
@@ -107,3 +110,5 @@ export type { SanitizedRuleAction as RuleAction } from '@kbn/alerting-types';
 export interface ValidationResult {
   errors: Record<string, any>;
 }
+
+export type RuleDashboardsPlugins = Pick<RuleFormPlugins, 'contentManagement'>;

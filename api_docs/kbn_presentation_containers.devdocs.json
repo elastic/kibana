@@ -47,6 +47,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.apiCanAddNewSection",
+        "type": "Function",
+        "tags": [],
+        "label": "apiCanAddNewSection",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.CanAddNewSection",
+            "text": "CanAddNewSection"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_section.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.apiCanAddNewSection.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_section.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.apiCanDuplicatePanels",
         "type": "Function",
         "tags": [],
@@ -127,41 +167,30 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.apiHasRuntimeChildState",
+        "id": "def-public.apiCanFocusPanel",
         "type": "Function",
-        "tags": [
-          "deprecated"
+        "tags": [],
+        "label": "apiCanFocusPanel",
+        "description": [
+          "\nA type guard which can be used to determine if a given API can focus a child panel"
         ],
-        "label": "apiHasRuntimeChildState",
-        "description": [],
         "signature": [
-          "<RuntimeState extends object = object>(api: unknown) => api is ",
+          "(api: unknown) => api is ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasRuntimeChildState",
-            "text": "HasRuntimeChildState"
-          },
-          "<RuntimeState>"
-        ],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "embeddable",
-            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx"
+            "section": "def-public.CanFocusPanel",
+            "text": "CanFocusPanel"
           }
         ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.apiHasRuntimeChildState.$1",
+            "id": "def-public.apiCanFocusPanel.$1",
             "type": "Unknown",
             "tags": [],
             "label": "api",
@@ -169,7 +198,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -180,28 +209,29 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.apiHasSaveNotification",
+        "id": "def-public.apiHasLastSavedChildState",
         "type": "Function",
         "tags": [],
-        "label": "apiHasSaveNotification",
+        "label": "apiHasLastSavedChildState",
         "description": [],
         "signature": [
-          "(api: unknown) => api is ",
+          "<SerializedState extends object = object>(api: unknown) => api is ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasSaveNotification",
-            "text": "HasSaveNotification"
-          }
+            "section": "def-public.HasLastSavedChildState",
+            "text": "HasLastSavedChildState"
+          },
+          "<SerializedState>"
         ],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/has_save_notification.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.apiHasSaveNotification.$1",
+            "id": "def-public.apiHasLastSavedChildState.$1",
             "type": "Unknown",
             "tags": [],
             "label": "api",
@@ -209,7 +239,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/has_save_notification.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -274,7 +304,8 @@
             "docId": "kibKbnPresentationContainersPluginApi",
             "section": "def-public.PresentationContainer",
             "text": "PresentationContainer"
-          }
+          },
+          "<unknown>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,
@@ -341,6 +372,48 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.apiSupportsPassThroughContext",
+        "type": "Function",
+        "tags": [],
+        "label": "apiSupportsPassThroughContext",
+        "description": [
+          "\nA type guard which can be used to determine if a given API supports PassThroughContext"
+        ],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.PassThroughContext",
+            "text": "PassThroughContext"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/pass_through_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.apiSupportsPassThroughContext.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/pass_through_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.canTrackContentfulRender",
         "type": "Function",
         "tags": [],
@@ -397,9 +470,9 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<{ [key: string]: unknown; }>) => ",
+          "<{ [key: string]: Api; }>) => ",
           "Observable",
-          "<{ [key: string]: object; } | undefined>"
+          "<{ uuid: string; hasUnsavedChanges: boolean; }[]>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/children_unsaved_changes.ts",
         "deprecated": false,
@@ -420,7 +493,7 @@
                 "section": "def-public.PublishingSubject",
                 "text": "PublishingSubject"
               },
-              "<{ [key: string]: unknown; }>"
+              "<{ [key: string]: Api; }>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/children_unsaved_changes.ts",
             "deprecated": false,
@@ -542,7 +615,7 @@
             "section": "def-public.PresentationContainer",
             "text": "PresentationContainer"
           },
-          " | undefined"
+          "<unknown> | undefined"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,
@@ -575,7 +648,17 @@
         "label": "initializeUnsavedChanges",
         "description": [],
         "signature": [
-          "<RuntimeState extends {} = {}>(initialLastSavedState: RuntimeState, parentApi: unknown, comparators: ",
+          "<StateType extends object = object>({ uuid, onReset, parentApi, getComparators, defaultState, serializeState, anyStateChange$, checkRefEquality, }: { uuid: string; parentApi: unknown; anyStateChange$: ",
+          "Observable",
+          "<void>; serializeState: () => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedPanelState",
+            "text": "SerializedPanelState"
+          },
+          "<StateType>; getComparators: () => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -583,23 +666,30 @@
             "section": "def-public.StateComparators",
             "text": "StateComparators"
           },
-          "<RuntimeState>) => { api: ",
+          "<StateType>; defaultState?: Partial<StateType> | undefined; onReset: (lastSavedPanelState?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedPanelState",
+            "text": "SerializedPanelState"
+          },
+          "<StateType> | undefined) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<void>; checkRefEquality?: boolean | undefined; }) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
-          },
-          "<RuntimeState> & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.HasSnapshottableState",
-            "text": "HasSnapshottableState"
-          },
-          "<RuntimeState>; cleanup: () => void; }"
+          }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
         "deprecated": false,
@@ -608,54 +698,186 @@
           {
             "parentPluginId": "@kbn/presentation-containers",
             "id": "def-public.initializeUnsavedChanges.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "initialLastSavedState",
-            "description": [],
-            "signature": [
-              "RuntimeState"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.initializeUnsavedChanges.$2",
-            "type": "Unknown",
-            "tags": [],
-            "label": "parentApi",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.initializeUnsavedChanges.$3",
             "type": "Object",
             "tags": [],
-            "label": "comparators",
+            "label": "{\n  uuid,\n  onReset,\n  parentApi,\n  getComparators,\n  defaultState,\n  serializeState,\n  anyStateChange$,\n  checkRefEquality,\n}",
             "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.StateComparators",
-                "text": "StateComparators"
-              },
-              "<RuntimeState>"
-            ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.initializeUnsavedChanges.$1.uuid",
+                "type": "string",
+                "tags": [],
+                "label": "uuid",
+                "description": [],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.initializeUnsavedChanges.$1.parentApi",
+                "type": "Unknown",
+                "tags": [],
+                "label": "parentApi",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.initializeUnsavedChanges.$1.anyStateChange$",
+                "type": "Object",
+                "tags": [],
+                "label": "anyStateChange$",
+                "description": [],
+                "signature": [
+                  "Observable",
+                  "<void>"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.initializeUnsavedChanges.$1.serializeState",
+                "type": "Function",
+                "tags": [],
+                "label": "serializeState",
+                "description": [],
+                "signature": [
+                  "() => ",
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "public",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-public.SerializedPanelState",
+                    "text": "SerializedPanelState"
+                  },
+                  "<StateType>"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.initializeUnsavedChanges.$1.getComparators",
+                "type": "Function",
+                "tags": [],
+                "label": "getComparators",
+                "description": [],
+                "signature": [
+                  "() => ",
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "public",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-public.StateComparators",
+                    "text": "StateComparators"
+                  },
+                  "<StateType>"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.initializeUnsavedChanges.$1.defaultState",
+                "type": "Object",
+                "tags": [],
+                "label": "defaultState",
+                "description": [],
+                "signature": [
+                  "Partial<StateType> | undefined"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.initializeUnsavedChanges.$1.onReset",
+                "type": "Function",
+                "tags": [],
+                "label": "onReset",
+                "description": [],
+                "signature": [
+                  "(lastSavedPanelState?: ",
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "public",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-public.SerializedPanelState",
+                    "text": "SerializedPanelState"
+                  },
+                  "<StateType> | undefined) => ",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.MaybePromise",
+                    "text": "MaybePromise"
+                  },
+                  "<void>"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/presentation-containers",
+                    "id": "def-public.initializeUnsavedChanges.$1.onReset.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "lastSavedPanelState",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/presentation-publishing",
+                        "scope": "public",
+                        "docId": "kibKbnPresentationPublishingPluginApi",
+                        "section": "def-public.SerializedPanelState",
+                        "text": "SerializedPanelState"
+                      },
+                      "<StateType> | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": false
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.initializeUnsavedChanges.$1.checkRefEquality",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "checkRefEquality",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -723,46 +945,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.tracksOverlays",
-        "type": "Function",
-        "tags": [],
-        "label": "tracksOverlays",
-        "description": [],
-        "signature": [
-          "(root: unknown) => root is ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.TracksOverlays",
-            "text": "TracksOverlays"
-          }
-        ],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.tracksOverlays.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "root",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -787,7 +969,7 @@
             "label": "addNewPanel",
             "description": [],
             "signature": [
-              "<SerializedState extends object, ApiType extends unknown = unknown>(panel: ",
+              "<StateType extends object, ApiType extends unknown = unknown>(panel: ",
               {
                 "pluginId": "@kbn/presentation-containers",
                 "scope": "public",
@@ -795,7 +977,7 @@
                 "section": "def-public.PanelPackage",
                 "text": "PanelPackage"
               },
-              "<SerializedState, object>, displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>"
+              "<StateType>, displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
             "deprecated": false,
@@ -816,7 +998,7 @@
                     "section": "def-public.PanelPackage",
                     "text": "PanelPackage"
                   },
-                  "<SerializedState, object>"
+                  "<StateType>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
                 "deprecated": false,
@@ -839,6 +1021,36 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.CanAddNewSection",
+        "type": "Interface",
+        "tags": [],
+        "label": "CanAddNewSection",
+        "description": [],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_section.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.CanAddNewSection.addNewSection",
+            "type": "Function",
+            "tags": [],
+            "label": "addNewSection",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_section.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -1075,23 +1287,23 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; lift: <R>(operator: ",
+              "<unknown>; }; observers: ",
+              "Observer",
+              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
               "<string | undefined, R>) => ",
               "Observable",
-              "<R>; subscribe: { (observerOrNext?: Partial<",
+              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string | undefined>; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: string | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; observers: ",
-              "Observer",
-              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string | undefined>; }"
+              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
@@ -1102,65 +1314,45 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.HasRuntimeChildState",
+        "id": "def-public.CanFocusPanel",
         "type": "Interface",
-        "tags": [
-          "deprecated"
+        "tags": [],
+        "label": "CanFocusPanel",
+        "description": [
+          "\nThis API can focus a child panel"
         ],
-        "label": "HasRuntimeChildState",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasRuntimeChildState",
-            "text": "HasRuntimeChildState"
-          },
-          "<RuntimeState>"
-        ],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
-        "deprecated": true,
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+        "deprecated": false,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts"
-          }
-        ],
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.HasRuntimeChildState.getRuntimeStateForChild",
+            "id": "def-public.CanFocusPanel.setFocusedPanelId",
             "type": "Function",
             "tags": [],
-            "label": "getRuntimeStateForChild",
+            "label": "setFocusedPanelId",
             "description": [],
             "signature": [
-              "(childId: string) => Partial<RuntimeState> | undefined"
+              "(panelId?: string | undefined) => void"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-public.HasRuntimeChildState.getRuntimeStateForChild.$1",
+                "id": "def-public.CanFocusPanel.setFocusedPanelId.$1",
                 "type": "string",
                 "tags": [],
-                "label": "childId",
+                "label": "panelId",
                 "description": [],
                 "signature": [
-                  "string"
+                  "string | undefined"
                 ],
-                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1170,29 +1362,106 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.HasSaveNotification",
+        "id": "def-public.HasLastSavedChildState",
         "type": "Interface",
         "tags": [],
-        "label": "HasSaveNotification",
+        "label": "HasLastSavedChildState",
         "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/has_save_notification.ts",
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.HasLastSavedChildState",
+            "text": "HasLastSavedChildState"
+          },
+          "<SerializedState>"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.HasSaveNotification.saveNotification$",
-            "type": "Object",
+            "id": "def-public.HasLastSavedChildState.lastSavedStateForChild$",
+            "type": "Function",
             "tags": [],
-            "label": "saveNotification$",
+            "label": "lastSavedStateForChild$",
             "description": [],
             "signature": [
-              "Subject",
-              "<void>"
+              "(childId: string) => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.SerializedPanelState",
+                "text": "SerializedPanelState"
+              },
+              "<SerializedState> | undefined>"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/has_save_notification.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.HasLastSavedChildState.lastSavedStateForChild$.$1",
+                "type": "string",
+                "tags": [],
+                "label": "childId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.HasLastSavedChildState.getLastSavedStateForChild",
+            "type": "Function",
+            "tags": [],
+            "label": "getLastSavedStateForChild",
+            "description": [],
+            "signature": [
+              "(childId: string) => ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.SerializedPanelState",
+                "text": "SerializedPanelState"
+              },
+              "<SerializedState> | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.HasLastSavedChildState.getLastSavedStateForChild.$1",
+                "type": "string",
+                "tags": [],
+                "label": "childId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1276,7 +1545,7 @@
             "section": "def-public.PanelPackage",
             "text": "PanelPackage"
           },
-          "<SerializedStateType, RuntimeStateType>"
+          "<SerializedStateType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,
@@ -1289,6 +1558,20 @@
             "tags": [],
             "label": "panelType",
             "description": [],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.PanelPackage.maybePanelId",
+            "type": "string",
+            "tags": [],
+            "label": "maybePanelId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1315,22 +1598,46 @@
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.PassThroughContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "PassThroughContext",
+        "description": [
+          "\nAllows the Presentation Container to provide generic untyped context to its children.\n\nFor example, alerting page links to dashboards.\nLinked dashboard panels should show the alert from alerting page.\nThe alerting page can use passThroughContext to pass '{ alert }' state to embeddables.\nEmbeddables can access passThroughContext from 'parentApi.getPassThroughContext()'\nand use the state to show the alert from the alerting page."
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/pass_through_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.PanelPackage.initialState",
-            "type": "Uncategorized",
+            "id": "def-public.PassThroughContext.getPassThroughContext",
+            "type": "Function",
             "tags": [],
-            "label": "initialState",
-            "description": [
-              "\nThe runtime state of this panel. @deprecated Use `serializedState` instead."
-            ],
+            "label": "getPassThroughContext",
+            "description": [],
             "signature": [
-              "RuntimeStateType | undefined"
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              " | undefined"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/pass_through_context.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1350,7 +1657,7 @@
             "section": "def-public.PresentationContainer",
             "text": "PresentationContainer"
           },
-          " extends ",
+          "<ApiType> extends ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
@@ -1433,7 +1740,7 @@
                 "section": "def-public.PanelPackage",
                 "text": "PanelPackage"
               },
-              "<SerializedState, object>) => Promise<string>"
+              "<SerializedState>) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
@@ -1469,7 +1776,7 @@
                     "section": "def-public.PanelPackage",
                     "text": "PanelPackage"
                   },
-                  "<SerializedState, object>"
+                  "<SerializedState>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
                 "deprecated": false,
@@ -1499,31 +1806,65 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.PresentationContainer.getChildApi",
+            "type": "Function",
+            "tags": [],
+            "label": "getChildApi",
+            "description": [
+              "\nGets a child API for the given ID. This is asynchronous and should await for the\nchild API to be available. It is best practice to retrieve a child API using this method"
+            ],
+            "signature": [
+              "(uuid: string) => Promise<ApiType | undefined>"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.PresentationContainer.getChildApi.$1",
+                "type": "string",
+                "tags": [],
+                "label": "uuid",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
             "id": "def-public.PresentationContainer.children$",
             "type": "Object",
             "tags": [],
             "label": "children$",
             "description": [
-              "\nA publishing subject containing the child APIs of the container. Note that\nchildren are created asynchronously. This means that the children$ observable might\ncontain fewer children than the actual number of panels in the container."
+              "\nA publishing subject containing the child APIs of the container. Note that\nchildren are created asynchronously. This means that the children$ observable might\ncontain fewer children than the actual number of panels in the container. Use getChildApi\nto retrieve the child API for a specific panel."
             ],
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: { [key: string]: unknown; }; error: (err: any) => void; forEach: { (next: (value: { [key: string]: unknown; }) => void): Promise<void>; (next: (value: { [key: string]: unknown; }) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => { [key: string]: unknown; }; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: { [key: string]: ApiType; }; error: (err: any) => void; forEach: { (next: (value: { [key: string]: ApiType; }) => void): Promise<void>; (next: (value: { [key: string]: ApiType; }) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => { [key: string]: ApiType; }; closed: boolean; pipe: { (): ",
               "Observable",
-              "<{ [key: string]: unknown; }>; <A>(op1: ",
+              "<{ [key: string]: ApiType; }>; <A>(op1: ",
               "OperatorFunction",
-              "<{ [key: string]: unknown; }, A>): ",
+              "<{ [key: string]: ApiType; }, A>): ",
               "Observable",
               "<A>; <A, B>(op1: ",
               "OperatorFunction",
-              "<{ [key: string]: unknown; }, A>, op2: ",
+              "<{ [key: string]: ApiType; }, A>, op2: ",
               "OperatorFunction",
               "<A, B>): ",
               "Observable",
               "<B>; <A, B, C>(op1: ",
               "OperatorFunction",
-              "<{ [key: string]: unknown; }, A>, op2: ",
+              "<{ [key: string]: ApiType; }, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -1531,7 +1872,7 @@
               "Observable",
               "<C>; <A, B, C, D>(op1: ",
               "OperatorFunction",
-              "<{ [key: string]: unknown; }, A>, op2: ",
+              "<{ [key: string]: ApiType; }, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -1541,7 +1882,7 @@
               "Observable",
               "<D>; <A, B, C, D, E>(op1: ",
               "OperatorFunction",
-              "<{ [key: string]: unknown; }, A>, op2: ",
+              "<{ [key: string]: ApiType; }, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -1553,7 +1894,7 @@
               "Observable",
               "<E>; <A, B, C, D, E, F>(op1: ",
               "OperatorFunction",
-              "<{ [key: string]: unknown; }, A>, op2: ",
+              "<{ [key: string]: ApiType; }, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -1567,7 +1908,7 @@
               "Observable",
               "<F>; <A, B, C, D, E, F, G>(op1: ",
               "OperatorFunction",
-              "<{ [key: string]: unknown; }, A>, op2: ",
+              "<{ [key: string]: ApiType; }, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -1583,7 +1924,7 @@
               "Observable",
               "<G>; <A, B, C, D, E, F, G, H>(op1: ",
               "OperatorFunction",
-              "<{ [key: string]: unknown; }, A>, op2: ",
+              "<{ [key: string]: ApiType; }, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -1601,7 +1942,7 @@
               "Observable",
               "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
               "OperatorFunction",
-              "<{ [key: string]: unknown; }, A>, op2: ",
+              "<{ [key: string]: ApiType; }, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -1621,7 +1962,7 @@
               "Observable",
               "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
               "OperatorFunction",
-              "<{ [key: string]: unknown; }, A>, op2: ",
+              "<{ [key: string]: ApiType; }, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -1641,23 +1982,23 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; operator: ",
-              "Operator",
-              "<any, { [key: string]: unknown; }> | undefined; lift: <R>(operator: ",
-              "Operator",
-              "<{ [key: string]: unknown; }, R>) => ",
-              "Observable",
-              "<R>; subscribe: { (observerOrNext?: Partial<",
+              "<unknown>; }; observers: ",
               "Observer",
-              "<{ [key: string]: unknown; }>> | ((value: { [key: string]: unknown; }) => void) | undefined): ",
-              "Subscription",
-              "; (next?: ((value: { [key: string]: unknown; }) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
-              "Subscription",
-              "; }; toPromise: { (): Promise<{ [key: string]: unknown; } | undefined>; (PromiseCtor: PromiseConstructor): Promise<{ [key: string]: unknown; } | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<{ [key: string]: unknown; } | undefined>; }; observers: ",
-              "Observer",
-              "<{ [key: string]: unknown; }>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "<{ [key: string]: ApiType; }>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "Operator",
+              "<{ [key: string]: ApiType; }, R>) => ",
               "Observable",
-              "<{ [key: string]: unknown; }>; }"
+              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<{ [key: string]: ApiType; }>; operator: ",
+              "Operator",
+              "<any, { [key: string]: ApiType; }> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "Observer",
+              "<{ [key: string]: ApiType; }>> | ((value: { [key: string]: ApiType; }) => void) | undefined): ",
+              "Subscription",
+              "; (next?: ((value: { [key: string]: ApiType; }) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
+              "Subscription",
+              "; }; toPromise: { (): Promise<{ [key: string]: ApiType; } | undefined>; (PromiseCtor: PromiseConstructor): Promise<{ [key: string]: ApiType; } | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<{ [key: string]: ApiType; } | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
@@ -1726,88 +2067,6 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/performance_trackers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.TracksOverlays",
-        "type": "Interface",
-        "tags": [],
-        "label": "TracksOverlays",
-        "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.TracksOverlays.openOverlay",
-            "type": "Function",
-            "tags": [],
-            "label": "openOverlay",
-            "description": [],
-            "signature": [
-              "(ref: ",
-              "OverlayRef",
-              ", options?: ",
-              "TracksOverlaysOptions",
-              " | undefined) => void"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-public.TracksOverlays.openOverlay.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "ref",
-                "description": [],
-                "signature": [
-                  "OverlayRef"
-                ],
-                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-public.TracksOverlays.openOverlay.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "TracksOverlaysOptions",
-                  " | undefined"
-                ],
-                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.TracksOverlays.clearOverlays",
-            "type": "Function",
-            "tags": [],
-            "label": "clearOverlays",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

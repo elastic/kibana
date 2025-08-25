@@ -10,7 +10,6 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -27,7 +26,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const licensingPluginMock = licensingMock.createStart();
   return {
     ...core,
-    actions: { validateEmailAddresses: jest.fn() },
+    actions: { validateEmailAddresses: jest.fn(), enabledEmailServices: ['*'] },
     ruleTypeRegistry: {
       has: jest.fn(),
       register: jest.fn(),
@@ -44,7 +43,6 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     },
     history: scopedHistoryMock.create(),
     setBreadcrumbs: jest.fn(),
-    dashboard: dashboardPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     dataViews: dataViewPluginMocks.createStartContract(),
     dataViewEditor: {

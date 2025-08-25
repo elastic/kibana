@@ -10,7 +10,7 @@ import type { PaletteOutput, CustomPaletteParams, ColorMapping } from '@kbn/colo
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { ExpressionFunctionDefinition, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SortingHint } from '../../../types';
-import { CollapseFunction } from '../../defs/collapse';
+import type { CollapseFunction } from '../../defs/collapse';
 
 const LENS_DATATABLE_COLUMN = 'lens_datatable_column';
 
@@ -42,6 +42,9 @@ export interface ColumnState {
   originalName?: string;
   bucketValues?: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>;
   alignment?: 'left' | 'right' | 'center';
+  /**
+   * @deprecated use `colorMapping` config
+   */
   palette?: PaletteOutput<CustomPaletteParams>;
   colorMapping?: ColorMapping.Config;
   colorMode?: 'none' | 'cell' | 'text';

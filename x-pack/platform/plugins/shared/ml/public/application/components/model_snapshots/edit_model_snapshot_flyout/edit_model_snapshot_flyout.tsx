@@ -102,6 +102,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'editModelSnapshotFlyout',
   });
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <>
@@ -204,9 +205,11 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
 
       {deleteModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate('xpack.ml.editModelSnapshotFlyout.deleteTitle', {
             defaultMessage: 'Delete snapshot?',
           })}
+          titleProps={{ id: modalTitleId }}
           onCancel={hideDeleteModal}
           onConfirm={deleteSnapshot}
           cancelButtonText={i18n.translate('xpack.ml.editModelSnapshotFlyout.cancelButton', {

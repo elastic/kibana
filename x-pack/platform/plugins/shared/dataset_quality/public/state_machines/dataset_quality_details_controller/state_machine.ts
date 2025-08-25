@@ -7,8 +7,9 @@
 
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { getDateISORange } from '@kbn/timerange';
-import { assign, createMachine, DoneInvokeEvent, InterpreterFrom, raise } from 'xstate';
-import {
+import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { assign, createMachine, raise } from 'xstate';
+import type {
   Dashboard,
   DataStreamDetails,
   DataStreamSettings,
@@ -21,17 +22,17 @@ import {
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { indexNameToDataStreamParts } from '../../../common/utils';
-import { IDataStreamDetailsClient } from '../../services/data_stream_details';
-import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
-import { DatasetQualityStartDeps } from '../../types';
+import type { IDataStreamDetailsClient } from '../../services/data_stream_details';
+import type { IDataStreamsStatsClient } from '../../services/data_streams_stats';
+import type { DatasetQualityStartDeps } from '../../types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
-import {
+import type {
   DatasetQualityDetailsControllerContext,
   DatasetQualityDetailsControllerEvent,
   DatasetQualityDetailsControllerTypeState,
 } from './types';
 
-import { IntegrationType } from '../../../common/data_stream_details';
+import type { IntegrationType } from '../../../common/data_stream_details';
 import {
   assertBreakdownFieldEcsFailedNotifier,
   fetchDataStreamDetailsFailedNotifier,
@@ -210,8 +211,20 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       },
                     },
                     dataStreamFailedDocs: {
-                      initial: 'fetchingFailedDocs',
+                      initial: 'pending',
                       states: {
+                        pending: {
+                          always: [
+                            {
+                              target: 'fetchingFailedDocs',
+                              cond: 'canReadFailureStore',
+                            },
+                            {
+                              // If the user does not have permission to read the failure store, we don't need to fetch failed docs
+                              target: 'doneFetchingFailedDocs',
+                            },
+                          ],
+                        },
                         fetchingFailedDocs: {
                           invoke: {
                             src: 'loadFailedDocsDetails',
@@ -757,6 +770,16 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             event.data.isIntegration
           );
         },
+        canReadFailureStore: (context) => {
+          return (
+            'dataStreamSettings' in context &&
+            Boolean(
+              context.dataStreamSettings.datasetUserPrivileges?.datasetsPrivilages[
+                context.dataStream
+              ].canReadFailureStore
+            )
+          );
+        },
       },
     }
   );
@@ -767,7 +790,6 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
   dataStreamDetailsClient: IDataStreamDetailsClient;
-  isFailureStoreEnabled: boolean;
 }
 
 export const createDatasetQualityDetailsControllerStateMachine = ({
@@ -776,7 +798,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
   toasts,
   dataStreamStatsClient,
   dataStreamDetailsClient,
-  isFailureStoreEnabled,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
   createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -841,14 +862,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return false;
       },
       loadFailedDocsDetails: (context) => {
-        if (!isFailureStoreEnabled) {
-          const unsupportedError = {
-            message: 'Failure store is disabled',
-            statusCode: 501,
-          };
-          return Promise.reject(unsupportedError);
-        }
-
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
         return dataStreamDetailsClient.getFailedDocsDetails({
@@ -903,14 +916,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return Promise.resolve();
       },
       loadfailedDocsErrors: (context) => {
-        if (!isFailureStoreEnabled) {
-          const unsupportedError = {
-            message: 'Failure store is disabled',
-            statusCode: 501,
-          };
-          return Promise.reject(unsupportedError);
-        }
-
         if ('expandedQualityIssue' in context && context.expandedQualityIssue) {
           const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 

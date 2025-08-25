@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption, EuiComboBoxSingleSelectionShape } from '@elastic/eui';
 import {
   EuiAccordion,
   euiPaletteComplementary,
@@ -16,8 +17,6 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiButton,
-  EuiComboBoxOptionOption,
-  EuiComboBoxSingleSelectionShape,
   EuiTextColor,
   EuiFieldText,
   EuiFieldNumber,
@@ -397,6 +396,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
             onCreateOption={onGraphOptionsCreate}
             options={graphOptions}
             selectedOptions={selectedGraphOptions}
+            singleSelection // Remove once post_evaluate support running multiple graphs
             onChange={onGraphOptionsChange}
           />
         </EuiFormRow>

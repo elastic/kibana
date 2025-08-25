@@ -11,18 +11,21 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  ChartSizeEvent,
-  extractContainerType,
-  extractVisualizationType,
-} from '@kbn/chart-expressions-common';
-import { ExpressionGaugePluginStart } from '../plugin';
-import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps, GaugeShapes } from '../../common';
+  createPerformanceTracker,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_TYPES,
+} from '@kbn/ebt-tools';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+import type { ExpressionGaugePluginStart } from '../plugin';
+import type { GaugeExpressionProps } from '../../common';
+import { EXPRESSION_GAUGE_NAME, GaugeShapes } from '../../common';
 import { getFormatService, getPaletteService } from '../services';
 
 interface ExpressionGaugeRendererDependencies {
@@ -38,6 +41,13 @@ export const gaugeRenderer: (
   }),
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    const performanceTracker = createPerformanceTracker({
+      type: PERFORMANCE_TRACKER_TYPES.PANEL,
+      subType: EXPRESSION_GAUGE_NAME,
+    });
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
+
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -45,6 +55,8 @@ export const gaugeRenderer: (
     });
 
     const renderComplete = () => {
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
+
       let type: string;
 
       switch (config.args.shape) {
@@ -92,6 +104,9 @@ export const gaugeRenderer: (
     };
 
     const { GaugeComponent } = await import('../components/gauge_component');
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
+
     render(
       <KibanaRenderContextProvider {...core}>
         <div

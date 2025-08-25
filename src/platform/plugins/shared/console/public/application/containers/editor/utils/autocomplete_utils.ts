@@ -8,18 +8,15 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
+import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import {
   getEndpointBodyCompleteComponents,
   getGlobalAutocompleteComponents,
   getTopLevelUrlCompleteComponents,
   getUnmatchedEndpointComponents,
 } from '../../../../lib/kb';
-import {
-  AutoCompleteContext,
-  type DataAutoCompleteRulesOneOf,
-  ResultTerm,
-} from '../../../../lib/autocomplete/types';
+import type { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
+import { type DataAutoCompleteRulesOneOf } from '../../../../lib/autocomplete/types';
 import { populateContext } from '../../../../lib/autocomplete/engine';
 import type { EditorRequest } from '../types';
 import { parseBody, parseLine, parseUrl } from './tokens_utils';
@@ -469,20 +466,4 @@ export const hasUnclosedQuote = (lineContent: string): boolean => {
   }
 
   return insideString;
-};
-
-export const isInsideTripleQuotes = (text: string) => {
-  let insideTripleQuote = false;
-  let i = 0;
-
-  while (i < text.length) {
-    if (text.startsWith('"""', i)) {
-      insideTripleQuote = !insideTripleQuote;
-      i += 3; // Skip the triple quotes
-    } else {
-      i++;
-    }
-  }
-
-  return insideTripleQuote;
 };

@@ -4,14 +4,35 @@
       "format": [
         "text"
       ],
-      "h": [],
       "help": "__flag__",
-      "s": [],
       "v": "__flag__",
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
+      "h": [
+        "active",
+        "completed",
+        "core",
+        "ephemeral_id",
+        "host",
+        "ip",
+        "keep_alive",
+        "largest",
+        "max",
+        "name",
+        "node_id",
+        "node_name",
+        "pid",
+        "pool_size",
+        "port",
+        "queue",
+        "queue_size",
+        "rejected",
+        "size",
+        "type"
+      ],
+      "s": [],
       "time": [
         "nanos",
         "micros",
@@ -35,7 +56,7 @@
       "_cat/thread_pool",
       "_cat/thread_pool/{thread_pool_patterns}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-thread-pool.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-thread-pool",
     "availability": {
       "stack": true,
       "serverless": false

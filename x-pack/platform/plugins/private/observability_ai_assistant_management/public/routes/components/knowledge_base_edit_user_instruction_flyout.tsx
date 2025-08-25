@@ -21,16 +21,21 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import { useGetUserInstructions } from '../../hooks/use_get_user_instructions';
 import { useCreateKnowledgeBaseUserInstruction } from '../../hooks/use_create_knowledge_base_user_instruction';
+import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
 
 export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: () => void }) {
-  const { userInstructions, isLoading: isFetching } = useGetUserInstructions();
-  const { mutateAsync: createEntry, isLoading: isSaving } = useCreateKnowledgeBaseUserInstruction();
   const [newEntryText, setNewEntryText] = useState('');
   const [newEntryId, setNewEntryId] = useState<string>();
+
+  const { userInstructions, isLoading: isFetching } = useGetUserInstructions();
+  const { mutateAsync: createOrUpdateEntry, isLoading: isSaving } =
+    useCreateKnowledgeBaseUserInstruction();
+  const { mutate: deleteEntry } = useDeleteKnowledgeBaseEntry();
 
   useEffect(() => {
     const userInstruction = userInstructions?.find((entry) => !entry.public);
@@ -39,22 +44,28 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
   }, [userInstructions]);
 
   const handleSubmit = async () => {
-    await createEntry({
-      entry: {
-        id: newEntryId ?? uuidv4(),
-        text: newEntryText,
-        public: false, // limit user instructions to private (for now)
-      },
-    });
+    if (newEntryId && !newEntryText) {
+      deleteEntry({ id: newEntryId, isUserInstruction: true });
+    } else {
+      await createOrUpdateEntry({
+        entry: {
+          id: newEntryId ?? uuidv4(),
+          text: newEntryText,
+          public: false, // limit user instructions to private (for now)
+        },
+      });
+    }
 
     onClose();
   };
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder data-test-subj="knowledgeBaseManualEntryFlyout">
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             {i18n.translate(
               'xpack.observabilityAiAssistantManagement.knowledgeBaseEditSystemPrompt.h2.editEntryLabel',
               { defaultMessage: 'User-specific System Prompt' }

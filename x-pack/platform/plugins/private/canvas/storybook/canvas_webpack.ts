@@ -8,7 +8,7 @@
 import { resolve } from 'path';
 import { defaultConfig } from '@kbn/storybook';
 import type { StorybookConfig } from '@kbn/storybook';
-import { Configuration } from 'webpack';
+import type { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
 import { KIBANA_ROOT } from './constants';
 

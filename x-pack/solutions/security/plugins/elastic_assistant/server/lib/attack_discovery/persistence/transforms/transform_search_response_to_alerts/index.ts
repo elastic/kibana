@@ -7,11 +7,17 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
-import { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import { transformInternalReplacements } from '@kbn/elastic-assistant-common';
 import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
+  ALERT_START,
+  ALERT_UPDATED_AT,
+  ALERT_UPDATED_BY_USER_ID,
+  ALERT_UPDATED_BY_USER_NAME,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 
@@ -30,20 +36,20 @@ import {
   ALERT_ATTACK_DISCOVERY_USERS,
   ALERT_RISK_SCORE,
 } from '../../../schedules/fields/field_names';
-import { AttackDiscoveryAlertDocument } from '../../../schedules/types';
+import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
 
 interface HasNumericValue {
   value: number;
 }
 
-interface ConnectorNamesAggregation {
+interface TermsAggregation {
   buckets?: Array<{
     key?: string;
     doc_count?: number;
   }>;
 }
 
-const sumBucketAggregationHasValue = (aggregation: unknown): aggregation is HasNumericValue =>
+const aggregationHasValue = (aggregation: unknown): aggregation is HasNumericValue =>
   typeof aggregation === 'object' &&
   aggregation !== null &&
   'value' in aggregation &&
@@ -53,14 +59,17 @@ interface TransformSearchResponseToAlerts {
   connectorNames: string[];
   data: AttackDiscoveryAlert[];
   uniqueAlertIdsCount: number;
+  uniqueAlertIds: string[];
 }
 
 export const transformSearchResponseToAlerts = ({
   logger,
   response,
+  includeUniqueAlertIds = false,
 }: {
   logger: Logger;
   response: estypes.SearchResponse<AttackDiscoveryAlertDocument>;
+  includeUniqueAlertIds?: boolean;
 }): TransformSearchResponseToAlerts => {
   const data = response.hits.hits.flatMap((hit) => {
     if (hit._source == null || isMissingRequiredFields(hit)) {
@@ -78,7 +87,18 @@ export const transformSearchResponseToAlerts = ({
     return {
       alertIds: source[ALERT_ATTACK_DISCOVERY_ALERT_IDS] ?? [], // required field
       alertRuleUuid: source[ALERT_RULE_UUID],
+      alertStart: moment(source[ALERT_START]).isValid()
+        ? moment(source[ALERT_START]).toISOString()
+        : undefined, // optional field
+      alertUpdatedAt: moment(source[ALERT_UPDATED_AT]).isValid()
+        ? moment(source[ALERT_UPDATED_AT]).toISOString()
+        : undefined, // optional field
+      alertUpdatedByUserId: source[ALERT_UPDATED_BY_USER_ID],
+      alertUpdatedByUserName: source[ALERT_UPDATED_BY_USER_NAME],
       alertWorkflowStatus: source[ALERT_WORKFLOW_STATUS],
+      alertWorkflowStatusUpdatedAt: moment(source[ALERT_WORKFLOW_STATUS_UPDATED_AT]).isValid()
+        ? moment(source[ALERT_WORKFLOW_STATUS_UPDATED_AT]).toISOString()
+        : undefined, // optional field
       connectorId: source[ALERT_ATTACK_DISCOVERY_API_CONFIG].connector_id, // required field
       connectorName: source[ALERT_ATTACK_DISCOVERY_API_CONFIG].name,
       detailsMarkdown: source[ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN] ?? '', // required field
@@ -89,10 +109,7 @@ export const transformSearchResponseToAlerts = ({
         ? source[ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]
         : undefined,
       replacements: Array.isArray(source[ALERT_ATTACK_DISCOVERY_REPLACEMENTS])
-        ? source[ALERT_ATTACK_DISCOVERY_REPLACEMENTS]?.reduce<Record<string, string>>(
-            (acc, r) => (r.uuid != null && r.value != null ? { ...acc, [r.uuid]: r.value } : acc),
-            {}
-          )
+        ? transformInternalReplacements(source[ALERT_ATTACK_DISCOVERY_REPLACEMENTS])
         : undefined,
       riskScore: source[ALERT_RISK_SCORE],
       summaryMarkdown: source[ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN] ?? '', // required field
@@ -110,19 +127,26 @@ export const transformSearchResponseToAlerts = ({
 
   const uniqueAlertIdsCountAggregation = response.aggregations?.unique_alert_ids_count;
 
-  const uniqueAlertIdsCount = sumBucketAggregationHasValue(uniqueAlertIdsCountAggregation)
+  const uniqueAlertIdsCount = aggregationHasValue(uniqueAlertIdsCountAggregation)
     ? uniqueAlertIdsCountAggregation.value
     : 0;
 
-  const connectorNamesAggregation: ConnectorNamesAggregation | undefined = response.aggregations
-    ?.api_config_name as ConnectorNamesAggregation;
+  const uniqueAttackAlertIdsAggregation: TermsAggregation | undefined = response.aggregations
+    ?.all_attack_alert_ids as TermsAggregation;
+  const uniqueAlertIds = includeUniqueAlertIds
+    ? uniqueAttackAlertIdsAggregation?.buckets?.flatMap((bucket) => bucket.key ?? []) ?? []
+    : [];
+
+  const connectorNamesAggregation: TermsAggregation | undefined = response.aggregations
+    ?.api_config_name as TermsAggregation;
 
   const connectorNames =
     connectorNamesAggregation?.buckets?.flatMap((bucket) => bucket.key ?? []) ?? [];
 
   return {
-    connectorNames: connectorNames.sort(), // mutation
+    connectorNames: [...connectorNames].sort(), // mutation
     data,
     uniqueAlertIdsCount,
+    uniqueAlertIds,
   };
 };

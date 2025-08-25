@@ -9,29 +9,28 @@ import React from 'react';
 import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   AppLeaveAction,
   AppMountParameters,
   KibanaExecutionContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import { Adapters } from '@kbn/inspector-plugin/public';
-import { Subscription } from 'rxjs';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import type { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
-import {
+import type {
   GlobalQueryStateFromUrl,
   QueryState,
   QueryStateChange,
   SavedQuery,
-  syncGlobalQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
-import {
-  createKbnUrlStateStorage,
-  withNotifyOnErrors,
-  IKbnUrlStateStorage,
-} from '@kbn/kibana-utils-plugin/public';
+import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { css } from '@emotion/react';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import {
   getData,
@@ -53,16 +52,33 @@ import {
   APP_ID,
   MAP_EMBEDDABLE_NAME,
 } from '../../../../common/constants';
+import type { SavedMap } from '../saved_map';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
-  SavedMap,
   unsavedChangesTitle,
   unsavedChangesWarning,
 } from '../saved_map';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
-import { RefreshConfig as MapRefreshConfig, ParsedMapStateJSON } from '../saved_map';
+import type { RefreshConfig as MapRefreshConfig, ParsedMapStateJSON } from '../saved_map';
 
+const styles = {
+  wrapper: css([
+    {
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    kbnFullBodyHeightCss(),
+  ]),
+  fullScreen: css({
+    height: '100vh !important',
+  }),
+  reactMapsRoot: css({
+    flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  }),
+};
 export interface Props {
   savedMap: SavedMap;
   // saveCounter used to trigger MapApp render after SaveMap.save
@@ -578,10 +594,10 @@ export class MapApp extends React.Component<Props, State> {
     }
 
     return (
-      <div id="maps-plugin" className={this.props.isFullScreen ? 'mapFullScreen' : ''}>
+      <div id="maps-plugin" css={[styles.wrapper, this.props.isFullScreen && styles.fullScreen]}>
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
-        <div id="react-maps-root">
+        <div id="react-maps-root" css={styles.reactMapsRoot}>
           {this._renderLegacyUrlConflict()}
           <MapContainer
             addFilters={this._addFilter}

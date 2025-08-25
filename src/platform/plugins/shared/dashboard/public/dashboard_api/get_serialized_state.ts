@@ -7,29 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { pick } from 'lodash';
-import moment, { Moment } from 'moment';
-import { RefreshInterval } from '@kbn/data-plugin/public';
+import type { Moment } from 'moment';
+import moment from 'moment';
 
 import type { Reference } from '@kbn/content-management-utils';
-import {
-  convertPanelMapToPanelsArray,
-  generateNewPanelIds,
-} from '../../common/lib/dashboard_panel_converters';
-import { extractReferences } from '../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 import type { DashboardAttributes } from '../../server';
 
-import { convertDashboardVersionToNumber } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
-import {
-  dataService,
-  embeddableService,
-  savedObjectsTaggingService,
-} from '../services/kibana_services';
 import type { DashboardState } from '../../common';
 import { LATEST_VERSION } from '../../common/content_management';
-import { convertNumberToDashboardVersion } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
-
-const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
+import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
+import type { DashboardApi } from './types';
+import { generateNewPanelIds } from './generate_new_panel_ids';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
@@ -46,20 +36,17 @@ export const getSerializedState = ({
   generateNewIds,
   dashboardState,
   panelReferences,
-  searchSourceReferences,
 }: {
   controlGroupReferences?: Reference[];
   generateNewIds?: boolean;
   dashboardState: DashboardState;
   panelReferences?: Reference[];
-  searchSourceReferences?: Reference[];
-}) => {
+}): ReturnType<DashboardApi['getSerializedState']> => {
   const {
     query: {
       timefilter: { timefilter },
     },
   } = dataService;
-
   const {
     tags,
     query,
@@ -80,10 +67,7 @@ export const getSerializedState = ({
   let { panels } = dashboardState;
   let prefixedPanelReferences = panelReferences;
   if (generateNewIds) {
-    const { panels: newPanels, references: newPanelReferences } = generateNewPanelIds(
-      panels,
-      panelReferences
-    );
+    const { newPanels, newPanelReferences } = generateNewPanelIds(panels, panelReferences);
     panels = newPanels;
     prefixedPanelReferences = newPanelReferences;
     //
@@ -92,7 +76,7 @@ export const getSerializedState = ({
     //
   }
 
-  const searchSource = { filter: filters, query };
+  const searchSource = { filters, query };
   const options = {
     useMargins,
     syncColors,
@@ -100,7 +84,6 @@ export const getSerializedState = ({
     syncTooltips,
     hidePanelTitles,
   };
-  const savedPanels = convertPanelMapToPanelsArray(panels, true);
 
   /**
    * Parse global time filter settings
@@ -117,43 +100,31 @@ export const getSerializedState = ({
       ]) as RefreshInterval)
     : undefined;
 
-  const rawDashboardAttributes: DashboardAttributes = {
-    version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
+  const attributes: DashboardAttributes = {
+    version: LATEST_VERSION,
     controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
     kibanaSavedObjectMeta: { searchSource },
     description: description ?? '',
     refreshInterval,
     timeRestore,
     options,
-    panels: savedPanels,
+    panels,
     timeFrom,
     title,
     timeTo,
   };
 
-  /**
-   * Extract references from raw attributes and tags into the references array.
-   */
-  const { attributes, references: dashboardReferences } = extractReferences(
-    {
-      attributes: rawDashboardAttributes,
-      references: searchSourceReferences ?? [],
-    },
-    { embeddablePersistableStateService: embeddableService }
-  );
-
   // TODO Provide tags as an array of tag names in the attribute. In that case, tag references
   // will be extracted by the server.
   const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
   const references = savedObjectsTaggingApi?.ui.updateTagsReferences
-    ? savedObjectsTaggingApi?.ui.updateTagsReferences(dashboardReferences, tags)
-    : dashboardReferences;
+    ? savedObjectsTaggingApi?.ui.updateTagsReferences([], tags)
+    : [];
 
   const allReferences = [
     ...references,
     ...(prefixedPanelReferences ?? []),
     ...(controlGroupReferences ?? []),
-    ...(searchSourceReferences ?? []),
   ];
   return { attributes, references: allReferences };
 };

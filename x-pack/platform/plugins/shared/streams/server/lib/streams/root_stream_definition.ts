@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { Streams, getSegments } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import { getSegments } from '@kbn/streams-schema';
+import { baseFields } from './component_templates/logs_layer';
 
 export const LOGS_ROOT_STREAM_NAME = 'logs';
 
@@ -14,25 +16,11 @@ export const rootStreamDefinition: Streams.WiredStream.Definition = {
   description: 'Root stream',
   ingest: {
     lifecycle: { dsl: {} },
-    processing: [],
+    processing: { steps: [] },
     wired: {
       routing: [],
       fields: {
-        '@timestamp': {
-          type: 'date',
-        },
-        message: {
-          type: 'match_only_text',
-        },
-        'host.name': {
-          type: 'keyword',
-        },
-        'log.level': {
-          type: 'keyword',
-        },
-        'stream.name': {
-          type: 'system',
-        },
+        ...baseFields,
       },
     },
   },

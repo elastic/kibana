@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import type { MlSummaryJob } from '@kbn/ml-plugin/common';
 import styled from 'styled-components';
 import { rgba } from 'polished';
@@ -44,9 +44,13 @@ export const OutdatedMlJobsUpgradeModal = memo(function LegacyMlJobsUpgradeModal
   onCancel,
   onConfirm,
 }: OutdatedMlJobsUpgradeModalProps): JSX.Element {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.ML_JOB_UPGRADE_MODAL_TITLE}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={i18n.ML_JOB_UPGRADE_MODAL_CANCEL}

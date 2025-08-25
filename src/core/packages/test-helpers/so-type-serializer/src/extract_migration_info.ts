@@ -12,7 +12,7 @@ import { getFlattenedObject } from '@kbn/std';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
 
 export interface SavedObjectTypeMigrationInfo {
   name: string;
@@ -56,19 +56,21 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     typeof soType.modelVersions === 'function'
       ? soType.modelVersions()
       : soType.modelVersions ?? {};
-  const modelVersionIds = Object.keys(modelVersionMap);
-  const modelVersions = modelVersionIds.map<ModelVersionSummary>((version) => {
-    const entry = modelVersionMap[version];
-    return {
-      version,
-      changeTypes: [...new Set(entry.changes.map((change) => change.type))].sort(),
-      hasTransformation: hasTransformation(entry.changes),
-      newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(entry.changes))),
-      schemas: {
-        forwardCompatibility: !!entry.schemas?.forwardCompatibility,
-      },
-    };
-  });
+
+  const modelVersions: ModelVersionSummary[] = Object.entries(modelVersionMap).map(
+    ([version, modelVersion]) => {
+      const { changes, schemas } = modelVersion ?? { changes: [] };
+      return {
+        version,
+        changeTypes: [...new Set(changes.map((change) => change.type))].sort(),
+        hasTransformation: hasTransformation(changes),
+        newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(changes))),
+        schemas: {
+          forwardCompatibility: !!schemas?.forwardCompatibility,
+        },
+      };
+    }
+  );
 
   return {
     name: soType.name,

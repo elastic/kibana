@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,16 +19,16 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiIconTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import classnames from 'classnames';
 
-import { ProjectID, EnvironmentName, Project, environmentNames } from '../../../common/labs';
+import type { ProjectID, EnvironmentName, Project } from '../../../common/labs';
+import { environmentNames } from '../../../common/labs';
 import { EnvironmentSwitch } from './environment_switch';
 
 import { LabsStrings } from '../../i18n';
 const { ListItem: strings } = LabsStrings.Components;
-
-import './project_list_item.scss';
 
 export interface Props {
   project: Project;
@@ -37,14 +38,15 @@ export interface Props {
 export const ProjectListItem = ({ project, onStatusChange }: Props) => {
   const { id, status, isActive, name, description, solutions } = project;
   const { isEnabled, isOverride } = status;
+  const { projectListItemStyles, pendingChangesIndicatorStyles, solutionsStyles } = useStyles();
 
   return (
     <EuiFlexItem
       className={classnames({
-        projectListItem: true,
         'projectListItem--isOverridden': isOverride,
         'projectListItem--isOverriddenEnabled': isOverride && isEnabled,
       })}
+      css={projectListItemStyles}
     >
       <EuiFlexGroup gutterSize="m" responsive={false}>
         <EuiFlexItem>
@@ -54,7 +56,7 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
                 <h2>
                   {name}
                   {isOverride ? (
-                    <span className="projectListItem__titlePendingChangesIndicator">
+                    <span css={pendingChangesIndicatorStyles}>
                       <EuiIconTip
                         content={strings.getOverriddenIconTipLabel()}
                         position="top"
@@ -67,7 +69,7 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <div className="projectListItem__solutions">
+              <div css={solutionsStyles}>
                 {solutions.map((solution) => (
                   <EuiBadge key={solution}>{solution}</EuiBadge>
                 ))}
@@ -118,4 +120,44 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
       </EuiFlexGroup>
     </EuiFlexItem>
   );
+};
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return {
+      projectListItemStyles: css({
+        position: 'relative',
+        '&.projectListItem--isOverridden:before': {
+          position: 'absolute',
+          top: euiTheme.size.m,
+          left: euiTheme.size.xs,
+          bottom: 0,
+          width: euiTheme.size.xs,
+          background: euiTheme.colors.success,
+          content: '""',
+        },
+        '.euiSwitch__label': {
+          width: '100%',
+        },
+        '.euiFlyout &': {
+          '&.projectListItem--isOverridden:before': {
+            left: `-${euiTheme.size.m}`,
+          },
+          '&.projectListItem--isOverridden:first-child:before': {
+            top: 0,
+          },
+        },
+      }),
+      pendingChangesIndicatorStyles: css({
+        marginLeft: euiTheme.size.s,
+        position: 'relative',
+        top: '-1px',
+      }),
+      solutionsStyles: css({
+        textTransform: 'capitalize',
+      }),
+    };
+  }, [euiTheme]);
+  return styles;
 };

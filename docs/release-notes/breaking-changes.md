@@ -36,9 +36,17 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+
+## 9.1.0 [kibana-9.1.0-breaking-changes]
+$$$kibana-213916$$$
+::::{dropdown} Change to variable syntax in {{esql}} queries
+
+% **Details**<br> Fields and functions variables are now described with `??` in {{esql}} queries. For value variables, you can continue to use `?`. 
+
+View [#213916]({{kib-pull}}213916).
+::::
+
 ## 9.0.0 [kibana-900-breaking-changes]
-
-
 $$$kibana-193792$$$
 :::{dropdown} Access to {{kib}}'s internal APIs is blocked
 Access to internal Kibana HTTP APIs is restricted from version 9.0.0. This is to ensure that HTTP API integrations with Kibana avoid unexpected breaking changes.
@@ -239,6 +247,20 @@ $$$kibana-162389$$$
 The `visualization:colorMapping` advanced setting for TSVB and Visualize charts has been removed. You can switch to Lens charts, which offer a more advanced, per-chart color mapping feature with enhanced configuration options. View [#162389](https://github.com/elastic/kibana/pull/162389).
 ::::
 
+**Elasticsearch solution**
+
+$$$kibana-212031$$$
+::::{dropdown} Removed Behavioral Analytics
+:name: breaking-212031
+
+**Details**
+
+The Behavioral Analytics feature is removed from the Kibana interface in 9.0 and its associated [APIs are deprecated](https://www.elastic.co/docs/release-notes/elasticsearch/deprecations#elasticsearch-900-deprecations).
+
+View [#212031]({{kib-pull}}212031).
+::::
+
+
 **Elastic Observability solution**
 
 $$$kibana-202278$$$
@@ -262,12 +284,12 @@ View [#203996]({{kib-pull}}203996).
 ::::
 
 $$$kibana-203685$$$
-::::{dropdown} Removed Logs Explorer
+::::{dropdown} Removed Logs explorer
 :name: deprecation-203685
 
 **Details**
 
-Logs Explorer has been removed. Instead, you can use Discover, that was improved to provide an optimal logs exploration experience. View [#203685]({{kib-pull}}203685).
+Logs explorer has been removed. Instead, you can use Discover, that was improved to provide an optimal logs exploration experience. View [#203685]({{kib-pull}}203685).
 ::::
 
 **Elastic Security solution**

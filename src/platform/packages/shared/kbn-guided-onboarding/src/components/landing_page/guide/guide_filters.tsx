@@ -12,9 +12,10 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { css } from '@emotion/react';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { GuideFilterValuesClassic } from '../../../../classic';
-import { GuideCardSolutions } from './guide_cards';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
+import type { GuideFilterValuesClassic } from '../../../../classic';
+import type { GuideCardSolutions } from './guide_cards';
 
 const filterButtonCss = css`
   border-radius: 20px !important;
@@ -66,34 +67,6 @@ export const GuideFilters = ({
 
   return (
     <EuiFlexGroup justifyContent="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          onClick={onSelectFilter}
-          data-filter-id="search"
-          data-test-subj="guide-filter-search"
-          color="text"
-          css={[filterButtonCss, activeFilter === 'search' && activeFilterFill]}
-        >
-          <FormattedMessage
-            id="guidedOnboardingPackage.gettingStarted.guideFilter.search.buttonLabel"
-            defaultMessage="Elasticsearch"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          onClick={onSelectFilter}
-          data-filter-id="observability"
-          data-test-subj="guide-filter-observability"
-          color="text"
-          css={[filterButtonCss, activeFilter === 'observability' && activeFilterFill]}
-        >
-          <FormattedMessage
-            id="guidedOnboardingPackage.gettingStarted.guideFilter.observability.buttonLabel"
-            defaultMessage="Observability"
-          />
-        </EuiButton>
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
           onClick={onSelectFilter}

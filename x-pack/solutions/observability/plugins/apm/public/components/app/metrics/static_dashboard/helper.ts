@@ -6,7 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
+import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { existingDashboardFileNames, loadDashboardFile } from './dashboards/dashboard_catalog';
 import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
 interface DashboardFileProps {
@@ -47,7 +47,7 @@ const getAdhocDataView = (dataView: DataView) => {
 export async function convertSavedDashboardToPanels(
   props: MetricsDashboardProps,
   dataView: DataView
-): Promise<DashboardPanelMap | undefined> {
+): Promise<DashboardState['panels'] | undefined> {
   const dashboardFilename = getDashboardFileNameFromProps(props);
   const dashboardJSON = !!dashboardFilename ? await loadDashboardFile(dashboardFilename) : false;
 
@@ -60,14 +60,14 @@ export async function convertSavedDashboardToPanels(
   const panels = panelsRawObjects.reduce((acc, panel) => {
     const { gridData, embeddableConfig, panelIndex, title } = panel;
     const { attributes } = embeddableConfig;
-    const { state } = attributes;
-    const layers =
-      state.datasourceStates?.formBased?.layers ?? state.datasourceStates?.textBased?.layers ?? [];
+    const datasourceStates = attributes?.state?.datasourceStates ?? {};
+    const layers = datasourceStates.formBased?.layers ?? datasourceStates.textBased?.layers ?? [];
 
-    acc[gridData.i] = {
+    acc.push({
       type: panel.type,
       gridData,
-      explicitInput: {
+      panelIndex,
+      panelConfig: {
         id: panelIndex,
         ...embeddableConfig,
         title,
@@ -75,7 +75,7 @@ export async function convertSavedDashboardToPanels(
           ...attributes,
           references: [],
           state: {
-            ...state,
+            ...(attributes?.state ?? {}),
             adHocDataViews: getAdhocDataView(dataView),
             internalReferences: Object.keys(layers).map((layerId) => ({
               id: dataView.id,
@@ -85,10 +85,10 @@ export async function convertSavedDashboardToPanels(
           },
         },
       },
-    };
+    });
 
     return acc;
-  }, {}) as DashboardPanelMap;
+  }, []);
 
   return panels;
 }

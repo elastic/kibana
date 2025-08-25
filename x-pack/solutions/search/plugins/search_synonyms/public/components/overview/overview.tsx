@@ -18,10 +18,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { PLUGIN_TITLE } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { SynonymSets } from '../synonym_sets/synonym_sets';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
+import { useSynonymsBreadcrumbs } from '../../hooks/use_synonyms_breadcrumbs';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { CreateSynonymsSetModal } from '../synonym_sets/create_new_set_modal';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
@@ -33,6 +35,7 @@ export const SearchSynonymsOverview = () => {
   } = useKibana();
   const { data: synonymsData, isInitialLoading, isError, error } = useFetchSynonymsSets();
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  useSynonymsBreadcrumbs();
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -49,7 +52,7 @@ export const SearchSynonymsOverview = () => {
     >
       {!isInitialLoading && !isError && synonymsData?._meta.totalItemCount !== 0 && (
         <KibanaPageTemplate.Header
-          pageTitle="Synonyms"
+          pageTitle={PLUGIN_TITLE}
           restrictWidth
           color="primary"
           rightSideItems={[

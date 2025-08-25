@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import color from 'color';
-import { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
-import { Panel } from '../../../../../common/types';
-import { Column, Layer } from '../../convert';
+import type { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
+import { getValidColor } from '@kbn/coloring';
+import type { Panel } from '../../../../../common/types';
+import type { Column, Layer } from '../../convert';
 import { getPalette } from '../palette';
 import { findMetricColumn, getMetricWithCollapseFn } from '../../../utils';
 
@@ -62,7 +62,9 @@ export const getConfigurationForGauge = (
   }
 
   const primaryColumn = findMetricColumn(primaryMetricWithCollapseFn.metric, layer.columns);
-  const primaryColor = primarySeries.color ? color(primarySeries.color).hex() : undefined;
+  const primaryColor = primarySeries.color
+    ? getValidColor(primarySeries.color, { shouldBeCompatibleWithColorJs: true }).hex()
+    : undefined;
 
   const gaugePalette = getPalette(model.gauge_color_rules ?? [], primaryColor);
   if (gaugePalette === null) {

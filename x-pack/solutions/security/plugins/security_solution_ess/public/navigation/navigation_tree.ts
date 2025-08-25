@@ -24,14 +24,16 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       isCollapsible: false,
       children: [
         {
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              link: 'discover',
-            },
-            defaultNavigationTree.dashboards(),
-          ],
+          link: securityLink(SecurityPageName.landing),
+          title: SOLUTION_NAME,
+          icon: 'logoSecurity',
+          renderAs: 'home',
+          sideNavVersion: 'v2',
         },
+        {
+          link: 'discover',
+        },
+        defaultNavigationTree.dashboards(),
         {
           breadcrumbStatus: 'hidden',
           children: [
@@ -54,19 +56,23 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         {
           breadcrumbStatus: 'hidden',
           children: [
+            defaultNavigationTree.entityAnalytics(),
+            defaultNavigationTree.explore(),
             defaultNavigationTree.investigations(),
             {
               id: SecurityPageName.threatIntelligence,
               link: securityLink(SecurityPageName.threatIntelligence),
             },
-            defaultNavigationTree.explore(),
           ],
         },
         {
           breadcrumbStatus: 'hidden',
           children: [
+            {
+              id: SecurityPageName.assetInventory,
+              link: securityLink(SecurityPageName.assetInventory),
+            },
             defaultNavigationTree.assets(services),
-            defaultNavigationTree.entityAnalytics(),
           ],
         },
         defaultNavigationTree.ml(),
@@ -119,6 +125,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                     { link: 'management:cross_cluster_replication' },
                     { link: 'management:remote_clusters' },
                     { link: 'management:migrate_data' },
+                    { link: 'management:content_connectors' },
                   ],
                 },
                 {
@@ -168,13 +175,19 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                     { link: 'management:objects' },
                     { link: 'management:tags' },
                     { link: 'management:search_sessions' },
-                    { link: 'management:aiAssistantManagementSelection' },
                     { link: 'management:spaces' },
                     { link: 'maps' },
                     { link: 'visualize' },
                     { link: 'graph' },
                     { link: 'canvas' },
                     { link: 'management:settings' },
+                  ],
+                },
+                {
+                  title: 'AI',
+                  children: [
+                    { link: 'management:genAiSettings' },
+                    { link: 'management:aiAssistantManagementSelection' },
                   ],
                 },
                 {

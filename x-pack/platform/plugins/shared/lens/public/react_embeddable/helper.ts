@@ -5,22 +5,31 @@
  * 2.0.
  */
 
+import type { Reference } from '@kbn/content-management-utils';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
   getInheritedViewMode,
-  ViewMode,
   type PublishingSubject,
   apiHasExecutionContext,
+  findSavedObjectRef,
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { RenderMode } from '@kbn/expressions-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
-import type { LensEmbeddableStartServices, LensRuntimeState, LensSerializedState } from './types';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
+import type {
+  LensEmbeddableStartServices,
+  LensRuntimeState,
+  LensSerializedState,
+  StructuredDatasourceStates,
+} from './types';
 import { loadESQLAttributes } from './esql';
+import type { DatasourceStates, GeneralDatasourceStates } from '../state_management';
+import type { FormBasedPersistedState } from '../datasources/form_based/types';
+import type { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
+import { DOC_TYPE } from '../../common/constants';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -65,14 +74,16 @@ export async function deserializeState(
     | 'uiSettings'
   >,
   rawState: LensSerializedState,
-  references?: SavedObjectReference[]
+  references?: Reference[]
 ) {
   const fallbackAttributes = createEmptyLensState().attributes;
-  if (rawState.savedObjectId) {
+  const savedObjectRef = findSavedObjectRef(DOC_TYPE, references);
+  const savedObjectId = savedObjectRef?.id ?? rawState.savedObjectId;
+  if (savedObjectId) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =
-        await attributeService.loadFromLibrary(rawState.savedObjectId);
-      return { ...rawState, attributes, managed, sharingSavedObjectProps };
+        await attributeService.loadFromLibrary(savedObjectId);
+      return { ...rawState, savedObjectId, attributes, managed, sharingSavedObjectProps };
     } catch (e) {
       // return an empty Lens document if no saved object is found
       return { ...rawState, attributes: fallbackAttributes };
@@ -97,39 +108,6 @@ export async function deserializeState(
     }
   }
   return newState;
-}
-
-export function emptySerializer() {
-  return {};
-}
-
-export type ComparatorType<T extends unknown> = [
-  BehaviorSubject<T>,
-  (newValue: T) => void,
-  (a: T, b: T) => boolean
-];
-
-export function makeComparator<T extends unknown>(
-  observable: BehaviorSubject<T>
-): ComparatorType<T> {
-  return [observable, (newValue: T) => observable.next(newValue), fastIsEqual];
-}
-
-/**
- * Helper function to either extract an observable from an API or create a new one
- * with a default value to start with.
- * Note that extracting from the API will make subscription emit if the value changes upstream
- * as it keeps the original reference without cloning.
- * @returns the observable and a comparator to use for detecting "unsaved changes" on it
- */
-export function buildObservableVariable<T extends unknown>(
-  variable: T | PublishingSubject<T>
-): [BehaviorSubject<T>, ComparatorType<T>] {
-  if (variable instanceof BehaviorSubject) {
-    return [variable, makeComparator(variable)];
-  }
-  const variable$ = new BehaviorSubject<T>(variable as T);
-  return [variable$, makeComparator(variable$)];
 }
 
 export function isTextBasedLanguage(state: LensRuntimeState) {
@@ -171,4 +149,17 @@ export function extractInheritedViewModeObservable(
     return extractInheritedViewModeObservable(parentApi.parentApi);
   }
   return new BehaviorSubject<ViewMode>('view');
+}
+
+export function getStructuredDatasourceStates(
+  datasourceStates?: Readonly<GeneralDatasourceStates>
+): StructuredDatasourceStates {
+  return {
+    formBased: ((datasourceStates as DatasourceStates)?.formBased?.state ??
+      datasourceStates?.formBased ??
+      undefined) as FormBasedPersistedState,
+    textBased: ((datasourceStates as DatasourceStates)?.textBased?.state ??
+      datasourceStates?.textBased ??
+      undefined) as TextBasedPersistedState,
+  };
 }

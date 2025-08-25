@@ -7,6 +7,7 @@
 
 import classNames from 'classnames';
 import React from 'react';
+import type { DraggableProvidedDragHandleProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,10 +15,9 @@ import {
   EuiLink,
   EuiIcon,
   EuiToolTip,
-  DraggableProvidedDragHandleProps,
 } from '@elastic/eui';
 
-import { ComponentTemplateListItem } from '../../../../../common';
+import type { ComponentTemplateListItem } from '../../../../../common';
 import { TemplateContentIndicator } from '../../shared';
 
 import './component_templates_list_item.scss';
@@ -83,7 +83,7 @@ export const ComponentTemplatesListItem = ({
             <EuiFlexGroup gutterSize="xs">
               {actions!.map((action, i) => (
                 <EuiFlexItem key={i}>
-                  <EuiToolTip content={action.label}>
+                  <EuiToolTip content={action.label} disableScreenReaderOutput>
                     <EuiButtonIcon
                       iconType={action.icon}
                       onClick={() => action.handler(component)}

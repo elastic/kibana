@@ -8,10 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { syncSpaceGlobalParams } from '../../../synthetics_service/sync_global_params';
-import { SyntheticsRestApiRouteFactory } from '../../types';
-import {
+import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { runSynPrivateLocationMonitorsTaskSoon } from '../../../tasks/sync_private_locations_monitors_task';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
+import type {
   SyntheticsParamRequest,
   SyntheticsParams,
   SyntheticsParamSOAttributes,
@@ -42,7 +42,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       body: schema.oneOf([ParamsObjectSchema, schema.arrayOf(ParamsObjectSchema)]),
     },
   },
-  handler: async ({ request, response, server, savedObjectsClient, syntheticsMonitorClient }) => {
+  handler: async ({ request, response, server, savedObjectsClient }) => {
     try {
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
         id: DEFAULT_SPACE_ID,
@@ -57,12 +57,8 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         savedObjectsData
       );
 
-      void syncSpaceGlobalParams({
-        spaceId,
-        logger: server.logger,
-        encryptedSavedObjects: server.encryptedSavedObjects,
-        savedObjects: server.coreStart.savedObjects,
-        syntheticsMonitorClient,
+      await runSynPrivateLocationMonitorsTaskSoon({
+        server,
       });
 
       if (savedObjectsData.length > 1) {

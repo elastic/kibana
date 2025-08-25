@@ -11,16 +11,16 @@ import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import {
   SavedObjectFinder,
-  SavedObjectFinderProps,
   type SavedObjectMetaData,
 } from '@kbn/saved-objects-finder-plugin/public';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { apiHasType } from '@kbn/presentation-publishing';
-import { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import {
   core,
   savedObjectsTaggingOss,
@@ -68,7 +68,6 @@ export const AddFromLibraryFlyout = ({
         );
         return;
       }
-
       libraryType.onAdd(container, savedObject);
       runAddTelemetry(container, savedObject, libraryType.savedObjectMetaData);
     },

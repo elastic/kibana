@@ -8,15 +8,20 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, map, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, merge, skip } from 'rxjs';
 
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { Filter, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
+import type { Filter, RangeFilterParams } from '@kbn/es-query';
+import { buildRangeFilter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 import { isCompressed } from '../../../control_group/utils/is_compressed';
-import { RANGE_SLIDER_CONTROL } from '../../../../common';
-import { initializeDataControl } from '../initialize_data_control';
+import {
+  defaultDataControlComparators,
+  initializeDataControlManager,
+} from '../data_control_manager';
 import type { DataControlFactory } from '../types';
 import { RangeSliderControl } from './components/range_slider_control';
 import { hasNoResults$ } from './has_no_results';
@@ -59,65 +64,79 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         </>
       );
     },
-    buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
+    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
       const controlFetch$ = controlGroupApi.controlFetch$(uuid);
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
       const step$ = new BehaviorSubject<number | undefined>(initialState.step ?? 1);
 
-      const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step'>>(
+      const dataControlManager = initializeDataControlManager<
+        Pick<RangesliderControlState, 'step'>
+      >(
         uuid,
         RANGE_SLIDER_CONTROL,
-        'rangeSliderDataView',
         initialState,
-        {
-          step: step$,
+        () => ({ step: step$.getValue() }),
+        (editorState: Pick<RangesliderControlState, 'step'>) => {
+          if (editorState.step !== step$.getValue()) step$.next(editorState.step);
         },
         controlGroupApi
       );
 
       const selections = initializeRangeControlSelections(
         initialState,
-        dataControl.setters.onSelectionChange
+        dataControlManager.internalApi.onSelectionChange
       );
 
-      const api = buildApi(
-        {
-          ...dataControl.api,
-          dataLoading$,
-          getTypeDisplayName: RangeSliderStrings.control.getDisplayName,
-          serializeState: () => {
-            const { rawState: dataControlState, references } = dataControl.serialize();
-            return {
-              rawState: {
-                ...dataControlState,
-                step: step$.getValue(),
-                value: selections.value$.getValue(),
-              },
-              references, // does not have any references other than those provided by the data control serializer
-            };
+      function serializeState() {
+        return {
+          rawState: {
+            ...dataControlManager.getLatestState(),
+            step: step$.getValue(),
+            value: selections.value$.getValue(),
           },
-          clearSelections: () => {
-            selections.setValue(undefined);
-          },
-          hasSelections$: selections.hasRangeSelection$,
+          references: dataControlManager.internalApi.extractReferences('rangeSliderDataView'),
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<RangesliderControlState>({
+        uuid,
+        parentApi: controlGroupApi,
+        serializeState,
+        anyStateChange$: merge(dataControlManager.anyStateChange$, selections.value$, step$).pipe(
+          map(() => undefined)
+        ),
+        getComparators: () => {
+          return {
+            ...defaultDataControlComparators,
+            value: 'referenceEquality',
+            step: (a, b) => (a ?? 1) === (b ?? 1),
+          };
         },
-        {
-          ...dataControl.comparators,
-          ...selections.comparators,
-          step: [
-            step$,
-            (nextStep: number | undefined) => step$.next(nextStep),
-            (a, b) => (a ?? 1) === (b ?? 1),
-          ],
-        }
-      );
+        onReset: (lastSaved) => {
+          dataControlManager.reinitializeState(lastSaved?.rawState);
+          selections.setValue(lastSaved?.rawState.value);
+          step$.next(lastSaved?.rawState.step ?? 1);
+        },
+      });
+
+      const api = finalizeApi({
+        ...unsavedChangesApi,
+        ...dataControlManager.api,
+        dataLoading$,
+        getTypeDisplayName: RangeSliderStrings.control.getDisplayName,
+        serializeState,
+        clearSelections: () => {
+          selections.setValue(undefined);
+        },
+        hasSelections$: selections.hasRangeSelection$,
+      });
 
       const dataLoadingSubscription = combineLatest([
         loadingMinMax$,
         loadingHasNoResults$,
-        dataControl.api.dataLoading$,
+        dataControlManager.api.dataLoading$,
       ])
         .pipe(
           debounceTime(100),
@@ -129,8 +148,8 @@ export const getRangesliderControlFactory = (): DataControlFactory<
 
       // Clear state when the field changes
       const fieldChangedSubscription = combineLatest([
-        dataControl.stateManager.fieldName,
-        dataControl.stateManager.dataViewId,
+        dataControlManager.api.fieldName$,
+        dataControlManager.api.dataViewId$,
       ])
         .pipe(skip(1))
         .subscribe(() => {
@@ -142,12 +161,12 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       const minMaxSubscription = minMax$({
         controlFetch$,
-        dataViews$: dataControl.api.dataViews$,
-        fieldName$: dataControl.stateManager.fieldName,
+        dataViews$: dataControlManager.api.dataViews$,
+        fieldName$: dataControlManager.api.fieldName$,
         setIsLoading: (isLoading: boolean) => {
           // clear previous loading error on next loading start
-          if (isLoading && dataControl.api.blockingError$.value) {
-            dataControl.api.setBlockingError(undefined);
+          if (isLoading && dataControlManager.api.blockingError$.value) {
+            dataControlManager.api.setBlockingError(undefined);
           }
           loadingMinMax$.next(isLoading);
         },
@@ -163,7 +182,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           max: number | undefined;
         }) => {
           if (error) {
-            dataControl.api.setBlockingError(error);
+            dataControlManager.api.setBlockingError(error);
           }
           max$.next(max !== undefined ? Math.ceil(max) : undefined);
           min$.next(min !== undefined ? Math.floor(min) : undefined);
@@ -171,8 +190,8 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       );
 
       const outputFilterSubscription = combineLatest([
-        dataControl.api.dataViews$,
-        dataControl.stateManager.fieldName,
+        dataControlManager.api.dataViews$,
+        dataControlManager.api.fieldName$,
         selections.value$,
       ])
         .pipe(debounceTime(0))
@@ -184,10 +203,10 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           const lte = parseFloat(value?.[1] ?? '');
 
           let rangeFilter: Filter | undefined;
-          if (value && dataView && dataViewField && !isNaN(gte) && !isNaN(lte)) {
+          if (value && dataView && dataViewField && (!isNaN(gte) || !isNaN(lte))) {
             const params = {
-              gte,
-              lte,
+              gte: !isNaN(gte) ? gte : -Infinity,
+              lte: !isNaN(lte) ? lte : Infinity,
             } as RangeFilterParams;
 
             rangeFilter = buildRangeFilter(dataViewField, params, dataView);
@@ -195,14 +214,14 @@ export const getRangesliderControlFactory = (): DataControlFactory<
             rangeFilter.meta.type = 'range';
             rangeFilter.meta.params = params;
           }
-          dataControl.setters.setOutputFilter(rangeFilter);
+          dataControlManager.internalApi.setOutputFilter(rangeFilter);
         });
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
       const hasNotResultsSubscription = hasNoResults$({
         controlFetch$,
-        dataViews$: dataControl.api.dataViews$,
-        rangeFilters$: dataControl.api.filters$,
+        dataViews$: dataControlManager.api.dataViews$,
+        rangeFilters$: dataControlManager.api.filters$,
         ignoreParentSettings$: controlGroupApi.ignoreParentSettings$,
         setIsLoading: (isLoading: boolean) => {
           loadingHasNoResults$.next(isLoading);
@@ -212,22 +231,31 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       });
 
       if (selections.hasInitialSelections) {
-        await dataControl.api.untilFiltersReady();
+        await dataControlManager.api.untilFiltersReady();
       }
 
       return {
         api,
         Component: ({ className: controlPanelClassName }) => {
-          const [dataLoading, fieldFormatter, max, min, selectionHasNoResults, step, value] =
-            useBatchedPublishingSubjects(
-              dataLoading$,
-              dataControl.api.fieldFormatter,
-              max$,
-              min$,
-              selectionHasNoResults$,
-              step$,
-              selections.value$
-            );
+          const [
+            dataLoading,
+            fieldFormatter,
+            max,
+            min,
+            selectionHasNoResults,
+            step,
+            value,
+            fieldName,
+          ] = useBatchedPublishingSubjects(
+            dataLoading$,
+            dataControlManager.api.fieldFormatter,
+            max$,
+            min$,
+            selectionHasNoResults$,
+            step$,
+            selections.value$,
+            dataControlManager.api.fieldName$
+          );
 
           useEffect(() => {
             return () => {
@@ -242,6 +270,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           return (
             <RangeSliderControl
               controlPanelClassName={controlPanelClassName}
+              fieldName={fieldName}
               fieldFormatter={fieldFormatter}
               isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}

@@ -7,32 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, CoreStart, CoreSetup } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { type IndicesAutocompleteResult, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
+
+import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
-  esqlControlTrigger,
   ESQL_CONTROL_TRIGGER,
+  esqlControlTrigger,
 } from './triggers/esql_controls/esql_control_trigger';
 import {
-  updateESQLQueryTrigger,
   UPDATE_ESQL_QUERY_TRIGGER,
+  updateESQLQueryTrigger,
 } from './triggers/update_esql_query/update_esql_query_trigger';
-import { ACTION_UPDATE_ESQL_QUERY, ACTION_CREATE_ESQL_CONTROL } from './triggers/constants';
+import { ACTION_CREATE_ESQL_CONTROL, ACTION_UPDATE_ESQL_QUERY } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
-import { JoinIndicesAutocompleteResult } from '../common';
-import { cacheNonParametrizedAsyncFunction } from './util/cache';
+import { cacheNonParametrizedAsyncFunction, cacheParametrizedAsyncFunction } from './util/cache';
 import { EsqlVariablesService } from './variables_service';
 
 interface EsqlPluginSetupDependencies {
-  indexManagement: IndexManagementPluginSetup;
   uiActions: UiActionsSetup;
 }
 
@@ -47,16 +49,16 @@ interface EsqlPluginStartDependencies {
 }
 
 export interface EsqlPluginStart {
-  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+  getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getInferenceEndpointsAutocomplete?: (
+    taskType: InferenceTaskType
+  ) => Promise<InferenceEndpointsAutocompleteResult>;
   variablesService: EsqlVariablesService;
 }
 
 export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
-  private indexManagement?: IndexManagementPluginSetup;
-
-  public setup(_: CoreSetup, { indexManagement, uiActions }: EsqlPluginSetupDependencies) {
-    this.indexManagement = indexManagement;
-
+  public setup(_: CoreSetup, { uiActions }: EsqlPluginSetupDependencies) {
     uiActions.registerTrigger(updateESQLQueryTrigger);
     uiActions.registerTrigger(esqlControlTrigger);
 
@@ -94,7 +96,11 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       const { CreateESQLControlAction } = await import(
         './triggers/esql_controls/esql_control_action'
       );
-      const createESQLControlAction = new CreateESQLControlAction(core, data.search.search);
+      const createESQLControlAction = new CreateESQLControlAction(
+        core,
+        data.search.search,
+        data.query.timefilter.timefilter
+      );
       return createESQLControlAction;
     });
 
@@ -102,7 +108,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
 
     const getJoinIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
       async () => {
-        const result = await core.http.get<JoinIndicesAutocompleteResult>(
+        const result = await core.http.get<IndicesAutocompleteResult>(
           '/internal/esql/autocomplete/join/indices'
         );
 
@@ -112,8 +118,52 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
     );
 
+    const getTimeseriesIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
+      async () => {
+        const result = await core.http.get<IndicesAutocompleteResult>(
+          '/internal/esql/autocomplete/timeseries/indices'
+        );
+
+        return result;
+      },
+      1000 * 60 * 5, // Keep the value in cache for 5 minutes
+      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
+    );
+
+    const getEditorExtensionsAutocomplete = async (
+      queryString: string,
+      activeSolutionId: SolutionId
+    ) => {
+      const result = await core.http.get(
+        `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${queryString}`
+      );
+      return result;
+    };
+
+    // Create a cached version of getEditorExtensionsAutocomplete
+    const cachedGetEditorExtensionsAutocomplete = cacheParametrizedAsyncFunction(
+      getEditorExtensionsAutocomplete,
+      (queryString, activeSolutionId) => `${queryString}-${activeSolutionId}`,
+      1000 * 60 * 5, // Keep the value in cache for 5 minutes
+      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
+    );
+
+    const getInferenceEndpointsAutocomplete = cacheParametrizedAsyncFunction(
+      async (taskType: InferenceTaskType) => {
+        return await core.http.get<InferenceEndpointsAutocompleteResult>(
+          `/internal/esql/autocomplete/inference_endpoints/${taskType}`
+        );
+      },
+      (taskType: InferenceTaskType) => taskType,
+      1000 * 60 * 5, // Keep the value in cache for 5 minutes
+      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
+    );
+
     const start = {
       getJoinIndicesAutocomplete,
+      getTimeseriesIndicesAutocomplete,
+      getEditorExtensionsAutocomplete: cachedGetEditorExtensionsAutocomplete,
+      getInferenceEndpointsAutocomplete,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
     };
@@ -126,7 +176,6 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       expressions,
       storage,
       uiActions,
-      this.indexManagement,
       fieldsMetadata,
       usageCollection
     );

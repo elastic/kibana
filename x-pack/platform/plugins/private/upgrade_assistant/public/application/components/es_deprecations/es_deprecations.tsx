@@ -6,15 +6,16 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 
 import { EuiPageHeader, EuiSpacer, EuiLink, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { EnrichedDeprecationInfo } from '../../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_ES_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
@@ -27,7 +28,7 @@ const getDeprecationCountByLevel = (deprecations: EnrichedDeprecationInfo[]) => 
   const warningDeprecations: EnrichedDeprecationInfo[] = [];
 
   deprecations.forEach((deprecation) => {
-    if (deprecation.isCritical) {
+    if (deprecation.level === 'critical') {
       criticalDeprecations.push(deprecation);
       return;
     }
@@ -177,7 +178,7 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
               <EuiCallOut
                 title={i18nTexts.remoteClustersDetectedTitle}
                 color="warning"
-                iconType="help"
+                iconType="question"
                 data-test-subj="remoteClustersWarningCallout"
               >
                 <p>

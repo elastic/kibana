@@ -13,6 +13,10 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
+import type { OrphanResponseActionsMetadata } from '../../../lib/reference_data';
+import { REF_DATA_KEYS } from '../../../lib/reference_data';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../common/endpoint/service/response_actions/crowdstrike';
 import type { EndpointInternalFleetServicesInterface } from '../../fleet';
@@ -83,6 +87,11 @@ export const fetchActionRequests = async ({
   const logger = endpointService.createLogger('FetchActionRequests');
   const fleetServices = endpointService.getInternalFleetServices(spaceId);
   const additionalFilters = [];
+  const orphanActionsSpaceId = (
+    await endpointService
+      .getReferenceDataClient()
+      .get<OrphanResponseActionsMetadata>(REF_DATA_KEYS.orphanResponseActionsSpace)
+  ).metadata.spaceId;
 
   if (commands?.length) {
     additionalFilters.push({ terms: { 'data.command': commands } });
@@ -109,15 +118,28 @@ export const fetchActionRequests = async ({
         `Space awareness is enabled - adding filter to narrow results to only response actions visible in space [${spaceId}]`
     );
 
-    must.push({
-      bool: {
-        filter: {
-          terms: {
-            'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices),
+    const matchIntegrationPolicyIds: QueryDslQueryContainer = {
+      terms: { 'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices) },
+    };
+    const matchOrphanActions: QueryDslQueryContainer | undefined =
+      orphanActionsSpaceId && orphanActionsSpaceId === spaceId
+        ? { term: { tags: ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted } }
+        : undefined;
+
+    if (matchOrphanActions) {
+      must.push({
+        bool: {
+          filter: {
+            bool: {
+              should: [matchIntegrationPolicyIds, matchOrphanActions],
+              minimum_should_match: 1,
+            },
           },
         },
-      },
-    });
+      });
+    } else {
+      must.push({ bool: { filter: matchIntegrationPolicyIds } });
+    }
   }
 
   // Add the date filters
@@ -166,9 +188,19 @@ export const fetchActionRequests = async ({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const action = esHit._source!;
 
-      // Ensure `agent.policy` is an array
+      // Ensure `agent.policy` is an array (associated with spaces)
       if (!Array.isArray(action.agent.policy)) {
         action.agent.policy = action.agent.policy ? [action.agent.policy] : [];
+      }
+
+      // Ensure `tags` is an array
+      if (!Array.isArray(action.tags)) {
+        action.tags = action.tags ? [action.tags] : [];
+      }
+
+      // Ensure that `originSpaceId` is populated (associated with spaces)
+      if (!action.originSpaceId) {
+        action.originSpaceId = DEFAULT_SPACE_ID;
       }
 
       return action;
@@ -179,7 +211,7 @@ export const fetchActionRequests = async ({
   };
 };
 
-/** @private */
+/** @internal */
 const getActionTypeFilter = (actionType: string): QueryDslBoolQuery => {
   return actionType === 'manual'
     ? {
@@ -203,7 +235,7 @@ const getActionTypeFilter = (actionType: string): QueryDslBoolQuery => {
 /**
  * Retrieves a list of all integration policy IDs in the active space for integrations that
  * support responses actions.
- * @private
+ * @internal
  * @param fleetServices
  */
 const fetchIntegrationPolicyIds = async (

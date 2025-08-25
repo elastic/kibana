@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { isEmpty } from 'lodash';
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION,
-  AlertConsumers,
   ALERT_RULE_NAME,
   ALERT_RULE_UUID,
   ALERT_START,
@@ -20,16 +21,24 @@ import {
   ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
 import { EuiBadge, EuiLink } from '@elastic/eui';
-import { JsonValue } from '@kbn/utility-types';
-import { AlertsTableSupportedConsumers, GetAlertsTableProp } from '../types';
-import { alertProducersData, observabilityFeatureIds } from '../constants';
+import type { JsonValue } from '@kbn/utility-types';
+import type { AlertsTableSupportedConsumers, GetAlertsTableProp } from '../types';
+import {
+  alertProducersData,
+  observabilityFeatureIds,
+  STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX,
+} from '../constants';
 import { useFieldFormatter } from '../hooks/use_field_formatter';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 export const DefaultCellValue = ({
   alert,
   columnId,
-}: Pick<ComponentProps<GetAlertsTableProp<'renderCellValue'>>, 'alert' | 'columnId'>) => {
+  openLinksInNewTab,
+}: Pick<
+  ComponentProps<GetAlertsTableProp<'renderCellValue'>>,
+  'alert' | 'columnId' | 'openLinksInNewTab'
+>) => {
   const {
     services: { fieldFormats, http },
   } = useAlertsTableContext();
@@ -53,9 +62,8 @@ export const DefaultCellValue = ({
       }
       return (
         <EuiLink
-          href={http.basePath.prepend(
-            `/app/management/insightsAndAlerting/triggersActions/rule/${ruleUuid}`
-          )}
+          href={http.basePath.prepend(`${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${ruleUuid}`)}
+          target={openLinksInNewTab ? '_blank' : undefined}
         >
           {ruleName}
         </EuiLink>

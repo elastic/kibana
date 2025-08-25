@@ -15,8 +15,9 @@ describe('getScriptPaths', () => {
       getScriptPaths({
         baseHref: '/base-path',
         darkMode: 'system',
+        themeName: 'borealis',
       })
-    ).toEqual(['/base-path/ui/legacy_theme.js']);
+    ).toEqual(['/base-path/ui/bootstrap_system_theme_borealis.js']);
   });
 
   it('returns the correct list when darkMode is `true`', () => {
@@ -24,6 +25,7 @@ describe('getScriptPaths', () => {
       getScriptPaths({
         baseHref: '/base-path',
         darkMode: true,
+        themeName: 'borealis',
       })
     ).toEqual([]);
   });
@@ -33,6 +35,7 @@ describe('getScriptPaths', () => {
       getScriptPaths({
         baseHref: '/base-path',
         darkMode: false,
+        themeName: 'borealis',
       })
     ).toEqual([]);
   });
@@ -62,10 +65,11 @@ describe('getStylesheetPaths', () => {
           baseHref: '/base-path/buildShaShort',
         })
       ).toMatchInlineSnapshot(`
-          Array [
-            "/base-path/buildShaShort/ui/legacy_dark_theme.min.css",
-          ]
-        `);
+        Array [
+          "/base-path/buildShaShort/ui/legacy_dark_theme.min.css",
+          "/base-path/buildShaShort/ui/charts/theme_dark.css",
+        ]
+      `);
     });
   });
   describe('when darkMode is `false`', () => {
@@ -76,10 +80,11 @@ describe('getStylesheetPaths', () => {
           baseHref: '/base-path/buildShaShort',
         })
       ).toMatchInlineSnapshot(`
-          Array [
-            "/base-path/buildShaShort/ui/legacy_light_theme.min.css",
-          ]
-        `);
+        Array [
+          "/base-path/buildShaShort/ui/legacy_light_theme.min.css",
+          "/base-path/buildShaShort/ui/charts/theme_light.css",
+        ]
+      `);
     });
   });
 });

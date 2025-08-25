@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { XYLayerConfig } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { XYLayerConfig } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Panel, Metric } from '../../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
-import {
+import type {
   Layer,
   PercentileColumnWithExtendedMeta,
   PercentileRanksColumnWithCommonMeta,
 } from '../../convert';
 import { getLayers } from './layers';
 import { createPanel, createSeries } from '../../__mocks__';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 const mockExtractOrGenerateDatasourceInfo = jest.fn();
@@ -520,7 +520,7 @@ describe('getLayers', () => {
           ignoreGlobalFilters: true,
           annotations: [
             {
-              color: '#D33115',
+              color: '#d33115',
               extraFields: ['geo.src'],
               filter: {
                 language: 'lucene',
@@ -571,7 +571,7 @@ describe('getLayers', () => {
           ignoreGlobalFilters: true,
           annotations: [
             {
-              color: '#D33115',
+              color: '#d33115',
               extraFields: ['geo.src'],
               filter: {
                 language: 'lucene',
@@ -639,7 +639,7 @@ describe('getLayers', () => {
           ignoreGlobalFilters: true,
           annotations: [
             {
-              color: '#D33115',
+              color: '#d33115',
               extraFields: ['geo.src'],
               filter: {
                 language: 'lucene',
@@ -665,7 +665,7 @@ describe('getLayers', () => {
           ignoreGlobalFilters: false,
           annotations: [
             {
-              color: '#0000FF',
+              color: '#0000ff',
               filter: {
                 language: 'kql',
                 query: 'tags: error AND tags: security',
@@ -689,7 +689,7 @@ describe('getLayers', () => {
           ignoreGlobalFilters: true,
           annotations: [
             {
-              color: '#FF0000',
+              color: '#ff0000',
               extraFields: ['category.keyword', 'price'],
               filter: {
                 language: 'kql',
@@ -749,7 +749,7 @@ describe('getLayers', () => {
           ignoreGlobalFilters: true,
           annotations: [
             {
-              color: '#D33115',
+              color: '#d33115',
               extraFields: ['geo.src'],
               filter: {
                 language: 'lucene',

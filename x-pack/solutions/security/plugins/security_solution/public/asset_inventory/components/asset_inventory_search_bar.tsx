@@ -5,19 +5,21 @@
  * 2.0.
  */
 import React from 'react';
-import { css } from '@emotion/react';
-import { type EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
+import { useRefresh } from '@kbn/cloud-security-posture/src/hooks/use_refresh';
 import { useKibana } from '../../common/lib/kibana';
 import { FiltersGlobal } from '../../common/components/filters_global/filters_global';
 import { useDataViewContext } from '../hooks/data_view_context';
 import type { AssetsURLQuery } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
+import { QUERY_KEY_ASSET_INVENTORY } from '../constants';
 
 interface AssetInventorySearchBarProps {
   setQuery(v: Partial<AssetsURLQuery>): void;
   placeholder?: string;
   query: AssetsURLQuery;
+  isLoading: boolean;
 }
 
 export const AssetInventorySearchBar = ({
@@ -29,6 +31,7 @@ export const AssetInventorySearchBar = ({
       defaultMessage: 'Filter your data using KQL syntax',
     }
   ),
+  isLoading,
 }: AssetInventorySearchBarProps) => {
   const { dataView } = useDataViewContext();
   const { euiTheme } = useEuiTheme();
@@ -38,31 +41,27 @@ export const AssetInventorySearchBar = ({
     },
   } = useKibana().services;
 
+  const { refresh, isRefreshing } = useRefresh(QUERY_KEY_ASSET_INVENTORY);
+
   return (
     <FiltersGlobal>
-      <div css={getContainerStyle(euiTheme)}>
+      <div css={{ borderBottom: euiTheme.border.thin }}>
         <SearchBar
           appName="Asset Inventory"
           showFilterBar={true}
           showQueryInput={true}
           showDatePicker={false}
           indexPatterns={[dataView]}
-          onQuerySubmit={setQuery}
-          onFiltersUpdated={(filters: Filter[]) => setQuery({ filters })}
+          onQuerySubmit={(payload, isUpdated) => (isUpdated ? setQuery(payload) : refresh())}
+          onFiltersUpdated={(newFilters: Filter[]) => setQuery({ filters: newFilters })}
           placeholder={placeholder}
           query={{
             query: query?.query?.query || '',
             language: query?.query?.language || 'kuery',
           }}
-          filters={query?.filters || []}
+          isLoading={isLoading || isRefreshing}
         />
       </div>
     </FiltersGlobal>
   );
 };
-
-const getContainerStyle = (theme: EuiThemeComputed) => css`
-  border-bottom: ${theme.border.thin};
-  background-color: ${theme.colors.backgroundBaseSubdued};
-  padding: ${theme.size.base};
-`;

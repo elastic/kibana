@@ -7,8 +7,9 @@
 
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { setup, SetupResult } from './pipeline_processors_editor.helpers';
-import { Pipeline } from '../../../../../common/types';
+import type { SetupResult } from './pipeline_processors_editor.helpers';
+import { setup, setupEnvironment } from './pipeline_processors_editor.helpers';
+import type { Pipeline } from '../../../../../common/types';
 import {
   extractProcessorDetails,
   getProcessorTypesAndLabels,
@@ -46,6 +47,7 @@ describe('Pipeline Editor', () => {
   let testBed: SetupResult;
 
   beforeAll(() => {
+    setupEnvironment();
     jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
@@ -112,7 +114,7 @@ describe('Pipeline Editor', () => {
       });
 
       // Get the list of processors that are only available for platinum licenses
-      const processorsForPlatinumLicense = extractProcessorDetails(mapProcessorTypeToDescriptor)
+      const processorsForPlatinumLicense = extractProcessorDetails(mapProcessorTypeToDescriptor())
         .filter((processor) => processor.forLicenseAtLeast === 'platinum')
         .map(({ value, label, category }) => ({ label, value, category }));
 

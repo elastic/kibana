@@ -127,7 +127,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
                 css={css`
                   vertical-align: inherit;
                 `}
-              />{' '}
+              />
               {i18n.ASK_ASSISTANT_ERROR_BUTTON}
             </NewChat>
           ),

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { NEVER } from 'rxjs';
 import { mockActionResponse } from '../../__mocks__/action_result_data';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -286,6 +286,7 @@ describe('chatCompleteRoute', () => {
 
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
                 errorMessage: 'simulated error',
+                errorLocation: 'chatCompleteRoute',
                 actionTypeId: '.gen-ai',
                 model: 'gpt-4',
                 assistantStreamingEnabled: false,

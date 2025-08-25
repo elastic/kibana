@@ -13,7 +13,8 @@ import { SemVer } from 'semver';
 
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
-import { ConfigService, Env, BuildFlavor } from '@kbn/config';
+import type { BuildFlavor } from '@kbn/config';
+import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
@@ -35,11 +36,8 @@ import {
 import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 
-import {
-  ALL_SAVED_OBJECT_INDICES,
-  ISavedObjectTypeRegistry,
-  SavedObjectsType,
-} from '@kbn/core-saved-objects-server';
+import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
@@ -76,6 +74,7 @@ export interface KibanaMigratorTestKitParams {
   nodeRoles?: NodeRoles;
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
+  removedTypes?: string[];
   defaultIndexTypesMap?: IndexTypesMap;
   hashToVersionMap?: Record<string, string>;
   logFilePath?: string;
@@ -140,6 +139,7 @@ export const getKibanaMigratorTestKit = async ({
   kibanaVersion = currentVersion,
   kibanaBranch = currentBranch,
   types = [],
+  removedTypes = [],
   logFilePath = defaultLogFilePath,
   nodeRoles = defaultNodeRoles,
   clientWrapperFactory,
@@ -157,7 +157,7 @@ export const getKibanaMigratorTestKit = async ({
   const rawClient = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
   const client = clientWrapperFactory ? clientWrapperFactory(rawClient) : rawClient;
 
-  const typeRegistry = new SavedObjectTypeRegistry();
+  const typeRegistry = new SavedObjectTypeRegistry({ legacyTypes: removedTypes });
 
   // types must be registered before instantiating the migrator
   registerTypes(typeRegistry, types);
@@ -289,6 +289,7 @@ interface GetMigratorParams {
   kibanaBranch: string;
   buildFlavor?: BuildFlavor;
   nodeRoles: NodeRoles;
+  kibanaVersionCheck?: string;
 }
 
 const getMigrator = async ({
@@ -303,6 +304,7 @@ const getMigrator = async ({
   kibanaBranch,
   buildFlavor = 'traditional',
   nodeRoles,
+  kibanaVersionCheck = '8.18.0',
 }: GetMigratorParams) => {
   const savedObjectsConf = await firstValueFrom(
     configService.atPath<SavedObjectsConfigType>('savedObjects')
@@ -332,6 +334,7 @@ const getMigrator = async ({
     waitForMigrationCompletion: false, // ensure we have an active role in the migration
     nodeRoles,
     esCapabilities,
+    kibanaVersionCheck,
   });
 };
 

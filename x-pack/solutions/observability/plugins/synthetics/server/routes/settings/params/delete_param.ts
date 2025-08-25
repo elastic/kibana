@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { syncSpaceGlobalParams } from '../../../synthetics_service/sync_global_params';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import { runSynPrivateLocationMonitorsTaskSoon } from '../../../tasks/sync_private_locations_monitors_task';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { DeleteParamsResponse } from '../../../../common/runtime_types';
+import type { DeleteParamsResponse } from '../../../../common/runtime_types';
 
 export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
@@ -36,14 +36,7 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  handler: async ({
-    savedObjectsClient,
-    request,
-    response,
-    server,
-    spaceId,
-    syntheticsMonitorClient,
-  }) => {
+  handler: async ({ savedObjectsClient, request, response, server }) => {
     const { ids } = request.body ?? {};
     const { id: paramId } = request.params ?? {};
 
@@ -69,13 +62,8 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       idsToDelete.map((id) => ({ type: syntheticsParamType, id })),
       { force: true }
     );
-
-    void syncSpaceGlobalParams({
-      spaceId,
-      logger: server.logger,
-      encryptedSavedObjects: server.encryptedSavedObjects,
-      savedObjects: server.coreStart.savedObjects,
-      syntheticsMonitorClient,
+    await runSynPrivateLocationMonitorsTaskSoon({
+      server,
     });
 
     return result.statuses.map(({ id, success }) => ({ id, deleted: success }));

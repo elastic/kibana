@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -13,20 +14,24 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { Option, none, some } from 'fp-ts/Option';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { Option } from 'fp-ts/Option';
+import { none, some } from 'fp-ts/Option';
 import { ReadOnlyConnectorMessage } from './read_only';
-import {
+import type {
   ActionConnector,
   ActionTypeModel,
   ActionTypeRegistryContract,
-  EditConnectorTabs,
   UserConfiguredActionConnector,
 } from '../../../../types';
-import { ConnectorForm, ConnectorFormState } from '../connector_form';
+import { EditConnectorTabs } from '../../../../types';
+import type { ConnectorFormState } from '../connector_form';
+import { ConnectorForm } from '../connector_form';
 import type { ConnectorFormSchema } from '../types';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -43,6 +48,7 @@ export interface EditConnectorFlyoutProps {
   onClose: () => void;
   tab?: EditConnectorTabs;
   onConnectorUpdated?: (connector: ActionConnector) => void;
+  isServerless?: boolean;
 }
 
 const getConnectorWithoutSecrets = (
@@ -60,6 +66,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   tab = EditConnectorTabs.Configuration,
   onConnectorUpdated,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const {
     docLinks,
     application: { capabilities },
@@ -177,7 +185,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-
       const { name, config, secrets } = data;
       const validConnector = {
         id: connector.id,
@@ -346,7 +353,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         <FlyoutHeader
           isPreconfigured={connector.isPreconfigured}
           connectorName={connector.name}
-          connectorTypeDesc={actionTypeModel?.selectMessage}
+          connectorTypeDesc={
+            actionTypeModel?.selectMessagePreconfigured || actionTypeModel?.selectMessage
+          }
           setTab={handleSetTab}
           selectedTab={selectedTab}
           icon={actionTypeModel?.iconClass}
@@ -362,6 +371,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       </EuiFlyout>
       {showConfirmModal && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           buttonColor="danger"
           data-test-subj="closeConnectorEditConfirm"
           title={i18n.translate(

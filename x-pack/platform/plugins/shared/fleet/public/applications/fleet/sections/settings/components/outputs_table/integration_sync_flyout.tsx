@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,18 +32,20 @@ import { IntegrationStatus } from './integration_status';
 
 interface Props {
   onClose: () => void;
-  syncedIntegrationsStatus?: GetRemoteSyncedIntegrationsStatusResponse;
   outputName: string;
+  syncedIntegrationsStatus?: GetRemoteSyncedIntegrationsStatusResponse;
+  syncUninstalledIntegrations?: boolean;
 }
 
 export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
-  ({ onClose, syncedIntegrationsStatus, outputName }) => {
+  ({ onClose, syncedIntegrationsStatus, outputName, syncUninstalledIntegrations }) => {
     const { docLinks } = useStartServices();
+    const flyoutTitleId = useGeneratedHtmlId();
     return (
-      <EuiFlyout onClose={onClose}>
+      <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle>
-            <h2>
+            <h2 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.fleet.integrationSyncFlyout.titleText"
                 defaultMessage="Integration syncing status"
@@ -89,20 +92,30 @@ export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
             </EuiCallOut>
           )}
           <EuiFlexGroup direction="column" gutterSize="m">
-            {(syncedIntegrationsStatus?.integrations ?? []).map((integration) => {
-              const customAssets = Object.values(
-                syncedIntegrationsStatus?.custom_assets ?? {}
-              ).filter((asset) => asset.package_name === integration.package_name);
-              return (
-                <EuiFlexItem grow={false} key={integration.package_name}>
-                  <IntegrationStatus
-                    data-test-subj={`${integration.package_name}-accordion`}
-                    integration={integration}
-                    customAssets={customAssets}
-                  />
-                </EuiFlexItem>
-              );
-            })}
+            {(syncedIntegrationsStatus?.integrations ?? [])
+              // don't show integrations that were successfully uninstalled
+              .filter(
+                (integration) =>
+                  !(
+                    integration.install_status?.main === 'not_installed' &&
+                    integration.install_status?.remote === 'not_installed'
+                  )
+              )
+              .map((integration) => {
+                const customAssets = Object.values(
+                  syncedIntegrationsStatus?.custom_assets ?? {}
+                ).filter((asset) => asset.package_name === integration.package_name);
+                return (
+                  <EuiFlexItem grow={false} key={integration.package_name}>
+                    <IntegrationStatus
+                      data-test-subj={`${integration.package_name}-accordion`}
+                      integration={integration}
+                      customAssets={customAssets}
+                      syncUninstalledIntegrations={syncUninstalledIntegrations}
+                    />
+                  </EuiFlexItem>
+                );
+              })}
           </EuiFlexGroup>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

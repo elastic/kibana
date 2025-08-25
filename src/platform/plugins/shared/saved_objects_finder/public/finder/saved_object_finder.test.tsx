@@ -16,15 +16,8 @@ jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
   fn.cancel = jest.fn();
   return fn;
 });
-import {
-  EuiInMemoryTable,
-  EuiLink,
-  EuiSearchBarProps,
-  EuiText,
-  EuiButton,
-  Query,
-} from '@elastic/eui';
-import { IconType } from '@elastic/eui';
+import type { EuiSearchBarProps, IconType } from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiText, EuiButton, Query } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import * as sinon from 'sinon';
@@ -34,7 +27,7 @@ import {
 } from './saved_object_finder';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { findTestSubject } from '@kbn/test-jest-helpers';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 describe('SavedObjectsFinder', () => {
@@ -1079,5 +1072,20 @@ describe('SavedObjectsFinder', () => {
     assertTooltip(doc.attributes.title, false);
     assertTooltip(doc2.attributes.title, false);
     assertTooltip(doc3.attributes.title, true);
+  });
+  it('should focus the search input on render', async () => {
+    (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({ hits: [doc] });
+
+    render(
+      <SavedObjectFinder
+        {...baseProps}
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
+        savedObjectMetaData={searchMetaData}
+      />
+    );
+
+    // 2. Grab the input directly and assert focus in one step
+    const input = await screen.findByTestId('savedObjectFinderSearchInput');
+    expect(input).toHaveFocus();
   });
 });

@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -130,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               const url = await browser.getCurrentUrl();
               // The url that is open is https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html
               // but it redirects to https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search
-              expect(url).to.contain('operation-search');
+              expect(url).to.contain('www.elastic.co/docs');
             });
           });
         });

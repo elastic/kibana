@@ -7,7 +7,10 @@
 
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
-import { GlobalSearchBatchedResults, GlobalSearchResult } from '@kbn/global-search-plugin/public';
+import type {
+  GlobalSearchBatchedResults,
+  GlobalSearchResult,
+} from '@kbn/global-search-plugin/public';
 import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
@@ -17,6 +20,7 @@ import React from 'react';
 import { of, throwError } from 'rxjs';
 import { EventReporter } from '.';
 import { SearchBar } from '../components/search_bar';
+import { apm } from '@elastic/apm-rum';
 
 jest.mock(
   'react-virtualized-auto-sizer',
@@ -24,6 +28,8 @@ jest.mock(
     ({ children }: any) =>
       children({ height: 600, width: 600 })
 );
+
+jest.mock('@elastic/apm-rum');
 
 type Result = { id: string; type: string } | string;
 
@@ -252,11 +258,15 @@ describe('SearchBar', () => {
 
       await focusAndUpdate();
 
-      expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_error', {
-        error_message: 'Error: service unavailable :(',
-        terms: 'Ahoy!',
-      });
-      expect(mockReportEvent).toHaveBeenCalledTimes(1);
+      expect(apm.captureError).toHaveBeenCalledTimes(1);
+      expect(apm.captureError).toHaveBeenCalledWith(
+        new Error('service unavailable :('),
+        expect.objectContaining({
+          labels: {
+            SearchValue: 'Ahoy!',
+          },
+        })
+      );
     });
 
     describe('chromeStyle: project', () => {

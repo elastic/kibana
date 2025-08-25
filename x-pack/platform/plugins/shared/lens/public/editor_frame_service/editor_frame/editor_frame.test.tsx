@@ -6,16 +6,22 @@
  */
 
 import React from 'react';
-import { screen, within } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { EditorFrame, EditorFrameProps } from './editor_frame';
-import { DatasourceMap, DatasourcePublicAPI, Visualization, VisualizationMap } from '../../types';
+import type { EditorFrameProps } from './editor_frame';
+import { EditorFrame } from './editor_frame';
+import type {
+  DatasourceMap,
+  DatasourcePublicAPI,
+  Visualization,
+  VisualizationMap,
+} from '../../types';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { DatasourceMock } from '../../mocks';
 import {
   createMockVisualization,
   createMockDatasource,
-  DatasourceMock,
   createExpressionRendererMock,
   mockStoreDeps,
   renderWithReduxStore,
@@ -25,11 +31,12 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { mockDataPlugin } from '../../mocks';
-import { LensAppState, setState } from '../../state_management';
+import type { LensAppState } from '../../state_management';
+import { setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
 function wrapDataViewsContract() {
   const dataViewsContract = dataViewPluginMocks.createStartContract();
@@ -193,7 +200,10 @@ describe('editor_frame', () => {
       expect(queryDataPanel()).not.toBeInTheDocument();
       expect(queryLayerPanel()).not.toBeInTheDocument();
 
-      simulateLoadingDatasource();
+      act(() => {
+        simulateLoadingDatasource();
+      });
+
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({ state: 'initialState' })
       );
@@ -215,16 +225,18 @@ describe('editor_frame', () => {
       const { store } = renderEditorFrame();
       const updatedState = 'updatedVisState';
 
-      store.dispatch(
-        setState({
-          visualization: {
-            activeId: mockVisualization.id,
-            state: updatedState,
-          },
-        })
-      );
+      act(() => {
+        store.dispatch(
+          setState({
+            visualization: {
+              activeId: mockVisualization.id,
+              state: updatedState,
+            },
+          })
+        );
+      });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -244,7 +256,9 @@ describe('editor_frame', () => {
         title: 'shazm',
       };
 
-      setDatasourceState(updatedState);
+      act(() => {
+        setDatasourceState(updatedState);
+      });
 
       expect(mockDatasource.DataPanelComponent).toHaveBeenCalledTimes(1);
       expect(mockDatasource.DataPanelComponent).toHaveBeenLastCalledWith(
@@ -274,7 +288,9 @@ describe('editor_frame', () => {
       const setDatasourceState = (mockDatasource.DataPanelComponent as jest.Mock).mock.calls[0][0]
         .setState;
 
-      setDatasourceState('newState');
+      act(() => {
+        setDatasourceState('newState');
+      });
 
       expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(

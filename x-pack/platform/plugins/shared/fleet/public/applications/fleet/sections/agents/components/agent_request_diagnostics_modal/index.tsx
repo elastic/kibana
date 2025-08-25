@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { EuiCheckbox, EuiConfirmModal } from '@elastic/eui';
+import { EuiCheckbox, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { RequestDiagnosticsAdditionalMetrics } from '../../../../../../../common/types';
@@ -31,6 +31,7 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
   agents,
   agentCount,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
   const { notifications } = useStartServices();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
@@ -83,6 +84,7 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
   return (
     <EuiConfirmModal
       data-test-subj="requestDiagnosticsModal"
+      aria-labelledby={confirmModalTitleId}
       title={
         isSingleAgent ? (
           <FormattedMessage
@@ -97,6 +99,7 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
           />
         )
       }
+      titleProps={{ id: confirmModalTitleId }}
       onCancel={onClose}
       onConfirm={onSubmit}
       cancelButtonText={

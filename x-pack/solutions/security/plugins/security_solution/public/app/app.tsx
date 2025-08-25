@@ -12,6 +12,7 @@ import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { useDarkMode } from '@kbn/kibana-react-plugin/public';
 import type { AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -23,7 +24,7 @@ import { APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
-import { KibanaContextProvider, useKibana, useDarkMode } from '../common/lib/kibana';
+import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import type { State } from '../common/store';
 import type { StartServices } from '../types';
 import { PageRouter } from './routes';
@@ -64,9 +65,9 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                       >
                         <UpsellingProvider upsellingService={upselling}>
                           <DiscoverInTimelineContextProvider>
-                            <AssistantProvider>
-                              <PageRouter history={history}>{children}</PageRouter>
-                            </AssistantProvider>
+                            <PageRouter history={history}>
+                              <AssistantProvider>{children}</AssistantProvider>
+                            </PageRouter>
                           </DiscoverInTimelineContextProvider>
                         </UpsellingProvider>
                       </CellActionsProvider>

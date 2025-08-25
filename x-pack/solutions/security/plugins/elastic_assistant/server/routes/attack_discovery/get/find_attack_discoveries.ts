@@ -17,7 +17,8 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { performChecks } from '../../helpers';
 import { buildResponse } from '../../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../../types';
+import { hasReadAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
 
 export const findAttackDiscoveriesRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -65,6 +66,15 @@ export const findAttackDiscoveriesRoute = (
           return checkResponse.response;
         }
 
+        // Perform alerts access check
+        const privilegesCheckResponse = await hasReadAttackDiscoveryAlertsPrivileges({
+          context: ctx,
+          response,
+        });
+        if (!privilegesCheckResponse.isSuccess) {
+          return privilegesCheckResponse.response;
+        }
+
         try {
           const { query } = request;
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
@@ -78,10 +88,15 @@ export const findAttackDiscoveriesRoute = (
 
           const currentUser = await checkResponse.currentUser;
 
+          // get an Elasticsearch client for the authenticated user:
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
           const result = await dataClient.findAttackDiscoveryAlerts({
             authenticatedUser: currentUser,
+            esClient,
             findAttackDiscoveryAlertsParams: {
               alertIds: query.alert_ids,
+              includeUniqueAlertIds: query.include_unique_alert_ids ?? false,
               ids: query.ids,
               search: query.search,
               shared: query.shared,
@@ -107,7 +122,7 @@ export const findAttackDiscoveriesRoute = (
           const error = transformError(err);
 
           return resp.error({
-            body: { success: false, error: error.message },
+            body: error.message,
             statusCode: error.statusCode,
           });
         }

@@ -7,11 +7,12 @@
 
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiStepsHorizontal, EuiStepStatus, EuiSpacer, EuiPageSection } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
+import { EuiStepsHorizontal, EuiSpacer, EuiPageSection } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RemoteClusterSetupTrust, RemoteClusterForm } from '../components';
-import { ClusterPayload } from '../../../../common/lib/cluster_serialization';
+import type { ClusterPayload } from '../../../../common/lib/cluster_serialization';
 import { RemoteClusterReview } from '../components/remote_cluster_config_steps/remote_cluster_review';
 
 const SETUP_TRUST = 1;

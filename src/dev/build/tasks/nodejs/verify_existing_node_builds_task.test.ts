@@ -14,7 +14,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createAnyInstanceSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 
-import { Config, Platform } from '../../lib';
+import type { Platform } from '../../lib';
+import { Config } from '../../lib';
 import { VerifyExistingNodeBuilds } from './verify_existing_node_builds_task';
 
 jest.mock('./node_shasums');
@@ -102,7 +103,7 @@ beforeEach(() => {
 it('checks shasums for each downloaded node build', async () => {
   const { config } = await setup();
 
-  await VerifyExistingNodeBuilds.run(config, log, []);
+  await VerifyExistingNodeBuilds.run(config, log);
 
   expect(getNodeShasums).toMatchInlineSnapshot(`
     [MockFunction] {
@@ -488,7 +489,7 @@ it('rejects if any download has an incorrect sha256', async () => {
   });
 
   await expect(
-    VerifyExistingNodeBuilds.run(config, log, [])
+    VerifyExistingNodeBuilds.run(config, log)
   ).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Download at linux:default:linux-arm64:downloadPath does not match expected checksum invalid shasum"`
   );

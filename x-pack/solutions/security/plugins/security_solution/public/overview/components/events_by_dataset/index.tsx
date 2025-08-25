@@ -7,14 +7,14 @@
 
 import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import type { Filter, Query } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { EuiButton } from '@elastic/eui';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
+import { APP_UI_ID, DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
@@ -25,8 +25,8 @@ import type {
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import {
-  eventsStackByOptions,
   eventsHistogramConfig,
+  eventsStackByOptions,
   NO_BREAKDOWN_STACK_BY_VALUE,
 } from '../../../common/components/events_tab/histogram_configurations';
 import { HostsTableType } from '../../../explore/hosts/store/model';
@@ -43,18 +43,18 @@ const DEFAULT_STACK_BY = NO_BREAKDOWN_STACK_BY_VALUE;
 const ID = 'eventsByDatasetOverview';
 const CHART_HEIGHT = 160;
 
-interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
+interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   filterQuery?: string;
   filters: Filter[];
   headerChildren?: React.ReactNode;
   dataViewSpec?: DataViewSpec;
+  dataView: DataView;
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
   // Make a unique query type everywhere this query is used
   queryType: 'topN' | 'overview';
   showSpacer?: boolean;
-  toggleTopN?: () => void;
   hideQueryToggle?: boolean;
   sourcererScopeId?: SourcererScopeName;
   applyGlobalQueriesAndFilters?: boolean;
@@ -79,15 +79,14 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   from,
   headerChildren,
   dataViewSpec,
+  dataView,
   onlyField,
   paddingSize,
   query,
   queryType,
-  setQuery,
   showSpacer = true,
   sourcererScopeId,
   to,
-  toggleTopN,
   hideQueryToggle = false,
   applyGlobalQueriesAndFilters,
 }) => {
@@ -134,12 +133,13 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       return convertToBuildEsQuery({
         config: getEsQueryConfig(kibana.services.uiSettings),
         dataViewSpec,
+        dataView,
         queries: [query],
         filters,
       });
     }
     return [filterQueryFromProps];
-  }, [filterQueryFromProps, kibana.services.uiSettings, dataViewSpec, query, filters]);
+  }, [filterQueryFromProps, kibana.services.uiSettings, dataViewSpec, dataView, query, filters]);
 
   useInvalidFilterQuery({
     id: uniqueQueryId,
@@ -188,7 +188,6 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       headerChildren={headerContent}
       id={uniqueQueryId}
       paddingSize={paddingSize}
-      setQuery={setQuery}
       showSpacer={showSpacer}
       startDate={from}
       sourcererScopeId={sourcererScopeId}

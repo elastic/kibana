@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -18,7 +19,7 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
+import type { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
 import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
@@ -55,16 +56,16 @@ export const useDashboardMenuItems = ({
    * Show the Dashboard app's share menu
    */
   const showShare = useCallback(
-    (anchorElement: HTMLElement) => {
+    (anchorElement: HTMLElement, asExport?: boolean) => {
       ShowShareModal({
+        asExport,
         dashboardTitle,
         anchorElement,
         savedObjectId: lastSavedId,
         isDirty: Boolean(hasUnsavedChanges),
-        getPanelsState: () => dashboardApi.panels$.value,
       });
     },
-    [dashboardTitle, hasUnsavedChanges, lastSavedId, dashboardApi]
+    [dashboardTitle, hasUnsavedChanges, lastSavedId]
   );
 
   /**
@@ -190,9 +191,21 @@ export const useDashboardMenuItems = ({
       share: {
         ...topNavStrings.share,
         id: 'share',
+        iconType: 'share',
+        iconOnly: true,
         testId: 'shareTopNavButton',
         disableButton: disableTopNav,
         run: showShare,
+      } as TopNavMenuData,
+
+      export: {
+        ...topNavStrings.export,
+        id: 'export',
+        iconType: 'download',
+        iconOnly: true,
+        testId: 'exportTopNavButton',
+        disableButton: disableTopNav,
+        run: (anchorElement) => showShare(anchorElement, true),
       } as TopNavMenuData,
 
       settings: {
@@ -200,6 +213,7 @@ export const useDashboardMenuItems = ({
         id: 'settings',
         testId: 'dashboardSettingsButton',
         disableButton: disableTopNav,
+        htmlId: 'dashboardSettingsButton',
         run: () => openSettingsFlyout(dashboardApi),
       },
     };
@@ -247,11 +261,21 @@ export const useDashboardMenuItems = ({
    */
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
 
+  const hasExportIntegration = Boolean(
+    shareService?.availableIntegrations('dashboard', 'export')?.length
+  );
+
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls } = getDashboardCapabilities();
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = shareService ? [menuItems.share] : [];
+    const shareMenuItem = shareService
+      ? ([
+          // Only show the export button if the current user meets the requirements for at least one registered export integration
+          hasExportIntegration ? menuItems.export : null,
+          menuItems.share,
+        ].filter(Boolean) as TopNavMenuData[])
+      : [];
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
     const editMenuItem = showWriteControls && !dashboardApi.isManaged ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
@@ -259,16 +283,35 @@ export const useDashboardMenuItems = ({
     return [
       ...labsMenuItem,
       menuItems.fullScreen,
-      ...shareMenuItem,
       ...duplicateMenuItem,
       ...mayberesetChangesMenuItem,
+      ...shareMenuItem,
       ...editMenuItem,
     ];
-  }, [isLabsEnabled, menuItems, dashboardApi.isManaged, showResetChange, resetChangesMenuItem]);
+  }, [
+    isLabsEnabled,
+    menuItems.labs,
+    menuItems.export,
+    menuItems.share,
+    menuItems.interactiveSave,
+    menuItems.edit,
+    menuItems.fullScreen,
+    hasExportIntegration,
+    dashboardApi.isManaged,
+    showResetChange,
+    resetChangesMenuItem,
+  ]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = shareService ? [menuItems.share] : [];
+    const shareMenuItem = shareService
+      ? ([
+          // Only show the export button if the current user meets the requirements for at least one registered export integration
+          hasExportIntegration ? menuItems.export : null,
+          menuItems.share,
+        ].filter(Boolean) as TopNavMenuData[])
+      : [];
+
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {
@@ -282,8 +325,27 @@ export const useDashboardMenuItems = ({
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
-    return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
-  }, [isLabsEnabled, menuItems, lastSavedId, showResetChange, resetChangesMenuItem]);
+
+    const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
+
+    // insert share menu item before the last item in edit mode
+    editModeTopNavConfigItems.splice(-1, 0, ...shareMenuItem);
+
+    return editModeTopNavConfigItems;
+  }, [
+    isLabsEnabled,
+    menuItems.labs,
+    menuItems.export,
+    menuItems.share,
+    menuItems.settings,
+    menuItems.interactiveSave,
+    menuItems.switchToViewMode,
+    menuItems.quickSave,
+    hasExportIntegration,
+    lastSavedId,
+    showResetChange,
+    resetChangesMenuItem,
+  ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
 };

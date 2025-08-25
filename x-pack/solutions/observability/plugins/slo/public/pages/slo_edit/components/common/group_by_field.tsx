@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
-import { QuerySchema } from '@kbn/slo-schema';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { QuerySchema } from '@kbn/slo-schema';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { CreateSLOForm } from '../../types';
+import type { CreateSLOForm } from '../../types';
 import { GroupByCardinality } from './group_by_cardinality';
 import { GroupByFieldSelector } from './group_by_field_selector';
 

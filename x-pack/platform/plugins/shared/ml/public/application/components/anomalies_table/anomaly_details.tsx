@@ -344,7 +344,7 @@ const CategoryExamples: FC<{ definition?: CategoryDefinition; examples: string[]
                     defaultMessage: 'Description',
                   }
                 )}
-                type="questionInCircle"
+                type="question"
                 color="subdued"
                 size="s"
                 content={
@@ -383,7 +383,7 @@ const CategoryExamples: FC<{ definition?: CategoryDefinition; examples: string[]
                     defaultMessage: 'Description',
                   }
                 )}
-                type="questionInCircle"
+                type="question"
                 color="subdued"
                 size="s"
                 content={

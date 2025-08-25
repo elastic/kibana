@@ -7,16 +7,12 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-import {
-  ReindexStatusResponse,
-  ReindexStatus,
-  ReindexStep,
-  IndexWarning,
-} from '../../../../../../common/types';
+import type { ReindexStatusResponse, IndexWarning } from '../../../../../../common/types';
+import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
-import { ApiService } from '../../../../lib/api';
+import type { ApiService } from '../../../../lib/api';
 
-const POLL_INTERVAL = 1000;
+const POLL_INTERVAL = 3000;
 
 export interface ReindexState {
   loadingState: LoadingState;
@@ -35,6 +31,7 @@ export interface ReindexState {
     isReadonly: boolean;
     isInDataStream: boolean;
     isClosedIndex: boolean;
+    isFollowerIndex: boolean;
   };
 }
 
@@ -136,6 +133,7 @@ export const useReindex = ({
       isInDataStream,
       isClosedIndex,
       isReadonly: false, // we don't have this information in the deprecation list
+      isFollowerIndex: false, // will be updated after fetching the reindexStatus
     },
   });
 
@@ -257,7 +255,10 @@ export const useReindex = ({
     }
 
     setReindexState((prevValue: ReindexState) => {
-      return getReindexState(prevValue, { reindexOp, meta: prevValue.meta });
+      return getReindexState(prevValue, {
+        reindexOp: reindexOp || undefined,
+        meta: prevValue.meta,
+      });
     });
     updateStatus();
   }, [api, indexName, updateStatus]);

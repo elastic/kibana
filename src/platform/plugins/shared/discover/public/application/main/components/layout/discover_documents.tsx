@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -15,9 +15,11 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -26,6 +28,7 @@ import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
   UnifiedDataTableProps,
+  UnifiedDataTableRestorableState,
   UseColumnsProps,
 } from '@kbn/unified-data-table';
 import {
@@ -48,6 +51,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
@@ -67,7 +71,6 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import type { CellRenderersExtensionParams } from '../../../../context_awareness';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
@@ -76,10 +79,12 @@ import {
 } from '../../../../context_awareness';
 import {
   internalStateActions,
+  useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import { useScopedServices } from '../../../../components/scoped_services_provider';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -106,11 +111,13 @@ function DiscoverDocumentsComponent({
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
+  const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
+  const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
-  const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
+  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata } = services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
@@ -138,6 +145,7 @@ function DiscoverDocumentsComponent({
     ];
   });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
+  const initialDocViewerTabId = useInternalStateSelector((state) => state.initialDocViewerTabId);
   const isEsqlMode = useIsEsqlMode();
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -189,22 +197,31 @@ function DiscoverDocumentsComponent({
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtManager, fieldsMetadata]
+    [onAddColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtManager, fieldsMetadata]
+    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
+  const docViewerRef = useRef<DocViewerApi>(null);
   const setExpandedDoc = useCallback(
-    (doc: DataTableRecord | undefined) => {
-      dispatch(internalStateActions.setExpandedDoc(doc));
+    (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
+      dispatch(
+        internalStateActions.setExpandedDoc({
+          expandedDoc: doc,
+          initialDocViewerTabId: options?.initialTabId,
+        })
+      );
+      if (options?.initialTabId) {
+        docViewerRef.current?.setSelectedTabId(options.initialTabId);
+      }
     },
     [dispatch]
   );
@@ -300,39 +317,58 @@ function DiscoverDocumentsComponent({
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
         query={query}
+        initialTabId={initialDocViewerTabId}
+        docViewerRef={docViewerRef}
       />
     ),
     [
       dataView,
-      onAddColumnWithTracking,
+      savedSearch.id,
       onAddFilter,
       onRemoveColumnWithTracking,
-      query,
-      savedSearch.id,
+      onAddColumnWithTracking,
       setExpandedDoc,
+      query,
+      initialDocViewerTabId,
     ]
   );
 
+  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
+  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
+  const onInitialStateChange = useCallback(
+    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) => {
+      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState }));
+    },
+    [dispatch, setDataGridUiState]
+  );
+
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
+  const cellRendererDensity = useMemo(
+    () => density ?? dataGridUiState?.density ?? getDataGridDensity(services.storage, 'discover'),
+    [density, dataGridUiState, services.storage]
+  );
+  const cellRendererRowHeight = useMemo(
+    () =>
+      getRowHeight({
+        storage: services.storage,
+        consumer: 'discover',
+        rowHeightState: rowHeight ?? dataGridUiState?.rowHeight,
+        configRowHeight,
+      }),
+    [rowHeight, dataGridUiState, services.storage, configRowHeight]
+  );
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
       actions: { addFilter: onAddFilter },
       dataView,
-      density: density ?? getDataGridDensity(services.storage, 'discover'),
-      rowHeight: getRowHeight({
-        storage: services.storage,
-        consumer: 'discover',
-        rowHeightState: rowHeight,
-        configRowHeight,
-      }),
+      density: cellRendererDensity,
+      rowHeight: cellRendererRowHeight,
     }),
-    [onAddFilter, dataView, density, services.storage, rowHeight, configRowHeight]
+    [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight]
   );
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
-  const { customCellRenderer, customGridColumnsConfiguration } =
-    useContextualGridCustomisations(cellRendererParams) || {};
-  const additionalFieldGroups = useAdditionalFieldGroups();
+  const { customCellRenderer } = useContextualGridCustomisations(cellRendererParams) || {};
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
@@ -364,10 +400,10 @@ function DiscoverDocumentsComponent({
           size="xs"
           color="accent"
           position="absolute"
-          css={progressStyle}
+          css={styles.progress}
         />
       ) : null,
-    [isDataLoading]
+    [isDataLoading, styles.progress]
   );
 
   const renderCustomToolbarWithElements = useMemo(
@@ -387,7 +423,7 @@ function DiscoverDocumentsComponent({
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
-      <div className="dscDocuments__loading" css={dscDocumentsLoadingCss}>
+      <div className="dscDocuments__loading" css={styles.dscDocumentsLoading}>
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
           <EuiSpacer size="s" />
@@ -399,13 +435,13 @@ function DiscoverDocumentsComponent({
 
   return (
     // class is used in tests
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
+    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={styles.container}>
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
         </h2>
       </EuiScreenReaderOnly>
-      <div className="unifiedDataTable">
+      <div className="unifiedDataTable" css={styles.dataTable}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <DiscoverGridMemoized
             ariaLabelledBy="documentsAriaLabel"
@@ -454,9 +490,7 @@ function DiscoverDocumentsComponent({
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
             externalCustomRenderers={cellRenderers}
-            customGridColumnsConfiguration={customGridColumnsConfiguration}
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-            additionalFieldGroups={additionalFieldGroups}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
             onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
@@ -464,6 +498,8 @@ function DiscoverDocumentsComponent({
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
+            initialState={dataGridUiState}
+            onInitialStateChange={onInitialStateChange}
           />
         </CellActionsProvider>
       </div>
@@ -473,20 +509,69 @@ function DiscoverDocumentsComponent({
 
 export const DiscoverDocuments = memo(DiscoverDocumentsComponent);
 
-const containerStyles = css`
-  position: relative;
-  min-height: 0;
-`;
+const componentStyles = {
+  container: css({
+    position: 'relative',
+    minHeight: 0,
+  }),
+  progress: css({
+    zIndex: 2,
+  }),
+  dscDocumentsLoading: css({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    textAlign: 'center',
+    height: '100%',
+    width: '100%',
+  }),
+  // Following guidelines for CSS-in-JS - styles for high granularity components should be assigned to a parent and targeting classes of repeating children
+  dataTable: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      maxWidth: '100%',
+      height: '100%',
+      overflow: 'hidden',
 
-const progressStyle = css`
-  z-index: 2;
-`;
+      '.unifiedDataTable__cell--highlight': {
+        backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      },
 
-const dscDocumentsLoadingCss = css`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-  height: 100%;
-  width: 100%;
-`;
+      '.unifiedDataTable__cell--expanded': {
+        backgroundColor: euiTheme.colors.highlight,
+      },
+
+      '.unifiedDataTable__cellValue': {
+        fontFamily: euiTheme.font.familyCode,
+      },
+
+      // Custom styles for data grid header cell.
+      // It can also be inside a portal (outside of `unifiedDataTable__inner`) when dragged.
+      '.unifiedDataTable__headerCell': {
+        alignItems: 'start',
+
+        '.euiDataGridHeaderCell__draggableIcon': {
+          paddingBlock: `calc(${euiTheme.size.xs} / 2)`, // to align with a token height
+        },
+        '.euiDataGridHeaderCell__button': {
+          marginBlock: -euiTheme.size.xs, // to override Eui value for Density "Expanded"
+        },
+      },
+
+      '.unifiedDataTable__rowControl': {
+        marginTop: -1, // fine-tuning the vertical alignment with the text for any row height setting
+      },
+      // Compact density - 'auto & custom' row height
+      '.euiDataGrid--fontSizeSmall .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--defaultHeight) .unifiedDataTable__rowControl':
+        {
+          marginTop: -2.5,
+        },
+
+      // Compact density - 'single' row height
+      '.euiDataGrid--fontSizeSmall .euiDataGridRowCell__content--defaultHeight .unifiedDataTable__rowControl':
+        {
+          alignSelf: 'flex-start',
+          marginTop: -3,
+        },
+    }),
+};

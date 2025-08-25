@@ -5,34 +5,30 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import { interpret } from 'xstate';
 import { createDatasetQualityDetailsControllerStateMachine } from '../../state_machines/dataset_quality_details_controller/state_machine';
-import { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
-import { DataStreamDetailsServiceStart } from '../../services/data_stream_details';
-import { DatasetQualityStartDeps } from '../../types';
+import type { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
+import type { DataStreamDetailsServiceStart } from '../../services/data_stream_details';
+import type { DatasetQualityStartDeps } from '../../types';
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
-import { DatasetQualityDetailsController, DatasetQualityDetailsPublicStateUpdate } from './types';
+import type {
+  DatasetQualityDetailsController,
+  DatasetQualityDetailsPublicStateUpdate,
+} from './types';
 
 interface Dependencies {
   core: CoreStart;
   plugins: DatasetQualityStartDeps;
   dataStreamStatsService: DataStreamsStatsServiceStart;
   dataStreamDetailsService: DataStreamDetailsServiceStart;
-  isFailureStoreEnabled: boolean;
 }
 
 export const createDatasetQualityDetailsControllerFactory =
-  ({
-    core,
-    plugins,
-    dataStreamStatsService,
-    dataStreamDetailsService,
-    isFailureStoreEnabled,
-  }: Dependencies) =>
+  ({ core, plugins, dataStreamStatsService, dataStreamDetailsService }: Dependencies) =>
   async ({
     initialState,
   }: {
@@ -51,7 +47,6 @@ export const createDatasetQualityDetailsControllerFactory =
       toasts: core.notifications.toasts,
       dataStreamStatsClient,
       dataStreamDetailsClient,
-      isFailureStoreEnabled,
     });
 
     const service = interpret(machine, {

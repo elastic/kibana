@@ -12,15 +12,15 @@ import { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 
-import { TimeRange } from '@kbn/es-query';
-import { PanelPackage } from '@kbn/presentation-containers';
+import type { TimeRange } from '@kbn/es-query';
+import type { PanelPackage } from '@kbn/presentation-containers';
 
-import { ViewMode } from '@kbn/presentation-publishing';
-import {
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type {
   MockDashboardApi,
   MockSerializedDashboardState,
   MockedDashboardPanelMap,
-  MockedDashboardRowMap,
+  MockedDashboardSectionMap,
 } from './types';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
@@ -57,7 +57,7 @@ export const useMockDashboardApi = ({
       getPanelCount: () => {
         return Object.keys(panels$.getValue()).length;
       },
-      rows$: new BehaviorSubject<MockedDashboardRowMap>(savedState.rows),
+      sections$: new BehaviorSubject<MockedDashboardSectionMap>(savedState.sections),
       expandedPanelId$,
       expandPanel: (id: string) => {
         if (expandedPanelId$.getValue()) {
@@ -79,7 +79,7 @@ export const useMockDashboardApi = ({
         const newId = v4();
         otherPanels[newId] = {
           ...oldPanel,
-          explicitInput: { ...newPanel.initialState, id: newId },
+          explicitInput: { ...(newPanel.serializedState?.rawState ?? {}), id: newId },
         };
         mockDashboardApi.panels$.next(otherPanels);
         return newId;
@@ -93,13 +93,12 @@ export const useMockDashboardApi = ({
           currentPanel.gridData.y = currentPanel.gridData.y + DEFAULT_PANEL_HEIGHT;
           otherPanels[id] = currentPanel;
         }
-        const newId = v4();
+        const newId = panelPackage.maybePanelId ?? v4();
         mockDashboardApi.panels$.next({
           ...otherPanels,
           [newId]: {
             type: panelPackage.panelType,
             gridData: {
-              row: 'first',
               x: 0,
               y: 0,
               w: DEFAULT_PANEL_WIDTH,
@@ -107,13 +106,16 @@ export const useMockDashboardApi = ({
               i: newId,
             },
             explicitInput: {
-              ...panelPackage.initialState,
+              ...(panelPackage.serializedState?.rawState ?? {}),
               id: newId,
             },
           },
         });
       },
       canRemovePanels: () => true,
+      getChildApi: () => {
+        throw new Error('getChildApi implemenation not provided');
+      },
     };
     // only run onMount
     // eslint-disable-next-line react-hooks/exhaustive-deps

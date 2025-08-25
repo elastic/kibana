@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Ast, fromExpression } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
+import { fromExpression } from '@kbn/interpreter';
 import type { DateRange } from '../../../common/types';
-import { DatasourceStates } from '../../state_management';
+import type { DatasourceStates } from '../../state_management';
 import type { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
 
 export function getDatasourceExpressionsByLayers(
@@ -17,7 +18,7 @@ export function getDatasourceExpressionsByLayers(
   nowInstant: Date,
   searchSessionId?: string,
   forceDSL?: boolean
-): null | Record<string, Ast> {
+): undefined | Record<string, Ast> {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
   Object.entries(datasourceMap).forEach(([datasourceId, datasource]) => {
@@ -45,7 +46,7 @@ export function getDatasourceExpressionsByLayers(
   });
 
   if (datasourceExpressions.length === 0) {
-    return null;
+    return undefined;
   }
 
   return datasourceExpressions.reduce(
@@ -107,10 +108,10 @@ export function buildExpression({
       title,
       description,
     },
-    datasourceExpressionsByLayers ?? undefined
+    datasourceExpressionsByLayers
   );
 
-  if (datasourceExpressionsByLayers === null || visualizationExpression === null) {
+  if (!datasourceExpressionsByLayers || visualizationExpression === null) {
     return null;
   }
 

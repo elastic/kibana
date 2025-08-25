@@ -33,10 +33,8 @@ import { IndexViewLogic } from './index_view_logic';
 
 import './index_mappings.scss';
 import { docLinks } from '../shared/doc_links';
-import {
-  AccessControlIndexSelector,
-  AccessControlSelectorOption,
-} from './access_control_index_selector/access_control_index_selector';
+import type { AccessControlSelectorOption } from './access_control_index_selector/access_control_index_selector';
+import { AccessControlIndexSelector } from './access_control_index_selector/access_control_index_selector';
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
 import { stripSearchPrefix } from '../../utils/strip_search_prefix';
 import { useAppContext } from '../../app_context';
@@ -91,7 +89,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
                     'xpack.contentConnectors.content.searchIndex.mappings.noIndex.title',
                     { defaultMessage: 'Access Control Index not found' }
                   )}
-                  iconType="iInCircle"
+                  iconType="info"
                 >
                   <p>
                     {i18n.translate(
@@ -134,7 +132,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
           <EuiPanel grow={false} hasShadow={false} hasBorder>
             <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="iInCircle" />
+                <EuiIcon type="info" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="xs">
@@ -176,7 +174,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
           <EuiPanel grow={false} hasShadow={false} hasBorder>
             <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="iInCircle" />
+                <EuiIcon type="info" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="xs">

@@ -23,11 +23,13 @@ const createFeatureFlagsInternalSetup = (): jest.Mocked<InternalFeatureFlagsSetu
   return {
     ...createFeatureFlagsSetup(),
     getOverrides: jest.fn().mockReturnValue({}),
+    getInitialFeatureFlags: jest.fn().mockImplementation(async () => ({})),
   };
 };
 
 const createFeatureFlagsSetup = (): jest.Mocked<FeatureFlagsSetup> => {
   return {
+    setInitialFeatureFlagsGetter: jest.fn(),
     setProvider: jest.fn(),
     appendContext: jest.fn(),
   };

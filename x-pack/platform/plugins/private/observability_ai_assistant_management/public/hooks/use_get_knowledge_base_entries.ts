@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
 
@@ -13,16 +14,19 @@ export function useGetKnowledgeBaseEntries({
   query,
   sortBy,
   sortDirection,
+  inferenceModelState,
 }: {
   query: string;
   sortBy: string;
   sortDirection: 'asc' | 'desc';
+  inferenceModelState?: InferenceModelState;
 }) {
   const { observabilityAIAssistant } = useKibana().services;
 
   const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
   const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
+    networkMode: 'always',
     queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES, query, sortBy, sortDirection],
     queryFn: async ({ signal }) => {
       if (!signal) {
@@ -40,6 +44,7 @@ export function useGetKnowledgeBaseEntries({
         },
       });
     },
+    enabled: inferenceModelState === InferenceModelState.READY,
     keepPreviousData: true,
     refetchOnWindowFocus: false,
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { REACT_QUERY_KEYS } from '../constants';
@@ -22,7 +22,7 @@ export function useDeleteKnowledgeBaseEntry() {
   const queryClient = useQueryClient();
   const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
-  return useMutation<unknown, ServerError, { id: string }>(
+  return useMutation<unknown, ServerError, { id: string; isUserInstruction?: boolean }>(
     [REACT_QUERY_KEYS.CREATE_KB_ENTRIES],
     ({ id: entryId }) => {
       return observabilityAIAssistantApi(
@@ -38,21 +38,33 @@ export function useDeleteKnowledgeBaseEntry() {
       );
     },
     {
-      onSuccess: (_data, { id }) => {
-        toasts.addSuccess(
-          i18n.translate(
-            'xpack.observabilityAiAssistantManagement.kb.deleteManualEntry.successNotification',
-            {
-              defaultMessage: 'Successfully deleted {id}',
-              values: { id },
-            }
-          )
-        );
+      networkMode: 'always',
+      onSuccess: (_data, { id, isUserInstruction }) => {
+        if (isUserInstruction) {
+          toasts.addSuccess(
+            i18n.translate(
+              'xpack.observabilityAiAssistantManagement.kb.deleteUserInstruction.successNotification',
+              {
+                defaultMessage: 'Successfully deleted user instruction',
+              }
+            )
+          );
+        } else {
+          toasts.addSuccess(
+            i18n.translate(
+              'xpack.observabilityAiAssistantManagement.kb.deleteManualEntry.successNotification',
+              {
+                defaultMessage: 'Successfully deleted {id}',
+                values: { id },
+              }
+            )
+          );
 
-        queryClient.invalidateQueries({
-          queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES],
-          refetchType: 'all',
-        });
+          queryClient.invalidateQueries({
+            queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES],
+            refetchType: 'all',
+          });
+        }
       },
       onError: (error, { id }) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {

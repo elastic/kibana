@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { buildExpression } from '@kbn/expressions-plugin/public';
-import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../../mocks';
-import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
-import {
+import type { DatasourceMock } from '../../mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
+import type { DatatableVisualizationState } from './visualization';
+import { getDatatableVisualization } from './visualization';
+import type {
   Operation,
   DataType,
   FramePublicAPI,
@@ -21,14 +23,16 @@ import { RowHeightMode } from '../../../common/types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import { ColorMapping, CUSTOM_PALETTE, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import {
+import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CUSTOM_PALETTE } from '@kbn/coloring';
+import type {
   ColumnState,
   DatatableColumnFn,
   DatatableExpressionFunction,
 } from '../../../common/expressions';
 import { getPaletteDisplayColors } from '../../shared_components/coloring';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { DataGridDensity } from '@kbn/unified-data-table';
 
 jest.mock('../../shared_components/coloring', () => {
   return {
@@ -923,6 +927,25 @@ describe('Datatable Visualization', () => {
           alignment: [],
         })
       );
+    });
+
+    it('sets density based on state', () => {
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).density).toEqual([
+        DataGridDensity.NORMAL,
+      ]);
+
+      for (const DENSITY of [
+        DataGridDensity.COMPACT,
+        DataGridDensity.NORMAL,
+        DataGridDensity.EXPANDED,
+      ]) {
+        expect(
+          getDatatableExpressionArgs({
+            ...defaultExpressionTableState,
+            density: DENSITY,
+          }).density
+        ).toEqual([DENSITY]);
+      }
     });
 
     describe('palette/colorMapping/colorMode', () => {

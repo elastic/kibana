@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { UsageStats } from './types';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { UsageStats } from './types';
 
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'securitySolution:defaultIndex': {
@@ -38,6 +38,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:suppressionBehaviorOnAlertClosure': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'xpackReporting:customPdfLogo': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -60,10 +64,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'visualization:heatmap:maxBuckets': {
     type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'visualization:useLegacyTimeAxis': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:regionmap:showWarnings': {
@@ -106,6 +106,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enablePrivilegedUserMonitoring': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:defaultAnomalyScore': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -139,6 +143,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableAssetInventory': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableCloudConnector': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -456,27 +464,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmEnableServiceMetrics': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmEnableContinuousRollups': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmAgentExplorerView': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmEnableTableSearchBar': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmEnableServiceInventoryTableSearchBar': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:entityCentricExperience': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -488,15 +480,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmEnableServiceMapApiV2': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:aiAssistantSimulatedFunctionCalling': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:aiAssistantSearchConnectorIndexPattern': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'ai:anonymizationSettings': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -506,6 +498,26 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       type: 'keyword',
       _meta: { description: 'Non-default value of setting.' },
     },
+  },
+  'onechat:mcp:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'onechat:a2a:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'onechat:ui:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'onechat:api:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'workflows:ui:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
   },
   'banners:placement': {
     type: 'keyword',
@@ -575,32 +587,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
-  'observability:apmLabsButton': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableAwsLambdaMetrics': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmProgressiveLoading': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmServiceGroupMaxNumberOfServices': {
     type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmServiceInventoryOptimizedSorting': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmTraceExplorerTab': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmEnableProfilingIntegration': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmEnableTransactionProfiling': {
@@ -625,18 +617,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:profilingDatacenterPUE': {
     type: 'integer',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmEnableCriticalPath': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableInfrastructureProfilingIntegration': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableInfrastructureAssetCustomDashboards': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableGroupedNav': {
@@ -690,6 +670,24 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable the new logs overview component.',
+    },
+  },
+  'observability:enableStreamsUI': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Streams UI.',
+    },
+  },
+  'observability:streamsEnableSignificantEvents': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable significant events in streams.',
+    },
+  },
+  'observability:enableDiagnosticMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable diagnostic mode',
     },
   },
 };

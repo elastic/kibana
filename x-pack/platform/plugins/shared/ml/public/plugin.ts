@@ -79,6 +79,7 @@ import { AnomalySwimLane } from './shared_components';
 import { MlManagementLocatorInternal } from './locator/ml_management_locator';
 import { TelemetryService } from './application/services/telemetry/telemetry_service';
 import type { ITelemetryClient } from './application/services/telemetry/types';
+import { registerEmbeddables } from './embeddables';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -144,25 +145,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2: false,
   };
-  private nlpSettings: NLPSettings = {
-    modelDeployment: {
-      allowStaticAllocations: true,
-      vCPURange: {
-        low: {
-          min: 0,
-          max: 2,
-        },
-        medium: {
-          min: 1,
-          max: 16,
-        },
-        high: {
-          min: 1,
-          max: 32,
-        },
-      },
-    },
-  };
+  private nlpSettings: NLPSettings = {};
 
   private telemetry = new TelemetryService();
 
@@ -282,12 +265,12 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               );
             }
 
-            const {
-              registerEmbeddables,
-              registerMlUiActions,
-              registerSearchLinks,
-              registerCasesAttachments,
-            } = await import('./register_helper');
+            if (fullLicense && mlCapabilities.canGetMlInfo && this.enabledFeatures.ad) {
+              registerEmbeddables(pluginsSetup.embeddable, core);
+            }
+
+            const { registerMlUiActions, registerSearchLinks, registerCasesAttachments } =
+              await import('./register_helper');
             registerSearchLinks(
               this.appUpdater$,
               fullLicense,
@@ -318,8 +301,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerMlUiActions(pluginsSetup.uiActions, core);
 
               if (this.enabledFeatures.ad) {
-                registerEmbeddables(pluginsSetup.embeddable, core);
-
                 if (pluginsSetup.cases) {
                   registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
                 }

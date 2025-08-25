@@ -9,7 +9,7 @@
 
 import url from 'url';
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 declare global {
   interface Window {

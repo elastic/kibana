@@ -13,15 +13,19 @@ import { useKibana } from '../../../hooks/use_kibana';
 
 import { navigateToIndexDetails } from '../../utils';
 
-export const useCreateIndex = () => {
+export const useCreateIndex = (workflow?: string) => {
   const { application, http } = useKibana().services;
   const { createIndex, isSuccess, isLoading, data: createIndexResponse } = useCreateIndexApi();
   useEffect(() => {
     if (isSuccess && createIndexResponse !== undefined) {
-      navigateToIndexDetails(application, http, createIndexResponse.index);
+      let query = '';
+      if (workflow) {
+        query = `?workflow=${encodeURIComponent(workflow)}`;
+      }
+      navigateToIndexDetails(application, http, createIndexResponse.index, query);
       return;
     }
-  }, [application, http, isSuccess, createIndexResponse]);
+  }, [application, http, isSuccess, createIndexResponse, workflow]);
 
   return { createIndex, isLoading };
 };

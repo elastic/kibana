@@ -11,7 +11,7 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { range, sortBy } from 'lodash';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
@@ -90,7 +90,7 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
     const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams({
         migrationAlgorithm: 'v2',
-        kibanaVersion: '8.8.0',
+        kibanaVersion: '8.18.0',
       }),
       types: [getTestModelVersionType({ beforeUpgrade: true })],
     });
@@ -114,16 +114,16 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
     const modelVersionType = getTestModelVersionType({ beforeUpgrade: false });
 
     const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams({ migrationAlgorithm: 'v2', kibanaVersion: '8.8.0' }),
+      ...getBaseMigratorParams({ migrationAlgorithm: 'v2', kibanaVersion: '8.18.0' }),
       logFilePath,
       types: [modelVersionType],
     });
     await runMigrations();
 
     const indices = await client.indices.get({ index: '.kibana*' });
-    expect(Object.keys(indices)).toEqual(['.kibana_8.8.0_001']);
+    expect(Object.keys(indices)).toEqual(['.kibana_8.18.0_001']);
 
-    const index = indices['.kibana_8.8.0_001'];
+    const index = indices['.kibana_8.18.0_001'];
     const mappings = index.mappings ?? {};
     const mappingMeta = mappings._meta ?? {};
 

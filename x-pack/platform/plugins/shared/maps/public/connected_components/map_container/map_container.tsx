@@ -7,14 +7,16 @@
 
 import '../../_index.scss';
 import React, { Component } from 'react';
-import classNames from 'classnames';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { Observable } from 'rxjs';
+import type { Filter } from '@kbn/es-query';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { Observable } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
@@ -22,12 +24,13 @@ import { ToolbarOverlay } from '../toolbar_overlay';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { isScreenshotMode } from '../../kibana_services';
-import { RawValue, RENDER_TIMEOUT } from '../../../common/constants';
+import type { RawValue } from '../../../common/constants';
+import { RENDER_TIMEOUT } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
-import { MapSettings } from '../../../common/descriptor_types';
+import type { MapSettings } from '../../../common/descriptor_types';
 import { MapSettingsPanel } from '../map_settings_panel';
-import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { ILayer } from '../../classes/layers/layer';
+import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import type { ILayer } from '../../classes/layers/layer';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -56,6 +59,7 @@ export interface Props {
    * Visualize Embeddable handles sharing attributes so sharing attributes are not needed in the children.
    */
   isSharable: boolean;
+  euiTheme?: any;
 }
 
 interface State {
@@ -64,6 +68,8 @@ interface State {
   showFitToBoundsButton: boolean;
   showTimesliderButton: boolean;
 }
+
+const mapWrapperStyles = css({ position: 'relative' });
 
 export class MapContainer extends Component<Props, State> {
   private _isMounted: boolean = false;
@@ -187,15 +193,6 @@ export class MapContainer extends Component<Props, State> {
       );
     }
 
-    let flyoutPanel = null;
-    if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
-      flyoutPanel = <AddLayerPanel />;
-    } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
-      flyoutPanel = <EditLayerPanel />;
-    } else if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
-      flyoutPanel = <MapSettingsPanel />;
-    }
-
     let exitFullScreenButton;
     if (isFullScreen) {
       exitFullScreenButton = <ExitFullScreenButton onExit={exitFullScreen} />;
@@ -213,7 +210,7 @@ export class MapContainer extends Component<Props, State> {
     return (
       <EuiFlexGroup gutterSize="none" responsive={false} {...shareAttributes}>
         <EuiFlexItem
-          className="mapMapWrapper"
+          css={mapWrapperStyles}
           style={{ backgroundColor: this.props.settings.backgroundColor }}
         >
           <MBMap
@@ -237,17 +234,50 @@ export class MapContainer extends Component<Props, State> {
             <Timeslider waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$} />
           )}
         </EuiFlexItem>
-        <EuiFlexItem
-          className={classNames('mapMapLayerPanel', {
-            'mapMapLayerPanel-isVisible': !!flyoutPanel,
-          })}
-          grow={false}
-        >
-          {flyoutPanel}
-        </EuiFlexItem>
-
+        <FlyoutPanelWrapper flyoutDisplay={flyoutDisplay} />
         {exitFullScreenButton}
       </EuiFlexGroup>
     );
   }
 }
+
+const componentStyles = {
+  flyoutPanelWrapperStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      overflow: 'hidden',
+      borderLeftWidth: 1,
+      borderLeftColor: euiTheme.colors.borderBaseSubdued,
+      borderLeftStyle: 'solid',
+      width: 0,
+      '& > *': {
+        width: `calc(${euiTheme.size.xxl} * 12)`,
+      },
+    }),
+  flyoutVisibleStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: `calc(${euiTheme.size.xxl} * 12)`,
+      transition: `width ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+    }),
+};
+
+const FlyoutPanelWrapper = ({ flyoutDisplay }: { flyoutDisplay: FLYOUT_STATE }) => {
+  let flyoutPanel = null;
+  if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
+    flyoutPanel = <AddLayerPanel />;
+  } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
+    flyoutPanel = <EditLayerPanel />;
+  } else if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
+    flyoutPanel = <MapSettingsPanel />;
+  }
+  const isVisible = !!flyoutPanel;
+  const styles = useMemoCss(componentStyles);
+  return (
+    <EuiFlexItem
+      css={[styles.flyoutPanelWrapperStyles, isVisible && styles.flyoutVisibleStyles]}
+      grow={false}
+    >
+      {flyoutPanel}
+    </EuiFlexItem>
+  );
+};

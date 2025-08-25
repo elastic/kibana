@@ -38,6 +38,7 @@ if arch_name != 'x64' and arch_name != 'arm64':
   raise Exception('Unexpected architecture: ' + arch_name + '. `x64` and `arm64` are supported.')
 
 print('Fetching locale files')
+# TODO: move this into the repo itself, so we are only writing the build output to the bucket
 runcmd('gsutil cp gs://headless_shell_staging/en-US.pak .')
 
 print('Building Chromium ' + source_version + ' for ' + arch_name + ' from ' + src_path)

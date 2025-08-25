@@ -7,15 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client, estypes } from '@elastic/elasticsearch';
-import { pipeline, Readable } from 'stream';
-import { LogDocument } from '@kbn/apm-synthtrace-client/src/lib/logs';
-import { IngestProcessorContainer, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { ValuesType } from 'utility-types';
-import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
+import type { Client, estypes } from '@elastic/elasticsearch';
+import type { Readable } from 'stream';
+import { pipeline } from 'stream';
+import type { LogDocument } from '@kbn/apm-synthtrace-client/src/lib/logs';
+import type {
+  IngestProcessorContainer,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ValuesType } from 'utility-types';
+import type { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
+import { SynthtraceEsClientBase } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
-import { Logger } from '../utils/create_logger';
-import { indexTemplates, IndexTemplateName } from './custom_logsdb_index_templates';
+import type { Logger } from '../utils/create_logger';
+import type { IndexTemplateName } from './custom_logsdb_index_templates';
+import { indexTemplates } from './custom_logsdb_index_templates';
 import { getRoutingTransform } from '../shared/data_stream_get_routing_transform';
 
 export const LogsIndex = 'logs';
@@ -26,12 +32,46 @@ export type LogsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pip
 interface Pipeline {
   includeSerialization?: boolean;
 }
+export interface LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
+  createIndexTemplate(name: IndexTemplateName): Promise<void>;
+  deleteIndexTemplate(name: IndexTemplateName): Promise<void>;
+  createComponentTemplate({
+    name,
+    mappings,
+    dataStreamOptions,
+  }: {
+    name: string;
+    mappings?: MappingTypeMapping;
+    dataStreamOptions?: {
+      failure_store: {
+        enabled: boolean;
+      };
+    };
+  }): Promise<void>;
+  deleteComponentTemplate(name: string): Promise<void>;
+  createIndex(index: string, mappings?: MappingTypeMapping): Promise<void>;
+  updateIndexTemplate(
+    indexName: string,
+    modify: (
+      template: ValuesType<
+        estypes.IndicesGetIndexTemplateResponse['index_templates']
+      >['index_template']
+    ) => estypes.IndicesPutIndexTemplateRequest
+  ): Promise<void>;
+  createCustomPipeline(processors: IngestProcessorContainer[], id: string): Promise<void>;
+  deleteCustomPipeline(id: string): Promise<void>;
+}
 
-export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
-  constructor(options: { client: Client; logger: Logger } & LogsSynthtraceEsClientOptions) {
+export class LogsSynthtraceEsClientImpl
+  extends SynthtraceEsClientBase<LogDocument>
+  implements LogsSynthtraceEsClient
+{
+  constructor(
+    options: { client: Client; logger: Logger; pipeline?: Pipeline } & LogsSynthtraceEsClientOptions
+  ) {
     super({
       ...options,
-      pipeline: logsPipeline(),
+      pipeline: logsPipeline({ includeSerialization: options.pipeline?.includeSerialization }),
     });
     this.dataStreams = ['logs-*-*'];
     this.indices = ['cloud-logs-*-*'];
@@ -148,7 +188,7 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
 
   async createCustomPipeline(processors: IngestProcessorContainer[], id = LogsCustom) {
     try {
-      this.client.ingest.putPipeline({
+      await this.client.ingest.putPipeline({
         id,
         processors,
         version: 1,
@@ -161,7 +201,7 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
 
   async deleteCustomPipeline(id = LogsCustom) {
     try {
-      this.client.ingest.deletePipeline({
+      await this.client.ingest.deletePipeline({
         id,
       });
       this.logger.info(`Custom pipeline deleted: ${id}`);
@@ -169,21 +209,17 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       this.logger.error(`Custom pipeline deletion failed: ${id} - ${err.message}`);
     }
   }
-
-  getDefaultPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
-    return logsPipeline({ includeSerialization });
-  }
 }
 
-function logsPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
+function logsPipeline({ includeSerialization = true }: Pipeline) {
   return (base: Readable) => {
     const serializationTransform = includeSerialization
       ? [getSerializeTransform<LogDocument>()]
       : [];
 
     return pipeline(
-      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       ...serializationTransform,
       getRoutingTransform('logs'),
       (err: unknown) => {

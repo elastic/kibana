@@ -31,6 +31,7 @@ export interface ActionDetails {
   user_id?: string;
   pack_id?: string;
   pack_name?: string;
+  space_id?: string;
   pack_prebuilt?: boolean;
   status?: string;
   queries?: Array<{
@@ -46,7 +47,9 @@ export interface ActionDetails {
   }>;
 }
 
-export type ActionsRequestOptions = RequestOptionsPaginated;
+export interface ActionsRequestOptions extends RequestOptionsPaginated {
+  spaceId: string;
+}
 
 export interface ActionDetailsStrategyResponse extends IEsSearchResponse {
   actionDetails: estypes.SearchHit<ActionDetails>;
@@ -55,6 +58,7 @@ export interface ActionDetailsStrategyResponse extends IEsSearchResponse {
 
 export interface ActionDetailsRequestOptions extends RequestOptions {
   actionId: string;
+  spaceId: string;
 }
 
 export interface ActionResultsStrategyResponse

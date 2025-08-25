@@ -9,7 +9,8 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/rule-data-utils",
@@ -21,7 +22,6 @@
     "@kbn/share-plugin",
     "@kbn/data-plugin",
     "@kbn/alerting-comparators",
-    "@kbn/guided-onboarding",
     "@kbn/rison",
     "@kbn/kibana-utils-plugin",
     "@kbn/spaces-plugin",
@@ -89,7 +89,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/home-plugin",
     "@kbn/data-view-field-editor-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/license-management-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/security-plugin",
@@ -114,11 +113,25 @@
     "@kbn/data-service",
     "@kbn/ebt-tools",
     "@kbn/response-ops-rule-params",
-    "@kbn/dashboard-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/controls-plugin",
     "@kbn/core-http-browser",
-    "@kbn/object-utils"
+    "@kbn/dashboard-plugin",
+    "@kbn/deeplinks-analytics",
+    "@kbn/object-utils",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-pricing-common",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/core-pricing-browser-mocks",
+    "@kbn/esql",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/scout-oblt",
+    "@kbn/content-management-content-editor",
+    "@kbn/saved-objects-tagging-plugin",
+    "@kbn/page-attachment-schema",
+    "@kbn/licensing-types"
   ],
   "exclude": ["target/**/*"]
 }

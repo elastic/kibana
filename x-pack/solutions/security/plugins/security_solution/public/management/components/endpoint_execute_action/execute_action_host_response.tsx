@@ -29,6 +29,7 @@ export interface ExecuteActionHostResponseProps {
   textSize?: 'xs' | 's';
   hideFile?: boolean;
   hideContext?: boolean;
+  showPasscode?: boolean;
 }
 
 // Note: also used for RunScript command
@@ -41,6 +42,7 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
     'data-test-subj': dataTestSubj,
     hideFile,
     hideContext,
+    showPasscode,
   }) => {
     const outputContent = useMemo(
       () =>
@@ -60,6 +62,7 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
               canAccessFileDownloadLink={canAccessFileDownloadLink}
               data-test-subj={`${dataTestSubj}-getExecuteLink`}
               textSize={textSize}
+              showPasscode={showPasscode}
             />
             <EuiSpacer size="xxl" />
           </EuiFlexItem>

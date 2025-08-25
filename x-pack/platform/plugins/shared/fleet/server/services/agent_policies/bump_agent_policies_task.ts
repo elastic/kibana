@@ -65,9 +65,7 @@ async function getPackagePoliciesToBump(savedObjectType: string) {
     });
   return {
     total: result.total,
-    items: result.saved_objects.map((so) =>
-      mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces)
-    ),
+    items: result.saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so)),
   };
 }
 
@@ -101,7 +99,6 @@ export async function _updatePackagePoliciesThatNeedBump(
     }
 
     const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
-    const esClient = appContextService.getInternalUserESClient();
 
     await soClient.bulkUpdate<PackagePolicySOAttributes>(
       packagePolicies.map((item) => ({
@@ -117,7 +114,7 @@ export async function _updatePackagePoliciesThatNeedBump(
 
     const agentPoliciesToBump = uniq(packagePolicies.map((item) => item.policy_ids).flat());
 
-    await agentPolicyService.bumpAgentPoliciesByIds(soClient, esClient, agentPoliciesToBump);
+    await agentPolicyService.bumpAgentPoliciesByIds(agentPoliciesToBump);
 
     logger.debug(
       `Updated ${updatedCount} package policies in space ${spaceId} in ${

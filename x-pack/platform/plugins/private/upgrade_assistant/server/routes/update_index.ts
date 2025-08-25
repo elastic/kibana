@@ -8,15 +8,17 @@
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH } from '../../common/constants';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import type { RouteDependencies } from '../types';
 import { updateIndex } from '../lib/update_index';
+import { versionService } from '../lib/version';
 
 export function registerUpdateIndexRoute({
   router,
-  log,
   lib: { handleEsError },
+  log,
+  current,
 }: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH}/update_index`;
   router.post(
@@ -43,14 +45,20 @@ export function registerUpdateIndexRoute({
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client },
       } = await core;
       const { index } = request.params;
       const { operations } = request.body;
       try {
-        await updateIndex({ esClient: client.asCurrentUser, index, operations, log });
+        await updateIndex({
+          esClient: client.asCurrentUser,
+          index,
+          operations,
+          log,
+          versionService,
+        });
         return response.ok();
       } catch (err) {
         if (err instanceof errors.ResponseError) {

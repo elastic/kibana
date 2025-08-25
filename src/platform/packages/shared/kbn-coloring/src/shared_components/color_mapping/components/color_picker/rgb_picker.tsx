@@ -22,8 +22,8 @@ import chromajs from 'chroma-js';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { KbnPalettes } from '@kbn/palettes';
-import { ColorMapping } from '../../config';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { ColorMapping } from '../../config';
 
 import { hasEnoughContrast } from '../../color/color_math';
 
@@ -80,7 +80,7 @@ export function RGBPicker({
     ? euiThemeVars.euiColorWarningText
     : '';
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" style={{ padding: 8 }}>
+    <EuiFlexGroup direction="column" gutterSize="s" css={{ padding: 8 }}>
       <EuiFlexItem>
         <EuiColorPicker
           onChange={(c) => {
@@ -139,6 +139,7 @@ export function RGBPicker({
                       });
                     }
                   }}
+                  data-test-subj="lns-colorMapping-colorPicker-custom-input"
                   aria-label={i18n.translate(
                     'coloring.colorMapping.colorPicker.hexColorinputAriaLabel',
                     {

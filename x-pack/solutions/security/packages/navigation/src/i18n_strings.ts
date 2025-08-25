@@ -127,7 +127,7 @@ export const i18nStrings = {
     },
     aiopsLabs: {
       title: i18n.translate('securitySolutionPackages.navLinks.ml.aiopsLabs', {
-        defaultMessage: 'Aiops labs',
+        defaultMessage: 'AIOps labs',
       }),
       logRateAnalysis: i18n.translate(
         'securitySolutionPackages.navLinks.ml.aiopsLabs.logRateAnalysis',
@@ -212,6 +212,11 @@ export const i18nStrings = {
     stack: {
       title: i18n.translate('securitySolutionPackages.navLinks.mngt.stack', {
         defaultMessage: 'Stack',
+      }),
+    },
+    ai: {
+      title: i18n.translate('securitySolutionPackages.navLinks.mngt.ai', {
+        defaultMessage: 'AI',
       }),
     },
     other: {

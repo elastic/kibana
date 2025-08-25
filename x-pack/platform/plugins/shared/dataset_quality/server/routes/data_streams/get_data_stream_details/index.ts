@@ -7,8 +7,8 @@
 
 import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
-import { DataStreamDetails } from '../../../../common/api_types';
-import { MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
+import type { DataStreamDetails } from '../../../../common/api_types';
+import { FAILURE_STORE_PRIVILEGE, MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import { datasetQualityPrivileges } from '../../../services';
 import { createDatasetQualityESClient } from '../../../utils';
@@ -36,15 +36,15 @@ export async function getDataStreamDetails({
   const esClientAsCurrentUser = esClient.asCurrentUser;
   const esClientAsSecondaryAuthUser = esClient.asSecondaryAuthUser;
 
-  const hasAccessToDataStream = (
+  const dataStreamPrivileges = (
     await datasetQualityPrivileges.getHasIndexPrivileges(
       esClientAsCurrentUser,
       [dataStream],
-      ['monitor']
+      ['monitor', FAILURE_STORE_PRIVILEGE]
     )
   )[dataStream];
 
-  const esDataStream = hasAccessToDataStream
+  const esDataStream = dataStreamPrivileges.monitor
     ? (
         await getDataStreams({
           esClient: esClientAsCurrentUser,
@@ -61,7 +61,7 @@ export async function getDataStreamDetails({
       end
     );
 
-    const failedDocs = isServerless
+    const failedDocs = !dataStreamPrivileges[FAILURE_STORE_PRIVILEGE]
       ? undefined
       : (
           await getFailedDocsPaginated({
@@ -74,7 +74,7 @@ export async function getDataStreamDetails({
         )?.[0];
 
     const avgDocSizeInBytes =
-      hasAccessToDataStream && dataStreamSummaryStats.docsCount > 0
+      dataStreamPrivileges.monitor && dataStreamSummaryStats.docsCount > 0
         ? isServerless
           ? await getMeteringAvgDocSizeInBytes(esClientAsSecondaryAuthUser, dataStream)
           : await getAvgDocSizeInBytes(esClientAsCurrentUser, dataStream)
@@ -86,14 +86,16 @@ export async function getDataStreamDetails({
       ...dataStreamSummaryStats,
       failedDocsCount: failedDocs?.count,
       sizeBytes,
+      hasFailureStore: esDataStream?.hasFailureStore,
       lastActivity: esDataStream?.lastActivity,
       userPrivileges: {
-        canMonitor: hasAccessToDataStream,
+        canMonitor: dataStreamPrivileges.monitor,
+        canReadFailureStore: dataStreamPrivileges[FAILURE_STORE_PRIVILEGE],
       },
     };
   } catch (e) {
     // Respond with empty object if data stream does not exist
-    if (e.statusCode === 404) {
+    if (e.statusCode === 404 || e.body?.error?.type === 'index_closed_exception') {
       return {};
     }
     throw e;
@@ -178,7 +180,7 @@ async function getMeteringAvgDocSizeInBytes(esClient: ElasticsearchClient, index
 }
 
 async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string) {
-  const indexStats = await esClient.indices.stats({ index });
+  const indexStats = await esClient.indices.stats({ index, forbid_closed_indices: false });
   const docCount = indexStats._all.total?.docs?.count ?? 0;
   const sizeInBytes = indexStats._all.total?.store?.size_in_bytes ?? 0;
 
@@ -186,6 +188,10 @@ async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string
 }
 
 function getTermsFromAgg(termAgg: TermAggregation, aggregations: any) {
+  if (!aggregations) {
+    return {};
+  }
+
   return Object.entries(termAgg).reduce((acc, [key, _value]) => {
     const values = aggregations[key]?.buckets.map((bucket: any) => bucket.key) as string[];
     return { ...acc, [key]: values };

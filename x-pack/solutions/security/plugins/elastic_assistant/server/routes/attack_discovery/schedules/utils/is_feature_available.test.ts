@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AwaitedProperties } from '@kbn/utility-types';
-import { ElasticAssistantRequestHandlerContext } from '../../../../types';
+import type { AwaitedProperties } from '@kbn/utility-types';
+import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 import { isFeatureAvailable } from './is_feature_available';
 
 const getBooleanValueMock = jest.fn();
@@ -28,7 +28,7 @@ describe('isFeatureAvailable', () => {
 
     expect(getBooleanValueMock).toHaveBeenCalledWith(
       'securitySolution.assistantAttackDiscoverySchedulingEnabled',
-      false
+      true
     );
   });
 });

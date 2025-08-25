@@ -62,7 +62,7 @@ describe('When on integration detail', () => {
   beforeEach(async () => {
     testRenderer = createIntegrationsTestRendererMock();
     mockedApi = mockApiCalls(testRenderer.startServices.http);
-    act(() => testRenderer.mountHistory.push(detailPageUrlPath));
+    await act(() => testRenderer.mountHistory.push(detailPageUrlPath));
   });
 
   describe('and the package is installed', () => {
@@ -75,12 +75,12 @@ describe('When on integration detail', () => {
       await act(() => mockedApi.waitForApi());
     }, TESTS_TIMEOUT);
 
-    it('should display agent policy usage count', async () => {
-      expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
+    it('should display policy usage count', async () => {
+      expect(await renderResult.findByTestId('policyCount')).not.toBeNull();
     });
 
     it('should show the Policies tab', async () => {
-      expect(renderResult.queryByTestId('tab-policies')).not.toBeNull();
+      expect(await renderResult.findByTestId('tab-policies')).not.toBeNull();
     });
   });
 
@@ -113,8 +113,8 @@ describe('When on integration detail', () => {
       await act(() => mockedApi.waitForApi());
     }, TESTS_TIMEOUT);
 
-    it('should NOT display agent policy usage count', async () => {
-      expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
+    it('should NOT display policy usage count', async () => {
+      expect(renderResult.queryByTestId('policyCount')).toBeNull();
     });
 
     it('should NOT display the Policies tab', async () => {
@@ -151,8 +151,8 @@ describe('When on integration detail', () => {
       await act(() => mockedApi.waitForApi());
     }, TESTS_TIMEOUT);
 
-    it('should NOT display agent policy usage count', async () => {
-      expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
+    it('should NOT display policy usage count', async () => {
+      expect(renderResult.queryByTestId('policyCount')).toBeNull();
     });
 
     it('should NOT display the Policies tab', async () => {
@@ -843,6 +843,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
   const epmGetStatsResponse: GetStatsResponse = {
     response: {
       agent_policy_count: 2,
+      package_policy_count: 2,
     },
   };
 

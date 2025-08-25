@@ -21,10 +21,12 @@ import {
   EuiSpacer,
   EuiText,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { useCore, useServices, useToastNotifications } from '../app_context';
-import { Frequency, CronEditor } from '../../shared_imports';
+import type { Frequency } from '../../shared_imports';
+import { CronEditor } from '../../shared_imports';
 import { DEFAULT_RETENTION_SCHEDULE, DEFAULT_RETENTION_FREQUENCY } from '../constants';
 import { updateRetentionSchedule } from '../services/http';
 
@@ -45,6 +47,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
   const { i18n } = useServices();
   const { docLinks } = useCore();
   const toastNotifications = useToastNotifications();
+  const modalTitleId = useGeneratedHtmlId();
 
   const [retentionSchedule, setRetentionSchedule] = useState<string>(DEFAULT_RETENTION_SCHEDULE);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -128,9 +131,9 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
     }
 
     return (
-      <EuiModal onClose={closeModal}>
+      <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             {isEditing ? (
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionEditTitle"
@@ -155,6 +158,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
                     defaultMessage="Error saving retention schedule"
                   />
                 }
+                role="alert"
                 color="danger"
                 iconType="warning"
               >
@@ -198,6 +202,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
                 fullWidth
               >
                 <EuiFieldText
+                  isInvalid={isInvalid}
                   defaultValue={retentionSchedule}
                   fullWidth
                   onChange={(e) => setRetentionSchedule(e.target.value)}

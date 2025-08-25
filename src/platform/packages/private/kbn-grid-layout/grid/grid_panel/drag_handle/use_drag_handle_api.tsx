@@ -11,7 +11,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { useGridLayoutContext } from '../../use_grid_layout_context';
 import { useGridLayoutPanelEvents } from '../../use_grid_layout_events';
-import { UserInteractionEvent } from '../../use_grid_layout_events/types';
+import type { UserInteractionEvent } from '../../use_grid_layout_events/types';
 
 export interface DragHandleApi {
   startDrag: (e: UserInteractionEvent) => void;
@@ -20,23 +20,29 @@ export interface DragHandleApi {
 
 export const useDragHandleApi = ({
   panelId,
-  rowId,
+  sectionId,
 }: {
   panelId: string;
-  rowId: string;
+  sectionId?: string;
 }): DragHandleApi => {
   const { useCustomDragHandle } = useGridLayoutContext();
 
-  const { startDrag } = useGridLayoutPanelEvents({
+  const startDrag = useGridLayoutPanelEvents({
     interactionType: 'drag',
     panelId,
-    rowId,
+    sectionId,
   });
 
   const removeEventListenersRef = useRef<(() => void) | null>(null);
 
   const setDragHandles = useCallback(
     (dragHandles: Array<HTMLElement | null>) => {
+      /**
+       * if new `startDrag` reference (which happens when, for example, panels change sections),
+       * then clean up the old event listeners
+       */
+      removeEventListenersRef.current?.();
+
       for (const handle of dragHandles) {
         if (handle === null) return;
         handle.addEventListener('mousedown', startDrag, { passive: true });

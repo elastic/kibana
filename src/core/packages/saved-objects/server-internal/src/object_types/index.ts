@@ -10,5 +10,5 @@
 export { registerCoreObjectTypes } from './registration';
 
 // set minimum number of registered saved objects to ensure no object types are removed after 8.8
-// declared in internal implementation exclicilty to prevent unintended changes.
-export const SAVED_OBJECT_TYPES_COUNT = 130 as const;
+// declared in internal implementation explicitly to prevent unintended changes.
+export const SAVED_OBJECT_TYPES_COUNT = 137 as const;

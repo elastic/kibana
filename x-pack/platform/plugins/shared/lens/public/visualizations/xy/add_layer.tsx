@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiButton,
   EuiPopover,
@@ -13,19 +14,18 @@ import {
   EuiContextMenu,
   EuiFlexItem,
   EuiFlexGroup,
-  IconType,
-  transparentize,
   type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
-import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
+import type { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
-import { SeriesType, XYState, visualizationTypes } from './types';
+import type { SeriesType, XYState } from './types';
+import { visualizationTypes } from './types';
 import { isHorizontalChart, isHorizontalSeries, isPercentageSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';
@@ -297,7 +297,7 @@ const chartOptionWrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
   &:hover,
   &:focus {
     color: ${euiTheme.colors.primary};
-    background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
+    background-color: ${euiTheme.colors.backgroundBasePrimary};
     span,
     .euiText {
       text-decoration: underline;

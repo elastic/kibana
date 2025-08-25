@@ -9,7 +9,7 @@ mapped_pages:
 
 ### OpenID Connect [ec_openid_connect]
 
-If you are using OpenID Connect to secure your clusters, these settings are supported in Elasticsearch Service.
+If you are using OpenID Connect to secure your clusters, these settings are supported on {{ech}}.
 
 `xpack.security.authc.providers.oidc.<provider-name>.order`
 :   Specifies order of the OpenID Connect authentication provider in the authentication chain.
@@ -28,7 +28,7 @@ To learn more, check [configuring Kibana to use OpenID Connect](docs-content://d
 
 ### Anonymous authentication [ec_anonymous_authentication]
 
-If you want to allow anonymous authentication in Kibana, these settings are supported in Elasticsearch Service. To learn more on how to enable anonymous access, check [Enabling anonymous access](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/anonymous-access.md) and [Configuring Kibana to use anonymous authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#anonymous-authentication).
+If you want to allow anonymous authentication in Kibana, these settings are supported on {{ech}}. To learn more on how to enable anonymous access, check [Enabling anonymous access](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/anonymous-access.md) and [Configuring Kibana to use anonymous authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#anonymous-authentication).
 
 #### Supported versions before 8.0.0 [ec_supported_versions_before_8_0_0]
 
@@ -54,11 +54,44 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 
 You can configure the following X-Pack settings from the Kibana **User Settings** editor.
 
+### Version 9.2+ [ec_version_9_2]
+```{applies_to}
+stack: ga 9.2
+```
+
+`xpack.actions.email.recipient_allowlist`
+:    A list of allowed email recipient patterns (`to`, `cc`, or `bcc`) that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
+
+### Version 9.1+ [ec_version_9_1]
+```{applies_to}
+stack: ga 9.1
+```
+
+`xpack.actions.email.services.enabled`
+:   An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
+
+`xpack.actions.email.services.ses.host`
+:   The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+
+`xpack.actions.email.services.ses.port`
+:   The port number for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+
+`xpack.actions.webhook.ssl.pfx.enabled`
+:   Disable PFX file support for SSL client authentication. When set to `false`, the application will not accept PFX certificate files and will require separate certificate and private key files instead. Only applies to the [Webhook connector](/reference/connectors-kibana/webhook-action-type.md).
+
+`xpack.banners.linkColor`
+:   The color for the banner link text. Defaults to `#0B64DD`.
+
+`xpack.product_intercept.enabled`
+:   Enable or disable Elastic product feedback prompts. Defaults to `true`.
+
+`xpack.product_intercept.interval`:
+:   Set the time that elapses between Elastic product feedback prompts. The time is formatted as a number and a time unit (d,h,m,s). For example, 20m, 24h, 7d. Defaults to `90d`.
+
 ### Version 8.18+ [ec_version_8_18]
 
 `xpack.fleet.enableManagedLogsAndMetricsDataviews`
 :   Allow to disable the automatic creation of global dataviews `logs-*` and `metrics-*`.
-
 
 ### Version 8.16+ [ec_version_8_16]
 
@@ -389,9 +422,6 @@ Banners are disabled by default. You need to manually configure them in order to
 
 `xpack.banners.textColor`
 :   The color for the banner text. Defaults to `#8A6A0A`.
-
-`xpack.banners.linkColor`
-:   The color for the banner link text. Defaults to `#0B64DD`.
 
 `xpack.banners.backgroundColor`
 :   The color of the banner background. Defaults to `#FFF9E8`.

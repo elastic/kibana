@@ -48,30 +48,32 @@ export const buildEnrichments = ({
   threats: ThreatListItem[];
   indicatorPath: string;
 }): ThreatEnrichment[] =>
-  queries.map((query) => {
-    const matchedThreat = threats.find((threat) => threat._id === query.id);
-    const indicatorValue = get(matchedThreat?._source, indicatorPath) as unknown;
-    const feedName = (get(matchedThreat?._source, FEED_NAME_PATH) ?? '') as string;
-    const indicator = ([indicatorValue].flat()[0] ?? {}) as Record<string, unknown>;
-    if (!isObject(indicator)) {
-      throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
-    }
-    const feed: { name?: string } = {};
-    if (feedName) {
-      feed.name = feedName;
-    }
-    return {
-      indicator,
-      feed,
-      matched: {
-        atomic: undefined,
-        field: query.field,
-        id: query.id,
-        index: query.index,
-        type: ENRICHMENT_TYPES.IndicatorMatchRule,
-      },
-    };
-  });
+  queries
+    .filter((q) => !q.negate)
+    .map((query) => {
+      const matchedThreat = threats.find((threat) => threat._id === query.id);
+      const indicatorValue = get(matchedThreat?._source, indicatorPath) as unknown;
+      const feedName = (get(matchedThreat?._source, FEED_NAME_PATH) ?? '') as string;
+      const indicator = ([indicatorValue].flat()[0] ?? {}) as Record<string, unknown>;
+      if (!isObject(indicator)) {
+        throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
+      }
+      const feed: { name?: string } = {};
+      if (feedName) {
+        feed.name = feedName;
+      }
+      return {
+        indicator,
+        feed,
+        matched: {
+          atomic: undefined,
+          field: query.field,
+          id: query.id,
+          index: query.index,
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
+        },
+      };
+    });
 
 const enrichSignalWithThreatMatches = (
   signalHit: SignalSourceHit,
@@ -114,16 +116,15 @@ const enrichSignalWithThreatMatches = (
  */
 export const enrichSignalThreatMatchesFromSignalsMap = async (
   signals: SignalSourceHit[],
-  getMatchedThreats: () => Promise<ThreatListItem[]>,
+  matchedThreats: ThreatListItem[],
   indicatorPath: string,
-  signalsMap: Map<string, ThreatMatchNamedQuery[]>
+  signalIdToMatchedQueriesMap: Map<string, ThreatMatchNamedQuery[]>
 ): Promise<SignalSourceHit[]> => {
   if (signals.length === 0) {
     return [];
   }
 
   const uniqueHits = groupAndMergeSignalMatches(signals);
-  const matchedThreats = await getMatchedThreats();
 
   const enrichmentsWithoutAtomic: Record<string, ThreatEnrichment[]> = {};
 
@@ -132,7 +133,7 @@ export const enrichSignalThreatMatchesFromSignalsMap = async (
     enrichmentsWithoutAtomic[hit._id!] = buildEnrichments({
       indicatorPath,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      queries: signalsMap.get(hit._id!) ?? [],
+      queries: signalIdToMatchedQueriesMap.get(hit._id!) ?? [],
       threats: matchedThreats,
     });
   });

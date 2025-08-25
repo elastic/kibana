@@ -6,13 +6,13 @@
  */
 import moment from 'moment';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
-import { TimeState } from '@kbn/es-query';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
-import { Streams, PhaseName } from '@kbn/streams-schema';
+import type { TimeState } from '@kbn/es-query';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import type { Streams, PhaseName } from '@kbn/streams-schema';
 import { lastValueFrom } from 'rxjs';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { DataStreamStats } from './use_data_stream_stats';
+import type { DataStreamStats } from './use_data_stream_stats';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
 
 const TIMESTAMP_FIELD = '@timestamp';
@@ -271,7 +271,7 @@ export const useIngestionRatePerTier = ({
           const countByTier = indices.buckets.reduce((tiers, index) => {
             const explain = ilmExplain.indices[index.key];
             const tier =
-              explain.managed && explain.phase in ilmPhases
+              explain.managed && explain.phase && explain.phase in ilmPhases
                 ? (explain.phase as PhaseNameWithoutDelete)
                 : fallbackTier;
             tiers[tier] = (tiers[tier] ?? 0) + index.doc_count;

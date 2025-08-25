@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import { SynthtraceClientsManager, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
-// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+
 import { initPlugin } from '@frsource/cypress-plugin-visual-regression-diff/plugins';
 import { Readable } from 'stream';
 import type { ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
@@ -20,11 +20,15 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
     isCloud: !!config.env.TEST_CLOUD,
   });
 
-  const synthtraceEsClient = new ApmSynthtraceEsClient({
+  const clientsManager = new SynthtraceClientsManager({
     client,
     logger,
     refreshAfterIndex: true,
-    version: config.env.APM_PACKAGE_VERSION,
+  });
+
+  const { apmEsClient } = clientsManager.getClients({
+    clients: ['apmEsClient'],
+    packageVersion: config.env.APM_PACKAGE_VERSION,
   });
 
   initPlugin(on, config);
@@ -44,15 +48,14 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
       events: Array<Record<string, any>>;
       pipeline: ApmSynthtracePipelines;
     }) {
-      synthtraceEsClient.pipeline(
-        synthtraceEsClient.getPipeline(pipeline, { includeSerialization: false })
+      await apmEsClient.index(
+        Readable.from(events),
+        apmEsClient.resolvePipelineType(pipeline, { includePipelineSerialization: false })
       );
-
-      await synthtraceEsClient.index(Readable.from(events));
       return null;
     },
     async 'synthtrace:clean'() {
-      await synthtraceEsClient.clean();
+      await apmEsClient.clean();
       return null;
     },
   });

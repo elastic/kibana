@@ -11,7 +11,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
-import { integrationLabels } from '../i18n';
+import { toolLabels } from '../i18n';
 
 export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
   const { navigateToWorkchatUrl } = useNavigation();
@@ -25,7 +25,7 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
         }),
         isSelected: tab === 'active',
         onClick: () => {
-          navigateToWorkchatUrl(appPaths.integrations.list);
+          navigateToWorkchatUrl(appPaths.tools.list);
         },
       },
       {
@@ -35,7 +35,7 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
         }),
         isSelected: tab === 'catalog',
         onClick: () => {
-          navigateToWorkchatUrl(appPaths.integrations.catalog);
+          navigateToWorkchatUrl(appPaths.tools.catalog);
         },
       },
     ];
@@ -43,7 +43,7 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
 
   return (
     <KibanaPageTemplate.Header
-      pageTitle={integrationLabels.breadcrumb.integrationsPill}
+      pageTitle={toolLabels.breadcrumb.toolsPill}
       description={i18n.translate('workchatApp.integrations.listView.description', {
         defaultMessage:
           'Connect to your tools and data so you can easily find, understand, and act on the information that matters.',
@@ -52,13 +52,13 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
       rightSideItems={[
         <EuiButton
           onClick={() => {
-            return navigateToWorkchatUrl(appPaths.integrations.create);
+            return navigateToWorkchatUrl(appPaths.tools.create);
           }}
           iconType="plusInCircle"
           color="primary"
           fill
         >
-          {integrationLabels.listView.addIntegrationLabel}
+          {toolLabels.listView.addToolLabel}
         </EuiButton>,
       ]}
     />

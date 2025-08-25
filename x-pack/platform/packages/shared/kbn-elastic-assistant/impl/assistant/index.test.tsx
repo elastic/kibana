@@ -13,16 +13,19 @@ import type { IHttpFetchError } from '@kbn/core/public';
 
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 
-import { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { TestProviders } from '../mock/test_providers/test_providers';
-import { FetchCurrentUserConversations, useFetchCurrentUserConversations } from './api';
+import type { FetchCurrentUserConversations } from './api';
+import { useFetchCurrentUserConversations } from './api';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
-import { AIConnector } from '../connectorland/connector_selector';
+import type { AIConnector } from '../connectorland/connector_selector';
+import type { FetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
@@ -31,6 +34,7 @@ jest.mock('react-use/lib/useSessionStorage');
 
 jest.mock('./quick_prompts/quick_prompts', () => ({ QuickPrompts: jest.fn() }));
 jest.mock('./api/conversations/use_fetch_current_user_conversations');
+jest.mock('./api/anonymization_fields/use_fetch_anonymization_fields');
 
 jest.mock('./use_conversation');
 const apiConfig = { connectorId: '123' };
@@ -99,6 +103,15 @@ const mockUseConversation = {
   setApiConfig: jest.fn().mockResolvedValue({}),
 };
 
+const mockAnonymizationFields: FetchAnonymizationFields = {
+  refetch: jest.fn(),
+  data: { page: 1, perPage: 20, total: 0, data: [] },
+  isFetching: false,
+  isError: false,
+  isLoading: false,
+  isFetched: true,
+};
+
 const refetchResults = jest.fn();
 const defaultFetchUserConversations = {
   data: mockData,
@@ -147,6 +160,7 @@ describe('Assistant', () => {
     jest
       .mocked(useFetchCurrentUserConversations)
       .mockReturnValue(defaultFetchUserConversations as unknown as FetchCurrentUserConversations);
+    jest.mocked(useFetchAnonymizationFields).mockReturnValue(mockAnonymizationFields);
     jest
       .mocked(useLocalStorage)
       .mockReturnValue([mockData.welcome_id, persistToLocalStorage] as unknown as ReturnType<

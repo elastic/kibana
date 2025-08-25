@@ -10,16 +10,17 @@
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { PersistenceAPI } from '../types';
+import type { PersistenceAPI } from '../types';
 import { DataViewLazy } from './data_view_lazy';
 import { DEFAULT_DATA_VIEW_ID } from '../constants';
-import { AbstractDataView } from './abstract_data_views';
+import type { AbstractDataView } from './abstract_data_views';
 
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
 import { DataView } from './data_view';
-import {
+import type {
   OnNotification,
   OnError,
   UiSettingsCommon,
@@ -34,7 +35,8 @@ import {
   TypeMeta,
 } from '../types';
 
-import { META_FIELDS, SavedObject } from '..';
+import type { SavedObject } from '..';
+import { META_FIELDS } from '..';
 import { DataViewMissingIndices } from '../lib';
 import { findByName } from '../utils';
 import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
@@ -1134,25 +1136,17 @@ export class DataViewsService {
     skipFetchFields = false,
     displayErrors = true
   ): Promise<DataView> {
-    const doCreate = () => this.createFromSpec(spec, skipFetchFields, displayErrors);
-
-    if (spec.id) {
-      const cachedDataView = this.dataViewCache.get(spec.id);
-
-      if (cachedDataView) {
-        return cachedDataView;
+    if (spec.id && this.dataViewCache.has(spec.id)) {
+      try {
+        return await this.dataViewCache.get(spec.id)!;
+      } catch (e) {
+        // The cached promise failed, so we need to create a new data view
       }
-
-      const dataViewPromise = doCreate();
-
-      this.dataViewCache.set(spec.id, dataViewPromise);
-
-      return dataViewPromise;
     }
 
-    const dataView = await doCreate();
-    this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
-    return dataView;
+    const dataViewPromise = this.createFromSpec(spec, skipFetchFields, displayErrors);
+    this.dataViewCache.set(spec.id ?? (await dataViewPromise).id!, dataViewPromise);
+    return dataViewPromise;
   }
 
   /**

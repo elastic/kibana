@@ -36,7 +36,7 @@ export const RiskScoreInfoTooltip: React.FC<{
           color="text"
           size="xs"
           iconSize="m"
-          iconType="iInCircle"
+          iconType="info"
           aria-label={i18n.INFORMATION_ARIA_LABEL}
           onClick={onClick}
         />

@@ -7,25 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { ESDocumentWithOperation, InfraDocument } from '@kbn/apm-synthtrace-client';
-import { pipeline, Readable, Transform } from 'stream';
-import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
+import type { Client } from '@elastic/elasticsearch';
+import type { ESDocumentWithOperation, InfraDocument } from '@kbn/apm-synthtrace-client';
+import type { Readable } from 'stream';
+import { pipeline, Transform } from 'stream';
+import type { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
+import { SynthtraceEsClientBase } from '../shared/base_client';
 import { getDedotTransform } from '../shared/get_dedot_transform';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
-import { Logger } from '../utils/create_logger';
+import type { Logger } from '../utils/create_logger';
+import type { PipelineOptions } from '../../cli/utils/clients_manager';
+import type { PackageManagement } from '../shared/types';
 
 export type InfraSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
-interface Pipeline {
-  includeSerialization?: boolean;
-}
+export interface InfraSynthtraceEsClient
+  extends SynthtraceEsClient<InfraDocument>,
+    PackageManagement {}
 
-export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
-  constructor(options: { client: Client; logger: Logger } & InfraSynthtraceEsClientOptions) {
+export class InfraSynthtraceEsClientImpl
+  extends SynthtraceEsClientBase<InfraDocument>
+  implements InfraSynthtraceEsClient
+{
+  constructor(
+    options: {
+      client: Client;
+      logger: Logger;
+      pipeline?: PipelineOptions;
+    } & InfraSynthtraceEsClientOptions &
+      PipelineOptions
+  ) {
     super({
       ...options,
-      pipeline: infraPipeline(),
+      pipeline: infraPipeline({
+        includePipelineSerialization: options.includePipelineSerialization,
+      }),
     });
     this.dataStreams = [
       'metrics-system*',
@@ -35,24 +51,43 @@ export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
     ];
   }
 
-  getDefaultPipeline(
-    {
-      includeSerialization,
-    }: {
-      includeSerialization?: boolean;
-    } = { includeSerialization: true }
-  ) {
-    return infraPipeline({ includeSerialization });
+  async initializePackage(opts?: { version?: string; skipInstallation?: boolean }) {
+    if (!this.fleetClient) {
+      throw new Error(
+        'InfraSynthtraceEsClient requires a FleetClient to be initialized. Please provide a valid Kibana client.'
+      );
+    }
+
+    const { version, skipInstallation = true } = opts ?? {};
+
+    let latestVersion = version;
+    if (!latestVersion || latestVersion === 'latest') {
+      latestVersion = await this.fleetClient.fetchLatestPackageVersion('system');
+    }
+
+    if (!skipInstallation) {
+      await this.fleetClient.installPackage('system', latestVersion);
+    }
+
+    return latestVersion;
+  }
+  async uninstallPackage() {
+    if (!this.fleetClient) {
+      throw new Error(
+        'InfraSynthtraceEsClient requires a FleetClient to be initialized. Please provide a valid Kibana client.'
+      );
+    }
+    await this.fleetClient.uninstallPackage('apm');
   }
 }
 
-function infraPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
+function infraPipeline({ includePipelineSerialization = true }: PipelineOptions) {
   return (base: Readable) => {
-    const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
+    const serializationTransform = includePipelineSerialization ? [getSerializeTransform()] : [];
 
     return pipeline(
-      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       ...serializationTransform,
       getRoutingTransform(),
       getDedotTransform(),

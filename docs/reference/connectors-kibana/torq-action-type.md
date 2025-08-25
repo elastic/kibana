@@ -2,21 +2,25 @@
 navigation_title: "Torq"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/torq-action-type.html
+applies_to:
+  stack: all
+  serverless:
+    observability: ga
+    security: ga
 ---
 
 # Torq connector and action [torq-action-type]
 
-
 The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.
-
 
 ## Create connectors in {{kib}} [define-torq-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you're creating a rule. For example:
 
-% TO DO: Use `:class: screenshot`
-![configured Torq connector](../images/torq-configured-connector.png)
-
+:::{image} ../images/torq-configured-connector.png
+:alt: Configure a Torq connector
+:screenshot:
+:::
 
 ### Connector configuration [torq-connector-configuration]
 
@@ -31,16 +35,16 @@ Torq endpoint URL
 Torq authentication header secret
 :   Secret of the webhook authentication header.
 
-
 ## Test connectors [torq-action-configuration]
 
-You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
+You can test connectors as you're creating or editing the connector in {{kib}}. For example:
 
-% TO DO: Use `:class: screenshot`
-![Torq connector test](../images/torq-connector-test.png)
+:::{image} ../images/torq-connector-test.png
+:alt: Torq connector test
+:screenshot:
+:::
 
 Torq actions have the following configuration properties.
 
 Body
 :   JSON payload to send to Torq.
-

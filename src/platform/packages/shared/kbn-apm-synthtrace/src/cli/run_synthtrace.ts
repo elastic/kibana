@@ -8,7 +8,7 @@
  */
 
 import datemath from '@kbn/datemath';
-import { Argv } from 'yargs';
+import type { Argv } from 'yargs';
 import yargs from 'yargs/yargs';
 import { readdirSync } from 'fs';
 import path from 'path';
@@ -23,8 +23,8 @@ function getBuiltinScenarios() {
 
 function options(y: Argv) {
   return y
-    .usage('$0 <file>')
-    .positional('file', {
+    .usage('$0 <files ...>')
+    .positional('files', {
       describe: 'Name of scenario',
       demandOption: true,
       string: true,

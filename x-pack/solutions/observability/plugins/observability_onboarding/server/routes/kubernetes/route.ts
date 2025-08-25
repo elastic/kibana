@@ -10,14 +10,14 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
-import { ElasticAgentVersionInfo } from '../../../common/types';
+import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed_otlp_service_api_key';
-import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
+import { getMangedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
 
 export interface CreateKubernetesOnboardingFlowRouteResponse {
   apiKeyEncoded: string;
@@ -61,11 +61,12 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const packageClient = fleetPluginStart.packageService.asScoped(request);
     const apiKeyPromise =
       config.serverless.enabled && params.body.pkgName === 'kubernetes_otel'
-        ? createManagedOtlpServiceApiKey(
+        ? createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-k8s`)
+        : createShipperApiKey(
             client.asCurrentUser,
-            `ingest-otel-k8s-${new Date().toISOString()}`
-          )
-        : createShipperApiKey(client.asCurrentUser, `${params.body.pkgName}_onboarding`, true);
+            params.body.pkgName === 'kubernetes_otel' ? 'otel-kubernetes' : 'kubernetes',
+            true
+          );
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
       apiKeyPromise,
@@ -89,7 +90,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       apiKeyEncoded,
       elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',
       elasticAgentVersionInfo,
-      managedOtlpServiceUrl: await getManagedOtlpServiceUrl(resources),
+      managedOtlpServiceUrl: getMangedOtlpServiceUrl(plugins),
     };
   },
 });

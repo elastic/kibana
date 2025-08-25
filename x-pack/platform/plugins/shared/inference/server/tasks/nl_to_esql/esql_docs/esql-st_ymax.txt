@@ -1,6 +1,6 @@
 # ST_YMAX
 
-Extracts the maximum value of the `y` coordinates from the given geometry input.
+Extracts the maximum value of the `y` coordinates from the supplied geometry. For geometries of type `geo_point` or `geo_shape`, this corresponds to the maximum `latitude` value.
 
 ## Syntax
 
@@ -8,13 +8,15 @@ Extracts the maximum value of the `y` coordinates from the given geometry input.
 
 ### Parameters
 
-#### point
+#### `point`
 
-An expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If the value is `null`, the function also returns `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
 
 ## Examples
 
-Here is an example of using the `ST_YMAX` function:
+Extracting the bounding box coordinates of a city boundary
+
+The following query calculates the bounding box of the city boundary for the airport with the abbreviation "CPH" and extracts the minimum and maximum `x` and `y` coordinates:
 
 ```esql
 FROM airport_city_boundaries
@@ -23,9 +25,3 @@ FROM airport_city_boundaries
 | EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
-
-The example above first uses the `ST_ENVELOPE` function to find the smaller rectangular polygon that contains `city_boundary`. Then it uses the `ST_XMIN`, `ST_XMAX`, `ST_YMIN`, and `ST_YMAX` functions to calculate the minimum and maximum `x` and `y` coordinates of the rectangle, respectively. Lastly, it keeps only the columns of interest: `abbrev`, `airport`, `xmin`, `xmax`, `ymin`, and `ymax`.
-
-When the `point` parameter is of type `geo_point` or `geo_shape`, using the `ST_YMAX` function is equivalent to finding the maximum `latitude` value.
-
-Where applicable, if there are limitations impacting this function, they will be mentioned in a "Limitations" section at the end of this document.

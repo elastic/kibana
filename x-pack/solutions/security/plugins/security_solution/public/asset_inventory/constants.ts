@@ -13,6 +13,7 @@ export const ASSET_INVENTORY_DATA_VIEW_ID_PREFIX = 'asset-inventory';
 export const QUERY_KEY_GRID_DATA = 'asset_inventory_grid_data';
 export const QUERY_KEY_CHART_DATA = 'asset_inventory_chart_data';
 export const QUERY_KEY_GROUPING_DATA = 'asset-inventory-grouping-data';
+export const QUERY_KEY_ASSET_INVENTORY = 'asset-inventory-query-key';
 
 export const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
 
@@ -37,8 +38,19 @@ export const TEST_SUBJ_ONBOARDING_PERMISSION_DENIED =
 export const TEST_SUBJ_GROUPING = 'asset-inventory-grouping';
 export const TEST_SUBJ_GROUPING_LOADING = 'asset-inventory-grouping-loading';
 export const TEST_SUBJ_GROUPING_COUNTER = 'asset-inventory-grouping-counter';
+export const TEST_SUBJ_AWS_CLOUD_FORMATION_ACCORDIAN =
+  'asset-inventory-launchAws-CloudFormation-Accordian-Instructions';
+export const TEST_SUBJ_AWS_CLOUD_FORMATION_ACCORDIAN_BUTTON =
+  'asset-inventory-launchAws-CloudFormation-Accordian-Instructions-Button';
+export const DOCS_URL = 'https://ela.st/cloud-asset-discovery';
 
-export const DOCS_URL = 'https://ela.st/asset-inventory';
+export const assetIntegrationDocsNavigation = {
+  overviewPath: `${DOCS_URL}`,
+  getStartedPath: `${DOCS_URL}-get-started`,
+  awsGetStartedPath: `${DOCS_URL}-get-started`,
+  gcpGetStartedPath: `${DOCS_URL}-get-started-gcp.html`,
+  azureGetStartedPath: `${DOCS_URL}-get-started-azure.html`,
+};
 
 export const DEFAULT_TABLE_SECTION_HEIGHT = 512; // px
 
@@ -50,7 +62,6 @@ export const ASSET_FIELDS = {
   ENTITY_ID: 'entity.id',
   ENTITY_NAME: 'entity.name',
   ENTITY_RISK: 'entity.risk',
-  ENTITY_SOURCE: 'entity.source',
   ENTITY_SUB_TYPE: 'entity.sub_type',
   ENTITY_TYPE: 'entity.type',
   TIMESTAMP: '@timestamp',
@@ -61,5 +72,8 @@ export const ASSET_GROUPING_OPTIONS = {
   ASSET_CRITICALITY: ASSET_FIELDS.ASSET_CRITICALITY,
   ENTITY_TYPE: ASSET_FIELDS.ENTITY_TYPE,
   CLOUD_ACCOUNT: ASSET_FIELDS.CLOUD_ACCOUNT_ID,
-  ENTITY_SOURCE: ASSET_FIELDS.ENTITY_SOURCE,
 };
+
+export const ASSET_INVENTORY_CLOUD_CREDENTIALS_PACKAGE_VERSION = '0.9.0-preview02';
+
+export const CLOUD_ASSET_DISCOVERY_INTEGRATION_PACKAGE_NAME = 'cloud_asset_inventory';

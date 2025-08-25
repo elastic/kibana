@@ -7,6 +7,11 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+export {
+  HOST_NAME as HOST_NAME_FIELD,
+  CONTAINER_ID as CONTAINER_ID_FIELD,
+  KUBERNETES_POD_UID as KUBERNETES_POD_UID_FIELD,
+} from '@kbn/metrics-data-access-plugin/common';
 
 export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
 export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
@@ -31,17 +36,23 @@ export type InfraFeatureId = typeof METRICS_FEATURE_ID | typeof LOGS_FEATURE_ID;
 export const TIMESTAMP_FIELD = '@timestamp';
 export const TIEBREAKER_FIELD = '_doc';
 
-// system
-export const HOST_NAME_FIELD = 'host.name';
-export const CONTAINER_ID_FIELD = 'container.id';
-export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
+// processes
+export const TOP_N = 10;
+export const MANDATORY_PROCESS_FIELDS_ECS = [
+  'system.process.cpu.total.pct',
+  'system.process.memory.rss.pct',
+  'system.process.cpu.start_time',
+  'system.process.state',
+  'user.name',
+  'process.pid',
+  'process.command_line',
+];
+export const MANDATORY_PROCESS_FIELDS_SEMCONV = [
+  'process.pid',
+  'process.command_line',
+  'process.owner',
+];
 export const PROCESS_COMMANDLINE_FIELD = 'process.command_line';
-export const EVENT_MODULE = 'event.module';
-export const METRICSET_MODULE = 'metricset.module';
-export const METRICSET_NAME = 'metricset.name';
-
-// integrations
-export const SYSTEM_INTEGRATION = 'system';
 
 // logs
 export const MESSAGE_FIELD = 'message';

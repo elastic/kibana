@@ -9,14 +9,14 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkchatIntegrationDefinition } from '@kbn/wci-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import {
+import type {
   WorkChatFrameworkPluginSetup,
   WorkChatFrameworkPluginStart,
 } from '@kbn/workchat-framework-plugin/server';
 
 export interface WorkChatAppPluginSetup {
   integrations: {
-    register: (integration: WorkchatIntegrationDefinition) => void;
+    register: (tool: WorkchatIntegrationDefinition) => void;
   };
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

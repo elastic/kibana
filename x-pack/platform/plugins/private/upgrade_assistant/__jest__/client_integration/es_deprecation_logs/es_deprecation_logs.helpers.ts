@@ -6,15 +6,16 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
-import { EsDeprecationLogs } from '../../../public/application/components';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
+import { Overview } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
-    initialEntries: ['/es_deprecation_logs'],
-    componentRoutePath: '/es_deprecation_logs',
+    initialEntries: [`/overview`],
+    componentRoutePath: '/overview',
   },
   doMountAsync: true,
 };
@@ -28,21 +29,30 @@ const createActions = (testBed: TestBed) => {
    * User Actions
    */
 
-  const clickDeprecationToggle = async () => {
+  const clickOpenFlyoutLoggingEnabled = async () => {
     const { find, component } = testBed;
 
     await act(async () => {
-      find('deprecationLoggingToggle').simulate('click');
+      find('viewDetailsLink').simulate('click');
+    });
+
+    component.update();
+  };
+  const clickOpenFlyoutLoggingDisabled = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('enableLogsLink').simulate('click');
     });
 
     component.update();
   };
 
-  const clickRetryButton = async () => {
+  const clickDeprecationToggle = async () => {
     const { find, component } = testBed;
 
     await act(async () => {
-      find('retryButton').simulate('click');
+      find('deprecationLoggingToggle').simulate('click');
     });
 
     component.update();
@@ -57,11 +67,22 @@ const createActions = (testBed: TestBed) => {
 
     component.update();
   };
+  const clickCloseFlyout = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('closeEsDeprecationLogs').simulate('click');
+    });
+
+    component.update();
+  };
 
   return {
+    clickOpenFlyoutLoggingEnabled,
+    clickOpenFlyoutLoggingDisabled,
     clickDeprecationToggle,
-    clickRetryButton,
     clickResetButton,
+    clickCloseFlyout,
   };
 };
 
@@ -70,7 +91,7 @@ export const setupESDeprecationLogsPage = async (
   overrides?: Record<string, unknown>
 ): Promise<EsDeprecationLogsTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(EsDeprecationLogs, httpSetup, overrides),
+    WithAppDependencies(Overview, httpSetup, overrides),
     testBedConfig
   );
   const testBed = await initTestBed();

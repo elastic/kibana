@@ -48,7 +48,22 @@ export const CONDITIONS_HEADER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.trustedApps.conditions.header.description',
   {
     defaultMessage:
-      'Select an operating system and add conditions. Availability of conditions may depend on your chosen OS.',
+      'Select either Basic or Advanced mode to add a trusted application. Then, select an operating system and add conditions. Availability of conditions may depend on your chosen operating system.',
+  }
+);
+
+export const USING_ADVANCED_MODE = i18n.translate(
+  'xpack.securitySolution.trustedApps.conditions.header.description.advancedMode',
+  {
+    defaultMessage: 'You are using advanced mode.',
+  }
+);
+
+export const USING_ADVANCED_MODE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.trustedApps.conditions.header.description.advancedMode2',
+  {
+    defaultMessage:
+      'While advanced Trusted Application configuration allows for more complex conditions, use caution. Overly broad conditions can expose your systems to risk.',
   }
 );
 

@@ -9,15 +9,15 @@
 
 import type { Observable } from 'rxjs';
 
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { PublishesESQLVariables } from '@kbn/esql-types';
-import { Filter } from '@kbn/es-query';
-import {
-  HasSaveNotification,
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { PublishesESQLVariables } from '@kbn/esql-types';
+import type { Filter } from '@kbn/es-query';
+import type {
+  HasLastSavedChildState,
   HasSerializedChildState,
   PresentationContainer,
 } from '@kbn/presentation-containers';
-import {
+import type {
   HasEditCapabilities,
   HasParentApi,
   PublishesDisabledActionIds,
@@ -27,20 +27,22 @@ import {
   PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import type { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
-import {
-  ControlGroupChainingSystem,
+import type {
+  ControlsChainingSystem,
+  ControlsGroupState,
+  ControlsIgnoreParentSettings,
+  ControlsLabelPosition,
+} from '@kbn/controls-schemas';
+import type {
   ControlGroupEditorConfig,
   ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  ControlLabelPosition,
   ControlPanelState,
   DefaultControlState,
-  ParentIgnoreSettings,
 } from '../../common';
-import { ControlFetchContext } from './control_fetch/control_fetch';
+import type { ControlFetchContext } from './control_fetch/control_fetch';
 
 /**
  * ----------------------------------------------------------------
@@ -49,22 +51,21 @@ import { ControlFetchContext } from './control_fetch/control_fetch';
  */
 
 export type ControlGroupApi = PresentationContainer &
-  DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
+  DefaultEmbeddableApi<ControlsGroupState> &
   PublishesFilters &
   PublishesDataViews &
   PublishesESQLVariables &
   HasSerializedChildState<ControlPanelState> &
   HasEditCapabilities &
-  Pick<PublishesUnsavedChanges<ControlGroupRuntimeState>, 'unsavedChanges$'> &
+  HasLastSavedChildState &
   PublishesTimeslice &
   PublishesDisabledActionIds &
-  Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification & PublishesReload> & {
+  PublishesUnsavedChanges &
+  Partial<HasParentApi<PublishesUnifiedSearch> & PublishesReload> & {
     allowExpensiveQueries$: PublishingSubject<boolean>;
     autoApplySelections$: PublishingSubject<boolean>;
-    ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
-    labelPosition: PublishingSubject<ControlLabelPosition>;
-
-    asyncResetUnsavedChanges: () => Promise<void>;
+    ignoreParentSettings$: PublishingSubject<ControlsIgnoreParentSettings | undefined>;
+    labelPosition: PublishingSubject<ControlsLabelPosition>;
     controlFetch$: (controlUuid: string, onReload?: () => void) => Observable<ControlFetchContext>;
     openAddDataControlFlyout: (options?: {
       controlStateTransform?: ControlStateTransform;
@@ -74,10 +75,9 @@ export type ControlGroupApi = PresentationContainer &
 
     /** Public getters */
     getEditorConfig: () => ControlGroupEditorConfig | undefined;
-    getLastSavedControlState: (controlUuid: string) => object;
 
     /** Public setters */
-    setChainingSystem: (chainingSystem: ControlGroupChainingSystem) => void;
+    setChainingSystem: (chainingSystem: ControlsChainingSystem) => void;
   };
 
 /**

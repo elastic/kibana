@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
-import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
+import type { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
-import {
+import type {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
 } from '../plugin';
@@ -54,7 +53,16 @@ export function ObservabilityOnboardingAppRoot({
   };
 
   return (
-    <KibanaRenderContextProvider {...core}>
+    <KibanaRenderContextProvider
+      {...core}
+      theme={{ theme$ }}
+      modify={{
+        breakpoint: {
+          xxl: 1600,
+          xxxl: 2000,
+        },
+      }}
+    >
       <div className={APP_WRAPPER_CLASS}>
         <RedirectAppLinks
           coreStart={{
@@ -62,27 +70,17 @@ export function ObservabilityOnboardingAppRoot({
           }}
         >
           <KibanaContextProvider services={services}>
-            <KibanaThemeProvider
-              theme={{ theme$ }}
-              modify={{
-                breakpoint: {
-                  xxl: 1600,
-                  xxxl: 2000,
-                },
-              }}
-            >
-              <Router history={history}>
-                <PerformanceContextProvider>
-                  <EuiErrorBoundary>
-                    <ObservabilityOnboardingHeaderActionMenu
-                      setHeaderActionMenu={setHeaderActionMenu}
-                      theme$={theme$}
-                    />
-                    <ObservabilityOnboardingFlow />
-                  </EuiErrorBoundary>
-                </PerformanceContextProvider>
-              </Router>
-            </KibanaThemeProvider>
+            <Router history={history}>
+              <PerformanceContextProvider>
+                <>
+                  <ObservabilityOnboardingHeaderActionMenu
+                    setHeaderActionMenu={setHeaderActionMenu}
+                    theme$={theme$}
+                  />
+                  <ObservabilityOnboardingFlow />
+                </>
+              </PerformanceContextProvider>
+            </Router>
           </KibanaContextProvider>
         </RedirectAppLinks>
       </div>

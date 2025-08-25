@@ -6,11 +6,13 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import React, { useEffect } from 'react';
+import { getRegularEcsField } from '@kbn/streams-schema';
 import { EcsRecommendation } from './ecs_recommendation';
 import { FieldType } from '../field_type';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { EMPTY_CONTENT, FIELD_TYPE_MAP, FieldTypeOption } from '../constants';
-import { MappedSchemaField, SchemaField } from '../types';
+import type { FieldTypeOption } from '../constants';
+import { EMPTY_CONTENT, FIELD_TYPE_MAP } from '../constants';
+import type { MappedSchemaField, SchemaField } from '../types';
 
 export const FieldFormType = ({
   field,
@@ -23,13 +25,15 @@ export const FieldFormType = ({
 }) => {
   const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
 
+  const ecsFieldName = getRegularEcsField(field.name);
+
   const { fieldsMetadata, loading } = useFieldsMetadata(
-    { attributes: ['type'], fieldNames: [field.name] },
+    { attributes: ['type'], fieldNames: [ecsFieldName] },
     [field]
   );
 
   // Propagate recommendation to state if a type is not already set
-  const recommendation = fieldsMetadata?.[field.name]?.type;
+  const recommendation = fieldsMetadata?.[ecsFieldName]?.type;
 
   useEffect(() => {
     if (

@@ -52,11 +52,10 @@ export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
 type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps | NetworkQueryTabBodyProps;
 
-export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
+export type EventsQueryTabBodyComponentProps = Omit<QueryTabBodyProps, 'setQuery'> & {
   additionalFilters: Filter[];
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   indexNames: string[];
-  setQuery: GlobalTimeArgs['setQuery'];
   tableId: TableId;
 };
 
@@ -76,11 +75,12 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   deleteQuery,
   endDate,
   filterQuery,
-  setQuery,
   startDate,
   tableId,
 }) => {
   let ACTION_BUTTON_COUNT = MAX_ACTION_BUTTON_COUNT;
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -191,9 +191,11 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           startDate={startDate}
           endDate={endDate}
           filterQuery={filterQuery}
-          setQuery={setQuery}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
+          sourcererScopeId={
+            newDataViewPickerEnabled ? SourcererScopeName.explore : SourcererScopeName.default
+          }
         />
       )}
       <StatefulEventsViewer
@@ -204,7 +206,9 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={SourcererScopeName.default}
+        sourcererScope={
+          newDataViewPickerEnabled ? SourcererScopeName.explore : SourcererScopeName.default
+        }
         tableId={tableId}
         unit={showExternalAlerts ? i18n.EXTERNAL_ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}

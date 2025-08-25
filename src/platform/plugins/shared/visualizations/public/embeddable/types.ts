@@ -8,11 +8,11 @@
  */
 
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import {
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import type {
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
@@ -20,10 +20,11 @@ import {
   PublishesDataViews,
   PublishesRendered,
   PublishesTimeRange,
+  PublishesTitle,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { DeepPartial } from '@kbn/utility-types';
+import type { DeepPartial } from '@kbn/utility-types';
 import type { HasVisualizeConfig } from './interfaces/has_visualize_config';
 import type { Vis, VisParams, VisSavedObject } from '../types';
 import type { SerializedVis } from '../vis';
@@ -44,7 +45,6 @@ export type VisualizeRuntimeState = SerializedTitles &
     serializedVis: SerializedVis<VisParams>;
     savedObjectId?: string;
     savedObjectProperties?: ExtraSavedObjectProperties;
-    linkedToLibrary?: boolean;
   };
 
 export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
@@ -55,7 +55,7 @@ export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
 
 export type VisualizeSavedObjectInputState = SerializedTitles &
   Partial<DynamicActionsSerializedState> & {
-    savedObjectId: string;
+    savedObjectId?: string;
     timeRange?: TimeRange;
     uiState?: any;
   };
@@ -75,12 +75,13 @@ export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &
   PublishesDataLoading &
   PublishesRendered &
+  Required<PublishesTitle> &
   HasVisualizeConfig &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesTimeRange &
   HasLibraryTransforms &
-  DefaultEmbeddableApi<VisualizeSerializedState, VisualizeRuntimeState> & {
+  DefaultEmbeddableApi<VisualizeSerializedState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
     openInspector: () => OverlayRef | undefined;
   };

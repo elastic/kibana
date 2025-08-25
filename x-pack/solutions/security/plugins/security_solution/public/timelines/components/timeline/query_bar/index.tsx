@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -14,7 +14,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import styled from '@emotion/styled';
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
@@ -27,7 +27,7 @@ import { useSavedQueryServices } from '../../../../common/utils/saved_query_serv
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { QueryBar } from '../../../../common/components/query_bar';
 import type { DataProvider } from '../data_providers/data_provider';
-import { TIMELINE_FILTER_DROP_AREA, buildGlobalQuery, getNonDropAreaFilters } from '../helpers';
+import { buildGlobalQuery, getNonDropAreaFilters, TIMELINE_FILTER_DROP_AREA } from '../helpers';
 import { timelineActions } from '../../../store';
 import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
@@ -76,6 +76,7 @@ const SearchBarContainer = styled.div`
   *   -----------------------------------------------------------
   *
   * */
+
   .uniSearchBar .filter-items-group {
     display: none;
   }
@@ -113,17 +114,28 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dateRangeTo, setDateRangTo] = useState<string>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
-    const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
+    const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataViewSpec } =
       useSourcererDataView(SourcererScopeName.timeline);
 
     const { newDataViewPickerEnabled } = useEnableExperimental();
-    const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
+    const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+
     const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
 
-    const sourcererDataView = newDataViewPickerEnabled
-      ? experimentalDataView
-      : oldSourcererDataView;
-    const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+    const dataViewBase = useMemo(
+      () => dataViewSpecToViewBase(oldSourcererDataViewSpec),
+      [oldSourcererDataViewSpec]
+    );
+
+    const dataView = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalDataView : dataViewBase),
+      [newDataViewPickerEnabled, experimentalDataView, dataViewBase]
+    );
+
+    const browserFields = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),
+      [experimentalBrowserFields, newDataViewPickerEnabled, oldBrowserFields]
+    );
 
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
@@ -132,13 +144,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     });
     const queryBarFilters = useMemo(() => getNonDropAreaFilters(filters), [filters]);
 
-    const indexPattern = useMemo(
-      () => dataViewSpecToViewBase(sourcererDataView),
-      [sourcererDataView]
-    );
-
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
-      convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
+      convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), dataView)
     );
     const savedQueryServices = useSavedQueryServices();
 
@@ -152,11 +159,11 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
                 kind,
                 expression,
               },
-              serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+              serializedQuery: convertKueryToElasticSearchQuery(expression, dataView),
             },
           })
         ),
-      [dispatch, indexPattern, timelineId]
+      [dispatch, dataView, timelineId]
     );
 
     useEffect(() => {
@@ -168,12 +175,9 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
 
     useEffect(() => {
       setDataProvidersDsl(
-        convertKueryToElasticSearchQuery(
-          buildGlobalQuery(dataProviders, browserFields),
-          indexPattern
-        )
+        convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), dataView)
       );
-    }, [dataProviders, browserFields, indexPattern]);
+    }, [dataProviders, browserFields, dataView]);
 
     useEffect(() => {
       if (fromStr != null && toStr != null) {
@@ -187,6 +191,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
 
     useEffect(() => {
       let isSubscribed = true;
+
       async function setSavedQueryByServices() {
         if (savedQueryId != null && savedQueryServices != null) {
           try {
@@ -212,6 +217,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           setSavedQuery(undefined);
         }
       }
+
       setSavedQueryByServices();
       return () => {
         isSubscribed = false;
@@ -281,7 +287,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       [dataProvidersDsl, savedQueryId, savedQueryServices]
     );
 
-    if (!indexPattern) {
+    if (!dataView) {
       return null;
     }
 
@@ -291,7 +297,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           dateRangeFrom={dateRangeFrom}
           dateRangeTo={dateRangeTo}
           hideSavedQuery={kqlMode === 'search'}
-          indexPattern={indexPattern}
+          indexPattern={dataView}
           isRefreshPaused={isRefreshPaused}
           filterQuery={filterQueryConverted}
           filterManager={filterManager}
@@ -302,6 +308,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           onSavedQuery={onSavedQuery}
           dataTestSubj={'timelineQueryInput'}
           displayStyle="inPage"
+          preventCacheClearOnUnmount={newDataViewPickerEnabled}
         />
       </SearchBarContainer>
     );

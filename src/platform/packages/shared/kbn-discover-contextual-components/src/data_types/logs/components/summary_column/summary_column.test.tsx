@@ -10,17 +10,19 @@
 import React from 'react';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
-import SummaryColumn, {
+import { userEvent } from '@testing-library/user-event';
+import type {
   AllSummaryColumnProps,
-  SummaryCellPopover,
   SummaryColumnFactoryDeps,
   SummaryColumnProps,
 } from './summary_column';
+import SummaryColumn, { SummaryCellPopover } from './summary_column';
 import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
-import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
 import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 
@@ -151,11 +153,13 @@ describe('SummaryColumn', () => {
       expect(screen.queryByText('+2')).not.toBeInTheDocument();
     });
 
-    it('should display a popover with details and actions upon a badge click', () => {
+    it('should display a popover with details and actions upon a badge click', async () => {
       const record = getBaseRecord();
       renderSummary(record);
       // Open badge popover
-      screen.getByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`).click();
+      await userEvent.click(
+        screen.getByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`)
+      );
 
       expect(screen.getByTestId('dataTableCellActionPopoverTitle')).toHaveTextContent(
         'service.name synth-service-2'

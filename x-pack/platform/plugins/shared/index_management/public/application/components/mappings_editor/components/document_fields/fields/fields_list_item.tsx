@@ -6,7 +6,6 @@
  */
 
 import React, { forwardRef } from 'react';
-import classNames from 'classnames';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,16 +13,18 @@ import {
   EuiButtonIcon,
   EuiToolTip,
   EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { NormalizedField, NormalizedFields, State } from '../../../types';
 
-import { NormalizedField, NormalizedFields, State } from '../../../types';
 import { getTypeLabelFromField } from '../../../lib';
 import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '../../../constants';
 
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
 import { DeleteFieldProvider } from './delete_field_provider';
+import { getListItemStyle } from '../common/listItemStyle';
 
 const i18nTexts = {
   addMultiFieldButtonLabel: i18n.translate(
@@ -43,6 +44,15 @@ const i18nTexts = {
   }),
   fieldIsShadowedLabel: i18n.translate('xpack.idxMgmt.mappingsEditor.fieldIsShadowedLabel', {
     defaultMessage: 'Field shadowed by a runtime field with the same name.',
+  }),
+  fieldListItemLabel: i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsListItemLabel', {
+    defaultMessage: 'Field details',
+  }),
+  fieldListNameLabel: i18n.translate('xpack.idxMgmt.mappingsEditor.fieldListNameLabel', {
+    defaultMessage: 'Field name',
+  }),
+  fieldListTypesLabel: i18n.translate('xpack.idxMgmt.mappingsEditor.fieldListTypeLabel', {
+    defaultMessage: 'Data type',
   }),
 };
 
@@ -101,6 +111,8 @@ function FieldListItemComponent(
     isExpanded,
     path,
   } = field;
+  const { euiTheme } = useEuiTheme();
+  const styles = getListItemStyle(euiTheme);
 
   // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
   // For that reason, we need to compensate and substract some indent to left align on the page.
@@ -145,10 +157,10 @@ function FieldListItemComponent(
     const { addMultiFieldButtonLabel, addPropertyButtonLabel, editButtonLabel, deleteButtonLabel } =
       i18nTexts;
     return (
-      <EuiFlexGroup gutterSize="s" className="mappingsEditor__fieldsListItem__actions">
+      <EuiFlexGroup gutterSize="s" css={styles.actions}>
         {canHaveMultiFields && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={addMultiFieldButtonLabel}>
+            <EuiToolTip content={addMultiFieldButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="documents"
                 onClick={addField}
@@ -161,7 +173,7 @@ function FieldListItemComponent(
 
         {canHaveChildFields && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={addPropertyButtonLabel}>
+            <EuiToolTip content={addPropertyButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="plusInCircle"
                 onClick={addField}
@@ -173,7 +185,7 @@ function FieldListItemComponent(
         )}
 
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={editButtonLabel}>
+          <EuiToolTip content={editButtonLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="pencil"
               onClick={editField}
@@ -186,7 +198,7 @@ function FieldListItemComponent(
         <EuiFlexItem grow={false}>
           <DeleteFieldProvider>
             {(deleteField) => (
-              <EuiToolTip content={deleteButtonLabel}>
+              <EuiToolTip content={deleteButtonLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconType="trash"
                   color="danger"
@@ -206,38 +218,36 @@ function FieldListItemComponent(
 
   return (
     <li
-      className={classNames('mappingsEditor__fieldsListItem', {
-        'mappingsEditor__fieldsListItem--dottedLine': hasDottedLine,
-      })}
       data-test-subj={`fieldsListItem ${dataTestSubj}`}
       ref={ref}
+      aria-label={i18nTexts.fieldListItemLabel}
     >
       <div
         style={{ paddingLeft: `${indent}px` }}
-        className={classNames('mappingsEditor__fieldsListItem__field', {
-          'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
-          'mappingsEditor__fieldsListItem__field--highlighted': isHighlighted,
-          'mappingsEditor__fieldsListItem__field--dim': isDimmed,
-        })}
+        css={[
+          styles.field,
+          areActionButtonsVisible && styles.fieldEnabled,
+          isHighlighted && styles.fieldHighlighted,
+          isDimmed && styles.fieldDim,
+          hasDottedLine && styles.dotted,
+        ]}
       >
         <div
-          className={classNames('mappingsEditor__fieldsListItem__wrapper', {
-            'mappingsEditor__fieldsListItem__wrapper--indent':
-              treeDepth === 0 && maxNestedDepth === 0,
-          })}
+          css={[styles.wrapper, treeDepth === 0 && maxNestedDepth === 0 && styles.wrapperIndent]}
         >
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
-            className={classNames('mappingsEditor__fieldsListItem__content', {
-              'mappingsEditor__fieldsListItem__content--toggle': hasChildFields || hasMultiFields,
-              'mappingsEditor__fieldsListItem__content--multiField': isMultiField,
-              'mappingsEditor__fieldsListItem__content--indent':
-                !hasChildFields && !hasMultiFields && maxNestedDepth > treeDepth,
-            })}
+            css={[
+              styles.content,
+              !hasChildFields &&
+                !hasMultiFields &&
+                maxNestedDepth > treeDepth &&
+                styles.contentIndent,
+            ]}
           >
             {(hasChildFields || hasMultiFields) && (
-              <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__toggle">
+              <EuiFlexItem grow={false} css={styles.toggle}>
                 <EuiButtonIcon
                   color="text"
                   onClick={toggleExpand}
@@ -263,54 +273,55 @@ function FieldListItemComponent(
             )}
 
             {isMultiField && (
-              <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__icon">
+              <EuiFlexItem grow={false}>
                 <EuiIcon color="subdued" type="documents" />
               </EuiFlexItem>
             )}
 
             <EuiFlexItem
               grow={false}
-              className="mappingsEditor__fieldsListItem__name"
               data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
+              aria-label={i18nTexts.fieldListNameLabel}
             >
               {source.name}
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                data-test-subj={`${dataTestSubj}-datatype`}
-                data-type-value={source.type}
-              >
-                {isMultiField
-                  ? i18n.translate('xpack.idxMgmt.mappingsEditor.multiFieldBadgeLabel', {
-                      defaultMessage: '{dataType} multi-field',
-                      values: {
-                        dataType: getTypeLabelFromField(source),
-                      },
-                    })
-                  : getTypeLabelFromField(source)}
-              </EuiBadge>
-            </EuiFlexItem>
-
-            {isSemanticText && source.inference_id ? (
+            <EuiFlexGroup aria-label={i18nTexts.fieldListTypesLabel}>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{source.inference_id as string}</EuiBadge>
+                <EuiBadge
+                  color="hollow"
+                  data-test-subj={`${dataTestSubj}-datatype`}
+                  data-type-value={source.type}
+                >
+                  {isMultiField
+                    ? i18n.translate('xpack.idxMgmt.mappingsEditor.multiFieldBadgeLabel', {
+                        defaultMessage: '{dataType} multi-field',
+                        values: {
+                          dataType: getTypeLabelFromField(source),
+                        },
+                      })
+                    : getTypeLabelFromField(source)}
+                </EuiBadge>
               </EuiFlexItem>
-            ) : null}
 
-            {isShadowed && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18nTexts.fieldIsShadowedLabel}>
-                  <EuiBadge color="warning" data-test-subj="isShadowedIndicator">
-                    {i18n.translate('xpack.idxMgmt.mappingsEditor.shadowedBadgeLabel', {
-                      defaultMessage: 'Shadowed',
-                    })}
-                  </EuiBadge>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
+              {isSemanticText && source.inference_id ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">{source.inference_id as string}</EuiBadge>
+                </EuiFlexItem>
+              ) : null}
 
+              {isShadowed && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={i18nTexts.fieldIsShadowedLabel}>
+                    <EuiBadge color="warning" data-test-subj="isShadowedIndicator">
+                      {i18n.translate('xpack.idxMgmt.mappingsEditor.shadowedBadgeLabel', {
+                        defaultMessage: 'Shadowed',
+                      })}
+                    </EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
             <EuiFlexItem grow={false}>{renderActionButtons()}</EuiFlexItem>
           </EuiFlexGroup>
         </div>

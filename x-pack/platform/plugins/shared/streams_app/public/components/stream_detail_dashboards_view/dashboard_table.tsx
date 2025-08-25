@@ -4,13 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
@@ -27,6 +22,7 @@ export function DashboardsTable({
   setSelectedDashboards,
   loading,
   entityId,
+  dataTestSubj,
 }: {
   entityId?: string;
   loading: boolean;
@@ -34,6 +30,7 @@ export function DashboardsTable({
   compact?: boolean;
   selectedDashboards?: SanitizedDashboardAsset[];
   setSelectedDashboards?: (dashboards: SanitizedDashboardAsset[]) => void;
+  dataTestSubj?: string;
 }) {
   const {
     core: { application },
@@ -58,7 +55,7 @@ export function DashboardsTable({
         }),
         render: (_, { title, id }) => (
           <EuiLink
-            data-test-subj="streamsAppColumnsLink"
+            data-test-subj="streamsAppDashboardColumnsLink"
             onClick={() => {
               if (entityId) {
                 telemetryClient.trackAssetClick({
@@ -117,6 +114,7 @@ export function DashboardsTable({
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false} />
       <EuiBasicTable
+        data-test-subj={dataTestSubj}
         columns={columns}
         itemId="id"
         items={items}

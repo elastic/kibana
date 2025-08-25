@@ -18,7 +18,7 @@ import {
   OtelKubernetesPage,
   FirehosePage,
 } from './pages';
-import { ObservabilityOnboardingAppServices } from '..';
+import type { ObservabilityOnboardingAppServices } from '..';
 import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
 
 const queryClient = new QueryClient();

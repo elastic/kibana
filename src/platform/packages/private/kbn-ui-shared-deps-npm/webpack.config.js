@@ -18,7 +18,9 @@ const UiSharedDepsNpm = require('.');
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
 
-const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
+const { REPO_ROOT } = require('@kbn/repo-info');
+
+const useEuiAmsterdamRelease = process.env.EUI_AMSTERDAM === 'true';
 
 /** @returns {import('webpack').Configuration} */
 module.exports = (_, argv) => {
@@ -33,7 +35,6 @@ module.exports = (_, argv) => {
       'kbn-ui-shared-deps-npm': [
         // polyfill code
         'core-js/stable',
-        'whatwg-fetch',
         'symbol-observable',
         // Parts of node-libs-browser that are used in many places across Kibana
         'buffer',
@@ -138,7 +139,21 @@ module.exports = (_, argv) => {
 
     resolve: {
       alias: {
-        '@elastic/eui$': '@elastic/eui/optimize/es',
+        // @elastic/eui-amsterdam is a package alias defined in Kibana's package.json
+        // that points to special EUI releases bundled with Amsterdam set as the default theme
+        // and meant to be used with Kibana 8.x. Kibana 9.0 and later use the Borealis theme
+        // and should import from the regular @elastic/eui package.
+        // TODO: Remove when Kibana 8.19 is EOL and Amsterdam backports aren't needed anymore
+        // https://github.com/elastic/kibana/issues/221593
+        '@elastic/eui$': useEuiAmsterdamRelease
+          ? '@elastic/eui-amsterdam/optimize/es'
+          : '@elastic/eui/optimize/es',
+        '@elastic/eui/optimize/es/components/provider/nested$': useEuiAmsterdamRelease
+          ? '@elastic/eui-amsterdam/optimize/es/components/provider/nested'
+          : '@elastic/eui/optimize/es/components/provider/nested',
+        '@elastic/eui/optimize/es/services/theme/warning$': useEuiAmsterdamRelease
+          ? '@elastic/eui-amsterdam/optimize/es/services/theme/warning'
+          : '@elastic/eui/optimize/es/services/theme/warning',
         moment: MOMENT_SRC,
         // NOTE: Used to include react profiling on bundles
         // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4

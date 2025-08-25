@@ -11,9 +11,19 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
-import { PointSeries, PointSeriesColumn } from './pointseries';
-import { ExpressionValueRender } from './render';
+import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
+import type { PointSeries, PointSeriesColumn } from './pointseries';
+import type { ExpressionValueRender } from './render';
+
+export enum DimensionType {
+  Y_AXIS = 'y',
+  X_AXIS = 'x',
+  REFERENCE_LINE = 'reference',
+  BREAKDOWN = 'breakdown',
+  MARK_SIZE = 'markSize',
+  SPLIT_COLUMN = 'splitCol',
+  SPLIT_ROW = 'splitRow',
+}
 
 const name = 'datatable';
 
@@ -73,9 +83,13 @@ export interface DatatableColumnMeta {
    */
   index?: string;
   /**
-   * names the domain this column represents
+   * i18nized names the domain this column represents
    */
   dimensionName?: string;
+  /**
+   * types of dimension this column represents
+   */
+  dimensionType?: string;
   /**
    * serialized field format
    */

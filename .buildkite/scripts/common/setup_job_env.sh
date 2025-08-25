@@ -144,8 +144,7 @@ EOF
 {
   if [[ "${FTR_SECURITY_GEN_AI:-}" =~ ^(1|true)$ ]]; then
     echo "FTR_SECURITY_GEN_AI was set - exposing LLM connectors"
-    export KIBANA_SECURITY_TESTING_AI_CONNECTORS="$(vault_get security-gen-ai/connectors config)"
-    export KIBANA_SECURITY_TESTING_LANGSMITH_KEY="$(vault_get security-gen-ai/langsmith key)"
+    export KIBANA_SECURITY_GEN_AI_CONFIG="$(vault_get security-gen-ai config)"
   fi
 }
 
@@ -185,17 +184,6 @@ EOF
 
   SCOUT_REPORTER_ES_API_KEY="$(vault_get scout/reporter/cluster-credentials es-api-key)"
   export SCOUT_REPORTER_ES_API_KEY
-}
-
-# Setup Bazel Remote/Local Cache Credentials
-{
-  BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
-  export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
-  vault_get kibana-ci-bazel-remote-cache-local-dev service_account_json > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
-
-  BAZEL_REMOTE_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-gcs.json"
-  export BAZEL_REMOTE_CACHE_CREDENTIALS_FILE
-  vault_get kibana-ci-bazel-remote-cache-sa-key key | base64 -d > "$BAZEL_REMOTE_CACHE_CREDENTIALS_FILE"
 }
 
 # Setup GCS Service Account Proxy for CI

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogDocument, log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+import type { LogDocument } from '@kbn/apm-synthtrace-client';
+import { log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
+import type { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { withClient } from '../lib/utils/with_client';
 import {
@@ -17,6 +18,7 @@ import {
   getCloudRegion,
   getCloudProvider,
   MORE_THAN_1024_CHARS,
+  STACKTRACE_MESSAGE,
 } from './helpers/logs_mock_data';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 
@@ -125,6 +127,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             'cloud.availability_zone': isMalformed
               ? MORE_THAN_1024_CHARS // "ignore_above": 1024 in mapping
               : `${cloudRegion}a`,
+            'error.stack_trace': isMalformed ? STACKTRACE_MESSAGE : undefined,
           })
           .timestamp(timestamp);
       };

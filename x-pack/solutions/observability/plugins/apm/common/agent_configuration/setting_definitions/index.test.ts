@@ -195,11 +195,36 @@ describe('filterByAgent', () => {
           'deactivate_all_instrumentations',
           'deactivate_instrumentations',
           'logging_level',
-          'recording',
+          'opamp_polling_interval',
+          'sampling_rate',
           'send_logs',
           'send_metrics',
           'send_traces',
         ])
+      );
+    });
+
+    it('opentelemetry/nodejs/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/nodejs/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
+      );
+    });
+
+    it('opentelemetry/python/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/python/elastic')).toEqual(
+        expect.arrayContaining(['logging_level', 'sampling_rate'])
+      );
+    });
+
+    it('opentelemetry/php/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/php/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
+      );
+    });
+
+    it('opentelemetry/dotnet/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/dotnet/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
       );
     });
 

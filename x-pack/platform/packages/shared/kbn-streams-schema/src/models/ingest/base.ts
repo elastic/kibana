@@ -5,10 +5,14 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { ModelValidation, modelValidation } from '../validation/model_validation';
-import { Validation, validation } from '../validation/validation';
-import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
-import { ProcessorDefinition, processorDefinitionSchema } from './processors';
+import type { StreamlangDSL } from '@kbn/streamlang';
+import { streamlangDSLSchema } from '@kbn/streamlang';
+import type { ModelValidation } from '../validation/model_validation';
+import { modelValidation } from '../validation/model_validation';
+import type { Validation } from '../validation/validation';
+import { validation } from '../validation/validation';
+import type { IngestStreamLifecycle } from './lifecycle';
+import { ingestStreamLifecycleSchema } from './lifecycle';
 import { BaseStream } from '../base';
 
 interface IngestStreamPrivileges {
@@ -20,6 +24,8 @@ interface IngestStreamPrivileges {
   lifecycle: boolean;
   // User can simulate changes to the processing or the mapping of the stream
   simulate: boolean;
+  // User can get data information using the text structure API (e.g. to detect the structure of a message)
+  text_structure: boolean;
 }
 
 const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
@@ -27,18 +33,19 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
   monitor: z.boolean(),
   lifecycle: z.boolean(),
   simulate: z.boolean(),
+  text_structure: z.boolean(),
 });
 
 export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
-  processing: ProcessorDefinition[];
+  processing: StreamlangDSL;
 }
 
 export const IngestBase: Validation<unknown, IngestBase> = validation(
   z.unknown(),
   z.object({
     lifecycle: ingestStreamLifecycleSchema,
-    processing: z.array(processorDefinitionSchema),
+    processing: streamlangDSLSchema,
   })
 );
 

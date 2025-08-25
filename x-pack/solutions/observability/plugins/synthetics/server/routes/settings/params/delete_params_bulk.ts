@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { syncSpaceGlobalParams } from '../../../synthetics_service/sync_global_params';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import { runSynPrivateLocationMonitorsTaskSoon } from '../../../tasks/sync_private_locations_monitors_task';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { DeleteParamsResponse } from '../../../../common/runtime_types';
+import type { DeleteParamsResponse } from '../../../../common/runtime_types';
 
 export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
@@ -28,7 +28,7 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  handler: async ({ savedObjectsClient, request, server, spaceId, syntheticsMonitorClient }) => {
+  handler: async ({ savedObjectsClient, request, server, spaceId }) => {
     const { ids } = request.body;
 
     const result = await savedObjectsClient.bulkDelete(
@@ -36,12 +36,8 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
       { force: true }
     );
 
-    void syncSpaceGlobalParams({
-      spaceId,
-      logger: server.logger,
-      encryptedSavedObjects: server.encryptedSavedObjects,
-      savedObjects: server.coreStart.savedObjects,
-      syntheticsMonitorClient,
+    await runSynPrivateLocationMonitorsTaskSoon({
+      server,
     });
 
     return result.statuses.map(({ id, success }) => ({ id, deleted: success }));

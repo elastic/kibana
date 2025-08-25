@@ -16,11 +16,12 @@ import type {
   MappingProperty,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { last, mapValues, padStart } from 'lodash';
-import { DiagnosticResult, errors } from '@elastic/elasticsearch';
-import {
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import type {
   IndexStorageSettings,
   StorageClientBulkResponse,
   StorageClientDeleteResponse,
@@ -38,7 +39,7 @@ import {
   InternalIStorageClient,
 } from '../..';
 import { getSchemaVersion } from '../get_schema_version';
-import { StorageMappingProperty } from '../../types';
+import type { StorageMappingProperty } from '../../types';
 
 function getAliasName(name: string) {
   return name;
@@ -88,6 +89,15 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
   });
 }
 
+export interface StorageIndexAdapterOptions<TApplicationType> {
+  /**
+   * If this callback is provided, it will be called on every _source before returned to the caller of the search or get methods.
+   * This is useful for migrating documents from one version to another, or for transforming the document before returning it.
+   * This should be used as rarely as possible - in most cases, new properties should be added as optional.
+   */
+  migrateSource?: (document: Record<string, unknown>) => TApplicationType;
+}
+
 /**
  * Adapter for writing and reading documents to/from Elasticsearch,
  * using plain indices.
@@ -104,7 +114,8 @@ export class StorageIndexAdapter<
   constructor(
     private readonly esClient: ElasticsearchClient,
     logger: Logger,
-    private readonly storage: TStorageSettings
+    private readonly storage: TStorageSettings,
+    private readonly options: StorageIndexAdapterOptions<TApplicationType> = {}
   ) {
     this.logger = logger.get('storage').get(this.storage.name);
   }
@@ -328,6 +339,18 @@ export class StorageIndexAdapter<
           ...request,
           index: this.getSearchIndexPattern(),
           allow_no_indices: true,
+        })
+        .then((response) => {
+          return {
+            ...response,
+            hits: {
+              ...response.hits,
+              hits: response.hits.hits.map((hit) => ({
+                ...hit,
+                _source: this.maybeMigrateSource(hit._source),
+              })),
+            },
+          };
         })
         .catch((error): StorageClientSearchResponse<TApplicationType, any> => {
           if (isNotFoundError(error)) {
@@ -574,7 +597,7 @@ export class StorageIndexAdapter<
       _id: hit._id!,
       _index: hit._index,
       found: true,
-      _source: hit._source as TApplicationType,
+      _source: this.maybeMigrateSource(hit._source),
       _ignored: hit._ignored,
       _primary_term: hit._primary_term,
       _routing: hit._routing,
@@ -582,6 +605,17 @@ export class StorageIndexAdapter<
       _version: hit._version,
       fields: hit.fields,
     };
+  };
+
+  private maybeMigrateSource = (_source: unknown): TApplicationType => {
+    // check whether source is an object, if not fail
+    if (typeof _source !== 'object' || _source === null) {
+      throw new Error(`Source must be an object, got ${typeof _source}`);
+    }
+    if (this.options.migrateSource) {
+      return this.options.migrateSource(_source as Record<string, unknown>);
+    }
+    return _source as TApplicationType;
   };
 
   private existsIndex: StorageClientExistsIndex = () => {

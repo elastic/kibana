@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KeyboardEvent } from 'react';
 import React, {
-  KeyboardEvent,
   useCallback,
   useEffect,
   useRef,
@@ -18,8 +18,8 @@ import React, {
 } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { DropResult } from '@elastic/eui';
 import {
-  DropResult,
   EuiButtonIcon,
   EuiDragDropContext,
   EuiDraggable,
@@ -36,7 +36,7 @@ import type { TabItem, TabsServices } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
-import { TabsBarMenu } from '../tabs_bar_menu';
+import { TabsBarMenu, type TabsBarMenuProps } from '../tabs_bar_menu';
 
 const DROPPABLE_ID = 'unifiedTabsOrder';
 
@@ -60,6 +60,7 @@ export type TabsBarProps = Pick<
   maxItemsCount?: number;
   services: TabsServices;
   onAdd: () => Promise<void>;
+  onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
   onReorder: (items: TabItem[]) => void;
 };
 
@@ -80,6 +81,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       onAdd,
       onLabelEdited,
       onSelect,
+      onSelectRecentlyClosed,
       onReorder,
       onClose,
       getPreviewData,
@@ -263,7 +265,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             {!!scrollRightButton && <EuiFlexItem grow={false}>{scrollRightButton}</EuiFlexItem>}
             {!hasReachedMaxItemsCount && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={addButtonLabel}>
+                <EuiToolTip content={addButtonLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
                     data-test-subj="unifiedTabs_tabsBar_newTabBtn"
                     iconType="plus"
@@ -278,10 +280,11 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TabsBarMenu
-            openedItems={items}
+            items={items}
             selectedItem={selectedItem}
-            onSelectOpenedTab={onSelect}
             recentlyClosedItems={recentlyClosedItems}
+            onSelect={onSelect}
+            onSelectRecentlyClosed={onSelectRecentlyClosed}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

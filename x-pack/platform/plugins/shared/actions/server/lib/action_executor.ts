@@ -23,7 +23,10 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
-import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
+import {
+  getGenAiTokenTracking,
+  shouldTrackGenAiToken,
+} from './token_tracking/gen_ai_token_tracking';
 import {
   validateConfig,
   validateConnector,
@@ -52,6 +55,7 @@ import type { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
+import type { ConnectorRateLimiter } from './connector_rate_limiter';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -110,11 +114,18 @@ export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
   private readonly isESOCanEncrypt: boolean;
-
+  private connectorRateLimiter: ConnectorRateLimiter;
   private actionInfo: ActionInfo | undefined;
 
-  constructor({ isESOCanEncrypt }: { isESOCanEncrypt: boolean }) {
+  constructor({
+    isESOCanEncrypt,
+    connectorRateLimiter,
+  }: {
+    isESOCanEncrypt: boolean;
+    connectorRateLimiter: ConnectorRateLimiter;
+  }) {
     this.isESOCanEncrypt = isESOCanEncrypt;
+    this.connectorRateLimiter = connectorRateLimiter;
   }
 
   public initialize(actionExecutorContext: ActionExecutorContext) {
@@ -403,6 +414,16 @@ export class ActionExecutor {
           this.actionInfo = actionInfo;
         }
 
+        if (this.connectorRateLimiter.isRateLimited(actionTypeId)) {
+          return {
+            actionId,
+            status: 'error',
+            message: `Action execution rate limit exceeded for connector: ${actionTypeId}`,
+            retry: true,
+            errorSource: TaskErrorSource.USER,
+          };
+        }
+
         if (
           !actionTypeRegistry.isActionExecutable(actionId, actionTypeId, {
             notifyUsage: true,
@@ -535,6 +556,8 @@ export class ActionExecutor {
           }
         }
 
+        this.connectorRateLimiter.log(actionTypeId);
+
         // allow null-ish return to indicate success
         const result = rawResult || {
           actionId,
@@ -551,7 +574,13 @@ export class ActionExecutor {
           event.user = event.user || {};
           event.user.name = currentUser?.username;
           event.user.id = currentUser?.profile_uid;
-          event.kibana!.user_api_key = currentUser?.api_key;
+          if (currentUser?.api_key) {
+            event.kibana!.user_api_key = {
+              name: currentUser.api_key?.name,
+              id: currentUser.api_key?.id,
+            };
+          }
+
           set(
             event,
             'kibana.action.execution.usage.request_body_bytes',
@@ -590,7 +619,10 @@ export class ActionExecutor {
         }
 
         // start genai extension
-        if (result.status === 'ok' && shouldTrackGenAiToken(actionTypeId)) {
+        if (
+          result.status === 'ok' &&
+          shouldTrackGenAiToken(actionTypeId, `${validatedParams.subAction}`)
+        ) {
           getGenAiTokenTracking({
             actionTypeId,
             logger,

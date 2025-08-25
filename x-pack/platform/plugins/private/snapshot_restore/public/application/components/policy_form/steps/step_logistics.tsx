@@ -25,14 +25,15 @@ import {
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { Repository } from '../../../../../common/types';
-import { Frequency, CronEditor, SectionError } from '../../../../shared_imports';
+import type { Repository } from '../../../../../common/types';
+import type { Frequency } from '../../../../shared_imports';
+import { CronEditor, SectionError } from '../../../../shared_imports';
 import { useCore, useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
 import { InlineLoading } from '../..';
-import { StepProps } from '.';
+import type { StepProps } from '.';
 import { DisableToolTip, MANAGED_POLICY_TOOLTIP_MESSAGE } from '../../disable_tooltip';
 
 export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
@@ -111,6 +112,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         fullWidth
       >
         <EuiFieldText
+          isInvalid={touched.name && Boolean(errors.name)}
           defaultValue={policy.name}
           fullWidth
           onBlur={() => setTouched({ ...touched, name: true })}
@@ -412,6 +414,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             fullWidth
           >
             <EuiFieldText
+              isInvalid={touched.schedule && Boolean(errors.schedule)}
               defaultValue={policy.schedule}
               fullWidth
               onChange={(e) => {
@@ -508,7 +511,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             flush="right"
             href={docLinks.links.apis.putSnapshotLifecyclePolicy}
             target="_blank"
-            iconType="help"
+            iconType="question"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepLogistics.docsButtonLabel"
@@ -529,6 +532,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 defaultMessage="Repository not found"
               />
             }
+            role="alert"
             color="danger"
             iconType="warning"
           >

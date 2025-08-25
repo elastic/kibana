@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OtelLogDocument } from '@kbn/apm-synthtrace-client';
 import {
-  OtelLogDocument,
   generateLongId,
   generateShortId,
   otelLog,
   apm,
   ApmSynthtracePipelineSchema,
 } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 
@@ -64,9 +64,8 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
   };
 
   return {
-    bootstrap: async ({ logsEsClient, apmEsClient }) => {
+    bootstrap: async ({ logsEsClient }) => {
       await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
-      apmEsClient.pipeline(apmEsClient.getPipeline(ApmSynthtracePipelineSchema.Otel));
     },
     generate: ({ range, clients: { logsEsClient, apmEsClient } }) => {
       const {
@@ -121,6 +120,9 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
           logger.perf('generating_apm_metrics', () => metricsets)
         ),
       ];
+    },
+    setupPipeline({ apmEsClient }) {
+      apmEsClient.setPipeline(apmEsClient.resolvePipelineType(ApmSynthtracePipelineSchema.Otel));
     },
   };
 };

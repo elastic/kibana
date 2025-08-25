@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiSwitchEvent, WithEuiThemeProps } from '@elastic/eui';
 import {
   htmlIdGenerator,
   EuiButton,
@@ -24,12 +25,10 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiTextArea,
   EuiIconTip,
   EuiText,
   withEuiTheme,
-  WithEuiThemeProps,
   mathWithUnits,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,6 +42,19 @@ export interface OnSaveProps {
   isTitleDuplicateConfirmed: boolean;
   onTitleDuplicate: () => void;
   newDescription: string;
+}
+
+export interface Reference {
+  type: string;
+  id: string;
+  name: string;
+}
+
+export interface SaveDashboardReturn {
+  id?: string;
+  error?: string;
+  references?: Reference[];
+  redirectRequired?: boolean;
 }
 
 interface Props {
@@ -87,7 +99,6 @@ class SavedObjectSaveModalComponent extends React.Component<
 > {
   private warning = React.createRef<HTMLDivElement>();
   private formId = generateId('form');
-  private savedObjectTitleInputRef = React.createRef<HTMLInputElement>();
 
   public readonly state = {
     title: this.props.title,
@@ -99,18 +110,11 @@ class SavedObjectSaveModalComponent extends React.Component<
     hasAttemptedSubmit: false,
   };
 
-  public componentDidMount() {
-    setTimeout(() => {
-      // defer so input focus ref value has been populated
-      this.savedObjectTitleInputRef.current?.focus();
-    }, 0);
-  }
-
   public render() {
     const { theme } = this.props;
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
     const duplicateWarningId = generateId();
-
+    const modalTitleId = generateId('saveModal');
     const hasColumns = !!this.props.rightOptions;
 
     const titleInputValid =
@@ -129,7 +133,6 @@ class SavedObjectSaveModalComponent extends React.Component<
         >
           <EuiFieldText
             fullWidth
-            inputRef={this.savedObjectTitleInputRef}
             data-test-subj="savedObjectTitle"
             value={title}
             onChange={this.onTitleChange}
@@ -163,10 +166,16 @@ class SavedObjectSaveModalComponent extends React.Component<
         ? mathWithUnits(theme.euiTheme.size.xxl, (x) => x * 20)
         : mathWithUnits(theme.euiTheme.size.xxl, (x) => x * 15),
     });
+
     return (
-      <EuiModal data-test-subj="savedObjectSaveModal" onClose={this.props.onClose} css={styles}>
+      <EuiModal
+        data-test-subj="savedObjectSaveModal"
+        onClose={this.props.onClose}
+        css={styles}
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             {this.props.customModalTitle ? (
               this.props.customModalTitle
             ) : (
@@ -268,13 +277,20 @@ class SavedObjectSaveModalComponent extends React.Component<
       isLoading: true,
     });
 
-    await this.props.onSave({
-      newTitle: this.state.title,
-      newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
-      isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
-      onTitleDuplicate: this.onTitleDuplicate,
-      newDescription: this.state.visualizationDescription,
-    });
+    // Although `onSave` is an asynchronous function, it is typed as returning `void`
+    // somewhere deeper in the call chain, which causes its asynchronous nature to be lost.
+    // We still need to treat it as async here to properly handle the loading state.
+    try {
+      await this.props.onSave({
+        newTitle: this.state.title,
+        newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
+        isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
+        onTitleDuplicate: this.onTitleDuplicate,
+        newDescription: this.state.visualizationDescription,
+      });
+    } finally {
+      this.setState({ isLoading: false });
+    }
   };
 
   private onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -418,7 +434,7 @@ class SavedObjectSaveModalComponent extends React.Component<
             css={({ euiTheme }) => ({ marginLeft: `-${euiTheme.size.base}` })}
             grow={false}
           >
-            <EuiIconTip type="iInCircle" content={this.props.mustCopyOnSaveMessage} />
+            <EuiIconTip type="info" content={this.props.mustCopyOnSaveMessage} />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={true} />

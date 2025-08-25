@@ -19,7 +19,7 @@ import {
   assertValidModelVersion,
   globalSwitchToModelVersionAt,
 } from '@kbn/core-saved-objects-base-server-internal';
-import {
+import type {
   SavedObjectsModelChange,
   SavedObjectsModelMappingsAdditionChange,
 } from '@kbn/core-saved-objects-server';
@@ -83,12 +83,6 @@ export function validateTypeMigrations({
       typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions ?? {};
 
     if (Object.keys(modelVersionMap).length > 0) {
-      if (!globalSwitchToModelVersionAt) {
-        throw new Error(
-          `Type ${type.name}: Using modelVersions requires to specify globalSwitchToModelVersionAt`
-        );
-      }
-
       Object.entries(modelVersionMap).forEach(([version, definition]) => {
         assertValidModelVersion(version);
       });

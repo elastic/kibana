@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { DashboardPlugin } from './plugin';
 export { PanelPlacementStrategy } from './plugin_constants';
@@ -22,7 +22,10 @@ export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';
 export type { RedirectToProps } from './dashboard_app/types';
 
-export { type SearchDashboardsResponse } from './services/dashboard_content_management_service/lib/find_dashboards';
+export {
+  type FindDashboardsByIdResponse,
+  type SearchDashboardsResponse,
+} from './services/dashboard_content_management_service/lib/find_dashboards';
 
 export { DASHBOARD_APP_ID } from '../common/constants';
 export { cleanEmptyKeys, DashboardAppLocatorDefinition } from '../common/locator/locator';

@@ -12,8 +12,8 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import { load, dump } from 'js-yaml';
-import { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
+import { dump } from 'js-yaml';
+import type { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
 import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
@@ -22,7 +22,8 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { getHasLogs } from './get_has_logs';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
-import { ElasticAgentStepPayload, InstalledIntegration, StepProgressPayloadRT } from '../types';
+import type { ElasticAgentStepPayload, InstalledIntegration } from '../types';
+import { StepProgressPayloadRT } from '../types';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
@@ -61,6 +62,12 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       core,
     } = resources;
 
+    /**
+     * Message is base64 encoded as it might include arbitrary error messages
+     * from user's terminal containing special characters that would otherwise
+     * break the request.
+     */
+    const decodedMessage = Buffer.from(message ?? '', 'base64').toString('utf-8');
     const coreStart = await core.start();
     const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
 
@@ -88,7 +95,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
           ...observabilityOnboardingState.progress,
           [name]: {
             status,
-            message,
+            message: decodedMessage,
             payload,
           },
         },
@@ -100,7 +107,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       flow_id: id,
       step: name,
       step_status: status,
-      step_message: message,
+      step_message: decodedMessage,
       payload,
     });
 
@@ -178,22 +185,8 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       reason: 'Authorization is checked by the Saved Object client',
     },
   },
-  params: t.type({
-    body: t.type({
-      name: t.string,
-    }),
-  }),
   async handler(resources) {
-    const {
-      context,
-      params: {
-        body: { name },
-      },
-      core,
-      request,
-      plugins,
-      kibanaVersion,
-    } = resources;
+    const { context, core, request, plugins, kibanaVersion } = resources;
     const coreStart = await core.start();
     const {
       elasticsearch: { client },
@@ -217,10 +210,10 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
             progress: {},
           },
         }),
-        createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
+        createShipperApiKey(client.asCurrentUser, 'standalone-elastic-agent'),
         (
           await context.resolve(['core'])
-        ).core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
+        ).core.security.authc.apiKeys.create(createInstallApiKey('onboarding-install')),
         getAgentVersionInfo(fleetPluginStart, kibanaVersion),
       ]);
 
@@ -306,6 +299,12 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     path: t.type({
       onboardingId: t.string,
     }),
+    query: t.union([
+      t.partial({
+        metricsEnabled: t.string,
+      }),
+      t.undefined,
+    ]),
     body: t.string,
   }),
   async handler({ context, request, response, params, core, plugins, services }) {
@@ -338,11 +337,13 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       });
     }
 
+    const metricsEnabled = params.query?.metricsEnabled === 'true';
     let installedIntegrations: InstalledIntegration[] = [];
     try {
       const settledResults = await ensureInstalledIntegrations(
         integrationsToInstall,
-        packageClient
+        packageClient,
+        metricsEnabled
       );
       installedIntegrations = settledResults.reduce<InstalledIntegration[]>((acc, result) => {
         if (result.status === 'fulfilled') {
@@ -427,7 +428,8 @@ export type IntegrationToInstall = RegistryIntegrationToInstall | CustomIntegrat
 
 async function ensureInstalledIntegrations(
   integrationsToInstall: IntegrationToInstall[],
-  packageClient: PackageClient
+  packageClient: PackageClient,
+  metricsEnabled: boolean = true
 ): Promise<Array<PromiseSettledResult<InstalledIntegration>>> {
   return Promise.allSettled(
     integrationsToInstall.map(async (integration) => {
@@ -436,8 +438,12 @@ async function ensureInstalledIntegrations(
       if (installSource === 'registry') {
         const installation = await packageClient.ensureInstalledPackage({ pkgName });
         const pkg = installation.package;
-        const config = filterUnsupportedInputs(
-          await packageClient.getAgentPolicyConfigYAML(pkg.name, pkg.version)
+        const config = await packageClient.getAgentPolicyConfigYAML(
+          pkg.name,
+          pkg.version,
+          (input) =>
+            !['httpjson', 'winlog'].includes(input.type) &&
+            (metricsEnabled || !input.type.endsWith('/metrics'))
         );
 
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
@@ -508,21 +514,6 @@ async function ensureInstalledIntegrations(
       }
     })
   );
-}
-
-function filterUnsupportedInputs(policyYML: string): string {
-  const policy = load(policyYML);
-
-  if (!policy) {
-    return policyYML;
-  }
-
-  return dump({
-    ...policy,
-    inputs: (policy.inputs || []).filter((input: any) => {
-      return input.type !== 'httpjson';
-    }),
-  });
 }
 
 /**

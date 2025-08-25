@@ -7,33 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  apiHasParentApi,
-  apiHasUniqueId,
-  PublishingSubject,
-  SerializedPanelState,
-} from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
-import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
+import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
+import { apiHasParentApi, apiHasUniqueId } from '@kbn/presentation-publishing';
+import type { BehaviorSubject, Observable } from 'rxjs';
+import { combineLatest, isObservable, map, of, switchMap } from 'rxjs';
+import type { CanAddNewPanel } from './can_add_new_panel';
+import { apiCanAddNewPanel } from './can_add_new_panel';
 
-export interface PanelPackage<
-  SerializedStateType extends object = object,
-  RuntimeStateType extends object = object
-> {
+export interface PanelPackage<SerializedStateType extends object = object> {
   panelType: string;
+  maybePanelId?: string;
 
   /**
    * The serialized state of this panel.
    */
   serializedState?: SerializedPanelState<SerializedStateType>;
-
-  /**
-   * The runtime state of this panel. @deprecated Use `serializedState` instead.
-   */
-  initialState?: RuntimeStateType;
 }
 
-export interface PresentationContainer extends CanAddNewPanel {
+export interface PresentationContainer<ApiType extends unknown = unknown> extends CanAddNewPanel {
   /**
    * Removes a panel from the container.
    */
@@ -58,11 +49,18 @@ export interface PresentationContainer extends CanAddNewPanel {
   getPanelCount: () => number;
 
   /**
+   * Gets a child API for the given ID. This is asynchronous and should await for the
+   * child API to be available. It is best practice to retrieve a child API using this method
+   */
+  getChildApi: (uuid: string) => Promise<ApiType | undefined>;
+
+  /**
    * A publishing subject containing the child APIs of the container. Note that
    * children are created asynchronously. This means that the children$ observable might
-   * contain fewer children than the actual number of panels in the container.
+   * contain fewer children than the actual number of panels in the container. Use getChildApi
+   * to retrieve the child API for a specific panel.
    */
-  children$: PublishingSubject<{ [key: string]: unknown }>;
+  children$: PublishingSubject<{ [key: string]: ApiType }>;
 }
 
 export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {

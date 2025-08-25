@@ -12,14 +12,12 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
-import {
-  FindConversationsRequestQuery,
-  FindConversationsResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen';
+import type { FindConversationsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { FindConversationsRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
+import type { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
 import {
   transformESSearchToConversations,
   transformFieldNamesToSourceScheme,

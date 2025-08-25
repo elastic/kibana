@@ -62,5 +62,20 @@ describe('Actions Plugin', () => {
         ]
       `);
     });
+
+    it('returns isWebhookSslWithPfxEnabled if set in kibana config', async () => {
+      const context = coreMock.createPluginInitializerContext({
+        webhook: {
+          ssl: {
+            pfx: {
+              enabled: false,
+            },
+          },
+        },
+      });
+      const plugin = new Plugin(context);
+      const pluginSetup = plugin.setup();
+      expect(pluginSetup.isWebhookSslWithPfxEnabled).toBe(false);
+    });
   });
 });

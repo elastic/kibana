@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFeature } from '@kbn/features-plugin/server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -114,19 +114,20 @@ export default function ({ getService }: FtrProviderContext) {
             'monitoring',
             'observabilityAIAssistant',
             'observabilityCasesV3',
+            'onechat',
             'savedObjectsManagement',
             'savedQueryManagement',
             'savedObjectsTagging',
             'ml',
             'apm',
             'stackAlerts',
-            'streams',
             'canvas',
             'generalCasesV3',
             'infrastructure',
-            'inventory',
             'logs',
             'maintenanceWindow',
+            'manageReporting',
+            'reportingLegacy',
             'maps_v2',
             'osquery',
             'rulesSettings',
@@ -135,8 +136,9 @@ export default function ({ getService }: FtrProviderContext) {
             'searchSynonyms',
             'searchQueryRules',
             'searchPlayground',
-            'siemV2',
+            'siemV3',
             'slo',
+            'streams',
             'securitySolutionAssistant',
             'securitySolutionAttackDiscovery',
             'securitySolutionCasesV3',
@@ -145,7 +147,6 @@ export default function ({ getService }: FtrProviderContext) {
             'securitySolutionSiemMigrations',
             'fleet',
             'fleetv2',
-            'entityManager',
           ].sort()
         );
       });
@@ -174,6 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
           'monitoring',
           'observabilityAIAssistant',
           'observabilityCasesV3',
+          'onechat',
           'savedObjectsManagement',
           'savedQueryManagement',
           'savedObjectsTagging',
@@ -184,7 +186,6 @@ export default function ({ getService }: FtrProviderContext) {
           'canvas',
           'generalCasesV3',
           'infrastructure',
-          'inventory',
           'logs',
           'maintenanceWindow',
           'maps_v2',
@@ -197,7 +198,9 @@ export default function ({ getService }: FtrProviderContext) {
           'searchPlayground',
           'siem',
           'siemV2',
+          'siemV3',
           'slo',
+          'streams',
           'securitySolutionAssistant',
           'securitySolutionAttackDiscovery',
           'securitySolutionCasesV3',
@@ -206,7 +209,8 @@ export default function ({ getService }: FtrProviderContext) {
           'securitySolutionSiemMigrations',
           'fleet',
           'fleetv2',
-          'entityManager',
+          'manageReporting',
+          'reportingLegacy',
         ];
 
         const features = body.filter(

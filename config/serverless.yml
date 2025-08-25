@@ -10,9 +10,14 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
 xpack.fleet.internal.useMeteringApi: true
+xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
+xpack.fleet.internal.registry.spec.min: '3.0'
+xpack.fleet.internal.registry.spec.max: '3.4'
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
+  onechat:
+    hidden: true
   dashboard:
     privileges:
       ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
@@ -172,6 +177,24 @@ xpack.security.showInsecureClusterWarning: false
 xpack.security.ui.userManagementEnabled: false
 xpack.security.ui.roleMappingManagementEnabled: false
 
+xpack.ml.nlp:
+  enabled: false
+  modelDeployment:
+    allowStaticAllocations: false
+    vCPURange:
+      low:
+        min: 0
+        max: 2
+        maxThreads: 2
+      medium:
+        min: 0
+        max: 32
+        maxThreads: 4
+      high:
+        min: 0
+        max: 512
+        maxThreads: 8
+
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 server.restrictInternalApis: true
 # Telemetry enabled by default and not disableable via UI
@@ -224,11 +247,6 @@ xpack.cases.stack.enabled: false
 # Alerting and action circuit breakers
 xpack.alerting.rules.run.actions.max: 3000
 xpack.alerting.rules.run.timeout: 1m
-xpack.alerting.rules.run.ruleTypeOverrides:
-  - id: siem.indicatorRule
-    timeout: 10m
-  - id: siem.eqlRule
-    timeout: 5m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
 xpack.alerting.rules.maxScheduledPerMinute: 400
 xpack.actions.run.maxAttempts: 10
@@ -268,3 +286,12 @@ xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
 
 ## Content Connectors in stack management
 xpack.contentConnectors.enabled: true
+
+## Enable Kibana Product Intercept
+xpack.product_intercept.enabled: true
+xpack.product_intercept.interval: '90d'
+
+# Gen AI Settings plugin
+xpack.genAiSettings:
+  showAiBreadcrumb: false
+  showSpacesIntegration: false

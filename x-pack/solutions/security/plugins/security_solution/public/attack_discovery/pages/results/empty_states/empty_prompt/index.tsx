@@ -17,11 +17,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import React, { useMemo } from 'react';
 
-import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { AnimatedCounter } from './animated_counter';
 import { Generate } from '../generate';
+import type { SettingsOverrideOptions } from '../../history/types';
 import * as i18n from './translations';
 import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 
@@ -31,7 +32,7 @@ interface Props {
   attackDiscoveriesCount: number;
   isDisabled?: boolean;
   isLoading: boolean;
-  onGenerate: () => void;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
 }
 
 const EmptyPromptComponent: React.FC<Props> = ({
@@ -88,7 +89,7 @@ const EmptyPromptComponent: React.FC<Props> = ({
                 content={i18n.RESPONSES_FROM_AI_SYSTEMS}
                 data-test-subj="responsesFromAiSystemsTooltip"
                 position="right"
-                type="iInCircle"
+                type="info"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -11,21 +11,19 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
-      "data",
-      "security",
-      "encryptedSavedObjects",
-      "usageCollection",
-      "licensing",
-      "taskManager",
       "alerting",
-      "inference",
+      "data",
+      "encryptedSavedObjects",
       "features",
+      "inference",
+      "licensing",
+      "ruleRegistry",
+      "security",
+      "taskManager",
+      "usageCollection"
     ],
-    "optionalPlugins": [
-      "cloud",
-      "serverless"
-    ],
-    "requiredBundles": [
-    ]
+    "optionalPlugins": ["cloud", "serverless"],
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   }
 }

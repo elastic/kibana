@@ -8,12 +8,12 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { Capabilities } from '@kbn/core/types';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures } from '../../../common';
 import type { AppLinkItems, LinkItem, NormalizedLinks } from '../../common/links/types';
-import { hasCapabilities } from '../../common/lib/capabilities';
+import { hasCapabilities, existCapabilities } from '../../common/lib/capabilities';
 
 /**
  * Dependencies to update the application links
@@ -51,16 +51,9 @@ class ApplicationLinksUpdater {
    * Updates the internal app links applying the filter by permissions
    */
   public update(appLinksToUpdate: AppLinkItems, params: ApplicationLinksUpdateParams) {
-    const filteredAppLinks = this.filterAppLinks(appLinksToUpdate, params);
-    this.linksSubject$.next(Object.freeze(filteredAppLinks));
-    this.normalizedLinksSubject$.next(Object.freeze(this.getNormalizedLinks(filteredAppLinks)));
-  }
-
-  /**
-   * Returns the current links value
-   */
-  public getLinksValue(): AppLinkItems {
-    return this.linksSubject$.getValue();
+    const processedAppLinks = this.processAppLinks(appLinksToUpdate, params);
+    this.linksSubject$.next(Object.freeze(processedAppLinks));
+    this.normalizedLinksSubject$.next(Object.freeze(this.getNormalizedLinks(processedAppLinks)));
   }
 
   /**
@@ -92,36 +85,54 @@ class ApplicationLinksUpdater {
   /**
    * Filters the app links based on the links configuration
    */
-  private filterAppLinks(appLinks: AppLinkItems, params: ApplicationLinksUpdateParams): LinkItem[] {
+  private processAppLinks(
+    appLinks: AppLinkItems,
+    params: ApplicationLinksUpdateParams,
+    inheritedProps: Partial<LinkItem> = {}
+  ): LinkItem[] {
     const { experimentalFeatures, uiSettingsClient, capabilities, license, upselling } = params;
 
-    return appLinks.reduce<LinkItem[]>((acc, { links, ...appLinkInfo }) => {
+    return appLinks.reduce<LinkItem[]>((acc, appLink) => {
+      const { links, ...link } = appLink;
+      // Check experimental flags and uiSettings, removing the link if any of them is defined and disabled
       if (
-        !this.isLinkExperimentalKeyAllowed(appLinkInfo, experimentalFeatures) ||
-        !this.isLinkUiSettingsAllowed(appLinkInfo, uiSettingsClient)
+        !this.isLinkExperimentalKeyAllowed(link, experimentalFeatures) ||
+        !this.isLinkUiSettingsAllowed(link, uiSettingsClient)
       ) {
         return acc;
       }
 
+      // Extra props to be assigned to the current link and its children
+      const extraProps: Partial<LinkItem> = { ...inheritedProps };
+
+      // Check link availability
       if (
-        !hasCapabilities(capabilities, appLinkInfo.capabilities) ||
-        !this.isLinkLicenseAllowed(appLinkInfo, license)
+        !existCapabilities(capabilities, link.capabilities) ||
+        !this.isLinkLicenseAllowed(link, license)
       ) {
-        if (upselling.isPageUpsellable(appLinkInfo.id)) {
-          acc.push({ ...appLinkInfo, unauthorized: true });
+        // The link is not available in the current product payment plan
+        if (!upselling.isPageUpsellable(link.id)) {
+          return acc; // no upselling registered for this link, just exclude it
         }
-        return acc; // not adding sub-links for links that are not authorized
+        extraProps.unavailable = true;
+
+        // Check link authorization only if it is available
+      } else if (!hasCapabilities(capabilities, link.capabilities)) {
+        // Required capabilities exist but are not granted
+        extraProps.unauthorized = true;
       }
 
-      const resultAppLink: LinkItem = appLinkInfo;
+      const processedAppLink: LinkItem = { ...link, ...extraProps };
+
+      // Process children links if they exist
       if (links) {
-        const childrenLinks = this.filterAppLinks(links, params);
+        const childrenLinks = this.processAppLinks(links, params, extraProps);
         if (childrenLinks.length > 0) {
-          resultAppLink.links = childrenLinks;
+          processedAppLink.links = childrenLinks;
         }
       }
 
-      acc.push(resultAppLink);
+      acc.push(processedAppLink);
       return acc;
     }, []);
   }

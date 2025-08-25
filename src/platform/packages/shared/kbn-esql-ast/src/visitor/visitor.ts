@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GlobalVisitorContext, SharedData } from './global_visitor_context';
+import type { SharedData } from './global_visitor_context';
+import { GlobalVisitorContext } from './global_visitor_context';
 import { QueryVisitorContext } from './contexts';
-import { VisitorContext } from './contexts';
+import type { VisitorContext } from './contexts';
 import type {
   AstNodeToVisitorName,
   EnsureFunction,
@@ -153,7 +154,7 @@ export class Visitor<
           if (isInside) return ctx.visitExpression(node);
           const isAfter = location.max < pos;
           if (isAfter) {
-            if (ctx.node.location && ctx.node.location.max === location.max) {
+            if (ctx.node.location && ctx.node.location.max >= location.max) {
               return ctx.visitExpression(node) || node;
             }
             return node;

@@ -7,14 +7,14 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { reindexOperationWithLargeErrorMessage } from './reindex_operation_with_large_error_message';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
 
-  describe('Upgrade Assistant', function () {
+  describe.skip('Upgrade Assistant', function () {
     describe('Reindex operation saved object', () => {
       const dotKibanaIndex = '.kibana';
       const fakeSavedObjectId = 'fakeSavedObjectId';

@@ -17,7 +17,8 @@ import {
   EuiSpacer,
   EuiRadioGroup,
 } from '@elastic/eui';
-import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
@@ -30,7 +31,8 @@ import {
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
+import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
+import { SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
@@ -112,6 +114,18 @@ export const EsqlQueryExpression: React.FC<
         [paramField]: paramValue,
       }));
       setRuleParams(paramField, paramValue);
+    },
+    [setRuleParams]
+  );
+
+  const clearParam = useCallback(
+    (paramField: string) => {
+      setCurrentRuleParams((currentParams) => {
+        const nextParams = { ...currentParams };
+        delete nextParams[paramField];
+        return nextParams;
+      });
+      setRuleParams(paramField, undefined);
     },
     [setRuleParams]
   );
@@ -213,24 +227,17 @@ export const EsqlQueryExpression: React.FC<
       if (!timeField && timestampField) {
         setParam('timeField', timestampField);
       }
+      if (!newTimeFieldOptions.find(({ value }) => value === timeField)) {
+        clearParam('timeField');
+      }
       setDetectedTimestamp(timestampField);
     },
-    [timeField, setParam, dataViews, http]
+    [timeField, setParam, clearParam, dataViews, http]
   );
 
   return (
     <Fragment>
-      <EuiFormRow
-        id="queryEditor"
-        data-test-subj="queryEsqlEditor"
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.defineEsqlQueryPrompt"
-            defaultMessage="Define your query using ES|QL"
-          />
-        }
-      >
+      <EuiFormRow id="queryEditor" data-test-subj="queryEsqlEditor" fullWidth>
         <ESQLLangEditor
           query={query}
           onTextLangQueryChange={(q: AggregateQuery) => {
@@ -240,11 +247,12 @@ export const EsqlQueryExpression: React.FC<
           }}
           onTextLangQuerySubmit={async () => {}}
           detectedTimestamp={detectedTimestamp}
-          hideRunQueryText={true}
+          hideRunQueryText
+          hideRunQueryButton
           isLoading={isLoading}
           editorIsInline
+          expandToFitQueryOnMount
           hasOutline
-          hideRunQueryButton={true}
         />
       </EuiFormRow>
       <EuiSpacer />
@@ -302,6 +310,7 @@ export const EsqlQueryExpression: React.FC<
             setRadioIdSelected(optionId);
             setParam('groupBy', optionId);
           }}
+          name="alertGroup"
         />
       </EuiFormRow>
       <EuiSpacer />

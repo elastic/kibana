@@ -7,14 +7,14 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import { mockAnonymizationFields } from '../../../mock/mock_anonymization_fields';
-import { getAnonymizedEvents } from '../helpers/get_anonymized_events';
+import { getAnonymizedEvents } from './get_anonymized_events';
 import { mockAnonymizedEvents } from '../../../mock/mock_anonymized_events';
 import { AnonymizedEventsRetriever } from '.';
 
-jest.mock('../helpers/get_anonymized_events', () => ({
+jest.mock('./get_anonymized_events', () => ({
   getAnonymizedEvents: jest.fn(),
 }));
 

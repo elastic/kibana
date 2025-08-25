@@ -7,7 +7,7 @@
 import { makeDefaultServices } from '../mocks';
 import type { LensAppServices } from './types';
 import { redirectToDashboard } from './save_modal_container_helpers';
-import { LensSerializedState } from '..';
+import type { LensSerializedState } from '..';
 
 describe('redirectToDashboard', () => {
   const embeddableInput = {
@@ -30,7 +30,7 @@ describe('redirectToDashboard', () => {
     });
     expect(navigateToWithEmbeddablePackageSpy).toHaveBeenCalledWith('security', {
       path: '#/view/id',
-      state: { input: { test: 'test' }, type: 'lens' },
+      state: { serializedState: { rawState: { test: 'test' }, references: [] }, type: 'lens' },
     });
   });
 
@@ -49,7 +49,7 @@ describe('redirectToDashboard', () => {
     });
     expect(navigateToWithEmbeddablePackageSpy).toHaveBeenCalledWith('dashboards', {
       path: '#/view/id',
-      state: { input: { test: 'test' }, type: 'lens' },
+      state: { serializedState: { rawState: { test: 'test' }, references: [] }, type: 'lens' },
     });
   });
 });

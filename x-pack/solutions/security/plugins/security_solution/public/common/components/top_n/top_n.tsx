@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
@@ -47,11 +47,12 @@ const useStyles = () => {
   };
 };
 
-export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
+export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   filterQuery?: string;
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
   filters: Filter[];
+  dataView: DataView;
   dataViewSpec?: DataViewSpec;
   options: TopNOption[];
   paddingSize?: 's' | 'm' | 'l' | 'none';
@@ -59,7 +60,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   setAbsoluteRangeDatePickerTarget: InputsModelId;
   scopeId?: string;
   toggleTopN: () => void;
-  onFilterAdded?: () => void; // eslint-disable-line react/no-unused-prop-types
+  onFilterAdded?: () => void;
   applyGlobalQueriesAndFilters?: boolean;
 }
 
@@ -70,12 +71,12 @@ const TopNComponent: React.FC<Props> = ({
   filters,
   field,
   from,
+  dataView,
   dataViewSpec,
   options,
   paddingSize,
   query,
   setAbsoluteRangeDatePickerTarget,
-  setQuery,
   scopeId,
   to,
   toggleTopN,
@@ -124,14 +125,13 @@ const TopNComponent: React.FC<Props> = ({
             filters={applicableFilters}
             from={from}
             headerChildren={headerChildren}
+            dataView={dataView}
             dataViewSpec={dataViewSpec}
             onlyField={field}
             paddingSize={paddingSize}
             query={query}
             queryType="topN"
-            setQuery={setQuery}
             showSpacer={false}
-            toggleTopN={toggleTopN}
             sourcererScopeId={sourcererScopeId}
             to={to}
             hideQueryToggle

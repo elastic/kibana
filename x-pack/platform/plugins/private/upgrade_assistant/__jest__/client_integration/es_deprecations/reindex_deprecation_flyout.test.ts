@@ -7,9 +7,11 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { ReindexStatus, ReindexStep, ReindexStatusResponse } from '../../../common/types';
+import type { ReindexStatusResponse } from '../../../common/types';
+import { ReindexStatus, ReindexStep } from '../../../common/types';
 import { setupEnvironment } from '../helpers';
-import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
+import type { ElasticsearchTestBed } from './es_deprecations.helpers';
+import { setupElasticsearchPage } from './es_deprecations.helpers';
 import {
   esDeprecationsMockResponse,
   MOCK_SNAPSHOT_ID,
@@ -24,6 +26,7 @@ const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {
   isFrozen: false,
   isReadonly: false,
   isInDataStream: false,
+  isFollowerIndex: false,
 };
 
 describe('Reindex deprecation flyout', () => {
@@ -70,18 +73,6 @@ describe('Reindex deprecation flyout', () => {
     testBed.component.update();
   });
 
-  it('renders a flyout with reindexing details', async () => {
-    const reindexDeprecation = esDeprecationsMockResponse.migrationsDeprecations[3];
-    const { actions, find, exists } = testBed;
-
-    await actions.table.clickDeprecationRowAt('reindex', 0);
-
-    expect(exists('reindexDetails')).toBe(true);
-    expect(find('reindexDetails.flyoutTitle').text()).toContain(
-      `Update ${reindexDeprecation.index}`
-    );
-  });
-
   it('renders error callout when reindex fails', async () => {
     httpRequestsMockHelpers.setStartReindexingResponse(MOCK_REINDEX_DEPRECATION.index!, undefined, {
       statusCode: 404,
@@ -90,7 +81,11 @@ describe('Reindex deprecation flyout', () => {
 
     const { actions, exists } = testBed;
 
-    await actions.table.clickDeprecationRowAt('reindex', 0);
+    await actions.table.clickDeprecationRowAt({
+      deprecationType: 'reindex',
+      index: 0,
+      action: 'reindex',
+    });
     await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
     await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
     expect(exists('reindexDetails')).toBe(true);
@@ -105,14 +100,32 @@ describe('Reindex deprecation flyout', () => {
 
     const { actions, exists } = testBed;
 
-    await actions.table.clickDeprecationRowAt('reindex', 0);
-    await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
+    await actions.table.clickDeprecationRowAt({
+      deprecationType: 'reindex',
+      index: 0,
+      action: 'reindex',
+    });
     await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
     expect(exists('reindexDetails.fetchFailedCallout')).toBe(true);
   });
 
   describe('reindexing progress', () => {
+    it('renders a flyout with index confirm step for reindex', async () => {
+      const reindexDeprecation = esDeprecationsMockResponse.migrationsDeprecations[3];
+      const { actions, find, exists } = testBed;
+
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
+
+      expect(exists('reindexDetails')).toBe(true);
+      expect(find('reindexDetails.flyoutTitle').text()).toContain(
+        `Reindex ${reindexDeprecation.index}`
+      );
+    });
     it('has started but not yet reindexing documents', async () => {
       httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
         reindexOp: {
@@ -127,7 +140,11 @@ describe('Reindex deprecation flyout', () => {
 
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
       await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
       await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
@@ -149,7 +166,11 @@ describe('Reindex deprecation flyout', () => {
 
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
       await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
       await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
@@ -171,7 +192,11 @@ describe('Reindex deprecation flyout', () => {
 
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
       await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
       await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
@@ -193,7 +218,11 @@ describe('Reindex deprecation flyout', () => {
 
       const { actions, find, exists, component } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
       await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
       await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
@@ -225,7 +254,11 @@ describe('Reindex deprecation flyout', () => {
 
       const { actions, find } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
       await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
       await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 

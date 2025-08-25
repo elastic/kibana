@@ -10,23 +10,21 @@ import { getOr } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import deepMerge from 'deepmerge';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import type {
-  TimelineResponse,
-  ColumnHeaderResult,
-  FilterTimelineResult,
-  DataProviderResult,
-  PinnedEvent,
-  Note,
-} from '../../../../common/api/timeline';
+import type { ColumnHeaderOptions, KueryFilterQuery } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import {
   DataProviderTypeEnum,
   RowRendererValues,
   TimelineStatusEnum,
   type TimelineType,
+  type ColumnHeaderResult,
+  type DataProviderResult,
+  type FilterTimelineResult,
+  type Note,
+  type PinnedEvent,
+  type TimelineResponse,
   TimelineTypeEnum,
 } from '../../../../common/api/timeline';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useUpdateTimeline } from './use_update_timeline';
 
 import type { TimelineModel } from '../../store/model';
@@ -292,13 +290,14 @@ export const formatTimelineResponseToModel = (
 export interface QueryTimelineById {
   activeTimelineTab?: TimelineTabs;
   duplicate?: boolean;
-  graphEventId?: string;
   timelineId?: string;
   timelineType?: TimelineType;
   onError?: TimelineErrorCallback;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   savedSearchId?: string;
+  /* Lucene or Kql query */
+  query?: KueryFilterQuery;
 }
 
 export const useQueryTimelineById = () => {
@@ -308,13 +307,13 @@ export const useQueryTimelineById = () => {
   return ({
     activeTimelineTab = TimelineTabs.query,
     duplicate = false,
-    graphEventId = '',
     timelineId,
     timelineType,
     onError,
     onOpenTimeline,
     openTimeline = true,
     savedSearchId,
+    query,
   }: QueryTimelineById) => {
     if (timelineId == null) {
       updateTimeline({
@@ -327,6 +326,12 @@ export const useQueryTimelineById = () => {
           ...timelineDefaults,
           columns: defaultUdtHeaders,
           id: TimelineId.active,
+          kqlQuery: {
+            filterQuery: {
+              kuery: query ?? null,
+              serializedQuery: query?.expression ?? '',
+            },
+          },
           activeTab: activeTimelineTab,
           show: openTimeline,
           initialized: true,
@@ -369,7 +374,6 @@ export const useQueryTimelineById = () => {
               timeline: {
                 ...timeline,
                 activeTab: activeTimelineTab,
-                graphEventId,
                 show: openTimeline,
                 dateRange: { start: from, end: to },
                 savedSearchId: timeline.savedSearchId,

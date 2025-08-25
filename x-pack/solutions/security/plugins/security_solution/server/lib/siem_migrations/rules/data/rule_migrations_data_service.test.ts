@@ -8,19 +8,21 @@
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
-import type { InstallParams } from '@kbn/index-adapter';
 import { IndexPatternAdapter, IndexAdapter } from '@kbn/index-adapter';
-import { loggerMock } from '@kbn/logging-mocks';
 import { Subject } from 'rxjs';
-import type { IndexNameProviders, SiemRuleMigrationsClientDependencies } from '../types';
+import type { RuleMigrationIndexNameProviders, RuleMigrationsClientDependencies } from '../types';
+import type { SetupParams } from './rule_migrations_data_service';
 import { INDEX_PATTERN, RuleMigrationsDataService } from './rule_migrations_data_service';
+import { RuleMigrationIndexMigrator } from '../index_migrators';
+
+jest.mock('../index_migrators');
 
 jest.mock('@kbn/index-adapter');
 
 // This mock is required to have a way to await the index pattern name promise
-let mockIndexNameProviders: IndexNameProviders;
+let mockIndexNameProviders: RuleMigrationIndexNameProviders;
 jest.mock('./rule_migrations_data_client', () => ({
-  RuleMigrationsDataClient: jest.fn((indexNameProviders: IndexNameProviders) => {
+  RuleMigrationsDataClient: jest.fn((indexNameProviders: RuleMigrationIndexNameProviders) => {
     mockIndexNameProviders = indexNameProviders;
   }),
 }));
@@ -30,7 +32,7 @@ const MockedIndexPatternAdapter = IndexPatternAdapter as unknown as jest.MockedC
 >;
 const MockedIndexAdapter = IndexAdapter as unknown as jest.MockedClass<typeof IndexAdapter>;
 
-const dependencies = {} as SiemRuleMigrationsClientDependencies;
+const dependencies = {} as RuleMigrationsClientDependencies;
 const esClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 
 describe('SiemRuleMigrationsDataService', () => {
@@ -86,18 +88,19 @@ describe('SiemRuleMigrationsDataService', () => {
   });
 
   describe('install', () => {
-    it('should install index pattern', async () => {
+    it('should install index pattern and run the migration', async () => {
       const service = new RuleMigrationsDataService(logger, kibanaVersion);
-      const params: Omit<InstallParams, 'logger'> = {
+      const params: SetupParams = {
         esClient,
         pluginStop$: new Subject(),
       };
-      await service.install(params);
+      await service.setup(params);
       const [indexPatternAdapter] = MockedIndexPatternAdapter.mock.instances;
       const [indexAdapter] = MockedIndexAdapter.mock.instances;
 
       expect(indexPatternAdapter.install).toHaveBeenCalledWith(expect.objectContaining(params));
       expect(indexAdapter.install).toHaveBeenCalledWith(expect.objectContaining(params));
+      expect(RuleMigrationIndexMigrator).toHaveBeenCalled();
     });
   });
 
@@ -112,9 +115,8 @@ describe('SiemRuleMigrationsDataService', () => {
 
     it('should install space index pattern', async () => {
       const service = new RuleMigrationsDataService(logger, kibanaVersion);
-      const params: InstallParams = {
+      const params: SetupParams = {
         esClient,
-        logger: loggerMock.create(),
         pluginStop$: new Subject(),
       };
 
@@ -122,7 +124,7 @@ describe('SiemRuleMigrationsDataService', () => {
         MockedIndexPatternAdapter.mock.instances;
       (rulesIndexPatternAdapter.install as jest.Mock).mockResolvedValueOnce(undefined);
 
-      await service.install(params);
+      await service.setup(params);
       service.createClient(createClientParams);
 
       await mockIndexNameProviders.rules();

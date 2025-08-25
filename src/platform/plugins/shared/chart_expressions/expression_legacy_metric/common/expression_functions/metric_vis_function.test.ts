@@ -10,9 +10,9 @@
 import { metricVisFunction } from './metric_vis_function';
 import type { MetricArguments } from '..';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { LabelPosition } from '../constants';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#metric', () => {
   const fn = functionWrapper(metricVisFunction());
@@ -30,7 +30,7 @@ describe('interpreter/functions#metric', () => {
         type: 'palette',
         name: '',
         params: {
-          colors: ['rgb(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
+          colors: ['rgba(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
           stops: [0, 10000],
           gradient: false,
           rangeMin: 0,

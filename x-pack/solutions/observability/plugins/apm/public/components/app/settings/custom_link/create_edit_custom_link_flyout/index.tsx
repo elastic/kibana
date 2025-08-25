@@ -12,6 +12,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -45,6 +46,7 @@ export function CreateEditCustomLinkFlyout({
   defaults,
   customLinkId,
 }: Props) {
+  const modalTitleId = useGeneratedHtmlId();
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
 
@@ -74,10 +76,10 @@ export function CreateEditCustomLinkFlyout({
 
   return (
     <form onSubmit={onSubmit} id="customLink_form">
-      <EuiFlyout ownFocus onClose={onClose} size="m">
+      <EuiFlyout ownFocus onClose={onClose} size="m" aria-labelledby={modalTitleId}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <h2>
+            <h2 id={modalTitleId}>
               {i18n.translate('xpack.apm.settings.customLink.flyout.title', {
                 defaultMessage: 'Create link',
               })}

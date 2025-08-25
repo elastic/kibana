@@ -7,23 +7,25 @@
 
 import { of, Observable } from 'rxjs';
 import { z } from '@kbn/zod';
+import type { AIMessageChunk } from '@langchain/core/messages';
 import {
   AIMessage,
-  AIMessageChunk,
   HumanMessage,
   isAIMessage,
   SystemMessage,
   ToolMessage,
 } from '@langchain/core/messages';
-import {
+import type {
   ChatCompleteAPI,
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
   ChatCompletionChunkEvent,
   ChatCompletionEvent,
-  ChatCompletionEventType,
   ChatCompletionTokenCount,
   InferenceConnector,
+} from '@kbn/inference-common';
+import {
+  ChatCompletionEventType,
   InferenceConnectorType,
   MessageRole,
   createInferenceRequestError,
@@ -36,6 +38,7 @@ const createConnector = (parts: Partial<InferenceConnector> = {}): InferenceConn
     connectorId: 'connector-id',
     name: 'My connector',
     config: {},
+    capabilities: {},
     ...parts,
   };
 };
@@ -93,6 +96,14 @@ const createChunkEvent = (input: ChunkEventInput): ChatCompletionChunkEvent => {
   }
 };
 
+const telemetryMetadata = {
+  pluginId: 'plugin-id',
+};
+
+const metadata = {
+  connectorTelemetry: telemetryMetadata,
+};
+
 describe('InferenceChatModel', () => {
   let chatComplete: ChatCompleteAPI & jest.MockedFn<ChatCompleteAPI>;
   let connector: InferenceConnector;
@@ -107,6 +118,7 @@ describe('InferenceChatModel', () => {
       const chatModel = new InferenceChatModel({
         chatComplete,
         connector,
+        telemetryMetadata,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -124,6 +136,7 @@ describe('InferenceChatModel', () => {
           },
         ],
         stream: false,
+        metadata,
       });
     });
 
@@ -131,6 +144,7 @@ describe('InferenceChatModel', () => {
       const chatModel = new InferenceChatModel({
         chatComplete,
         connector,
+        telemetryMetadata,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -170,6 +184,7 @@ describe('InferenceChatModel', () => {
           },
         ],
         stream: false,
+        metadata,
       });
     });
 
@@ -177,6 +192,7 @@ describe('InferenceChatModel', () => {
       const chatModel = new InferenceChatModel({
         chatComplete,
         connector,
+        telemetryMetadata,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -247,6 +263,7 @@ describe('InferenceChatModel', () => {
           },
         ],
         stream: false,
+        metadata,
       });
     });
 
@@ -254,6 +271,7 @@ describe('InferenceChatModel', () => {
       const chatModel = new InferenceChatModel({
         chatComplete,
         connector,
+        telemetryMetadata,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -308,6 +326,7 @@ describe('InferenceChatModel', () => {
           },
         },
         stream: false,
+        metadata,
       });
     });
 
@@ -320,6 +339,7 @@ describe('InferenceChatModel', () => {
         model: 'super-duper-model',
         functionCallingMode: 'simulated',
         signal: abortCtrl.signal,
+        telemetryMetadata,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -336,6 +356,7 @@ describe('InferenceChatModel', () => {
         modelName: 'super-duper-model',
         abortSignal: abortCtrl.signal,
         stream: false,
+        metadata,
       });
     });
 
@@ -370,6 +391,9 @@ describe('InferenceChatModel', () => {
         modelName: 'some-other-model',
         abortSignal: abortCtrl.signal,
         stream: false,
+        metadata: {
+          connectorTelemetry: undefined,
+        },
       });
     });
   });
@@ -685,6 +709,7 @@ describe('InferenceChatModel', () => {
       const chatModel = new InferenceChatModel({
         chatComplete,
         connector,
+        telemetryMetadata,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -736,6 +761,7 @@ describe('InferenceChatModel', () => {
           },
         },
         stream: false,
+        metadata,
       });
     });
   });
@@ -746,6 +772,7 @@ describe('InferenceChatModel', () => {
         chatComplete,
         connector,
         model: 'my-super-model',
+        telemetryMetadata,
       });
 
       const identifyingParams = chatModel.identifyingParams();
@@ -754,6 +781,7 @@ describe('InferenceChatModel', () => {
         connectorId: 'connector-id',
         modelName: 'my-super-model',
         model_name: 'my-super-model',
+        metadata,
       });
     });
   });
@@ -792,6 +820,7 @@ describe('InferenceChatModel', () => {
       const chatModel = new InferenceChatModel({
         chatComplete,
         connector,
+        telemetryMetadata,
       });
 
       const structuredOutputModel = chatModel.withStructuredOutput(
@@ -858,6 +887,7 @@ describe('InferenceChatModel', () => {
           },
         },
         stream: false,
+        metadata,
       });
     });
 

@@ -6,9 +6,14 @@
  */
 
 export type { Message, Conversation, KnowledgeBaseEntry, ConversationCreateRequest } from './types';
-export { KnowledgeBaseEntryRole, MessageRole, ConversationAccess } from './types';
+export {
+  KnowledgeBaseEntryRole,
+  MessageRole,
+  ConversationAccess,
+  KnowledgeBaseType,
+  InferenceModelState,
+} from './types';
 export type { FunctionDefinition, CompatibleJSONSchema } from './functions/types';
-export { FunctionVisibility } from './functions/function_visibility';
 export {
   VISUALIZE_ESQL_USER_INTENTIONS,
   VisualizeESQLUserIntention,
@@ -47,4 +52,34 @@ export { concatenateChatCompletionChunks } from './utils/concatenate_chat_comple
 
 export { ShortIdTable } from './utils/short_id_table';
 
-export { KnowledgeBaseType, KnowledgeBaseState } from './types';
+export {
+  ELSER_ON_ML_NODE_INFERENCE_ID,
+  ELSER_IN_EIS_INFERENCE_ID,
+  E5_SMALL_INFERENCE_ID,
+  E5_LARGE_IN_EIS_INFERENCE_ID,
+  EIS_PRECONFIGURED_INFERENCE_IDS,
+  LEGACY_CUSTOM_INFERENCE_ID,
+} from './preconfigured_inference_ids';
+
+export {
+  GET_ALERTS_DATASET_INFO_FUNCTION_NAME,
+  ALERTS_FUNCTION_NAME,
+  QUERY_FUNCTION_NAME,
+  EXECUTE_QUERY_FUNCTION_NAME,
+  GET_DATA_ON_SCREEN_FUNCTION_NAME,
+  CONTEXT_FUNCTION_NAME,
+  ELASTICSEARCH_FUNCTION_NAME,
+  EXECUTE_CONNECTOR_FUNCTION_NAME,
+  GET_DATASET_INFO_FUNCTION_NAME,
+  SELECT_RELEVANT_FIELDS_NAME,
+  KIBANA_FUNCTION_NAME,
+  SUMMARIZE_FUNCTION_NAME,
+  VISUALIZE_QUERY_FUNCTION_NAME,
+  CHANGES_FUNCTION_NAME,
+  RETRIEVE_ELASTIC_DOC_FUNCTION_NAME,
+  GET_APM_DATASET_INFO_FUNCTION_NAME,
+  GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME,
+  GET_APM_SERVICES_LIST_FUNCTION_NAME,
+  GET_APM_TIMESERIES_FUNCTION_NAME,
+  LENS_FUNCTION_NAME,
+} from './function_names';

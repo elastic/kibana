@@ -77,6 +77,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
     <>
       <DeleteConnectorModal isCrawler={isCrawler} />
       <EnterpriseSearchContentPageTemplate
+        data-test-subj="searchConnectorsPage"
         pageChrome={!isCrawler ? connectorsBreadcrumbs : crawlersBreadcrumbs}
         pageViewTelemetry={!isCrawler ? 'Connectors' : 'Web Crawlers'}
         isLoading={isLoading}

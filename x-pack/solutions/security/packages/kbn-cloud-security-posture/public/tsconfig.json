@@ -32,10 +32,13 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/i18n",
     "@kbn/search-types",
-    "@kbn/ui-theme",
     "@kbn/i18n-react",
     "@kbn/rison",
     "@kbn/core-lifecycle-browser",
     "@kbn/expandable-flyout",
+    "@kbn/grouping",
+    "@kbn/core-http-server-mocks",
+    "@kbn/shared-ux-router",
+    "@kbn/std",
   ]
 }

@@ -2804,6 +2804,91 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-public.TableSourceDescriptor",
+        "type": "Interface",
+        "tags": [],
+        "label": "TableSourceDescriptor",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/join_sources/table_source/table_source.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.TableSourceDescriptor.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/join_sources/table_source/table_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.TableSourceDescriptor.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.SOURCE_TYPES",
+                "text": "SOURCE_TYPES"
+              },
+              ".TABLE_SOURCE"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/join_sources/table_source/table_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.TableSourceDescriptor.__rows",
+            "type": "Array",
+            "tags": [],
+            "label": "__rows",
+            "description": [],
+            "signature": [
+              "{ [key: string]: string | number; }[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/join_sources/table_source/table_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.TableSourceDescriptor.__columns",
+            "type": "Array",
+            "tags": [],
+            "label": "__columns",
+            "description": [],
+            "signature": [
+              "{ name: string; label?: string | undefined; type: \"string\" | \"number\"; }[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/join_sources/table_source/table_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.TableSourceDescriptor.term",
+            "type": "string",
+            "tags": [],
+            "label": "term",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/join_sources/table_source/table_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -2917,14 +3002,6 @@
             "text": "DefaultEmbeddableApi"
           },
           "<",
-          {
-            "pluginId": "maps",
-            "scope": "public",
-            "docId": "kibMapsPluginApi",
-            "section": "def-public.MapSerializedState",
-            "text": "MapSerializedState"
-          },
-          ", ",
           {
             "pluginId": "maps",
             "scope": "public",
@@ -3124,11 +3201,25 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedTimeRange",
+            "text": "SerializedTimeRange"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.SerializedTitles",
             "text": "SerializedTitles"
           },
           " & Partial<",
-          "DynamicActionsSerializedState",
+          {
+            "pluginId": "embeddableEnhanced",
+            "scope": "public",
+            "docId": "kibEmbeddableEnhancedPluginApi",
+            "section": "def-public.DynamicActionsSerializedState",
+            "text": "DynamicActionsSerializedState"
+          },
           "> & { attributes?: ",
           "MapAttributes",
           " | undefined; savedObjectId?: string | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; mapCenter?: ",
@@ -3137,15 +3228,7 @@
           "MapExtent",
           " | undefined; mapSettings?: Partial<",
           "MapSettings",
-          "> | undefined; hiddenLayers?: string[] | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
+          "> | undefined; hiddenLayers?: string[] | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts",
         "deprecated": false,
@@ -3504,11 +3587,2206 @@
     }
   },
   "server": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.MapsStorage",
+        "type": "Class",
+        "tags": [],
+        "label": "MapsStorage",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.MapsStorage.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    logger,\n    throwOnResultValidationError,\n  }",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "maps",
+                    "id": "def-server.MapsStorage.Unnamed.$1.logger",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "logger",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/logging",
+                        "scope": "common",
+                        "docId": "kibKbnLoggingPluginApi",
+                        "section": "def-common.Logger",
+                        "text": "Logger"
+                      }
+                    ],
+                    "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "maps",
+                    "id": "def-server.MapsStorage.Unnamed.$1.throwOnResultValidationError",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "throwOnResultValidationError",
+                    "description": [],
+                    "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.MapsStorage.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", id: string) => Promise<Readonly<{} & { meta: Readonly<{ aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; } & { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; }>; item: Readonly<{ [x: string]: any; } & {}>; }>>"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.get.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.get.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.MapsStorage.bulkGet",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkGet",
+            "description": [],
+            "signature": [
+              "() => Promise<never>"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.MapsStorage.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", data: ",
+              "MapAttributes",
+              ", options: Readonly<{ references?: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ [x: string]: any; } & {}>; }>>"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "MapAttributes"
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.create.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Readonly<{ references?: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined; } & {}>"
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.MapsStorage.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", id: string, data: ",
+              "MapAttributes",
+              ", options: Readonly<{ references?: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ [x: string]: any; } & {}>; }>>"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.update.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.update.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.update.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "MapAttributes"
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.update.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Readonly<{ references?: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined; } & {}>"
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.MapsStorage.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", id: string, options?: { force: boolean; } | undefined) => Promise<",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.DeleteResult",
+                "text": "DeleteResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.delete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.delete.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.delete.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "maps",
+                    "id": "def-server.MapsStorage.delete.$3.force",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "force",
+                    "description": [],
+                    "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.MapsStorage.search",
+            "type": "Function",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", query: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchQuery",
+                "text": "SearchQuery"
+              },
+              ", options: Readonly<{ onlyTitle?: boolean | undefined; } & {}> | undefined) => Promise<{ hits: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<",
+              "MapAttributes",
+              ">[]; pagination: { total: number; cursor?: string | undefined; }; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.search.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.search.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.SearchQuery",
+                    "text": "SearchQuery"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.search.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Readonly<{ onlyTitle?: boolean | undefined; } & {}> | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.MapsStorage.mSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "mSearch",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.mSearch.savedObjectType",
+                "type": "string",
+                "tags": [],
+                "label": "savedObjectType",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-server.MapsStorage.mSearch.toItemResult",
+                "type": "Function",
+                "tags": [],
+                "label": "toItemResult",
+                "description": [],
+                "signature": [
+                  "(ctx: ",
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  },
+                  ", savedObject: ",
+                  "SavedObject",
+                  "<Readonly<{ description?: string | null | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; uiStateJSON?: string | undefined; } & { title: string; }>>) => ",
+                  {
+                    "pluginId": "@kbn/content-management-utils",
+                    "scope": "server",
+                    "docId": "kibKbnContentManagementUtilsPluginApi",
+                    "section": "def-server.SOWithMetadata",
+                    "text": "SOWithMetadata"
+                  },
+                  "<",
+                  "MapAttributes",
+                  ">"
+                ],
+                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "maps",
+                    "id": "def-server.MapsStorage.mSearch.toItemResult.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "ctx",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "contentManagement",
+                        "scope": "server",
+                        "docId": "kibContentManagementPluginApi",
+                        "section": "def-server.StorageContext",
+                        "text": "StorageContext"
+                      }
+                    ],
+                    "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  },
+                  {
+                    "parentPluginId": "maps",
+                    "id": "def-server.MapsStorage.mSearch.toItemResult.$2",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "savedObject",
+                    "description": [],
+                    "signature": [
+                      "SavedObject",
+                      "<Readonly<{ description?: string | null | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; uiStateJSON?: string | undefined; } & { title: string; }>>"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.AbstractESAggSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "AbstractESAggSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly applyForceRefresh?: boolean | undefined; readonly id: string; readonly indexPatternId: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.AbstractESJoinSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "AbstractESJoinSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly applyForceRefresh?: boolean | undefined; readonly whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly id: string; readonly type: string; readonly indexPatternId: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.AbstractESSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "AbstractESSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly applyForceRefresh?: boolean | undefined; readonly id: string; readonly indexPatternId: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.AggDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "AggDescriptor",
+        "description": [],
+        "signature": [
+          "Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.CountAggDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "CountAggDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly label?: string | undefined; readonly mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.EMSFileSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "EMSFileSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly tooltipProperties?: string[] | undefined; readonly id: string; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".EMS_FILE; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.EMSTMSSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "EMSTMSSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly id?: string | undefined; readonly isAutoSelect?: boolean | undefined; readonly lightModeDefault?: string | undefined; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".EMS_TMS; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.ESDistanceSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ESDistanceSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly applyForceRefresh?: boolean | undefined; readonly whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly id: string; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_DISTANCE_SOURCE; readonly indexPatternId: string; readonly geoField: string; readonly distance: number; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.ESGeoGridSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ESGeoGridSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly applyForceRefresh?: boolean | undefined; readonly id: string; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_GEO_GRID; readonly indexPatternId: string; readonly resolution: ",
+          "GRID_RESOLUTION",
+          "; readonly geoField: string; readonly requestType: ",
+          "RENDER_AS",
+          "; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.ESGeoLineSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ESGeoLineSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly sortField?: string | undefined; readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly applyForceRefresh?: boolean | undefined; readonly groupByTimeseries?: boolean | undefined; readonly lineSimplificationSize?: number | undefined; readonly splitField?: string | undefined; readonly id: string; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_GEO_LINE; readonly indexPatternId: string; readonly geoField: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.ESPewPewSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ESPewPewSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly applyForceRefresh?: boolean | undefined; readonly id: string; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_PEW_PEW; readonly indexPatternId: string; readonly destGeoField: string; readonly sourceGeoField: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.ESQLSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ESQLSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly applyForceRefresh?: boolean | undefined; readonly geoField?: string | undefined; readonly dateField?: string | undefined; readonly narrowByMapBounds?: boolean | undefined; readonly narrowByGlobalSearch?: boolean | undefined; readonly narrowByGlobalTime?: boolean | undefined; readonly id: string; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ESQL; readonly esql: string; readonly columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; readonly dataViewId: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.ESSearchSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ESSearchSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly sortField?: string | undefined; readonly sortOrder?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SortDirection",
+            "text": "SortDirection"
+          },
+          " | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly applyForceRefresh?: boolean | undefined; readonly tooltipProperties?: string[] | undefined; readonly filterByMapBounds?: boolean | undefined; readonly scalingType?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SCALING_TYPES",
+            "text": "SCALING_TYPES"
+          },
+          " | undefined; readonly topHitsGroupByTimeseries?: boolean | undefined; readonly topHitsSplitField?: string | undefined; readonly topHitsSize?: number | undefined; readonly id: string; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_SEARCH; readonly indexPatternId: string; readonly geoField: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.ESTermSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ESTermSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly size?: number | undefined; readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly applyForceRefresh?: boolean | undefined; readonly whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly id: string; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_TERM_SOURCE; readonly term: string; readonly indexPatternId: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.FieldedAggDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldedAggDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly label?: string | undefined; readonly field?: string | undefined; readonly mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.JoinSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "JoinSourceDescriptor",
+        "description": [],
+        "signature": [
+          "Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; applyForceRefresh?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_DISTANCE_SOURCE; indexPatternId: string; geoField: string; distance: number; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; applyForceRefresh?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_TERM_SOURCE; term: string; indexPatternId: string; }> | Readonly<{} & { id: string; type: string; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.KibanaTilemapSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaTilemapSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".KIBANA_TILEMAP; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.MVTFieldDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "MVTFieldDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly type: ",
+          "MVT_FIELD_TYPE",
+          "; readonly name: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.PercentileAggDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "PercentileAggDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly label?: string | undefined; readonly field?: string | undefined; readonly mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; readonly percentile?: number | undefined; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.SourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "SourceDescriptor",
+        "description": [],
+        "signature": [
+          "Readonly<{ tooltipProperties?: string[] | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".EMS_FILE; }> | Readonly<{ id?: string | undefined; isAutoSelect?: boolean | undefined; lightModeDefault?: string | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".EMS_TMS; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; applyForceRefresh?: boolean | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_GEO_GRID; indexPatternId: string; resolution: ",
+          "GRID_RESOLUTION",
+          "; geoField: string; requestType: ",
+          "RENDER_AS",
+          "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; applyForceRefresh?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_GEO_LINE; indexPatternId: string; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; applyForceRefresh?: boolean | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_PEW_PEW; indexPatternId: string; destGeoField: string; sourceGeoField: string; }> | Readonly<{ sortField?: string | undefined; sortOrder?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SortDirection",
+            "text": "SortDirection"
+          },
+          " | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; applyForceRefresh?: boolean | undefined; tooltipProperties?: string[] | undefined; filterByMapBounds?: boolean | undefined; scalingType?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SCALING_TYPES",
+            "text": "SCALING_TYPES"
+          },
+          " | undefined; topHitsGroupByTimeseries?: boolean | undefined; topHitsSplitField?: string | undefined; topHitsSize?: number | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_SEARCH; indexPatternId: string; geoField: string; }> | Readonly<{ applyForceRefresh?: boolean | undefined; geoField?: string | undefined; dateField?: string | undefined; narrowByMapBounds?: boolean | undefined; narrowByGlobalSearch?: boolean | undefined; narrowByGlobalTime?: boolean | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".KIBANA_TILEMAP; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".WMS; layers: string; serviceUrl: string; styles: string; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".EMS_XYZ; urlTemplate: string; }> | Readonly<{ fields?: Readonly<{} & { type: ",
+          "MVT_FIELD_TYPE",
+          "; name: string; }>[] | undefined; tooltipProperties?: string[] | undefined; maxSourceZoom?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".MVT_SINGLE_LAYER; urlTemplate: string; layerName: string; minSourceZoom: number; }> | Readonly<{} & { type: string; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.TiledSingleLayerVectorSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "TiledSingleLayerVectorSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly fields?: Readonly<{} & { type: ",
+          "MVT_FIELD_TYPE",
+          "; name: string; }>[] | undefined; readonly tooltipProperties?: string[] | undefined; readonly maxSourceZoom?: number | undefined; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".MVT_SINGLE_LAYER; readonly urlTemplate: string; readonly layerName: string; readonly minSourceZoom: number; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.WMSSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "WMSSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".WMS; readonly layers: string; readonly serviceUrl: string; readonly styles: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.XYZTMSSourceDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "XYZTMSSourceDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".EMS_XYZ; readonly urlTemplate: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {
@@ -3807,10 +6085,17 @@
         "label": "EMSFileSourceDescriptor",
         "description": [],
         "signature": [
-          "AbstractSourceDescriptor",
-          " & { id: string; tooltipProperties: string[]; }"
+          "{ readonly tooltipProperties?: string[] | undefined; readonly id: string; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".EMS_FILE; }"
         ],
-        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/source_descriptor_types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3823,18 +6108,77 @@
         "label": "ESTermSourceDescriptor",
         "description": [],
         "signature": [
-          "AbstractSourceDescriptor",
-          " & { id: string; indexPatternId: string; geoField?: string | undefined; applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; } & { metrics: ",
-          "AggDescriptor",
-          "[]; } & { whereQuery?: ",
+          "{ readonly size?: number | undefined; readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "maps",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
           },
-          " | undefined; } & { term: string; size?: number | undefined; type: ",
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly applyForceRefresh?: boolean | undefined; readonly whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly id: string; readonly type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -3842,9 +6186,9 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".ES_TERM_SOURCE; }"
+          ".ES_TERM_SOURCE; readonly term: string; readonly indexPatternId: string; }"
         ],
-        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/source_descriptor_types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3907,9 +6251,327 @@
           "TileError",
           "[] | undefined; alpha?: number | undefined; attribution?: ",
           "Attribution",
-          " | undefined; id: string; label?: string | null | undefined; locale?: string | null | undefined; areLabelsOnTop?: boolean | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; sourceDescriptor: ",
-          "AbstractSourceDescriptor",
-          " | null; type?: string | undefined; visible?: boolean | undefined; style?: ",
+          " | undefined; id: string; label?: string | null | undefined; locale?: string | null | undefined; areLabelsOnTop?: boolean | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; sourceDescriptor: Readonly<{ tooltipProperties?: string[] | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".EMS_FILE; }> | Readonly<{ id?: string | undefined; isAutoSelect?: boolean | undefined; lightModeDefault?: string | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".EMS_TMS; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; applyForceRefresh?: boolean | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_GEO_GRID; indexPatternId: string; resolution: ",
+          "GRID_RESOLUTION",
+          "; geoField: string; requestType: ",
+          "RENDER_AS",
+          "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; applyForceRefresh?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_GEO_LINE; indexPatternId: string; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".AVG | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MAX | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".MIN | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".SUM | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".TERMS | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".UNIQUE_COUNT; }> | Readonly<{ label?: string | undefined; field?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "MASK_OPERATOR",
+          "; }> | undefined; percentile?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.AGG_TYPE",
+            "text": "AGG_TYPE"
+          },
+          ".PERCENTILE; }>)[] | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; applyForceRefresh?: boolean | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_PEW_PEW; indexPatternId: string; destGeoField: string; sourceGeoField: string; }> | Readonly<{ sortField?: string | undefined; sortOrder?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SortDirection",
+            "text": "SortDirection"
+          },
+          " | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; applyForceRefresh?: boolean | undefined; tooltipProperties?: string[] | undefined; filterByMapBounds?: boolean | undefined; scalingType?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SCALING_TYPES",
+            "text": "SCALING_TYPES"
+          },
+          " | undefined; topHitsGroupByTimeseries?: boolean | undefined; topHitsSplitField?: string | undefined; topHitsSize?: number | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ES_SEARCH; indexPatternId: string; geoField: string; }> | Readonly<{ applyForceRefresh?: boolean | undefined; geoField?: string | undefined; dateField?: string | undefined; narrowByMapBounds?: boolean | undefined; narrowByGlobalSearch?: boolean | undefined; narrowByGlobalTime?: boolean | undefined; } & { id: string; type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".KIBANA_TILEMAP; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".WMS; layers: string; serviceUrl: string; styles: string; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".EMS_XYZ; urlTemplate: string; }> | Readonly<{ fields?: Readonly<{} & { type: ",
+          "MVT_FIELD_TYPE",
+          "; name: string; }>[] | undefined; tooltipProperties?: string[] | undefined; maxSourceZoom?: number | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SOURCE_TYPES",
+            "text": "SOURCE_TYPES"
+          },
+          ".MVT_SINGLE_LAYER; urlTemplate: string; layerName: string; minSourceZoom: number; }> | Readonly<{} & { type: string; }> | null; type?: string | undefined; visible?: boolean | undefined; style?: ",
           "StyleDescriptor",
           " | null | undefined; query?: ",
           {

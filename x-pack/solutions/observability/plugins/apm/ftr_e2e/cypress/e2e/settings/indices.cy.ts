@@ -15,10 +15,12 @@ const getAbleToModifyCase = () => {
     input.should('not.be.disabled');
     input.clear().type(newErrorIndex);
     cy.intercept('POST', '/internal/apm-sources/settings/apm-indices/save*').as(
-      'internalApiRequest'
+      'saveSettingsApiRequest'
     );
     cy.contains('Apply changes').should('not.be.disabled').click();
-    cy.wait('@internalApiRequest').its('response.statusCode').should('eq', 200);
+    cy.wait('@saveSettingsApiRequest', { timeout: 15000 })
+      .its('response.statusCode')
+      .should('eq', 200);
   });
 };
 

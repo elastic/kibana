@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiFormRow, EuiFieldText, EuiButtonGroup, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { MetricStyle } from '@elastic/charts';
-import { ToolbarPopover, ToolbarPopoverProps } from '../../../shared_components';
-import { MetricVisualizationState, ValueFontMode } from '../types';
+import type { MetricStyle } from '@elastic/charts';
+import type { ToolbarPopoverProps } from '../../../shared_components';
+import { ToolbarPopover } from '../../../shared_components';
+import type { MetricVisualizationState, ValueFontMode } from '../types';
 import { metricStateDefaults } from '../constants';
 
 export interface TitlesAndTextPopoverProps {
@@ -156,7 +158,7 @@ function ValueFontSizeOption({
             color="subdued"
             position="top"
             size="s"
-            type="questionInCircle"
+            type="question"
           />
         </span>
       }
@@ -227,7 +229,7 @@ function TitlesAlignmentOption({
             color="subdued"
             position="top"
             size="s"
-            type="questionInCircle"
+            type="question"
           />
         </span>
       }
@@ -274,7 +276,7 @@ function ValuesAlignmentOption({
             }}
             position="top"
             size="s"
-            type="questionInCircle"
+            type="question"
           />
         </span>
       }

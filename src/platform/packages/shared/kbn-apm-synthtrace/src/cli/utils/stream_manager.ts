@@ -8,13 +8,14 @@
  */
 
 import { castArray, once, pull } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { PassThrough, Readable, Writable, finished } from 'stream';
-import { Fields } from '@kbn/apm-synthtrace-client';
+import type { Fields } from '@kbn/apm-synthtrace-client';
 import { isGeneratorObject } from 'util/types';
-import { Worker, parentPort } from 'worker_threads';
-import { SynthtraceEsClient } from '../../lib/shared/base_client';
-import { SynthGenerator } from '../../lib/utils/with_client';
+import type { Worker } from 'worker_threads';
+import { parentPort } from 'worker_threads';
+import type { SynthtraceEsClient } from '../../lib/shared/base_client';
+import type { SynthGenerator } from '../../lib/utils/with_client';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 
 // execute a callback when one of the kill signals is received
@@ -51,7 +52,7 @@ const asyncNoop = async () => {};
 export class StreamManager {
   private readonly clientStreams: Map<SynthtraceEsClient<Fields>, PassThrough> = new Map();
   private readonly trackedGeneratorStreams: Writable[] = [];
-  private readonly trackedWorkers: Worker[] = [];
+  public readonly trackedWorkers: Worker[] = [];
 
   constructor(
     private readonly logger: ToolingLog,
@@ -149,6 +150,7 @@ export class StreamManager {
       this.clientStreams.set(client, stream);
       client.index(stream);
     }
+
     return stream;
   }
 

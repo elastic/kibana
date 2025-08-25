@@ -147,8 +147,10 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const allTypes = typeRegistry.getAllTypes().map((t) => t.name);
     const serializer = new SavedObjectsSerializer(typeRegistry);
     const visibleTypes = allTypes.filter((type) => !typeRegistry.isHidden(type));
-    const allowedTypes = [...new Set(visibleTypes.concat(includedHiddenTypes))];
-    const missingTypeMappings = includedHiddenTypes.filter((type) => !allTypes.includes(type));
+    // Ensure includedHiddenTypes is an array, even if null or undefined was passed
+    const safeIncludedHiddenTypes = Array.isArray(includedHiddenTypes) ? includedHiddenTypes : [];
+    const allowedTypes = [...new Set(visibleTypes.concat(safeIncludedHiddenTypes))];
+    const missingTypeMappings = safeIncludedHiddenTypes.filter((type) => !allTypes.includes(type));
     if (missingTypeMappings.length > 0) {
       throw new Error(
         `Missing mappings for saved objects types: '${missingTypeMappings.join(', ')}'`

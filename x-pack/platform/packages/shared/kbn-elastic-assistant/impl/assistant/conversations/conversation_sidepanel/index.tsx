@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   useEuiTheme,
   EuiLoadingSpinner,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
@@ -24,8 +25,8 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 import { isEmpty, findIndex } from 'lodash';
 import { useConversationsByDate } from './use_conversations_by_date';
-import { DataStreamApis } from '../../use_data_stream_apis';
-import { Conversation } from '../../../..';
+import type { DataStreamApis } from '../../use_data_stream_apis';
+import type { Conversation } from '../../../..';
 import * as i18n from './translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -89,6 +90,8 @@ export const ConversationSidePanel = React.memo<Props>(
     setPaginationObserver,
   }) => {
     const euiTheme = useEuiTheme();
+
+    const confirmModalTitleId = useGeneratedHtmlId();
 
     const titleClassName = css`
       text-transform: uppercase;
@@ -301,7 +304,9 @@ export const ConversationSidePanel = React.memo<Props>(
         </EuiFlexGroup>
         {deleteConversationItem && (
           <EuiConfirmModal
+            aria-labelledby={confirmModalTitleId}
             title={i18n.DELETE_CONVERSATION_TITLE}
+            titleProps={{ id: confirmModalTitleId }}
             onCancel={handleCloseModal}
             onConfirm={handleDelete}
             cancelButtonText={i18n.CANCEL_BUTTON_TEXT}

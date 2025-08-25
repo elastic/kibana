@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, Search } from '@elastic/eui';
+import type { EuiBasicTableColumn, Search } from '@elastic/eui';
+import { EuiInMemoryTable, EuiButton, EuiLink } from '@elastic/eui';
 
 import { PAGINATION_CONFIG } from '../constants';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
@@ -74,10 +75,22 @@ const i18nTexts = {
       defaultMessage: 'Type',
     }
   ),
+  statusFilterLabel: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.table.statusFilterLabel',
+    {
+      defaultMessage: 'Status',
+    }
+  ),
   criticalFilterLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.criticalFilterLabel',
     {
       defaultMessage: 'Critical',
+    }
+  ),
+  warningFilterLabel: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.table.warningFilterLabel',
+    {
+      defaultMessage: 'Warning',
     }
   ),
   searchPlaceholderLabel: i18n.translate(
@@ -109,7 +122,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (level: KibanaDeprecationDetails['level']) => {
-        return <DeprecationBadge isCritical={level === 'critical'} />;
+        return <DeprecationBadge level={level} />;
       },
     },
     {
@@ -181,10 +194,20 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
   const searchConfig: Search = {
     filters: [
       {
-        type: 'field_value_toggle',
-        name: i18nTexts.criticalFilterLabel,
+        type: 'field_value_selection',
         field: 'level',
-        value: 'critical',
+        name: i18nTexts.statusFilterLabel,
+        multiSelect: false,
+        options: [
+          {
+            value: 'critical',
+            name: i18nTexts.criticalFilterLabel,
+          },
+          {
+            value: 'warning',
+            name: i18nTexts.warningFilterLabel,
+          },
+        ],
       },
       {
         type: 'field_value_selection',
@@ -235,8 +258,11 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       search={searchConfig}
       sorting={sorting}
       pagination={PAGINATION_CONFIG}
-      rowProps={() => ({
+      rowProps={(deprecation) => ({
         'data-test-subj': 'row',
+        onClick: () => {
+          toggleFlyout(deprecation);
+        },
       })}
       cellProps={(deprecation, field) => ({
         'data-test-subj': `${((field?.name as string) || 'table').toLowerCase()}Cell`,

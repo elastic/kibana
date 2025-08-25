@@ -9,9 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useGroupTakeActionsItems } from '../../../detections/hooks/alerts_table/use_group_take_action_items';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   defaultGroupingOptions,
   defaultGroupStatsAggregations,
@@ -21,11 +19,11 @@ import {
 import { HeaderSection } from '../../../common/components/header_section';
 import * as i18n from './translations';
 import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
-import type { EntityRiskScore } from '../../../../common/search_strategy';
 import {
   EntityType,
   type HostRiskScore,
   type UserRiskScore,
+  type EntityRiskScore,
 } from '../../../../common/search_strategy';
 import { DetectionEngineAlertsTable } from '../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../detections/components/alerts_table/alerts_grouping';
@@ -36,7 +34,7 @@ import { useUserData } from '../../../detections/components/user_info';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { RiskInformationButtonEmpty } from '../risk_information';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 export interface TopRiskScoreContributorsAlertsProps<T extends EntityType> {
   toggleStatus: boolean;
@@ -54,16 +52,13 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   loading,
 }: TopRiskScoreContributorsAlertsProps<T>) => {
   const { to, from } = useGlobalTime();
-  const [{ loading: userInfoLoading, signalIndexName, hasIndexWrite, hasIndexMaintenance }] =
-    useUserData();
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+  const [{ loading: userInfoLoading, hasIndexWrite, hasIndexMaintenance }] = useUserData();
+
+  const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView(
     SourcererScopeName.detections
   );
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
-
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -148,6 +143,8 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
             <GroupedAlertsTable
               accordionButtonContent={defaultGroupTitleRenderers}
               accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+              dataViewSpec={oldSourcererDataViewSpec} // TODO: Should be removed after migrating to new data view picker
+              dataView={experimentalDataView}
               defaultFilters={defaultFilters}
               defaultGroupingOptions={defaultGroupingOptions}
               from={from}
@@ -156,8 +153,6 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
               groupTakeActionItems={groupTakeActionItems}
               loading={userInfoLoading || loading}
               renderChildComponent={renderGroupedAlertTable}
-              runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
-              signalIndexName={signalIndexName}
               tableId={TableId.alertsRiskInputs}
               to={to}
             />

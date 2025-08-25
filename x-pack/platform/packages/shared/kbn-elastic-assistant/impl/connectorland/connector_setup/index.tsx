@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
-import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
-import { Conversation } from '../../..';
+import type { Conversation } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useConversation } from '../../assistant/use_conversation';
 import { useAssistantContext } from '../../assistant_context';
@@ -45,7 +45,7 @@ export const ConnectorSetup = ({
 
   const onSaveConnector = useCallback(
     async (connector: ActionConnector) => {
-      if (updateConversationsOnSaveConnector) {
+      if (updateConversationsOnSaveConnector && conversation.id !== '') {
         // this side effect is not required for Attack discovery, because the connector is not used in a conversation
         const config = getGenAiConfig(connector);
         // persist only the active conversation
@@ -64,12 +64,9 @@ export const ConnectorSetup = ({
           onConversationUpdate?.({
             cId: updatedConversation.id,
           });
-
-          refetchConnectors?.();
         }
-      } else {
-        refetchConnectors?.();
       }
+      refetchConnectors?.();
     },
     [
       conversation,

@@ -18,7 +18,7 @@ import { renderAiSocCallout } from './callout';
 
 const SOLUTION_NAME = i18n.translate(
   'xpack.securitySolutionServerless.aiNavigation.projectType.title',
-  { defaultMessage: 'AI for SOC' }
+  { defaultMessage: 'Elastic AI SOC Engine' }
 );
 
 export const createAiNavigationTree = (): NavigationTreeDefinition => ({
@@ -33,17 +33,12 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       isCollapsible: false,
       children: [
         {
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              id: SecurityPageName.alertSummary,
-              link: securityLink(SecurityPageName.alertSummary),
-            },
-            {
-              id: SecurityPageName.attackDiscovery,
-              link: securityLink(SecurityPageName.attackDiscovery),
-            },
-          ],
+          id: SecurityPageName.alertSummary,
+          link: securityLink(SecurityPageName.alertSummary),
+        },
+        {
+          id: SecurityPageName.attackDiscovery,
+          link: securityLink(SecurityPageName.attackDiscovery),
         },
         {
           breadcrumbStatus: 'hidden',
@@ -75,6 +70,10 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
           children: [
             {
               link: 'discover',
+            },
+            {
+              id: SecurityPageName.aiValue,
+              link: securityLink(SecurityPageName.aiValue),
             },
           ],
         },

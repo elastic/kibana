@@ -34,7 +34,7 @@ export interface TabPreviewProps {
   showPreview: boolean;
   setShowPreview: (show: boolean) => void;
   tabItem: TabItem;
-  getPreviewData: (item: TabItem) => TabPreviewData;
+  previewData: TabPreviewData;
   stopPreviewOnHover?: boolean;
   previewDelay?: number;
 }
@@ -60,9 +60,9 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   showPreview,
   setShowPreview,
   tabItem,
-  getPreviewData,
+  previewData,
   stopPreviewOnHover,
-  previewDelay = 500,
+  previewDelay = 1250, // as "long" EuiToolTip delay
 }) => {
   const { euiTheme } = useEuiTheme();
   const [previewTimer, setPreviewTimer] = useState<NodeJS.Timeout | null>(null);
@@ -86,14 +86,14 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
         leftPosition = windowWidth - PREVIEW_WIDTH + window.scrollX;
       }
 
-      setTabPreviewData(getPreviewData(tabItem));
+      setTabPreviewData(previewData);
 
       setTabPosition({
         top: rect.bottom + window.scrollY,
         left: leftPosition,
       });
     }
-  }, [showPreview, getPreviewData, tabItem]);
+  }, [showPreview, previewData, tabItem]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -113,6 +113,12 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
       }
     };
   }, [previewTimer]);
+
+  useEffect(() => {
+    if (stopPreviewOnHover && previewTimer) {
+      clearTimeout(previewTimer);
+    }
+  }, [previewTimer, stopPreviewOnHover]);
 
   const handleMouseEnter = useCallback(() => {
     if (stopPreviewOnHover) return;
@@ -151,6 +157,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
                   language={getQueryLanguage(tabPreviewData)}
                   transparentBackground
                   paddingSize="none"
+                  css={codeBlockCss}
                 >
                   {getPreviewQuery(tabPreviewData)}
                 </EuiCodeBlock>
@@ -200,6 +207,15 @@ const getPreviewContainerCss = (
     transition: opacity ${euiTheme.animation.normal} ease;
   `;
 };
+
+const codeBlockCss = css`
+  .euiCodeBlock__code {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+`;
 
 const getSplitPanelCss = (euiTheme: EuiThemeComputed) => {
   return css`

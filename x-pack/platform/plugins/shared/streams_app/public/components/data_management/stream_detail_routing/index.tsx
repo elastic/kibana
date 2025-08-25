@@ -4,20 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiResizableContainer,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { Streams } from '@kbn/streams-schema';
-import React from 'react';
+import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { ChildStreamList } from './child_stream_list';
@@ -28,10 +30,8 @@ import {
 } from './state_management/stream_routing_state_machine';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { PreviewPanel } from './preview_panel';
-import {
-  StatefulStreamsAppRouter,
-  useStreamsAppRouter,
-} from '../../../hooks/use_streams_app_router';
+import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 
 interface StreamDetailRoutingProps {
   definition: Streams.WiredStream.GetResponse;
@@ -46,12 +46,15 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
+  const { timeState$ } = useTimefilter();
+
   return (
     <StreamRoutingContextProvider
       definition={props.definition}
       refreshDefinition={props.refreshDefinition}
       core={core}
       data={data}
+      timeState$={timeState$}
       streamsRepositoryClient={streamsRepositoryClient}
       forkSuccessNofitier={createForkSuccessNofitier({ core, router })}
     >
@@ -99,6 +102,7 @@ export function StreamDetailRoutingImpl() {
   });
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
+  const isVerticalLayout = useIsWithinBreakpoints(['xs', 's']);
 
   return (
     <EuiFlexItem
@@ -125,12 +129,12 @@ export function StreamDetailRoutingImpl() {
           `}
           paddingSize="xs"
         >
-          <EuiResizableContainer>
+          <EuiResizableContainer direction={isVerticalLayout ? 'vertical' : 'horizontal'}>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel
                   initialSize={40}
-                  minSize="400px"
+                  minSize="150px"
                   tabIndex={0}
                   paddingSize="s"
                   color="subdued"

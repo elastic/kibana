@@ -24,6 +24,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { CloudProviderIcon, type CloudProvider } from '@kbn/custom-icons';
+import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
+import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
 import { ASSET_GROUPING_OPTIONS, TEST_SUBJ_GROUPING_COUNTER } from '../../../constants';
 import { firstNonNullValue } from './first_non_null_value';
 import { NullGroup } from './null_group';
@@ -67,20 +69,29 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
 
   switch (selectedGroup) {
     case ASSET_GROUPING_OPTIONS.ASSET_CRITICALITY:
+      const rawCriticalityLevel = firstNonNullValue(bucket.assetCriticality?.buckets?.[0]?.key) as
+        | CriticalityLevelWithUnassigned
+        | 'deleted';
+
+      const criticalityLevel =
+        rawCriticalityLevel === 'deleted' ? 'unassigned' : rawCriticalityLevel;
+
       return nullGroupMessage ? (
-        renderNullGroup(NULL_GROUPING_MESSAGES.ASSET_CRITICALITY)
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem>
+                <AssetCriticalityBadge criticalityLevel="unassigned" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s"> {getGroupPanelTitle()}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs" color="subdued">
-                  {firstNonNullValue(bucket.assetCriticality?.buckets?.[0]?.key)}{' '}
-                  {firstNonNullValue(bucket.assetCriticality?.buckets?.[0]?.key)}
-                </EuiText>
+                <AssetCriticalityBadge criticalityLevel={criticalityLevel} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -128,20 +139,6 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
                 <EuiText size="s">{getGroupPanelTitle('accountName')}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    case ASSET_GROUPING_OPTIONS.ENTITY_SOURCE:
-      return nullGroupMessage ? (
-        renderNullGroup(NULL_GROUPING_MESSAGES.SOURCE)
-      ) : (
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>
-                <EuiText size="s">{getGroupPanelTitle()}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

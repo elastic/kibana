@@ -55,6 +55,7 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { Case } from './apis/bulk_get_cases';
 
 export interface Consumer {
@@ -62,7 +63,7 @@ export interface Consumer {
   name: string;
 }
 
-export type AlertsTableSupportedConsumers = Exclude<AlertConsumers, 'alerts'>;
+export type AlertsTableSupportedConsumers = Exclude<AlertConsumers, 'alerts' | 'streams'>;
 
 export type CellComponent = NonNullable<AlertsTableProps['renderCellValue']>;
 
@@ -92,6 +93,17 @@ type UseCasesAddToExistingCaseModal = (
   close: () => void;
 };
 
+export interface Ecs {
+  _id: string;
+  _index?: string;
+  signal?: {
+    [x: string]: any;
+  };
+  kibana?: {
+    alert: any;
+  };
+}
+
 /**
  * Minimal cases service interface required by the alerts table
  *
@@ -108,6 +120,7 @@ export interface CasesService {
   helpers: {
     groupAlertsByRule: (items: any[]) => any[];
     canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
+    getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
   };
 }
 
@@ -127,6 +140,12 @@ export interface AlertWithLegacyFormats {
    * @deprecated
    */
   ecsAlert: any;
+}
+
+export interface AlertsTableOnLoadedProps {
+  alerts: Alert[];
+  columns: EuiDataGridColumn[];
+  totalAlertsCount: number;
 }
 
 export interface AlertsTableProps<AC extends AdditionalContext = AdditionalContext>
@@ -168,7 +187,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
   /**
    * Callback fired when the alerts have been first loaded
    */
-  onLoaded?: (alerts: Alert[], columns: EuiDataGridColumn[]) => void;
+  onLoaded?: (props: AlertsTableOnLoadedProps) => void;
   /**
    * Any runtime mappings to be applied to the alerts search request
    */
@@ -189,7 +208,34 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
-  emptyStateHeight?: 'tall' | 'short';
+
+  emptyState?: {
+    /**
+     * The message title for the empty state prompt
+     */
+    messageTitle?: string;
+    /**
+     * The message body for the empty state prompt
+     */
+    messageBody?: string;
+    /**
+     * The height variant for the empty state prompt
+     */
+    height?: 'tall' | 'short' | 'flex';
+    /**
+     * The style variant for the empty state prompt.
+     *
+     * `subdued` shows a subtle background color and with a distinct centered panel.
+     * `transparent` shows a transparent background and a less prominent center panel.
+     * @default `subdued`
+     */
+    variant?: 'subdued' | 'transparent';
+  };
+  /**
+   * If true, the links in default cells, flyout and row actions will open in a new tab
+   * @default false
+   */
+  openLinksInNewTab?: boolean;
   /**
    * An object used to compose the render context passed to all render functions as part of their
    * props
@@ -234,9 +280,24 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderFlyoutFooter?: FlyoutSectionRenderer<AC>;
   /**
+   * Passed to the alerts preview flyout's `ownFocus` prop
+   * @default false
+   */
+  flyoutOwnsFocus?: boolean;
+  /**
+   * If false, hides the pagination in the alert details flyout
+   * @default true
+   */
+  flyoutPagination?: boolean;
+  /**
    * Timestamp of the last data refetch request
    */
   lastReloadRequestTime?: number;
+  /**
+   * A storage provider where to persist the table configuration
+   * @default new Storage(window.localStorage)
+   */
+  configurationStorage?: IStorageWrapper;
   /**
    * Dependencies
    */
@@ -342,8 +403,12 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'renderFlyoutBody'
     | 'renderFlyoutFooter'
     | 'services'
+    | 'casesConfiguration'
+    | 'openLinksInNewTab'
+    | 'flyoutOwnsFocus'
+    | 'flyoutPagination'
   >,
-  'columns'
+  'columns' | 'openLinksInNewTab'
 > &
   AC;
 

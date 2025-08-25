@@ -7,8 +7,7 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-import {
-  DataStreamMigrationStatus,
+import type {
   DataStreamMigrationWarning,
   DataStreamMetadata,
   DataStreamReindexStatusResponse,
@@ -16,11 +15,12 @@ import {
   DataStreamResolutionType,
   ResponseError,
 } from '../../../../../../common/types';
+import { DataStreamMigrationStatus } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
-import { ApiService } from '../../../../lib/api';
+import type { ApiService } from '../../../../lib/api';
 import { readOnlyExecute } from './readonly_state';
 
-const POLL_INTERVAL = 1000;
+const POLL_INTERVAL = 3000;
 
 export interface MigrationState {
   loadingState: LoadingState;

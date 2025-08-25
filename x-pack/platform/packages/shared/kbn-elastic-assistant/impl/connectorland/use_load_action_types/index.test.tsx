@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { act, waitFor, renderHook } from '@testing-library/react';
-import { useLoadActionTypes, Props } from '.';
+import { waitFor, renderHook } from '@testing-library/react';
+import type { Props } from '.';
+import { useLoadActionTypes } from '.';
 import { mockActionTypes } from '../../mock/connectors';
 
 jest.mock('@tanstack/react-query', () => ({
@@ -50,12 +51,10 @@ describe('useLoadActionTypes', () => {
     );
   });
   it('should display error toast when api throws error', async () => {
-    await act(async () => {
-      const mockHttp = {
-        get: jest.fn().mockRejectedValue(new Error('this is an error')),
-      } as unknown as Props['http'];
-      renderHook(() => useLoadActionTypes({ ...defaultProps, http: mockHttp }));
-      await waitFor(() => expect(toasts.addError).toHaveBeenCalled());
-    });
+    const mockHttp = {
+      get: jest.fn().mockRejectedValue(new Error('this is an error')),
+    } as unknown as Props['http'];
+    renderHook(() => useLoadActionTypes({ ...defaultProps, http: mockHttp }));
+    await waitFor(() => expect(toasts.addError).toHaveBeenCalled());
   });
 });

@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  Logger,
-  type PackageInfo,
-} from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, type PackageInfo } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
@@ -25,7 +20,7 @@ import { ReportingPlugin } from './plugin';
 import { createMockPluginSetup, createMockPluginStart } from './test_helpers';
 import type { ReportingSetupDeps } from './types';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -73,6 +68,21 @@ describe('Reporting Plugin', () => {
     expect(coreSetup.uiSettings.register).toHaveBeenCalled();
     expect((coreSetup.uiSettings.register as jest.Mock).mock.calls[0][0]).toHaveProperty(
       'xpackReporting:customPdfLogo'
+    );
+  });
+
+  it('registers a saved object for scheduled reports', async () => {
+    plugin.setup(coreSetup, pluginSetup);
+    expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'scheduled_report',
+        namespaceType: 'multiple',
+        hidden: true,
+        indexPattern: '.kibana_alerting_cases',
+        management: {
+          importableAndExportable: false,
+        },
+      })
     );
   });
 
@@ -168,21 +178,37 @@ describe('Reporting Plugin', () => {
   });
 
   describe('features registration', () => {
-    it('does not register Kibana reporting feature in traditional build flavour', async () => {
+    it('registers Kibana manage scheduled reporting feature in traditional build flavour', async () => {
       plugin.setup(coreSetup, pluginSetup);
-      expect(featuresSetup.registerKibanaFeature).not.toHaveBeenCalled();
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(2); // manage scheduled reports + shell feature for self-managed
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
+        id: 'manageReporting',
+        name: 'Manage Scheduled Reports',
+        description: 'View and manage scheduled reports for all users in this space.',
+        category: DEFAULT_APP_CATEGORIES.management,
+        scope: ['spaces', 'security'],
+        app: [],
+        privileges: {
+          all: {
+            api: ['manage_scheduled_reports'],
+            savedObject: { all: ['scheduled_report'], read: [] },
+            ui: ['show'],
+          },
+          read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
+        },
+      });
       expect(featuresSetup.enableReportingUiCapabilities).toHaveBeenCalledTimes(1);
     });
 
-    it('registers Kibana reporting feature in serverless build flavour', async () => {
+    it('registers additional Kibana reporting feature in serverless build flavour', async () => {
       const serverlessInitContext = coreMock.createPluginInitializerContext(configSchema);
       // Force type-cast to convert `ReadOnly<PackageInfo>` to mutable `PackageInfo`.
       (serverlessInitContext.env.packageInfo as PackageInfo).buildFlavor = 'serverless';
       plugin = new ReportingPlugin(serverlessInitContext);
 
       plugin.setup(coreSetup, pluginSetup);
-      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(1);
-      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(2); // manage scheduled reports + shell feature for serverless
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenNthCalledWith(1, {
         id: 'reporting',
         name: 'Reporting',
         category: DEFAULT_APP_CATEGORIES.management,
@@ -190,6 +216,22 @@ describe('Reporting Plugin', () => {
         app: [],
         privileges: {
           all: { savedObject: { all: [], read: [] }, ui: [] },
+          read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
+        },
+      });
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenNthCalledWith(2, {
+        id: 'manageReporting',
+        name: 'Manage Scheduled Reports',
+        description: 'View and manage scheduled reports for all users in this space.',
+        category: DEFAULT_APP_CATEGORIES.management,
+        scope: ['spaces', 'security'],
+        app: [],
+        privileges: {
+          all: {
+            api: ['manage_scheduled_reports'],
+            savedObject: { all: ['scheduled_report'], read: [] },
+            ui: ['show'],
+          },
           read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
         },
       });

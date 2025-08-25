@@ -6,7 +6,7 @@
  */
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 
@@ -78,7 +78,7 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
 
   step('Should filter monitors by type', async () => {
     await page.getByRole('button', { name: 'Type All' }).click();
-    await page.getByTestId('comboBoxInput').click();
+    await page.getByTestId('monitorTypeField').click();
     await page.getByRole('option', { name: 'http' }).click();
     await page.getByTestId('ruleDefinition').getByRole('button', { name: 'Type http' }).click();
     await expect(page.getByTestId('syntheticsStatusRuleVizMonitorQueryIDsButton')).toHaveText(

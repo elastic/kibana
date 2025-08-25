@@ -14,15 +14,16 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsDataGrid } from '../components/alerts_data_grid';
-import { AlertsField, BulkActionsConfig, BulkActionsState } from '../types';
-import { RenderContext, AdditionalContext } from '../types';
+import type { BulkActionsConfig, BulkActionsState } from '../types';
+import { AlertsField } from '../types';
+import type { RenderContext, AdditionalContext } from '../types';
 import { bulkActionsReducer } from './bulk_actions_reducer';
 import { createMockBulkActionsState, mockRenderContext } from '../mocks/context.mock';
-import {
+import type {
   TestAlertsDataGridProps,
   BaseAlertsDataGridProps,
-  mockDataGridProps,
 } from '../components/alerts_data_grid.test';
+import { mockDataGridProps } from '../components/alerts_data_grid.test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { getJsDomPerformanceFix, testQueryClientConfig } from '../utils/test';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -617,7 +618,9 @@ describe('AlertsDataGrid bulk actions', () => {
             await userEvent.click(await screen.findByText('Fake Bulk Action'));
 
             // the callback given to our clients to run when they want to update the loading state
-            mockOnClick.mock.calls[0][2](false);
+            act(() => {
+              mockOnClick.mock.calls[0][2](false);
+            });
 
             expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
           });

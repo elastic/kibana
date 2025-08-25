@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { SaveProps } from './app';
+import type { SaveProps } from './app';
 import { type SaveVisualizationProps, runSaveLensVisualization } from './save_modal_container';
 import { defaultDoc, makeDefaultServices } from '../mocks';
 import { faker } from '@faker-js/faker';
 import { makeAttributeService } from '../mocks/services_mock';
-
-jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
-  checkForDuplicateTitle: jest.fn(async () => false),
-}));
 
 describe('runSaveLensVisualization', () => {
   // Need to call reset here as makeDefaultServices() reuses some mocks from core
@@ -49,6 +45,7 @@ describe('runSaveLensVisualization', () => {
       returnToOrigin: false,
       dashboardId: undefined,
       newCopyOnSave: false,
+      onTitleDuplicate: jest.fn(),
       ...propsOverrides,
     };
     const options = {
@@ -261,7 +258,12 @@ describe('runSaveLensVisualization', () => {
           // make sure the new savedObject id is removed from the new input
           expect.objectContaining({
             state: expect.objectContaining({
-              input: expect.objectContaining({ savedObjectId: undefined }),
+              serializedState: expect.objectContaining({
+                rawState: expect.objectContaining({ savedObjectId: undefined }),
+                references: expect.arrayContaining([
+                  expect.objectContaining({ type: 'index-pattern' }),
+                ]),
+              }),
             }),
           })
         );
@@ -288,7 +290,12 @@ describe('runSaveLensVisualization', () => {
           // make sure the new savedObject id is passed with the new input
           expect.objectContaining({
             state: expect.objectContaining({
-              input: expect.objectContaining({ savedObjectId: '1234' }),
+              serializedState: expect.objectContaining({
+                rawState: expect.objectContaining({ savedObjectId: '1234' }),
+                references: expect.arrayContaining([
+                  expect.objectContaining({ type: 'index-pattern' }),
+                ]),
+              }),
             }),
           })
         );

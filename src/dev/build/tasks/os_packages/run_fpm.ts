@@ -9,9 +9,10 @@
 
 import { resolve } from 'path';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { exec, Config, Build } from '../../lib';
+import type { Config, Build } from '../../lib';
+import { exec } from '../../lib';
 
 export async function runFpm(
   config: Config,
@@ -87,6 +88,8 @@ export async function runFpm(
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
     `/etc/kibana`,
+    '--config-files',
+    `/etc/${envFolder}/kibana`,
 
     // define template values that will be injected into the install/uninstall
     // scripts, also causes scripts to be processed with erb
@@ -148,5 +151,6 @@ export async function runFpm(
   await exec(log, 'fpm', args, {
     cwd: config.resolveFromRepo('.'),
     level: 'info',
+    build,
   });
 }

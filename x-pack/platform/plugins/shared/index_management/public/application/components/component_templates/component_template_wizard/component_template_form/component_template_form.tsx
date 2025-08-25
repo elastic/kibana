@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 
+import type { ComponentTemplateDeserialized, CommonWizardSteps } from '../../shared_imports';
 import {
   serializers,
   Forms,
-  ComponentTemplateDeserialized,
-  CommonWizardSteps,
   StepSettingsContainer,
   StepMappingsContainer,
   StepAliasesContainer,
@@ -101,7 +100,7 @@ export const ComponentTemplateForm = ({
   onStepChange,
 }: Props) => {
   const {
-    template: { settings, mappings, aliases, lifecycle },
+    template: { settings, mappings, aliases, lifecycle, data_stream_options: dataStreamOptions },
     ...logistics
   } = defaultValue;
 
@@ -274,6 +273,7 @@ export const ComponentTemplateForm = ({
           getComponentTemplateData={buildComponentTemplateObject(defaultValue)}
           dataStreams={dataStreams}
           canRollover={canRollover}
+          dataStreamOptions={dataStreamOptions}
         />
       </FormWizardStep>
     </FormWizard>

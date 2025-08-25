@@ -48,6 +48,7 @@ import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
+import { sendGapDetectedTelemetryEvent } from './utils/telemetry/send_gap_detected_telemetry_event';
 import type { RuleParams } from '../rule_schema';
 import {
   SECURITY_FROM,
@@ -63,6 +64,7 @@ import {
   SECURITY_RULE_ID,
   SECURITY_TO,
 } from './utils/apm_field_names';
+import { checkErrorDetails } from './utils/check_error_details';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
@@ -379,6 +381,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             remainingGap,
             warningStatusMessage: rangeTuplesWarningMessage,
             gap,
+            originalFrom,
+            originalTo,
           } = await getRuleRangeTuples({
             startedAt,
             previousStartedAt,
@@ -398,6 +402,16 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           if (remainingGap.asMilliseconds() > 0) {
             const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
             const gapErrorMessage = `${gapDuration} were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances`;
+            if (analytics) {
+              sendGapDetectedTelemetryEvent({
+                analytics,
+                interval,
+                gapDuration: remainingGap,
+                originalFrom,
+                originalTo,
+                ruleParams: params,
+              });
+            }
             wrapperErrors.push(gapErrorMessage);
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
@@ -567,7 +581,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
                   frozenIndicesQueriedCount,
                 },
-                userError: result.userError,
+                userError:
+                  result.userError ||
+                  result.errors.every((err) => checkErrorDetails(err).isUserError),
               });
             } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
               ruleExecutionLogger.debug('Security Rule execution completed');
@@ -597,6 +613,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
               message: `An error occurred during rule execution: message: "${errorMessage}"`,
+              userError: checkErrorDetails(errorMessage).isUserError,
               metrics: {
                 searchDurations: result.searchAfterTimes,
                 indexingDurations: result.bulkCreateTimes,

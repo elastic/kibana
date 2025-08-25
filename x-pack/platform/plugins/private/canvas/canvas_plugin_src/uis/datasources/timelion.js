@@ -59,7 +59,7 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
 
   return (
     <div>
-      <EuiCallOut title={strings.getTipsHeading()} size="s" iconType="iInCircle">
+      <EuiCallOut title={strings.getTipsHeading()} size="s" iconType="info">
         <ul>
           <li>
             <FormattedMessage

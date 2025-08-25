@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardPanelState } from '../../common';
+import type { DashboardPanel } from '../../server';
 
-import {
-  dataService,
-  embeddableService,
-  savedObjectsTaggingService,
-} from '../services/kibana_services';
+import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { getSampleDashboardState } from '../mocks';
 import { getSerializedState } from './get_serialized_state';
 
@@ -29,10 +25,6 @@ dataService.query.timefilter.timefilter.getTime = jest
 dataService.query.timefilter.timefilter.getRefreshInterval = jest
   .fn()
   .mockReturnValue({ pause: true, value: 0 });
-
-embeddableService.extract = jest
-  .fn()
-  .mockImplementation((attributes) => ({ state: attributes, references: [] }));
 
 if (savedObjectsTaggingService) {
   savedObjectsTaggingService.getTaggingApi = jest.fn().mockReturnValue({
@@ -58,7 +50,6 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences: [],
-      searchSourceReferences: [],
     });
 
     expect(result.attributes).toMatchInlineSnapshot(`
@@ -67,7 +58,7 @@ describe('getSerializedState', () => {
         "description": "",
         "kibanaSavedObjectMeta": Object {
           "searchSource": Object {
-            "filter": Array [],
+            "filters": Array [],
             "query": Object {
               "language": "kuery",
               "query": "hi",
@@ -87,7 +78,7 @@ describe('getSerializedState', () => {
         "timeRestore": false,
         "timeTo": undefined,
         "title": "My Dashboard",
-        "version": 3,
+        "version": 1,
       }
     `);
     expect(result.references).toEqual([]);
@@ -96,7 +87,7 @@ describe('getSerializedState', () => {
   it('should generate new IDs for panels and references when generateNewIds is true', () => {
     const dashboardState = {
       ...getSampleDashboardState(),
-      panels: { oldPanelId: { type: 'visualization' } as unknown as DashboardPanelState },
+      panels: [{ panelIndex: 'oldPanelId', type: 'visualization' } as DashboardPanel],
     };
     const result = getSerializedState({
       controlGroupReferences: [],
@@ -109,7 +100,6 @@ describe('getSerializedState', () => {
           id: 'bizzbuzz',
         },
       ],
-      searchSourceReferences: [],
     });
 
     expect(result.attributes.panels).toMatchInlineSnapshot(`
@@ -118,10 +108,8 @@ describe('getSerializedState', () => {
           "gridData": Object {
             "i": "54321",
           },
-          "panelConfig": Object {},
           "panelIndex": "54321",
           "type": "visualization",
-          "version": undefined,
         },
       ]
     `);
@@ -146,7 +134,6 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences: [],
-      searchSourceReferences: [],
     });
 
     expect(result.references).toEqual(controlGroupReferences);
@@ -162,7 +149,6 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences,
-      searchSourceReferences: [],
     });
 
     expect(result.references).toEqual(panelReferences);

@@ -6,7 +6,7 @@
  */
 
 import { deserializeTemplate, serializeTemplate } from './template_serialization';
-import { TemplateDeserialized, TemplateSerialized, IndexMode } from '../types';
+import type { TemplateDeserialized, TemplateSerialized, IndexMode } from '../types';
 import { STANDARD_INDEX_MODE, LOGSDB_INDEX_MODE, TIME_SERIES_MODE } from '../constants';
 
 const defaultSerializedTemplate: TemplateSerialized = {
@@ -116,6 +116,11 @@ describe('Template serialization', () => {
             })
           ).toHaveProperty('template.settings.index.mode', value);
         });
+      });
+      test(`correctly serializes data_stream_options`, () => {
+        expect(
+          serializeTemplate(defaultDeserializedTemplate, { failure_store: { enabled: true } })
+        ).toHaveProperty('template.data_stream_options', { failure_store: { enabled: true } });
       });
     });
   });

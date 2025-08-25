@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
+
+import { css } from '@emotion/react';
 
 import {
   EuiSwitch,
@@ -17,13 +20,12 @@ import {
   EuiTextColor,
   EuiButtonEmpty,
   EuiLoadingSpinner,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ResponseError } from '../../../../../../common/types';
-import { DeprecationLoggingPreviewProps } from '../../../types';
-
-import './_deprecation_logging_toggle.scss';
+import type { ResponseError } from '../../../../../../common/types';
+import type { DeprecationLoggingPreviewProps } from '../../../types';
 
 const i18nTexts = {
   fetchErrorMessage: i18n.translate(
@@ -99,11 +101,17 @@ export const DeprecationLoggingToggle: FunctionComponent<Props> = ({
   resendRequest,
   toggleLogging,
 }) => {
+  const { euiTheme } = useEuiTheme();
   if (isLoading) {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center" className="upgToggleLoading">
-        <EuiFlexItem grow={false} className="upgLoadingItem">
-          <EuiLoadingSpinner size="m" />
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner
+            size="m"
+            css={css`
+              margin: calc(${euiTheme.size.m} / 2);
+            `}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{i18nTexts.loadingLogsLabel}</EuiFlexItem>
       </EuiFlexGroup>
@@ -137,7 +145,7 @@ export const DeprecationLoggingToggle: FunctionComponent<Props> = ({
       <EuiFlexItem grow={false}>
         <EuiSwitch
           data-test-subj="deprecationLoggingToggle"
-          label={i18nTexts.buttonLabel}
+          label={<EuiText>{i18nTexts.buttonLabel}</EuiText>}
           checked={!!isDeprecationLogIndexingEnabled}
           onChange={toggleLogging}
           disabled={Boolean(fetchError) || isUpdating}

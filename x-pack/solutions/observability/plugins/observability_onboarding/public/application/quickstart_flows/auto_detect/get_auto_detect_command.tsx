@@ -6,20 +6,34 @@
  */
 
 import { flatten, zip } from 'lodash';
-import { useOnboardingFlow } from './use_onboarding_flow';
 
-export function getAutoDetectCommand(
-  options: NonNullable<ReturnType<typeof useOnboardingFlow>['data']>
-) {
+export function getAutoDetectCommand({
+  scriptDownloadUrl,
+  onboardingId,
+  kibanaUrl,
+  installApiKey,
+  ingestApiKey,
+  elasticAgentVersion,
+  metricsEnabled,
+}: {
+  scriptDownloadUrl: string;
+  onboardingId: string;
+  kibanaUrl: string;
+  installApiKey: string;
+  ingestApiKey: string;
+  elasticAgentVersion: string;
+  metricsEnabled: boolean;
+}) {
   const scriptName = 'auto_detect.sh';
   return oneLine`
-    curl ${options.scriptDownloadUrl} -so ${scriptName} &&
+    curl ${scriptDownloadUrl} -so ${scriptName} &&
     sudo bash ${scriptName}
-      --id=${options.onboardingFlow.id}
-      --kibana-url=${options.kibanaUrl}
-      --install-key=${options.installApiKey}
-      --ingest-key=${options.ingestApiKey}
-      --ea-version=${options.elasticAgentVersionInfo.agentVersion}
+      --id=${onboardingId}
+      --kibana-url=${kibanaUrl}
+      --install-key=${installApiKey}
+      --ingest-key=${ingestApiKey}
+      --ea-version=${elasticAgentVersion}
+      ${!metricsEnabled ? '--metrics-enabled=false' : ''}
   `;
 }
 function oneLine(parts: TemplateStringsArray, ...args: string[]) {

@@ -32,7 +32,6 @@ import type {
   AlertInstanceState,
   RuleTypeParams,
   IntervalSchedule,
-  RuleMonitoring,
   RuleTaskState,
   SanitizedRule,
   RuleTypeState,
@@ -59,15 +58,23 @@ import type { MaintenanceWindowsService } from './maintenance_windows';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
-  monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
   taskRunError?: DecoratedError;
+  shouldDeleteTask?: boolean;
+  shouldDisableTask?: boolean;
 }
 
+export const getDeleteRuleTaskRunResult = (): RuleTaskRunResult => ({
+  state: {},
+  schedule: undefined,
+  shouldDeleteTask: true,
+});
+
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state
-export type RuleTaskStateAndMetrics = RuleTaskState & {
+export interface RunRuleResult {
   metrics: RuleRunMetrics;
-};
+  state: RuleTaskState;
+}
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
   apiKey: RawRule['apiKey'];
@@ -138,6 +145,7 @@ export type Executable<
 export interface RuleTypeRunnerContext {
   alertingEventLogger: AlertingEventLogger;
   flappingSettings?: RulesSettingsFlappingProperties;
+  logger: Logger;
   maintenanceWindowsService?: MaintenanceWindowsService;
   namespace?: string;
   queryDelaySec?: number;

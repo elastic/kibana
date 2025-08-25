@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -57,7 +57,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    describe('search', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/232481
+    // FLAKY: https://github.com/elastic/kibana/issues/232496
+    describe.skip('search', function () {
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
@@ -514,6 +516,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
           await testSubjects.click('docViewerTab-doc_view_source');
+          await browser.pressKeys(browser.keys.ARROW_RIGHT);
+          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+        });
+
+        it('should not navigate between documents with arrow keys when resizable button is focused', async () => {
+          await dataGrid.clickRowToggle({ defaultTabId: false });
+          await discover.isShowingDocViewer();
+          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
+          await browser.pressKeys(browser.keys.ARROW_RIGHT);
+          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await testSubjects.click('euiResizableButton');
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
         });

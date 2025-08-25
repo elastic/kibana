@@ -6,15 +6,15 @@
  */
 
 import { createAction, createReducer, current } from '@reduxjs/toolkit';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
-import { Filter, Query } from '@kbn/es-query';
-import { History } from 'history';
+import type { Filter, Query } from '@kbn/es-query';
+import type { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
-import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
-import { SeriesType } from '@kbn/visualizations-plugin/common';
-import { TableInspectorAdapter } from '../editor_frame_service/types';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import type { SeriesType } from '@kbn/visualizations-plugin/common';
+import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
   VisualizeEditorContext,
   Suggestion,
@@ -897,14 +897,19 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             typeof updater === 'function' ? updater(current(state.visualization.state)) : updater;
         }
 
+        const datasourceByLayerId = new Map<string, string>(
+          Object.entries(datasourceMap).flatMap(([datasourceId, datasource]) => {
+            if (!state.datasourceStates[datasourceId]) {
+              return [];
+            }
+            return datasource
+              .getLayers(state.datasourceStates[datasourceId].state)
+              .map((layerId) => [layerId, datasourceId]);
+          }) ?? []
+        );
+
         layerIds.forEach((layerId) => {
-          const [layerDatasourceId] =
-            Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
-              return (
-                state.datasourceStates[datasourceId] &&
-                datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
-              );
-            }) ?? [];
+          const layerDatasourceId = datasourceByLayerId.get(layerId);
           if (layerDatasourceId) {
             const { newState } = datasourceMap[layerDatasourceId].removeLayer(
               current(state).datasourceStates[layerDatasourceId].state,

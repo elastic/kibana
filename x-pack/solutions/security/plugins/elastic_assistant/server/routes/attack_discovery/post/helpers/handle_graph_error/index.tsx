@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup, AuthenticatedUser, Logger } from '@kbn/core/server';
-import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import type { AnalyticsServiceSetup, AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { AttackDiscoveryDataClient } from '../../../../../lib/attack_discovery/persistence';
+import type { AttackDiscoveryDataClient } from '../../../../../lib/attack_discovery/persistence';
 import { attackDiscoveryStatus } from '../../../helpers/helpers';
-import { ATTACK_DISCOVERY_ERROR_EVENT } from '../../../../../lib/telemetry/event_based_telemetry';
+import { reportAttackDiscoveryGenerationFailure } from '../../../helpers/telemetry';
 
 export const handleGraphError = async ({
   apiConfig,
@@ -55,19 +55,17 @@ export const handleGraphError = async ({
       },
       authenticatedUser,
     });
-    telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
-      actionTypeId: apiConfig.actionTypeId,
+    reportAttackDiscoveryGenerationFailure({
+      apiConfig,
       errorMessage: error.message,
-      model: apiConfig.model,
-      provider: apiConfig.provider,
+      telemetry,
     });
   } catch (updateErr) {
     const updateError = transformError(updateErr);
-    telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
-      actionTypeId: apiConfig.actionTypeId,
+    reportAttackDiscoveryGenerationFailure({
+      apiConfig,
       errorMessage: updateError.message,
-      model: apiConfig.model,
-      provider: apiConfig.provider,
+      telemetry,
     });
   }
 };

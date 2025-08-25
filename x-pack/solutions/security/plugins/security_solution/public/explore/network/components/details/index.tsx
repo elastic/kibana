@@ -8,8 +8,8 @@
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import React from 'react';
 
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { DescriptionList } from '../../../../../common/utility_types';
-import { useDarkMode } from '../../../../common/lib/kibana';
 import type {
   FlowTargetSourceDest,
   NetworkDetailsStrategyResponse,
@@ -57,6 +57,7 @@ export interface IpOverviewProps {
   type: networkModel.NetworkType;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
+  isFlyoutOpen?: boolean;
 }
 
 export const IpOverview = React.memo<IpOverviewProps>(
@@ -76,10 +77,11 @@ export const IpOverview = React.memo<IpOverviewProps>(
     scopeId,
     indexPatterns,
     jobNameById,
+    isFlyoutOpen = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const darkMode = useDarkMode();
+    const darkMode = useKibanaIsDarkMode();
     const typeData = data[flowTarget];
     const column: DescriptionList[] = [
       {
@@ -153,6 +155,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
                   ipFilter: ip,
                   contextID,
                   scopeId,
+                  isFlyoutOpen,
                 })
               : getEmptyTagValue(),
         },
@@ -160,7 +163,13 @@ export const IpOverview = React.memo<IpOverviewProps>(
           title: i18n.HOST_NAME,
           description:
             typeData && data.host
-              ? hostNameRenderer(scopeId, data.host, ip, contextID)
+              ? hostNameRenderer({
+                  scopeId,
+                  host: data.host,
+                  ipFilter: ip,
+                  contextID,
+                  isFlyoutOpen,
+                })
               : getEmptyTagValue(),
         },
       ],

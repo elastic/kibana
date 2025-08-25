@@ -8,7 +8,7 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: CreateConversation
-      description: Create a new Security AI Assistant conversation.
+      description: Create a new Security AI Assistant conversation. This endpoint allows the user to initiate a conversation with the Security AI Assistant by providing the required parameters.
       summary: Create a conversation
       tags:
         - Conversation API
@@ -18,15 +18,45 @@ paths:
           application/json:
             schema:
               $ref: './common_attributes.schema.yaml#/components/schemas/ConversationCreateProps'
+            example:
+              title: "Security Discussion"
+              category: "assistant"
+              messages:
+                - content: "Hello, how can I assist you today?"
+                  role: "system"
+                  timestamp: "2023-10-31T12:00:00Z"
+              apiConfig:
+                connectorId: "12345"
+                actionTypeId: "67890"
+              replacements: {}
+              excludeFromLastConversationStorage: false
       responses:
         200:
-          description: Indicates a successful call.
+          description: Indicates a successful call. The conversation was created successfully.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+              example:
+                id: "abc123"
+                title: "Security Discussion"
+                category: "assistant"
+                createdAt: "2023-10-31T12:01:00Z"
+                updatedAt: "2023-10-31T12:01:00Z"
+                users:
+                  - id: "user1"
+                    name: "John Doe"
+                messages:
+                  - content: "Hello, how can I assist you today?"
+                    role: "system"
+                    timestamp: "2023-10-31T12:00:00Z"
+                apiConfig:
+                  connectorId: "12345"
+                  actionTypeId: "67890"
+                replacements: {}
+                excludeFromLastConversationStorage: false
         400:
-          description: Generic Error
+          description: Generic Error. This response indicates an issue with the request, such as missing required parameters or incorrect data.
           content:
             application/json:
               schema:
@@ -34,17 +64,76 @@ paths:
                 properties:
                   statusCode:
                     type: number
+                    example: 400
                   error:
                     type: string
+                    example: "Bad Request"
                   message:
                     type: string
-
+                    example: "Missing required parameter: title"
+    delete:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: DeleteAllConversations
+      description: This endpoint allows users to permanently delete all conversations.
+      summary: Delete conversations
+      tags:
+        - Conversation API
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                excludedIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Optional list of conversation IDs to delete.
+                  example: ["abc123", "def456"]
+      responses:
+        200:
+          description: Indicates a successful call. The conversations were deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  totalDeleted:
+                    type: number
+                    example: 10
+                  failures:
+                    type: array
+                    items:
+                      type: string
+              example:
+                success: true
+        400:
+          description: Generic Error. This response indicates an issue with the request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 400
+                  error:
+                    type: string
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    example: "Invalid conversation ID"
   /api/security_ai_assistant/current_user/conversations/{id}:
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: ReadConversation
-      description: Get the details of an existing conversation using the conversation ID.
+      description: Get the details of an existing conversation using the conversation ID. This allows users to fetch the specific conversation data by its unique ID.
       summary: Get a conversation
       tags:
         - Conversations API
@@ -52,18 +141,37 @@ paths:
         - name: id
           in: path
           required: true
-          description: The conversation's `id` value.
+          description: The conversation's `id` value, a unique identifier for the conversation.
           schema:
             $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "abc123"
       responses:
         200:
-          description: Indicates a successful call.
+          description: Indicates a successful call. The conversation details are returned.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+              example:
+                id: "abc123"
+                title: "Security Discussion"
+                category: "assistant"
+                createdAt: "2023-10-31T12:01:00Z"
+                updatedAt: "2023-10-31T12:01:00Z"
+                users:
+                  - id: "user1"
+                    name: "John Doe"
+                messages:
+                  - content: "Hello, how can I assist you today?"
+                    role: "system"
+                    timestamp: "2023-10-31T12:00:00Z"
+                apiConfig:
+                  connectorId: "12345"
+                  actionTypeId: "67890"
+                replacements: {}
+                excludeFromLastConversationStorage: false
         400:
-          description: Generic Error
+          description: Generic Error. The request could not be processed due to an error.
           content:
             application/json:
               schema:
@@ -71,15 +179,19 @@ paths:
                 properties:
                   statusCode:
                     type: number
+                    example: 400
                   error:
                     type: string
+                    example: "Bad Request"
                   message:
                     type: string
+                    example: "Invalid conversation ID"
+
     put:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: UpdateConversation
-      description: Update an existing conversation using the conversation ID.
+      description: Update an existing conversation using the conversation ID. This endpoint allows users to modify the details of an existing conversation.
       summary: Update a conversation
       tags:
         - Conversation API
@@ -90,21 +202,52 @@ paths:
           description: The conversation's `id` value.
           schema:
             $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "abc123"
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: './common_attributes.schema.yaml#/components/schemas/ConversationUpdateProps'
+            example:
+              title: "Updated Security Discussion"
+              category: "insights"
+              messages:
+                - content: "The issue was resolved."
+                  role: "assistant"
+                  timestamp: "2023-10-31T12:30:00Z"
+              apiConfig:
+                connectorId: "54321"
+                actionTypeId: "09876"
+              replacements: {}
+              excludeFromLastConversationStorage: true
       responses:
         200:
-          description: Indicates a successful call.
+          description: Indicates a successful call. The conversation was updated successfully.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+              example:
+                id: "abc123"
+                title: "Updated Security Discussion"
+                category: "insights"
+                createdAt: "2023-10-31T12:01:00Z"
+                updatedAt: "2023-10-31T12:31:00Z"
+                users:
+                  - id: "user1"
+                    name: "John Doe"
+                messages:
+                  - content: "The issue was resolved."
+                    role: "assistant"
+                    timestamp: "2023-10-31T12:30:00Z"
+                apiConfig:
+                  connectorId: "54321"
+                  actionTypeId: "09876"
+                replacements: {}
+                excludeFromLastConversationStorage: true
         400:
-          description: Generic Error
+          description: Generic Error. This response indicates an issue with the request, such as missing required parameters or incorrect data.
           content:
             application/json:
               schema:
@@ -112,15 +255,19 @@ paths:
                 properties:
                   statusCode:
                     type: number
+                    example: 400
                   error:
                     type: string
+                    example: "Bad Request"
                   message:
                     type: string
+                    example: "Missing required field: title"
+
     delete:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: DeleteConversation
-      description: Delete an existing conversation using the conversation ID.
+      description: Delete an existing conversation using the conversation ID. This endpoint allows users to permanently delete a conversation.
       summary: Delete a conversation
       tags:
         - Conversation API
@@ -131,15 +278,34 @@ paths:
           description: The conversation's `id` value.
           schema:
             $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "abc123"
       responses:
         200:
-          description: Indicates a successful call.
+          description: Indicates a successful call. The conversation was deleted successfully.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+              example:
+                id: "abc123"
+                title: "Deleted Security Discussion"
+                category: "assistant"
+                createdAt: "2023-10-31T12:01:00Z"
+                updatedAt: "2023-10-31T12:01:00Z"
+                users:
+                  - id: "user1"
+                    name: "John Doe"
+                messages:
+                  - content: "The conversation has been deleted."
+                    role: "system"
+                    timestamp: "2023-10-31T12:35:00Z"
+                apiConfig:
+                  connectorId: "12345"
+                  actionTypeId: "67890"
+                replacements: {}
+                excludeFromLastConversationStorage: false
         400:
-          description: Generic Error
+          description: Generic Error. This response indicates an issue with the request.
           content:
             application/json:
               schema:
@@ -147,7 +313,10 @@ paths:
                 properties:
                   statusCode:
                     type: number
+                    example: 400
                   error:
                     type: string
+                    example: "Bad Request"
                   message:
                     type: string
+                    example: "Invalid conversation ID"

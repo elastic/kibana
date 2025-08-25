@@ -132,7 +132,28 @@ describe('Service Overview', () => {
 
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
       cy.getByTestSubj('apmHttpInfoUrl').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
+    });
+
+    it('shows waterfall and transaction details flyout', () => {
+      cy.visitKibana(transactionUrl);
+
+      cy.getByTestSubj('apmWaterfallButton').should('exist');
+      cy.getByTestSubj('waterfall').should('exist');
+      cy.getByTestSubj('accordionWaterfall').should('exist');
+      cy.getByTestSubj('accordionWaterfall').first().click();
+      cy.contains('h4', 'Transaction details');
+      cy.getByTestSubj('apmTransactionDetailLinkLink').should('exist');
+      cy.getByTestSubj('apmTransactionDetailLinkLink').contains('parent-synth');
+      cy.getByTestSubj('apmServiceListAppLink').should('exist');
+      cy.getByTestSubj('apmServiceListAppLink').contains('sendotlp-otel-native-synth');
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmHttpInfoRequestMethod').contains('GET');
+      cy.getByTestSubj('apmHttpInfoUrl').should('exist');
+      cy.getByTestSubj('apmHttpInfoUrl').contains('https://elastic.co/');
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').contains('OK');
     });
   });
 
@@ -160,8 +181,8 @@ describe('Service Overview', () => {
       cy.getByTestSubj('apmHttpInfoRequestMethod').contains('GET');
       cy.getByTestSubj('apmHttpInfoUrl').should('exist');
       cy.getByTestSubj('apmHttpInfoUrl').contains('https://elastic.co/');
-      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').contains('OK');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').contains('OK');
     });
   });
 });

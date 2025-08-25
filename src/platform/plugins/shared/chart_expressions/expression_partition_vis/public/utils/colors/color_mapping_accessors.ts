@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NodeColorAccessor, PATH_KEY } from '@elastic/charts';
+import type { NodeColorAccessor } from '@elastic/charts';
+import { PATH_KEY } from '@elastic/charts';
 import { decreaseOpacity } from '@kbn/charts-plugin/public';
+import type { getColorFactory } from '@kbn/coloring';
 import { MultiFieldKey } from '@kbn/data-plugin/common';
-import { getColorFactory } from '@kbn/coloring';
-import { isMultiFieldKey } from '@kbn/data-plugin/common';
 import { ChartTypes } from '../../../common/types';
 
 export function getCategoryKeys(category: string | MultiFieldKey): string | string[] {
-  return isMultiFieldKey(category) ? category.keys.map(String) : `${category}`;
+  return MultiFieldKey.isInstance(category) ? category.keys.map(String) : `${category}`;
 }
 
 /**

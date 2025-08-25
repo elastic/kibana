@@ -12,13 +12,13 @@ import type {
   RegistryPolicyTemplate,
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { merge } from 'lodash';
-import semverValid from 'semver/functions/valid';
-import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import {
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+} from '@kbn/cloud-security-posture-common/constants';
+import { i18n } from '@kbn/i18n';
+import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import {
   CLOUDBEAT_AWS,
@@ -32,22 +32,77 @@ import {
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import type {
-  AwsCredentialsType,
   PostureInput,
   CloudSecurityPolicyTemplate,
+  AwsCredentialsType,
 } from '../../../common/types_old';
-import { cloudPostureIntegrations } from '../../common/constants';
-import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
-import {
-  DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
-  DEFAULT_AWS_CREDENTIALS_TYPE,
-  DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
-} from './aws_credentials_form/get_aws_credentials_form_options';
-import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form';
-import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
+import type { CloudPostureIntegrations } from '../../common/constants';
+import eksLogo from '../../assets/icons/cis_eks_logo.svg';
 
-// Posture policies only support the default namespace
-export const POSTURE_NAMESPACE = 'default';
+const cloudPostureIntegrations: CloudPostureIntegrations = {
+  cspm: {
+    policyTemplate: CSPM_POLICY_TEMPLATE,
+    name: i18n.translate('xpack.csp.cspmIntegration.integration.nameTitle', {
+      defaultMessage: 'Cloud Security Posture Management',
+    }),
+    shortName: i18n.translate('xpack.csp.cspmIntegration.integration.shortNameTitle', {
+      defaultMessage: 'CSPM',
+    }),
+  },
+  kspm: {
+    policyTemplate: KSPM_POLICY_TEMPLATE,
+    name: i18n.translate('xpack.csp.kspmIntegration.integration.nameTitle', {
+      defaultMessage: 'Kubernetes Security Posture Management',
+    }),
+    shortName: i18n.translate('xpack.csp.kspmIntegration.integration.shortNameTitle', {
+      defaultMessage: 'KSPM',
+    }),
+    options: [
+      {
+        type: CLOUDBEAT_VANILLA,
+        name: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.nameTitle', {
+          defaultMessage: 'Self-Managed',
+        }),
+        benchmark: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.benchmarkTitle', {
+          defaultMessage: 'CIS Kubernetes',
+        }),
+        icon: 'logoKubernetes',
+        testId: 'cisK8sTestId',
+      },
+      {
+        type: CLOUDBEAT_EKS,
+        name: i18n.translate('xpack.csp.kspmIntegration.eksOption.nameTitle', {
+          defaultMessage: 'EKS',
+        }),
+        benchmark: i18n.translate('xpack.csp.kspmIntegration.eksOption.benchmarkTitle', {
+          defaultMessage: 'CIS EKS',
+        }),
+        icon: eksLogo,
+        tooltip: i18n.translate('xpack.csp.kspmIntegration.eksOption.tooltipContent', {
+          defaultMessage: 'Elastic Kubernetes Service',
+        }),
+        testId: 'cisEksTestId',
+      },
+    ],
+  },
+  vuln_mgmt: {
+    policyTemplate: VULN_MGMT_POLICY_TEMPLATE,
+    name: 'Vulnerability Management', // TODO: we should use i18n and fix this
+    shortName: 'VULN_MGMT', // TODO: we should use i18n and fix this
+    options: [
+      {
+        type: CLOUDBEAT_VULN_MGMT_AWS,
+        name: i18n.translate('xpack.csp.vulnMgmtIntegration.awsOption.nameTitle', {
+          defaultMessage: 'Amazon Web Services',
+        }),
+        icon: 'logoAWS',
+        benchmark: 'N/A', // TODO: change benchmark to be optional
+      },
+    ],
+  },
+};
+
+const DEFAULT_EKS_VARS_GROUP: AwsCredentialsType = 'assume_role';
 
 type PosturePolicyInput =
   | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof CSPM_POLICY_TEMPLATE }
@@ -66,7 +121,7 @@ export const isPostureInput = (
   SUPPORTED_POLICY_TEMPLATES.includes(input.policy_template as CloudSecurityPolicyTemplate) &&
   SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as PostureInput);
 
-const getPostureType = (policyTemplateInput: PostureInput) => {
+export const getPostureType = (policyTemplateInput: PostureInput) => {
   switch (policyTemplateInput) {
     case CLOUDBEAT_AWS:
     case CLOUDBEAT_AZURE:
@@ -82,7 +137,7 @@ const getPostureType = (policyTemplateInput: PostureInput) => {
   }
 };
 
-const getDeploymentType = (policyTemplateInput: PostureInput) => {
+export const getDeploymentType = (policyTemplateInput: PostureInput) => {
   switch (policyTemplateInput) {
     case CLOUDBEAT_AWS:
     case CLOUDBEAT_VULN_MGMT_AWS:
@@ -134,7 +189,7 @@ export const getPosturePolicy = (
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
   ...newPolicy,
-  namespace: POSTURE_NAMESPACE,
+  namespace: newPolicy.namespace,
   // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
   // Set hidden policy vars
@@ -178,131 +233,13 @@ export const getVulnMgmtCloudFormationDefaultValue = (packageInfo: PackageInfo):
   return cloudFormationTemplate;
 };
 
-export const getCspmCloudFormationDefaultValue = (packageInfo: PackageInfo): string => {
-  if (!packageInfo.policy_templates) return '';
-
-  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === CSPM_POLICY_TEMPLATE);
-  if (!policyTemplate) return '';
-
-  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
-
-  if (!policyTemplateInputs) return '';
-
-  const cloudFormationTemplate = policyTemplateInputs.reduce((acc, input): string => {
-    if (!input.vars) return acc;
-    const template = input.vars.find((v) => v.name === 'cloud_formation_template')?.default;
-    return template ? String(template) : acc;
-  }, '');
-
-  return cloudFormationTemplate;
-};
-
-export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): string => {
-  if (!packageInfo.policy_templates) return '';
-
-  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === CSPM_POLICY_TEMPLATE);
-  if (!policyTemplate) return '';
-
-  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
-  if (!policyTemplateInputs) return '';
-
-  const armTemplateUrl = policyTemplateInputs.reduce((acc, input): string => {
-    if (!input.vars) return acc;
-    const template = input.vars.find((v) => v.name === 'arm_template_url')?.default;
-    return template ? String(template) : acc;
-  }, '');
-
-  return armTemplateUrl;
-};
-
-export const getDefaultAwsCredentialsType = (
-  packageInfo: PackageInfo,
-  setupTechnology?: SetupTechnology
-): AwsCredentialsType => {
-  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
-    return DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
-  }
-
-  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
-  if (hasCloudFormationTemplate) {
-    return DEFAULT_AWS_CREDENTIALS_TYPE;
-  }
-
-  return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
-};
-
-export const getDefaultAzureCredentialsType = (
-  packageInfo: PackageInfo,
-  setupTechnology?: SetupTechnology
-): string => {
-  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
-    return AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET;
-  }
-
-  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
-  if (hasArmTemplateUrl) {
-    return AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE;
-  }
-
-  return AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
-};
-
-export const getDefaultGcpHiddenVars = (
-  packageInfo: PackageInfo,
-  setupTechnology?: SetupTechnology
-): Record<string, PackagePolicyConfigRecordEntry> => {
-  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
-    return {
-      'gcp.credentials.type': {
-        value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
-        type: 'text',
-      },
-    };
-  }
-
-  const hasCloudShellUrl = !!getCspmCloudShellDefaultValue(packageInfo);
-  if (hasCloudShellUrl) {
-    return {
-      'gcp.credentials.type': {
-        value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
-        type: 'text',
-      },
-    };
-  }
-
-  return {
-    'gcp.credentials.type': {
-      value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
-      type: 'text',
-    },
-  };
-};
-
 /**
  * Input vars that are hidden from the user
  */
 export const getPostureInputHiddenVars = (
-  inputType: PostureInput,
-  packageInfo: PackageInfo,
-  setupTechnology: SetupTechnology
+  inputType: PostureInput
 ): Record<string, PackagePolicyConfigRecordEntry> | undefined => {
   switch (inputType) {
-    case 'cloudbeat/cis_aws':
-      return {
-        'aws.credentials.type': {
-          value: getDefaultAwsCredentialsType(packageInfo, setupTechnology),
-          type: 'text',
-        },
-      };
-    case 'cloudbeat/cis_azure':
-      return {
-        'azure.credentials.type': {
-          value: getDefaultAzureCredentialsType(packageInfo, setupTechnology),
-          type: 'text',
-        },
-      };
-    case 'cloudbeat/cis_gcp':
-      return getDefaultGcpHiddenVars(packageInfo, setupTechnology);
     case 'cloudbeat/cis_eks':
       return { 'aws.credentials.type': { value: DEFAULT_EKS_VARS_GROUP, type: 'text' } };
     default:
@@ -310,8 +247,16 @@ export const getPostureInputHiddenVars = (
   }
 };
 
+export const hasErrors = (validationResults: PackagePolicyValidationResults | undefined) => {
+  if (!validationResults) return 0;
+
+  const flattenedValidation = getFlattenedObject(validationResults);
+  const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
+  return errors.length;
+};
+
 export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolicyTemplate) =>
-  cloudPostureIntegrations[policyTemplate].options.map((o) => ({
+  cloudPostureIntegrations[policyTemplate].options?.map((o) => ({
     tooltip: o.tooltip,
     value: o.type,
     id: o.type,
@@ -339,63 +284,6 @@ export const getMaxPackageName = (
   return `${packageName}-${maxPkgPolicyName + 1}`;
 };
 
-export const getCspmCloudShellDefaultValue = (packageInfo: PackageInfo): string => {
-  if (!packageInfo.policy_templates) return '';
-
-  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === CSPM_POLICY_TEMPLATE);
-  if (!policyTemplate) return '';
-
-  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
-
-  if (!policyTemplateInputs) return '';
-
-  const cloudShellUrl = policyTemplateInputs.reduce((acc, input): string => {
-    if (!input.vars) return acc;
-    const template = input.vars.find((v) => v.name === 'cloud_shell_url')?.default;
-    return template ? String(template) : acc;
-  }, '');
-
-  return cloudShellUrl;
-};
-
-export const getAwsCredentialsType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
-): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;
-
-export const isBelowMinVersion = (version: string, minVersion: string) => {
-  const semanticVersion = semverValid(version);
-  const versionNumberOnly = semverCoerce(semanticVersion) || '';
-  return semverLt(versionNumberOnly, minVersion);
-};
-
-/**
- * Searches for a variable definition in a given packageInfo object based on a specified key.
- * It navigates through nested arrays within the packageInfo object to locate the variable definition associated with the provided key.
- * If found, it returns the variable definition object; otherwise, it returns undefined.
- */
-export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
-  return packageInfo?.data_streams
-    ?.filter((datastreams) => datastreams !== undefined)
-    .map((ds) => ds.streams)
-    .filter((streams) => streams !== undefined)
-    .flat()
-    .filter((streams) => streams?.vars !== undefined)
-    .map((cis) => cis?.vars)
-    .flat()
-    .find((vars) => vars?.name === key);
-};
-
-export const fieldIsInvalid = (value: string | undefined, hasInvalidRequiredVars: boolean) =>
-  hasInvalidRequiredVars && !value;
-
 export const POLICY_TEMPLATE_FORM_DTS = {
   LOADER: 'policy-template-form-loader',
-};
-
-export const hasErrors = (validationResults: PackagePolicyValidationResults | undefined) => {
-  if (!validationResults) return 0;
-
-  const flattenedValidation = getFlattenedObject(validationResults);
-  const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
-  return errors.length;
 };

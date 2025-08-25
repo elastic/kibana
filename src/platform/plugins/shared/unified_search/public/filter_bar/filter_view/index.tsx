@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadgeProps, EuiToolTip, useInnerText } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiToolTip, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
-import { Filter, isFilterPinned } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { FC } from 'react';
+import React from 'react';
+import type { Filter } from '@kbn/es-query';
+import { isFilterPinned } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { stringHash } from '@kbn/ml-string-hash';
 import type { FilterLabelStatus } from '../filter_item/filter_item';
 import { FilterBadge } from '../../filter_badge';
@@ -74,11 +77,6 @@ export const FilterView: FC<Props> = ({
         title, // use native tooltip for non-read-only filter pills
         iconType: 'cross',
         iconSide: 'right',
-        closeButtonProps: {
-          // Removing tab focus on close button because the same option can be obtained through the context menu
-          // Also, we may want to add a `DEL` keyboard press functionality
-          tabIndex: -1,
-        },
         iconOnClick,
         iconOnClickAriaLabel: i18n.translate(
           'unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel',

@@ -8,21 +8,13 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type {
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-} from '@kbn/controls-plugin/common';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 
-import type { DashboardPanelMap } from './dashboard_container/types';
-import type {
-  DashboardAttributes,
-  DashboardOptions,
-  DashboardPanel,
-} from '../server/content_management';
+import type { DashboardAttributes, DashboardOptions } from '../server/content_management';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
@@ -31,21 +23,12 @@ export interface DashboardCapabilities {
   [key: string]: boolean;
 }
 
-/**
- * A partially parsed version of the Dashboard Attributes used for inject and extract logic for both the Dashboard Container and the Dashboard Saved Object.
- */
-export interface ParsedDashboardAttributesWithType {
-  id: string;
-  panels: DashboardPanelMap;
-  type: 'dashboard';
-}
-
 export interface DashboardAttributesAndReferences {
   attributes: DashboardAttributes;
   references: Reference[];
 }
 
-export type DashboardSettings = DashboardOptions & {
+export type DashboardSettings = Writable<DashboardOptions> & {
   description?: DashboardAttributes['description'];
   tags: string[];
   timeRestore: DashboardAttributes['timeRestore'];
@@ -53,12 +36,11 @@ export type DashboardSettings = DashboardOptions & {
 };
 
 export interface DashboardState extends DashboardSettings {
-  query: Query;
-  filters: Filter[];
+  query?: Query;
+  filters?: Filter[];
   timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
-  viewMode: ViewMode;
-  panels: DashboardPanelMap;
+  panels: DashboardAttributes['panels'];
 
   /**
    * Temporary. Currently Dashboards are in charge of providing references to all of their children.
@@ -70,51 +52,43 @@ export interface DashboardState extends DashboardSettings {
    * Serialized control group state.
    * Contains state loaded from dashboard saved object
    */
-  controlGroupInput?: ControlGroupSerializedState | undefined;
-  /**
-   * Runtime control group state.
-   * Contains state passed from dashboard locator
-   * Use runtime state when building input for portable dashboards
-   */
-  controlGroupState?: Partial<ControlGroupRuntimeState>;
+  controlGroupInput?: ControlsGroupState;
 }
 
 export type DashboardLocatorParams = Partial<
-  Omit<DashboardState, 'panels' | 'controlGroupInput' | 'references'>
-> & {
-  /**
-   * If given, the dashboard saved object with this id will be loaded. If not given,
-   * a new, unsaved dashboard will be loaded up.
-   */
-  dashboardId?: string;
+  DashboardState & {
+    controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
 
-  /**
-   * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
-   * whether to hash the data in the url to avoid url length issues.
-   */
-  useHash?: boolean;
+    references?: DashboardState['references'] & SerializableRecord;
 
-  /**
-   * When `true` filters from saved filters from destination dashboard as merged with applied filters
-   * When `false` applied filters take precedence and override saved filters
-   *
-   * true is default
-   */
-  preserveSavedFilters?: boolean;
+    viewMode?: ViewMode;
 
-  /**
-   * Search search session ID to restore.
-   * (Background search)
-   */
-  searchSessionId?: string;
+    /**
+     * If provided, the dashboard with this id will be loaded. If not given, new, unsaved dashboard will be loaded.
+     */
+    dashboardId?: string;
 
-  /**
-   * List of dashboard panels
-   */
-  panels?: Array<DashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
+    /**
+     * Determines whether to hash the contents of the url to avoid url length issues. Defaults to the uiSettings configuration for `storeInSessionStorage`.
+     */
+    useHash?: boolean;
 
-  /**
-   * Control group changes
-   */
-  controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord; // used SerializableRecord here to force the GridData type to be read as serializable
-};
+    /**
+     * Denotes whether to merge provided filters from the locator state with the filters saved into the Dashboard.
+     * When false, the saved filters will be overwritten. Defaults to true.
+     */
+    preserveSavedFilters?: boolean;
+
+    /**
+     * Search search session ID to restore.
+     * (Background search)
+     */
+    searchSessionId?: string;
+
+    /**
+     * Set to pass state from solution to embeddables.
+     * See PassThroughContext presentation container interface for details
+     */
+    passThroughContext?: SerializableRecord;
+  }
+>;

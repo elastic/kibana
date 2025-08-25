@@ -9,7 +9,7 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
-import { Column, FormulaColumn, Layer } from '../../convert';
+import type { Column, FormulaColumn, Layer } from '../../convert';
 import { createPanel, createSeries } from '../../__mocks__';
 import { getConfigurationForMetric, getConfigurationForGauge } from '.';
 
@@ -271,7 +271,7 @@ describe('getConfigurationForGauge', () => {
       metricAccessor: undefined,
       palette: undefined,
       maxAccessor: maxColumnId,
-      color: '#FFFFFF',
+      color: '#ffffff',
       showBar: true,
     });
     expect(mockGetPalette).toBeCalledTimes(1);

@@ -11,13 +11,15 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { ColorPicker } from '@kbn/visualization-ui-components';
 
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import { PaletteRegistry, ColorMapping, PaletteOutput } from '@kbn/coloring';
+import type { PaletteRegistry, ColorMapping, PaletteOutput } from '@kbn/coloring';
+import { canCreateCustomMatch } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { ValuesType } from 'utility-types';
-import { KbnPalette, KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
 import type { VisualizationDimensionEditorProps } from '../../../types';
-import { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
-import { FormatFactory } from '../../../../common/types';
+import type { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
+import type { FormatFactory } from '../../../../common/types';
 import { getSeriesColor, isHorizontalChart } from '../state_helpers';
 import { getDataLayers } from '../visualization_helpers';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
@@ -102,7 +104,7 @@ export function DataDimensionEditor(
   );
   const setPalette = useCallback(
     (palette: PaletteOutput) => {
-      updateLayerState(index, { palette });
+      updateLayerState(index, { palette, colorMapping: undefined });
     },
     [updateLayerState, index]
   );
@@ -132,11 +134,13 @@ export function DataDimensionEditor(
     ).color;
   }, [props.frame, props.paletteService, state.layers, accessor, props.formatFactory, layer]);
 
-  const table = props.frame.activeData?.[layer.layerId];
-  const { splitAccessor } = layer;
-  const splitCategories = getColorCategories(table?.rows, splitAccessor);
-
   if (props.groupId === 'breakdown') {
+    const currentData = props.frame.activeData?.[layer.layerId];
+    const splitCategories = getColorCategories(currentData?.rows, layer.splitAccessor);
+    const columnMeta = currentData?.columns?.find(({ id }) => id === layer.splitAccessor)?.meta;
+    const allowCustomMatch = canCreateCustomMatch(columnMeta);
+    const formatter = props.formatFactory(columnMeta?.params);
+
     return !layer.collapseFn ? (
       <ColorMappingByTerms
         isDarkMode={isDarkMode}
@@ -149,6 +153,8 @@ export function DataDimensionEditor(
         palettes={props.palettes}
         panelRef={props.panelRef}
         categories={splitCategories}
+        formatter={formatter}
+        allowCustomMatch={allowCustomMatch}
       />
     ) : null;
   }

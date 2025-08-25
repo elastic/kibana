@@ -37,6 +37,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { useForm, FormProvider, useController } from 'react-hook-form';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
@@ -60,7 +61,6 @@ import { useLicense } from '../../../../hooks/use_license';
 import { isProviderValid } from './helpers';
 import * as i18n from './translations';
 import { useGetScopedSourcererDataView } from '../../../../../sourcerer/components/use_get_sourcerer_data_view';
-import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
 
 interface InsightComponentProps {
   label?: string;
@@ -290,8 +290,10 @@ const InsightEditorComponent = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataViewSpec } = useDataViewSpec();
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
+  const dataViewName = newDataViewPickerEnabled
+    ? experimentalDataView.name
+    : oldSourcererDataView.name;
 
   const {
     unifiedSearch: {
@@ -300,9 +302,11 @@ const InsightEditorComponent = ({
     uiSettings,
   } = useKibana().services;
 
-  const dataView = useGetScopedSourcererDataView({
+  const oldDataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.default,
   });
+
+  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   const [providers, setProviders] = useState<Provider[][]>([[]]);
   const dateRangeChoices = useMemo(() => {
@@ -411,7 +415,7 @@ const InsightEditorComponent = ({
     );
   }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {
-    const index = sourcererDataView.name ?? '*';
+    const index = dataViewName ?? '*';
     return [
       {
         $state: {
@@ -425,7 +429,7 @@ const InsightEditorComponent = ({
         },
       },
     ];
-  }, [sourcererDataView]);
+  }, [dataViewName]);
   const isPlatinum = useLicense().isAtLeast('platinum');
 
   return (
@@ -475,6 +479,10 @@ const InsightEditorComponent = ({
               fullWidth
             >
               <EuiFieldText
+                isInvalid={
+                  labelController.field.value !== undefined &&
+                  labelController.field.value.trim().length === 0
+                }
                 {...{
                   ...formMethods.register('label'),
                   ref: null,

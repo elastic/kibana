@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraHomePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -31,7 +31,9 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await datePickerInput.type(time);
 
       // dismiss the tooltip, which won't be hidden because blur doesn't happen reliably
-      await testSubjects.click('waffleDatePickerIntervalTooltip');
+      await this.dismissDatePickerTooltip();
+
+      await datePickerInput.pressKeys(browser.keys.ESCAPE);
 
       await this.waitForLoading();
     },

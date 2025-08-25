@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { recursiveRecord } from '../shared/record_types';
@@ -62,6 +62,7 @@ export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.record(
 
 export type InheritedFieldDefinitionConfig = FieldDefinitionConfig & {
   from: string;
+  alias_for?: string;
 };
 
 export interface InheritedFieldDefinition {
@@ -70,7 +71,10 @@ export interface InheritedFieldDefinition {
 
 export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> = z.record(
   z.string(),
-  z.intersection(fieldDefinitionConfigSchema, z.object({ from: NonEmptyString }))
+  z.intersection(
+    fieldDefinitionConfigSchema,
+    z.object({ from: NonEmptyString, alias_for: z.optional(NonEmptyString) })
+  )
 );
 
 export type NamedFieldDefinitionConfig = FieldDefinitionConfig & {

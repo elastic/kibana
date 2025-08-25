@@ -8,7 +8,8 @@
  */
 
 import type { ZodType } from '@kbn/zod';
-import { schema, Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import type { RouterRoute, VersionedRouterRoute } from '@kbn/core-http-server';
 import { createLargeSchema } from './oas_converter/kbn_config_schema/lib.test.util';
@@ -138,7 +139,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema): Versione
   ],
 });
 
-interface CreatTestRouterArgs {
+export interface CreateTestRouterArgs {
   routers?: { [routerId: string]: { routes: Array<Partial<RoutesMeta>> } };
   versionedRouters?: {
     [routerId: string]: { routes: Array<Partial<VersionedRoutesMeta>> };
@@ -147,7 +148,7 @@ interface CreatTestRouterArgs {
 }
 
 export const createTestRouters = (
-  { routers = {}, versionedRouters = {}, bodySchema }: CreatTestRouterArgs = {
+  { routers = {}, versionedRouters = {}, bodySchema }: CreateTestRouterArgs = {
     routers: { testRouter: { routes: [{}] } },
     versionedRouters: { testVersionedRouter: { routes: [{}] } },
   }

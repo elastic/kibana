@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPanel, EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { HeaderSection } from '../../../../../common/components/header_section';
 import { getLensAttributes } from './get_lens_attributes';
 import { useColumns } from './use_columns';
 import { GRANTED_RIGHTS_STACK_BY_OPTIONS, PAGE_SIZE } from './constants';
@@ -16,7 +19,8 @@ import {
   generateVisualizationESQLQuery,
   getBucketTimeRange,
 } from './esql_data_generation';
-import { EsqlDashboardPanel } from '../esql_dashboard_panel';
+
+import { EsqlDashboardPanel } from '../esql_dashboard_panel/esql_dashboard_panel';
 import type { TableItemType } from './types';
 
 const PrivilegedUserMonitoringSampleDashboardComponent = () => {
@@ -29,22 +33,53 @@ const PrivilegedUserMonitoringSampleDashboardComponent = () => {
     [esqlSource]
   );
 
-  return (
-    <EsqlDashboardPanel<TableItemType>
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashboard.grantedRights.title"
-          defaultMessage="Granted rights"
-        />
-      }
-      timerange={bucketTimerange}
-      stackByOptions={GRANTED_RIGHTS_STACK_BY_OPTIONS}
-      getLensAttributes={getLensAttributes}
-      generateVisualizationQuery={generateVisualizationQuery}
-      generateTableQuery={generateTableQuery}
-      columns={columns}
-      pageSize={PAGE_SIZE}
+  const stackByOptions = GRANTED_RIGHTS_STACK_BY_OPTIONS;
+
+  const setSelectedChartOptionCallback = useCallback(
+    (value: string) => {
+      setSelectedStackByOption(value ?? stackByOptions[0].value);
+    },
+    [stackByOptions]
+  );
+
+  const defaultStackByOption = stackByOptions[0];
+  const [selectedStackByOption, setSelectedStackByOption] = useState<string>(
+    defaultStackByOption.value
+  );
+
+  const title = (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashboard.grantedRights.title"
+      defaultMessage="Granted rights"
     />
+  );
+
+  return (
+    <EuiPanel hasBorder hasShadow={false} data-test-subj="privMonSampleDashboard">
+      <HeaderSection title={title} titleSize="s" outerDirection={'column'}>
+        <EuiSuperSelect
+          onChange={setSelectedChartOptionCallback}
+          options={GRANTED_RIGHTS_STACK_BY_OPTIONS}
+          prepend={i18n.translate('xpack.securitySolution.genericDashboard.stackBy.label', {
+            defaultMessage: 'Stack by',
+          })}
+          valueOfSelected={selectedStackByOption}
+          hasDividers={true}
+          itemLayoutAlign="top"
+        />
+      </HeaderSection>
+
+      <EsqlDashboardPanel<TableItemType>
+        title={title}
+        timerange={bucketTimerange}
+        stackByField={selectedStackByOption}
+        getLensAttributes={getLensAttributes}
+        generateVisualizationQuery={generateVisualizationQuery}
+        generateTableQuery={generateTableQuery}
+        columns={columns}
+        pageSize={PAGE_SIZE}
+      />
+    </EuiPanel>
   );
 };
 

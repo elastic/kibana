@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { type AlertStatus } from '@kbn/rule-data-utils';
+import type { DataSchemaFormat } from './hosts_locator';
 
-export enum SupportedAssetTypes {
+export enum SupportedEntityTypes {
   container = 'container',
   host = 'host',
 }
@@ -17,8 +18,8 @@ export enum SupportedAssetTypes {
 export type AssetDetailsLocator = LocatorPublic<AssetDetailsLocatorParams>;
 
 export interface AssetDetailsLocatorParams extends SerializableRecord {
-  assetType: string;
-  assetId: string;
+  entityType: string;
+  entityId: string;
   // asset types not migrated to use the asset details page
   _a?: {
     time?: {
@@ -41,6 +42,7 @@ export interface AssetDetailsLocatorParams extends SerializableRecord {
     logsSearch?: string;
     profilingSearch?: string;
     alertStatus?: AlertStatus | 'all';
+    schema?: DataSchemaFormat | null;
   };
 }
 
@@ -53,8 +55,8 @@ export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDet
     params: AssetDetailsLocatorParams & { state?: SerializableRecord }
   ) => {
     // Check which asset types are currently supported
-    const isSupportedByAssetDetails = Object.values(SupportedAssetTypes).includes(
-      params.assetType as SupportedAssetTypes
+    const isSupportedByAssetDetails = Object.values(SupportedEntityTypes).includes(
+      params.entityType as SupportedEntityTypes
     );
 
     // Map the compatible parameters to _a compatible shape
@@ -83,7 +85,7 @@ export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDet
 
     return {
       app: 'metrics',
-      path: `/detail/${params.assetType}/${params.assetId}?${queryParams.join('&')}`,
+      path: `/detail/${params.entityType}/${params.entityId}?${queryParams.join('&')}`,
       state: params.state ? params.state : {},
     };
   };

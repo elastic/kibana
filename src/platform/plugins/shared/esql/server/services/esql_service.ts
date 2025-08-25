@@ -8,7 +8,9 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { JoinIndexAutocompleteItem, JoinIndicesAutocompleteResult } from '../../common';
+import type { IndicesAutocompleteResult, IndexAutocompleteItem } from '@kbn/esql-types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;
@@ -44,29 +46,32 @@ export class EsqlService {
     return result;
   }
 
-  public async getJoinIndices(): Promise<JoinIndicesAutocompleteResult> {
+  public async getIndicesByIndexMode(
+    mode: 'lookup' | 'time_series'
+  ): Promise<IndicesAutocompleteResult> {
     const { client } = this.options;
 
-    // Execute: GET /_all/_settings/index.mode,aliases?flat_settings=true
+    // Execute: GET /_all/_settings/index.mode,index.hidden,aliases?flat_settings=true
     interface IndexModeResponse {
       [indexName: string]: {
         settings: {
           'index.mode': string;
+          'index.hidden': boolean;
         };
       };
     }
     const queryByIndexModeResponse = (await client.indices.getSettings({
-      name: 'index.mode',
+      name: ['index.hidden', 'index.mode'],
       flat_settings: true,
     })) as IndexModeResponse;
 
-    const indices: JoinIndexAutocompleteItem[] = [];
+    const indices: IndexAutocompleteItem[] = [];
     const indexNames: string[] = [];
 
     for (const [name, { settings }] of Object.entries(queryByIndexModeResponse)) {
-      if (settings['index.mode'] === 'lookup') {
+      if (settings['index.mode'] === mode && !settings['index.hidden']) {
         indexNames.push(name);
-        indices.push({ name, mode: 'lookup', aliases: [] });
+        indices.push({ name, mode, aliases: [] });
       }
     }
 
@@ -76,10 +81,28 @@ export class EsqlService {
       index.aliases = aliases[index.name] ?? [];
     }
 
-    const result: JoinIndicesAutocompleteResult = {
+    const result: IndicesAutocompleteResult = {
       indices,
     };
 
     return result;
+  }
+
+  public async getInferenceEndpoints(
+    taskType: InferenceTaskType
+  ): Promise<InferenceEndpointsAutocompleteResult> {
+    const { client } = this.options;
+
+    const { endpoints } = await client.inference.get({
+      inference_id: '_all',
+      task_type: taskType,
+    });
+
+    return {
+      inferenceEndpoints: endpoints.map((endpoint) => ({
+        inference_id: endpoint.inference_id,
+        task_type: endpoint.task_type,
+      })),
+    };
   }
 }

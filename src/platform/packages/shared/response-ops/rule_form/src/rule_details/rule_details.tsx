@@ -8,26 +8,34 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiDescribedFormGroup,
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import {
-  RULE_DETAILS_TITLE,
-  RULE_DETAILS_DESCRIPTION,
+  RULE_INVESTIGATION_GUIDE_LABEL,
+  RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT,
   RULE_NAME_INPUT_TITLE,
   RULE_TAG_INPUT_TITLE,
   RULE_TAG_PLACEHOLDER,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
+import { InvestigationGuideEditor } from './rule_investigation_guide_editor';
+import { RuleDashboards } from './rule_dashboards';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
+import { LabelWithTooltip } from './label_with_tooltip';
+
+export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
 export const RuleDetails = () => {
-  const { formData, baseErrors } = useRuleFormState();
+  const { formData, baseErrors, plugins } = useRuleFormState();
+  const { contentManagement } = plugins;
 
   const dispatch = useRuleFormDispatch();
 
@@ -76,49 +84,84 @@ export const RuleDetails = () => {
     }
   }, [dispatch, tags]);
 
+  const onSetArtifacts = useCallback(
+    (value: object) => {
+      dispatch({
+        type: 'setRuleProperty',
+        payload: {
+          property: 'artifacts',
+          value: formData.artifacts ? { ...formData.artifacts, ...value } : value,
+        },
+      });
+    },
+    [dispatch, formData.artifacts]
+  );
+
   return (
-    <EuiDescribedFormGroup
-      fullWidth
-      title={<h3>{RULE_DETAILS_TITLE}</h3>}
-      description={
-        <EuiText size="s">
-          <p>{RULE_DETAILS_DESCRIPTION}</p>
-        </EuiText>
-      }
-      data-test-subj="ruleDetails"
-    >
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            data-test-subj="ruleDetails"
+            fullWidth
+            label={RULE_NAME_INPUT_TITLE}
+            isInvalid={!!baseErrors?.name?.length}
+            error={baseErrors?.name}
+          >
+            <EuiFieldText
+              fullWidth
+              value={name}
+              placeholder={RULE_NAME_INPUT_TITLE}
+              onChange={onNameChange}
+              data-test-subj="ruleDetailsNameInput"
+              isInvalid={!!baseErrors?.name?.length}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            label={RULE_TAG_INPUT_TITLE}
+            labelAppend={OptionalFieldLabel}
+            isInvalid={!!baseErrors?.tags?.length}
+            error={baseErrors?.tags}
+          >
+            <EuiComboBox
+              isInvalid={!!baseErrors?.tags?.length}
+              fullWidth
+              noSuggestions
+              placeholder={RULE_TAG_PLACEHOLDER}
+              data-test-subj="ruleDetailsTagsInput"
+              selectedOptions={tagsOptions}
+              onCreateOption={onAddTag}
+              onChange={onSetTag}
+              onBlur={onBlur}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
       <EuiFormRow
         fullWidth
-        label={RULE_NAME_INPUT_TITLE}
-        isInvalid={!!baseErrors?.name?.length}
-        error={baseErrors?.name}
-      >
-        <EuiFieldText
-          fullWidth
-          value={name}
-          placeholder={RULE_NAME_INPUT_TITLE}
-          onChange={onNameChange}
-          data-test-subj="ruleDetailsNameInput"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={RULE_TAG_INPUT_TITLE}
+        label={
+          <LabelWithTooltip
+            labelContent={RULE_INVESTIGATION_GUIDE_LABEL}
+            tooltipContent={RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT}
+          />
+        }
         labelAppend={OptionalFieldLabel}
-        isInvalid={!!baseErrors?.tags?.length}
-        error={baseErrors?.tags}
+        isInvalid={
+          (formData.artifacts?.investigation_guide?.blob?.length ?? 0) >
+          MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH
+        }
       >
-        <EuiComboBox
-          fullWidth
-          noSuggestions
-          placeholder={RULE_TAG_PLACEHOLDER}
-          data-test-subj="ruleDetailsTagsInput"
-          selectedOptions={tagsOptions}
-          onCreateOption={onAddTag}
-          onChange={onSetTag}
-          onBlur={onBlur}
+        <InvestigationGuideEditor
+          setRuleParams={onSetArtifacts}
+          value={formData.artifacts?.investigation_guide?.blob ?? ''}
         />
       </EuiFormRow>
-    </EuiDescribedFormGroup>
+      {contentManagement && <RuleDashboards contentManagement={contentManagement} />}
+      <EuiSpacer size="xxl" />
+    </>
   );
 };

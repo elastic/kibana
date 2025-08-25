@@ -27,6 +27,15 @@ jest.mock('.', () => ({
   },
 }));
 
+jest.mock('./agents/agentless_agent', () => ({
+  agentlessAgentService: {
+    getDefaultSettings: jest.fn().mockReturnValue({
+      outputId: 'es-default-output',
+      fleetServerId: 'default-fleet-server',
+    }),
+  },
+}));
+
 jest.mock('./agent_policy', () => ({
   agentPolicyService: {
     find: jest.fn(),
@@ -62,6 +71,9 @@ describe('correct agentless policy settings', () => {
       {
         data_output_id: 'es-default-output',
         fleet_server_host_id: 'default-fleet-server',
+      },
+      {
+        force: true,
       }
     );
     expect(agentPolicyService.update).toHaveBeenCalledWith(
@@ -71,6 +83,9 @@ describe('correct agentless policy settings', () => {
       {
         data_output_id: 'es-default-output',
         fleet_server_host_id: 'default-fleet-server',
+      },
+      {
+        force: true,
       }
     );
   });

@@ -10,13 +10,16 @@
 export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_api_context';
 
 export {
-  getInitialValuesFromComparators,
-  getUnchangingComparator,
-  runComparators,
-  type ComparatorDefinition,
   type ComparatorFunction,
   type StateComparators,
-} from './comparators';
+  type WithAllKeys,
+  runComparator,
+  areComparatorsEqual,
+  diffComparators,
+  initializeStateManager,
+  shouldLogStateDiff,
+  logStateDiff,
+} from './state_manager';
 export {
   apiCanAccessViewMode,
   getInheritedViewMode,
@@ -29,9 +32,10 @@ export {
 } from './interfaces/can_lock_hover_actions';
 export { fetch$, useFetchContext, type FetchContext } from './interfaces/fetch/fetch';
 export {
-  initializeTimeRange,
+  initializeTimeRangeManager,
+  timeRangeComparators,
   type SerializedTimeRange,
-} from './interfaces/fetch/initialize_time_range';
+} from './interfaces/fetch/time_range_manager';
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
 export {
   apiPublishesFilters,
@@ -59,6 +63,10 @@ export {
 } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export {
+  canOverrideHoverActions,
+  type CanOverrideHoverActions,
+} from './interfaces/can_override_hover_actions';
+export {
   hasReadOnlyCapabilities,
   type HasReadOnlyCapabilities,
 } from './interfaces/has_read_only_capabilities';
@@ -73,9 +81,7 @@ export {
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
 export {
   apiHasSerializableState,
-  apiHasSnapshottableState,
   type HasSerializableState,
-  type HasSnapshottableState,
   type SerializedPanelState,
 } from './interfaces/has_serializable_state';
 export {
@@ -146,6 +152,7 @@ export {
 export {
   initializeTitleManager,
   stateHasTitles,
+  titleComparators,
   type TitlesApi,
   type SerializedTitles,
 } from './interfaces/titles/title_manager';
@@ -156,3 +163,4 @@ export {
   useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';
+export { SAVED_OBJECT_REF_NAME, findSavedObjectRef } from './saved_object_ref';

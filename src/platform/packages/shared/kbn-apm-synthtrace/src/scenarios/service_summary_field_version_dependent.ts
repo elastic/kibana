@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields, ApmSynthtracePipelineSchema, apm } from '@kbn/apm-synthtrace-client';
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelineSchema, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
 import semver from 'semver';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
-import { Logger } from '../lib/utils/create_logger';
+import type { RunOptions } from '../cli/utils/parse_run_cli_flags';
+import type { Logger } from '../lib/utils/create_logger';
 
 const scenario: Scenario<ApmFields> = async ({
   logger,
@@ -22,15 +23,6 @@ const scenario: Scenario<ApmFields> = async ({
   const version = versionOverride as string;
   const isLegacy = version ? semver.lt(version as string, '8.7.0') : false;
   return {
-    bootstrap: async ({ apmEsClient }) => {
-      if (isLegacy) {
-        apmEsClient.pipeline(
-          apmEsClient.getPipeline(ApmSynthtracePipelineSchema.Default, {
-            versionOverride: version,
-          })
-        );
-      }
-    },
     generate: ({ range, clients: { apmEsClient } }) => {
       const successfulTimestamps = range.ratePerMinute(6);
       const instance = apm
@@ -54,6 +46,15 @@ const scenario: Scenario<ApmFields> = async ({
             .success();
         })
       );
+    },
+    setupPipeline: ({ apmEsClient }) => {
+      if (isLegacy) {
+        apmEsClient.setPipeline(
+          apmEsClient.resolvePipelineType(ApmSynthtracePipelineSchema.Default, {
+            versionOverride: version,
+          })
+        );
+      }
     },
   };
 };

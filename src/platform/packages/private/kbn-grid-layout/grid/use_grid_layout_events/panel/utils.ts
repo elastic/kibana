@@ -8,45 +8,91 @@
  */
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { GridLayoutStateManager, PanelInteractionEvent } from '../../types';
-import type { UserInteractionEvent, PointerPosition } from '../types';
-import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
-import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
+
+import type { ActivePanelEvent, GridPanelData } from '../../grid_panel';
+import type { GridLayoutStateManager, RuntimeGridSettings } from '../../types';
 import { updateClientY } from '../keyboard_utils';
+import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
+import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
+import type { PointerPosition, UserInteractionEvent } from '../types';
+
+export const getDefaultResizeOptions = (runtimeSettings: RuntimeGridSettings) => ({
+  minWidth: 1,
+  maxWidth: runtimeSettings.columnCount,
+  minHeight: 1,
+  maxHeight: Infinity,
+});
+
+const getColumnCountInPixels = ({
+  columnCount,
+  runtimeSettings,
+}: {
+  columnCount: number;
+  runtimeSettings: RuntimeGridSettings;
+}) =>
+  columnCount * runtimeSettings.columnPixelWidth + (columnCount - 1) * runtimeSettings.gutterSize;
+
+const getRowCountInPixels = ({
+  rowCount,
+  runtimeSettings,
+}: {
+  rowCount: number;
+  runtimeSettings: RuntimeGridSettings;
+}) => rowCount * runtimeSettings.rowHeight + (rowCount - 1) * runtimeSettings.gutterSize;
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
-  interactionEvent,
+  activePanel,
   pointerPixel,
-  maxRight,
+  runtimeSettings,
+  resizeOptions,
 }: {
   pointerPixel: PointerPosition;
-  interactionEvent: PanelInteractionEvent;
-  maxRight: number;
+  activePanel: ActivePanelEvent;
+  runtimeSettings: RuntimeGridSettings;
+  resizeOptions: GridPanelData['resizeOptions'];
 }) => {
-  const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
-
+  const panelRect = activePanel.panelDiv.getBoundingClientRect();
+  const { minWidth, maxWidth, minHeight, maxHeight } = {
+    ...getDefaultResizeOptions(runtimeSettings),
+    ...resizeOptions,
+  };
   return {
     left: panelRect.left,
     top: panelRect.top,
-    bottom: pointerPixel.clientY - interactionEvent.sensorOffsets.bottom,
-    right: Math.min(pointerPixel.clientX - interactionEvent.sensorOffsets.right, maxRight),
+    bottom: Math.max(
+      Math.min(
+        pointerPixel.clientY - activePanel.sensorOffsets.bottom, // actual height based on mouse position
+        panelRect.top + getRowCountInPixels({ rowCount: maxHeight, runtimeSettings }) // max height of panel
+      ),
+      panelRect.top + getRowCountInPixels({ rowCount: minHeight, runtimeSettings }) // min height of panel
+    ),
+    right: Math.max(
+      Math.min(
+        pointerPixel.clientX - activePanel.sensorOffsets.right, // actual width based on mouse position
+        panelRect.left + getColumnCountInPixels({ columnCount: maxWidth, runtimeSettings }), // max width of panel
+        // cannot extend width past the right edge of the grid layout
+        getColumnCountInPixels({ columnCount: runtimeSettings.columnCount, runtimeSettings }) +
+          runtimeSettings.gutterSize
+      ),
+      panelRect.left + getColumnCountInPixels({ columnCount: minWidth, runtimeSettings }) // min width of panel
+    ),
   };
 };
 
 // Calculates the preview rect coordinates for a dragged panel
 export const getDragPreviewRect = ({
   pointerPixel,
-  interactionEvent,
+  activePanel,
 }: {
   pointerPixel: PointerPosition;
-  interactionEvent: PanelInteractionEvent;
+  activePanel: ActivePanelEvent;
 }) => {
   return {
-    left: pointerPixel.clientX - interactionEvent.sensorOffsets.left,
-    top: pointerPixel.clientY - interactionEvent.sensorOffsets.top,
-    bottom: pointerPixel.clientY - interactionEvent.sensorOffsets.bottom,
-    right: pointerPixel.clientX - interactionEvent.sensorOffsets.right,
+    left: pointerPixel.clientX - activePanel.sensorOffsets.left,
+    top: pointerPixel.clientY - activePanel.sensorOffsets.top,
+    bottom: pointerPixel.clientY - activePanel.sensorOffsets.bottom,
+    right: pointerPixel.clientX - activePanel.sensorOffsets.right,
   };
 };
 
@@ -73,15 +119,14 @@ export const getNextKeyboardPositionForPanel = (
   handlePosition: { clientX: number; clientY: number }
 ) => {
   const {
-    interactionEvent$: { value: interactionEvent },
-    activePanel$: { value: activePanel },
+    activePanelEvent$: { value: activePanel },
     runtimeSettings$: {
       value: { columnPixelWidth, rowHeight, gutterSize, keyboardDragTopLimit },
     },
   } = gridLayoutStateManager;
 
-  const { type } = interactionEvent || {};
-  const panelPosition = activePanel?.position || interactionEvent?.panelDiv.getBoundingClientRect();
+  const { type } = activePanel ?? {};
+  const panelPosition = activePanel?.position ?? activePanel?.panelDiv.getBoundingClientRect();
 
   if (!panelPosition) return handlePosition;
 

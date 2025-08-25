@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
-import { Ast } from '@kbn/interpreter';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { Ast } from '@kbn/interpreter';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
   type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
@@ -33,7 +34,7 @@ import type {
   SuggestionRequest,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
-import { LensDocument } from '../../persistence/saved_object_store';
+import type { LensDocument } from '../../persistence';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
 import type { DatasourceState, DatasourceStates, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
@@ -55,7 +56,7 @@ const COLORING_METHOD: SuggestionRequest['mainPalette'] = COLOR_MAPPING_OFF_BY_D
 
 function getIndexPatterns(
   annotationGroupDataviewIds: string[],
-  references?: SavedObjectReference[],
+  references?: Reference[],
   initialContext?: VisualizeFieldContext | VisualizeEditorContext,
   initialId?: string,
   adHocDataviews?: string[]
@@ -126,7 +127,7 @@ export async function initializeDataViews(
     datasourceStates: DatasourceStates;
     defaultIndexPatternId: string;
     storage: IStorageWrapper;
-    references?: SavedObjectReference[];
+    references?: Reference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
     annotationGroups: Record<string, EventAnnotationGroupConfig>;
@@ -199,7 +200,7 @@ export async function initializeDataViews(
 
 const initializeEventAnnotationGroups = async (
   eventAnnotationService: EventAnnotationServiceType,
-  references?: SavedObjectReference[]
+  references?: Reference[]
 ) => {
   const annotationGroups: Record<string, EventAnnotationGroupConfig> = {};
 
@@ -241,7 +242,7 @@ export async function initializeSources(
     datasourceStates: DatasourceStates;
     defaultIndexPatternId: string;
     storage: IStorageWrapper;
-    references?: SavedObjectReference[];
+    references?: Reference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
   },
@@ -267,21 +268,24 @@ export async function initializeSources(
     options
   );
 
+  const initializedDatasourceStates = initializeDatasources({
+    datasourceMap,
+    datasourceStates,
+    initialContext,
+    indexPatternRefs,
+    indexPatterns,
+    references,
+  });
+
   return {
     indexPatterns,
     indexPatternRefs,
     annotationGroups,
-    datasourceStates: initializeDatasources({
-      datasourceMap,
-      datasourceStates,
-      initialContext,
-      indexPatternRefs,
-      indexPatterns,
-      references,
-    }),
+    datasourceStates: initializedDatasourceStates,
     visualizationState: initializeVisualization({
       visualizationMap,
       visualizationState,
+      datasourceStates,
       references,
       initialContext,
       annotationGroups,
@@ -292,12 +296,14 @@ export async function initializeSources(
 export function initializeVisualization({
   visualizationMap,
   visualizationState,
+  datasourceStates,
   references,
   annotationGroups,
 }: {
   visualizationState: VisualizationState;
   visualizationMap: VisualizationMap;
-  references?: SavedObjectReference[];
+  datasourceStates: DatasourceStates;
+  references?: Reference[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   annotationGroups: Record<string, EventAnnotationGroupConfig>;
 }) {
@@ -306,8 +312,9 @@ export function initializeVisualization({
       visualizationMap[visualizationState.activeId]?.initialize(
         () => '',
         visualizationState.state,
-        // initialize a new visualization with the color mapping off
         COLORING_METHOD,
+        datasourceStates,
+        // initialize a new visualization with the color mapping off
         annotationGroups,
         references
       ) ?? visualizationState.state
@@ -328,7 +335,7 @@ export function initializeDatasources({
   datasourceStates: DatasourceStates;
   indexPatterns: Record<string, IndexPattern>;
   indexPatternRefs: IndexPatternRef[];
-  references?: SavedObjectReference[];
+  references?: Reference[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 }) {
   // init datasources
@@ -398,15 +405,6 @@ export async function persistedStateToExpression(
   );
 
   const visualization = visualizations[visualizationType!];
-  const activeVisualizationState = initializeVisualization({
-    visualizationMap: visualizations,
-    visualizationState: {
-      state: persistedVisualizationState,
-      activeId: visualizationType,
-    },
-    annotationGroups,
-    references: [...references, ...(internalReferences || [])],
-  });
   const datasourceStatesFromSO = Object.fromEntries(
     Object.entries(persistedDatasourceStates).map(([id, state]) => [
       id,
@@ -432,6 +430,17 @@ export async function persistedStateToExpression(
     references: [...references, ...(internalReferences || [])],
     indexPatterns,
     indexPatternRefs,
+  });
+
+  const activeVisualizationState = initializeVisualization({
+    visualizationMap: visualizations,
+    visualizationState: {
+      state: persistedVisualizationState,
+      activeId: visualizationType,
+    },
+    datasourceStates,
+    annotationGroups,
+    references: [...references, ...(internalReferences || [])],
   });
 
   const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap, indexPatterns);

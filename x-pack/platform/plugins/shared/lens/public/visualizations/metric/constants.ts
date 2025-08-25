@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { OptionalKeys } from 'utility-types';
-import { MetricVisualizationState } from './types';
+import type { OptionalKeys } from 'utility-types';
+import type { MetricVisualizationState } from './types';
 
 export const LENS_METRIC_ID = 'lnsMetric';
 
@@ -40,3 +40,5 @@ export const metricStateDefaults: Required<
   iconAlign: 'left',
   valueFontMode: 'default',
 };
+
+export const SECONDARY_DEFAULT_STATIC_COLOR = '#E4E8F1';

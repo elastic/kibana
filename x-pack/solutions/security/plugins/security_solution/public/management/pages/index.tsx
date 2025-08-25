@@ -20,6 +20,7 @@ import {
   MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
   MANAGEMENT_ROUTING_BLOCKLIST_PATH,
   MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
   MANAGEMENT_ROUTING_NOTES_PATH,
@@ -37,6 +38,8 @@ import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
 import { PrivilegedRoute } from '../components/privileged_route';
+import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
+import { TrustedDevicesContainer } from './trusted_devices';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -56,6 +59,13 @@ const TrustedAppTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.trustedApps}>
     <TrustedAppsContainer />
     <SpyRoute pageName={SecurityPageName.trustedApps} />
+  </TrackApplicationView>
+);
+
+const TrustedDevicesTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.trustedDevices}>
+    <TrustedDevicesContainer />
+    <SpyRoute pageName={SecurityPageName.trustedDevices} />
   </TrackApplicationView>
 );
 
@@ -80,11 +90,10 @@ const ResponseActionsTelemetry = () => (
   </TrackApplicationView>
 );
 
-const NotesTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.notes}>
+const Notes = () => (
+  <SecurityRoutePageWrapper pageName={SecurityPageName.notes}>
     <NotesContainer />
-    <SpyRoute pageName={SecurityPageName.notes} />
-  </TrackApplicationView>
+  </SecurityRoutePageWrapper>
 );
 
 export const ManagementContainer = memo(() => {
@@ -92,11 +101,14 @@ export const ManagementContainer = memo(() => {
     'securitySolutionNotesDisabled'
   );
 
+  const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+
   const {
     loading,
     canReadPolicyManagement,
     canReadBlocklist,
     canReadTrustedApplications,
+    canReadTrustedDevices,
     canReadEventFilters,
     canReadActionsLogManagement,
     canReadEndpointList,
@@ -141,6 +153,13 @@ export const ManagementContainer = memo(() => {
         component={TrustedAppTelemetry}
         hasPrivilege={canReadTrustedApplications}
       />
+      {trustedDevicesEnabled && (
+        <PrivilegedRoute
+          path={MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH}
+          component={TrustedDevicesTelemetry}
+          hasPrivilege={canReadTrustedDevices}
+        />
+      )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH}
         component={EventFilterTelemetry}
@@ -163,7 +182,7 @@ export const ManagementContainer = memo(() => {
       />
 
       {!securitySolutionNotesDisabled && (
-        <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={NotesTelemetry} />
+        <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={Notes} />
       )}
 
       {canReadEndpointList && (

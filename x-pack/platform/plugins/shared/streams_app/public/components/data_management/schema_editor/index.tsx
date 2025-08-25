@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiPortal, EuiProgress } from '@elastic/eui';
 import { useControls } from './hooks/use_controls';
-import { SchemaEditorProps } from './types';
+import type { SchemaEditorProps } from './types';
 import { SchemaEditorContextProvider } from './schema_editor_context';
 import { Controls } from './schema_editor_controls';
 import { FieldsTable } from './schema_editor_table';
@@ -25,6 +25,7 @@ export function SchemaEditor({
   withControls = false,
   withFieldSimulation = false,
   withTableActions = false,
+  withToolbar = true,
 }: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
 
@@ -49,7 +50,9 @@ export function SchemaEditor({
           <Controls controls={controls} onChange={updateControls} onRefreshData={onRefreshData} />
         )}
         <FieldsTable
+          isLoading={isLoading ?? false}
           controls={controls}
+          withToolbar={withToolbar}
           defaultColumns={defaultColumns}
           fields={fields}
           stream={stream}

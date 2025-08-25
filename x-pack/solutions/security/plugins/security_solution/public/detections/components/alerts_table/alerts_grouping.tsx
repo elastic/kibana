@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
+import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import {
   type GroupOption,
   type GroupStatsItem,
@@ -20,22 +21,18 @@ import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { GetGroupStats, GroupingArgs, GroupPanelRenderer } from '@kbn/grouping/src';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { GroupTakeActionItems } from './types';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { AlertsEventTypes, track } from '../../../common/lib/telemetry';
 import * as i18n from './translations';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 export interface AlertsTableComponentProps {
   /**
@@ -59,6 +56,14 @@ export interface AlertsTableComponentProps {
      */
     renderer: GetGroupStats<AlertsGroupingAggregation>;
   };
+  /**
+   * DataViewSpec object to use internally to fetch the data
+   */
+  dataViewSpec: DataViewSpec;
+  /**
+   * DataView object to use internally to fetch the data.
+   */
+  dataView?: DataView;
   defaultFilters?: Filter[];
   /**
    * Default values to display in the group selection dropdown.
@@ -75,8 +80,6 @@ export interface AlertsTableComponentProps {
   groupTakeActionItems?: GroupTakeActionItems;
   loading: boolean;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  runtimeMappings: RunTimeMappings;
-  signalIndexName: string | null;
   tableId: TableIdLiteral;
   to: string;
 }
@@ -137,21 +140,7 @@ const useStorage = (storage: Storage, tableId: string) =>
 
 const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
-
-  const { sourcererDataView: oldSourcererDataView, selectedPatterns: oldSelectedPatterns } =
-    useSourcererDataView(SourcererScopeName.detections);
-
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
-
-  const sourcererDataView = newDataViewPickerEnabled
-    ? experimentalDataViewSpec
-    : oldSourcererDataView;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-
   const {
     services: { storage, telemetry },
   } = useKibana();
@@ -189,7 +178,26 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [dispatch, props.tableId]
   );
 
-  const fields = useMemo(() => Object.values(sourcererDataView.fields || {}), [sourcererDataView]);
+  const fields = useMemo(
+    () =>
+      newDataViewPickerEnabled
+        ? props.dataView?.fields.map((field) => field.spec) || []
+        : Object.values(props.dataViewSpec.fields || {}),
+    [newDataViewPickerEnabled, props.dataView?.fields, props.dataViewSpec.fields]
+  );
+
+  const runtimeMappings = useMemo(
+    () =>
+      newDataViewPickerEnabled
+        ? (props.dataView?.getRuntimeMappings() as RunTimeMappings)
+        : (props.dataViewSpec?.runtimeFieldMap as RunTimeMappings),
+    [newDataViewPickerEnabled, props.dataView, props.dataViewSpec?.runtimeFieldMap]
+  );
+
+  const dataViewTitle = useMemo(
+    () => (newDataViewPickerEnabled ? props.dataView?.title : props.dataViewSpec.title),
+    [newDataViewPickerEnabled, props.dataView?.title, props.dataViewSpec.title]
+  );
 
   const groupingOptions = useMemo(
     () => props.defaultGroupingOptions || DEFAULT_GROUPING_OPTIONS,
@@ -230,12 +238,11 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       dispatch(
         updateGroups({
           activeGroups: selectedGroups,
-          options: groupingOptions,
           tableId: props.tableId,
         })
       );
     }
-  }, [groupingOptions, dispatch, props.tableId, selectedGroups]);
+  }, [dispatch, props.tableId, selectedGroups]);
 
   useEffect(() => {
     if (groupInRedux != null && !isNoneGroup(groupInRedux.activeGroups)) {
@@ -349,16 +356,28 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           pageSize={pageSize[level] ?? DEFAULT_PAGE_SIZE}
           parentGroupingFilter={parentGroupingFilter}
           renderChildComponent={rcc}
+          runtimeMappings={runtimeMappings}
           selectedGroup={selectedGroup}
           setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
+          signalIndexName={dataViewTitle}
         />
       );
     },
-    [getGrouping, groupStatusAggregations, pageIndex, pageSize, props, selectedGroups, setPageVar]
+    [
+      dataViewTitle,
+      getGrouping,
+      groupStatusAggregations,
+      pageIndex,
+      pageSize,
+      props,
+      runtimeMappings,
+      selectedGroups,
+      setPageVar,
+    ]
   );
 
-  if (isEmpty(selectedPatterns)) {
+  if (isEmpty(dataViewTitle)) {
     return null;
   }
 

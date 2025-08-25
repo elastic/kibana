@@ -11,7 +11,7 @@ import { firstValueFrom } from 'rxjs';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import type { IConfigService } from '@kbn/config';
 import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
-import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type { ThemeName, UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 import {
   config as loggingConfigDef,
   type LoggingConfigWithBrowserType,
@@ -33,14 +33,20 @@ export const getSettingValue = <T>(
 export const getBundlesHref = (baseHref: string): string => `${baseHref}/bundles`;
 
 export const getScriptPaths = ({
+  themeName,
   baseHref,
   darkMode,
 }: {
   baseHref: string;
   darkMode: DarkModeValue;
+  themeName: ThemeName;
 }) => {
   if (darkMode === 'system') {
-    return [`${baseHref}/ui/legacy_theme.js`];
+    return [
+      `${baseHref}/ui/bootstrap_system_theme_${
+        themeName === 'borealis' ? 'borealis' : 'amsterdam'
+      }.js`,
+    ];
   } else {
     return [];
   }
@@ -63,8 +69,14 @@ export const getThemeStylesheetPaths = ({
 }) => {
   return [
     ...(darkMode
-      ? [`${baseHref}/ui/legacy_dark_theme.min.css`]
-      : [`${baseHref}/ui/legacy_light_theme.min.css`]),
+      ? [
+          `${baseHref}/ui/legacy_dark_theme.min.css`,
+          `${baseHref}/ui/charts/theme_dark.css`, // Elastic Charts' CSS (dark theme)
+        ]
+      : [
+          `${baseHref}/ui/legacy_light_theme.min.css`,
+          `${baseHref}/ui/charts/theme_light.css`, // Elastic Charts' CSS (light theme)
+        ]),
   ];
 };
 

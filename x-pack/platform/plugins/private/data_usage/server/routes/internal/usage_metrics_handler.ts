@@ -6,7 +6,7 @@
  */
 
 import { chunk } from 'lodash/fp';
-import { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import { momentDateParser } from '../../../common/utils';
 import type {
   MetricTypes,
@@ -14,7 +14,7 @@ import type {
   UsageMetricsRequestBody,
   UsageMetricsResponseSchemaBody,
 } from '../../../common/rest_types';
-import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
+import type { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../utils';
@@ -112,10 +112,12 @@ export function transformMetricsData(
       metricType,
       series.map((metricSeries) => ({
         name: metricSeries.name,
-        data: (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
-          x: timestamp,
-          y: value,
-        })),
+        data: Array.isArray(metricSeries.data)
+          ? (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
+              x: timestamp,
+              y: value,
+            }))
+          : [],
       })),
     ])
   ) as UsageMetricsResponseSchemaBody;

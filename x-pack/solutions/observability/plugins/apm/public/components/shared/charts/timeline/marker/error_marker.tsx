@@ -56,7 +56,11 @@ export function ErrorMarker({ mark }: Props) {
     '/services/{serviceName}/overview',
     '/services/{serviceName}/errors',
     '/services/{serviceName}/transactions/view',
-    '/traces/explorer/waterfall'
+    '/mobile-services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/errors-and-crashes',
+    '/traces/explorer/waterfall',
+    '/dependencies/operation'
   );
 
   const togglePopover = () => showPopover(!isPopoverOpen);

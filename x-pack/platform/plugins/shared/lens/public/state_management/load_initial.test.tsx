@@ -13,10 +13,11 @@ import {
   mockStoreDeps,
   exactMatchDoc,
 } from '../mocks';
-import { Location, History } from 'history';
+import type { Location, History } from 'history';
 import { act } from 'react-dom/test-utils';
-import { InitialAppState, loadInitial } from './lens_slice';
-import { Filter } from '@kbn/es-query';
+import type { InitialAppState } from './lens_slice';
+import { loadInitial } from './lens_slice';
+import type { Filter } from '@kbn/es-query';
 import { faker } from '@faker-js/faker';
 import { DOC_TYPE } from '../../common/constants';
 
@@ -234,7 +235,14 @@ describe('Initializing the store', () => {
 
       expect(store.getState()).toEqual({
         lens: expect.objectContaining({
-          persistedDoc: { ...defaultDoc, type: DOC_TYPE },
+          persistedDoc: expect.objectContaining({
+            ...defaultDoc,
+            type: DOC_TYPE,
+            state: {
+              ...defaultDoc.state,
+              visualization: 'testVis initial state',
+            },
+          }),
           query: defaultDoc.state.query,
           isLoading: false,
           activeDatasourceId: 'testDatasource',

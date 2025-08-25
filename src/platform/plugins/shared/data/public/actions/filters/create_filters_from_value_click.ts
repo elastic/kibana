@@ -8,11 +8,12 @@
  */
 
 import _ from 'lodash';
-import { Datatable, isSourceParamsESQL } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { isSourceParamsESQL } from '@kbn/expressions-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
-  Filter,
   toggleFilterNegated,
   type AggregateQuery,
 } from '@kbn/es-query';
@@ -22,10 +23,10 @@ import {
   buildSimpleNumberRangeFilter,
 } from '@kbn/es-query/src/filters/build_filters';
 import { getIndexPatterns, getSearchService } from '../../services';
-import { AggConfigSerialized } from '../../../common/search/aggs';
+import type { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
 
-interface ValueClickDataContext {
+export interface ValueClickDataContext {
   data: Array<{
     table: Pick<Datatable, 'rows' | 'columns' | 'meta'>;
     column: number;
@@ -226,20 +227,32 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
   if (!dataPoints.length) {
     return;
   }
-  const { table, column: columnIndex, row: rowIndex } = dataPoints[dataPoints.length - 1];
 
-  if (table?.columns?.[columnIndex]) {
-    const column = table.columns[columnIndex];
-    const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
-    if (value == null) {
-      return;
+  let queryString = query.esql;
+  for (const point in dataPoints) {
+    if (dataPoints[point]) {
+      const { table, column: columnIndex, row: rowIndex } = dataPoints[point];
+
+      if (table?.columns?.[columnIndex]) {
+        const column = table.columns[columnIndex];
+        const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
+        if (value == null) {
+          return;
+        }
+        const queryWithWhere = appendWhereClauseToESQLQuery(
+          queryString,
+          column.name,
+          value,
+          negate ? '-' : '+',
+          column.meta?.type
+        );
+
+        if (queryWithWhere) {
+          queryString = queryWithWhere;
+        }
+      }
     }
-    return appendWhereClauseToESQLQuery(
-      query.esql,
-      column.name,
-      value,
-      negate ? '-' : '+',
-      column.meta?.type
-    );
   }
+
+  return queryString;
 };

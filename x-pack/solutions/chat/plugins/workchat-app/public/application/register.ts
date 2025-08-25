@@ -8,7 +8,7 @@
 import { type CoreSetup, AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { WORKCHAT_APP_ID } from '../../common/features';
 import type { WorkChatAppPluginStartDependencies } from '../types';
-import { WorkChatServices } from '../services';
+import type { WorkChatServices } from '../services';
 
 export const registerApp = ({
   core,
@@ -27,7 +27,7 @@ export const registerApp = ({
     updater$: undefined,
     deepLinks: [
       { id: 'agents', path: '/assistants', title: 'Assistants' },
-      { id: 'integrations', path: '/integrations', title: 'Integrations' },
+      { id: 'integrations', path: '/tools', title: 'Tools' },
     ],
     visibleIn: ['sideNav', 'globalSearch'],
     async mount({ element, history }) {

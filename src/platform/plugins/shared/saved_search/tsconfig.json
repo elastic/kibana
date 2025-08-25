@@ -28,6 +28,8 @@
     "@kbn/utility-types",
     "@kbn/search-types",
     "@kbn/unified-data-table",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/discover-utils",
   ],
   "exclude": ["target/**/*"]
 }

@@ -8,12 +8,11 @@
  */
 
 import type { Token } from 'antlr4';
-import { ParseOptions, parse } from '../parser';
+import type { ParseOptions } from '../parser';
+import { parse } from '../parser';
 import type { ESQLAstQueryExpression, EditorError } from '../types';
-import {
-  WrappingPrettyPrinter,
-  WrappingPrettyPrinterOptions,
-} from '../pretty_print/wrapping_pretty_printer';
+import type { WrappingPrettyPrinterOptions } from '../pretty_print/wrapping_pretty_printer';
+import { WrappingPrettyPrinter } from '../pretty_print/wrapping_pretty_printer';
 
 /**
  * Represents a parsed or programmatically created ES|QL query. Keeps track of
@@ -41,8 +40,8 @@ export class EsqlQuery {
     public readonly src: string = '',
 
     /**
-     * Optional array of ANTLR tokens, in case the query was parsed from a
-     * source code.
+     * Optional array of ANTLR tokens, in case the query was parsed from
+     * source text.
      */
     public readonly tokens: Token[] = [],
 

@@ -24,9 +24,10 @@ import {
   EuiText,
   useEuiTheme,
   useEuiFontSize,
+  EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
+import type { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
 import {
   RuleSettingsFlappingForm,
   RuleSettingsFlappingTitleTooltip,
@@ -76,6 +77,9 @@ export const RuleDefinition = () => {
   const dispatch = useRuleFormDispatch();
 
   const ruleDefinitionContainerCss = css`
+    .ruleDefinitionHeader {
+      align-items: center;
+    }
     @container (max-width: 767px) {
       .euiDescribedFormGroup {
         flex-direction: column;
@@ -85,15 +89,12 @@ export const RuleDefinition = () => {
       }
       .ruleDefinitionHeader {
         flex-direction: column;
-        gap: ${euiTheme.size.m};
-      }
-      .ruleDefinitionHeaderRuleTypeName {
-        font-size: ${useEuiFontSize('m')}
-        margin-bottom: ${euiTheme.size.xs}
+        align-items: flex-start;
+        gap: ${euiTheme.size.xs};
       }
       .ruleDefinitionHeaderRuleTypeDescription,
       .ruleDefinitionHeaderDocsLink {
-        font-size: ${useEuiFontSize('s')};
+        ${useEuiFontSize('s')}
       }
     }
   `;
@@ -225,12 +226,12 @@ export const RuleDefinition = () => {
       <EuiSplitPanel.Inner color="subdued">
         <EuiFlexGroup gutterSize="s" className="ruleDefinitionHeader">
           <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeName">
-            <EuiText size="xs" className="ruleDefinitionHeaderRuleTypeName">
-              <strong>{selectedRuleType.name}</strong>
-            </EuiText>
+            <EuiTitle size="s" className="ruleDefinitionHeaderRuleTypeName">
+              <h3>{selectedRuleType.name}</h3>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeDescription">
-            <EuiText size="xs" className="ruleDefinitionHeaderRuleTypeDescription">
+            <EuiText size="s" className="ruleDefinitionHeaderRuleTypeDescription">
               <p>{selectedRuleTypeModel.description}</p>
             </EuiText>
           </EuiFlexItem>
@@ -296,11 +297,7 @@ export const RuleDefinition = () => {
             <EuiText size="s">
               <p>
                 {SCHEDULE_DESCRIPTION_TEXT}&nbsp;
-                <EuiIconTip
-                  position="right"
-                  type="questionInCircle"
-                  content={SCHEDULE_TOOLTIP_TEXT}
-                />
+                <EuiIconTip position="right" type="question" content={SCHEDULE_TOOLTIP_TEXT} />
               </p>
             </EuiText>
           }
@@ -345,8 +342,9 @@ export const RuleDefinition = () => {
                       {ALERT_DELAY_DESCRIPTION_TEXT}&nbsp;
                       <EuiIconTip
                         position="right"
-                        type="questionInCircle"
+                        type="question"
                         content={ALERT_DELAY_HELP_TEXT}
+                        aria-label={ALERT_DELAY_HELP_TEXT}
                       />
                     </p>
                   </EuiText>
@@ -361,14 +359,12 @@ export const RuleDefinition = () => {
                   title={<h4>{ALERT_FLAPPING_DETECTION_TITLE}</h4>}
                   description={
                     <EuiText size="s">
-                      <p>
-                        {ALERT_FLAPPING_DETECTION_DESCRIPTION}
-                        <RuleSettingsFlappingTitleTooltip
-                          isOpen={isFlappingPopoverOpen}
-                          setIsPopoverOpen={setIsFlappingPopoverOpen}
-                          anchorPosition="downCenter"
-                        />
-                      </p>
+                      <p>{ALERT_FLAPPING_DETECTION_DESCRIPTION}</p>
+                      <RuleSettingsFlappingTitleTooltip
+                        isOpen={isFlappingPopoverOpen}
+                        setIsPopoverOpen={setIsFlappingPopoverOpen}
+                        anchorPosition="downCenter"
+                      />
                     </EuiText>
                   }
                 >

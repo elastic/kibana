@@ -65,7 +65,7 @@ describe('generateAdditiveMappingDiff', () => {
     const meta: IndexMappingMeta = {
       mappingVersions: {
         foo: '10.1.0',
-        bar: '7.9.0',
+        bar: '8.5.0',
       },
     };
 
@@ -77,7 +77,6 @@ describe('generateAdditiveMappingDiff', () => {
 
     expect(addedMappings).toEqual({
       foo: foo.mappings,
-      bar: bar.mappings,
     });
   });
 
@@ -108,7 +107,7 @@ describe('generateAdditiveMappingDiff', () => {
     const meta: IndexMappingMeta = {
       mappingVersions: {
         foo: '10.1.0',
-        bar: '8.2.0',
+        bar: '8.5.0',
         deletedType: '10.2.0',
       },
     };
@@ -121,7 +120,6 @@ describe('generateAdditiveMappingDiff', () => {
 
     expect(addedMappings).toEqual({
       foo: foo.mappings,
-      bar: bar.mappings,
     });
   });
 
@@ -268,7 +266,7 @@ describe('generateAdditiveMappingDiff', () => {
     const meta: IndexMappingMeta = {
       mappingVersions: {
         foo: '10.1.0',
-        bar: '7.9.0',
+        bar: '8.5.0',
       },
     };
 
@@ -288,7 +286,6 @@ describe('generateAdditiveMappingDiff', () => {
 
     expect(addedMappings).toEqual({
       foo: foo.mappings,
-      bar: bar.mappings,
       rootA: { type: 'keyword' },
     });
   });

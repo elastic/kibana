@@ -18,8 +18,12 @@ import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { mockAttackDiscovery } from '../mock/mock_attack_discovery';
 import { Results } from '.';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('./history', () => ({
+  History: () => <div data-test-subj="history" />,
+}));
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -96,12 +100,11 @@ describe('Results', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
     mockUseKibana.mockReturnValue({
       services: {
         application: {
           capabilities: {
-            siemV2: { crud_alerts: true, read_alerts: true },
+            [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
           },
           navigateToUrl: jest.fn(),
         },
@@ -143,35 +146,26 @@ describe('Results', () => {
     } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
   });
 
-  it('renders the EmptyStates when showEmptyStates returns true', () => {
-    render(
-      <TestProviders>
-        <Results {...defaultProps} aiConnectors={[]} />
-      </TestProviders>
-    );
+  describe('when isLoading is true', () => {
+    beforeEach(() => {
+      render(
+        <TestProviders>
+          <Results {...defaultProps} isLoading={true} />
+        </TestProviders>
+      );
+    });
 
-    expect(screen.getByTestId('welcome')).toBeInTheDocument();
-  });
+    it('does not render the welcome empty state', () => {
+      expect(screen.queryByTestId('welcome')).not.toBeInTheDocument();
+    });
 
-  it('calls onGenerate when the generate button is clicked', () => {
-    render(
-      <TestProviders>
-        <Results {...defaultProps} alertsContextCount={0} />
-      </TestProviders>
-    );
+    it('does not render the failure empty state', () => {
+      expect(screen.queryByTestId('failure')).not.toBeInTheDocument();
+    });
 
-    fireEvent.click(screen.getByTestId('generate'));
-
-    expect(defaultProps.onGenerate).toHaveBeenCalled();
-  });
-
-  it('renders the Summary when showSummary returns true', () => {
-    render(
-      <TestProviders>
-        <Results {...defaultProps} />
-      </TestProviders>
-    );
-    expect(screen.getByTestId('summary')).toBeInTheDocument();
+    it('does not render the noAlerts empty state', () => {
+      expect(screen.queryByTestId('noAlerts')).not.toBeInTheDocument();
+    });
   });
 
   it('calls onToggleShowAnonymized when the show anonymized toggle is clicked', () => {
@@ -186,15 +180,96 @@ describe('Results', () => {
     expect(defaultProps.onToggleShowAnonymized).toHaveBeenCalled();
   });
 
-  it('renders a AttackDiscoveryPanel for the attack discovery', () => {
+  it('renders the failure EmptyStates when failureReason is present and not loading', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        ...mockUseKibana().services,
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(false),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+
+    render(
+      <TestProviders>
+        <Results
+          {...defaultProps}
+          failureReason="some error"
+          isLoading={false}
+          attackDiscoveriesCount={0}
+        />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('failure')).toBeInTheDocument();
+  });
+
+  it('renders the welcome empty state when there are no connectors', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        ...mockUseKibana().services,
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(false),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+
+    render(
+      <TestProviders>
+        <Results {...defaultProps} aiConnectors={[]} attackDiscoveriesCount={0} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('welcome')).toBeInTheDocument();
+  });
+
+  it('renders the noAlerts empty state when alertsContextCount is 0', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        ...mockUseKibana().services,
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(false),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+
+    render(
+      <TestProviders>
+        <Results {...defaultProps} alertsContextCount={0} attackDiscoveriesCount={0} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('noAlerts')).toBeInTheDocument();
+  });
+
+  it('renders a AttackDiscoveryPanel for each attack discovery', () => {
     render(
       <TestProviders>
         <Results {...defaultProps} />
       </TestProviders>
     );
 
-    expect(screen.getAllByTestId('attackDiscovery')).toHaveLength(
-      defaultProps.selectedConnectorAttackDiscoveries.length
+    // The panel uses data-test-subj="attackDiscoveryPanel-<id>"
+    const panels = screen.getAllByTestId(/^attackDiscoveryPanel-/);
+    expect(panels).toHaveLength(defaultProps.selectedConnectorAttackDiscoveries.length);
+  });
+
+  it('renders the History component when attackDiscoveryAlertsEnabled is true', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        ...mockUseKibana().services,
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+
+    render(
+      <TestProviders>
+        <Results {...defaultProps} />
+      </TestProviders>
     );
+
+    expect(screen.getByTestId('history')).toBeInTheDocument();
   });
 });

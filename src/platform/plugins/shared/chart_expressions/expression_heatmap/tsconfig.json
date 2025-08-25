@@ -30,6 +30,9 @@
     "@kbn/visualization-utils",
     "@kbn/react-kibana-context-render",
     "@kbn/transpose-utils",
+    "@kbn/ebt-tools",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/chart-test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",

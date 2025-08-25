@@ -10,7 +10,7 @@
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -84,10 +84,10 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'dashboard',
             namespaces: ['default'],
             migrationVersion: {
-              dashboard: '10.2.0',
+              dashboard: '10.3.0',
             },
             coreMigrationVersion: '8.8.0',
-            typeMigrationVersion: '10.2.0',
+            typeMigrationVersion: '10.3.0',
             updated_at: resp.body.updated_at,
             created_at: resp.body.created_at,
             version: resp.body.version,

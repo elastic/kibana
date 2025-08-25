@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FindRulesSortField } from '../../../../common/api/detection_engine';
@@ -30,9 +31,7 @@ import {
   LAST_EXECUTION_COLUMN,
   RULE_NAME_COLUMN,
   SEARCH_DURATION_COLUMN,
-  TOTAL_UNFILLED_DURATION_COLUMN,
   useEnabledColumn,
-  useGapDurationColumn,
   useRuleExecutionStatusColumn,
 } from '../../../detection_engine/rule_management_ui/components/rules_table/use_columns';
 import { useUserData } from '../../../detections/components/user_info';
@@ -193,19 +192,17 @@ const useRulesColumns = ({ currentTab }: ColumnsProps): Array<EuiBasicTableColum
     isLoadingJobs: false,
     mlJobs: [],
   });
-  const gapDurationColumn = useGapDurationColumn();
 
   return useMemo(() => {
     if (currentTab === PromotionRuleTabs.monitoring) {
       return [
         {
           ...RULE_NAME_COLUMN,
-          width: '30%',
+          render: (value: Rule['name']) => <EuiText size="s">{value}</EuiText>,
+          width: '38%',
         } as EuiBasicTableColumn<Rule>,
         INDEXING_DURATION_COLUMN,
         SEARCH_DURATION_COLUMN,
-        gapDurationColumn,
-        TOTAL_UNFILLED_DURATION_COLUMN,
         LAST_EXECUTION_COLUMN,
         executionStatusColumn,
         enabledColumn,
@@ -215,11 +212,12 @@ const useRulesColumns = ({ currentTab }: ColumnsProps): Array<EuiBasicTableColum
     return [
       {
         ...RULE_NAME_COLUMN,
+        render: (value: Rule['name']) => <EuiText size="s">{value}</EuiText>,
         width: '100%',
       } as EuiBasicTableColumn<Rule>,
       LAST_EXECUTION_COLUMN,
       executionStatusColumn,
       enabledColumn,
     ];
-  }, [currentTab, enabledColumn, executionStatusColumn, gapDurationColumn]);
+  }, [currentTab, enabledColumn, executionStatusColumn]);
 };

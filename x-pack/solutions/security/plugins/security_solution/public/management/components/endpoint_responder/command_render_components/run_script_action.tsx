@@ -17,17 +17,22 @@ import type {
   ResponseActionRunScriptParameters,
 } from '../../../../../common/endpoint/types';
 import type { ActionRequestComponentProps } from '../types';
+export interface CrowdStrikeRunScriptActionParameters {
+  Raw?: string[];
+  HostPath?: string[];
+  CloudFile?: string[];
+  CommandLine?: string[];
+  Timeout?: number[];
+}
+
+export interface MicrosoftDefenderEndpointRunScriptActionParameters {
+  ScriptName: string[];
+  Args?: string[];
+}
 
 export const RunScriptActionResult = memo<
   ActionRequestComponentProps<
-    {
-      Raw?: string;
-      HostPath?: string;
-      CloudFile?: string;
-      CommandLine?: string;
-      Timeout?: number;
-      comment?: string;
-    },
+    CrowdStrikeRunScriptActionParameters | MicrosoftDefenderEndpointRunScriptActionParameters,
     ResponseActionRunScriptOutputContent,
     ResponseActionRunScriptParameters
   >
@@ -39,16 +44,44 @@ export const RunScriptActionResult = memo<
     if (!endpointId) {
       return;
     }
+    // Note TC: I had much issues moving this outside of useMemo - caused by command type. If you think this is a problem - please try to move it out.
+    const getParams = () => {
+      const args = command.args.args;
+
+      if (agentType === 'microsoft_defender_endpoint') {
+        const msDefenderArgs = args as MicrosoftDefenderEndpointRunScriptActionParameters;
+
+        return {
+          scriptName: msDefenderArgs.ScriptName?.[0],
+          args: msDefenderArgs.Args?.[0],
+        };
+      }
+
+      if (agentType === 'crowdstrike') {
+        const csArgs = args as CrowdStrikeRunScriptActionParameters;
+
+        return {
+          raw: csArgs.Raw?.[0],
+          hostPath: csArgs.HostPath?.[0],
+          cloudFile: csArgs.CloudFile?.[0],
+          commandLine: csArgs.CommandLine?.[0],
+          timeout: csArgs.Timeout?.[0],
+        };
+      }
+
+      return {};
+    };
+
+    const parameters = getParams();
+    // Early return if we have no parameters
+    if (Object.keys(parameters).length === 0) {
+      return;
+    }
+
     return {
       agent_type: agentType,
       endpoint_ids: [endpointId],
-      parameters: {
-        raw: command.args.args.Raw?.[0],
-        hostPath: command.args.args.HostPath?.[0],
-        cloudFile: command.args.args.CloudFile?.[0],
-        commandLine: command.args.args.CommandLine?.[0],
-        timeout: command.args.args.Timeout?.[0],
-      },
+      parameters,
       comment: command.args.args?.comment?.[0],
     };
   }, [command]);
@@ -87,7 +120,9 @@ export const RunScriptActionResult = memo<
         agentId={command.commandDefinition?.meta?.endpointId}
         textSize="s"
         data-test-subj="console"
-        hideFile={true}
+        // Currently file is not supported for CrowdStrike
+        hideFile={command.commandDefinition?.meta?.agentType === 'crowdstrike'}
+        showPasscode={false}
         hideContext={true}
       />
     </ResultComponent>

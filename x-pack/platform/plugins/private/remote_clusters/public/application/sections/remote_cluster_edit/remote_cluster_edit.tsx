@@ -19,8 +19,8 @@ import {
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useRouteMatch } from 'react-router-dom';
-import { RequestError } from '../../../types';
-import { Cluster, ClusterPayload } from '../../../../common/lib';
+import type { RequestError } from '../../../types';
+import type { Cluster, ClusterPayload } from '../../../../common/lib';
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
@@ -151,7 +151,7 @@ export const RemoteClusterEdit: React.FC<Props> = ({
                 />
               }
               color="warning"
-              iconType="help"
+              iconType="question"
             >
               <FormattedMessage
                 id="xpack.remoteClusters.edit.deprecatedSettingsMessage"

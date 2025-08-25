@@ -11,21 +11,21 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { uniqBy } from 'lodash';
 import type { DiscoverAppState } from '../discover_app_state_container';
-import type { DefaultAppStateColumn, ProfilesManager } from '../../../../context_awareness';
+import type { DefaultAppStateColumn, ScopedProfilesManager } from '../../../../context_awareness';
 import { getMergedAccessor } from '../../../../context_awareness';
 import type { DataDocumentsMsg } from '../discover_data_state_container';
 import type { TabState } from '../redux';
 
 export const getDefaultProfileState = ({
-  profilesManager,
+  scopedProfilesManager,
   resetDefaultProfileState,
   dataView,
 }: {
-  profilesManager: ProfilesManager;
+  scopedProfilesManager: ScopedProfilesManager;
   resetDefaultProfileState: TabState['resetDefaultProfileState'];
   dataView: DataView;
 }) => {
-  const defaultState = getDefaultState(profilesManager, dataView);
+  const defaultState = getDefaultState(scopedProfilesManager, dataView);
 
   return {
     /**
@@ -42,6 +42,10 @@ export const getDefaultProfileState = ({
         dataView.fields.getByName(defaultState.breakdownField)
       ) {
         stateUpdate.breakdownField = defaultState.breakdownField;
+      }
+
+      if (resetDefaultProfileState.hideChart && defaultState.hideChart !== undefined) {
+        stateUpdate.hideChart = defaultState.hideChart;
       }
 
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
@@ -94,9 +98,9 @@ export const getDefaultProfileState = ({
   };
 };
 
-const getDefaultState = (profilesManager: ProfilesManager, dataView: DataView) => {
+const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView: DataView) => {
   const getDefaultAppState = getMergedAccessor(
-    profilesManager.getProfiles(),
+    scopedProfilesManager.getProfiles(),
     'getDefaultAppState',
     () => ({})
   );

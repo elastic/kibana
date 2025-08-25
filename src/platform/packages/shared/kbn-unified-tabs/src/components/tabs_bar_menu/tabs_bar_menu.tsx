@@ -10,19 +10,17 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { EuiSelectableOption, EuiSelectableOptionsListProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiPopover,
   useGeneratedHtmlId,
-  EuiSelectableOption,
   EuiSelectable,
   EuiPopoverTitle,
   EuiHorizontalRule,
   EuiToolTip,
-  EuiSelectableOptionsListProps,
 } from '@elastic/eui';
 import type { TabItem } from '../../types';
-import type { TabsBarProps } from '../tabs_bar';
 
 const getOpenedTabsList = (
   tabItems: TabItem[],
@@ -42,18 +40,19 @@ const getRecentlyClosedTabsList = (tabItems: TabItem[]): EuiSelectableOption[] =
   }));
 };
 
-interface TabsBarMenuProps {
-  onSelectOpenedTab: TabsBarProps['onSelect'];
-  selectedItem: TabsBarProps['selectedItem'];
-  openedItems: TabsBarProps['items'];
-  recentlyClosedItems: TabsBarProps['recentlyClosedItems'];
+export interface TabsBarMenuProps {
+  items: TabItem[];
+  selectedItem: TabItem | null;
+  recentlyClosedItems: TabItem[];
+  onSelect: (item: TabItem) => Promise<void>;
+  onSelectRecentlyClosed: (item: TabItem) => Promise<void>;
 }
 
 export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
-  ({ openedItems, selectedItem, onSelectOpenedTab, recentlyClosedItems }) => {
+  ({ items, selectedItem, recentlyClosedItems, onSelect, onSelectRecentlyClosed }) => {
     const openedTabsList = useMemo(
-      () => getOpenedTabsList(openedItems, selectedItem),
-      [openedItems, selectedItem]
+      () => getOpenedTabsList(items, selectedItem),
+      [items, selectedItem]
     );
     const recentlyClosedTabsList = useMemo(
       () => getRecentlyClosedTabsList(recentlyClosedItems),
@@ -91,7 +90,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           css: popoverCss,
         }}
         button={
-          <EuiToolTip content={menuButtonLabel}>
+          <EuiToolTip content={menuButtonLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={menuButtonLabel}
               color="text"
@@ -109,9 +108,9 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           options={openedTabsList}
           onChange={(newOptions) => {
             const clickedTabId = newOptions.find((option) => option.checked)?.key;
-            const tabToNavigate = openedItems.find((tab) => tab.id === clickedTabId);
+            const tabToNavigate = items.find((tab) => tab.id === clickedTabId);
             if (tabToNavigate) {
-              onSelectOpenedTab(tabToNavigate);
+              onSelect(tabToNavigate);
               closePopover();
             }
           }}
@@ -137,12 +136,16 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
                 defaultMessage: 'Recently closed tabs list',
               })}
               options={recentlyClosedTabsList}
-              onChange={() => {
-                alert('restore tab'); // TODO restore closed tab
-                closePopover();
-              }}
               singleSelection={true}
               listProps={selectableListProps}
+              onChange={(newOptions) => {
+                const clickedTabId = newOptions.find((option) => option.checked)?.key;
+                const tabToNavigate = recentlyClosedItems.find((tab) => tab.id === clickedTabId);
+                if (tabToNavigate) {
+                  onSelectRecentlyClosed(tabToNavigate);
+                  closePopover();
+                }
+              }}
             >
               {(tabs) => (
                 <>

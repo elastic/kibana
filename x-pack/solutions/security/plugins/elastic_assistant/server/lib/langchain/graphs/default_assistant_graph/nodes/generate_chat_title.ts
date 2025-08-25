@@ -7,11 +7,18 @@
 import { StringOutputParser } from '@langchain/core/output_parsers';
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import type { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { BaseMessage } from '@langchain/core/messages';
+import { NEW_CHAT } from '../../../../../routes/helpers';
+import type { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
+import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../../telemetry/event_based_telemetry';
 import { getPrompt, promptDictionary } from '../../../../prompt';
-import { AgentState, NodeParamsBase } from '../types';
+import type { GraphInputs, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
+import { getActionTypeId } from '../../../../../routes/utils';
 
 export const GENERATE_CHAT_TITLE_PROMPT = ({
   prompt,
@@ -20,27 +27,53 @@ export const GENERATE_CHAT_TITLE_PROMPT = ({
   prompt: string;
   responseLanguage: string;
 }) =>
-  ChatPromptTemplate.fromMessages([
+  ChatPromptTemplate.fromMessages<{
+    newMessages: BaseMessage[];
+  }>([
     ['system', `${prompt}\nPlease create the title in ${responseLanguage}.`],
-    ['human', '{input}'],
+    ['placeholder', '{newMessages}'],
   ]);
 
 export interface GenerateChatTitleParams extends NodeParamsBase {
-  state: AgentState;
+  state: Pick<
+    GraphInputs,
+    'connectorId' | 'conversationId' | 'llmType' | 'responseLanguage' | 'isStream'
+  >;
+  newMessages: BaseMessage[];
   model: BaseChatModel;
+  conversationsDataClient?: AIAssistantConversationsDataClient;
+  telemetryParams?: TelemetryParams;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export async function generateChatTitle({
   actionsClient,
+  conversationsDataClient,
   logger,
   savedObjectsClient,
   state,
   model,
-}: GenerateChatTitleParams): Promise<Partial<AgentState>> {
+  telemetryParams,
+  telemetry,
+  newMessages,
+}: GenerateChatTitleParams): Promise<void> {
+  if (!state.conversationId) {
+    return;
+  }
   try {
     logger.debug(
       () => `${NodeType.GENERATE_CHAT_TITLE}: Node state:\n${JSON.stringify(state, null, 2)}`
     );
+    const conversation = await conversationsDataClient?.getConversation({
+      id: state.conversationId,
+    });
+    if (!conversation) {
+      logger.debug('No conversation found, skipping chat title generation');
+      return;
+    }
+    if (conversation?.title?.length && conversation?.title !== NEW_CHAT) {
+      return;
+    }
 
     const outputParser = new StringOutputParser();
     const prompt = await getPrompt({
@@ -51,25 +84,42 @@ export async function generateChatTitle({
       provider: state.llmType,
       savedObjectsClient,
     });
-    const graph = GENERATE_CHAT_TITLE_PROMPT({ prompt, responseLanguage: state.responseLanguage })
+    const graph = GENERATE_CHAT_TITLE_PROMPT({
+      prompt,
+      responseLanguage: state.responseLanguage ?? 'English',
+    })
       .pipe(model)
-      .pipe(outputParser);
+      .pipe(outputParser)
+      .withConfig({ runName: 'Generate Chat Title' });
 
     const chatTitle = await graph.invoke({
-      input: JSON.stringify(state.input, null, 2),
+      newMessages,
     });
     logger.debug(`chatTitle: ${chatTitle}`);
 
-    return {
-      chatTitle,
-      lastNode: NodeType.GENERATE_CHAT_TITLE,
-    };
+    if (conversation?.title !== chatTitle) {
+      await conversationsDataClient?.updateConversation({
+        conversationUpdateProps: {
+          id: state.conversationId,
+          title: chatTitle,
+        },
+      });
+    }
   } catch (e) {
-    return {
-      // generate a chat title if there is an error in order to complete the graph
-      // limit title to 60 characters
-      chatTitle: (e.name ?? e.message ?? e.toString()).slice(0, 60),
-      lastNode: NodeType.GENERATE_CHAT_TITLE,
-    };
+    telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+      actionTypeId: telemetryParams?.actionTypeId ?? getActionTypeId(state.llmType ?? `.gen-ai`),
+      model: telemetryParams?.model,
+      errorMessage: e.message ?? e.toString(),
+      assistantStreamingEnabled:
+        telemetryParams?.assistantStreamingEnabled ?? state.isStream ?? true,
+      isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
+      errorLocation: 'generateChatTitle',
+    });
+    await conversationsDataClient?.updateConversation({
+      conversationUpdateProps: {
+        id: state.conversationId,
+        title: (e.name ?? e.message ?? e.toString()).slice(0, 60),
+      },
+    });
   }
 }

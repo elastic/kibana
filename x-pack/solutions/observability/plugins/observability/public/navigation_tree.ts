@@ -32,6 +32,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
         children: [
           {
             link: 'observability-overview',
+            title,
+            icon,
+            renderAs: 'home',
+            sideNavVersion: 'v2',
+          },
+          {
+            link: 'observability-overview',
+            sideNavVersion: 'v1',
           },
           {
             title: i18n.translate('xpack.observability.obltNav.discover', {
@@ -69,15 +77,12 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'AI Assistant',
             }),
           },
-          {
-            link: 'inventory',
-            spaceBefore: 'm',
-          },
           ...(streamsAvailable
             ? [
                 {
                   link: 'streams' as const,
                   withBadge: true,
+                  badgeTypeV2: 'techPreview' as const,
                   badgeOptions: {
                     icon: 'beaker',
                     tooltip: i18n.translate('xpack.observability.obltNav.streamsBadgeTooltip', {
@@ -89,14 +94,29 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               ]
             : []),
           {
-            id: 'apm',
+            id: 'applications',
             title: i18n.translate('xpack.observability.obltNav.applications', {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
             children: [
               {
+                id: 'apm',
                 children: [
+                  {
+                    link: 'apm:service-map',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/service-map'));
+                    },
+                    sideNavStatus: 'hidden',
+                  },
+                  {
+                    link: 'apm:service-groups-list',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/service-groups'));
+                    },
+                    sideNavStatus: 'hidden',
+                  },
                   {
                     link: 'apm:services',
                     getIsActive: ({ pathNameSerialized }) => {
@@ -147,10 +167,34 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   },
                 ],
               },
+              {
+                id: 'uptime',
+                title: i18n.translate('xpack.observability.obltNav.apm.uptimeGroupTitle', {
+                  defaultMessage: 'Uptime',
+                }),
+                children: [
+                  {
+                    link: 'uptime',
+                    title: i18n.translate('xpack.observability.obltNav.apm.uptime.monitors', {
+                      defaultMessage: 'Uptime monitors',
+                    }),
+                  },
+                  {
+                    link: 'uptime:Certificates',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.apm.uptime.tlsCertificates',
+                      {
+                        defaultMessage: 'TLS certificates',
+                      }
+                    ),
+                  },
+                ],
+              },
             ],
           },
           {
             id: 'metrics',
+            link: 'metrics:inventory',
             title: i18n.translate('xpack.observability.obltNav.infrastructure', {
               defaultMessage: 'Infrastructure',
             }),
@@ -161,7 +205,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   {
                     link: 'metrics:inventory',
                     title: i18n.translate('xpack.observability.infrastructure.inventory', {
-                      defaultMessage: 'Infrastructure Inventory',
+                      defaultMessage: 'Infrastructure inventory',
                     }),
                     getIsActive: ({ pathNameSerialized, prepend }) => {
                       return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
@@ -189,7 +233,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 title: i18n.translate(
                   'xpack.observability.obltNav.infrastructure.universalProfiling',
                   {
-                    defaultMessage: 'Universal profiling',
+                    defaultMessage: 'Universal Profiling',
                   }
                 ),
                 children: [
@@ -256,7 +300,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               {
                 id: 'category-aiops_labs',
                 title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
-                  defaultMessage: 'Aiops labs',
+                  defaultMessage: 'AIOps labs',
                 }),
                 breadcrumbStatus: 'hidden',
                 children: [
@@ -381,6 +425,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                       { link: 'management:cross_cluster_replication' },
                       { link: 'management:remote_clusters' },
                       { link: 'management:migrate_data' },
+                      { link: 'management:content_connectors' },
                     ],
                   },
                   {
@@ -422,9 +467,15 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                       { link: 'management:objects' },
                       { link: 'management:tags' },
                       { link: 'management:search_sessions' },
-                      { link: 'management:aiAssistantManagementSelection' },
                       { link: 'management:spaces' },
                       { link: 'management:settings' },
+                    ],
+                  },
+                  {
+                    title: 'AI',
+                    children: [
+                      { link: 'management:genAiSettings' },
+                      { link: 'management:aiAssistantManagementSelection' },
                     ],
                   },
                   {

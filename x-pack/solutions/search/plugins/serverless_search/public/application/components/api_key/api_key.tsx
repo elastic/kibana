@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
 import { ApiKeySelectableTokenField } from '@kbn/security-api-key-management';
-import {
+import type {
   SecurityCreateApiKeyResponse,
   SecurityUpdateApiKeyResponse,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -183,7 +183,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
               {!!data?.apiKeys && (
                 <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon size="s" type="iInCircle" color="subdued" />
+                    <EuiIcon size="s" type="info" color="subdued" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="subdued">

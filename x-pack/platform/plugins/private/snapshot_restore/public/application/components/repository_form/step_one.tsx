@@ -24,13 +24,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
+import type { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common';
-import { SectionError, Error } from '../../../shared_imports';
+import type { Error } from '../../../shared_imports';
+import { SectionError } from '../../../shared_imports';
 
 import { useLoadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
-import { RepositoryValidation } from '../../services/validation';
+import type { RepositoryValidation } from '../../services/validation';
 import { SectionLoading, RepositoryTypeLogo } from '..';
 import { useCore } from '../../app_context';
 import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';
@@ -115,6 +116,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFieldText
+          isInvalid={Boolean(hasValidationErrors && validation.errors.name)}
           defaultValue={repository.name}
           fullWidth
           onChange={(e) => {
@@ -146,7 +148,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               href={getRepositoryTypeDocUrl(docLinks, type)}
               target="_blank"
               size="xs"
-              iconType="iInCircle"
+              iconType="info"
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.fields.typeDocsLinkText"
@@ -352,6 +354,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               defaultMessage="Fix errors before continuing."
             />
           }
+          role="alert"
           color="danger"
           data-test-subj="repositoryFormError"
         />

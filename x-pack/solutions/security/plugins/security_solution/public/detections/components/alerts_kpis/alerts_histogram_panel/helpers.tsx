@@ -6,7 +6,7 @@
  */
 
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
+import { RESET_GROUP_BY_FIELDS } from '../chart_panels/chart_settings_popover/configurations/default/translations';
 import type { LensDataTableEmbeddable } from '../../../../common/components/visualization_actions/types';
 
 interface LegacyLensEmbeddable {
@@ -92,8 +92,5 @@ export const createGenericSubtitle = (
   totalAlerts: string
 ) => !isInitialLoading && showTotalAlertsCount && totalAlerts;
 
-export const createEmbeddedDataSubtitle = (
-  embeddedDataLoaded: boolean,
-  embeddedDataAvailable: boolean,
-  totalAlerts: string
-) => embeddedDataLoaded && embeddedDataAvailable && totalAlerts;
+export const createEmbeddedDataSubtitle = (embeddedDataAvailable: boolean, totalAlerts: string) =>
+  embeddedDataAvailable && totalAlerts;

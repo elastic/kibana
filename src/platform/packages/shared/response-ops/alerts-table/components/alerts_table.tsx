@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Ref, FC } from 'react';
 import React, {
   useState,
   useCallback,
@@ -16,18 +17,16 @@ import React, {
   useEffect,
   useImperativeHandle,
   forwardRef,
-  Ref,
   memo,
-  FC,
 } from 'react';
 import { isEmpty } from 'lodash';
-import {
+import type {
   EuiDataGridColumn,
-  EuiProgress,
   EuiDataGridSorting,
   EuiDataGridControlColumn,
   EuiDataGridRefProps,
 } from '@elastic/eui';
+import { EuiProgress } from '@elastic/eui';
 import {
   ALERT_CASE_IDS,
   ALERT_MAINTENANCE_WINDOW_IDS,
@@ -41,7 +40,7 @@ import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import deepEqual from 'fast-deep-equal';
-import { Alert } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
 import { ErrorFallback } from './error_fallback';
@@ -50,8 +49,8 @@ import { Storage } from '../utils/storage';
 import { queryKeys } from '../constants';
 import { AlertsDataGrid } from './alerts_data_grid';
 import { EmptyState } from './empty_state';
-import { RenderContext, RowSelectionState } from '../types';
-import {
+import type { RenderContext, RowSelectionState } from '../types';
+import type {
   AdditionalContext,
   AlertsDataGridProps,
   AlertsTableImperativeApi,
@@ -187,7 +186,8 @@ const AlertsTableContent = typedForwardRef(
       toolbarVisibility,
       shouldHighlightRow,
       dynamicRowHeight = false,
-      emptyStateHeight,
+      emptyState,
+      openLinksInNewTab = false,
       additionalContext,
       renderCellValue,
       renderCellPopover,
@@ -195,8 +195,11 @@ const AlertsTableContent = typedForwardRef(
       renderFlyoutHeader,
       renderFlyoutBody,
       renderFlyoutFooter,
+      flyoutOwnsFocus = false,
+      flyoutPagination = true,
       renderAdditionalToolbarControls: AdditionalToolbarControlsComponent,
       lastReloadRequestTime,
+      configurationStorage = new Storage(window.localStorage),
       services,
       ...publicDataGridProps
     }: AlertsTableProps<AC>,
@@ -208,9 +211,9 @@ const AlertsTableContent = typedForwardRef(
     const { casesConfiguration, showInspectButton } = publicDataGridProps;
     const { data, cases: casesService, http, notifications, application, licensing } = services;
     const queryClient = useQueryClient({ context: AlertsQueryContext });
-    const storage = useRef(new Storage(window.localStorage));
+    const storageRef = useRef(configurationStorage);
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
-    const localStorageAlertsTableConfig = storage.current.get(
+    const localStorageAlertsTableConfig = storageRef.current.get(
       id
     ) as Partial<AlertsTablePersistedConfiguration>;
 
@@ -263,7 +266,7 @@ const AlertsTableContent = typedForwardRef(
     } = useColumns({
       ruleTypeIds,
       storageAlertsTable,
-      storage,
+      storage: storageRef,
       id,
       defaultColumns: initialColumns ?? DEFAULT_COLUMNS,
       alertsFields: propBrowserFields,
@@ -327,9 +330,9 @@ const AlertsTableContent = typedForwardRef(
 
     useEffect(() => {
       if (onLoaded && !isLoadingAlerts && isSuccess) {
-        onLoaded(alerts, columns);
+        onLoaded({ alerts, columns, totalAlertsCount: alertsCount });
       }
-    }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded]);
+    }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded, alertsCount]);
 
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
     const mutedAlertsQuery = useGetMutedAlertsQuery({
@@ -394,22 +397,27 @@ const AlertsTableContent = typedForwardRef(
 
     const onSortChange = useCallback(
       (_sort: EuiDataGridSorting['columns']) => {
-        const newSort = _sort.map((sortItem) => {
-          return {
-            [sortItem.id]: {
-              order: sortItem.direction,
-            },
-          };
-        });
+        const newSort = _sort
+          .map((sortItem) => {
+            return {
+              [sortItem.id]: {
+                order: sortItem.direction,
+              },
+            };
+          })
+          .filter((entry) => {
+            const sortKey = Object.keys(entry)[0];
+            return visibleColumns.includes(sortKey);
+          });
 
         storageAlertsTable.current = {
           ...storageAlertsTable.current,
           sort: newSort,
         };
-        storage.current.set(id, storageAlertsTable.current);
+        storageRef.current.set(id, storageAlertsTable.current);
         setSort(newSort);
       },
-      [id]
+      [id, visibleColumns]
     );
 
     const CasesContext = useMemo(() => {
@@ -478,6 +486,9 @@ const AlertsTableContent = typedForwardRef(
           renderFlyoutHeader,
           renderFlyoutBody,
           renderFlyoutFooter,
+          flyoutOwnsFocus,
+          flyoutPagination,
+          openLinksInNewTab,
           services: memoizedServices,
         } as RenderContext<AC>),
       [
@@ -508,6 +519,9 @@ const AlertsTableContent = typedForwardRef(
         renderFlyoutHeader,
         renderFlyoutBody,
         renderFlyoutFooter,
+        flyoutOwnsFocus,
+        flyoutPagination,
+        openLinksInNewTab,
         memoizedServices,
       ]
     );
@@ -592,7 +606,10 @@ const AlertsTableContent = typedForwardRef(
               additionalToolbarControls={additionalToolbarControls}
               alertsQuerySnapshot={alertsQuerySnapshot}
               showInspectButton={showInspectButton}
-              height={emptyStateHeight}
+              messageTitle={emptyState?.messageTitle}
+              messageBody={emptyState?.messageBody}
+              height={emptyState?.height}
+              variant={emptyState?.variant}
             />
           </InspectButtonContainer>
         )}

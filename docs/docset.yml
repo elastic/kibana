@@ -1,4 +1,6 @@
 project: 'Kibana docs'
+products:
+  - id: kibana
 exclude:
   - settings-gen/readme.md
   - development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.createdefaultinspectoradapters.md
@@ -32,7 +34,9 @@ subs:
   fleet-server:   "Fleet Server"
   package-manager:   "Elastic Package Manager"
   stack:   "Elastic Stack"
+  elastic-sec:   "Elastic Security"
   es:   "Elasticsearch"
+  esql:   "ES|QL"
   kib:   "Kibana"
   ls:   "Logstash"
   security-features:   "security features"
@@ -50,6 +54,7 @@ subs:
   bedrock:   "Amazon Bedrock"
   gemini:   "Google Gemini"
   hive:   "TheHive"
+  xsoar:   "XSOAR"
   report-features:   "reporting features"
   ml:   "machine learning"
   ccs:   "cross-cluster search"

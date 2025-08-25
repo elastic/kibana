@@ -572,6 +572,14 @@
                 "section": "def-public.SharePublicStart",
                 "text": "SharePublicStart"
               },
+              "; dashboard: ",
+              {
+                "pluginId": "dashboard",
+                "scope": "public",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-public.DashboardStart",
+                "text": "DashboardStart"
+              },
               "; }, unknown, ",
               "CoreStart",
               ">"
@@ -692,6 +700,26 @@
           },
           {
             "parentPluginId": "dashboardEnhanced",
+            "id": "def-public.StartDependencies.dashboard",
+            "type": "Object",
+            "tags": [],
+            "label": "dashboard",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dashboard",
+                "scope": "public",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-public.DashboardStart",
+                "text": "DashboardStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.StartDependencies.data",
             "type": "Object",
             "tags": [],
@@ -764,7 +792,9 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/plugin.ts",
             "deprecated": false,

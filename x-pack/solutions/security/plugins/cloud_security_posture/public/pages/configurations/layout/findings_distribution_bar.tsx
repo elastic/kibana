@@ -8,7 +8,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiHealth, EuiBadge, EuiSpacer, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import { useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { getAbbreviatedNumber, MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import type { Evaluation } from '../../../../common/types_old';
@@ -27,6 +27,20 @@ const I18N_FAILED_FINDINGS = i18n.translate('xpack.csp.findings.distributionBar.
   defaultMessage: 'Failed Findings',
 });
 
+const I18N_PASSED_FINDINGS_FILTER_LABEL = i18n.translate(
+  'xpack.csp.findings.distributionBar.passedFilterLabel',
+  {
+    defaultMessage: 'Filter for passed findings',
+  }
+);
+
+const I18N_FAILED_FINDINGS_FILTER_LABEL = i18n.translate(
+  'xpack.csp.findings.distributionBar.failedFilterLabel',
+  {
+    defaultMessage: 'Filter for failed findings',
+  }
+);
+
 export const FindingsDistributionBar = (props: Props) => (
   <div>
     <Counters {...props} />
@@ -36,6 +50,7 @@ export const FindingsDistributionBar = (props: Props) => (
 );
 const Counters = ({ passed, failed }: Pick<Props, 'passed' | 'failed'>) => {
   const { euiTheme } = useEuiTheme();
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
 
   return (
     <EuiFlexGroup
@@ -62,6 +77,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
   distributionOnClick,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
 
   return (
     <EuiFlexGroup
@@ -78,7 +94,8 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
           distributionOnClick(RULE_PASSED);
         }}
         data-test-subj="distribution_bar_passed"
-        aria-label={`${I18N_PASSED_FINDINGS}: ${passed}`}
+        aria-label={`${I18N_PASSED_FINDINGS_FILTER_LABEL}. ${I18N_PASSED_FINDINGS}: ${passed}`}
+        title={`${I18N_PASSED_FINDINGS_FILTER_LABEL}. ${I18N_PASSED_FINDINGS}: ${passed}`}
       />
       <DistributionBarPart
         value={failed}
@@ -87,7 +104,8 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
           distributionOnClick(RULE_FAILED);
         }}
         data-test-subj="distribution_bar_failed"
-        aria-label={`${I18N_FAILED_FINDINGS}: ${failed}`}
+        aria-label={`${I18N_FAILED_FINDINGS_FILTER_LABEL}. ${I18N_FAILED_FINDINGS}: ${failed}`}
+        title={`${I18N_FAILED_FINDINGS_FILTER_LABEL}. ${I18N_FAILED_FINDINGS}: ${failed}`}
       />
     </EuiFlexGroup>
   );
@@ -104,10 +122,12 @@ const DistributionBarPart = ({
   distributionOnClick: () => void;
   ['data-test-subj']: string;
   ['aria-label']: string;
+  title?: string;
 }) => (
   <button
     data-test-subj={rest['data-test-subj']}
     aria-label={rest['aria-label']}
+    title={rest.title}
     onClick={distributionOnClick}
     css={{
       background: color,

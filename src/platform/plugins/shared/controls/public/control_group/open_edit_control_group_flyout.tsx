@@ -7,106 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { i18n } from '@kbn/i18n';
-import { tracksOverlays } from '@kbn/presentation-containers';
-import { apiHasParentApi } from '@kbn/presentation-publishing';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import { openLazyFlyout } from '@kbn/presentation-util';
+import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 
-import { ControlStateManager } from '../controls/types';
-import { ControlGroupEditor } from './components/control_group_editor';
-import { ControlGroupApi, ControlGroupEditorState } from './types';
+import type { ControlGroupApi, ControlGroupEditorState } from './types';
 import { coreServices } from '../services/kibana_services';
+import { confirmDeleteAllControls } from '../common/confirm_delete_control';
 
 export const openEditControlGroupFlyout = (
   controlGroupApi: ControlGroupApi,
-  stateManager: ControlStateManager<ControlGroupEditorState>
+  stateManager: StateManager<ControlGroupEditorState>
 ) => {
-  /**
-   * Duplicate all state into a new manager because we do not want to actually apply the changes
-   * to the control group until the user hits save.
-   */
-  const editorStateManager: ControlStateManager<ControlGroupEditorState> = Object.keys(
-    stateManager
-  ).reduce((prev, key) => {
-    return {
-      ...prev,
-      [key as keyof ControlGroupEditorState]: new BehaviorSubject(
-        stateManager[key as keyof ControlGroupEditorState].getValue()
-      ),
-    };
-  }, {} as ControlStateManager<ControlGroupEditorState>);
+  const lastSavedState = stateManager.getLatestState();
 
-  const closeOverlay = (overlayRef: OverlayRef) => {
-    if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
-      controlGroupApi.parentApi.clearOverlays();
-    }
-    overlayRef.close();
-  };
-
-  const onDeleteAll = (ref: OverlayRef) => {
-    coreServices.overlays
-      .openConfirm(
-        i18n.translate('controls.controlGroup.management.delete.sub', {
-          defaultMessage: 'Controls are not recoverable once removed.',
-        }),
-        {
-          confirmButtonText: i18n.translate('controls.controlGroup.management.delete.confirm', {
-            defaultMessage: 'Delete',
-          }),
-          cancelButtonText: i18n.translate('controls.controlGroup.management.delete.cancel', {
-            defaultMessage: 'Cancel',
-          }),
-          title: i18n.translate('controls.controlGroup.management.delete.deleteAllTitle', {
-            defaultMessage: 'Delete all controls?',
-          }),
-          buttonColor: 'danger',
-        }
-      )
-      .then((confirmed) => {
-        if (confirmed)
-          Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {
-            controlGroupApi.removePanel(childId);
-          });
-        closeOverlay(ref);
-      });
-  };
-
-  const overlay = coreServices.overlays.openFlyout(
-    toMountPoint(
-      <ControlGroupEditor
-        api={controlGroupApi}
-        stateManager={editorStateManager}
-        onSave={() => {
-          Object.keys(stateManager).forEach((key) => {
-            (
-              stateManager[key as keyof ControlGroupEditorState] as BehaviorSubject<
-                ControlGroupEditorState[keyof ControlGroupEditorState]
-              >
-            ).next(editorStateManager[key as keyof ControlGroupEditorState].getValue());
-          });
-          closeOverlay(overlay);
-        }}
-        onDeleteAll={() => onDeleteAll(overlay)}
-        onCancel={() => closeOverlay(overlay)}
-      />,
-      coreServices
-    ),
-    {
+  openLazyFlyout({
+    core: coreServices,
+    parentApi: controlGroupApi.parentApi,
+    loadContent: async ({ closeFlyout }) => {
+      const { ControlGroupEditor } = await import('./components/control_group_editor');
+      return (
+        <ControlGroupEditor
+          api={controlGroupApi}
+          stateManager={stateManager}
+          onSave={closeFlyout}
+          onDeleteAll={() => {
+            confirmDeleteAllControls().then((confirmed) => {
+              if (confirmed)
+                Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {
+                  controlGroupApi.removePanel(childId);
+                });
+              closeFlyout();
+            });
+          }}
+          onCancel={() => {
+            stateManager.reinitializeState(lastSavedState);
+            closeFlyout();
+          }}
+        />
+      );
+    },
+    flyoutProps: {
       'aria-label': i18n.translate('controls.controlGroup.manageControl', {
         defaultMessage: 'Edit control settings',
       }),
-      size: 'm',
-      maxWidth: 500,
-      paddingSize: 'm',
       outsideClickCloses: false,
-      onClose: () => closeOverlay(overlay),
-    }
-  );
-
-  if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
-    controlGroupApi.parentApi.openOverlay(overlay);
-  }
+      triggerId: 'dashboard-controls-menu-button',
+    },
+  });
 };

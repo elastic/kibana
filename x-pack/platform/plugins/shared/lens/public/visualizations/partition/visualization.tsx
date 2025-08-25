@@ -6,22 +6,20 @@
  */
 
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  ColorMapping,
-  DEFAULT_COLOR_MAPPING_CONFIG,
-  PaletteRegistry,
-  getColorsFromMapping,
-} from '@kbn/coloring';
-import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
+import type { ColorMapping, PaletteRegistry } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG, getColorsFromMapping } from '@kbn/coloring';
+import type { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
-import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { AccessorConfig } from '@kbn/visualization-ui-components';
-import useObservable from 'react-use/lib/useObservable';
-import { getKbnPalettes } from '@kbn/palettes';
+import type { AccessorConfig, FormatFactory } from '@kbn/visualization-ui-components';
+import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
+
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   Visualization,
@@ -38,7 +36,7 @@ import {
   toExpression,
   toPreviewExpression,
 } from './to_expression';
-import { PieLayerState, PieVisualizationState } from '../../../common/types';
+import type { PieLayerState, PieVisualizationState } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
@@ -51,15 +49,15 @@ import { PieToolbar } from './toolbar';
 import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
-import { DatasourcePublicAPI } from '../..';
+import type { DatasourcePublicAPI } from '../..';
 import { nonNullable, getColorMappingDefaults } from '../../utils';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
-import { PersistedPieVisualizationState, convertToRuntime } from './persistence';
 import {
   PIE_RENDER_ARRAY_VALUES,
   PIE_TOO_MANY_DIMENSIONS,
   WAFFLE_SMALL_VALUES,
 } from '../../user_messages_ids';
+import { convertToRuntimeState } from './runtime_state';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -127,10 +125,12 @@ export const getDefaultColorForMultiMetricDimension = ({
 export const getPieVisualization = ({
   paletteService,
   kibanaTheme,
+  formatFactory,
 }: {
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
-}): Visualization<PieVisualizationState, PersistedPieVisualizationState> => ({
+  formatFactory: FormatFactory;
+}): Visualization<PieVisualizationState> => ({
   id: 'lnsPie',
   visualizationTypes,
   getVisualizationTypeId(state) {
@@ -161,10 +161,9 @@ export const getPieVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
-  initialize(addNewLayer, state, mainPalette) {
-    if (state) {
-      return convertToRuntime(state);
-    }
+  initialize(addNewLayer, state, mainPalette, datasourceStates) {
+    if (state) return convertToRuntimeState(state, datasourceStates);
+
     return {
       shape: PieChartTypes.DONUT,
       layers: [
@@ -175,6 +174,10 @@ export const getPieVisualization = ({
       ],
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
+  },
+
+  convertToRuntimeState(state, datasourceStates) {
+    return convertToRuntimeState(state, datasourceStates);
   },
 
   getMainPalette: (state) => {
@@ -498,17 +501,16 @@ export const getPieVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
-      darkMode: false,
-      name: 'amsterdam',
-    });
-    const palettes = getKbnPalettes(theme);
+    const isDarkMode = useKibanaIsDarkMode();
+    const palettes = useKbnPalettes();
+
     return (
       <DimensionEditor
         {...props}
         paletteService={paletteService}
         palettes={palettes}
-        isDarkMode={theme.darkMode}
+        isDarkMode={isDarkMode}
+        formatFactory={formatFactory}
       />
     );
   },

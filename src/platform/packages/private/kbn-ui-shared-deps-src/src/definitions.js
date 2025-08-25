@@ -13,13 +13,13 @@ const Fs = require('fs');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const localDist = Path.resolve(__dirname, '../shared_built_assets');
-const bazelDist = Path.resolve(REPO_ROOT, 'bazel-bin', Path.relative(REPO_ROOT, localDist));
+const builtDist = Path.resolve(REPO_ROOT, 'target', 'build', Path.relative(REPO_ROOT, localDist));
 
 // extracted const vars
 /**
  * Absolute path to the distributable directory
  */
-const distDir = Fs.existsSync(localDist) ? localDist : bazelDist;
+const distDir = Fs.existsSync(localDist) ? localDist : builtDist;
 
 /**
  * Filename of the main bundle file in the distributable directory
@@ -76,6 +76,7 @@ const externals = {
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
   'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
+  'chroma-js': '__kbnSharedDeps__.ChromaJs',
   // cache some used methods of the react-use library
   ...[
     'useAsync',

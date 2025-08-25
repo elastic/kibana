@@ -4,18 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiFlexItem,
   EuiPopover,
+  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSelectableOption,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from '../../../../components/mappings_editor/mappings_state_context';
-import { State } from '../../../../components/mappings_editor/types';
+import type { State } from '../../../../components/mappings_editor/types';
 import {
   getFieldsFromState,
   getFieldsMatchingFilterFromState,
@@ -38,6 +41,11 @@ export const MappingsFilter: React.FC<Props> = ({
 }) => {
   const [isFilterByPopoverVisible, setIsFilterPopoverVisible] = useState<boolean>(false);
   const dispatch = useDispatch();
+
+  const isClearAllFilterDisabled = !isAddingFields
+    ? state.filter.selectedOptions.filter((option) => option.checked === 'on').length === 0
+    : previousState.filter.selectedOptions.filter((option) => option.checked === 'on').length === 0;
+
   const setSelectedOptions = useCallback(
     (options: EuiSelectableOption[]) => {
       dispatch({
@@ -111,6 +119,20 @@ export const MappingsFilter: React.FC<Props> = ({
       })}
     </EuiFilterButton>
   );
+
+  const clearOptions = () => {
+    const clearCheckedOptions = (options: EuiSelectableOption[]) => {
+      return options.map((option) =>
+        option.checked === 'on' ? { ...option, checked: undefined } : option
+      );
+    };
+    if (!isAddingFields) {
+      setSelectedOptions(clearCheckedOptions(state.filter.selectedOptions));
+    } else {
+      setPreviousStateSelectedOptions(clearCheckedOptions(previousState.filter.selectedOptions));
+    }
+  };
+
   return (
     <EuiFilterGroup>
       <EuiPopover
@@ -119,6 +141,7 @@ export const MappingsFilter: React.FC<Props> = ({
         closePopover={() => setIsFilterPopoverVisible(!isFilterByPopoverVisible)}
         anchorPosition="downCenter"
         data-test-subj="indexDetailsMappingsFilter"
+        panelPaddingSize="none"
       >
         <EuiSelectable
           searchable
@@ -154,6 +177,24 @@ export const MappingsFilter: React.FC<Props> = ({
             </div>
           )}
         </EuiSelectable>
+        <EuiPopoverFooter paddingSize="xs">
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              color="danger"
+              size="s"
+              data-test-subj="clearFilters"
+              disabled={isClearAllFilterDisabled}
+              onClick={clearOptions}
+            >
+              {i18n.translate(
+                'xpack.idxMgmt.indexDetails.mappings.filterByFieldType.filter.clearAll',
+                {
+                  defaultMessage: 'Clear all',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiPopoverFooter>
       </EuiPopover>
     </EuiFilterGroup>
   );

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 fail() {
-  printf "%s\n" "$@" >&2
+  printf "\n\033[33m%s\e[0m\n\e[2m%s\e[0m\n" "$1" "$2" >&2
   exit 1
 }
 
@@ -26,6 +26,7 @@ ingest_api_key_encoded=""
 kibana_api_endpoint=""
 onboarding_flow_id=""
 elastic_agent_version=""
+metrics_enabled=true
 
 help() {
   echo "Usage: sudo ./auto-detect.sh <arguments>"
@@ -45,11 +46,6 @@ ensure_argument() {
     help
   fi
 }
-
-if [ "$EUID" -ne 0 ]; then
-  echo "Error: This script must be run as root."
-  help
-fi
 
 # Parse command line arguments
 for i in "$@"; do
@@ -74,6 +70,14 @@ for i in "$@"; do
     shift
     elastic_agent_version="${i#*=}"
     ;;
+  --metrics-enabled=*)
+    val="${1#*=}"
+    case "$val" in
+      true) metrics_enabled=true ;;
+      *) metrics_enabled=false ;;
+    esac
+    shift
+    ;;
   --help)
     help
     ;;
@@ -97,13 +101,14 @@ update_step_progress() {
   local PAYLOAD=${4:-}
   local data=""
 
-  MESSAGE=$(echo "$MESSAGE" | sed 's/"/\\"/g')
+  MESSAGE=$(printf "%s" "$MESSAGE" | base64 --wrap=0)
 
   if [ -z "$PAYLOAD" ]; then
     data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}"
   else
     data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\", \"payload\":${PAYLOAD}}"
   fi
+
   curl --request POST \
     --url "${kibana_api_endpoint}/internal/observability_onboarding/flow/${onboarding_flow_id}/step/${STEPNAME}" \
     --header "Authorization: ApiKey ${install_api_key_encoded}" \
@@ -116,6 +121,12 @@ update_step_progress() {
     --show-error \
     --fail
 }
+
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: This script must be run as root."
+  update_step_progress "logs-detect" "danger" "The user running the script doesn't have root privileges."
+  help
+fi
 
 update_step_progress "logs-detect" "initialize"
 
@@ -134,7 +145,6 @@ elastic_agent_config_path="/opt/Elastic/Agent/elastic-agent.yml"
 elastic_agent_tmp_config_path="/tmp/elastic-agent-config.tar"
 integration_names=()
 integration_titles=()
-config_files_with_password=()
 
 OS="$(uname)"
 ARCH="$(uname -m)"
@@ -160,73 +170,86 @@ elastic_agent_artifact_name="elastic-agent-${elastic_agent_version}-${os}-${arch
 download_elastic_agent() {
   local download_url="https://artifacts.elastic.co/downloads/beats/elastic-agent/${elastic_agent_artifact_name}.tar.gz"
   rm -rf "./${elastic_agent_artifact_name}" "./${elastic_agent_artifact_name}.tar.gz"
-  curl -L -O "$download_url" --silent --fail
+  agent_download_result=$(curl -L -O "$download_url" --silent --show-error --fail 2>&1)
+  local download_exit_code=$?
 
-  if [ "$?" -eq 0 ]; then
+  if [ $download_exit_code -eq 0 ]; then
     printf "\e[32;1m✓\e[0m %s\n" "Elastic Agent downloaded to $(pwd)/$elastic_agent_artifact_name.tar.gz"
     update_step_progress "ea-download" "complete"
   else
-    update_step_progress "ea-download" "danger" "Failed to download Elastic Agent, see script output for error."
-    fail "Failed to download Elastic Agent"
+    update_step_progress "ea-download" "danger" "Failed to download Elastic Agent. Curl error: $agent_download_result.\nURL: $download_url"
+    fail "Failed to download Elastic Agent" "$agent_download_result"
   fi
 }
 
 extract_elastic_agent() {
-  tar -xzf "${elastic_agent_artifact_name}.tar.gz"
+  agent_extract_result=$(tar -xzf "${elastic_agent_artifact_name}.tar.gz" 2>&1)
 
   if [ "$?" -eq 0 ]; then
     printf "\e[32;1m✓\e[0m %s\n" "Archive extracted"
     update_step_progress "ea-extract" "complete"
   else
-    update_step_progress "ea-extract" "danger" "Failed to extract Elastic Agent, see script output for error."
-    fail "Failed to extract Elastic Agent"
+    update_step_progress "ea-extract" "danger" "Failed to extract Elastic Agent. Tar Error: $agent_extract_result"
+    fail "Failed to extract Elastic Agent" "$agent_extract_result"
   fi
 }
 
 install_elastic_agent() {
-  "./${elastic_agent_artifact_name}/elastic-agent" install -f -n >/dev/null
+  agent_install_result=$("./${elastic_agent_artifact_name}/elastic-agent" install -f -n 2>&1)
 
   if [ "$?" -eq 0 ]; then
     printf "\e[32;1m✓\e[0m %s\n" "Elastic Agent installed to $(dirname "$elastic_agent_config_path")"
     update_step_progress "ea-install" "complete"
   else
-    update_step_progress "ea-install" "danger" "Failed to install Elastic Agent, see script output for error."
-    fail "Failed to install Elastic Agent"
+    update_step_progress "ea-install" "danger" "Failed to install Elastic Agent. Elastic Agent install error: $agent_install_result"
+    fail "Failed to install Elastic Agent" "$agent_install_result"
   fi
 }
 
 wait_for_elastic_agent_status() {
   local MAX_RETRIES=10
+  local DELAY_SECONDS=2
   local i=0
-  elastic-agent status >/dev/null 2>&1
-  local ELASTIC_AGENT_STATUS_EXIT_CODE="$?"
-  while [ "$ELASTIC_AGENT_STATUS_EXIT_CODE" -ne 0 ] && [ $i -le $MAX_RETRIES ]; do
-    sleep 1
-    elastic-agent status >/dev/null 2>&1
-    ELASTIC_AGENT_STATUS_EXIT_CODE="$?"
+
+  local output=$(elastic-agent status --output json 2>/dev/null)
+
+  while [ output != \{* ] && [ $i -le $MAX_RETRIES ]; do
+    sleep "$DELAY_SECONDS"
+    output=$(elastic-agent status --output json 2>/dev/null)
     ((i++))
   done
 
-  if [ "$ELASTIC_AGENT_STATUS_EXIT_CODE" -ne 0 ]; then
-    update_step_progress "ea-status" "warning" "Unable to determine agent status"
+  if [ "$i" -eq "$MAX_RETRIES" ]; then
+    update_step_progress "ea-status" "danger" "Elastic Agent did not report status in the allocated wait time ($((MAX_RETRIES * DELAY_SECONDS)) seconds)."
+    fail "Unable to get Elastic Agent status to proceed. Try re-running the script."
   fi
 }
 
 ensure_elastic_agent_healthy() {
-  # https://www.elastic.co/guide/en/fleet/current/elastic-agent-cmd-options.html#elastic-agent-status-command
-  ELASTIC_AGENT_STATES=(STARTING CONFIGURING HEALTHY DEGRADED FAILED STOPPING UPGRADING ROLLBACK)
-  # Get elastic-agent status in json format | removing extra states in the json | finding "state":value | removing , | removing "state": | trimming the result
-  ELASTIC_AGENT_STATE="$(elastic-agent status --output json | sed -n '/components/q;p' | grep state | sed 's/\(.*\),/\1 /' | sed 's/"state": //' | sed 's/[[:space:]]//g')"
-  # Get elastic-agent status in json format | removing extra states in the json | finding "message":value | removing , | removing "message": | trimming the result | removing ""
-  ELASTIC_AGENT_MESSAGE="$(elastic-agent status --output json | sed -n '/components/q;p' | grep message | sed 's/\(.*\),/\1 /' | sed 's/"message": //' | sed 's/[[:space:]]//g' | sed 's/\"//g')"
-  # Get elastic-agent status in json format | removing extra ids in the json | finding "id":value | removing , | removing "id": | trimming the result | removing ""
   ELASTIC_AGENT_ID="$(elastic-agent status --output json | sed -n '/components/q;p' | grep \"id\" | sed 's/\(.*\),/\1 /' | sed 's/"id": //' | sed 's/[[:space:]]//g' | sed 's/\"//g')"
 
-  if [ "${ELASTIC_AGENT_STATE}" = "2" ] && [ "${ELASTIC_AGENT_MESSAGE}" = "Running" ]; then
+  local MAX_RETRIES=10
+  local DELAY_SECONDS=2
+  local FOUND_HEALTHY=0
+
+  for ((i=0; i<MAX_RETRIES; i++)); do
+      local output=$(sudo elastic-agent status --output json 2>/dev/null)
+
+      if [[ "$output" =~ \"status\":\ *\"HEALTHY\" ]]; then
+          FOUND_HEALTHY=1
+          break
+      fi
+
+      sleep "$DELAY_SECONDS"
+  done
+
+  if [[ $FOUND_HEALTHY -eq 1 ]]; then
     update_step_progress "ea-status" "complete" "" "{\"agentId\": \"${ELASTIC_AGENT_ID}\"}"
   else
-    update_step_progress "ea-status" "danger" "Expected agent status HEALTHY / Running but got ${ELASTIC_AGENT_STATES[ELASTIC_AGENT_STATE]} / ${ELASTIC_AGENT_MESSAGE}"
-    fail "Elastic Agent is not healthy.\nCurrent status: ${ELASTIC_AGENT_STATES[ELASTIC_AGENT_STATE]} / ${ELASTIC_AGENT_MESSAGE}.\nFor help, please see our troubleshooting guide at https://www.elastic.co/guide/en/fleet/8.13/fleet-troubleshooting.html."
+    local current_status = $(elastic-agent status --output human)
+
+    update_step_progress "ea-status" "danger" "${current_status}"
+    fail "Elastic Agent is not healthy.\nCurrent status:\n${current_status}"
   fi
 }
 
@@ -281,8 +304,8 @@ install_integrations() {
     install_integrations_api_body_string+="$integration_name\tcustom\t$item\n"
   done
 
-  curl --request POST \
-    --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install" \
+  install_integrations_result=$(curl --request POST \
+    --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install?metricsEnabled=$metrics_enabled" \
     --header "Authorization: ApiKey $install_api_key_encoded" \
     --header "Content-Type: text/tab-separated-values" \
     --header "Accept: application/x-tar" \
@@ -292,13 +315,13 @@ install_integrations() {
     --silent \
     --show-error \
     --fail \
-    --output "$elastic_agent_tmp_config_path"
+    --output "$elastic_agent_tmp_config_path" 2>&1)
 
   if [ "$?" -eq 0 ]; then
     printf "\n\e[32;1m✓\e[0m %s\n" "Integrations installed"
   else
-    update_step_progress "install-integrations" "danger" "Failed to install integrations"
-    fail "Failed to install integrations"
+    update_step_progress "install-integrations" "danger" "Failed to install integrations.\nCurl error: $install_integrations_result.\nIntegrations: $install_integrations_api_body_string"
+    fail "Failed to install integrations" "$install_integrations_result"
   fi
 }
 
@@ -323,10 +346,6 @@ apply_elastic_agent_config() {
     while IFS= read -r file; do
       local path="$(dirname "$elastic_agent_config_path")/$file"
       printf "  \e[36m%s\e[0m\n" "$path"
-      grep '<PASSWORD>' "$path" >/dev/null
-      if [ "$?" -eq 0 ]; then
-        config_files_with_password+=("$path")
-      fi
     done < <(tar --list --file "$elastic_agent_tmp_config_path" | grep '\.yml$')
 
     update_step_progress "ea-config" "complete"
@@ -637,7 +656,7 @@ extract_elastic_agent
 install_elastic_agent
 apply_elastic_agent_config
 
-printf "\n\e[1m%s\e[0m\n" "Waiting for healthy status..."
+printf "\n\e[1m%s\e[0m\n" "Waiting for Elastic Agent status..."
 wait_for_elastic_agent_status
 ensure_elastic_agent_healthy
 
@@ -645,7 +664,12 @@ printf "\n\e[32m%s\e[0m\n" "🎉 Elastic Agent is configured and running!"
 
 printf "\n\e[1m%s\e[0m\n" "Next steps:"
 printf "\n• %s\n" "Go back to Kibana and check for incoming data"
-for path in "${config_files_with_password[@]}"; do
-  printf "\n• %s:\n  \e[36m%s\e[0m\n" "Collect $(known_integration_title "$(basename "${path%.yml}")") metrics by adding your username and password to" "$path"
-done
+
+current_status=$(elastic-agent status --output human)
+status_exit_code=$?
+
+if [ $status_exit_code -ne 0 ]; then
+  printf "\n• %s\n  %s\n\e[36m%s\e[0m\n" "Some integration may require additional configuration, like login and password to collect metrics." "Here is the current Elastic Agent status for unhealthy data streams:" "$current_status"
+fi
+
 printf "\n• %s:\n  \e[36;4m%s\e[0m\n" "For information on other standalone integration setups, visit" "https://www.elastic.co/guide/en/fleet/current/elastic-agent-configuration.html"

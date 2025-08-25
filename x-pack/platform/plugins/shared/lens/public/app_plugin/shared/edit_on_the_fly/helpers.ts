@@ -11,7 +11,7 @@ import {
   formatESQLColumns,
   mapVariableToColumn,
 } from '@kbn/esql-utils';
-import { isEqual, cloneDeep } from 'lodash';
+import { isEqual } from 'lodash';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
@@ -25,7 +25,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getTime } from '@kbn/data-plugin/common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 
@@ -197,7 +197,7 @@ export const injectESQLQueryIntoLensLayers = (
     return attributes;
   }
 
-  const datasourceState = cloneDeep(attributes.state.datasourceStates[datasourceId]);
+  const datasourceState = structuredClone(attributes.state.datasourceStates[datasourceId]);
 
   if (datasourceState && datasourceState.layers) {
     Object.values(datasourceState.layers).forEach((layer) => {

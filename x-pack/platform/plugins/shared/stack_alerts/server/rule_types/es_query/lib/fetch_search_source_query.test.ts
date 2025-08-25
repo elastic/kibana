@@ -659,6 +659,27 @@ describe('fetchSearchSourceQuery', () => {
       }
     });
 
+    it('should throw user error if data view does not have a timefield', async () => {
+      try {
+        const dataView = createDataView();
+        dataView.timeFieldName = undefined;
+        const searchSourceInstance = createSearchSourceMock({ index: dataView });
+
+        await updateSearchSource(
+          searchSourceInstance,
+          dataView,
+          defaultParams,
+          '2020-01-09T22:12:41.941Z',
+          new Date().toISOString(),
+          new Date().toISOString(),
+          logger
+        );
+      } catch (err) {
+        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+        expect(err.message).toBe('Data view with ID test-id no longer contains a time field.');
+      }
+    });
+
     it('should re-throw error for generic errors', async () => {
       searchSourceCommonMock.createLazy.mockImplementationOnce(() => {
         throw new Error('fail');

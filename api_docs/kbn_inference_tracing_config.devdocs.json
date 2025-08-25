@@ -1,0 +1,211 @@
+{
+  "id": "@kbn/inference-tracing-config",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/inference-tracing-config",
+        "id": "def-common.InferenceTracingLangfuseExportConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceTracingLangfuseExportConfig",
+        "description": [
+          "\nConfiguration schema for the Langfuse exporter."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing-config",
+            "id": "def-common.InferenceTracingLangfuseExportConfig.base_url",
+            "type": "string",
+            "tags": [],
+            "label": "base_url",
+            "description": [
+              "\nThe URL for Langfuse server and Langfuse UI."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing-config",
+            "id": "def-common.InferenceTracingLangfuseExportConfig.public_key",
+            "type": "string",
+            "tags": [],
+            "label": "public_key",
+            "description": [
+              "\nThe public key for API requests to Langfuse server."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing-config",
+            "id": "def-common.InferenceTracingLangfuseExportConfig.secret_key",
+            "type": "string",
+            "tags": [],
+            "label": "secret_key",
+            "description": [
+              "\nThe secret key for API requests to Langfuse server."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing-config",
+            "id": "def-common.InferenceTracingLangfuseExportConfig.scheduled_delay",
+            "type": "number",
+            "tags": [],
+            "label": "scheduled_delay",
+            "description": [
+              "\nThe delay in milliseconds before the exporter sends another\nbatch of spans."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-tracing-config",
+        "id": "def-common.InferenceTracingPhoenixExportConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceTracingPhoenixExportConfig",
+        "description": [
+          "\nConfiguration schema for the Phoenix exporter."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing-config",
+            "id": "def-common.InferenceTracingPhoenixExportConfig.base_url",
+            "type": "string",
+            "tags": [],
+            "label": "base_url",
+            "description": [
+              "\nThe URL for Phoenix server."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing-config",
+            "id": "def-common.InferenceTracingPhoenixExportConfig.public_url",
+            "type": "string",
+            "tags": [],
+            "label": "public_url",
+            "description": [
+              "\nThe URL for Phoenix UI."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing-config",
+            "id": "def-common.InferenceTracingPhoenixExportConfig.project_name",
+            "type": "string",
+            "tags": [],
+            "label": "project_name",
+            "description": [
+              "\nThe project in which traces are stored. Used for\ngenerating links to Phoenix UI."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing-config",
+            "id": "def-common.InferenceTracingPhoenixExportConfig.api_key",
+            "type": "string",
+            "tags": [],
+            "label": "api_key",
+            "description": [
+              "\nThe API key for API requests to Phoenix server."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing-config",
+            "id": "def-common.InferenceTracingPhoenixExportConfig.scheduled_delay",
+            "type": "number",
+            "tags": [],
+            "label": "scheduled_delay",
+            "description": [
+              "\nThe delay in milliseconds before the exporter sends another\nbatch of spans."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/inference-tracing-config",
+        "id": "def-common.inferenceTracingExportConfigSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "inferenceTracingExportConfigSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<",
+          "InferenceTracingExportConfig",
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

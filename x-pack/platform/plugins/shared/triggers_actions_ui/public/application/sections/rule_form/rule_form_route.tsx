@@ -27,8 +27,8 @@ export const RuleFormRoute = () => {
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
+    contentManagement,
     chrome,
-    isServerless,
     setBreadcrumbs,
     ...startServices
   } = useKibana().services;
@@ -74,9 +74,9 @@ export const RuleFormRoute = () => {
           docLinks,
           ruleTypeRegistry,
           actionTypeRegistry,
+          contentManagement,
           ...startServices,
         }}
-        isServerless={isServerless}
         id={id}
         ruleTypeId={ruleTypeId}
         onCancel={() => {

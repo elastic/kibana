@@ -256,7 +256,7 @@ describe('publishing subject', () => {
           screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
         ).toBeInTheDocument();
       });
-      expect(renderCount).toBe(7);
+      expect(renderCount).toBe(2);
     });
   });
 

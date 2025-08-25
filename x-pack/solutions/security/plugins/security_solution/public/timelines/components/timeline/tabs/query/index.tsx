@@ -15,9 +15,9 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
-import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
   DocumentDetailsLeftPanelKey,
@@ -71,13 +71,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   end,
   filters,
   timelineId,
-  isLive,
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
   kqlQueryLanguage,
-  renderCellValue,
   rowRenderers,
   show,
   showCallOutUnauthorizedMsg,
@@ -91,7 +89,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { dataViewSpec: experimentalDataView, status: sourcererStatus } = useDataViewSpec(
+  const { dataView: experimentalDataView, status: sourcererStatus } = useDataView(
     SourcererScopeName.timeline
   );
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
@@ -104,18 +102,25 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const loadingSourcerer = newDataViewPickerEnabled
-    ? sourcererStatus !== 'ready'
-    : oldLoadingSourcerer;
-  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
+  const loadingSourcerer = useMemo(
+    () => (newDataViewPickerEnabled ? sourcererStatus !== 'ready' : oldLoadingSourcerer),
+    [newDataViewPickerEnabled, oldLoadingSourcerer, sourcererStatus]
+  );
+  const browserFields = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),
+    [experimentalBrowserFields, newDataViewPickerEnabled, oldBrowserFields]
+  );
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+  );
+  const dataViewId = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId),
+    [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
+  );
 
   /*
    * `pageIndex` needs to be maintained for each table in each tab independently
@@ -147,17 +152,33 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [kqlQueryExpression, kqlQueryLanguage]
   );
 
+  const runtimeMappings = useMemo(() => {
+    return newDataViewPickerEnabled
+      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings)
+      : (oldSourcererDataViewSpec.runtimeFieldMap as RunTimeMappings);
+  }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec.runtimeFieldMap]);
+
   const combinedQueries = useMemo(() => {
     return combineQueries({
       config: esQueryConfig,
       dataProviders,
-      dataViewSpec: sourcererDataView,
+      dataViewSpec: oldSourcererDataViewSpec,
+      dataView: experimentalDataView,
       browserFields,
       filters,
       kqlQuery,
       kqlMode,
     });
-  }, [esQueryConfig, dataProviders, sourcererDataView, browserFields, filters, kqlQuery, kqlMode]);
+  }, [
+    esQueryConfig,
+    dataProviders,
+    oldSourcererDataViewSpec,
+    experimentalDataView,
+    browserFields,
+    filters,
+    kqlQuery,
+    kqlMode,
+  ]);
 
   useInvalidFilterQuery({
     id: timelineId,
@@ -207,7 +228,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       indexNames: selectedPatterns,
       language: kqlQuery.language,
       limit: sampleSize,
-      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings,
       skip: !canQueryTimeline,
       sort: timelineQuerySortField,
       startDate: start,
@@ -462,7 +483,6 @@ const makeMapStateToProps = () => {
       timelineId,
       pinnedEventIds,
       eventIdToNoteIds,
-      isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
@@ -490,7 +510,6 @@ const QueryTabContent = connector(
       compareQueryProps(prevProps, nextProps) &&
       prevProps.activeTab === nextProps.activeTab &&
       isTimerangeSame(prevProps, nextProps) &&
-      prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&

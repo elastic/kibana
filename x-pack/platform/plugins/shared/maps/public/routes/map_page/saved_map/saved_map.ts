@@ -8,13 +8,14 @@
 import _ from 'lodash';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { ScopedHistory } from '@kbn/core/public';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { ScopedHistory } from '@kbn/core/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { MapAttributes } from '../../../../common/content_management';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
-import { MapSettings } from '../../../../common/descriptor_types';
+import type { MapStore, MapStoreState } from '../../../reducers/store';
+import { createMapStore } from '../../../reducers/store';
+import type { MapSettings } from '../../../../common/descriptor_types';
 import {
   getTimeFilters,
   getMapZoom,
@@ -35,9 +36,10 @@ import {
   setHiddenLayers,
 } from '../../../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
-import { loadFromLibrary, SharingSavedObjectProps } from './load_from_library';
+import type { SharingSavedObjectProps } from './load_from_library';
+import { loadFromLibrary } from './load_from_library';
 import { saveToLibrary } from './save_to_library';
-import { MapSerializedState } from '../../../react_embeddable/types';
+import type { MapSerializedState } from '../../../react_embeddable/types';
 import {
   getCoreChrome,
   getIndexPatternService,
@@ -47,13 +49,13 @@ import {
   getUsageCollection,
   getServerless,
 } from '../../../kibana_services';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
+import type { LayerDescriptor } from '../../../../common/descriptor_types';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 import { whenLicenseInitialized } from '../../../licensed_features';
-import { ParsedMapStateJSON, ParsedUiStateJSON } from './types';
+import type { ParsedMapStateJSON, ParsedUiStateJSON } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
@@ -124,6 +126,11 @@ export class SavedMap {
 
   public getStore() {
     return this._store;
+  }
+
+  public async reset(mapSerializedState: MapSerializedState) {
+    this._mapSerializedState = mapSerializedState;
+    await this.whenReady();
   }
 
   async whenReady() {
@@ -469,11 +476,11 @@ export class SavedMap {
     await this._syncAttributesWithStore();
 
     let mapSerializedState: MapSerializedState | undefined;
+    const { attributes, references } = extractReferences({
+      attributes: this._attributes,
+    });
     if (saveByReference) {
       try {
-        const { attributes, references } = extractReferences({
-          attributes: this._attributes,
-        });
         const savedObjectsTagging = getSavedObjectsTagging();
         const tagReferences =
           savedObjectsTagging && tags ? savedObjectsTagging.ui.updateTagsReferences([], tags) : [];
@@ -521,7 +528,7 @@ export class SavedMap {
         state: {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
-          input: mapSerializedState,
+          serializedState: { rawState: mapSerializedState, references },
         },
         path: this._originatingPath,
       });
@@ -530,7 +537,7 @@ export class SavedMap {
       await this._getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
         state: {
           type: MAP_SAVED_OBJECT_TYPE,
-          input: mapSerializedState,
+          serializedState: { rawState: mapSerializedState, references },
         },
         path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
       });

@@ -9,9 +9,9 @@
 
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import React, { useCallback, useMemo } from 'react';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
+import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 
@@ -71,10 +71,15 @@ export const PresentationPanelHeader = <
         padding: 0px ${euiTheme.size.s};
 
         display: flex;
-        flex-grow: 1;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         column-gap: ${euiTheme.size.s};
         align-items: center;
+        // all direct children now share the available parent width equally, ensuring consistent layout regardless of their content length
+        > * {
+          min-width: 0;
+          flex: 1 !important;
+          max-width: fit-content !important;
+        }
       `,
     };
   }, [euiTheme.colors.warning, euiTheme.size]);

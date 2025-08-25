@@ -17,147 +17,134 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { SerializedPanelState, StateComparators } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
-  getUnchangingComparator,
   initializeTitleManager,
-  SerializedTitles,
-  SerializedPanelState,
   useBatchedPublishingSubjects,
+  initializeStateManager,
+  titleComparators,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { serializeBookAttributes, stateManagerFromAttributes } from './book_state';
-import { SAVED_BOOK_ID } from './constants';
-import { openSavedBookEditor } from './saved_book_editor';
-import { loadBookAttributes, saveBookAttributes } from './saved_book_library';
-import {
-  BookApi,
-  BookAttributes,
-  BookByReferenceSerializedState,
-  BookByValueSerializedState,
-  BookRuntimeState,
-  BookSerializedState,
-} from './types';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { merge } from 'rxjs';
+import { openLazyFlyout } from '@kbn/presentation-util';
+import type { BookState } from '../../../server';
+import { defaultBookState } from './default_book_state';
+import { loadBook, saveBook } from './library_utils';
+import type { BookApi } from './types';
+import type { BookEmbeddableState, BookByReferenceState } from '../../../common';
+import { BOOK_EMBEDDABLE_TYPE } from '../../../common';
 
-const bookSerializedStateIsByReference = (
-  state?: BookSerializedState
-): state is BookByReferenceSerializedState => {
-  return Boolean(state && (state as BookByReferenceSerializedState).savedBookId);
+const bookStateComparators: StateComparators<BookState> = {
+  bookTitle: 'referenceEquality',
+  authorName: 'referenceEquality',
+  bookSynopsis: 'referenceEquality',
+  numberOfPages: 'referenceEquality',
 };
 
 export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
-  const savedBookEmbeddableFactory: ReactEmbeddableFactory<
-    BookSerializedState,
-    BookRuntimeState,
-    BookApi
-  > = {
-    type: SAVED_BOOK_ID,
-    deserializeState: async (serializedState) => {
-      // panel state is always stored with the parent.
-      const titlesState: SerializedTitles = {
-        title: serializedState.rawState.title,
-        hidePanelTitles: serializedState.rawState.hidePanelTitles,
-        description: serializedState.rawState.description,
-      };
-
-      const savedBookId = bookSerializedStateIsByReference(serializedState.rawState)
-        ? serializedState.rawState.savedBookId
-        : undefined;
-
-      const attributes: BookAttributes = bookSerializedStateIsByReference(serializedState.rawState)
-        ? await loadBookAttributes(serializedState.rawState.savedBookId)!
-        : serializedState.rawState.attributes;
-
-      // Combine the serialized state from the parent with the state from the
-      // external store to build runtime state.
-      return {
-        ...titlesState,
-        ...attributes,
-        savedBookId,
-      };
-    },
-    buildEmbeddable: async (state, buildApi) => {
-      const titleManager = initializeTitleManager(state);
-      const bookAttributesManager = stateManagerFromAttributes(state);
-      const isByReference = Boolean(state.savedBookId);
-
-      const serializeBook = (byReference: boolean, newId?: string) => {
-        if (byReference) {
-          // if this book is currently by reference, we serialize the reference only.
-          const bookByReferenceState: BookByReferenceSerializedState = {
-            savedBookId: newId ?? state.savedBookId!,
-            ...titleManager.serialize(),
-          };
-          return { rawState: bookByReferenceState };
-        }
-        // if this book is currently by value, we serialize the entire state.
-        const bookByValueState: BookByValueSerializedState = {
-          attributes: serializeBookAttributes(bookAttributesManager),
-          ...titleManager.serialize(),
-        };
-        return { rawState: bookByValueState };
-      };
-
-      const api = buildApi(
-        {
-          ...titleManager.api,
-          onEdit: async () => {
-            openSavedBookEditor({
-              attributesManager: bookAttributesManager,
-              parent: api.parentApi,
-              isCreate: false,
-              core,
-              api,
-            }).then((result) => {
-              const nextIsByReference = Boolean(result.savedBookId);
-
-              // if the by reference state has changed during this edit, reinitialize the panel.
-              if (
-                nextIsByReference !== isByReference &&
-                apiIsPresentationContainer(api.parentApi)
-              ) {
-                api.parentApi.replacePanel<BookSerializedState>(api.uuid, {
-                  serializedState: serializeBook(nextIsByReference, result.savedBookId),
-                  panelType: api.type,
-                });
-              }
-            });
-          },
-          isEditingEnabled: () => true,
-          getTypeDisplayName: () =>
-            i18n.translate('embeddableExamples.savedbook.editBook.displayName', {
-              defaultMessage: 'book',
-            }),
-          serializeState: () => serializeBook(isByReference),
-
-          // library transforms
-          getSavedBookId: () => state.savedBookId,
-          saveToLibrary: async (newTitle: string) => {
-            bookAttributesManager.bookTitle.next(newTitle);
-            const newId = await saveBookAttributes(
-              undefined,
-              serializeBookAttributes(bookAttributesManager)
-            );
-            return newId;
-          },
-          checkForDuplicateTitle: async (title) => {},
-          getSerializedStateByValue: () =>
-            serializeBook(false) as SerializedPanelState<BookByValueSerializedState>,
-          getSerializedStateByReference: (newId) =>
-            serializeBook(true, newId) as SerializedPanelState<BookByReferenceSerializedState>,
-          canLinkToLibrary: async () => !isByReference,
-          canUnlinkFromLibrary: async () => isByReference,
-        },
-        {
-          savedBookId: getUnchangingComparator(), // saved book id will not change over the lifetime of the embeddable.
-          ...bookAttributesManager.comparators,
-          ...titleManager.comparators,
-        }
+  const savedBookEmbeddableFactory: EmbeddableFactory<BookEmbeddableState, BookApi> = {
+    type: BOOK_EMBEDDABLE_TYPE,
+    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+      const titleManager = initializeTitleManager(initialState.rawState);
+      const savedObjectId = (initialState.rawState as BookByReferenceState).savedObjectId;
+      const initialBookState = savedObjectId
+        ? await loadBook(savedObjectId)
+        : initialState.rawState;
+      const bookStateManager = initializeStateManager<BookState>(
+        initialBookState as BookState,
+        defaultBookState
       );
+      const isByReference = Boolean(savedObjectId);
+
+      const serializeBook = (id?: string) => {
+        return {
+          rawState: {
+            ...titleManager.getLatestState(),
+            ...(id ? { savedObjectId: id } : bookStateManager.getLatestState()),
+          },
+        };
+      };
+
+      const serializeState = () => serializeBook(savedObjectId);
+
+      const unsavedChangesApi = initializeUnsavedChanges<BookEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState,
+        anyStateChange$: merge(titleManager.anyStateChange$, bookStateManager.anyStateChange$),
+        getComparators: () => {
+          return {
+            ...titleComparators,
+            ...bookStateComparators,
+            savedObjectId: 'skip', // saved book id will not change over the lifetime of the embeddable.
+          };
+        },
+        onReset: async (lastSaved) => {
+          titleManager.reinitializeState(lastSaved?.rawState);
+          if (!savedObjectId) bookStateManager.reinitializeState(lastSaved?.rawState as BookState);
+        },
+      });
+
+      const api = finalizeApi({
+        ...unsavedChangesApi,
+        ...titleManager.api,
+        onEdit: async () => {
+          openLazyFlyout({
+            core,
+            parentApi: api.parentApi,
+            loadContent: async ({ closeFlyout }) => {
+              const { getSavedBookEditor } = await import('./saved_book_editor');
+              return getSavedBookEditor({
+                closeFlyout,
+                stateManager: bookStateManager,
+                isCreate: false,
+                api,
+                onSubmit: (result: { savedObjectId?: string }) => {
+                  const nextIsByReference = Boolean(result.savedObjectId);
+
+                  // if the by reference state has changed during this edit, reinitialize the panel.
+                  if (
+                    nextIsByReference !== isByReference &&
+                    apiIsPresentationContainer(api.parentApi)
+                  ) {
+                    api.parentApi.replacePanel<BookEmbeddableState>(api.uuid, {
+                      serializedState: serializeBook(result.savedObjectId),
+                      panelType: api.type,
+                    });
+                  }
+                },
+              });
+            },
+          });
+        },
+        isEditingEnabled: () => true,
+        getTypeDisplayName: () =>
+          i18n.translate('embeddableExamples.savedbook.editBook.displayName', {
+            defaultMessage: 'book',
+          }),
+        serializeState,
+
+        // library transforms
+        getSavedObjectId: () => savedObjectId,
+        saveToLibrary: async (newTitle: string) => {
+          bookStateManager.api.setBookTitle(newTitle);
+          const newId = await saveBook(undefined, bookStateManager.getLatestState());
+          return newId;
+        },
+        checkForDuplicateTitle: async (title) => {},
+        getSerializedStateByValue: () => serializeBook() as SerializedPanelState<BookState>,
+        getSerializedStateByReference: (newId) =>
+          serializeBook(newId) as SerializedPanelState<BookByReferenceState>,
+        canLinkToLibrary: async () => !isByReference,
+        canUnlinkFromLibrary: async () => isByReference,
+      });
 
       const showLibraryCallout =
         apiHasParentApi(api) &&
@@ -167,10 +154,10 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
         api,
         Component: () => {
           const [authorName, numberOfPages, bookTitle, synopsis] = useBatchedPublishingSubjects(
-            bookAttributesManager.authorName,
-            bookAttributesManager.numberOfPages,
-            bookAttributesManager.bookTitle,
-            bookAttributesManager.bookSynopsis
+            bookStateManager.api.authorName$,
+            bookStateManager.api.numberOfPages$,
+            bookStateManager.api.bookTitle$,
+            bookStateManager.api.bookSynopsis$
           );
           const { euiTheme } = useEuiTheme();
 

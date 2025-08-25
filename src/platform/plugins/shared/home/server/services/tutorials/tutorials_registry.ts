@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext, IStaticAssets } from '@kbn/core/server';
-import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
-import { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
-import {
+import type {
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  IStaticAssets,
+} from '@kbn/core/server';
+import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
+import type {
   TutorialProvider,
   TutorialContextFactory,
   ScopedTutorialContextFactory,
   TutorialContext,
 } from './lib/tutorials_registry_types';
-import { TutorialSchema, tutorialSchema } from './lib/tutorial_schema';
+import type { TutorialSchema } from './lib/tutorial_schema';
+import { tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 
@@ -73,8 +79,11 @@ export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
   private staticAssets!: IStaticAssets;
+  private readonly isServerless: boolean;
 
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+  }
 
   public setup(core: CoreSetup, customIntegrations?: CustomIntegrationsPluginSetup) {
     this.staticAssets = core.http.staticAssets;
@@ -100,10 +109,13 @@ export class TutorialsRegistry {
           },
           initialContext
         );
+        const tutorials = this.tutorialProviders.map((tutorialProvider) => {
+          return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
+        });
         return res.ok({
-          body: this.tutorialProviders.map((tutorialProvider) => {
-            return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
-          }),
+          body: this.isServerless
+            ? tutorials.filter(({ omitServerless }) => !omitServerless)
+            : tutorials,
         });
       }
     );
@@ -150,6 +162,7 @@ export class TutorialsRegistry {
     if (customIntegrations) {
       builtInTutorials.forEach((provider) => {
         const tutorial = provider(this.baseTutorialContext);
+        if (tutorial.omitServerless && this.isServerless) return;
         registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);
       });
     }

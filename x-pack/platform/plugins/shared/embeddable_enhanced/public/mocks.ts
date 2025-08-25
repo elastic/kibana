@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EmbeddableEnhancedSetupContract, EmbeddableEnhancedPluginStart } from '.';
+import type { EmbeddableEnhancedSetupContract, EmbeddableEnhancedPluginStart } from '.';
 
 export type Setup = jest.Mocked<EmbeddableEnhancedSetupContract>;
 export type Start = jest.Mocked<EmbeddableEnhancedPluginStart>;
@@ -18,7 +18,7 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    initializeReactEmbeddableDynamicActions: jest.fn(),
+    initializeEmbeddableDynamicActions: jest.fn(),
   };
 
   return startContract;

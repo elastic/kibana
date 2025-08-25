@@ -6,13 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NamedFieldDefinitionConfig, Streams, getAdvancedParameters } from '@kbn/streams-schema';
+import type { NamedFieldDefinitionConfig, Streams } from '@kbn/streams-schema';
+import { getAdvancedParameters } from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
 import { useMemo, useCallback } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { SchemaField, isSchemaFieldTyped } from '../types';
+import type { SchemaField } from '../types';
+import { isSchemaFieldTyped } from '../types';
 import { convertToFieldDefinitionConfig } from '../utils';
 import { getFormattedError } from '../../../../util/errors';
 
@@ -62,6 +64,7 @@ export const useSchemaFields = ({
         format: 'format' in field ? field.format : undefined,
         additionalParameters: getAdvancedParameters(name, field),
         parent: field.from,
+        alias_for: field.alias_for,
         status: 'inherited',
       })
     );
