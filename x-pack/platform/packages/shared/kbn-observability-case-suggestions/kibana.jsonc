@@ -1,0 +1,9 @@
+{
+    "type": "shared-server",
+    "id": "@kbn/observability-case-suggestions", 
+    "owner": [
+      "@elastic/obs-ux-management"
+    ],
+    "group": "platform",
+    "visibility": "shared"
+  }
