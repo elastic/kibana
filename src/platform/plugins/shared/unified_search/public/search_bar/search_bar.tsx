@@ -280,16 +280,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       // safeguard against query type mismatch
       return state;
     }
-    console.log(
-      'state',
-      {
-        ...state,
-        query: draft.query ? ({ ...draft.query } as SearchBarState<QT>['query']) : state.query,
-        dateRangeFrom: draft.dateRangeFrom || state.dateRangeFrom,
-        dateRangeTo: draft.dateRangeTo || state.dateRangeTo,
-      },
-      draft
-    );
 
     return {
       ...state,
@@ -317,7 +307,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   } as SearchBarState<QT>);
 
   public isDirty = () => {
-    // console.log('IS DIRTY');
     if (!this.props.showDatePicker && this.state.query && this.props.query) {
       return !isEqual(this.state.query, this.props.query);
     }
@@ -327,7 +316,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       this.state.dateRangeFrom !== this.props.dateRangeFrom ||
       this.state.dateRangeTo !== this.props.dateRangeTo ||
       Object.keys(this.props.dirtyState ?? {}).length
-      // || this.props.filters?.length
     );
   };
 
@@ -544,8 +532,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   }
 
   public render() {
-    console.log(this.state);
-
     const { theme, query } = this.props;
     const isESQLQuery = isOfAggregateQueryType(query);
     const isScreenshotMode = this.props.isScreenshotMode === true;

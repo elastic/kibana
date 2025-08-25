@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import { apiAppliesFilters, type AppliesFilters } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
-import { BehaviorSubject, combineLatestWith, filter, map } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, filter, map, tap } from 'rxjs';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
@@ -23,13 +23,9 @@ export const initializeFiltersManager = (
 ) => {
   // wait until all child APIs are loaded.
   // await layoutManager.internalApi.untilAllChildrenAreAvailable();
-
-  const childFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+  const publishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-  const filterManagerSubscription = combineCompatibleChildrenApis<
-    AppliesFilters,
-    Filter[] | undefined
-  >(
+  const childFilters$ = combineCompatibleChildrenApis<AppliesFilters, Filter[] | undefined>(
     { children$: layoutManager.api.children$ },
     'appliedFilters$',
     apiAppliesFilters,
@@ -40,14 +36,16 @@ export const initializeFiltersManager = (
       ) as Filter[][];
       return allOutputFilters && allOutputFilters.length > 0 ? allOutputFilters.flat() : undefined;
     }
-  ).subscribe((allChildFilters) => unpublishedChildFilters$.next(allChildFilters));
+  );
+  const filterManagerSubscription = childFilters$.subscribe((allChildFilters) => {
+    unpublishedChildFilters$.next(allChildFilters);
+  });
 
   const publishFilters = () => {
-    const published = childFilters$.getValue();
+    const published = publishedChildFilters$.getValue();
     const unpublished = unpublishedChildFilters$.getValue();
     if (!deepEqual(published, unpublished)) {
-      childFilters$.next(unpublished);
-      unpublishedChildFilters$.next(undefined);
+      publishedChildFilters$.next(unpublished);
     }
   };
   const autoPublishFiltersSubscription = unpublishedChildFilters$
@@ -61,7 +59,7 @@ export const initializeFiltersManager = (
 
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   filterManagerSubscription.add(
-    childFilters$
+    publishedChildFilters$
       .pipe(
         combineLatestWith(unifiedSearchManager.internalApi.unifiedSearchFilters$),
         map(([childFilters, unifiedSearchFilters]) => {
@@ -74,7 +72,13 @@ export const initializeFiltersManager = (
   );
 
   return {
-    api: { filters$, childFilters$, unpublishedChildFilters$, publishFilters },
+    api: {
+      filters$,
+      childFilters$,
+      publishedChildFilters$,
+      unpublishedChildFilters$,
+      publishFilters,
+    },
     cleanup: () => {
       autoPublishFiltersSubscription.unsubscribe();
       filterManagerSubscription.unsubscribe();

@@ -9,6 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
+import deepEqual from 'fast-deep-equal';
 
 import type { EuiBreadcrumb, EuiToolTipProps, UseEuiTheme } from '@elastic/eui';
 import {
@@ -95,7 +96,8 @@ export function InternalDashboardTopNav({
     query,
     title,
     viewMode,
-    unpublishedFilters,
+    publishedChildFilters,
+    unpublishedChildFilters,
   ] = useBatchedPublishingSubjects(
     dashboardApi.dataViews$,
     dashboardApi.focusedPanelId$,
@@ -105,9 +107,14 @@ export function InternalDashboardTopNav({
     dashboardApi.query$,
     dashboardApi.title$,
     dashboardApi.viewMode$,
+    dashboardApi.publishedChildFilters$,
     dashboardApi.unpublishedChildFilters$
   );
-  // console.log({ unpublishedFilters });
+
+  const hasUnpublishedFilters = useMemo(() => {
+    return !deepEqual(publishedChildFilters ?? [], unpublishedChildFilters ?? []);
+  }, [publishedChildFilters, unpublishedChildFilters]);
+  // console.log({ hasUnpublishedFilters });
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -388,19 +395,13 @@ export function InternalDashboardTopNav({
             : undefined
         }
         onQuerySubmit={(_payload, isUpdate) => {
-          console.log('ON SUBMIT ', isUpdate);
           if (isUpdate === false) {
             dashboardApi.forceRefresh();
           }
           dashboardApi.publishFilters();
         }}
         onSavedQueryIdChange={setSavedQueryId}
-        // onFiltersUpdated={(newFilters) => {
-        //   console.log('TEST', newFilters);
-        //   dashboardApi.setFilters(cleanFiltersForSerialize(newFilters));
-        // }}
-
-        dirtyState={unpublishedFilters?.length ? { filters: unpublishedFilters } : undefined}
+        dirtyState={hasUnpublishedFilters ? { hasUnpublishedFilters } : undefined}
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />

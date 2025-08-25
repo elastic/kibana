@@ -91,6 +91,7 @@ export function getDashboardApi({
     settingsManager,
     unifiedSearchManager,
     getReferences,
+    filtersManager,
   });
 
   function getState() {
