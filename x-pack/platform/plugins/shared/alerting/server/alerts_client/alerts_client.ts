@@ -748,7 +748,7 @@ export class AlertsClient<
     const params: Record<string, string[]> = {};
 
     idsToUpdate.forEach((id) => {
-      const newAlert = newAlerts.find((alert) => alert.getUuid() === id || alert.getId() === id);
+      const newAlert = newAlerts.find((alert) => alert.matchesUuid(id));
       if (newAlert) {
         params[id] = newAlert.getMaintenanceWindowIds();
       }
@@ -844,9 +844,7 @@ export class AlertsClient<
       )) {
         // Go through matched alerts, find the in memory object
         alertIds.forEach((alertId) => {
-          const newAlert = newAlerts.find(
-            (alert) => alert.getUuid() === alertId || alert.getId() === alertId
-          );
+          const newAlert = newAlerts.find((alert) => alert.matchesUuid(alertId));
           if (!newAlert) {
             return;
           }
