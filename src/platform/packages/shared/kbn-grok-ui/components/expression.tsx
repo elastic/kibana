@@ -39,12 +39,15 @@ export const Expression = ({
   const grokEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const divRef = useRef<HTMLDivElement | null>(null);
 
-  const onGrokEditorMount: CodeEditorProps['editorDidMount'] = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
-    grokEditorRef.current = editor;
-    if (onEditorMount && divRef.current) {
-      onEditorMount(editor, divRef.current);
-    }
-  }, [onEditorMount]);
+  const onGrokEditorMount: CodeEditorProps['editorDidMount'] = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      grokEditorRef.current = editor;
+      if (onEditorMount && divRef.current) {
+        onEditorMount(editor, divRef.current);
+      }
+    },
+    [onEditorMount]
+  );
 
   const onGrokEditorWillUnmount: CodeEditorProps['editorWillUnmount'] = useCallback(() => {
     if (onEditorWillUnmount) {
