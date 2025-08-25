@@ -9,7 +9,8 @@
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from '../stats/validate';
 import { Parser } from '../../../parser';
-import { expectErrors, getNoValidCallSignatureError } from '../../../__tests__/validation';
+import { expectErrors } from '../../../__tests__/validation';
+import { getNoValidCallSignatureError } from '../../../definitions/utils/validation/utils';
 
 const inlinestatsExpectErrors = (
   query: string,

@@ -8,7 +8,8 @@
  */
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
-import { expectErrors, getNoValidCallSignatureError } from '../../../__tests__/validation';
+import { expectErrors } from '../../../__tests__/validation';
+import { getNoValidCallSignatureError } from '../../../definitions/utils/validation/utils';
 
 const forkExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'fork', validate);

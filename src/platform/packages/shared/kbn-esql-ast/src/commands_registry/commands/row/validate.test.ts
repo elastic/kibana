@@ -8,9 +8,10 @@
  */
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
-import { expectErrors, getNoValidCallSignatureError } from '../../../__tests__/validation';
+import { expectErrors } from '../../../__tests__/validation';
 import { capitalize } from 'lodash';
 import { DATE_PERIOD_UNITS, TIME_DURATION_UNITS } from '../../../parser/constants';
+import { getNoValidCallSignatureError } from '../../../definitions/utils/validation/utils';
 
 const rowExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'row', validate);
