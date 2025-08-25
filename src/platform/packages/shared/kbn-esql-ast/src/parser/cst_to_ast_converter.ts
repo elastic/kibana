@@ -1242,10 +1242,166 @@ export class CstToAstConverter {
 
   // ------------------------------------------------------------------- RERANK
 
+  /**
+   * Supports two syntax forms:
+   * - RERANK "query" ON fields WITH {options}
+   * - RERANK target = "query" ON fields WITH {options}
+   */
   private fromRerankCommand(ctx: cst.RerankCommandContext): ast.ESQLAstRerankCommand {
-    const command = this.createCommand<'rerank', ast.ESQLAstRerankCommand>('rerank', ctx, {});
+    const command = this.createCommand<'rerank', ast.ESQLAstRerankCommand>('rerank', ctx);
+
+    this.parseRerankQuery(ctx, command);
+    this.parseRerankFields(ctx, command);
+    this.parseRerankInferenceId(ctx, command);
 
     return command;
+  }
+
+  /**
+   * Parses the query text and optional target field assignment.
+   * Handles: RERANK [target =] "query" ...
+   */
+  private parseRerankQuery(ctx: cst.RerankCommandContext, command: ast.ESQLAstRerankCommand): void {
+    if (!ctx._queryText) {
+      return;
+    }
+
+    const queryText = this.fromConstant(ctx._queryText);
+    if (!queryText) {
+      return;
+    }
+
+    command.query = queryText as ast.ESQLLiteral;
+
+    // Handle target field assignment: RERANK target = "query"
+    if (ctx._targetField && ctx.ASSIGN()) {
+      const targetField = this.toColumn(ctx._targetField);
+      const assignment = this.createFunction(
+        ctx.ASSIGN().getText(),
+        ctx,
+        undefined,
+        'binary-expression'
+      ) as ast.ESQLBinaryExpression;
+
+      assignment.args.push(targetField, queryText);
+      assignment.location = this.computeLocationExtends(assignment);
+
+      command.targetField = targetField;
+      command.args.push(assignment);
+    } else {
+      command.args.push(queryText);
+    }
+  }
+
+  /**
+   * Parses the ON fields list.
+   * Handles: ... ON field1, field2 = X(field2, 2)
+   */
+  private parseRerankFields(
+    ctx: cst.RerankCommandContext,
+    command: ast.ESQLAstRerankCommand
+  ): void {
+    const rerankFieldsCtx = ctx.rerankFields();
+    command.fields = rerankFieldsCtx ? this.fromRerankFields(rerankFieldsCtx) : [];
+  }
+
+  /**
+   * Parses WITH parameters and extracts inference_id.
+   * Handles: ... WITH {"inference_id": "model"}
+   */
+  private parseRerankInferenceId(
+    ctx: cst.RerankCommandContext,
+    command: ast.ESQLAstRerankCommand
+  ): void {
+    const namedParamsCtx = ctx.commandNamedParameters();
+
+    if (!namedParamsCtx) {
+      return;
+    }
+
+    const withOption = this.fromCommandNamedParameters(namedParamsCtx);
+    const map = withOption.args[0] as ast.ESQLMap | undefined;
+    const inferenceIdExpr = this.getMapEntry(map, 'inference_id');
+
+    if (withOption && inferenceIdExpr) {
+      command.inferenceId = inferenceIdExpr as ast.ESQLIdentifierOrParam;
+      command.args.push(withOption);
+    }
+  }
+
+  /**
+   * Collects all ON fields for RERANK.
+   *
+   * - Accepts simple columns (e.g. `title`).
+   * - Accepts assignments (e.g. `title = X(title, 2)`).
+   * - Accepts expressions after a qualified name (e.g. `field < 10`).
+   */
+  private fromRerankFields(ctx: cst.RerankFieldsContext | undefined): ast.ESQLAstField[] {
+    const fields: ast.ESQLAstField[] = [];
+    if (!ctx) {
+      return fields;
+    }
+
+    try {
+      for (const fieldCtx of ctx.rerankField_list()) {
+        const field = this.fromRerankField(fieldCtx);
+
+        if (field) {
+          fields.push(field);
+        }
+      }
+    } catch (e) {
+      // do nothing
+    }
+    return fields;
+  }
+
+  /**
+   * Parses a single RERANK field entry.
+   *
+   * Supports three forms:
+   * 1) Assignment:     qualifiedName '=' booleanExpression
+   * 2) Expression:      qualifiedName booleanExpression
+   * 3) Column only:     qualifiedName
+   */
+  private fromRerankField(ctx: cst.RerankFieldContext): ast.ESQLAstField | undefined {
+    try {
+      const qualifiedNameCtx = ctx.qualifiedName();
+
+      if (!qualifiedNameCtx) {
+        return undefined;
+      }
+
+      // 1) field assignment: <col> = <booleanExpression>
+      if (ctx.ASSIGN() && ctx.booleanExpression()) {
+        const left = this.toColumn(qualifiedNameCtx);
+        const right = this.collectBooleanExpression(ctx.booleanExpression());
+        const assignment = this.createFunction(
+          ctx.ASSIGN().getText(),
+          ctx,
+          undefined,
+          'binary-expression'
+        ) as ast.ESQLBinaryExpression;
+        assignment.args.push(left, right);
+        assignment.location = this.computeLocationExtends(assignment);
+
+        return assignment;
+      }
+
+      // 2) expression following a qualified name
+      if (ctx.booleanExpression()) {
+        return this.collectBooleanExpression(ctx.booleanExpression())[0] as
+          | ast.ESQLAstField
+          | undefined;
+      }
+
+      // 3) simple column reference
+      return this.toColumn(qualifiedNameCtx);
+    } catch (e) {
+      // do nothing
+    }
+
+    return undefined;
   }
 
   // --------------------------------------------------------------------- FUSE
@@ -1637,6 +1793,16 @@ export class CstToAstConverter {
     withOption.incomplete = map.incomplete;
 
     return withOption;
+  }
+
+  /**
+   * Looks up a key inside an ES|QL map expression and returns its value if present.
+   */
+  private getMapEntry(
+    map: ast.ESQLMap | undefined,
+    key: string
+  ): ast.ESQLAstExpression | undefined {
+    return map?.entries.find((entry) => entry.key.valueUnquoted === key)?.value;
   }
 
   private collectInlineCast(ctx: cst.InlineCastContext): ast.ESQLInlineCast {
