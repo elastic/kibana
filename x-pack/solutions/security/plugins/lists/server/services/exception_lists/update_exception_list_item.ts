@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   DescriptionOrUndefined,
   EntriesArray,
@@ -24,7 +24,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
-import { ExceptionListSoSchema } from '../../schemas/saved_objects';
+import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import {
   transformSavedObjectUpdateToExceptionListItem,

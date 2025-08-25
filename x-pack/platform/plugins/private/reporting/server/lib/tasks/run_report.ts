@@ -8,15 +8,15 @@
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
-import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
+import type { ReportingError } from '@kbn/reporting-common';
 import {
   CancellationToken,
   KibanaShuttingDownError,
   MissingAuthenticationError,
-  ReportingError,
   durationToNumber,
   numberToDuration,
 } from '@kbn/reporting-common';
@@ -37,19 +37,21 @@ import {
   type TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
 
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import { ReportTaskParams, ReportingTask, ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
+import type { ReportTaskParams, ReportingTask } from '.';
+import { ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
 import type { ReportingCore } from '../..';
-import { EventTracker } from '../../usage';
-import { Report, SavedReport } from '../store';
+import type { EventTracker } from '../../usage';
+import type { SavedReport } from '../store';
+import { Report } from '../store';
 import type { ReportFailedFields, ReportWarningFields } from '../store/store';
 import { errorLogger } from './error_logger';
 import { finishedWithNoPendingCallbacks, getContentStream } from '../content_stream';
-import { EmailNotificationService } from '../../services/notifications/email_notification_service';
-import { ScheduledReportType } from '../../types';
+import type { EmailNotificationService } from '../../services/notifications/email_notification_service';
+import type { ScheduledReportType } from '../../types';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 

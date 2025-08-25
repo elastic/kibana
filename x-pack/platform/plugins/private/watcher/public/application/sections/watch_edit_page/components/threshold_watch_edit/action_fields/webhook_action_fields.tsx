@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 
 import { ErrableFormRow } from '../../../../../components/form_errors';
-import { WebhookAction } from '../../../../../../../common/types/action_types';
+import type { WebhookAction } from '../../../../../../../common/types/action_types';
 
 interface Props {
   action: WebhookAction;

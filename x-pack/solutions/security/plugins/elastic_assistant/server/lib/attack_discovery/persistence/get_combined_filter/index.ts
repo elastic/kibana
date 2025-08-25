@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { isEmpty } from 'lodash/fp';
 
 import { ALERT_ATTACK_DISCOVERY_USERS } from '../../schedules/fields/field_names';

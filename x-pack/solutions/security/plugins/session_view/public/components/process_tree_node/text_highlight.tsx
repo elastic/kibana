@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 
 type Props = {
   children: JSX.Element | JSX.Element[];

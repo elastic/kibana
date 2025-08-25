@@ -11,8 +11,8 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SlackActionParams, SlackSecrets } from '../types';
-import { PostMessageParams } from '../../../common/slack_api/types';
+import type { SlackActionParams, SlackSecrets } from '../types';
+import type { PostMessageParams } from '../../../common/slack_api/types';
 
 export const subtype = [
   {

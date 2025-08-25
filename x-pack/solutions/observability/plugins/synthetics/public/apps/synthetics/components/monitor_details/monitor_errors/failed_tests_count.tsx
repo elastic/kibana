@@ -8,7 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { FAILED_TESTS_LABEL } from './failed_tests';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 
 export const FailedTestsCount = ({ from, to, id }: { to: string; from: string; id: string }) => {

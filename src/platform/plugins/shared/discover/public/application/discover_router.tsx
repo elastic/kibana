@@ -12,6 +12,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { NotFoundRoute } from './not_found';
@@ -23,6 +24,7 @@ import { DiscoverMainRoute } from './main';
 export interface DiscoverRouterProps {
   services: DiscoverServices;
   customizationContext: DiscoverCustomizationContext;
+  onAppLeave: AppMountParameters['onAppLeave'];
 }
 
 export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps) => {
@@ -40,7 +42,7 @@ export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps)
 // this exists as a separate component to allow the tests to gather the routes
 export const DiscoverRoutes = ({
   ...routeProps
-}: Pick<DiscoverRouterProps, 'customizationContext'>) => {
+}: Pick<DiscoverRouterProps, 'customizationContext' | 'onAppLeave'>) => {
   return (
     <Routes>
       <Route path="/context/:dataViewId/:id">

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionCreator, AnyAction } from 'typescript-fsa';
+import type { ActionCreator, AnyAction } from 'typescript-fsa';
 
 /**
  * Infers the type of an action out of a given action type.

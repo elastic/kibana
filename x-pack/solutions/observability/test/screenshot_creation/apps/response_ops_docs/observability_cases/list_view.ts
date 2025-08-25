@@ -8,7 +8,7 @@
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { createAndUploadFile } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import { OBSERVABILITY_FILE_KIND } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const common = getPageObject('common');

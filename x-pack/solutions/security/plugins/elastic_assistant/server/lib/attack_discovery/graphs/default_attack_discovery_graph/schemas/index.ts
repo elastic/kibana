@@ -14,7 +14,7 @@
 
 import { z } from '@kbn/zod';
 
-import { GenerationPrompts } from '../prompts';
+import type { GenerationPrompts } from '../prompts';
 
 export const getAttackDiscoveriesGenerationSchema = (prompts: GenerationPrompts) =>
   z.object({

@@ -8,7 +8,14 @@ echo "--- Setup Node"
 
 NODE_VERSION="$(cat "$KIBANA_DIR/.node-version")"
 export NODE_VERSION
-export NODE_DIR="$CACHE_DIR/node/$NODE_VERSION"
+NODE_VARIANT="glibc-217"
+if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
+  echo ' -- Using Node.js variant with pointer compression enabled'
+  NODE_VARIANT="pointer-compression"
+  export NODE_DIR="$CACHE_DIR/node-pointer-compression/$NODE_VERSION"
+else
+  export NODE_DIR="$CACHE_DIR/node/$NODE_VERSION"
+fi
 export NODE_BIN_DIR="$NODE_DIR/bin"
 
 ## Install node for whatever the current os/arch are
@@ -31,12 +38,7 @@ elif [[ "$UNAME" == "Darwin" ]]; then
 fi
 echo " -- Running on OS: $OS"
 
-NODE_VARIANT="node-glibc-217/"
-if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
-  echo ' -- Using Node.js variant with pointer compression enabled'
-  NODE_VARIANT="node-pointer-compression/"
-fi
-nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/${NODE_VARIANT}dist/v$NODE_VERSION/node-v$NODE_VERSION-${OS}-${classifier}"
+nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-${NODE_VARIANT}/dist/v$NODE_VERSION/node-v$NODE_VERSION-${OS}-${classifier}"
 
 echo " -- node: version=v${NODE_VERSION} dir=$NODE_DIR"
 

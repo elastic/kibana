@@ -8,7 +8,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { registerServerSearchRoute } from './server_search_route';
 
 export function registerRoutes(router: IRouter<DataRequestHandlerContext>) {

@@ -44,9 +44,16 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
 
   const timerange = useMemo(() => ({ from, to }), [from, to]);
   const getLensAttributes = useCallback<GetLensAttributes>(
-    (args) => getCostSavingsMetricLensAttributes({ ...args, minutesPerAlert, analystHourlyRate }),
-    [analystHourlyRate, minutesPerAlert]
+    (args) =>
+      getCostSavingsMetricLensAttributes({
+        ...args,
+        backgroundColor: colors.backgroundBaseSuccess,
+        minutesPerAlert,
+        analystHourlyRate,
+      }),
+    [analystHourlyRate, colors.backgroundBaseSuccess, minutesPerAlert]
   );
+
   return (
     <div
       css={css`

@@ -8,16 +8,17 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
 import { parseDocument } from 'yaml';
-import _ from 'lodash';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
-import { MUSTACHE_REGEX_GLOBAL } from './regex';
+import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
+import { MUSTACHE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { MarkerSeverity, getSeverityString } from './utils';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
-import { getContextForPath } from '../../../features/workflow_context/lib/get_context_for_path';
+import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
+import { isValidSchemaPath } from '../../../../common/lib/zod_utils';
+import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
 interface UseYamlValidationProps {
   workflowYamlSchema: z.ZodSchema;
@@ -95,14 +96,20 @@ export function useYamlValidation({
           const severity: YamlValidationErrorSeverity = 'warning';
 
           const path = getCurrentPath(yamlDocument, matchStart);
-          const context = getContextForPath(result.data, workflowGraph, path);
+          const context = getContextSchemaForPath(result.data, workflowGraph, path);
 
-          if (match.groups?.key) {
-            if (!_.get(context, match.groups.key)) {
-              errorMessage = `Variable ${match.groups?.key} is not defined`;
-            }
-          } else {
+          if (!match.groups?.key) {
             errorMessage = `Variable is not defined`;
+          } else {
+            const parsedPath = parseVariablePath(match.groups.key);
+            if (parsedPath?.errors) {
+              errorMessage = parsedPath.errors.join(', ');
+            }
+            if (parsedPath?.propertyPath) {
+              if (!isValidSchemaPath(context, parsedPath.propertyPath)) {
+                errorMessage = `Variable ${parsedPath.propertyPath} is invalid`;
+              }
+            }
           }
 
           // Add marker for validation issues

@@ -12,7 +12,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { BaseAuthenticationProvider } from './base';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
-import { getDetailedErrorMessage } from '../../errors';
+import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -210,23 +210,21 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
-      this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
-      return AuthenticationResult.failed(err);
-    }
+      // If refresh token is no longer valid, then we should clear session and redirect user to the
+      // login page to re-authenticate, or fail if redirect isn't possible.
+      if (err instanceof InvalidGrantError) {
+        if (canStartNewSession(request)) {
+          this.logger.warn('Clearing session since refresh token is expired.');
 
-    // If refresh token is no longer valid, then we should clear session and redirect user to the
-    // login page to re-authenticate, or fail if redirect isn't possible.
-    if (refreshTokenResult === null) {
-      if (canStartNewSession(request)) {
-        this.logger.warn('Clearing session since both access and refresh tokens are expired.');
+          // Set state to `null` to let `Authenticator` know that we want to clear current session.
+          return AuthenticationResult.redirectTo(this.getLoginPageURL(request), { state: null });
+        }
 
-        // Set state to `null` to let `Authenticator` know that we want to clear current session.
-        return AuthenticationResult.redirectTo(this.getLoginPageURL(request), { state: null });
+        return AuthenticationResult.failed(Boom.badRequest(err.message));
       }
 
-      return AuthenticationResult.failed(
-        Boom.badRequest('Both access and refresh tokens are expired.')
-      );
+      this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
+      return AuthenticationResult.failed(err);
     }
 
     this.logger.debug('Request has been authenticated via refreshed token.');

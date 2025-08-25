@@ -11,7 +11,8 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../test_utils';
+import type { TestEnvironmentUtils } from '../../test_utils';
+import { setupIntegrationEnvironment } from '../../test_utils';
 
 describe('Files usage telemetry', () => {
   let testHarness: TestEnvironmentUtils;

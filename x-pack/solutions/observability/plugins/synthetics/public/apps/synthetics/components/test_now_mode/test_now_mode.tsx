@@ -9,9 +9,9 @@ import React, { useEffect } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useRunOnceErrors } from './hooks/use_run_once_errors';
 import { BrowserTestRunResult } from './browser/browser_test_results';
-import { TestRun } from './test_now_mode_flyout';
+import type { TestRun } from './test_now_mode_flyout';
 import { SimpleTestResults } from './simple/simple_test_results';
-import { Locations, ServiceLocationErrors } from '../../../../../common/runtime_types';
+import type { Locations, ServiceLocationErrors } from '../../../../../common/runtime_types';
 
 export function TestNowMode({
   testRun,

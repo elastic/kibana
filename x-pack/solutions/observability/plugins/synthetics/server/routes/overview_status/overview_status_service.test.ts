@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
-import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { getUptimeESMockClient } from '../../queries/test_helpers';
 
 import * as allLocationsFn from '../../synthetics_service/get_all_locations';

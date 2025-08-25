@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { AIAssistantKnowledgeBaseDataClient, KnowledgeBaseDataClientParams } from '.';
+import type { KnowledgeBaseDataClientParams } from '.';
+import { AIAssistantKnowledgeBaseDataClient } from '.';
 import {
   getCreateKnowledgeBaseEntrySchemaMock,
   getKnowledgeBaseEntryMock,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ContentPack, ContentPackIncludedObjects } from '@kbn/content-packs-schema';
-import { HttpSetup } from '@kbn/core/public';
-import { Streams } from '@kbn/streams-schema';
+import type { ContentPack, ContentPackIncludedObjects } from '@kbn/content-packs-schema';
+import type { HttpSetup } from '@kbn/core/public';
+import type { Streams } from '@kbn/streams-schema';
 
 export async function importContent({
   file,

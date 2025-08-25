@@ -4521,6 +4521,14 @@
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
                 "plugin": "visTypeTimelion",
                 "path": "src/platform/plugins/private/vis_types/timelion/server/routes/functions.ts"
               },
@@ -5175,6 +5183,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -6629,6 +6645,10 @@
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_permissions_route.ts"
               },
               {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+              },
+              {
                 "plugin": "sampleDataIngest",
                 "path": "x-pack/platform/plugins/shared/sample_data_ingest/server/routes/installation.ts"
               },
@@ -7221,6 +7241,10 @@
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
                 "plugin": "visTypeTimelion",
                 "path": "src/platform/plugins/private/vis_types/timelion/server/routes/run.ts"
               },
@@ -7763,6 +7787,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/enable/enable_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_internal_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -14327,6 +14355,30 @@
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/search.ts"
               },
               {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
+              },
+              {
                 "plugin": "controls",
                 "path": "src/platform/plugins/shared/controls/server/options_list/options_list_cluster_settings_route.ts"
               },
@@ -14671,30 +14723,6 @@
                 "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
-              },
-              {
                 "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
               },
@@ -14889,10 +14917,6 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/find_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/get_knowledge_base_indices.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -15973,6 +15997,14 @@
                 "path": "src/platform/plugins/shared/unified_search/server/autocomplete/value_suggestions_route.ts"
               },
               {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
                 "plugin": "controls",
                 "path": "src/platform/plugins/shared/controls/server/options_list/options_list_suggestions_route.ts"
               },
@@ -16427,14 +16459,6 @@
               {
                 "plugin": "inferenceEndpoint",
                 "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
               },
               {
                 "plugin": "onechat",
@@ -17267,6 +17291,10 @@
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/delete.ts"
               },
               {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
                 "plugin": "dashboard",
                 "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
               },
@@ -17325,10 +17353,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
               },
               {
                 "plugin": "onechat",

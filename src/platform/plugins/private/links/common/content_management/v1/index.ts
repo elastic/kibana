@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LinksCrudTypes } from './types';
+import type { LinksCrudTypes } from './types';
 export type { LinksCrudTypes, LinksLayoutType, LinkType } from './types';
 export type LinksItem = LinksCrudTypes['Item'];
 export type LinksSearchOut = LinksCrudTypes['SearchOut'];

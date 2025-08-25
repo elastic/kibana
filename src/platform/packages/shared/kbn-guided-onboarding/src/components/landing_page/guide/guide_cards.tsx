@@ -13,9 +13,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
-import { GuideId, GuideState } from '../../../types';
-import { GuideFilterValues } from './guide_filters';
-import { GuideCardConstants } from './guide_cards.constants';
+import type { GuideId, GuideState } from '../../../types';
+import type { GuideFilterValues } from './guide_filters';
+import type { GuideCardConstants } from './guide_cards.constants';
 import { GuideCard } from './guide_card';
 
 export type GuideCardSolutions = 'search' | 'observability' | 'security';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
 
 const ACTION_SHOW_CONFIG_PANEL_SUBJ = 'embeddablePanelAction-ACTION_SHOW_CONFIG_PANEL';
