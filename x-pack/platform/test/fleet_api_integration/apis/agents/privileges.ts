@@ -15,7 +15,7 @@ import {
   FILE_STORAGE_METADATA_AGENT_INDEX,
 } from '@kbn/fleet-plugin/server/constants';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { generateAgent } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
 import { testUsers } from '../test_users';
@@ -33,7 +33,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_agents_api_privileges', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       const getPkRes = await supertest
         .get(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}`)
         .set('kbn-xsrf', 'xxxx')
@@ -88,7 +88,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await supertest
         .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
         .set('kbn-xsrf', 'xxxx');

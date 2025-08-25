@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { render, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-  RecurringScheduleFormFields,
-  RecurringScheduleFieldsProps,
-} from './recurring_schedule_form_fields';
+import type { RecurringScheduleFieldsProps } from './recurring_schedule_form_fields';
+import { RecurringScheduleFormFields } from './recurring_schedule_form_fields';
 import type { RecurringSchedule } from '../types';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getRecurringScheduleFormSchema } from '../schemas/recurring_schedule_form_schema';

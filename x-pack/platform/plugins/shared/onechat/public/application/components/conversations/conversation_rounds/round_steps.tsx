@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ConversationRound, ConversationRoundStepType } from '@kbn/onechat-common';
+import type { ConversationRoundStep } from '@kbn/onechat-common';
+import { ConversationRoundStepType } from '@kbn/onechat-common';
 import React from 'react';
 import { ToolCallPanel } from './tool_call_panel';
 
 interface RoundStepsProps {
-  round: ConversationRound;
+  steps: ConversationRoundStep[];
 }
 
-export const RoundSteps: React.FC<RoundStepsProps> = ({ round }) => {
-  const { steps } = round;
+export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
   return (
     <>
       {steps?.map((step) => {

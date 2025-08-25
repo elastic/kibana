@@ -18,6 +18,7 @@ All features in the Onechat plugin are developed behind UI settings (feature fla
 ```yml
 uiSettings.overrides:
   onechat:mcp:enabled: true
+  onechat:a2a:enabled: true
   onechat:api:enabled: true
   onechat:ui:enabled: true
 ```
@@ -31,6 +32,7 @@ POST kbn://internal/kibana/settings
 {
    "changes": {
       "onechat:mcp:enabled": true,
+      "onechat:a2a:enabled": true,
       "onechat:api:enabled": true,
       "onechat:ui:enabled": true
    }
@@ -45,7 +47,7 @@ The main primitives are:
 
 - [tools](#tools)
 
-Additionally, the plugin implements [MCP server](#mcp-server) that exposes onechat tools.
+Additionally, the plugin implements [MCP server](#mcp-server) that exposes onechat tools and [A2A server](#a2a-server) that exposes onechat agents for agent-to-agent communication.
 
 ## Tools
 
@@ -250,7 +252,7 @@ try {
 
 ## MCP Server
 
-The MCP server provides a standardized interface for external MCP clients to access onechat tools.
+The MCP server provides a standardized interface for external MCP clients to access onechat tools. It's available on `/api/chat/mcp` endpoint.
 
 
 ### Running with Claude Desktop
@@ -269,17 +271,23 @@ Configure Claude Desktop by adding this to its configuration:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:5601/api/mcp",
+        "http://localhost:5601/api/chat/mcp",
         "--header",
-        "Authorization: ApiKey ${API_KEY}"
+        "Authorization:${AUTH_HEADER}"
       ],
       "env": {
-        "API_KEY": "..."
+        "AUTH_HEADER": "ApiKey {...}"
       }
     }
   }
 }
 ```
+
+## A2A Server
+
+The A2A (Agent-to-Agent) server provides a standardized interface for external A2A clients to communicate with onechat agents, enabling agent-to-agent collaboration following the A2A protocol specification.
+
+Agentcards for onechat agents are exposed on `GET /api/chat/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/chat/a2a/{agentId}`.
 
 ## ES|QL Based Tools
 

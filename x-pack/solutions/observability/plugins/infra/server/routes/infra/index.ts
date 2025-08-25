@@ -35,7 +35,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
       },
     },
     async (context, request, response) => {
-      const { from, to, metrics, limit, query } = request.body;
+      const { from, to, metrics, limit, query, schema } = request.body;
 
       try {
         const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
@@ -56,6 +56,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
           alertsClient,
           infraMetricsClient,
           apmDataAccessServices,
+          schema,
         });
 
         return response.ok({

@@ -10,6 +10,7 @@
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  aiValue = 'ai_value',
   assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
@@ -34,6 +35,7 @@ export enum SecurityPageName {
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
+  endpointExceptions = 'endpoint_exceptions',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
   exploreLanding = 'explore',
@@ -72,6 +74,7 @@ export enum SecurityPageName {
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
+  trustedDevices = 'trusted_devices',
   users = 'users',
   usersAll = 'users-all',
   usersAnomalies = 'users-anomalies',

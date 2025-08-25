@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
+import type { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
       return [
         {
           suiteTitle: 'binary classification job',
-          archive: 'x-pack/test/functional/es_archives/ml/ihp_outlier',
+          archive: 'x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier',
           dataView: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
             id: `ihp_fi_binary_${timestamp}`,
@@ -106,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           suiteTitle: 'multi class classification job',
-          archive: 'x-pack/test/functional/es_archives/ml/ihp_outlier',
+          archive: 'x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier',
           dataView: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
             id: `ihp_fi_multi_${timestamp}`,
@@ -177,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           suiteTitle: 'regression job',
-          archive: 'x-pack/test/functional/es_archives/ml/egs_regression',
+          archive: 'x-pack/platform/test/fixtures/es_archives/ml/egs_regression',
           dataView: { name: 'ft_egs_regression', timeField: '@timestamp' },
           job: {
             id: `egs_fi_reg_${timestamp}`,

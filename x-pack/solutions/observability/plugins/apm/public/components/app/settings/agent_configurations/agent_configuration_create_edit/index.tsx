@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import { isEmpty } from 'lodash';
@@ -111,6 +111,22 @@ export function AgentConfigurationCreateEdit({
 
       <EuiSpacer size="m" />
 
+      {isEditMode && existingConfigResult?.data?.error ? (
+        <>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.apm.agentConfigurationCreateEdit.euiCallOut.errorApplyingConfigurationLabel',
+              { defaultMessage: 'Error applying configuration' }
+            )}
+            color="danger"
+            iconType="error"
+          >
+            <p>{existingConfigResult.data.error}</p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+
       <EuiTitle size="s">
         <h2>
           {isEditMode
@@ -138,7 +154,7 @@ export function AgentConfigurationCreateEdit({
 
       {pageStep === 'choose-settings-step' && (
         <SettingsPage
-          status={existingConfigResult?.status}
+          initialConfig={existingConfigResult}
           unsavedChanges={unsavedChanges}
           onClickEdit={() => setPage('choose-service-step', history)}
           newConfig={newConfig}

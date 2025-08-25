@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginFunctionalProviderContext } from '@kbn/test-suites-src/plugin_functional/services';
+import type { PluginFunctionalProviderContext } from '@kbn/test-suites-src/plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, loadTestFile }: PluginFunctionalProviderContext) {
@@ -16,9 +16,9 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
     this.tags('skipFirefox');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
       ); // need at least one index pattern
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
@@ -26,9 +26,9 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
       );
     });
 

@@ -13,7 +13,7 @@ export const commandsMetadata: Record<string, unknown> = {
   change_point: {
     type: 'command',
     name: 'change_point',
-    license: 'PLATINUM',
+    license: 'platinum',
     observability_tier: 'COMPLETE',
   },
   dissect: {
@@ -79,11 +79,6 @@ export const commandsMetadata: Record<string, unknown> = {
   rerank: {
     type: 'command',
     name: 'rerank',
-  },
-  rrf: {
-    type: 'command',
-    name: 'rrf',
-    license: 'ENTERPRISE',
   },
   sample: {
     type: 'command',

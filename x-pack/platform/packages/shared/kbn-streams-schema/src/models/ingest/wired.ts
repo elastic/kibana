@@ -6,19 +6,16 @@
  */
 import { z } from '@kbn/zod';
 import { IngestBase, IngestBaseStream } from './base';
-import { RoutingDefinition, routingDefinitionListSchema } from './routing';
-import {
-  WiredIngestStreamEffectiveLifecycle,
-  wiredIngestStreamEffectiveLifecycleSchema,
-} from './lifecycle';
-import {
-  FieldDefinition,
-  InheritedFieldDefinition,
-  fieldDefinitionSchema,
-  inheritedFieldDefinitionSchema,
-} from '../../fields';
-import { Validation, validation } from '../validation/validation';
-import { ModelValidation, modelValidation } from '../validation/model_validation';
+import type { RoutingDefinition } from './routing';
+import { routingDefinitionListSchema } from './routing';
+import type { WiredIngestStreamEffectiveLifecycle } from './lifecycle';
+import { wiredIngestStreamEffectiveLifecycleSchema } from './lifecycle';
+import type { FieldDefinition, InheritedFieldDefinition } from '../../fields';
+import { fieldDefinitionSchema, inheritedFieldDefinitionSchema } from '../../fields';
+import type { Validation } from '../validation/validation';
+import { validation } from '../validation/validation';
+import type { ModelValidation } from '../validation/model_validation';
+import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
 
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -86,3 +83,14 @@ export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> =
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
   }
 );
+
+// Optimized implementation for Definition check - the fallback is a zod-based check
+WiredStream.Definition.is = (
+  stream: BaseStream.Model['Definition']
+): stream is WiredStream.Definition =>
+  Boolean(
+    'ingest' in stream &&
+      typeof stream.ingest === 'object' &&
+      stream.ingest &&
+      'wired' in stream.ingest
+  );

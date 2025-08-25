@@ -10,6 +10,7 @@ import {
   RuleTranslationResult,
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
+import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
 
 export const conditions = {
   isFullyTranslated(): QueryDslQueryContainer {
@@ -56,5 +57,12 @@ export const conditions = {
   },
   isNotFailed(): QueryDslQueryContainer {
     return { bool: { must_not: conditions.isFailed() } };
+  },
+  isMissingIndex(): QueryDslQueryContainer {
+    return {
+      query_string: {
+        query: `elastic_rule.query: "${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}"`,
+      },
+    };
   },
 };

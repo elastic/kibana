@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RoutingDefinition } from '@kbn/streams-schema';
+import type { RoutingDefinition } from '@kbn/streams-schema';
 
 export interface RoutingDefinitionWithUIAttributes extends RoutingDefinition {
   id: string;

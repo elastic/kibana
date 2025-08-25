@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiText } from '@elastic/eui';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { ArgTypes, Args, Decorator } from '@storybook/react';
 import { produce } from 'immer';
+import React from 'react';
 import { mockUnifiedDocViewerServices } from '../public/__mocks__';
 import { setUnifiedDocViewerServices } from '../public/plugin';
 
@@ -54,7 +56,7 @@ export const argTypes: ArgTypes = {
 };
 
 export const decorators: Decorator[] = [
-  (Story, { args: storyArgs }) => {
+  (Story, { args: storyArgs, parameters }) => {
     // Override items provided by the mock unified doc view services.
     const unifiedDocViewerServices = produce(mockUnifiedDocViewerServices, (draft) => {
       // Mock locator return so the locator service returns as expected.
@@ -92,6 +94,15 @@ export const decorators: Decorator[] = [
     // The document the doc viewer gets is a `DataTableRecord`, while our fixtures use a "raw" hit object.
     // `buildDataTableRecord` adds the `flattened` fields.
     const hit = buildDataTableRecord(storyArgs.hit as EsHitRecord);
-    return Story({ args: { ...storyArgs, hit } });
+    return (
+      <>
+        <Story args={{ ...storyArgs, hit }} />
+        {parameters?.docs?.description?.story && (
+          <EuiText css={{ width: '33em', float: 'right' }} size="xs" color="subdued">
+            <p>{parameters.docs.description.story}</p>
+          </EuiText>
+        )}
+      </>
+    );
   },
 ];

@@ -107,6 +107,12 @@ Array [
   Object {
     "appLink": "",
     "attributes": Object {},
+    "id": "sample_alert_rule",
+    "type": "alert",
+  },
+  Object {
+    "appLink": "",
+    "attributes": Object {},
     "id": "sample_csp_rule_template",
     "type": "csp-rule-template",
   },

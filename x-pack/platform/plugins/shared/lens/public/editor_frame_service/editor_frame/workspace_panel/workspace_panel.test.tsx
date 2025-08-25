@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { UserMessage } from '../../../types';
+import type { UserMessage } from '../../../types';
 import { fireEvent, screen, act } from '@testing-library/react';
 import {
   createMockVisualization,
@@ -20,14 +20,14 @@ import {
 import { mockDataPlugin, mountWithReduxStore } from '../../../mocks';
 
 import { WorkspacePanel } from './workspace_panel';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import { buildExistsFilter } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable/events';
 import {
   applyChanges,
@@ -38,7 +38,8 @@ import {
 import { getLensInspectorService } from '../../../lens_inspector_service';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { disableAutoApply, enableAutoApply } from '../../../state_management/lens_slice';
-import { Ast, toExpression } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
+import { toExpression } from '@kbn/interpreter';
 import { faker } from '@faker-js/faker';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {

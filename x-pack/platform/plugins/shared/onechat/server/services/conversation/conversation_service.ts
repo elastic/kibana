@@ -11,7 +11,8 @@ import type {
   SecurityServiceStart,
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
-import { ConversationClient, createClient } from './client';
+import type { ConversationClient } from './client';
+import { createClient } from './client';
 import { createStorage } from './storage';
 
 export interface ConversationService {

@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { ErrorCode } from '../../../../../../common/types/error_codes';
 
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
-import {
-  AddConnectorApiLogic,
+import type {
   AddConnectorApiLogicArgs,
   AddConnectorApiLogicResponse,
 } from '../../../api/connector/add_connector_api_logic';
+import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 import { SearchIndexTabId } from '../../search_index/search_index';
 
@@ -53,11 +54,9 @@ export const AddConnectorLogic = kea<MakeLogicType<AddConnectorValues, AddConnec
     isModalVisible: [
       false,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         apiError: (_, error) =>
           error.body?.attributes?.error_code === ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
         apiSuccess: () => false,
-        // @ts-expect-error upgrade typescript v5.1.6
         setIsModalVisible: (_, { isModalVisible }) => isModalVisible,
       },
     ],

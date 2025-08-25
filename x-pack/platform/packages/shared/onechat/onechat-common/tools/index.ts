@@ -24,4 +24,6 @@ export {
   type EsqlToolFieldTypes,
   type EsqlToolParam,
   type EsqlToolDefinition,
+  type EsqlToolDefinitionWithSchema,
+  isEsqlTool,
 } from './esql';

@@ -7,20 +7,21 @@
 
 import expect from '@kbn/expect';
 
-import {
-  ReindexStatus,
-  REINDEX_OP_TYPE,
-  type ResolveIndexResponseFromES,
-} from '@kbn/upgrade-assistant-plugin/common/types';
-import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/server/lib/reindexing/index_settings';
-import { getIndexState } from '@kbn/upgrade-assistant-plugin/common/get_index_state';
+import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-plugin/common/types';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { generateNewIndexName } from '@kbn/reindex-service-plugin/server';
+import { getIndexState, Version } from '@kbn/upgrade-assistant-pkg-server';
+import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-pkg-server';
 import { sortBy } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+
+  const versionService = new Version();
+  versionService.setup('8.0.0');
 
   // Utility function that keeps polling API until reindex operation has completed or failed.
   const waitForReindexToComplete = async (indexName: string) => {
@@ -59,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should create a new index with the same documents', async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
 
       const { dummydata: originalIndex } = await es.indices.get({
         index: 'dummydata',
@@ -107,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should match the same original index settings after reindex', async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
 
       const originalSettings = {
         'index.number_of_replicas': 1,
@@ -153,7 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can resume after reindexing was stopped right after creating the new index', async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
 
       // This new index is the new soon to be created reindexed index. We create it
       // upfront to simulate a situation in which the user restarted kibana half
@@ -179,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should update any aliases', async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
 
       // Add aliases and ensure each returns the right number of docs
       await es.indices.updateAliases({
@@ -268,7 +269,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const cleanupReindex = async (indexName: string) => {
         try {
-          await es.indices.delete({ index: generateNewIndexName(indexName) });
+          await es.indices.delete({ index: generateNewIndexName(indexName, versionService) });
         } catch (e) {
           try {
             await es.indices.delete({ index: indexName });

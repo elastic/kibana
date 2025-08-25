@@ -6,11 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { disableStreams, enableStreams } from './helpers/requests';
 import { createStreams } from './helpers/create_streams';
 
@@ -202,7 +200,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.streams.some((stream) => stream.name === 'test-group')).to.eql(true);
       });
 
-      it('unsuccessfully creates a group stream with the same name as a unwired stream', async () => {
+      it('unsuccessfully creates a group stream with the same name as a classic stream', async () => {
         await esClient.index({ index: 'metrics-test-test', document: { '@timestamp': '2025' } });
         await apiClient
           .fetch('PUT /api/streams/{name} 2023-10-31', {

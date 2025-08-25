@@ -54,17 +54,17 @@ The **with...Span** helpers create an active span, run your callback, and automa
 
 Helper overview:
 
-| Helper                              | Typical use-case                  |
-| ----------------------------------- | --------------------------------- |
-| `withInferenceSpan(options, cb)`    | Generic wrapper for any operation |
-| `withChatCompleteSpan(options, cb)` | Chat completion calls             |
-| `withExecuteToolSpan(options, cb)`  | Tool execution calls              |
+| Helper                                 | Typical use-case                  |
+| -------------------------------------- | --------------------------------- |
+| `withActiveInferenceSpan(options, cb)` | Generic wrapper for any operation |
+| `withChatCompleteSpan(options, cb)`    | Chat completion calls             |
+| `withExecuteToolSpan(options, cb)`     | Tool execution calls              |
 
 ### Examples
 
 ```ts
 // Generic
-return withInferenceSpan('getWeather', () => callLLM());
+return withActiveInferenceSpan('getWeather', () => callLLM());
 
 // Chat completion
 await withChatCompleteSpan(

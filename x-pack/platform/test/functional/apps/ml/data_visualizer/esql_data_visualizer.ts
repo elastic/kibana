@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { MetricFieldVisConfig, NonMetricFieldVisConfig } from './types';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { MetricFieldVisConfig, NonMetricFieldVisConfig } from './types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -302,8 +302,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   describe('esql data visualizer', function () {
     this.tags(['ml']);
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs'
+      );
 
       await ml.testResources.setKibanaTimeZoneToUTC();
 

@@ -44,7 +44,7 @@
         "label": "InferenceServiceFormFields",
         "description": [],
         "signature": [
-          "({ http, toasts, isEdit, enforceAdaptiveAllocations, isPreconfigured, }: InferenceServicesProps) => React.JSX.Element | null"
+          "({ http, toasts, isEdit, enforceAdaptiveAllocations, isPreconfigured, currentSolution, }: InferenceServicesProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
         "deprecated": false,
@@ -55,7 +55,7 @@
             "id": "def-public.InferenceServiceFormFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  isEdit,\n  enforceAdaptiveAllocations,\n  isPreconfigured,\n}",
+            "label": "{\n  http,\n  toasts,\n  isEdit,\n  enforceAdaptiveAllocations,\n  isPreconfigured,\n  currentSolution,\n}",
             "description": [],
             "signature": [
               "InferenceServicesProps"
@@ -844,7 +844,7 @@
         "tags": [],
         "label": "ServiceProviderKeys",
         "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.ts",
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -861,7 +861,7 @@
         "signature": [
           "\"completion\""
         ],
-        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.ts",
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -914,7 +914,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.ts",
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -929,7 +929,7 @@
         "signature": [
           "\"max_number_of_allocations\""
         ],
-        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.ts",
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -938,12 +938,42 @@
     "objects": [
       {
         "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.GEMINI_PROJECT_ID_DOC_LINK",
+        "type": "Object",
+        "tags": [],
+        "label": "GEMINI_PROJECT_ID_DOC_LINK",
+        "description": [],
+        "signature": [
+          "React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.GEMINI_REGION_DOC_LINK",
+        "type": "Object",
+        "tags": [],
+        "label": "GEMINI_REGION_DOC_LINK",
+        "description": [],
+        "signature": [
+          "React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
         "id": "def-public.INTERNAL_OVERRIDE_FIELDS",
         "type": "Object",
         "tags": [],
         "label": "INTERNAL_OVERRIDE_FIELDS",
         "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.ts",
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -954,7 +984,7 @@
             "tags": [],
             "label": "[ServiceProviderKeys.elasticsearch]",
             "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.ts",
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -968,7 +998,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.ts",
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -990,7 +1020,7 @@
                   },
                   ".INTEGER; updatable: false; }; }[]"
                 ],
-                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.ts",
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1887,6 +1917,61 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.serviceProviderLinkComponents",
+        "type": "Object",
+        "tags": [],
+        "label": "serviceProviderLinkComponents",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.serviceProviderLinkComponents.ServiceProviderKeys.googlevertexai",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.googlevertexai]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.serviceProviderLinkComponents.ServiceProviderKeys.googlevertexai.location",
+                "type": "Object",
+                "tags": [],
+                "label": "location",
+                "description": [],
+                "signature": [
+                  "React.JSX.Element"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.serviceProviderLinkComponents.ServiceProviderKeys.googlevertexai.project_id",
+                "type": "Object",
+                "tags": [],
+                "label": "project_id",
+                "description": [],
+                "signature": [
+                  "React.JSX.Element"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }

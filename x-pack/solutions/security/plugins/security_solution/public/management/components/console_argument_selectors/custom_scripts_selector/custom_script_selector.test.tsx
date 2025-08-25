@@ -11,11 +11,15 @@ import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 
 import { CustomScriptSelector } from './custom_script_selector';
 import { useGetCustomScripts } from '../../../hooks/custom_scripts/use_get_custom_scripts';
-import { useConsoleStateDispatch } from '../../console/hooks/state_selectors/use_console_state_dispatch';
 import { useCustomScriptsErrorToast } from './use_custom_scripts_error_toast';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { CommandArgumentValueSelectorProps } from '../../console/types';
 import type { CustomScript } from '../../../../../server/endpoint/services';
+import type {
+  CommandArgumentValueSelectorProps,
+  Command,
+  CommandArgDefinition,
+} from '../../console/types';
+import type { ParsedCommandInterface } from '../../console/service/types';
 
 jest.mock('../../../hooks/custom_scripts/use_get_custom_scripts');
 jest.mock('../../console/hooks/state_selectors/use_console_state_dispatch');
@@ -29,27 +33,40 @@ describe('CustomScriptSelector', () => {
   const mockUseGetCustomScripts = useGetCustomScripts as jest.MockedFunction<
     typeof useGetCustomScripts
   >;
-  const mockUseConsoleStateDispatch = useConsoleStateDispatch as jest.MockedFunction<
-    typeof useConsoleStateDispatch
-  >;
   const mockUseCustomScriptsErrorToast = useCustomScriptsErrorToast as jest.MockedFunction<
     typeof useCustomScriptsErrorToast
   >;
   const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
   const mockOnChange = jest.fn();
-  const mockDispatch = jest.fn();
+  const mockRequestFocus = jest.fn();
   const mockScripts: CustomScript[] = [
     { id: 'script1', name: 'Script 1', description: 'Test script 1' },
     { id: 'script2', name: 'Script 2', description: 'Test script 2' },
   ];
 
+  const mockCommand: Command = {
+    input: 'runscript --ScriptName',
+    inputDisplay: 'runscript --ScriptName',
+    args: {} as ParsedCommandInterface<Record<string, CommandArgDefinition>>,
+    commandDefinition: {
+      name: 'runscript',
+      about: 'Execute a script',
+      RenderComponent: () => <div>{'Mock render'}</div>,
+      meta: {
+        agentType: 'microsoft_defender_endpoint',
+      },
+    },
+  };
+
   const defaultProps: CommandArgumentValueSelectorProps<string, { isPopoverOpen: boolean }> = {
     value: undefined,
     valueText: '',
-    argName: 'script',
+    argName: 'ScriptName',
     argIndex: 0,
     store: { isPopoverOpen: false },
     onChange: mockOnChange,
+    command: mockCommand,
+    requestFocus: mockRequestFocus,
   };
 
   beforeEach(() => {
@@ -60,9 +77,6 @@ describe('CustomScriptSelector', () => {
       isError: false,
       error: null,
     } as unknown as ReturnType<typeof useGetCustomScripts>);
-
-    // Mock the dispatch function
-    mockUseConsoleStateDispatch.mockReturnValue(mockDispatch);
 
     // Mock the error toast hook
     mockUseCustomScriptsErrorToast.mockImplementation(() => {});
@@ -107,31 +121,27 @@ describe('CustomScriptSelector', () => {
       error: null,
     } as unknown as ReturnType<typeof useGetCustomScripts>);
 
-    const SelectorComponent = CustomScriptSelector('endpoint');
-    render(<SelectorComponent {...defaultProps} />);
+    render(<CustomScriptSelector {...defaultProps} />);
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   test('renders initial display label when no script is selected', async () => {
-    const SelectorComponent = CustomScriptSelector('endpoint');
-    await renderAndWaitForComponent(<SelectorComponent {...defaultProps} />);
+    await renderAndWaitForComponent(<CustomScriptSelector {...defaultProps} />);
 
     expect(screen.getByText('Click to select script')).toBeInTheDocument();
   });
 
   test('renders selected script name when a script is selected', async () => {
-    const SelectorComponent = CustomScriptSelector('endpoint');
     await renderAndWaitForComponent(
-      <SelectorComponent {...defaultProps} value="Script 1" valueText="Script 1" />
+      <CustomScriptSelector {...defaultProps} value="Script 1" valueText="Script 1" />
     );
 
     expect(screen.getByText('Script 1')).toBeInTheDocument();
   });
 
   test('opens popover when clicked', async () => {
-    const SelectorComponent = CustomScriptSelector('endpoint');
-    await renderAndWaitForComponent(<SelectorComponent {...defaultProps} />);
+    await renderAndWaitForComponent(<CustomScriptSelector {...defaultProps} />);
 
     // Click to open the popover
     fireEvent.click(screen.getByText('Click to select script'));
@@ -144,10 +154,9 @@ describe('CustomScriptSelector', () => {
     );
   });
 
-  test('displays script options in the popover when open', async () => {
-    const SelectorComponent = CustomScriptSelector('endpoint');
+  test('renders searchbox and listbox when popover is open', async () => {
     await renderAndWaitForComponent(
-      <SelectorComponent {...defaultProps} store={{ isPopoverOpen: true }} />
+      <CustomScriptSelector {...defaultProps} store={{ isPopoverOpen: true }} />
     );
 
     // Check that the searchbox is rendered
@@ -156,9 +165,8 @@ describe('CustomScriptSelector', () => {
   });
 
   test('calls onChange with selected script when user makes selection', async () => {
-    const SelectorComponent = CustomScriptSelector('endpoint');
     await renderAndWaitForComponent(
-      <SelectorComponent {...defaultProps} store={{ isPopoverOpen: true }} />
+      <CustomScriptSelector {...defaultProps} store={{ isPopoverOpen: true }} />
     );
 
     const searchbox = screen.getByRole('searchbox', { name: 'Filter options' });
@@ -183,9 +191,8 @@ describe('CustomScriptSelector', () => {
   });
 
   test('closes popover after selection', async () => {
-    const SelectorComponent = CustomScriptSelector('endpoint');
     await renderAndWaitForComponent(
-      <SelectorComponent {...defaultProps} store={{ isPopoverOpen: true }} />
+      <CustomScriptSelector {...defaultProps} store={{ isPopoverOpen: true }} />
     );
 
     const searchbox = screen.getByRole('searchbox', { name: 'Filter options' });
@@ -206,16 +213,24 @@ describe('CustomScriptSelector', () => {
   });
 
   test('calls useGetCustomScripts with correct agent type', async () => {
-    const SelectorComponent = CustomScriptSelector('crowdstrike');
-    await renderAndWaitForComponent(<SelectorComponent {...defaultProps} />);
+    const crowdstrikeCommand = {
+      ...mockCommand,
+      commandDefinition: {
+        ...mockCommand.commandDefinition,
+        meta: { agentType: 'crowdstrike' },
+      },
+    };
+
+    await renderAndWaitForComponent(
+      <CustomScriptSelector {...defaultProps} command={crowdstrikeCommand} />
+    );
 
     expect(mockUseGetCustomScripts).toHaveBeenCalledWith('crowdstrike');
   });
 
   test('displays script description in dropdown', async () => {
-    const SelectorComponent = CustomScriptSelector('endpoint');
     await renderAndWaitForComponent(
-      <SelectorComponent {...defaultProps} store={{ isPopoverOpen: true }} />
+      <CustomScriptSelector {...defaultProps} store={{ isPopoverOpen: true }} />
     );
 
     // The descriptions should be contained within the option elements
@@ -224,9 +239,8 @@ describe('CustomScriptSelector', () => {
   });
 
   test('shows placeholder text in the search box when no search is performed', async () => {
-    const SelectorComponent = CustomScriptSelector('endpoint');
     await renderAndWaitForComponent(
-      <SelectorComponent
+      <CustomScriptSelector
         {...defaultProps}
         value="Script 1"
         valueText="Script 1"
@@ -239,9 +253,8 @@ describe('CustomScriptSelector', () => {
   });
 
   test('filters script options as the user types in the search box', async () => {
-    const SelectorComponent = CustomScriptSelector('endpoint');
     await renderAndWaitForComponent(
-      <SelectorComponent
+      <CustomScriptSelector
         {...defaultProps}
         value="Script 1"
         valueText="Script 1"
@@ -258,5 +271,23 @@ describe('CustomScriptSelector', () => {
       expect(screen.queryByText('Test script 1')).not.toBeInTheDocument();
       expect(screen.getByText('Test script 2')).toBeInTheDocument();
     });
+  });
+
+  test('calls requestFocus when popover closes', async () => {
+    await renderAndWaitForComponent(
+      <CustomScriptSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+    );
+
+    // Simulate popover closing by changing the store state
+    await renderAndWaitForComponent(
+      <CustomScriptSelector {...defaultProps} store={{ isPopoverOpen: false }} />
+    );
+
+    // Advance timers to trigger the setTimeout in useEffect
+    act(() => {
+      jest.advanceTimersByTime(10);
+    });
+
+    expect(mockRequestFocus).toHaveBeenCalled();
   });
 });

@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { exactly } from '../../../canvas_plugin_src/functions/common/exactly';
-import { FunctionHelp } from '../function_help';
-import { FunctionFactory } from '../../../types';
+import type { FunctionHelp } from '../function_help';
+import type { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof exactly>> = {
   help: i18n.translate('xpack.canvas.functions.exactlyHelpText', {

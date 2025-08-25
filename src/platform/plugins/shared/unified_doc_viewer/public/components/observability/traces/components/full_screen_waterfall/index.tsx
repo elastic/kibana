@@ -17,10 +17,11 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { SERVICE_NAME_FIELD, SPAN_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { SpanFlyout } from './span_flyout';
 import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
@@ -48,6 +49,8 @@ export const FullScreenWaterfall = ({
   const [spanId, setSpanId] = useState<string | null>(null);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const overlayMaskRef = useRef<HTMLDivElement>(null);
+  const { euiTheme } = useEuiTheme();
+
   const {
     share: {
       url: { locators },
@@ -107,7 +110,11 @@ export const FullScreenWaterfall = ({
     <>
       <EuiOverlayMask
         maskRef={overlayMaskRef}
-        css={{ paddingBlockEnd: '0 !important', overflowY: 'scroll' }}
+        css={{
+          paddingBlockEnd: '0 !important',
+          overflowY: 'scroll',
+          backgroundColor: `${euiTheme.colors.backgroundBasePlain} !important`,
+        }}
       >
         <EuiFocusTrap css={{ height: '100%', width: '100%' }}>
           <EuiPanel hasShadow={false} css={{ minHeight: '100%', width: '100%' }}>
@@ -131,7 +138,7 @@ export const FullScreenWaterfall = ({
                   ariaLabel={i18n.translate(
                     'unifiedDocViewer.observability.traces.fullScreenWaterfall.exitFullScreen.button',
                     {
-                      defaultMessage: 'Exit full screen waterfall',
+                      defaultMessage: 'Exit expanded trace timeline',
                     }
                   )}
                 />

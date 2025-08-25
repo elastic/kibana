@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
-import {
+import type {
   CustomIntegrationsSetup,
   CustomIntegrationsStart,
   CustomIntegrationsStartDependencies,
 } from './types';
+import type { CustomIntegration } from '../common';
 import {
-  CustomIntegration,
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
 } from '../common';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const searchFuncationalConfig = await readConfigFile(require.resolve('../config'));
@@ -14,6 +14,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...searchFuncationalConfig.getAll(),
     junit: {
       reportName: 'Search Solution Functional Tests - Apps - Search Playground',
+    },
+    kbnTestServer: {
+      ...searchFuncationalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...searchFuncationalConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.spaces.defaultSolution=es', // Default to Search Solution
+      ],
     },
     // load tests in the index file
     testFiles: [require.resolve('../apps/search_playground/index.ts')],

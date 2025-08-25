@@ -26,6 +26,7 @@ export {
   type ToolCallsOf,
   type ToolCallbacksOf,
   type ToolCall,
+  type ToolCallback,
   type ToolDefinition,
   type ToolOptions,
   type FunctionCallingMode,

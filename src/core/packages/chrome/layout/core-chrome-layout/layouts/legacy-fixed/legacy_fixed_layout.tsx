@@ -10,7 +10,8 @@
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { LegacyFixedLayoutGlobalStyles } from './legacy_fixed_global_app_style';
-import { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
+import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
+import { type LayoutServiceParams } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
@@ -18,14 +19,16 @@ import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
  * Service for providing layout component wired to other core services.
  */
 export class LegacyFixedLayout implements LayoutService {
-  constructor(private deps: LayoutServiceStartDeps) {}
+  constructor(private deps: LayoutServiceStartDeps, private readonly params: LayoutServiceParams) {}
 
   /**
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
     const { chrome, overlays, application } = this.deps;
-    const chromeHeader = chrome.getLegacyHeaderComponentForFixedLayout();
+    const chromeHeader = chrome.getLegacyHeaderComponentForFixedLayout({
+      projectSideNavVersion: this.params.projectSideNavVersion ?? 'v1',
+    });
     const bannerComponent = overlays.banners.getComponent();
     const appComponent = application.getComponent();
     const chromeVisible$ = chrome.getIsVisible$();

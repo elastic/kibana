@@ -10,7 +10,7 @@ import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
 } from '../../../../alerting_api_integration/common/lib/actions_simulations_utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
@@ -34,7 +34,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   /**
    * This test test an upgrade from 7.15 to the latest Kibana version.
-   * The x-pack/test/functional/fixtures/kbn_archiver/cases/7.17.5/case.json contains a case with
+   * The x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.17.5/case.json contains a case with
    * all available user actions except user actions related to alerts. By importing the case,
    * all migrations run. We ensure that the case shows all data after migrations.
    */
@@ -45,7 +45,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/cases/7.17.5/case.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.17.5/case.json'
       );
 
       await cases.testResources.installKibanaSampleData('logs');
@@ -66,7 +66,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/cases/7.17.5/case.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.17.5/case.json'
       );
 
       await cases.testResources.removeKibanaSampleData('logs');

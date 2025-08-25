@@ -10,8 +10,8 @@ import React from 'react';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { OptionalText } from '../components/optional_text';
-import { ListParamItem } from './params_list';
-import { SyntheticsParams } from '../../../../../../common/runtime_types';
+import type { ListParamItem } from './params_list';
+import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { VALUE_LABEL, VALUE_REQUIRED } from './add_param_form';
 
 export const ParamValueField = ({ isEditingItem }: { isEditingItem: ListParamItem | null }) => {

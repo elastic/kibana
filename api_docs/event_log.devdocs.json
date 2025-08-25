@@ -763,7 +763,7 @@
             "signature": [
               "(properties: ",
               "IEvent",
-              ") => void"
+              ", id?: string | undefined) => void"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
             "deprecated": false,
@@ -778,6 +778,21 @@
                 "description": [],
                 "signature": [
                   "IEvent"
+                ],
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogger.logEvent.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,

@@ -12,7 +12,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui'
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { GuideCardSolutions } from './guide_cards';
+import type { GuideCardSolutions } from './guide_cards';
 
 const filterButtonCss = css`
   border-radius: 20px !important;

@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { ControlGroupRuntimeState, ControlPanelState, SerializedControlState } from '../../common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { ControlPanelState, SerializedControlState } from '../../common';
 
 // using SerializableRecord to force type to be read as serializable
 export type SerializableControlGroupState = SerializableRecord &
-  Omit<
-    ControlGroupRuntimeState,
-    'initialChildControlState' | 'editorConfig' // editor config is not persisted
-  > & {
+  Omit<ControlsGroupState, 'controls'> & {
     panels: Record<string, ControlPanelState<SerializedControlState>> | {};
   };
 

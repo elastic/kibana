@@ -8,21 +8,19 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
+import type { SpanDocumentOverview } from '@kbn/discover-utils';
 import {
   SERVICE_ENVIRONMENT_FIELD,
   SPAN_DESTINATION_SERVICE_RESOURCE_FIELD,
   SPAN_NAME_FIELD,
   SPAN_SUBTYPE_FIELD,
   SPAN_TYPE_FIELD,
-  SpanDocumentOverview,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { HighlightField } from '../../components/highlight_field.tsx';
-import {
-  FieldConfiguration,
-  getCommonFieldConfiguration,
-} from '../../resources/get_field_configuration';
+import { HighlightField } from '../../components/highlight_field';
+import type { FieldConfiguration } from '../../resources/get_field_configuration';
+import { getCommonFieldConfiguration } from '../../resources/get_field_configuration';
 import { DependencyNameLink } from '../sub_components/dependency_name_link';
 
 export const getSpanFieldConfiguration = ({

@@ -21,6 +21,7 @@ import type {
   RunRuleParams,
   TaskRunnerContext,
 } from './types';
+import { getDeleteRuleTaskRunResult } from './types';
 import { getExecutorServices } from './get_executor_services';
 import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
 import type {
@@ -67,6 +68,11 @@ import {
   getState,
   getTaskRunError,
 } from './lib';
+import {
+  ErrorWithType,
+  isOutdatedTaskVersionError,
+  OUTDATED_TASK_VERSION,
+} from '../lib/error_with_type';
 import { getTrackedExecutions } from './lib/get_tracked_execution';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
@@ -520,6 +526,15 @@ export class TaskRunner<
         getDecryptedRule(this.context, ruleId, spaceId)
       );
 
+      // Check that this task is current
+      const scheduledTaskId = ruleData.rawRule.scheduledTaskId;
+      if (this.taskInstance.id !== ruleId && this.taskInstance.id !== scheduledTaskId) {
+        throw new ErrorWithType({
+          message: 'The task ID does not match the rule ID',
+          type: OUTDATED_TASK_VERSION,
+        });
+      }
+
       const runRuleParams = validateRuleAndCreateFakeRequest({
         ruleData,
         paramValidator: this.ruleType.validate.params,
@@ -672,6 +687,7 @@ export class TaskRunner<
 
     let runRuleResult: Result<RunRuleResult, Error>;
     let schedule: Result<IntervalSchedule, Error>;
+    let shouldDisableTask = false;
     try {
       const validatedRuleData = await this.prepareToRun();
 
@@ -681,8 +697,16 @@ export class TaskRunner<
 
       schedule = asOk(validatedRuleData.rule.schedule);
     } catch (err) {
+      if (isOutdatedTaskVersionError(err)) {
+        this.logger.info(
+          `Outdated task version: The task instance ID: ${this.taskInstance.id} does not match the rule ID: ${ruleId}.`
+        );
+        return getDeleteRuleTaskRunResult();
+      }
+
       runRuleResult = asErr(err);
       schedule = asErr(err);
+      shouldDisableTask = err.reason === RuleExecutionStatusErrorReasons.Disabled;
     }
 
     await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>
@@ -714,6 +738,8 @@ export class TaskRunner<
         ruleTypeId: this.ruleType.id,
         ruleId,
       }),
+      // added this way so we don't add shouldDisableTask: false explicitly
+      ...(shouldDisableTask ? { shouldDisableTask } : {}),
     };
   }
 

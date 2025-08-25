@@ -7,21 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ESQLAst,
-  ESQLCommand,
-  ESQLMessage,
-  EsqlQuery,
-  walk,
-  esqlCommandRegistry,
-  ErrorTypes,
-} from '@kbn/esql-ast';
+import type { ESQLAst, ESQLCommand, ESQLMessage, ErrorTypes } from '@kbn/esql-ast';
+import { EsqlQuery, walk, esqlCommandRegistry } from '@kbn/esql-ast';
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type {
   ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
+  ICommandCallbacks,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { areFieldAndUserDefinedColumnTypesCompatible } from '../shared/helpers';
+import type { LicenseType } from '@kbn/licensing-types';
+
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
 import {
@@ -93,11 +87,12 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getFieldsMetadata: [],
   getVariables: [],
   canSuggestVariables: [],
-  getJoinIndices: [],
-  getTimeseriesIndices: [],
+  getJoinIndices: ['invalidJoinIndex'],
+  getTimeseriesIndices: ['unknownIndex'],
   getEditorExtensions: [],
   getInferenceEndpoints: [],
   getLicense: [],
+  getActiveProduct: [],
 };
 
 /**
@@ -151,8 +146,6 @@ async function validateAst(
   }
 
   const userDefinedColumns = collectUserDefinedColumns(rootCommands, availableFields, queryString);
-  // notify if the user is rewriting a column as userDefinedColumn with another type
-  messages.push(...validateFieldsShadowing(availableFields, userDefinedColumns));
   messages.push(...validateUnsupportedTypeFields(availableFields, rootCommands));
 
   const references: ReferenceMaps = {
@@ -164,8 +157,13 @@ async function validateAst(
     joinIndices: joinIndices?.indices || [],
   };
 
+  const license = await callbacks?.getLicense?.();
+  const hasMinimumLicenseRequired = license?.hasAtLeast;
   for (const [_, command] of rootCommands.entries()) {
-    const commandMessages = validateCommand(command, references, rootCommands);
+    const commandMessages = validateCommand(command, references, rootCommands, {
+      ...callbacks,
+      hasMinimumLicenseRequired,
+    });
     messages.push(...commandMessages);
   }
 
@@ -191,7 +189,8 @@ async function validateAst(
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
-  ast: ESQLAst
+  ast: ESQLAst,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
@@ -202,6 +201,24 @@ function validateCommand(
 
   if (!commandDefinition) {
     return messages;
+  }
+
+  // Check license requirements for the command
+  if (callbacks?.hasMinimumLicenseRequired) {
+    const license = commandDefinition.metadata.license;
+
+    if (license && !callbacks.hasMinimumLicenseRequired(license.toLowerCase() as LicenseType)) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'licenseRequired',
+          values: {
+            name: command.name.toUpperCase(),
+            requiredLicense: license.toUpperCase(),
+          },
+          locations: command.location,
+        })
+      );
+    }
   }
 
   const context = {
@@ -215,47 +232,11 @@ function validateCommand(
   };
 
   if (commandDefinition.methods.validate) {
-    messages.push(...commandDefinition.methods.validate(command, ast, context));
+    messages.push(...commandDefinition.methods.validate(command, ast, context, callbacks));
   }
 
   // no need to check for mandatory options passed
   // as they are already validated at syntax level
-  return messages;
-}
-
-function validateFieldsShadowing(
-  fields: Map<string, ESQLFieldWithMetadata>,
-  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>
-) {
-  const messages: ESQLMessage[] = [];
-  for (const userDefinedColumn of userDefinedColumns.keys()) {
-    if (fields.has(userDefinedColumn)) {
-      const userDefinedColumnHits = userDefinedColumns.get(userDefinedColumn)!;
-      if (
-        !areFieldAndUserDefinedColumnTypesCompatible(
-          fields.get(userDefinedColumn)?.type,
-          userDefinedColumnHits[0].type
-        )
-      ) {
-        const fieldType = fields.get(userDefinedColumn)!.type;
-        const userDefinedColumnType = userDefinedColumnHits[0].type;
-        const flatFieldType = fieldType;
-        const flatUserDefinedColumnType = userDefinedColumnType;
-        messages.push(
-          getMessageFromId({
-            messageId: 'shadowFieldType',
-            values: {
-              field: userDefinedColumn,
-              fieldType: flatFieldType,
-              newType: flatUserDefinedColumnType,
-            },
-            locations: userDefinedColumnHits[0].location,
-          })
-        );
-      }
-    }
-  }
-
   return messages;
 }
 

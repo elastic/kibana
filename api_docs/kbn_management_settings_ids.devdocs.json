@@ -1209,6 +1209,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE",
+        "description": [],
+        "signature": [
+          "\"observability:enableDiagnosticMode\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID",
         "type": "string",
         "tags": [],
@@ -1668,6 +1683,21 @@
         "description": [],
         "signature": [
           "\"securitySolution:showRelatedIntegrations\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING",
+        "description": [],
+        "signature": [
+          "\"securitySolution:suppressionBehaviorOnAlertClosure\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

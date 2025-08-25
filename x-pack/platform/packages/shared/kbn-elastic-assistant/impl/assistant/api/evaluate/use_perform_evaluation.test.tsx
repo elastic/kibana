@@ -6,10 +6,12 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { usePerformEvaluation, UsePerformEvaluationParams } from './use_perform_evaluation';
+import type { UsePerformEvaluationParams } from './use_perform_evaluation';
+import { usePerformEvaluation } from './use_perform_evaluation';
 import { postEvaluation as _postEvaluation } from './evaluate';
 import { useMutation as _useMutation } from '@tanstack/react-query';
-import { API_VERSIONS, PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
+import type { PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 const useMutationMock = _useMutation as jest.Mock;
 const postEvaluationMock = _postEvaluation as jest.Mock;

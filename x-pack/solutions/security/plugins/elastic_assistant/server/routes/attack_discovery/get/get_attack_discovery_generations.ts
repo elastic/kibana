@@ -17,7 +17,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { performChecks } from '../../helpers';
 import { buildResponse } from '../../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 
 export const getAttackDiscoveryGenerationsRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
