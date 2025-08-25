@@ -27,6 +27,7 @@ import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/err
 import { EVENT_FILTER_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/event_filters/constants';
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/host_isolation_exceptions/constants';
 import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/blocklist/constants';
+import { TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/trusted_devices/constants';
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
 import type TestAgent from 'supertest/lib/agent';
 import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
@@ -194,6 +195,16 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       return this.createExceptionItem(blocklist, options);
     }
 
+    async createTrustedDevice(
+      overrides: Partial<CreateExceptionListItemSchema> = {},
+      options?: ArtifactCreateOptions
+    ): Promise<ArtifactTestData> {
+      await this.ensureListExists(TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION, options);
+      const trustedDevice = this.exceptionsGenerator.generateTrustedDeviceForCreate(overrides);
+
+      return this.createExceptionItem(trustedDevice, options);
+    }
+
     async createArtifact(
       listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number] | typeof ENDPOINT_LIST_ID,
       overrides: Partial<CreateExceptionListItemSchema> = {},
@@ -202,6 +213,9 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       switch (listId) {
         case ENDPOINT_ARTIFACT_LISTS.trustedApps.id: {
           return this.createTrustedApp(overrides, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.trustedDevices.id: {
+          return this.createTrustedDevice(overrides, options);
         }
         case ENDPOINT_ARTIFACT_LISTS.eventFilters.id: {
           return this.createEventFilter(overrides, options);

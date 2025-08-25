@@ -54,6 +54,7 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/response-ops-rule-params",
     "@kbn/securitysolution-exceptions-common",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/securitysolution-utils"
   ]
 }
