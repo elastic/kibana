@@ -1,118 +1,96 @@
-# Kibana Serverless Tests
+# Kibana Platform Serverless Tests
 
 The tests and helper methods (services, page objects) defined here in
-`x-pack/test_serverless` cover the serverless functionality introduced by the
-`serverless`, `serverless_observability`, `serverless_search`, `security_solution_serverless` and `serverless_chat` plugins.
+`x-pack/platform/test/serverless` cover the platform-shared serverless functionality that works across all serverless project types (Security, Observability, Search, Chat).
 
-For how to set up Docker for serverless ES images, please refer to
+**Important**: Only tests that validate platform-shared functionality should be located here. Solution-specific serverless tests should be located in their respective solution directories: `x-pack/solutions/<solution>/test/serverless`.
+
+For instructions on how to set up Docker for serverless ES images, please refer to
+[src/platform/packages/shared/kbn-es/README](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/README.mdx).
 [src/platform/packages/shared/kbn-es/README](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/README.mdx).
 
-## Serverless testing structure and conventions
+## Platform Serverless Testing Structure and Conventions
 
 ### Overview
 
-The serverless test structure corresponds to what we have in `x-pack/test` with
-API tests in `api_integration` and UI tests in `functional`, each with their
-set of helper methods and sub-directories for
+The platform serverless test structure focuses on functionality that is shared across all serverless project types. This includes core platform features, shared UX components, and common serverless behaviors that are not specific to any particular solution.
 
-- `common` functionality shared across serverless projects (core, shared UX, ...)
-- `observability` project specific functionality
-- `search` project specific functionality
-- `security` project specific functionality
-- `chat` project specific functionality
+Tests are organized in `api_integration` and `functional` directories with their respective helper methods and services.
 
-The `shared` directory contains fixtures, services, ... that are shared across
+The `shared` directory contains fixtures, services, and utilities that are shared across
 `api_integration` and `functional` tests.
 
 ```
-x-pack/test_serverless/
+x-pack/platform/test/serverless/
 ├─ api_integration
+│  ├─ configs
 │  ├─ services
 │  ├─ test_suites
-│  │  ├─ chat
-│  │  ├─ common
-│  │  ├─ observability
-│  │  ├─ search
-│  │  ├─ security
+│  │  ├─ # Platform-shared API functionality
 ├─ functional
+│  ├─ configs
 │  ├─ page_objects
 │  ├─ services
 │  ├─ test_suites
-│  │  ├─ chat
-│  │  ├─ common
-│  │  ├─ observability
-│  │  ├─ search
-│  │  ├─ security
+│  │  ├─ # Platform-shared UI functionality
 ├─ shared
 │  ├─ services
 │  ├─ types
 ```
 
-### Common tests
+### Solution-Specific Tests
 
-As outlined above, tests in the `common` API integration and functional test suites are
-covering functionality that's shared across serverless projects. That's why these tests
-don't have a dedicated config file and instead need to be included in project specific
-configurations.
+Tests that are specific to individual serverless project types should be located in their respective solution directories:
 
-**If you add a new `api_integration` or `functional` `common` sub-directory, remember to add it to the corresponding `common_configs` of all projects (`x-pack/test_serverless/[api_integration|functional]/test_suites/[chat|observability|search|security]/common_configs`).**
+- **Security Solution**: `x-pack/solutions/security/test/serverless/`
+- **Observability Solution**: `x-pack/solutions/observability/test/serverless/`
+- **Search Solution**: `x-pack/solutions/search/test/serverless/`
+- **Other Solutions**: `x-pack/solutions/<solution>/test/serverless/`
 
-In case a common test needs to be skipped for one of the projects
-(in both regular pipelines that start KBN in serverless mode [against serverless ES] & pipelines creating serverless projects in MKI [Cloud]),
-there are the following suite tags available to do so:
-`skipSvlChat`, `skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be added like this to a test suite:
+**Guidelines for platform tests**:
 
-```ts
-describe('my test suite', function () {
-  this.tags(['skipSvlChat', 'skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']);
-  // or for a single tag: this.tags('skipSvlSec');
-  [...]
-});
-```
+- Focus on functionality that works identically across all project types
+- Test core platform features (spaces, saved objects, user management, alerting, etc.)
+- Validate shared UI components and navigation patterns
+- Ensure consistent behavior across different serverless project types
 
-Tests that are designed to only run in one of the projects should be added to the project
-specific test directory and not to `common` with three skips.
+**What should NOT be included**:
 
-Note, that `common` tests are invoked up to four times in a full test run: once per project to make
-sure the covered shared functionality works correctly in every project. So when writing tests there, be mindful about the test run time.
+- Solution-specific features or APIs
+- Project-type specific UI elements or workflows
+- Business logic specific to Security, Observability, Search, or Chat solutions
 
-See also the README files for [Serverless Common API Integration Tests](https://github.com/elastic/kibana/blob/main/x-pack/platform/test/serverless/api_integration/test_suites/README.md) and [Serverless Common Functional Tests](https://github.com/elastic/kibana/blob/main/x-pack/platform/test/serverless/functional/test_suites/README.md).
+### Shared Services and Page Objects
 
-### Shared services and page objects
-
-Test services and page objects from `x-pack/test/[api_integration|functional]`
+Test services and page objects from `x-pack/platform/test/[api_integration|functional]`
 are available for reuse.
 
-Serverless specific services and page objects are implemented in
-`x-pack/test_serverless/[api_integration|functional|shared]` only and may not be added
-to or make modifications in `x-pack/test`.
+Platform serverless-specific services and page objects are implemented in
+`x-pack/platform/test/serverless/[api_integration|functional|shared]` only.
 
-With this helper method reuse, we have to avoid name clashes and go with the
-following namespaces:
+**Naming conventions for helper methods**:
 
-| project       | namespace for helper methods |
-| ------------- | ---------------------------- |
-| common        | svlCommon                    |
-| observability | svlOblt                      |
-| search        | svlSearch                    |
-| security      | svlSec                       |
-| chat          | svlChat                      |
+| scope    | namespace for helper methods |
+| -------- | ---------------------------- |
+| platform | svlCommon                    |
 
-### Adding Serverless Tests
+**Note**: Solution-specific helper methods should be implemented in their respective solution test directories and use solution-specific namespaces.
 
-As outlined above, serverless tests are separated from stateful tests (except
-the reuse of helper methods), which includes a new base configuration. All
-tests that should run in a serverless environment have to be added to the
-`x-pack/test_serverless`.
+### Adding Platform Serverless Tests
 
-Tests in this area should be clearly designed for the serverless environment,
-particularly when it comes to timing for API requests and UI interaction.
+Platform serverless tests should only be added when testing functionality that is truly shared across all serverless project types. All tests that should run in a serverless environment but are solution-specific should be added to the respective solution directories: `x-pack/solutions/<solution>/test/serverless/`.
+
+**Before adding tests here, ask yourself**:
+
+- Does this functionality work identically across all serverless project types?
+- Is this a core platform feature rather than solution-specific logic?
+- Would this test provide value when run against any serverless project type?
 
 ### Roles-based testing
 
 Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles)
 and in order to properly test Kibana functionality, test design requires to login with
-a project-supported SAML role. FTR provides `svlUserManager` service to do SAML authentication, that allows UI tests to set
+a project-supported SAML role. FTR provides `samlAuth` service to do SAML authentication, that allows UI tests to set
 the SAML cookie in the browser context and generates api key to use in the api integration tests. See examples below.
 
 General recommendations:
@@ -213,7 +191,7 @@ describe("my internal APIs test suite", async function() {
 With custom native roles now enabled for Security, Search, and Observability projects on MKI, FTR supports
 defining and authenticating with custom roles in both UI functional and API integration tests.
 
-To test custom roles on a project type that doesn't yet support them, use a feature flags test config ([example](./functional/test_suites/observability/config.feature_flags.ts)). This allows testing in the Kibana CI before the feature is enabled on MKI. Once the project type officially supports custom roles, move the tests to a standard FTR config to enable execution on MKI.
+To test custom roles on a project type that doesn't yet support them, use a feature flags test config ([example](./functional/test_suites/data_usage/privileges.ts)). This allows testing in the Kibana CI before the feature is enabled on MKI. Once the project type officially supports custom roles, move the tests to a standard FTR config to enable execution on MKI.
 
 When running tests locally against MKI, ensure that the `.ftr/role_users.json` file includes the reserved role name `custom_role_worker_1` along with its credentials. This role name has been updated for compatibility with Scout, which supports parallel test execution and allows multiple credential pairs to be passed.
 
@@ -314,14 +292,14 @@ feature flags tests can be pointed to the project.
 
 ## Run tests
 
-Similar to how functional tests are run in `x-pack/test`, you can point the
-functional tests server and test runner to config files in this `x-pack/test_serverless`
+Similar to how functional tests are run in other directories, you can point the
+functional tests server and test runner to config files in this `x-pack/platform/test/serverless/[api_integration|functional]/configs`
 directory, e.g. from the `x-pack` directory run:
 
 ```bash
-node scripts/functional_tests_server.js --config test_serverless/api_integration/test_suites/search/config.ts
+node scripts/functional_tests_server.js --config x-pack/platform/test/serverless/api_integration/configs/search/config.group1.ts
 
-node scripts/functional_test_runner.js --config test_serverless/api_integration/test_suites/search/config.ts
+node scripts/functional_test_runner.js --config x-pack/platform/test/serverless/api_integration/configs/search/config.group1.ts
 ```
 
 ## Run tests on MKI
@@ -329,7 +307,7 @@ node scripts/functional_test_runner.js --config test_serverless/api_integration/
 There is no need to start servers locally, you just need to create MKI project and copy urls for Elasticsearch and Kibana. Make sure to update urls with username/password and port 443 for Elasticsearch. FTR has no control over MKI and can't update your projects so make sure your `config.ts` does not specify any custom arguments for Kibana or Elasticsearch. Otherwise, it will be ignored. You can run the tests from the `x-pack` directory:
 
 ```bash
-TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://elastic:PASSWORD@ES_HOSTNAME:443" TEST_KIBANA_URL="https://elastic:PASSWORD@KIBANA_HOSTNAME" node scripts/functional_test_runner --config test_serverless/api_integration/test_suites/search/config.ts --exclude-tag=skipMKI
+TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://elastic:PASSWORD@ES_HOSTNAME:443" TEST_KIBANA_URL="https://elastic:PASSWORD@KIBANA_HOSTNAME" node scripts/functional_test_runner --config x-pack/platform/test/serverless/api_integration/configs/search/config.group1.ts --exclude-tag=skipMKI
 ```
 
 Steps to follow to run on QA environment:
@@ -370,7 +348,7 @@ Steps to follow to run on QA environment:
 - Now run the tests from the `x-pack` directory
 
 ```bash
-TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://testing-internal:testing-internal_pwd@ES_HOSTNAME:443" TEST_KIBANA_URL="https://testing-internal:testing-internal_pwd@KIBANA_HOSTNAME:443" node scripts/functional_test_runner.js --config test_serverless/functional/test_suites/security/common_configs/config.group1.ts --exclude-tag=skipMKI
+TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://testing-internal:testing-internal_pwd@ES_HOSTNAME:443" TEST_KIBANA_URL="https://testing-internal:testing-internal_pwd@KIBANA_HOSTNAME:443" node scripts/functional_test_runner.js --config x-pack/platform/test/serverless/api_integration/configs/search/config.group1.ts --exclude-tag=skipMKI
 ```
 
 ## Skipping tests for MKI run
