@@ -96,7 +96,7 @@ export function initializeESQLControlSelections(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
       switchMap(async ({ timeRange }) => {
         setDataLoading(true);
-        await getESQLSingleColumnValues({
+        return await getESQLSingleColumnValues({
           query: esqlQuery$.getValue(),
           search: dataService.search.search,
           timeRange,
