@@ -402,18 +402,21 @@ describe('generate_semconv', () => {
   });
 
   describe('output validation', () => {
-    it('should merge registry and metric fields correctly', () => {
+    it('should merge hardcoded, registry and metric fields correctly', () => {
       createTestYamlFile([mockRegistryGroup, mockMetricGroup]);
 
       const result = processSemconvYaml(tempYamlFile);
 
       expect(result.totalFields).toEqual({
+        ...result.hardcodedFields,
         ...result.registryFields,
         ...result.metricFields,
       });
 
       expect(result.stats.totalFields).toBe(
-        Object.keys(result.registryFields).length + Object.keys(result.metricFields).length
+        Object.keys(result.hardcodedFields).length +
+          Object.keys(result.registryFields).length +
+          Object.keys(result.metricFields).length
       );
     });
 
@@ -469,6 +472,116 @@ describe('generate_semconv', () => {
         description: '|\n      The name of the web engine.',
         type: 'keyword',
       });
+    });
+  });
+
+  describe('hardcoded mappings integration', () => {
+    it('should include hardcoded fields in result', () => {
+      createTestYamlFile([]);
+
+      const result = processSemconvYaml(tempYamlFile);
+
+      expect(result.hardcodedFields).toBeDefined();
+      expect(Object.keys(result.hardcodedFields).length).toBeGreaterThan(0);
+      expect(result.stats.hardcodedFields).toBeGreaterThan(0);
+    });
+
+    it('should include core OTLP fields in hardcoded mappings', () => {
+      createTestYamlFile([]);
+
+      const result = processSemconvYaml(tempYamlFile);
+
+      // Check for key OTLP fields
+      expect(result.hardcodedFields['@timestamp']).toEqual({
+        name: '@timestamp',
+        description: expect.stringContaining('Time when'),
+        type: 'date_nanos',
+      });
+
+      expect(result.hardcodedFields.trace_id).toEqual({
+        name: 'trace_id',
+        description: 'A unique identifier for a trace.',
+        type: 'keyword',
+      });
+
+      expect(result.hardcodedFields['resource.attributes.*']).toEqual({
+        name: 'resource.attributes.*',
+        description: expect.stringContaining('Resource attributes'),
+        type: 'passthrough',
+      });
+    });
+
+    it('should allow semantic convention fields to override hardcoded fields', () => {
+      // Create a registry group that conflicts with a hardcoded field
+      const conflictingGroup: YamlGroup = {
+        id: 'registry.test',
+        type: 'attribute_group',
+        brief: 'Test group',
+        attributes: [
+          {
+            name: '@timestamp',
+            brief: 'Custom timestamp description from semantic conventions',
+            type: 'string',
+          },
+        ],
+      };
+
+      createTestYamlFile([conflictingGroup]);
+
+      const result = processSemconvYaml(tempYamlFile);
+
+      // Semantic convention should override hardcoded field
+      expect(result.totalFields['@timestamp']).toEqual({
+        name: '@timestamp',
+        description: 'Custom timestamp description from semantic conventions',
+        type: 'keyword', // string maps to keyword
+      });
+
+      // But hardcoded field should still exist separately
+      expect(result.hardcodedFields['@timestamp']).toEqual({
+        name: '@timestamp',
+        description: expect.stringContaining('Time when'),
+        type: 'date_nanos',
+      });
+    });
+
+    it('should properly count all field sources', () => {
+      createTestYamlFile([mockRegistryGroup, mockMetricGroup]);
+
+      const result = processSemconvYaml(tempYamlFile);
+
+      expect(result.stats.hardcodedFields).toBeGreaterThan(0);
+      expect(result.stats.registryGroups).toBe(1);
+      expect(result.stats.metricGroups).toBe(1);
+
+      // Total should include all sources
+      const expectedTotal =
+        Object.keys(result.hardcodedFields).length +
+        Object.keys(result.registryFields).length +
+        Object.keys(result.metricFields).length;
+
+      expect(result.stats.totalFields).toBe(expectedTotal);
+    });
+
+    it('should maintain field structure consistency across all sources', () => {
+      createTestYamlFile([mockRegistryGroup, mockMetricGroup]);
+
+      const result = processSemconvYaml(tempYamlFile);
+
+      // Check that all field sources have consistent structure
+      [result.hardcodedFields, result.registryFields, result.metricFields].forEach(
+        (fieldSource) => {
+          Object.entries(fieldSource).forEach(([fieldName, fieldMetadata]) => {
+            expect(fieldMetadata).toHaveProperty('name');
+            expect(fieldMetadata).toHaveProperty('description');
+            expect(fieldMetadata).toHaveProperty('type');
+
+            expect(fieldMetadata.name).toBe(fieldName);
+            expect(typeof fieldMetadata.description).toBe('string');
+            expect(typeof fieldMetadata.type).toBe('string');
+          });
+        }
+      );
     });
   });
 });

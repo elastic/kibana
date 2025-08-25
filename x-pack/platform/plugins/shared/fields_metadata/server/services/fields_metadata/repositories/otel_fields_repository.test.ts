@@ -275,6 +275,17 @@ describe('OtelFieldsRepository', () => {
         expect(field!.source).toBe('otel');
       });
 
+      it('should strip "scope.attributes." prefix and find field', () => {
+        const field = otelFieldsRepository.getByName('scope.attributes.cloud.account.id');
+
+        expect(field).toBeDefined();
+        expect(field!.name).toBe('cloud.account.id');
+        expect(field!.description).toBe('The cloud account id the resource is assigned to.');
+        expect(field!.type).toBe('keyword');
+        expect(field!.example).toBe('111111111111');
+        expect(field!.source).toBe('otel');
+      });
+
       it('should strip "attributes." prefix and find field', () => {
         const field = otelFieldsRepository.getByName('attributes.service.name');
 
@@ -305,15 +316,18 @@ describe('OtelFieldsRepository', () => {
 
       it('should handle multiple prefix types correctly', () => {
         const resourceField = otelFieldsRepository.getByName('resource.attributes.service.version');
+        const scopeField = otelFieldsRepository.getByName('scope.attributes.service.version');
         const attributesField = otelFieldsRepository.getByName('attributes.service.version');
         const normalField = otelFieldsRepository.getByName('service.version');
 
         // All should return the same field metadata
         expect(resourceField).toBeDefined();
+        expect(scopeField).toBeDefined();
         expect(attributesField).toBeDefined();
         expect(normalField).toBeDefined();
 
         expect(resourceField!.name).toBe('service.version');
+        expect(scopeField!.name).toBe('service.version');
         expect(attributesField!.name).toBe('service.version');
         expect(normalField!.name).toBe('service.version');
       });
@@ -321,10 +335,12 @@ describe('OtelFieldsRepository', () => {
       it('should handle edge cases with prefix stripping', () => {
         // Test field names that start with prefix but don't have content after
         expect(otelFieldsRepository.getByName('resource.attributes.')).toBeUndefined();
+        expect(otelFieldsRepository.getByName('scope.attributes.')).toBeUndefined();
         expect(otelFieldsRepository.getByName('attributes.')).toBeUndefined();
 
         // Test partial matches that shouldn't be stripped
         expect(otelFieldsRepository.getByName('resource.attribute.service.name')).toBeUndefined();
+        expect(otelFieldsRepository.getByName('scope.attribute.service.name')).toBeUndefined();
         expect(otelFieldsRepository.getByName('attribute.service.name')).toBeUndefined();
       });
     });
@@ -334,22 +350,25 @@ describe('OtelFieldsRepository', () => {
         const fieldsDict = otelFieldsRepository.find({
           fieldNames: [
             'resource.attributes.cloud.account.id',
-            'attributes.service.name',
+            'scope.attributes.service.name',
+            'attributes.http.request.method',
             'cloud.provider', // no prefix
           ],
         });
         const fields = fieldsDict.getFields();
 
-        expect(Object.keys(fields)).toHaveLength(3);
+        expect(Object.keys(fields)).toHaveLength(4);
 
         // Check that keys are the stripped field names
         expect(fields['cloud.account.id']).toBeDefined();
         expect(fields['service.name']).toBeDefined();
+        expect(fields['http.request.method']).toBeDefined();
         expect(fields['cloud.provider']).toBeDefined();
 
         // Verify field contents
         expect(fields['cloud.account.id'].name).toBe('cloud.account.id');
         expect(fields['service.name'].name).toBe('service.name');
+        expect(fields['http.request.method'].name).toBe('http.request.method');
         expect(fields['cloud.provider'].name).toBe('cloud.provider');
       });
 
@@ -357,8 +376,8 @@ describe('OtelFieldsRepository', () => {
         const fieldsDict = otelFieldsRepository.find({
           fieldNames: [
             'resource.attributes.cloud.account.id', // exists
-            'attributes.non.existing.field', // doesn't exist
-            'resource.attributes.service.name', // exists
+            'scope.attributes.non.existing.field', // doesn't exist
+            'attributes.service.name', // exists
           ],
         });
         const fields = fieldsDict.getFields();
@@ -373,6 +392,7 @@ describe('OtelFieldsRepository', () => {
         const fieldsDict = otelFieldsRepository.find({
           fieldNames: [
             'resource.attributes.service.name',
+            'scope.attributes.service.name',
             'attributes.service.name',
             'service.name', // all resolve to the same field
           ],
@@ -389,13 +409,15 @@ describe('OtelFieldsRepository', () => {
         const fieldsDict = otelFieldsRepository.find({
           fieldNames: [
             'resource.attributes.http.request.method',
+            'scope.attributes.cloud.account.id',
             'attributes.system.cpu.utilization',
           ],
         });
         const fields = fieldsDict.getFields();
 
-        expect(Object.keys(fields)).toHaveLength(2);
+        expect(Object.keys(fields)).toHaveLength(3);
         expect(fields['http.request.method']).toBeDefined();
+        expect(fields['cloud.account.id']).toBeDefined();
         expect(fields['system.cpu.utilization']).toBeDefined();
       });
 
@@ -403,6 +425,7 @@ describe('OtelFieldsRepository', () => {
         const fieldsDict = otelFieldsRepository.find({
           fieldNames: [
             'resource.attributes.non.existing.field',
+            'scope.attributes.missing.field',
             'attributes.another.missing.field',
           ],
         });
@@ -416,15 +439,18 @@ describe('OtelFieldsRepository', () => {
       it('should not strip partial prefix matches', () => {
         // These should not be stripped because they don't match the full prefix
         const partialResource = otelFieldsRepository.getByName('resource.attr.service.name');
+        const partialScope = otelFieldsRepository.getByName('scope.attr.service.name');
         const partialAttributes = otelFieldsRepository.getByName('attr.service.name');
 
         expect(partialResource).toBeUndefined();
+        expect(partialScope).toBeUndefined();
         expect(partialAttributes).toBeUndefined();
       });
 
       it('should handle empty strings and special characters', () => {
         expect(otelFieldsRepository.getByName('')).toBeUndefined();
         expect(otelFieldsRepository.getByName('resource.attributes.')).toBeUndefined();
+        expect(otelFieldsRepository.getByName('scope.attributes.')).toBeUndefined();
         expect(otelFieldsRepository.getByName('attributes.')).toBeUndefined();
       });
 

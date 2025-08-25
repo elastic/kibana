@@ -9,6 +9,7 @@
 
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
+import { getHardcodedMappings } from './hardcoded_mappings';
 import type {
   ResolvedSemconvYaml,
   YamlGroup,
@@ -269,16 +270,21 @@ export function processSemconvYaml(
   const registryFields = processRegistryGroups(registryGroups, options);
   const metricFields = processMetricGroups(metricGroups, options);
 
-  // Merge all fields
-  const totalFields = { ...registryFields, ...metricFields };
+  // Get hardcoded mappings from OTLP protocol definitions
+  const hardcodedFields = getHardcodedMappings();
+
+  // Merge all fields - hardcoded fields are added first, semantic convention fields can override
+  const totalFields = { ...hardcodedFields, ...registryFields, ...metricFields };
 
   const result: ProcessingResult = {
     registryFields,
     metricFields,
+    hardcodedFields,
     totalFields,
     stats: {
       registryGroups: registryGroups.length,
       metricGroups: metricGroups.length,
+      hardcodedFields: Object.keys(hardcodedFields).length,
       totalGroups: registryGroups.length + metricGroups.length,
       totalFields: Object.keys(totalFields).length,
     },

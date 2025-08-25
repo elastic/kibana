@@ -79,10 +79,12 @@ export interface SemconvStructuredFieldDefinitions {
 export interface ProcessingResult {
   registryFields: SemconvStructuredFieldDefinitions;
   metricFields: SemconvStructuredFieldDefinitions;
+  hardcodedFields: SemconvStructuredFieldDefinitions;
   totalFields: SemconvStructuredFieldDefinitions;
   stats: {
     registryGroups: number;
     metricGroups: number;
+    hardcodedFields: number;
     totalGroups: number;
     totalFields: number;
   };

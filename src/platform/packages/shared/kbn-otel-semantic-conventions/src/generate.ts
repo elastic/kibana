@@ -57,9 +57,10 @@ function generateTypeScriptFile(result: any, outputPath: string, log: ToolingLog
 
 // This file is auto-generated. Do not edit manually.
 // Generated on: ${timestamp}
-// Source: resolved-semconv.yaml
+// Sources: resolved-semconv.yaml + hardcoded OTLP mappings
 // Registry groups: ${stats.registryGroups}
 // Metric groups: ${stats.metricGroups}
+// Hardcoded fields: ${stats.hardcodedFields}
 // Total fields: ${stats.totalFields}
 
 import type { TSemconvFields } from '../types';

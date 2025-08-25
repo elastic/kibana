@@ -43,9 +43,10 @@ interface FindOptions {
 /**
  * Strip common OpenTelemetry prefixes from field names to match the actual field names
  * in the semantic conventions dictionary.
- * 
+ *
  * Examples:
  * - "resource.attributes.cloud.account.id" -> "cloud.account.id"
+ * - "scope.attributes.service.name" -> "service.name"
  * - "attributes.service.name" -> "service.name"
  * - "cloud.account.id" -> "cloud.account.id" (no change)
  */
@@ -54,12 +55,17 @@ function stripOtelPrefixes(fieldName: string): string {
   if (fieldName.startsWith('resource.attributes.')) {
     return fieldName.substring('resource.attributes.'.length);
   }
-  
+
+  // Strip "scope.attributes." prefix
+  if (fieldName.startsWith('scope.attributes.')) {
+    return fieldName.substring('scope.attributes.'.length);
+  }
+
   // Strip "attributes." prefix
   if (fieldName.startsWith('attributes.')) {
     return fieldName.substring('attributes.'.length);
   }
-  
+
   // Return original field name if no prefixes match
   return fieldName;
 }
