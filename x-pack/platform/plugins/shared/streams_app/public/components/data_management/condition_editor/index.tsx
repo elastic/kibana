@@ -38,7 +38,7 @@ import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/conditio
 export type RoutingConditionEditorProps = ConditionEditorProps;
 
 export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
-  const isEnabled = isRoutingEnabled(props.status);
+  const isEnabled = isRoutingEnabled(props.status!);
 
   const handleStatusChange = (newStatus: RoutingStatus) => {
     props.onConditionChange({
