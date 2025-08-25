@@ -40,6 +40,9 @@ module.exports = () => ({
         // Need this since we are using TypeScript 3.9+
         require.resolve('@babel/plugin-proposal-private-methods'),
 
+        // Do a custom transform that rewrites require() calls to import statements
+        require.resolve('../kbn-babel-require-transformer'),
+
         // It enables the @babel/runtime so we can decrease the bundle sizes of the produced outputs
         [
           require.resolve('@babel/plugin-transform-runtime'),
