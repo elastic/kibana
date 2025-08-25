@@ -898,7 +898,7 @@ describe('function validation', () => {
                     optional: false,
                   },
                 ],
-                license: 'PLATINUM', // licensed signature
+                license: 'platinum', // licensed signature
                 returnType: 'keyword',
               },
               {

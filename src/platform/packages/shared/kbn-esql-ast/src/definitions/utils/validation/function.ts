@@ -23,7 +23,12 @@ import type { ICommandCallbacks, ICommandContext } from '../../../commands_regis
 import { getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
 import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage } from '../../../types';
 import { Walker } from '../../../walker';
-import type { FunctionDefinition, FunctionParameterType, SupportedDataType } from '../../types';
+import type {
+  FunctionDefinition,
+  FunctionParameterType,
+  Signature,
+  SupportedDataType,
+} from '../../types';
 import {
   getExpressionType,
   getParamAtPosition,
@@ -228,11 +233,11 @@ export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameter
  * @param types
  */
 function getSignaturesMatchingTypes(
-  signatures: FunctionDefinition['signatures'],
+  signatures: Signature[],
   givenTypes: Array<SupportedDataType | 'unknown'>,
   // a boolean array indicating which args are literals
   literalMask: boolean[]
-): FunctionDefinition['signatures'] {
+): Signature[] {
   return signatures.filter((sig) => {
     if (!matchesArity(sig, givenTypes.length)) {
       return false;

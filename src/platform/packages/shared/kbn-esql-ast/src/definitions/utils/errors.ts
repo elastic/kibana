@@ -544,10 +544,7 @@ export const errors = {
       requiredLicense: license,
     }),
 
-  licenseRequiredForSignature: (
-    fn: ESQLFunction,
-    signature: FunctionDefinition['signatures'][number]
-  ): ESQLMessage => {
+  licenseRequiredForSignature: (fn: ESQLFunction, signature: Signature): ESQLMessage => {
     const signatureDescription = signature.params
       .map((param) => `'${param.name}' of type '${param.type}'`) // TODO this isn't well i18n'd
       .join(', ');
