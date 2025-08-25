@@ -19,7 +19,7 @@ export interface VirtualizerHelperProps<G extends GroupNode>
   /**
    * cause the active group root row to stick right under the header
    */
-  stickyGroupRoot?: boolean;
+  enableStickyGroupHeader: boolean;
 }
 
 interface VirtualizerHelperReturn {
@@ -31,7 +31,7 @@ interface VirtualizerHelperReturn {
 
 export const useRowVirtualizerHelper = <G extends GroupNode>({
   overscan,
-  stickyGroupRoot,
+  enableStickyGroupHeader,
   rows,
   getScrollElement,
 }: VirtualizerHelperProps<G>): VirtualizerHelperReturn => {
@@ -51,7 +51,7 @@ export const useRowVirtualizerHelper = <G extends GroupNode>({
     NonNullable<Parameters<typeof useVirtualizer>[0]['rangeExtractor']>
   >(
     (range) => {
-      if (!stickyGroupRoot) {
+      if (!enableStickyGroupHeader) {
         return defaultRangeExtractor(range);
       }
 
@@ -67,7 +67,7 @@ export const useRowVirtualizerHelper = <G extends GroupNode>({
       );
       return Array.from(next).sort((a, b) => a - b);
     },
-    [rows, stickyGroupRoot]
+    [rows, enableStickyGroupHeader]
   );
 
   const virtualizer = useVirtualizer({
