@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiPortal, EuiProgress } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiPortal, EuiProgress } from '@elastic/eui';
 import { useControls } from './hooks/use_controls';
 import type { SchemaEditorProps } from './types';
 import { SchemaEditorContextProvider } from './schema_editor_context';
@@ -22,6 +22,10 @@ export function SchemaEditor({
   onFieldUpdate,
   onRefreshData,
   stream,
+  withStagedFields = false,
+  stagedFields,
+  setStagedFields,
+  commitStagedFields,
   withControls = false,
   withFieldSimulation = false,
   withTableActions = false,
@@ -35,6 +39,8 @@ export function SchemaEditor({
       isLoading={isLoading}
       onFieldUnmap={onFieldUnmap}
       onFieldUpdate={onFieldUpdate}
+      stagedFields={stagedFields}
+      setStagedFields={setStagedFields}
       stream={stream}
       withControls={withControls}
       withFieldSimulation={withFieldSimulation}
@@ -56,8 +62,21 @@ export function SchemaEditor({
           defaultColumns={defaultColumns}
           fields={fields}
           stream={stream}
+          withStagedFields={withStagedFields}
           withTableActions={withTableActions}
         />
+        {withStagedFields && setStagedFields && commitStagedFields ? (
+          <EuiFlexGroup direction="row" gutterSize="m" justifyContent="flexEnd">
+            <EuiButton
+              isDisabled={stagedFields?.length === 0}
+              onClick={() => {
+                commitStagedFields();
+              }}
+            >
+              Save
+            </EuiButton>
+          </EuiFlexGroup>
+        ) : null}
       </EuiFlexGroup>
     </SchemaEditorContextProvider>
   );
