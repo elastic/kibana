@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 
-import {
-  RemoveAlertFromCaseModal,
-  type RemoveAlertModalProps,
-} from '../../components/case_view/components/remove_alert_from_case_modal';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { type RemoveAlertModalProps } from '../../components/case_view/components/remove_alert_from_case_modal';
 
 export const getRemoveAlertFromCaseModal = ({
   caseId,
@@ -18,10 +16,20 @@ export const getRemoveAlertFromCaseModal = ({
   onClose,
   onSuccess,
 }: RemoveAlertModalProps) => (
-  <RemoveAlertFromCaseModal
+  <RemoveAlertFromCaseModalLazy
     caseId={caseId}
     alertId={alertId}
     onClose={onClose}
     onSuccess={onSuccess}
   />
+);
+
+export const RemoveAlertFromCaseModalLazy: React.FC<RemoveAlertModalProps> = lazy(
+  () => import('../../components/case_view/components/remove_alert_from_case_modal')
+);
+
+export const getCreateCaseFlyoutLazyNoProvider = (props: RemoveAlertModalProps) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <RemoveAlertFromCaseModalLazy {...props} />
+  </Suspense>
 );

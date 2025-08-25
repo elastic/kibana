@@ -441,13 +441,13 @@ export const removeAlertFromComment = async ({
   const { alertId, index, rule, version, id, owner } = alertAttachment;
   if (Array.isArray(alertId) && Array.isArray(index) && alertId.length > 1) {
     const alertIdx = alertId.indexOf(alertIdToRemove);
-    alertId.splice(alertIdx, 1);
-    index.splice(alertIdx, 1);
+    const newAlertId = [...alertId.slice(0, alertIdx), ...alertId.slice(alertIdx + 1)];
+    const newIndex = [...index.slice(0, alertIdx), ...index.slice(alertIdx + 1)];
     patchComment({
       caseId,
       commentId: id,
       version,
-      patch: { type: AttachmentType.alert, alertId, index, rule, owner },
+      patch: { type: AttachmentType.alert, alertId: newAlertId, index: newIndex, rule, owner },
       signal,
     });
   } else {

@@ -17,33 +17,37 @@ export interface RemoveAlertModalProps {
   onSuccess: () => void;
 }
 
-const RemoveAlertFromCaseModalComponent: React.FC<RemoveAlertModalProps> = ({
+const RemoveAlertFromCaseModal: React.FC<RemoveAlertModalProps> = ({
   caseId,
   alertId,
   onClose,
   onSuccess,
 }) => {
-  const removalSuccessToast = i18n.translate(
-    'xpack.cases.caseView.alerts.actions.removeFromCaseSuccess',
-    { defaultMessage: 'Alert removed from case' }
-  );
+  const onRemovalSuccess = () => {
+    onSuccess();
+    onClose();
+  };
 
   const { mutateAsync: removeAlertFromComment } = useRemoveAlertFromCase(caseId);
 
   return (
     <DeleteAttachmentConfirmationModal
       onCancel={onClose}
-      onConfirm={() => {
-        Promise.allSettled(
-          alertId.map((id) =>
-            removeAlertFromComment({
+      onConfirm={async () => {
+        await Promise.allSettled(
+          alertId.map((id) => {
+            const removalSuccessToast = i18n.translate(
+              'xpack.cases.caseView.alerts.actions.removeFromCaseSuccess',
+              { defaultMessage: 'Alert {alertId} removed from case', values: { alertId: id } }
+            );
+            return removeAlertFromComment({
               alertId: id,
               successToasterTitle: removalSuccessToast,
-            })
-          )
-        );
-        onSuccess();
-        onClose();
+            });
+          })
+        ).then(() => {
+          onRemovalSuccess();
+        });
       }}
       confirmButtonText={i18n.translate(
         'xpack.cases.caseView.alerts.actions.removeFromCaseConfirm',
@@ -58,6 +62,6 @@ const RemoveAlertFromCaseModalComponent: React.FC<RemoveAlertModalProps> = ({
   );
 };
 
-RemoveAlertFromCaseModalComponent.displayName = 'RemoveAlertFromCaseModal';
-
-export const RemoveAlertFromCaseModal = React.memo(RemoveAlertFromCaseModalComponent);
+RemoveAlertFromCaseModal.displayName = 'RemoveAlertFromCaseModal';
+// eslint-disable-next-line import/no-default-export
+export { RemoveAlertFromCaseModal as default };
