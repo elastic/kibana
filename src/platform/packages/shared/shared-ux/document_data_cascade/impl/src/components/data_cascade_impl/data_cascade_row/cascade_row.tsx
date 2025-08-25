@@ -10,9 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiTheme } from '@elastic/eui';
-import { flexRender, type Row } from '@tanstack/react-table';
-import type { VirtualItem } from '@tanstack/react-virtual';
-import { type CascadeRowCellPrimitiveProps } from '../data_cascade_row_cell/cascade_row_cell';
+import type { CascadeRowPrimitiveProps } from '../types';
+import { flexRender } from '../../../lib/core/table';
 import {
   type LeafNode,
   type GroupNode,
@@ -25,59 +24,6 @@ import {
   rootRowAttribute,
   childRowAttribute,
 } from './cascade_row.styles';
-
-interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
-  row: Row<G>;
-  /**
-   * @description The path of the row that was expanded in the group by hierarchy.
-   */
-  nodePath: string[];
-  /**
-   * @description KV record of the path values for the row node.
-   */
-  nodePathMap: Record<string, string>;
-}
-
-/**
- * @internal
- * @description Internal cascade row primitive component props.
- */
-export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNode> {
-  isActiveSticky: boolean;
-  innerRef: React.LegacyRef<HTMLDivElement>;
-  /**
-   * @description Callback function that is called when a cascade node is expanded.
-   */
-  onCascadeGroupNodeExpanded: (args: OnCascadeGroupNodeExpandedArgs<G>) => Promise<G[]>;
-  /**
-   * @description The row instance for the cascade row.
-   */
-  rowInstance: Row<G>;
-  /**
-   * @description The row header title slot for the cascade row.
-   */
-  rowHeaderTitleSlot: React.FC<{ row: Row<G> }>;
-  /**
-   * @description The row header meta slots for the cascade row.
-   */
-  rowHeaderMetaSlots?: (props: { row: Row<G> }) => React.ReactNode[];
-  /**
-   * @description The row header actions slot for the cascade row.
-   */
-  rowHeaderActions?: (props: { row: Row<G> }) => React.ReactNode[];
-  /**
-   * @description The size of the row component, can be 's' (small), 'm' (medium), or 'l' (large).
-   */
-  size: CascadeRowCellPrimitiveProps<G, L>['size'];
-  /**
-   * @description The virtual row for the cascade row.
-   */
-  virtualRow: VirtualItem;
-  /**
-   * @description The virtual row style for the cascade row.
-   */
-  virtualRowStyle: React.CSSProperties;
-}
 
 /**
  * @internal
@@ -230,7 +176,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
                           css={[
                             styles.rowHeaderSlotWrapper,
                             {
-                              paddingLeft: `${euiTheme.size[size]}`,
+                              paddingLeft: euiTheme.size[size],
                             },
                           ]}
                           grow={false}
