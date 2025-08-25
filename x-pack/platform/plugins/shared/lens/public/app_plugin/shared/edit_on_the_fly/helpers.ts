@@ -13,6 +13,8 @@ import {
 } from '@kbn/esql-utils';
 import { isEqual } from 'lodash';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
 import {
@@ -37,9 +39,10 @@ export interface ESQLDataGridAttrs {
 
 const getDSLFilter = (
   queryService: DataPublicPluginStart['query'],
-  timeFieldName?: string,
-  allowLeadingWildcards?: boolean
+  uiSettings: IUiSettingsClient,
+  timeFieldName?: string
 ) => {
+  const esQueryConfigs = getEsQueryConfig(uiSettings);
   const kqlQuery = queryService.queryString.getQuery();
   const filters = queryService.filterManager.getFilters();
   const timeFilter =
@@ -52,9 +55,7 @@ const getDSLFilter = (
     undefined,
     kqlQuery || [],
     [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])],
-    {
-      allowLeadingWildcards: Boolean(allowLeadingWildcards),
-    }
+    esQueryConfigs
   );
 };
 
@@ -62,9 +63,9 @@ export const getGridAttrs = async (
   query: AggregateQuery,
   adHocDataViews: DataViewSpec[],
   data: DataPublicPluginStart,
+  uiSettings: IUiSettingsClient,
   abortController?: AbortController,
-  esqlVariables: ESQLControlVariable[] = [],
-  allowLeadingWildcards?: boolean
+  esqlVariables: ESQLControlVariable[] = []
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
@@ -75,7 +76,7 @@ export const getGridAttrs = async (
     ? await data.dataViews.create(dataViewSpec)
     : await getESQLAdHocDataview(query.esql, data.dataViews);
 
-  const filter = getDSLFilter(data.query, dataView.timeFieldName, allowLeadingWildcards);
+  const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
 
   const results = await getESQLResults({
     esqlQuery: query.esql,
@@ -106,6 +107,7 @@ export const getGridAttrs = async (
 export const getSuggestions = async (
   query: AggregateQuery,
   data: DataPublicPluginStart,
+  uiSettings: IUiSettingsClient,
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
@@ -114,17 +116,16 @@ export const getSuggestions = async (
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
   esqlVariables: ESQLControlVariable[] = [],
   shouldUpdateAttrs = true,
-  preferredVisAttributes?: TypedLensSerializedState['attributes'],
-  allowLeadingWildcards?: boolean
+  preferredVisAttributes?: TypedLensSerializedState['attributes']
 ) => {
   try {
     const { dataView, columns, rows } = await getGridAttrs(
       query,
       adHocDataViews,
       data,
+      uiSettings,
       abortController,
-      esqlVariables,
-      allowLeadingWildcards
+      esqlVariables
     );
     const updatedWithVariablesColumns = esqlVariables.length
       ? mapVariableToColumn(query.esql, esqlVariables, columns)
