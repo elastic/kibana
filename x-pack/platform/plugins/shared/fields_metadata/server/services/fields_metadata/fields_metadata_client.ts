@@ -48,17 +48,17 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     // 1. Try resolving from metadata-fields static metadata (highest priority)
     let field = this.metadataFieldsRepository.getByName(fieldName as AnyFieldName);
 
-    // 2. Try searching for the field in the Elastic Package Registry (integration-specific)
+    // 2. Try resolving from ECS static metadata (authoritative schema)
+    if (!field) {
+      field = this.ecsFieldsRepository.getByName(fieldName as AnyFieldName);
+    }
+
+    // 3. Try searching for the field in the Elastic Package Registry (integration-specific)
     if (!field && this.hasFleetPermissions(this.capabilities)) {
       field = await this.integrationFieldsRepository.getByName(fieldName as IntegrationFieldName, {
         integration,
         dataset,
       });
-    }
-
-    // 3. Try resolving from ECS static metadata (authoritative schema)
-    if (!field) {
-      field = this.ecsFieldsRepository.getByName(fieldName as AnyFieldName);
     }
 
     // 4. Try resolving from OpenTelemetry semantic conventions (fallback)
