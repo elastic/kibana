@@ -32,7 +32,7 @@ const MAX_FILE_SIZE = 1024 * 1024 * 1024;
 
 let magicBytes = require('magic-bytes.js');
 
-export const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
+const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
 const baseSafePaths = [join(REPO_ROOT, 'data'), join(REPO_ROOT, '.es')];
 
 const tmpPath = tmpdir();
@@ -319,4 +319,5 @@ module.exports = {
   getSafePath,
   validateAndSanitizeFileData,
   getFileExtension,
+  isDevOrCI,
 };
