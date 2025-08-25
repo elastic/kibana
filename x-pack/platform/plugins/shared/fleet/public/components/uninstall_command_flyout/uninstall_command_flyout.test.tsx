@@ -290,4 +290,22 @@ describe('UninstallCommandFlyout', () => {
       expect(useGetUninstallTokenMock).toHaveBeenCalledWith('theProvidedTokenId');
     });
   });
+
+  describe('accessibility', () => {
+    it('should have proper aria-labelledby attribute for screen readers', () => {
+      const renderResult = render();
+
+      const flyout = renderResult.container.querySelector('[data-test-subj="uninstall-command-flyout"]');
+      const flyoutTitle = renderResult.getByRole('heading', { level: 2 });
+      
+      expect(flyout).toHaveAttribute('aria-labelledby');
+      expect(flyoutTitle).toHaveAttribute('id');
+      
+      const ariaLabelledBy = flyout?.getAttribute('aria-labelledby');
+      const titleId = flyoutTitle.getAttribute('id');
+      
+      expect(ariaLabelledBy).toBe(titleId);
+      expect(flyoutTitle).toHaveTextContent('Uninstall agent');
+    });
+  });
 });
