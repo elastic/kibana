@@ -48,7 +48,7 @@
 # is proxied through the Kibana server.
 #elasticsearch.username: "kibana_system"
 #elasticsearch.password: "pass"
-
+feature_flags.overrides.discover.tabsEnabled: true
 # Kibana can also authenticate to Elasticsearch via "service account tokens".
 # Service account tokens are Bearer style tokens that replace the traditional username/password based configuration.
 # Use this token instead of a username/password.
