@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { from, takeUntil } from 'rxjs';
 import type {
   GlobalSearchProviderResult,
@@ -16,6 +16,7 @@ import { Streams } from '@kbn/streams-schema';
 import type { StreamsStorageClient, StreamsStorageSettings } from './service';
 import { streamsStorageSettings } from './service';
 import { migrateOnRead } from './helpers/migrate_on_read';
+import { checkAccessBulk } from './stream_crud';
 
 export function createStreamsGlobalSearchResultProvider(
   logger: Logger
@@ -36,7 +37,7 @@ export function createStreamsGlobalSearchResultProvider(
       });
       const storageClient = storageAdapter.getClient();
 
-      return from(findStreams({ term, types, maxResults, storageClient })).pipe(
+      return from(findStreams({ term, types, maxResults, storageClient, client })).pipe(
         takeUntil(aborted$)
       );
     },
@@ -48,11 +49,13 @@ async function findStreams({
   types,
   maxResults,
   storageClient,
+  client,
 }: {
   term: string;
   types: string[];
   maxResults: number;
   storageClient: StreamsStorageClient;
+  client: IScopedClusterClient;
 }) {
   // This does NOT included unmanaged Classic streams
   const searchResponse = await storageClient.search({
@@ -79,6 +82,18 @@ async function findStreams({
     },
   });
 
+  const privileges = await checkAccessBulk({
+    names: searchResponse.hits.hits
+      .filter((hit) => !Streams.GroupStream.Definition.is(hit._source))
+      .map((hit) => hit._source.name),
+    scopedClusterClient: client,
+  });
+
+  const hitsWithAccess = searchResponse.hits.hits.filter((hit) => {
+    if (Streams.GroupStream.Definition.is(hit._source)) return true;
+    return privileges[hit._source.name]?.read === true;
+  });
+
   const allStreams = types.includes('stream');
   const classicStreams = types.includes('classic stream');
   const wiredStreams = types.includes('wired stream');
@@ -86,12 +101,10 @@ async function findStreams({
   const noSubStreams = !classicStreams && !wiredStreams && !groupStreams;
 
   if (allStreams || noSubStreams) {
-    return searchResponse.hits.hits.map((hit) =>
-      toGlobalSearchProviderResult(hit._id!, hit._source, term)
-    );
+    return hitsWithAccess.map((hit) => toGlobalSearchProviderResult(hit._id!, hit._source, term));
   }
 
-  const relevantStreams = searchResponse.hits.hits.filter(({ _source }) => {
+  const relevantStreams = hitsWithAccess.filter(({ _source }) => {
     return (
       (classicStreams && Streams.ClassicStream.Definition.is(_source)) ||
       (wiredStreams && Streams.WiredStream.Definition.is(_source)) ||
