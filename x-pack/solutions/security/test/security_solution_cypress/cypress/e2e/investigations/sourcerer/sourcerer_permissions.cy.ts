@@ -15,7 +15,8 @@ import { login } from '../../../tasks/login';
 
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
-describe('Sourcerer permissions', { tags: ['@ess', '@skipInServerless'] }, () => {
+// Skipping this as we are defaulting to the new data view picker, deprecating sourcerer
+describe.skip('Sourcerer permissions', { tags: ['@ess', '@skipInServerless'] }, () => {
   beforeEach(() => {
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });

@@ -17,6 +17,7 @@ import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../com
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 jest.mock('../unified_components', () => {
   return {
@@ -68,6 +69,8 @@ const MockUnifiedTimelineComponent = jest.fn(() => <div />);
 describe('UnifiedTimelineBody', () => {
   beforeEach(() => {
     (UnifiedTimeline as unknown as jest.Mock).mockImplementation(MockUnifiedTimelineComponent);
+
+    jest.mocked(useDataView).mockReturnValue({ status: 'ready', dataView: mockDataView });
   });
 
   it('should pass default columns when empty column list is supplied', () => {
@@ -93,7 +96,9 @@ describe('UnifiedTimelineBody', () => {
     );
   });
 
-  it('should render the dataview error component when no dataView is provided', () => {
+  // WARN: skipping this test as data view picker is the new default implementation.
+  // See https://github.com/elastic/security-team/issues/11959
+  it.skip('should render the dataview error component when no dataView is provided', () => {
     mockUseGetScopedSourcererDataView.mockImplementationOnce(() => undefined);
     const { queryByTestId } = renderTestComponents();
 
