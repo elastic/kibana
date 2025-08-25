@@ -7,7 +7,7 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
-import type { MigrationTranslationResult } from '../../../../../common/siem_migrations/model/migration.gen';
+import type { MigrationTranslationResult as MigrationTranslationResultType } from '../../../../../common/siem_migrations/model/migration.gen';
 import * as i18n from './translations';
 
 const COLORS = {
@@ -31,7 +31,7 @@ export const useResultVisColors = () => {
   return COLORS;
 };
 
-export const convertTranslationResultIntoColor = (status?: MigrationTranslationResult) => {
+export const convertTranslationResultIntoColor = (status?: MigrationTranslationResultType) => {
   switch (status) {
     case MigrationTranslationResult.FULL:
       return COLORS[MigrationTranslationResult.FULL];
@@ -44,7 +44,7 @@ export const convertTranslationResultIntoColor = (status?: MigrationTranslationR
   }
 };
 
-export const convertTranslationResultIntoText = (status?: MigrationTranslationResult) => {
+export const convertTranslationResultIntoText = (status?: MigrationTranslationResultType) => {
   switch (status) {
     case MigrationTranslationResult.FULL:
       return i18n.SIEM_TRANSLATION_RESULT_FULL_LABEL;
