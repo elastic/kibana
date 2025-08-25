@@ -70,15 +70,8 @@ module.exports = (api, _ = {}) => {
           // Required for TypeScript decorators support
           require.resolve('babel-plugin-transform-typescript-metadata'),
 
-          ...(isNode
-            ? [
-                [
-                  require.resolve('../kbn-babel-require-transformer'),
-                  // require.resolve('@babel/plugin-transform-modules-commonjs'),
-                  // { loose: true, lazy: true },
-                ],
-              ]
-            : []),
+          // Only apply our CommonJS inliner when running under the Node register.
+          ...(isNode ? [[require.resolve('@kbn/babel-require-transformer')]] : []),
 
           // Required for TypeScript decorators support
           [require.resolve('@babel/plugin-proposal-decorators'), { version: 'legacy' }],
