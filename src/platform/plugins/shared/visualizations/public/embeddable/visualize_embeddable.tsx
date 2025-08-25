@@ -479,12 +479,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
           };
         }, []);
 
-        useEffect(() => {
-          if (hasRendered && domNode.current) {
-            dispatchRenderComplete(domNode.current);
-          }
-        }, [hasRendered]);
-
         return (
           <div
             css={{ width: '100%', height: '100%' }}
