@@ -32,7 +32,7 @@ export const CaseSummary = React.memo(({ caseId }: { caseId: string }) => {
 
   const { isAtLeastEnterprise } = useLicense();
 
-  if (!isAtLeastEnterprise || !connectorId) {
+  if (!isAtLeastEnterprise() || !connectorId) {
     return null;
   }
 
