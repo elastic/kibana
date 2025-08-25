@@ -51,6 +51,7 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteResponse,
 } from './apis';
+import { SearchClient } from './search_client';
 
 /**
  * @internal
@@ -177,6 +178,11 @@ export interface ISavedObjectsRepository {
     options: SavedObjectsFindOptions,
     internalOptions?: SavedObjectsFindInternalOptions
   ): Promise<SavedObjectsFindResponse<T, A>>;
+
+  /**
+   * TODO(@jloleysens)
+   */
+  getSearchClient(): SearchClient;
 
   /**
    * Returns an array of objects by id
