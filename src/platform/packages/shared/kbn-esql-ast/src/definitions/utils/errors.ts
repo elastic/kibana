@@ -17,7 +17,7 @@ import type {
   ESQLMessage,
   ESQLSource,
 } from '../../types';
-import type { ErrorTypes, ErrorValues, FunctionDefinition } from '../types';
+import type { ErrorTypes, ErrorValues, FunctionDefinition, Signature } from '../types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -66,13 +66,13 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'noMatchingCallSignature':
       const signatureList = (out.validSignatures as unknown as string[])
-        .map((sig) => `- [${sig}]`)
+        .map((sig) => `- (${sig})`)
         .join('\n  ');
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.noMatchingCallSignatures', {
           defaultMessage: `The arguments to [{functionName}] don't match a valid call signature.
 
-Received [{argTypes}].
+Received ({argTypes}).
 
 Expected one of:
   {validSignatures}`,
@@ -425,7 +425,7 @@ Expected one of:
           values: {
             name: out.name,
             signatureDescription: out.signatureDescription,
-            requiredLicense: out.requiredLicense,
+            requiredLicense: out.requiredLicense.toUpperCase(),
           },
         }),
       };
@@ -519,7 +519,7 @@ export const errors = {
       identifier: identifier.name,
     }),
 
-  noMatchingCallSignatures: (
+  noMatchingCallSignature: (
     fn: ESQLFunction,
     definition: FunctionDefinition,
     argTypes: string[]
@@ -527,18 +527,7 @@ export const errors = {
     const validSignatures = definition.signatures
       .toSorted((a, b) => a.params.length - b.params.length)
       .map((sig) => {
-        const definitionArgTypes = sig.params
-          .map((param) => {
-            let ret = param.type as string;
-            if (sig.minParams) {
-              ret = '...' + ret;
-            }
-            if (param.optional) {
-              ret = `[${ret}]`;
-            }
-            return ret;
-          })
-          .join(', ');
+        const definitionArgTypes = buildSignatureTypes(sig);
         return `${definitionArgTypes}`;
       });
 
@@ -612,3 +601,17 @@ export const errors = {
     }
   },
 };
+
+export const buildSignatureTypes = (sig: Signature) =>
+  sig.params
+    .map((param) => {
+      let ret = param.type as string;
+      if (sig.minParams) {
+        ret = '...' + ret;
+      }
+      if (param.optional) {
+        ret = `[${ret}]`;
+      }
+      return ret;
+    })
+    .join(', ');

@@ -26,6 +26,7 @@ import type { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../commands_r
 import { Parser } from '../parser';
 import type { ESQLCommand, ESQLMessage } from '../types';
 import { mockContext } from './context_fixtures';
+import { buildSignatureTypes } from '../definitions/utils/errors';
 /**
  * This function is used to assert that a query produces the expected errors.
  *
@@ -64,24 +65,10 @@ export const expectErrors = (
 
 export const getNoValidCallSignatureError = (fnName: string, givenTypes: string[]) => {
   const definition = buildFunctionLookup().get(fnName)!;
-  return `The arguments to [${fnName}] don't match a valid call signature.\n\nReceived [${givenTypes.join(
+  return `The arguments to [${fnName}] don't match a valid call signature.\n\nReceived (${givenTypes.join(
     ', '
-  )}].\n\nExpected one of:\n  ${definition.signatures
+  )}).\n\nExpected one of:\n  ${definition.signatures
     .toSorted((a, b) => a.params.length - b.params.length)
-    .map(
-      (sig) =>
-        `- [${sig.params
-          .map((p) => {
-            let ret = p.type as string;
-            if (sig.minParams) {
-              ret = '...' + ret;
-            }
-            if (p.optional) {
-              ret = `[${ret}]`;
-            }
-            return ret;
-          })
-          .join(', ')}]`
-    )
+    .map((sig) => `- (${buildSignatureTypes(sig)})`)
     .join('\n  ')}`;
 };

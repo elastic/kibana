@@ -119,14 +119,14 @@ class FunctionValidator {
     const A = getSignaturesWithMatchingArity(this.definition, this.fn);
 
     if (!A.length) {
-      this.report(errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes));
+      this.report(errors.noMatchingCallSignature(this.fn, this.definition, this.argTypes));
       return;
     }
 
     const S = getSignaturesMatchingTypes(A, this.argTypes, this.argLiteralsMask);
 
     if (!S.length) {
-      this.report(errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes));
+      this.report(errors.noMatchingCallSignature(this.fn, this.definition, this.argTypes));
       return;
     }
 
