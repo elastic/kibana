@@ -8,8 +8,17 @@
  */
 import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { SCHEMA_SEARCH_MODEL_VERSION_5, SCHEMA_SEARCH_MODEL_VERSION_6 } from '../../server/saved_objects/schema';
-import { extractTabs, extractTabsBackfillFn, removeTopLevelTabAttributes, SavedSearchType, VIEW_MODE } from '..';
+import type {
+  SCHEMA_SEARCH_MODEL_VERSION_5,
+  SCHEMA_SEARCH_MODEL_VERSION_7,
+} from '../../server/saved_objects/schema';
+import {
+  extractTabs,
+  extractTabsBackfillFn,
+  removeTopLevelTabAttributes,
+  SavedSearchType,
+  VIEW_MODE,
+} from '..';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
@@ -170,7 +179,7 @@ describe('extractTabs', () => {
 
   describe('removeTopLevelTabAttributes', () => {
     it('should return only title, description, and tabs from the attributes', () => {
-      const attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_6> = {
+      const attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_7> = {
         title: 'my_title',
         description: 'my description',
         tabs: [
