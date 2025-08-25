@@ -80,7 +80,6 @@ export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEvents
             searchSource: dataService.search.searchSource,
             dataViews: dataService.dataViews,
           }}
-          columns={['log.level']}
           displayOptions={{
             solutionNavIdOverride: 'oblt',
             enableDocumentViewer: false,
