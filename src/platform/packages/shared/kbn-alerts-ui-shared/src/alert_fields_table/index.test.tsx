@@ -92,7 +92,7 @@ describe('AlertFieldsTable', () => {
   it('paginates the results', async () => {
     const user = userEvent.setup();
     render(<AlertFieldsTable {...defaultProps} />);
-  
+
     expect(getBodyRows()).toHaveLength(25);
 
     const next = screen.getByTestId('pagination-button-next');
@@ -106,8 +106,8 @@ describe('AlertFieldsTable', () => {
   it('filters rows according to search string', async () => {
     render(<AlertFieldsTable {...defaultProps} />);
 
-  const search = screen.getByRole('searchbox');
-  fireEvent.change(search, { target: { value: 'kibana.alert.status' } });
+    const search = screen.getByRole('searchbox');
+    fireEvent.change(search, { target: { value: 'kibana.alert.status' } });
 
     // Wait for filtered caption (1 rows out of 1) or the specific field cell
     await screen.findByText('kibana.alert.status');
