@@ -20,6 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { ToolDefinition } from '@kbn/onechat-common';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
@@ -58,8 +59,15 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
   tool,
   onClose,
 }) => {
-  const [formData, setFormData] = useState<Record<string, any>>({});
   const [response, setResponse] = useState<string>('{}');
+
+  const form = useForm({
+    mode: 'onChange',
+  });
+  const {
+    handleSubmit,
+    formState: { errors },
+  } = form;
 
   const { executeTool, isLoading: isExecuting } = useExecuteTool({
     onSuccess: (data: ExecuteToolResponse) => {
@@ -70,16 +78,12 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
     },
   });
 
-  const handleInputChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleExecute = async () => {
+  const onSubmit = async (formData: Record<string, any>) => {
     if (!tool?.id) return;
 
     const toolParams: Record<string, any> = {};
     getParameters(tool).forEach((field) => {
-      if (formData[field.name]) {
+      if (field.name) {
         let value = formData[field.name];
         if (field.type === 'integer' || field.type === 'long') {
           value = parseInt(value, 10);
@@ -112,80 +116,99 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFlexGroup gutterSize="l">
-          <EuiFlexItem grow={1}>
-            <EuiTitle size="s">
-              <h5>
-                {i18n.translate('xpack.onechat.tools.testTool.inputsTitle', {
-                  defaultMessage: 'Inputs',
-                })}
-              </h5>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiForm component="form">
-              {getParameters(tool)?.map((field) => (
-                <EuiFormRow key={field.name} label={field.label}>
-                  {field.type === 'integer' ||
-                  field.type === 'long' ||
-                  field.type === 'double' ||
-                  field.type === 'float' ? (
-                    <EuiFieldNumber
-                      value={formData[field.name] || ''}
-                      onChange={(e) => handleInputChange(field.name, e.target.value)}
-                      placeholder={`Enter ${field.label.toLowerCase()}`}
-                      fullWidth
-                    />
-                  ) : (
-                    <EuiFieldText
-                      value={formData[field.name] || field.value}
-                      onChange={(e) => handleInputChange(field.name, e.target.value)}
-                      placeholder={`Enter ${field.label.toLowerCase()}`}
-                      fullWidth
-                    />
-                  )}
-                </EuiFormRow>
-              ))}
+        <FormProvider {...form}>
+          <EuiFlexGroup gutterSize="l" responsive={false}>
+            <EuiFlexItem grow={false} style={{ minWidth: '200px', maxWidth: '300px' }}>
+              <EuiTitle size="s">
+                <h5>
+                  {i18n.translate('xpack.onechat.tools.testTool.inputsTitle', {
+                    defaultMessage: 'Inputs',
+                  })}
+                </h5>
+              </EuiTitle>
               <EuiSpacer size="m" />
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    fill
-                    onClick={handleExecute}
-                    isLoading={isExecuting}
-                    disabled={!tool?.id}
+              <EuiForm component="form" onSubmit={handleSubmit(onSubmit)}>
+                {getParameters(tool)?.map((field) => (
+                  <EuiFormRow
+                    key={field.name}
+                    label={field.label}
+                    isInvalid={!!errors[field.name]}
+                    error={errors[field.name]?.message as string}
                   >
-                    {i18n.translate('xpack.onechat.tools.testTool.executeButton', {
-                      defaultMessage: 'Submit',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiForm>
-          </EuiFlexItem>
-          <EuiFlexItem grow={3}>
-            <EuiTitle size="s">
-              <h5>
-                {i18n.translate('xpack.onechat.tools.testTool.responseTitle', {
-                  defaultMessage: 'Response',
-                })}
-              </h5>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <CodeEditor
-              languageId="json"
-              value={response}
-              fullWidth={true}
-              height="600px"
-              options={{
-                readOnly: true,
-                fontSize: 14,
-                wordWrap: 'on',
-                automaticLayout: true,
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                    {field.type === 'integer' ||
+                    field.type === 'long' ||
+                    field.type === 'double' ||
+                    field.type === 'float' ? (
+                      <Controller
+                        control={form.control}
+                        name={field.name}
+                        rules={{ required: `${field.label} is required` }}
+                        render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
+                          <EuiFieldNumber
+                            {...fieldProps}
+                            inputRef={ref}
+                            placeholder={`Enter ${field.label.toLowerCase()}`}
+                            fullWidth
+                            isInvalid={!!error}
+                          />
+                        )}
+                      />
+                    ) : (
+                      <Controller
+                        control={form.control}
+                        name={field.name}
+                        rules={{ required: `${field.label} is required` }}
+                        render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
+                          <EuiFieldText
+                            {...fieldProps}
+                            inputRef={ref}
+                            placeholder={`Enter ${field.label.toLowerCase()}`}
+                            fullWidth
+                            isInvalid={!!error}
+                          />
+                        )}
+                      />
+                    )}
+                  </EuiFormRow>
+                ))}
+                <EuiSpacer size="m" />
+                <EuiButton
+                  type="submit"
+                  size="s"
+                  fill
+                  isLoading={isExecuting}
+                  disabled={Object.keys(errors).length > 0 || !tool?.id}
+                >
+                  {i18n.translate('xpack.onechat.tools.testTool.executeButton', {
+                    defaultMessage: 'Submit',
+                  })}
+                </EuiButton>
+              </EuiForm>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h5>
+                  {i18n.translate('xpack.onechat.tools.testTool.responseTitle', {
+                    defaultMessage: 'Response',
+                  })}
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <CodeEditor
+                languageId="json"
+                value={response}
+                fullWidth={true}
+                height="600px"
+                options={{
+                  readOnly: true,
+                  fontSize: 14,
+                  wordWrap: 'on',
+                  automaticLayout: true,
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </FormProvider>
       </EuiFlyoutBody>
     </EuiFlyout>
   );

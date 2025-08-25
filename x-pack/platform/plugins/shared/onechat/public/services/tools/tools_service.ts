@@ -56,7 +56,7 @@ export class ToolsService {
     });
   }
 
-  async execute(toolId: string, toolParams: Record<string, any>) {
+  async execute(toolId: string, toolParams: Record<string, unknown>) {
     return await this.http.post<ExecuteToolResponse>('/api/chat/tools/_execute', {
       body: JSON.stringify({
         tool_id: toolId,

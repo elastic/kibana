@@ -68,7 +68,7 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
   const { navigateToOnechatUrl } = useNavigation();
   const form = useEsqlToolForm();
   const { reset, formState } = form;
-  const { errors } = formState;
+  const { errors, isDirty } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
   const [testToolData, setTestToolData] = useState<OnechatEsqlToolFormData>(form.getValues());
 
@@ -90,7 +90,10 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
 
   useEffect(() => {
     if (tool) {
-      reset(transformEsqlToolToFormData(tool), { keepDefaultValues: true });
+      reset(transformEsqlToolToFormData(tool), {
+        keepDefaultValues: true,
+        keepDirty: true,
+      });
     }
   }, [tool, reset]);
 
@@ -127,8 +130,24 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
       disabled={Object.keys(errors).length > 0 || isSubmitting}
       isLoading={isSubmitting}
     >
-      {i18n.translate('xpack.onechat.tools.esqlToolFlyout.saveButtonLabel', {
+      {i18n.translate('xpack.onechat.tools.esqlToolFlyout.saveAndTestButtonLabel', {
         defaultMessage: 'Save and Test',
+      })}
+    </EuiButton>
+  );
+
+  const testButton = (
+    <EuiButton
+      fill
+      onClick={() => {
+        const formData = form.getValues();
+        setTestToolData(formData);
+        setShowTestFlyout(true);
+      }}
+      disabled={Object.keys(errors).length > 0}
+    >
+      {i18n.translate('xpack.onechat.tools.esqlToolFlyout.testButtonLabel', {
+        defaultMessage: 'Test',
       })}
     </EuiButton>
   );
@@ -193,6 +212,8 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
             <EuiFlexItem>
               <EuiButton onClick={handleClear}>{labels.tools.clearButtonLabel}</EuiButton>
             </EuiFlexItem>
+            {!isDirty && <EuiFlexItem>{testButton}</EuiFlexItem>}
+            {isDirty && <EuiFlexItem>{saveAndTestButton}</EuiFlexItem>}
             <EuiFlexItem>
               {Object.keys(errors).length > 0 ? (
                 <EuiToolTip display="block" content={labels.tools.saveButtonTooltip}>
@@ -202,7 +223,6 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
                 saveButton
               )}
             </EuiFlexItem>
-            <EuiFlexItem>{saveAndTestButton}</EuiFlexItem>
           </EuiFlexGroup>
         </KibanaPageTemplate.BottomBar>
       </KibanaPageTemplate>

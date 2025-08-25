@@ -11,7 +11,7 @@ import { useOnechatServices } from '../use_onechat_service';
 
 export interface ExecuteToolParams {
   toolId: string;
-  toolParams: Record<string, any>;
+  toolParams: Record<string, unknown>;
 }
 
 export type ExecuteToolSuccessCallback = (data: ExecuteToolResponse) => void;
