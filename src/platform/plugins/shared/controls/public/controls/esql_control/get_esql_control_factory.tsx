@@ -8,11 +8,10 @@
  */
 
 import React from 'react';
-import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, merge } from 'rxjs';
 import type { ESQLControlState } from '@kbn/esql-types';
-import { apiPublishesESQLVariables, EsqlControlType } from '@kbn/esql-types';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { initializeStateManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
@@ -33,9 +32,6 @@ const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
   defaultMessage: 'Static values list',
 });
 
-const removeInternalStateForSerialization = (state: ESQLControlState) =>
-  state.controlType === EsqlControlType.VALUES_FROM_QUERY ? omit(state, 'availableOptions') : state;
-
 export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLControlApi> => {
   return {
     type: ESQL_CONTROL,
@@ -54,20 +50,17 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         controlGroupApi?.replacePanel(uuid, {
           panelType: 'esqlControl',
           serializedState: {
-            rawState: removeInternalStateForSerialization(updatedState),
+            rawState: updatedState,
           },
         });
       };
 
       function serializeState() {
-        const latestState = {
-          ...defaultControlManager.getLatestState(),
-          ...selections.getLatestState(),
-        };
-
-        const rawState = removeInternalStateForSerialization(latestState);
         return {
-          rawState,
+          rawState: {
+            ...defaultControlManager.getLatestState(),
+            ...selections.getLatestState(),
+          },
           references: [],
         };
       }

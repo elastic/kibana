@@ -169,7 +169,9 @@ export function initializeESQLControlSelections(
     getLatestState: () => {
       return {
         selectedOptions: selectedOptions$.getValue() ?? [],
-        availableOptions: availableOptions$.getValue() ?? [],
+        ...(controlType$.getValue() === EsqlControlType.STATIC_VALUES
+          ? { availableOptions: availableOptions$.getValue() ?? [] }
+          : {}),
         variableName: variableName$.getValue() ?? '',
         variableType: variableType$.getValue() ?? ESQLVariableType.VALUES,
         controlType: controlType$.getValue(),
