@@ -7,23 +7,24 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+
 import type { SiemMigrationResourceBase } from '../../../../../../common/siem_migrations/model/common.gen';
 import {
-  GetRuleMigrationResourcesMissingRequestParams,
-  type GetRuleMigrationResourcesMissingResponse,
-} from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH } from '../../../../../../common/siem_migrations/constants';
+  GetDashboardMigrationResourcesMissingRequestParams,
+  type GetDashboardMigrationResourcesMissingResponse,
+} from '../../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import { SIEM_DASHBOARD_MIGRATION_RESOURCES_MISSING_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../../../common/utils/authz';
 import { withLicense } from '../../../common/utils/with_license';
 
-export const registerSiemRuleMigrationsResourceGetMissingRoute = (
+export const registerSiemDashboardMigrationsResourceGetMissingRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   router.versioned
     .get({
-      path: SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH,
+      path: SIEM_DASHBOARD_MIGRATION_RESOURCES_MISSING_PATH,
       access: 'internal',
       security: { authz },
     })
@@ -32,7 +33,7 @@ export const registerSiemRuleMigrationsResourceGetMissingRoute = (
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(GetRuleMigrationResourcesMissingRequestParams),
+            params: buildRouteValidationWithZod(GetDashboardMigrationResourcesMissingRequestParams),
           },
         },
       },
@@ -41,14 +42,18 @@ export const registerSiemRuleMigrationsResourceGetMissingRoute = (
           context,
           req,
           res
-        ): Promise<IKibanaResponse<GetRuleMigrationResourcesMissingResponse>> => {
+        ): Promise<IKibanaResponse<GetDashboardMigrationResourcesMissingResponse>> => {
           const migrationId = req.params.migration_id;
           try {
             const ctx = await context.resolve(['securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+            const dashboardMigrationsClient =
+              ctx.securitySolution.siemMigrations.getDashboardsClient();
 
             const options = { filters: { hasContent: false } };
-            const batches = ruleMigrationsClient.data.resources.searchBatches(migrationId, options);
+            const batches = dashboardMigrationsClient.data.resources.searchBatches(
+              migrationId,
+              options
+            );
 
             const missingResources: SiemMigrationResourceBase[] = [];
             let results = await batches.next();

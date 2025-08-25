@@ -8,9 +8,9 @@
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/data-stream-adapter';
 import type {
   RuleMigration,
-  RuleMigrationResource,
   RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SiemMigrationResource } from '../../../../../common/siem_migrations/model/common.gen';
 import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 
 export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrationRule, 'id'>>> = {
@@ -48,7 +48,7 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrat
 };
 
 export const ruleMigrationResourcesFieldMap: FieldMap<
-  SchemaFieldMapKeys<Omit<RuleMigrationResource, 'id'>>
+  SchemaFieldMapKeys<Omit<SiemMigrationResource, 'id'>>
 > = {
   migration_id: { type: 'keyword', required: true },
   type: { type: 'keyword', required: true },

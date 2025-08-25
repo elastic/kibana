@@ -20,3 +20,5 @@ export interface RuleMigrationFilters {
   searchTerm?: string;
   missingIndex?: boolean;
 }
+
+export type SiemMigrationVendor = 'splunk';

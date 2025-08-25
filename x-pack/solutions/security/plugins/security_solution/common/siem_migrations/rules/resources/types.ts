@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type {
-  OriginalRule,
-  RuleMigrationResourceBase,
-  RuleMigrationResourceData,
-} from '../../model/rule_migration.gen';
+import type { SiemMigrationResourceBase, SiemMigrationResourceData } from '../../model/common.gen';
 
-export type ResourceIdentifier = (input: string) => RuleMigrationResourceBase[];
+import type { OriginalRule } from '../../model/rule_migration.gen';
+
+export type VendorResourceIdentifier = (input: string) => SiemMigrationResourceBase[];
 
 export interface ResourceIdentifiers {
-  fromOriginalRule: (originalRule: OriginalRule) => RuleMigrationResourceBase[];
-  fromResource: (resource: RuleMigrationResourceData) => RuleMigrationResourceBase[];
+  fromOriginalRule: (originalRule: OriginalRule) => SiemMigrationResourceBase[];
+  fromResource: (resource: SiemMigrationResourceData) => SiemMigrationResourceBase[];
 }
