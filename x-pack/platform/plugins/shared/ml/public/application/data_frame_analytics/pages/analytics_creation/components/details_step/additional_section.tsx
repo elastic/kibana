@@ -63,9 +63,9 @@ export const AdditionalSection: FC<Props> = ({ formState, setFormState }) => {
                 defaultMessage: 'Custom URLs',
               }
             )}
-            descriptionMessageId="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.description"
-            descriptionDefaultMessage="Provide links from anomalies to Kibana dashboards, Discover, or other web pages. {learnMoreLink}"
-            learnMoreLinkMessageId="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.learnMoreLinkText"
+            descriptionMessageId="xpack.ml.dataframe.analytics.create.detailsStep.additionalSection.customUrlsSelection.description"
+            descriptionDefaultMessage="Provide links from analytics job results to Kibana dashboards, Discover, or other web pages. {learnMoreLink}"
+            learnMoreLinkMessageId="xpack.ml.dataframe.analytics.create.detailsStep.additionalSection.customUrlsSelection.learnMoreLinkText"
           >
             <CustomUrlsWrapper
               job={analyticsJob as DataFrameAnalyticsConfig}
