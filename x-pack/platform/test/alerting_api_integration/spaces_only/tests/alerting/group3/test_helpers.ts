@@ -10,7 +10,7 @@ import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { Agent as SuperTestAgent } from 'supertest';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import type { ObjectRemover } from '../../../../common/lib';
 import { getUrlPrefix, getTestRuleData, getEventLog } from '../../../../common/lib';
