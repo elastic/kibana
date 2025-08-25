@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import type { GrokCollection } from '@kbn/grok-ui';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import { Expression } from '@kbn/grok-ui';
+import type { monaco } from '@kbn/monaco';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
@@ -31,6 +32,7 @@ import { useStreamEnrichmentSelector } from '../../state_management/stream_enric
 import { SortableList } from '../../sortable_list';
 import type { GrokFormState } from '../../types';
 import { useAIFeatures } from './use_ai_features';
+import { useResizeCheckerUtils } from '../../../../../hooks/use_resize_checker_utils';
 
 const GrokPatternAISuggestions = dynamic(() =>
   import('./grok_pattern_suggestion').then((mod) => ({ default: mod.GrokPatternAISuggestions }))
@@ -45,6 +47,7 @@ export const GrokPatternsEditor = () => {
   const { euiTheme } = useEuiTheme();
 
   const aiFeatures = useAIFeatures();
+  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
 
   const grokCollection = useStreamEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
@@ -107,6 +110,8 @@ export const GrokPatternsEditor = () => {
                 onRemove={getRemovePatternHandler(idx)}
                 grokCollection={grokCollection}
                 onChange={(expression) => handlePatternChange(expression, idx)}
+                setupResizeChecker={setupResizeChecker}
+                destroyResizeChecker={destroyResizeChecker}
               />
             ))}
           </SortableList>
@@ -148,6 +153,11 @@ interface DraggablePatternInputProps {
   grokCollection: GrokCollection;
   onChange: (expression: DraftGrokExpression) => void;
   onRemove: ((idx: number) => void) | null;
+  setupResizeChecker: (
+    divElement: HTMLDivElement,
+    editor: monaco.editor.IStandaloneCodeEditor
+  ) => void;
+  destroyResizeChecker: () => void;
 }
 
 const DraggablePatternInput = ({
@@ -156,6 +166,8 @@ const DraggablePatternInput = ({
   grokCollection,
   onChange,
   onRemove,
+  setupResizeChecker,
+  destroyResizeChecker,
 }: DraggablePatternInputProps) => {
   return (
     <EuiDraggable
@@ -181,12 +193,14 @@ const DraggablePatternInput = ({
                 <EuiIcon type="grab" />
               </EuiPanel>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem style={{ minWidth: 0 }}>
               <Expression
                 draftGrokExpression={draftGrokExpression}
                 grokCollection={grokCollection}
                 dataTestSubj="streamsAppPatternExpression"
                 onChange={onChange}
+                onEditorMount={(editor, divElement) => setupResizeChecker(divElement, editor)}
+                onEditorWillUnmount={() => destroyResizeChecker()}
               />
             </EuiFlexItem>
             {onRemove && (

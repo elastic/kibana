@@ -9,7 +9,7 @@
 
 import type { CodeEditorProps, monaco } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { DraftGrokExpression, GrokCollection } from '../models';
 
@@ -19,12 +19,16 @@ export const Expression = ({
   onChange,
   height = '100px',
   dataTestSubj,
+  onEditorMount,
+  onEditorWillUnmount,
 }: {
   grokCollection: GrokCollection;
   draftGrokExpression: DraftGrokExpression;
   onChange?: (expression: DraftGrokExpression) => void;
   height?: CodeEditorProps['height'];
   dataTestSubj?: string;
+  onEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor, divElement: HTMLDivElement) => void;
+  onEditorWillUnmount?: () => void;
 }) => {
   const [suggestionProvider] = useState(() => {
     return grokCollection.getSuggestionProvider();
@@ -33,10 +37,23 @@ export const Expression = ({
   const expression = useObservable(draftGrokExpression.getExpression$());
 
   const grokEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const divRef = useRef<HTMLDivElement | null>(null);
 
-  const onGrokEditorMount: CodeEditorProps['editorDidMount'] = (editor) => {
-    grokEditorRef.current = editor;
-  };
+  const onGrokEditorMount: CodeEditorProps['editorDidMount'] = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      grokEditorRef.current = editor;
+      if (onEditorMount && divRef.current) {
+        onEditorMount(editor, divRef.current);
+      }
+    },
+    [onEditorMount]
+  );
+
+  const onGrokEditorWillUnmount: CodeEditorProps['editorWillUnmount'] = useCallback(() => {
+    if (onEditorWillUnmount) {
+      onEditorWillUnmount();
+    }
+  }, [onEditorWillUnmount]);
 
   const onGrokEditorChange: CodeEditorProps['onChange'] = (value) => {
     draftGrokExpression.updateExpression(value);
@@ -44,14 +61,25 @@ export const Expression = ({
   };
 
   return (
-    <CodeEditor
-      languageId="grok"
-      value={expression ?? ''}
-      height={height}
-      editorDidMount={onGrokEditorMount}
-      onChange={onGrokEditorChange}
-      suggestionProvider={suggestionProvider}
-      dataTestSubj={dataTestSubj}
-    />
+    <div
+      ref={divRef}
+      style={{
+        width: '100%',
+        height,
+        overflow: 'hidden',
+      }}
+    >
+      <CodeEditor
+        languageId="grok"
+        value={expression ?? ''}
+        height={height}
+        fullWidth={true}
+        editorDidMount={onGrokEditorMount}
+        editorWillUnmount={onGrokEditorWillUnmount}
+        onChange={onGrokEditorChange}
+        suggestionProvider={suggestionProvider}
+        dataTestSubj={dataTestSubj}
+      />
+    </div>
   );
 };
