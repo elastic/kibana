@@ -98,7 +98,7 @@ import { TrustedAppsApiClient } from '../../service';
 import { TRUSTED_APPS_LIST_TYPE } from '../../constants';
 import { Loader } from '../../../../../common/components/loader';
 import { computeHasDuplicateFields, getAddedFieldsCounts } from '../../../../common/utils';
-import { EventFilterItemAndAdvancedTrustedAppsEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import type { EventFilterItemAndAdvancedTrustedAppsEntries } from '../../../../../../common/endpoint/types/exception_list_items';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -167,7 +167,12 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
 
   const os = ((values.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
 
-  if (!values.entries.length || (values.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some((e) => e.value === '' || !e.value.length)) {
+  if (
+    !values.entries.length ||
+    (values.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some(
+      (e) => e.value === '' || !e.value.length
+    )
+  ) {
     isValid = false;
     addResultToValidation(validation, 'entries', 'errors', INPUT_ERRORS.field);
   } else if (!isAdvancedModeEnabled(values)) {

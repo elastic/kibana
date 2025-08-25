@@ -177,7 +177,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         !hasNameError &&
         !hasCommentError &&
         !!exception.entries.length &&
-        (exception.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some((e) => e.value !== '' || e.value.length)
+        (exception.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some(
+          (e) => e.value !== '' || e.value.length
+        )
       );
     }, [hasCommentError, hasNameError, exception.entries]);
 
