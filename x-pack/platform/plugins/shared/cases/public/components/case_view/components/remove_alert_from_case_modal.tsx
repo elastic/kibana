@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DeleteAttachmentConfirmationModal } from '../../user_actions/delete_attachment_confirmation_modal';
 import { useRemoveAlertFromCase } from '../../../containers/use_remove_alert_from_case';
@@ -23,32 +23,31 @@ const RemoveAlertFromCaseModal: React.FC<RemoveAlertModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const onRemovalSuccess = () => {
-    onSuccess();
-    onClose();
-  };
-
   const { mutateAsync: removeAlertFromComment } = useRemoveAlertFromCase(caseId);
+
+  const handleRemoveAlert = useCallback(async () => {
+    Promise.allSettled(
+      alertId.map((id) => {
+        const removalSuccessToast = i18n.translate(
+          'xpack.cases.caseView.alerts.actions.removeFromCaseSuccess',
+          { defaultMessage: 'Alert {alertId} removed from case', values: { alertId: id } }
+        );
+        return removeAlertFromComment({
+          alertId: id,
+          successToasterTitle: removalSuccessToast,
+        });
+      })
+    ).then(() => {
+      onSuccess();
+    });
+
+    onClose();
+  }, [alertId, onClose, onSuccess, removeAlertFromComment]);
 
   return (
     <DeleteAttachmentConfirmationModal
       onCancel={onClose}
-      onConfirm={async () => {
-        await Promise.allSettled(
-          alertId.map((id) => {
-            const removalSuccessToast = i18n.translate(
-              'xpack.cases.caseView.alerts.actions.removeFromCaseSuccess',
-              { defaultMessage: 'Alert {alertId} removed from case', values: { alertId: id } }
-            );
-            return removeAlertFromComment({
-              alertId: id,
-              successToasterTitle: removalSuccessToast,
-            });
-          })
-        ).then(() => {
-          onRemovalSuccess();
-        });
-      }}
+      onConfirm={handleRemoveAlert}
       confirmButtonText={i18n.translate(
         'xpack.cases.caseView.alerts.actions.removeFromCaseConfirm',
         {

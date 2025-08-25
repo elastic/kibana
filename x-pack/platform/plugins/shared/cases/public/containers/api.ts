@@ -7,14 +7,7 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type {
-  AlertAttachment,
-  CaseCustomField,
-  User,
-  AlertAttachmentPayload,
-  UserCommentAttachmentPayload,
-  Attachment,
-} from '../../common/types/domain';
+import type { AlertAttachment, CaseCustomField, User, Attachment } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -415,7 +408,7 @@ export const patchComment = async ({
 }: {
   caseId: string;
   commentId: string;
-  patch: AlertAttachmentPayload | UserCommentAttachmentPayload;
+  patch: AttachmentRequest;
   version: string;
   signal?: AbortSignal;
 }): Promise<Attachment> => {
@@ -437,13 +430,13 @@ export const removeAlertFromComment = async ({
   alertId: string;
   alertAttachment: AlertAttachment;
   signal?: AbortSignal;
-}): Promise<void> => {
+}): Promise<Attachment | void> => {
   const { alertId, index, rule, version, id, owner } = alertAttachment;
   if (Array.isArray(alertId) && Array.isArray(index) && alertId.length > 1) {
     const alertIdx = alertId.indexOf(alertIdToRemove);
     const newAlertId = [...alertId.slice(0, alertIdx), ...alertId.slice(alertIdx + 1)];
     const newIndex = [...index.slice(0, alertIdx), ...index.slice(alertIdx + 1)];
-    patchComment({
+    return patchComment({
       caseId,
       commentId: id,
       version,
@@ -451,7 +444,7 @@ export const removeAlertFromComment = async ({
       signal,
     });
   } else {
-    deleteComment({
+    return deleteComment({
       caseId,
       commentId: alertAttachment.id,
       signal,

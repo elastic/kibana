@@ -69,7 +69,7 @@ export const useRemoveAlertFromCase = (caseId: string) => {
       });
     },
     {
-      mutationKey: casesMutationsKeys.deleteComment,
+      mutationKey: [casesMutationsKeys.deleteComment, casesMutationsKeys.updateComment],
       onSuccess: (_, { successToasterTitle }) => {
         showSuccessToast(successToasterTitle);
         refreshCaseViewPage();
