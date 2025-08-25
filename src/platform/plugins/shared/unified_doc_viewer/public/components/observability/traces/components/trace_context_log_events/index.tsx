@@ -83,9 +83,9 @@ export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEvents
           displayOptions={{
             solutionNavIdOverride: 'oblt',
             enableDocumentViewer: false,
-            enableFilters: true,
+            enableFilters: false,
           }}
-          height="30vh"
+          height="100%"
         />
       }
     />
