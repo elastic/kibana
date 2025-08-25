@@ -26,6 +26,8 @@ export const getPublicStateFromContext = (
     integration: context.integration,
     expandedQualityIssue: context.expandedQualityIssue,
     showCurrentQualityIssues: context.showCurrentQualityIssues,
+    selectedIssueTypes: context.selectedIssueTypes,
+    selectedFields: context.selectedFields,
   };
 };
 
@@ -59,4 +61,6 @@ export const getContextFromPublicState = (
   expandedQualityIssue: publicState.expandedQualityIssue,
   showCurrentQualityIssues:
     publicState.showCurrentQualityIssues ?? DEFAULT_CONTEXT.showCurrentQualityIssues,
+  selectedIssueTypes: publicState.selectedIssueTypes ?? DEFAULT_CONTEXT.selectedIssueTypes,
+  selectedFields: publicState.selectedFields ?? DEFAULT_CONTEXT.selectedFields,
 });

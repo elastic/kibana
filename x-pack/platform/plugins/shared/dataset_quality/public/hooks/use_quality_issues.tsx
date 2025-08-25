@@ -41,7 +41,8 @@ export function useQualityIssues() {
   const {
     qualityIssues,
     expandedQualityIssue: expandedDegradedField,
-    showCurrentQualityIssues,
+    selectedIssueTypes,
+    selectedFields,
     failedDocsErrors,
   } = useSelector(service, (state) => state.context);
   const { data, table } = qualityIssues ?? {};
@@ -54,7 +55,17 @@ export function useQualityIssues() {
     sort: failedDocsErrorsSort,
   } = failedDocsErrorsTable;
 
-  const totalItemCount = data?.length ?? 0;
+  const filteredItems = useMemo(() => {
+    if (!data) return [];
+
+    return data.filter(
+      (item) =>
+        (selectedIssueTypes.length === 0 || selectedIssueTypes.includes(item.type)) &&
+        (selectedFields.length === 0 || selectedFields.includes(item.name))
+    );
+  }, [data, selectedIssueTypes, selectedFields]);
+
+  const totalItemCount = filteredItems?.length ?? 0;
 
   const pagination = {
     pageIndex: page,
@@ -84,9 +95,9 @@ export function useQualityIssues() {
   );
 
   const renderedItems = useMemo(() => {
-    const sortedItems = orderBy(data, sort.field, sort.direction);
+    const sortedItems = orderBy(filteredItems, sort.field, sort.direction);
     return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
-  }, [data, sort.field, sort.direction, page, rowsPerPage]);
+  }, [filteredItems, sort.field, sort.direction, page, rowsPerPage]);
 
   const expandedRenderedItem = useMemo(() => {
     return renderedItems.find(
@@ -132,10 +143,6 @@ export function useQualityIssues() {
     },
     [expandedDegradedField, service]
   );
-
-  const toggleCurrentQualityIssues = useCallback(() => {
-    service.send('TOGGLE_CURRENT_QUALITY_ISSUES');
-  }, [service]);
 
   const degradedFieldValues = useSelector(service, (state) =>
     state.matches('initializing.qualityIssueFlyout.open.degradedFieldFlyout.ignoredValues.done')
@@ -346,8 +353,6 @@ export function useQualityIssues() {
     isAnalysisInProgress,
     degradedFieldAnalysis,
     degradedFieldAnalysisFormattedResult,
-    toggleCurrentQualityIssues,
-    showCurrentQualityIssues,
     expandedRenderedItem,
     updateNewFieldLimit,
     isMitigationInProgress,

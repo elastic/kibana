@@ -10,13 +10,14 @@ import { EuiButtonIcon, EuiText, formatNumber } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { QualityIssue } from '../../../../../common/api_types';
 import { NUMBER_FORMAT } from '../../../../../common/constants';
 import {
-  countColumnName,
+  degradedField,
   documentIndexFailed,
+  documentsColumnName,
+  fieldColumnName,
   issueColumnName,
   lastOccurrenceColumnName,
 } from '../../../../../common/translations';
@@ -24,38 +25,25 @@ import type { QualityIssueType } from '../../../../state_machines/dataset_qualit
 import { SparkPlot } from '../../../common/spark_plot';
 
 const expandDatasetAriaLabel = i18n.translate(
-  'xpack.datasetQuality.details.qualityIssuesTable.expandLabel',
+  'xpack.datasetQuality.details.qualityIssuesTable.expand',
   {
     defaultMessage: 'Expand',
-  }
-);
-const collapseDatasetAriaLabel = i18n.translate(
-  'xpack.datasetQuality.details.qualityIssuesTable.collapseLabel',
-  {
-    defaultMessage: 'Collapse',
   }
 );
 
 export const getQualityIssuesColumns = ({
   dateFormatter,
   isLoading,
-  expandedQualityIssue,
   openQualityIssueFlyout,
 }: {
   dateFormatter: FieldFormat;
   isLoading: boolean;
-  expandedQualityIssue?: {
-    name: string;
-    type: QualityIssueType;
-  };
   openQualityIssueFlyout: (name: string, type: QualityIssueType) => void;
 }): Array<EuiBasicTableColumn<QualityIssue>> => [
   {
     name: '',
     field: 'name',
     render: (_, { name, type }) => {
-      const isExpanded = name === expandedQualityIssue?.name && type === expandedQualityIssue?.type;
-
       const onExpandClick = () => {
         openQualityIssueFlyout(name, type);
       };
@@ -66,9 +54,9 @@ export const getQualityIssuesColumns = ({
           size="xs"
           color="text"
           onClick={onExpandClick}
-          iconType={isExpanded ? 'minimize' : 'expand'}
-          title={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
-          aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
+          iconType={'expand'}
+          title={expandDatasetAriaLabel}
+          aria-label={expandDatasetAriaLabel}
         />
       );
     },
@@ -80,35 +68,36 @@ export const getQualityIssuesColumns = ({
     `,
   },
   {
+    name: fieldColumnName,
+    field: 'name',
+    render: (_, { name, type }) => {
+      return <EuiText size="s">{name}</EuiText>;
+    },
+  },
+  {
     name: issueColumnName,
     field: 'name',
     render: (_, { name, type }) => {
-      return type === 'degraded' ? (
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.datasetQuality.details.qualityIssues.degradedField"
-            defaultMessage="{name} field ignored"
-            values={{
-              name: (
-                <>
-                  <strong>{name}</strong>{' '}
-                </>
-              ),
-            }}
-          />
-        </EuiText>
-      ) : (
-        <>{documentIndexFailed}</>
+      return (
+        <EuiText size="s">{type === 'degraded' ? degradedField : documentIndexFailed}</EuiText>
       );
     },
   },
   {
-    name: countColumnName,
-    sortable: true,
+    name: documentsColumnName,
     field: 'count',
+    align: 'right',
     render: (_, { count, timeSeries }) => {
       const countValue = formatNumber(count, NUMBER_FORMAT);
-      return <SparkPlot series={timeSeries} valueLabel={countValue} isLoading={isLoading} />;
+      return <EuiText size="s">{countValue}</EuiText>;
+    },
+  },
+  {
+    name: '',
+    field: 'count',
+    align: 'left',
+    render: (_, { count, timeSeries }) => {
+      return <SparkPlot series={timeSeries} isLoading={isLoading} />;
     },
   },
   {

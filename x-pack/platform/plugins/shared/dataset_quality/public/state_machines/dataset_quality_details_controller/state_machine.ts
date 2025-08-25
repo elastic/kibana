@@ -279,6 +279,15 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         '#DatasetQualityDetailsController.initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields',
                       actions: ['toggleCurrentQualityIssues'],
                     },
+                    UPDATE_SELECTED_ISSUE_TYPES: {
+                      target:
+                        '#DatasetQualityDetailsController.initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields',
+                      actions: ['updateSelectedIssueTypes'],
+                    },
+                    UPDATE_SELECTED_FIELDS: {
+                      target: 'doneFetchingQualityIssues',
+                      actions: ['updateSelectedFields'],
+                    },
                   },
                 },
               },
@@ -659,6 +668,17 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         toggleCurrentQualityIssues: assign((context) => {
           return {
             showCurrentQualityIssues: !context.showCurrentQualityIssues,
+          };
+        }),
+        updateSelectedIssueTypes: assign((_context, event) => {
+          return {
+            selectedIssueTypes:
+              'selectedIssueTypes' in event ? event.selectedIssueTypes : ['degraded', 'failed'],
+          };
+        }),
+        updateSelectedFields: assign((_context, event) => {
+          return {
+            selectedFields: 'selectedFields' in event ? event.selectedFields : [],
           };
         }),
         raiseDegradedFieldsLoaded: raise('DEGRADED_FIELDS_LOADED'),
