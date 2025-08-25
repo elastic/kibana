@@ -208,11 +208,12 @@ Scout uses Playwright's [projects concept](https://playwright.dev/docs/test-proj
 To start the servers locally without running tests, use the following command:
 
 ```bash
-node scripts/scout.js start-server [--stateful|--serverless=[es|oblt|security]]
+node scripts/scout.js start-server [--stateful|--serverless=[es|oblt|security]] [--kibana-config <config-file-path>]
 ```
 
 - **`--stateful`**: Starts servers in a stateful mode.
 - **`--serverless`**: Starts servers in a serverless mode. You can specify additional options like `es` (Elasticsearch), `oblt` (Observability), or `security`.
+- **`--kibana-config`**: Path to a Kibana config file to use. When provided, Scout will use the specified config file instead of the default `--no-dev-config` option. Note that Kibana will still connect to the Scout-created Elasticsearch cluster (`cluster-scout`), so you should comment out or remove any Elasticsearch configuration properties from your YAML file.
 
 This command is useful for manual testing or running tests via an IDE.
 
