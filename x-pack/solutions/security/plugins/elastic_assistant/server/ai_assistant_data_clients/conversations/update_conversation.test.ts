@@ -26,6 +26,9 @@ export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => (
   excludeFromLastConversationStorage: false,
   messages: [],
   replacements: {},
+  summary: {
+    semanticContent: 'Updated semantic content.',
+  },
 });
 
 const mockUser1 = authenticatedUser;
@@ -65,6 +68,10 @@ export const getConversationResponseMock = (): ConversationResponse => ({
       name: 'elastic',
     },
   ],
+  summary: {
+    timestamp: '2025-08-19T12:44:51.083Z',
+    semanticContent: 'Very nice semantic content.',
+  },
 });
 
 jest.mock('./get_conversation', () => ({
@@ -202,6 +209,10 @@ describe('transformToUpdateScheme', () => {
           role: 'user',
         },
       ],
+      summary: {
+        '@timestamp': updateAt,
+        semantic_content: 'Updated semantic content.',
+      },
     };
     expect(transformed).toEqual(expected);
   });

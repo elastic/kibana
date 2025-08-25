@@ -298,25 +298,27 @@ export const ApiConfig = z.object({
   model: z.string().optional(),
 });
 
-export type ConversationSummary = z.infer<typeof ConversationSummary>;
-export const ConversationSummary = z.object({
+export type ConversationSummaryBase = z.infer<typeof ConversationSummaryBase>;
+export const ConversationSummaryBase = z.object({
   /**
    * Summary text of the conversation over time.
    */
-  content: z.string().optional(),
+  semanticContent: z.string().optional(),
   /**
-   * The timestamp summary was updated.
+   * The list of summarized messages.
    */
-  timestamp: NonEmptyTimestamp.optional(),
-  /**
-   * Define if summary is marked as publicly available.
-   */
-  public: z.boolean().optional(),
-  /**
-   * How confident you are about this being a correct and useful learning.
-   */
-  confidence: ConversationConfidence.optional(),
+  summarizedMessageIds: z.array(NonEmptyString).optional(),
 });
+
+export type ConversationSummary = z.infer<typeof ConversationSummary>;
+export const ConversationSummary = ConversationSummaryBase.merge(
+  z.object({
+    /**
+     * The timestamp summary was updated.
+     */
+    timestamp: NonEmptyTimestamp,
+  })
+);
 
 export type ErrorSchema = z.infer<typeof ErrorSchema>;
 export const ErrorSchema = z
@@ -389,7 +391,7 @@ export const ConversationUpdateProps = z.object({
    * LLM API configuration.
    */
   apiConfig: ApiConfig.optional(),
-  summary: ConversationSummary.optional(),
+  summary: ConversationSummaryBase.optional(),
   /**
    * Exclude from last conversation storage.
    */
