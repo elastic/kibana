@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaSolution } from '@kbn/projects-solutions-groups';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 
 export type PlatformName = 'win32' | 'darwin' | 'linux';
 export type PlatformArchitecture = 'x64' | 'arm64';
