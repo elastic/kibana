@@ -34,11 +34,6 @@ export {
   InvalidJSONProperty,
   DuplicateField,
 } from '../common/errors';
-export {
-  RenderCompleteDispatcher,
-  dispatchRenderComplete,
-  dispatchRenderStart,
-} from './render_complete';
 export { ResizeChecker } from './resize_checker';
 export type {
   BaseState,
