@@ -105,24 +105,11 @@ export const PreviewImage = ({ element }: Props) => {
           title=""
           betaBadgeProps={{
             label: PREVIEW_BADGE_LABEL,
-            size: 's',
           }}
           css={cardCss}
           paddingSize="xs"
         >
-          <EuiImage
-            alt={PREVIEW_ALT_TEXT}
-            src={screenshot}
-            // Using css prop doesn't work here
-            style={{
-              width: '100%',
-              height: 'auto',
-              maxHeight: `${HEIGHT}px`,
-              objectFit: 'contain',
-              display: 'block',
-              margin: '0 auto',
-            }}
-          />
+          <EuiImage alt={PREVIEW_ALT_TEXT} src={screenshot} size={200} hasShadow={false} />
         </EuiCard>
       </EuiSkeletonRectangle>
       <EuiSpacer size="l" />
