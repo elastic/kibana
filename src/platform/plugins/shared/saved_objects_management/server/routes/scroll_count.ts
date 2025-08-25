@@ -7,71 +7,118 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import type { IRouter, SavedObjectsCreatePointInTimeFinderOptions } from '@kbn/core/server';
+import { inject, injectable } from 'inversify';
 import { chain } from 'lodash';
-import type { v1 } from '../../common';
-import { getSavedObjectCounts } from '../lib';
+import type { estypes } from '@elastic/elasticsearch';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import {
+  type ISavedObjectsClientFactory,
+  Request,
+  Response,
+  SavedObjectsClient,
+  SavedObjectsClientFactory,
+  SavedObjectsTypeRegistry,
+} from '@kbn/core-di-server';
+import type {
+  ISavedObjectTypeRegistry,
+  KibanaRequest,
+  KibanaResponseFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
-export const registerScrollForCountRoute = (router: IRouter) => {
-  router.post(
-    {
-      path: '/api/kibana/management/saved_objects/scroll/counts',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
+type ScrollCountRequest = KibanaRequest<
+  never,
+  never,
+  TypeOf<typeof ScrollCountRoute.validate.body>
+>;
+
+export function scrollCountClientFactory(
+  { body: { typesToInclude: types } }: ScrollCountRequest,
+  clientFactory: ISavedObjectsClientFactory,
+  typeRegistry: ISavedObjectTypeRegistry
+): SavedObjectsClientContract {
+  return clientFactory({
+    includedHiddenTypes: chain(types)
+      .uniq()
+      .filter((type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type))
+      .value(),
+  });
+}
+scrollCountClientFactory.inject = [
+  Request,
+  SavedObjectsClientFactory,
+  SavedObjectsTypeRegistry,
+] as const satisfies unknown[];
+
+@injectable()
+export class ScrollCountRoute {
+  static method = 'post' as const;
+  static handleLegacyErrors = true;
+  static path = '/api/kibana/management/saved_objects/scroll/counts';
+  static security = {
+    authz: {
+      enabled: false,
+      reason: 'This route is opted out from authorization',
+    },
+  } as const;
+  static validate = {
+    body: schema.object({
+      typesToInclude: schema.arrayOf(schema.string()),
+      searchString: schema.maybe(schema.string()),
+      references: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            type: schema.string(),
+            id: schema.string(),
+          })
+        )
+      ),
+    }),
+  };
+
+  constructor(
+    @inject(SavedObjectsClient) private readonly client: SavedObjectsClientContract,
+    @inject(Request) private readonly request: ScrollCountRequest,
+    @inject(Response) private readonly response: KibanaResponseFactory
+  ) {}
+
+  private async getSavedObjectCounts(): Promise<Record<string, number>> {
+    const { typesToInclude, searchString, references } = this.request.body;
+    const body = await this.client.find<void, { types: estypes.AggregationsStringTermsAggregate }>({
+      ...(searchString ? { search: `${searchString}*`, searchFields: ['title'] } : {}),
+      ...(references ? { hasReference: references, hasReferenceOperator: 'OR' } : {}),
+      type: typesToInclude,
+      perPage: 0,
+      aggs: {
+        types: {
+          terms: {
+            field: 'type',
+            size: typesToInclude.length,
+          },
         },
       },
-      validate: {
-        body: schema.object({
-          typesToInclude: schema.arrayOf(schema.string()),
-          searchString: schema.maybe(schema.string()),
-          references: schema.maybe(
-            schema.arrayOf(
-              schema.object({
-                type: schema.string(),
-                id: schema.string(),
-              })
-            )
-          ),
-        }),
-      },
-    },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const { getClient, typeRegistry } = (await context.core).savedObjects;
-      const { typesToInclude, searchString, references } = req.body;
+    });
 
-      const includedHiddenTypes = chain(typesToInclude)
-        .uniq()
-        .filter(
-          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
-        )
-        .value();
+    const buckets =
+      (body.aggregations?.types?.buckets as estypes.AggregationsStringTermsBucketKeys[]) || [];
 
-      const client = getClient({ includedHiddenTypes });
-      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
-        type: typesToInclude,
-        ...(searchString ? { search: `${searchString}*`, searchFields: ['title'] } : {}),
-        ...(references ? { hasReference: references, hasReferenceOperator: 'OR' } : {}),
-      };
+    const counts = buckets.reduce((memo, bucket) => {
+      memo[`${bucket.key}`] = bucket.doc_count;
+      return memo;
+    }, {} as Record<string, number>);
 
-      const rawCounts = await getSavedObjectCounts({
-        types: typesToInclude,
-        client,
-        options: findOptions,
-      });
+    return counts;
+  }
 
-      const counts: Record<string, number> = {};
-      for (const type of typesToInclude) {
-        counts[type] = rawCounts[type] ?? 0;
-      }
+  async handle() {
+    const rawCounts = await this.getSavedObjectCounts();
+    const counts: Record<string, number> = {};
+    for (const type of this.request.body.typesToInclude) {
+      counts[type] = rawCounts[type] ?? 0;
+    }
 
-      const body: v1.ScrollCountResponseHTTP = counts;
-
-      return res.ok({
-        body,
-      });
-    })
-  );
-};
+    return this.response.ok({
+      body: counts,
+    });
+  }
+}

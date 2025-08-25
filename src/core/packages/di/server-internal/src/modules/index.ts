@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const registerRoutesMock = jest.fn();
+import { ContainerModule } from 'inversify';
+import { loadCapabilites } from './capabilities';
+import { loadHttp } from './http';
+import { loadSavedObjects } from './saved_objects';
 
-jest.doMock('./routes', () => ({
-  registerRoutes: registerRoutesMock,
-}));
+export const core = new ContainerModule((options) => {
+  loadCapabilites(options);
+  loadHttp(options);
+  loadSavedObjects(options);
+});

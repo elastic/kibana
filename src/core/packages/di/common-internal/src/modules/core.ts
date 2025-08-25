@@ -7,16 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SavedObjectsManagementPluginSetup {}
+import { ContainerModule } from 'inversify';
+import { loadLogging } from './logging';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SavedObjectsManagementPluginStart {}
-
-export type {
-  SavedObjectMetadata,
-  SavedObjectWithMetadata,
-  SavedObjectRelationKind,
-  SavedObjectRelation,
-  SavedObjectInvalidRelation,
-} from '../common';
+export const core = new ContainerModule((options) => {
+  loadLogging(options);
+});

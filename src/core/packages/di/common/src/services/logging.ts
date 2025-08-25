@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CapabilitiesProvider } from './src/services/capabilities';
-export {
-  Request,
-  Response,
-  Route,
-  type RouteDefinition,
-  type RouteHandler,
-  Router,
-} from './src/services/http';
-export {
-  type ISavedObjectsClientFactory,
-  SavedObjectsClient,
-  SavedObjectsClientFactory,
-  SavedObjectsTypeRegistry,
-} from './src/services/saved_objects';
-export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';
+import type { ServiceIdentifier } from 'inversify';
+import type { Logger as ILogger, LoggerFactory as ILoggerFactory } from '@kbn/logging';
+
+/**
+ * Plugin's default logger instance.
+ * @public
+ */
+export const Logger = Symbol.for('Logger') as ServiceIdentifier<ILogger>;
+
+/**
+ * Plugin's logger factory.
+ * @public
+ */
+export const LoggerFactory = Symbol.for('LoggerFactory') as ServiceIdentifier<ILoggerFactory>;
