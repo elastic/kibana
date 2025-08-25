@@ -40,7 +40,6 @@ export class DashboardMigrationsDataResourcesClient extends SiemMigrationsDataBa
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    this.logger.error(`Creating ${resources.length} resources in index ${index}`);
     let resourcesSlice: CreateDashboardMigrationResourceInput[];
     const createdAt = new Date().toISOString();
     while ((resourcesSlice = resources.splice(0, BULK_MAX_SIZE)).length > 0) {
