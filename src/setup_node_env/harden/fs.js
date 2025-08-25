@@ -117,7 +117,7 @@ const pathUnsecureMethod = (target, thisArg, argumentsList) => {
     return target.apply(thisArg, argumentsList);
   }
 
-  throw new Error('This method is blocked by security hardening model');
+  throw new Error('This method is blocked by security hardening');
 };
 
 const createFsProxy = (fs) => {
@@ -131,7 +131,6 @@ const createFsProxy = (fs) => {
   fs.createWriteStream = new Proxy(fs.createWriteStream, { apply: patchWriteStream });
 
   // Methods that we want to block completely
-  fs.open = new Proxy(fs.open, { apply: pathUnsecureMethod });
   fs.openSync = new Proxy(fs.openSync, { apply: pathUnsecureMethod });
   fs.symlink = new Proxy(fs.symlink, { apply: pathUnsecureMethod });
   fs.symlinkSync = new Proxy(fs.symlinkSync, { apply: pathUnsecureMethod });
