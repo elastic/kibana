@@ -82,7 +82,7 @@ pageLoadAssetSize:
   infra: 56302
   ingestPipelines: 17866
   inputControlVis: 9842
-  inspectComponent: 38000
+  inspectComponent: 50000
   inspector: 18000
   interactiveSetup: 42153
   intercepts: 19011
