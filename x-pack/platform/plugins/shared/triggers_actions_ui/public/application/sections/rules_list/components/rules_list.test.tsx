@@ -8,7 +8,7 @@
 import { MAINTENANCE_WINDOW_FEATURE_ID, parseDuration } from '@kbn/alerting-plugin/common';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
-import { IToasts } from '@kbn/core/public';
+import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -24,12 +24,12 @@ import * as React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
+import type {
   ActionTypeRegistryContract,
-  Percentiles,
   RuleTypeModel,
   RuleTypeRegistryContract,
 } from '../../../../types';
+import { Percentiles } from '../../../../types';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { getFormattedDuration } from '../../../lib/monitoring_utils';

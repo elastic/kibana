@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { QuerySchema, querySchema } from '@kbn/slo-schema';
-import { FieldPath, useFormContext } from 'react-hook-form';
-import { CreateSLOForm } from '../types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { QuerySchema } from '@kbn/slo-schema';
+import { querySchema } from '@kbn/slo-schema';
+import type { FieldPath } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
+import type { CreateSLOForm } from '../types';
 const isFieldBeingUsed = (fieldName: string, query?: QuerySchema) => {
   if (!query) {
     return false;

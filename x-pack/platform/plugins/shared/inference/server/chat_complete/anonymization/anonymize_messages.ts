@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { AnonymizationOutput, AnonymizationRule, Message } from '@kbn/inference-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AnonymizationOutput, AnonymizationRule, Message } from '@kbn/inference-common';
 import { merge } from 'lodash';
 import { anonymizeRecords } from './anonymize_records';
 import { messageFromAnonymizationRecords } from './message_from_anonymization_records';
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
-import { RegexWorkerService } from './regex_worker_service';
+import type { RegexWorkerService } from './regex_worker_service';
 
 export async function anonymizeMessages({
   system,

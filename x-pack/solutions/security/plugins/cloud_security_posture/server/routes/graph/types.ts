@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
 
 export type EsQuery = GraphRequest['query']['esQuery'];
 

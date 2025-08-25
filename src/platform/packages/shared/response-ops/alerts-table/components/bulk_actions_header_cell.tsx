@@ -8,7 +8,8 @@
  */
 
 import { EuiCheckbox } from '@elastic/eui';
-import React, { ChangeEvent, useCallback } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback } from 'react';
 import { BulkActionsVerbs } from '../types';
 import { COLUMN_HEADER_ARIA_LABEL } from '../translations';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';

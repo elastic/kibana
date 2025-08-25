@@ -7,7 +7,8 @@
 
 import { useAssistantOverlay } from '.';
 import { waitFor, renderHook, act } from '@testing-library/react';
-import { FetchCurrentUserConversations, useFetchCurrentUserConversations } from '../api';
+import type { FetchCurrentUserConversations } from '../api';
+import { useFetchCurrentUserConversations } from '../api';
 import { mockConnectors } from '../../mock/connectors';
 
 const mockUseAssistantContext = {

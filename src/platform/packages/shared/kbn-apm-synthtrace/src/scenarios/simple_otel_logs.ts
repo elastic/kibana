@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  OtelLogDocument,
-  generateLongId,
-  generateShortId,
-  otelLog,
-} from '@kbn/apm-synthtrace-client';
+import type { OtelLogDocument } from '@kbn/apm-synthtrace-client';
+import { generateLongId, generateShortId, otelLog } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import {
   MORE_THAN_1024_CHARS,

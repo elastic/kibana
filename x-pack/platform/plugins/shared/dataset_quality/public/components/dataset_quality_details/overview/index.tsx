@@ -7,8 +7,9 @@
 
 import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { EuiFlexItem, EuiSpacer, OnRefreshProps, EuiSplitPanel } from '@elastic/eui';
-import { QualityIssueType } from '../../../state_machines/dataset_quality_details_controller';
+import type { OnRefreshProps } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer, EuiSplitPanel } from '@elastic/eui';
+import type { QualityIssueType } from '../../../state_machines/dataset_quality_details_controller';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { QualityIssues } from './quality_issues';

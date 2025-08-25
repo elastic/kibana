@@ -37,6 +37,7 @@ import { createRule, patchRule } from '../../../../../tasks/api_calls/rules';
 import { login } from '../../../../../tasks/login';
 
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
+
 describe(
   'Detection rules, Prebuilt Rules reversion workflow',
   {

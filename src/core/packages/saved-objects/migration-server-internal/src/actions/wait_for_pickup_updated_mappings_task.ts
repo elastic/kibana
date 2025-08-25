@@ -10,13 +10,13 @@
 import * as TaskEither from 'fp-ts/TaskEither';
 import * as Option from 'fp-ts/Option';
 import { flow } from 'fp-ts/function';
-import {
-  waitForTask,
+import type {
   WaitForTaskCompletionTimeout,
   TaskCompletedWithRetriableError,
 } from './wait_for_task';
+import { waitForTask } from './wait_for_task';
 
-import { RetryableEsClientError } from './catch_retryable_es_client_errors';
+import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 
 export const waitForPickupUpdatedMappingsTask = flow(
   waitForTask,
