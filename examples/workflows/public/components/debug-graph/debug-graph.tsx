@@ -4,11 +4,11 @@ import dagre from '@dagrejs/dagre';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 import type { NodeTypes, Node } from '@xyflow/react';
 import { Background, Controls, Position, ReactFlow } from '@xyflow/react';
-// import { parseWorkflowYamlToJSON } from './yaml_utils';
-import {
-  WORKFLOW_ZOD_SCHEMA_LOOSE,
-  parseWorkflowYamlToJSON,
-} from '@kbn/workflows-management-plugin/common';
+import { parseWorkflowYamlToJSON } from './yaml_utils';
+// import {
+//   WORKFLOW_ZOD_SCHEMA_LOOSE,
+//   parseWorkflowYamlToJSON,
+// } from '@kbn/workflows-management-plugin/common';
 import { WorkflowGraphEdge, WorkflowGraphNode } from './nodes';
 import {
   mainScopeNodes,
@@ -19,6 +19,7 @@ import {
 } from './nodes/types';
 
 import '@xyflow/react/dist/style.css';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from './schema';
 
 export interface WorkflowExecutionProps {
   workflowYaml: string;
@@ -113,6 +114,7 @@ export const DebugGraph: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) =
     }
     const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
     if (result.error) {
+      console.error(result.error);
       return null;
     }
 
@@ -172,7 +174,7 @@ export const DebugGraph: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) =
             height: '100%',
           }}
         >
-          No valid workflow graph to display
+          No valid workflow graph to display!
         </div>
       )}
     </>
