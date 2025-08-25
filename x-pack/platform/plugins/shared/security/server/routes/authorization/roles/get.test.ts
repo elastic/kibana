@@ -27,6 +27,7 @@ interface TestOptions {
   apiResponse?: () => unknown;
   asserts: { statusCode: number; result?: Record<string, any> };
   query?: Record<string, unknown>;
+  version?: typeof API_VERSIONS.roles.public.v1 | typeof API_VERSIONS.roles.public.v2;
 }
 
 const features: KibanaFeature[] = [
@@ -145,7 +146,14 @@ const features: KibanaFeature[] = [
 describe('GET role', () => {
   const getRoleTest = (
     description: string,
-    { name, licenseCheckResult = { state: 'valid' }, apiResponse, asserts, query }: TestOptions
+    {
+      name,
+      licenseCheckResult = { state: 'valid' },
+      apiResponse,
+      asserts,
+      query,
+      version,
+    }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
@@ -170,10 +178,10 @@ describe('GET role', () => {
           (() => ({ body: apiResponse() })) as any
         );
       }
-
+      const versionToUse = version ?? API_VERSIONS.roles.public.v1;
       defineGetRolesRoutes(mockRouteDefinitionParams);
       const handler = versionedRouterMock.getRoute('get', '/api/security/role/{name}').versions[
-        API_VERSIONS.roles.public.v1
+        versionToUse
       ].handler;
 
       const headers = { authorization: 'foo' };
@@ -1355,9 +1363,10 @@ describe('GET role', () => {
       }
     );
 
-    getRoleTest('returns exportable roles', {
+    getRoleTest('returns importable roles', {
       name: 'first_role',
       query: { exportable: true },
+      version: API_VERSIONS.roles.public.v2,
       apiResponse: () => ({
         first_role: {
           cluster: [],
@@ -1384,9 +1393,10 @@ describe('GET role', () => {
       },
     });
 
-    getRoleTest('correctly handles replaced privileges when trying to get exportable', {
+    getRoleTest('correctly handles replaced privileges when trying to get importable role', {
       name: 'first_role',
-      query: { exportable: true, replaceDeprecatedPrivileges: true },
+      query: { replaceDeprecatedPrivileges: true },
+      version: API_VERSIONS.roles.public.v2,
       apiResponse: () => ({
         first_role: {
           cluster: [],

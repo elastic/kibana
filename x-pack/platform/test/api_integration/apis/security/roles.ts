@@ -682,8 +682,9 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
 
         const getRole = await supertest
-          .get('/api/security/role/role_to_query?exportable=true')
+          .get('/api/security/role/role_to_query')
           .set('kbn-xsrf', 'xxx')
+          .set('version', '2025-10-31')
           .expect(200);
 
         await supertest

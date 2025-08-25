@@ -124,6 +124,7 @@ export const API_VERSIONS = {
   roles: {
     public: {
       v1: '2023-10-31',
+      v2: '2025-10-31',
     },
   },
 };

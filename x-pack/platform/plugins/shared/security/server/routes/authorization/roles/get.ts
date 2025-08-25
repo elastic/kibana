@@ -55,11 +55,69 @@ export function defineGetRolesRoutes({
                     },
                   })
                 ),
-                exportable: schema.maybe(
+              })
+            ),
+          },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+            },
+          },
+        },
+      },
+      createLicensedRouteHandler(async (context, request, response) => {
+        try {
+          const esClient = (await context.core).elasticsearch.client;
+
+          const [features, elasticsearchRoles] = await Promise.all([
+            getFeatures(),
+            await esClient.asCurrentUser.security.getRole({
+              name: request.params.name,
+            }),
+          ]);
+
+          const elasticsearchRole = elasticsearchRoles[request.params.name];
+
+          if (elasticsearchRole) {
+            return response.ok({
+              body: transformElasticsearchRoleToRole({
+                features,
+                subFeaturePrivilegeIterator,
+                // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
+                elasticsearchRole,
+                name: request.params.name,
+                application: authz.applicationName,
+                logger,
+                replaceDeprecatedKibanaPrivileges:
+                  request.query?.replaceDeprecatedPrivileges ?? false,
+              }),
+            });
+          }
+
+          return response.notFound();
+        } catch (error) {
+          return response.customError(wrapIntoCustomErrorResponse(error));
+        }
+      })
+    )
+    .addVersion(
+      {
+        version: API_VERSIONS.roles.public.v2,
+        validate: {
+          request: {
+            params: schema.object({
+              name: schema.string({
+                minLength: 1,
+                meta: { description: 'The role name.' },
+              }),
+            }),
+            query: schema.maybe(
+              schema.object({
+                replaceDeprecatedPrivileges: schema.maybe(
                   schema.boolean({
                     meta: {
                       description:
-                        'If `true`, the resulting output from the API can be used to re-import the role.',
+                        'If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.',
                     },
                   })
                 ),
@@ -87,7 +145,6 @@ export function defineGetRolesRoutes({
           const elasticsearchRole = elasticsearchRoles[request.params.name];
 
           if (elasticsearchRole) {
-            const exportable = request.query?.exportable ?? false;
             const transformedRole = transformElasticsearchRoleToRole({
               features,
               subFeaturePrivilegeIterator,
@@ -100,18 +157,14 @@ export function defineGetRolesRoutes({
                 request.query?.replaceDeprecatedPrivileges ?? false,
             });
 
-            if (exportable) {
-              return response.ok({
-                body: omit(transformedRole, [
-                  '_transform_error',
-                  '_unrecognized_applications',
-                  'name',
-                  'transient_metadata',
-                ]),
-              });
-            }
-
-            return response.ok({ body: transformedRole });
+            return response.ok({
+              body: omit(transformedRole, [
+                '_transform_error',
+                '_unrecognized_applications',
+                'name',
+                'transient_metadata',
+              ]),
+            });
           }
 
           return response.notFound();
