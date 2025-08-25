@@ -15,6 +15,7 @@ import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -48,6 +49,7 @@ export interface UnifiedDocViewerStartDeps {
   fieldsMetadata: FieldsMetadataPublicStart;
   share: SharePluginStart;
   discoverShared: DiscoverSharedPublicStart;
+  embeddable: EmbeddableStart;
 }
 
 export class UnifiedDocViewerPublicPlugin
@@ -101,7 +103,7 @@ export class UnifiedDocViewerPublicPlugin
       uiSettings,
       notifications: { toasts },
     } = core;
-    const { data, fieldFormats, fieldsMetadata, share, discoverShared } = deps;
+    const { data, fieldFormats, fieldsMetadata, share, embeddable } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
@@ -117,7 +119,7 @@ export class UnifiedDocViewerPublicPlugin
       unifiedDocViewer,
       share,
       core,
-      discoverShared,
+      embeddable,
     };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;

@@ -38,7 +38,7 @@ import {
   getTabContentAvailableHeight,
   DEFAULT_MARGIN_BOTTOM,
 } from '../../../doc_viewer_source/get_height';
-import { Logs } from '../components/logs';
+import { TraceContextLogEvents } from '../components/trace_context_log_events';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   indexes: {
@@ -169,7 +169,10 @@ export function SpanOverview({
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <Logs />
+                <TraceContextLogEvents
+                  traceId={flattenedDoc[TRACE_ID_FIELD]}
+                  spanId={flattenedDoc[SPAN_ID_FIELD]}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </FieldActionsProvider>
