@@ -12,8 +12,9 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
+import { ValueFormatConfig } from '../../../../../common/types';
 import { OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
+import { FieldBasedIndexPatternColumn } from './column_types';
 
 import {
   getFormatFromPreviousColumn,

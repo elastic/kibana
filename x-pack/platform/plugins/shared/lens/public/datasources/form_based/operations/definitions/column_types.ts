@@ -6,7 +6,7 @@
  */
 
 import type { Query } from '@kbn/es-query';
-import { ValueFormatConfig } from '../../../../../common';
+import type { ValueFormatConfig } from '../../../../../common';
 import type { Operation } from '../../../../types';
 import type { TimeScaleUnit } from '../../../../../common/expressions';
 import type { OperationType } from '.';
