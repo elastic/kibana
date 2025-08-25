@@ -193,6 +193,15 @@ export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
 /** This Kibana Advanced Setting enables the warnings for CCS read permissions */
 export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
 
+/** This Kibana Advanced Setting when turned on keeps the suppression window open when an alert is closed */
+export const SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
+  'securitySolution:suppressionBehaviorOnAlertClosure' as const;
+
+export enum SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM {
+  RestartWindow = 'restart-suppression',
+  ContinueWindow = 'continue-until-window-ends',
+}
+
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
 
