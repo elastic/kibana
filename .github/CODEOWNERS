@@ -22,7 +22,6 @@ examples/feature_flags_example @elastic/kibana-core
 examples/field_formats_example @elastic/kibana-data-discovery
 examples/files_example @elastic/appex-sharedux
 examples/grid_example @elastic/kibana-presentation
-examples/guided_onboarding_example @elastic/appex-sharedux
 examples/hello_world @elastic/kibana-core
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
@@ -497,7 +496,6 @@ src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-
 src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
 src/platform/packages/shared/kbn-grok-ui @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
-src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
 src/platform/packages/shared/kbn-i18n-react @elastic/kibana-core
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
@@ -735,7 +733,6 @@ src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/platform/plugins/shared/expressions @elastic/kibana-visualizations
 src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 src/platform/plugins/shared/files @elastic/appex-sharedux
-src/platform/plugins/shared/guided_onboarding @elastic/appex-sharedux
 src/platform/plugins/shared/home @elastic/appex-sharedux
 src/platform/plugins/shared/inspector @elastic/kibana-presentation
 src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
@@ -2937,9 +2934,6 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 # EUI team
 /src/plugins/kibana_react/public/page_template/ @elastic/eui-team @elastic/appex-sharedux
 
-# Landing page for guided onboarding in Home plugin
-/src/plugins/home/public/application/components/guided_onboarding @elastic/appex-sharedux
-
 # Changes to translation files should not ping code reviewers
 x-pack/platform/plugins/private/translations/translations
 
@@ -2986,8 +2980,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/examples/state_sync/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/error_boundary/index.ts @elastic/appex-sharedux
 /src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
-/src/platform/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
-/x-pack/solutions/search/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
 /x-pack/platform/test/banners_functional @elastic/appex-sharedux
 /x-pack/platform/test/custom_branding @elastic/appex-sharedux
 /x-pack/platform/test/api_integration/apis/content_management @elastic/appex-sharedux
