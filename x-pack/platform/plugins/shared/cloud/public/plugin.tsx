@@ -14,13 +14,13 @@ import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
-import { CLOUD_SNAPSHOTS_PATH, ELASTICSEARCH_CONFIG_ROUTE } from '../common/constants';
+import { ELASTICSEARCH_CONFIG_ROUTE } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
-import { getFullCloudUrl } from '../common/utils';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
-import type { CloudSetup, CloudStart, PublicElasticsearchConfigType } from './types';
-import { getSupportUrl } from './utils';
 import type { ElasticsearchConfigType } from '../common/types';
+import type { CloudSetup, CloudStart, PublicElasticsearchConfigType } from './types';
+import { CloudUrlsService } from './urls';
+import { getSupportUrl } from './utils';
 
 export interface CloudConfigType {
   id?: string;
@@ -50,27 +50,14 @@ export interface CloudConfigType {
   };
 }
 
-interface CloudUrls {
-  /** Link to all deployments page on cloud */
-  deploymentsUrl?: string;
-  /** Link to the current deployment on cloud */
-  deploymentUrl?: string;
-  profileUrl?: string;
-  billingUrl?: string;
-  organizationUrl?: string;
-  snapshotsUrl?: string;
-  performanceUrl?: string;
-  usersAndRolesUrl?: string;
-  projectsUrl?: string;
-}
-
-export class CloudPlugin implements Plugin<CloudSetup> {
+export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
   private readonly isServerlessEnabled: boolean;
   private readonly contextProviders: Array<FC<PropsWithChildren<unknown>>> = [];
   private readonly logger: Logger;
   private elasticsearchConfig?: PublicElasticsearchConfigType;
+  private readonly cloudUrls = new CloudUrlsService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
@@ -86,7 +73,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const {
       id,
       cname,
-      base_url: baseUrl,
       trial_end_date: trialEndDate,
       is_elastic_staff_owned: isElasticStaffOwned,
       csp,
@@ -96,6 +82,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     if (id) {
       decodedId = decodeCloudId(id, this.logger);
     }
+    const kibanaUrl = decodedId?.kibanaUrl;
+
+    this.cloudUrls.setup(this.config, core, kibanaUrl);
 
     return {
       cloudId: id,
@@ -103,9 +92,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       cname,
       csp,
-      baseUrl,
-      ...this.getCloudUrls(),
-      kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
       trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
@@ -129,6 +115,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         this.contextProviders.push(contextProvider);
       },
       fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, core.http),
+      ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
+      getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
+      getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
     };
   }
 
@@ -150,82 +139,24 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       );
     };
 
-    const {
-      deploymentsUrl,
-      deploymentUrl,
-      profileUrl,
-      billingUrl,
-      organizationUrl,
-      performanceUrl,
-      usersAndRolesUrl,
-      projectsUrl,
-    } = this.getCloudUrls();
-
-    let decodedId: DecodedCloudId | undefined;
-    if (this.config.id) {
-      decodedId = decodeCloudId(this.config.id, this.logger);
-    }
-
     return {
       CloudContextProvider,
       isCloudEnabled: this.isCloudEnabled,
       cloudId: this.config.id,
-      billingUrl,
-      deploymentsUrl,
-      deploymentUrl,
-      profileUrl,
-      organizationUrl,
-      projectsUrl,
-      kibanaUrl: decodedId?.kibanaUrl,
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
       },
-      performanceUrl,
-      usersAndRolesUrl,
       fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, coreStart.http),
+      ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
+      getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
+      getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
     };
   }
 
   public stop() {}
-
-  private getCloudUrls(): CloudUrls {
-    const {
-      profile_url: profileUrl,
-      billing_url: billingUrl,
-      organization_url: organizationUrl,
-      deployments_url: deploymentsUrl,
-      deployment_url: deploymentUrl,
-      base_url: baseUrl,
-      performance_url: performanceUrl,
-      users_and_roles_url: usersAndRolesUrl,
-      projects_url: projectsUrl,
-    } = this.config;
-
-    const fullCloudDeploymentsUrl = getFullCloudUrl(baseUrl, deploymentsUrl);
-    const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
-    const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl);
-    const fullCloudBillingUrl = getFullCloudUrl(baseUrl, billingUrl);
-    const fullCloudOrganizationUrl = getFullCloudUrl(baseUrl, organizationUrl);
-    const fullCloudPerformanceUrl = getFullCloudUrl(baseUrl, performanceUrl);
-    const fullCloudUsersAndRolesUrl = getFullCloudUrl(baseUrl, usersAndRolesUrl);
-    const fullCloudProjectsUrl = getFullCloudUrl(baseUrl, projectsUrl);
-    const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
-
-    return {
-      deploymentsUrl: fullCloudDeploymentsUrl,
-      deploymentUrl: fullCloudDeploymentUrl,
-      profileUrl: fullCloudProfileUrl,
-      billingUrl: fullCloudBillingUrl,
-      organizationUrl: fullCloudOrganizationUrl,
-      snapshotsUrl: fullCloudSnapshotsUrl,
-      performanceUrl: fullCloudPerformanceUrl,
-      usersAndRolesUrl: fullCloudUsersAndRolesUrl,
-      projectsUrl: fullCloudProjectsUrl,
-    };
-  }
 
   private async fetchElasticsearchConfig(
     http: CoreStart['http']

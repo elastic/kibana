@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await getService('esSupertest')
         .post('/_security/role_mapping/cloud-saml-kibana')
         .send({
-          roles: ['superuser'],
+          roles: ['superuser', '_ec_billing_admin'],
           enabled: true,
           rules: { field: { 'realm.name': 'cloud-saml-kibana' } },
         })
