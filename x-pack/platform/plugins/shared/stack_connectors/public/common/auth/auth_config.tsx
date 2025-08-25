@@ -9,13 +9,17 @@ import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 
 import {
-  EuiButtonEmpty,
+  EuiButton,
   EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiPanel,
+  EuiIcon,
+  EuiSuperSelect,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   UseArray,
@@ -57,8 +61,14 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = 
       'config.verificationMode',
       '__internal__.hasHeaders',
       '__internal__.hasCA',
+      // __internal__.headers -> to save the headers
+      '__internal__.headers',
     ],
   });
+
+  const { euiTheme } = useEuiTheme();
+
+  console.log('__internal__: ', __internal__);
 
   const authType = config == null ? AuthType.Basic : config.authType;
   const certType = config == null ? SSLCertType.CRT : config.certType;
@@ -66,6 +76,7 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = 
   const hasCA = __internal__ != null ? __internal__.hasCA : false;
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
+
   const authTypeDefaultValue =
     getFieldDefaultValue('config.hasAuth') === false
       ? null
@@ -76,7 +87,44 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = 
     !!getFieldDefaultValue<boolean | undefined>('config.ca') ||
     getFieldDefaultValue('config.verificationMode') === 'none';
 
+  const headerTypeOptions = [
+    {
+      value: 'config',
+      inputDisplay: (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="controls" size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <span>Config</span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': 'option-config',
+    },
+    {
+      value: 'secret',
+      inputDisplay: (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="lock" size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <span>Secret</span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': 'option-secret',
+    },
+  ];
+
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
+
+  // const [headerTypeValue, setHeaderTypeValue] = useState(headerTypeOptions[0].value);
+
+  // const onHeaderTypeOptionChange = (value) => {
+  //   setHeaderTypeValue(value);
+  // };
 
   return (
     <>
@@ -138,65 +186,117 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = 
         }}
       />
       {hasHeaders && (
-        <UseArray path="config.headers" initialNumberOfItems={1}>
+        <UseArray path="__internal__.headers" initialNumberOfItems={1}>
           {({ items, addItem, removeItem }) => {
             return (
               <>
+                <EuiSpacer size="m" />
                 <EuiTitle size="xxs" data-test-subj="webhookHeaderText">
                   <h5>{i18n.HEADERS_TITLE}</h5>
                 </EuiTitle>
                 <EuiSpacer size="s" />
-                {items.map((item) => (
-                  <EuiFlexGroup key={item.id}>
-                    <EuiFlexItem>
-                      <UseField
-                        path={`${item.path}.key`}
-                        config={{
-                          label: i18n.KEY_LABEL,
+                <span>{i18n.HEADERS_SUBTITLE}</span>
+                {/* <EuiSpacer size="m" /> */}
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      iconType="plusInCircle"
+                      onClick={addItem}
+                      data-test-subj="webhookAddHeaderButton"
+                    >
+                      {i18n.ADD_BUTTON}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiSpacer size="s" />
+
+                {items.map((item) => {
+                  const headerTypeValue = item?.path
+                    ? getFieldDefaultValue(`${item.path}.type`)
+                    : headerTypeOptions[0].value;
+
+                  console.log('headerTypeValue: ', headerTypeValue);
+                  return (
+                    <EuiFlexGroup key={item.id}>
+                      <EuiPanel
+                        hasBorder={true}
+                        hasShadow={false}
+                        css={{
+                          marginBottom: '20px',
+                          background:
+                            headerTypeValue === 'secret'
+                              ? euiTheme.colors.backgroundBaseSubdued
+                              : euiTheme.colors.backgroundBasePlain,
                         }}
-                        component={TextField}
-                        // This is needed because when you delete
-                        // a row and add a new one, the stale values will appear
-                        readDefaultValueOnForm={!item.isNew}
-                        componentProps={{
-                          euiFieldProps: { readOnly, ['data-test-subj']: 'webhookHeadersKeyInput' },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <UseField
-                        path={`${item.path}.value`}
-                        config={{ label: i18n.VALUE_LABEL }}
-                        component={TextField}
-                        readDefaultValueOnForm={!item.isNew}
-                        componentProps={{
-                          euiFieldProps: {
-                            readOnly,
-                            ['data-test-subj']: 'webhookHeadersValueInput',
-                          },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        color="danger"
-                        onClick={() => removeItem(item.id)}
-                        iconType="minusInCircle"
-                        aria-label={i18n.DELETE_BUTTON}
-                        css={{ marginTop: '28px' }}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ))}
-                <EuiSpacer size="m" />
-                <EuiButtonEmpty
-                  iconType="plusInCircle"
-                  onClick={addItem}
-                  data-test-subj="webhookAddHeaderButton"
-                >
-                  {i18n.ADD_BUTTON}
-                </EuiButtonEmpty>
-                <EuiSpacer />
+                      >
+                        <EuiFlexGroup>
+                          <EuiFlexItem>
+                            <UseField
+                              path={`${item.path}.key`}
+                              config={{
+                                label: i18n.KEY_LABEL,
+                              }}
+                              component={TextField}
+                              componentProps={{
+                                euiFieldProps: {
+                                  readOnly,
+                                  ['data-test-subj']: 'webhookHeadersKeyInput',
+                                },
+                              }}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <UseField
+                              path={`${item.path}.value`}
+                              config={{ label: i18n.VALUE_LABEL }}
+                              component={TextField}
+                              readDefaultValueOnForm={!item.isNew}
+                              componentProps={{
+                                euiFieldProps: {
+                                  readOnly,
+                                  ['data-test-subj']: 'webhookHeadersValueInput',
+                                },
+                              }}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <UseField
+                              path={`${item.path}.type`}
+                              config={{
+                                label: i18n.HEADER_TYPE_LABEL,
+                                defaultValue: headerTypeOptions[0].value,
+                              }}
+                              component={({ field }) => (
+                                <EuiSuperSelect
+                                  options={headerTypeOptions}
+                                  valueOfSelected={field.value}
+                                  onChange={(val) => field.setValue(val)}
+                                  hasDividers
+                                  fullWidth
+                                  data-test-subj="webhookHeaderTypeSelect"
+                                  css={{ marginTop: '20px', minWidth: '120px' }}
+                                />
+                              )}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              color="danger"
+                              onClick={() => removeItem(item.id)}
+                              iconType="minusInCircle"
+                              aria-label={i18n.DELETE_BUTTON}
+                              css={{
+                                marginTop: '28px',
+                                background: euiTheme.colors.backgroundBaseDanger,
+                              }}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiPanel>
+                    </EuiFlexGroup>
+                  );
+                })}
               </>
             );
           }}
