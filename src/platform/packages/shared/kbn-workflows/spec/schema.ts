@@ -187,6 +187,29 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+/* --- Internal Connector Steps --- */
+export const ElasticsearchRequestStepSchema = BaseStepSchema.extend({
+  type: z.literal('elasticsearch.request'),
+  request: z.object({
+    method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS']),
+    path: z.string(),
+    headers: z.record(z.string(), z.string()).optional(),
+    body: z.any().optional(),
+    query: z.record(z.string(), z.string()).optional(),
+  }),
+});
+
+export const KibanaRequestStepSchema = BaseStepSchema.extend({
+  type: z.literal('kibana.request'),
+  request: z.object({
+    method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS']),
+    path: z.string(),
+    headers: z.record(z.string(), z.string()).optional(),
+    body: z.any().optional(),
+    query: z.record(z.string(), z.string()).optional(),
+  }),
+});
+
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice']);
 
@@ -246,6 +269,8 @@ const StepSchema = z.lazy(() =>
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,
+    ElasticsearchRequestStepSchema,
+    KibanaRequestStepSchema,
   ])
 );
 
