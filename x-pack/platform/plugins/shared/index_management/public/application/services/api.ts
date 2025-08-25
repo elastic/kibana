@@ -7,9 +7,9 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
-import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -35,7 +35,7 @@ import {
   UIM_TEMPLATE_CLONE,
   UIM_TEMPLATE_SIMULATE,
 } from '../../../common/constants';
-import {
+import type {
   TemplateDeserialized,
   TemplateListItem,
   DataStream,
@@ -44,9 +44,9 @@ import {
 } from '../../../common';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
-import { UiMetricService } from './ui_metric';
+import type { UiMetricService } from './ui_metric';
 import type { FieldFromIndicesRequest } from '../../../common';
-import { Fields } from '../components/mappings_editor/types';
+import type { Fields } from '../components/mappings_editor/types';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;

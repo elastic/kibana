@@ -3309,7 +3309,7 @@
               "\nA callback that should be executed anytime a change to the Integration Policy needs to\nbe reported back to the Fleet Policy Edit page"
             ],
             "signature": [
-              "(opts: { isValid: boolean; updatedPolicy: ",
+              "(opts: { isValid?: boolean | undefined; updatedPolicy: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -3337,11 +3337,14 @@
                   {
                     "parentPluginId": "fleet",
                     "id": "def-public.PackagePolicyCreateExtensionComponentProps.onChange.$1.isValid",
-                    "type": "boolean",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "isValid",
                     "description": [
                       "is current form state is valid"
+                    ],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/types/ui_extensions.ts",
                     "deprecated": false,
@@ -3616,7 +3619,7 @@
               "\nA callback that should be executed anytime a change to the Integration Policy needs to\nbe reported back to the Fleet Policy Edit page.\n\n**NOTE:**\nthis callback will be recreated everytime the policy data changes, thus logic around its\ninvocation should take that into consideration in order to avoid an endless loop."
             ],
             "signature": [
-              "(opts: { isValid: boolean; updatedPolicy: Partial<",
+              "(opts: { isValid?: boolean | undefined; updatedPolicy: Partial<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -3644,11 +3647,14 @@
                   {
                     "parentPluginId": "fleet",
                     "id": "def-public.PackagePolicyEditExtensionComponentProps.onChange.$1.isValid",
-                    "type": "boolean",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "isValid",
                     "description": [
                       "is current form state is valid"
+                    ],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/types/ui_extensions.ts",
                     "deprecated": false,
@@ -7190,7 +7196,7 @@
               "\nReturn the status by the Agent's id"
             ],
             "signature": [
-              "(agentId: string) => Promise<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\">"
+              "(agentId: string) => Promise<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"degraded\" | \"uninstalled\" | \"orphaned\">"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/services/agents/agent_service.ts",
             "deprecated": false,
@@ -7285,7 +7291,7 @@
                 "section": "def-common.Agent",
                 "text": "Agent"
               },
-              "[]; total: number; page: number; perPage: number; pit?: string | undefined; statusSummary?: Record<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\", number> | undefined; aggregations?: Record<string, ",
+              "[]; total: number; page: number; perPage: number; pit?: string | undefined; statusSummary?: Record<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"degraded\" | \"uninstalled\" | \"orphaned\", number> | undefined; aggregations?: Record<string, ",
               "AggregationsAggregate",
               "> | undefined; }>"
             ],
@@ -7602,7 +7608,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -8385,6 +8391,8 @@
                   "; sql: ",
                   "default",
                   "; ssl: ",
+                  "default",
+                  "; streams: ",
                   "default",
                   "; synonyms: ",
                   "default",
@@ -8906,7 +8914,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -9689,6 +9697,8 @@
                   "; sql: ",
                   "default",
                   "; ssl: ",
+                  "default",
+                  "; streams: ",
                   "default",
                   "; synonyms: ",
                   "default",
@@ -15716,7 +15726,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -16499,6 +16509,8 @@
               "; sql: ",
               "default",
               "; ssl: ",
+              "default",
+              "; streams: ",
               "default",
               "; synonyms: ",
               "default",
@@ -16807,7 +16819,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -17590,6 +17602,8 @@
               "; sql: ",
               "default",
               "; ssl: ",
+              "default",
+              "; streams: ",
               "default",
               "; synonyms: ",
               "default",
@@ -17911,7 +17925,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -18694,6 +18708,8 @@
               "; sql: ",
               "default",
               "; ssl: ",
+              "default",
+              "; streams: ",
               "default",
               "; synonyms: ",
               "default",
@@ -19012,7 +19028,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -19795,6 +19811,8 @@
               "; sql: ",
               "default",
               "; ssl: ",
+              "default",
+              "; streams: ",
               "default",
               "; synonyms: ",
               "default",
@@ -20116,7 +20134,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -20899,6 +20917,8 @@
               "; sql: ",
               "default",
               "; ssl: ",
+              "default",
+              "; streams: ",
               "default",
               "; synonyms: ",
               "default",
@@ -21960,7 +21980,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\" | undefined"
+              "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"degraded\" | \"uninstalled\" | \"orphaned\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -22017,7 +22037,7 @@
             "label": "last_known_status",
             "description": [],
             "signature": [
-              "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\" | undefined"
+              "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"degraded\" | \"uninstalled\" | \"orphaned\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -23730,7 +23750,7 @@
               "\nLast checkin status"
             ],
             "signature": [
-              "\"error\" | \"online\" | \"degraded\" | \"updating\" | undefined"
+              "\"error\" | \"online\" | \"updating\" | \"degraded\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -23941,7 +23961,7 @@
               "\nThe last known agent status"
             ],
             "signature": [
-              "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\" | undefined"
+              "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"degraded\" | \"uninstalled\" | \"orphaned\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -24589,7 +24609,7 @@
             "label": "statusSummary",
             "description": [],
             "signature": [
-              "Record<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\", number> | undefined"
+              "Record<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"degraded\" | \"uninstalled\" | \"orphaned\", number> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agent.ts",
             "deprecated": false,
@@ -28576,7 +28596,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"password\" | \"select\" | \"textarea\" | \"bool\" | \"yaml\""
+              "\"string\" | \"text\" | \"integer\" | \"password\" | \"select\" | \"textarea\" | \"url\" | \"bool\" | \"yaml\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -28703,6 +28723,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.url_allowed_schemes",
+            "type": "Array",
+            "tags": [],
+            "label": "[RegistryVarsEntryKeys.url_allowed_schemes]",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -29193,7 +29227,7 @@
         "label": "AgentStatus",
         "description": [],
         "signature": [
-          "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\""
+          "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"degraded\" | \"uninstalled\" | \"orphaned\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent.ts",
         "deprecated": false,

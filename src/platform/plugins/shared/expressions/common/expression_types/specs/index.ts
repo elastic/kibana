@@ -21,7 +21,7 @@ import { render } from './render';
 import { shape } from './shape';
 import { string } from './string';
 import { style } from './style';
-import { AnyExpressionTypeDefinition } from '../types';
+import type { AnyExpressionTypeDefinition } from '../types';
 import { uiSetting } from './ui_setting';
 
 export const typeSpecs: AnyExpressionTypeDefinition[] = [

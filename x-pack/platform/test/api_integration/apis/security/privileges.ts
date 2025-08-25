@@ -8,9 +8,9 @@
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect';
-import { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
+import type { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
 import { diff } from 'jest-diff';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -317,7 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],
       aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
-    reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+    reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
   };
 
   describe('Privileges', () => {

@@ -13,7 +13,7 @@ import {
   DEFAULT_STATE,
 } from './containers';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
-import { AlertSearchBarWithUrlSyncProps } from './types';
+import type { AlertSearchBarWithUrlSyncProps } from './types';
 import { useKibana } from '../../utils/kibana_react';
 import { useToasts } from '../../hooks/use_toast';
 

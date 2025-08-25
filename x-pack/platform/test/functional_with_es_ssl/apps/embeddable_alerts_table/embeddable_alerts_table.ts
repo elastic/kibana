@@ -16,8 +16,8 @@ import {
   NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ,
   SAVE_CONFIG_BUTTON_SUBJ,
 } from '@kbn/embeddable-alerts-table-plugin/public/constants';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
 
 const DASHBOARD_PANEL_TEST_SUBJ = 'dashboardPanel';

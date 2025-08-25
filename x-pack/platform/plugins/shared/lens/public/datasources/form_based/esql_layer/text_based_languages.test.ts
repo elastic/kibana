@@ -6,14 +6,14 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { TextBasedPersistedState, TextBasedPrivateState } from './types';
+import type { TextBasedPersistedState, TextBasedPrivateState } from './types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../../id_generator';
-import { DatasourcePublicAPI, Datasource, FramePublicAPI } from '../../../types';
+import type { DatasourcePublicAPI, Datasource, FramePublicAPI } from '../../../types';
 jest.mock('../../../id_generator');
 
 const fieldsOne = [

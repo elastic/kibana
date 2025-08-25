@@ -17,7 +17,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { ChartColumn, ChartLayer, FormulaValueConfig } from '../../types';
 import { getDefaultReferences, getHistogramColumn } from '../../utils';
-import { METRIC_TREND_LINE_ID } from '../constants';
+import type { METRIC_TREND_LINE_ID } from '../constants';
 import { FormulaColumn } from './columns/formula';
 
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';

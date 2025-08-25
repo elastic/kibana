@@ -64,6 +64,7 @@ mapped_pages:
 | [links](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/links/README.md) | This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard. |
 | [management](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/management/README.md) | This plugins contains the "Stack Management" page framework. It offers navigation and an API to link individual management section into it. This plugin does not contain any individual management section itself. |
 | [mapsEms](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/maps_ems/README.md) | Utility plugin: |
+| [metricsExperience](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/metrics_experience/README.md) | Exposes the services, components, and API endpoints required for the Metrics Experience in Discover. |
 | [navigation](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/navigation/README.md) | The Navigation plugin provides essential navigation components and services for Kibana. It serves as a central hub for navigation-related functionality across the application. |
 | [newsfeed](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/newsfeed/README.md) | The newsfeed plugin adds a NewsfeedNavButton to the top navigation bar and renders the content in the flyout. Content is fetched from the remote (https://feeds.elastic.co) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely. |
 | [noDataPage](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/no_data_page/README.md) | Helps to globally configure the no data page components |
@@ -99,8 +100,8 @@ mapped_pages:
 | [visTypeVislib](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vislib) | WARNING: Missing or empty README. |
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
 | [visualizations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualizations) | WARNING: Missing or empty README. |
-| [workflowsExecutionEngine](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_execution_engine/README.md) | WARNING: Missing or empty README. |
-| [workflowsManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_management/README.md) | This directory contains the foundational structure for the Workflows plugin. |
+| [workflowsExecutionEngine](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_execution_engine/README.md) | Stateless execution engine for workflows. |
+| [workflowsManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_management/README.md) | This plugin contains the Workflows management application and APIs. |
 
 ## x-pack/plugins [_x_packplugins]
 
@@ -146,6 +147,7 @@ mapped_pages:
 | [fieldsMetadata](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fields_metadata/README.md) | The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS/Metadata definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future. |
 | [fileUpload](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/file_upload) | WARNING: Missing or empty README. |
 | [fleet](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fleet/README.md) | Fleet provides a web-based UI in Kibana for centrally managing Elastic Agents and their policies. |
+| [genAiSettings](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/gen_ai_settings/README.md) | This plugin provides a management interface for configuring generative AI settings within Kibana's Stack Management section. |
 | [globalSearch](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/global_search/README.md) | The GlobalSearch plugin provides an easy way to search for various objects, such as applications or dashboards from the Kibana instance, from both server and client-side plugins |
 | [globalSearchBar](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/global_search_bar/README.md) | The GlobalSearchBar plugin provides a search interface for navigating Kibana. (It is the UI to the GlobalSearch plugin.) |
 | [globalSearchProviders](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/global_search_providers/README.md) | The globalSearchProviders plugin provides Kibana default search providers for the GlobalSearch plugin. |
@@ -153,6 +155,7 @@ mapped_pages:
 | [grokdebugger](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/grokdebugger/README.md) | This plugin helps users define Grok patterns, which are particularly useful for ingesting logs. |
 | [indexLifecycleManagement](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/index_lifecycle_management/README.md) | You can test that the Frozen badge, phase filtering, and lifecycle information is surfaced in Index Management by running this series of requests in Console: |
 | [indexManagement](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/index_management/README.md) | This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page. |
+| [indicesMetadata](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/indices_metadata/README.md) | Plugin for managing and retrieving metadata about indices in Kibana. This plugin collects and processes metadata from Elasticsearch indices, data streams, ILM policies, and index templates. |
 | [inference](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/inference/README.md) | The inference plugin is a central place to handle all interactions with the Elasticsearch Inference API and external LLM APIs. Its goals are: |
 | [inferenceEndpoint](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/inference_endpoint/README.md) | A Kibana plugin |
 | [infra](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/README.md) | This is the home of the infra plugin, which aims to provide a solution for the infrastructure monitoring use-case within Kibana. |

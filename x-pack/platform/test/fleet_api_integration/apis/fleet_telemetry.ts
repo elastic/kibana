@@ -11,7 +11,7 @@ import {
 } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import type { GetAgentsResponse } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, generateAgent } from '../helpers';
 
 const AGENT_COUNT_WAIT_ATTEMPTS = 3;

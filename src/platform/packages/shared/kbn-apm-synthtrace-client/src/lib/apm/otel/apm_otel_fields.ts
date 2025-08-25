@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Fields } from '../../entity';
+import type { Fields } from '../../entity';
 import type { ApmFields } from '../apm_fields';
 
 export type SpanKind = 'Internal' | 'Server' | 'Client' | 'Consumer' | 'Producer';

@@ -12,16 +12,16 @@ import { GroupStream } from './streams/group_stream';
 import { ClassicStream } from './streams/classic_stream';
 import { WiredStream } from './streams/wired_stream';
 import * as streamFromDefinition from './stream_active_record/stream_from_definition';
-import {
-  StreamActiveRecord,
+import type {
   StreamChangeStatus,
   ValidationResult,
 } from './stream_active_record/stream_active_record';
-import { StreamChange } from './types';
-import { ElasticsearchAction } from './execution_plan/types';
+import { StreamActiveRecord } from './stream_active_record/stream_active_record';
+import type { StreamChange } from './types';
+import type { ElasticsearchAction } from './execution_plan/types';
 import { ExecutionPlan } from './execution_plan/execution_plan';
-import { Streams } from '@kbn/streams-schema';
-import { LockManagerService } from '@kbn/lock-manager';
+import type { Streams } from '@kbn/streams-schema';
+import type { LockManagerService } from '@kbn/lock-manager';
 
 describe('State', () => {
   const searchMock = jest.fn();
@@ -42,7 +42,7 @@ describe('State', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [] },
         wired: {
           fields: {},
           routing: [],
@@ -54,7 +54,7 @@ describe('State', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [] },
         classic: {},
       },
     };

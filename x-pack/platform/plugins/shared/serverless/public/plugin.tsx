@@ -6,13 +6,13 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { generateManageOrgMembersNavCard, manageOrgMembersNavCardName } from './navigation';
-import {
+import type {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
   ServerlessPluginStart,

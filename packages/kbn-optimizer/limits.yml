@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  aiAssistantManagementSelection: 6069
+  aiAssistantManagementSelection: 6917
   aiops: 19890
   alerting: 28395
   apm: 38573
@@ -67,6 +67,7 @@ pageLoadAssetSize:
   filesManagement: 5270
   fileUpload: 16910
   fleet: 187942
+  genAiSettings: 4981
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
@@ -99,6 +100,7 @@ pageLoadAssetSize:
   maps: 45917
   mapsEms: 6767
   metricsDataAccess: 49711
+  metricsExperience: 10000
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983

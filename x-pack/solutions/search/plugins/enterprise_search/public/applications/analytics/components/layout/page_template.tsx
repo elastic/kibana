@@ -19,7 +19,8 @@ import { DeprecationCallout } from '../../../shared/deprecation_callout/deprecat
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetAnalyticsChrome } from '../../../shared/kibana_chrome';
-import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
+import type { PageTemplateProps } from '../../../shared/layout';
+import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';
 import { useEnterpriseSearchAnalyticsNav } from '../../../shared/layout/nav';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 import {

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsConfigApiResponse } from '../../../../../common/types/api_responses';
-import { RouteDependencies } from '../../..';
+import type { EsConfigApiResponse } from '../../../../../common/types/api_responses';
+import type { RouteDependencies } from '../../..';
 
 export const registerEsConfigRoute = ({ router, services }: RouteDependencies): void => {
   router.get(

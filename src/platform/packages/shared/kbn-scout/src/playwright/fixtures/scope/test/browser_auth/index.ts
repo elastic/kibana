@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaRole, PROJECT_DEFAULT_ROLES } from '../../../../../common';
+import type { KibanaRole } from '../../../../../common';
+import { PROJECT_DEFAULT_ROLES } from '../../../../../common';
 import { coreWorkerFixtures } from '../../worker';
 
 export type LoginFunction = (role: string) => Promise<void>;

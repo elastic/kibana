@@ -8,12 +8,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import {
-  ESQLControlVariable,
-  ESQLLicenseType,
-  ESQLVariableType,
-  RecommendedField,
-} from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import {
   type FunctionDefinition,
@@ -28,11 +25,11 @@ import { aggFunctionDefinitions } from '../generated/aggregation_functions';
 import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
-import { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
+import type { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
-import { ESQLAstItem, ESQLFunction } from '../../types';
+import type { ESQLAstItem, ESQLFunction } from '../../types';
 import { removeFinalUnknownIdentiferArg, isParamExpressionType } from './shared';
 import { getTestFunctions } from './test_functions';
 
@@ -88,7 +85,7 @@ export function getFunctionDefinition(name: string) {
 
 export const filterFunctionSignatures = (
   signatures: FunctionDefinition['signatures'],
-  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: LicenseType) => boolean) | undefined
 ): FunctionDefinition['signatures'] => {
   if (!hasMinimumLicenseRequired) {
     return signatures;
@@ -96,14 +93,14 @@ export const filterFunctionSignatures = (
 
   return signatures.filter((signature) => {
     if (!signature.license) return true;
-    return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as ESQLLicenseType);
+    return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType);
   });
 };
 
 export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
   predicates: FunctionFilterPredicates | undefined,
-  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined,
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: LicenseType) => boolean) | undefined,
   activeProduct?: PricingProduct | undefined
 ): FunctionDefinition[] => {
   if (!predicates) {
@@ -118,7 +115,7 @@ export const filterFunctionDefinitions = (
       }
 
       if (!!hasMinimumLicenseRequired && license) {
-        if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as ESQLLicenseType)) {
+        if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as LicenseType)) {
           return false;
         }
       }
@@ -291,7 +288,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
  */
 export const getFunctionSuggestions = (
   predicates?: FunctionFilterPredicates,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean,
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
   activeProduct?: PricingProduct | undefined
 ): ISuggestionItem[] => {
   return filterFunctionDefinitions(

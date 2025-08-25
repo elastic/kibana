@@ -7,10 +7,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import {
-  ScheduledReportFlyoutShareWrapper,
-  ScheduledReportMenuItem,
-} from './scheduled_report_flyout_share_wrapper';
+import type { ScheduledReportMenuItem } from './scheduled_report_flyout_share_wrapper';
+import { ScheduledReportFlyoutShareWrapper } from './scheduled_report_flyout_share_wrapper';
 import { useShareTypeContext } from '@kbn/share-plugin/public';
 import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
 

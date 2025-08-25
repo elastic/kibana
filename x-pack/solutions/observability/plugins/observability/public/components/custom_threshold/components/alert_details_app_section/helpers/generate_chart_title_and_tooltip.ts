@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MetricExpression } from '../../../types';
+import type { MetricExpression } from '../../../types';
 
 const CHART_TITLE_LIMIT = 120;
 
