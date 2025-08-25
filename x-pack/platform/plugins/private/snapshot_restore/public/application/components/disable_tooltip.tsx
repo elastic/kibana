@@ -6,7 +6,7 @@
  */
 
 import type { ReactElement } from 'react';
-import React from 'react';
+import React, { cloneElement } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -42,12 +42,16 @@ export const DisableToolTip: React.FunctionComponent<Props> = ({
   isManaged,
   tooltipMessage,
   component,
+  ...rest
 }) => {
+  // Ensures that any additional props (e.g. id, aria-describedby) are forwarded to the wrapped component
+  const componentWithProps = cloneElement(component, { ...rest });
+
   return isManaged ? (
     <EuiToolTip content={tooltipMessage} display="block">
-      {component}
+      {componentWithProps}
     </EuiToolTip>
   ) : (
-    component
+    componentWithProps
   );
 };
