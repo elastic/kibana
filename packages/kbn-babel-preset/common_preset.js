@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = (api, options = {}) => {
+module.exports = (api, _ = {}) => {
   const isNode = api.caller((c) => !!c && (c.target === 'node' || c.name === 'kbn-babel-register'));
 
   return {
@@ -72,12 +72,10 @@ module.exports = (api, options = {}) => {
 
           ...(isNode
             ? [
-                // Consider removing this rewrite for best performance:
-                // require.resolve('../kbn-babel-require-transformer'),
-                // Transform ESM to CJS for Node, optimized:
                 [
-                  require.resolve('@babel/plugin-transform-modules-commonjs'),
-                  { loose: true, lazy: true },
+                  require.resolve('../kbn-babel-require-transformer'),
+                  // require.resolve('@babel/plugin-transform-modules-commonjs'),
+                  // { loose: true, lazy: true },
                 ],
               ]
             : []),

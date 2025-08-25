@@ -1,7 +1,22 @@
-/* Rewrites top-level require() to ESM imports for backend files only.
-   Skips absolute paths, .ts/.tsx specifiers, and setup_node_env/polyfills.
-   Adds .js to relative specifiers to satisfy ESM resolution when needed. */
-module.exports = function rewriteRequireToImport({ types: t }) {
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/* Convert top-level CommonJS require() patterns into "inlined" CommonJS requires.
+ * Examples:
+ *   const { a, b } = require('pkg');
+ *     -> const _pkg = require('pkg'); const { a, b } = _pkg;
+ *   const x = require('pkg').x;
+ *     -> const _pkg = require('pkg'); const x = _pkg.x;
+ *   const x = require('pkg'); // unchanged (already inline)
+ *   require('pkg');           // unchanged (side-effect)
+ */
+module.exports = function inlineCommonJsRequire({ types: t }) {
   function isRequireCall(node) {
     return (
       t.isCallExpression(node) &&
@@ -11,93 +26,100 @@ module.exports = function rewriteRequireToImport({ types: t }) {
     );
   }
 
-  // Skip: absolute paths, explicit TS files, and setup_node_env targets
-  const SKIP_SPEC = /^(\/|[A-Za-z]:[\\/])|\.tsx?$|(?:^|[\\/])setup_node_env(?:[\\/]|$)/;
-
-  function shouldTransformFile(state) {
-    const f = state.file?.opts?.filename || '';
-    // Backend sources only; avoid early boot and public/browser code.
-    if (!f) return false;
-    if (f.includes('/src/setup_node_env/')) return false;
-    if (f.includes('/scripts/')) return false;
-    if (f.includes('/public/')) return false;
-    // Apply to typical server-side code locations
-    return f.includes('/src/') || f.includes('/x-pack/') || f.includes('/packages/');
+  function createInlineRequire(path, sourceLiteral) {
+    const uid = path.scope.generateUidIdentifier(
+      sourceLiteral.value.replace(/[^a-zA-Z0-9_$]+/g, '_') || 'mod'
+    );
+    const requireCall = t.callExpression(t.identifier('require'), [sourceLiteral]);
+    const tmpDecl = t.variableDeclaration('const', [t.variableDeclarator(uid, requireCall)]);
+    return { uid, tmpDecl };
   }
 
-  function addJsExtIfRelative(lit) {
-    const v = lit.value;
-    if ((v.startsWith('./') || v.startsWith('../')) && !/\.(m?js|cjs|json|node)$/.test(v)) {
-      return t.stringLiteral(v + '.js');
+  function transformDeclarator(path, decl) {
+    const init = decl.init;
+    if (!init) return null;
+
+    // Pattern 1: const { a } = require('pkg'); OR const [a] = require('pkg');
+    if ((t.isObjectPattern(decl.id) || t.isArrayPattern(decl.id)) && isRequireCall(init)) {
+      const { uid, tmpDecl } = createInlineRequire(path, init.arguments[0]);
+      const newDecl = t.variableDeclarator(decl.id, uid);
+      return [tmpDecl, t.variableDeclaration(path.node.kind, [newDecl])];
     }
-    return lit;
-  }
 
-  function shouldRewriteLiteral(lit) {
-    return !SKIP_SPEC.test(lit.value);
+    // Pattern 2: const x = require('pkg').prop; or const x = require('pkg')[expr]
+    if (t.isMemberExpression(init) && isRequireCall(init.object)) {
+      const { uid, tmpDecl } = createInlineRequire(path, init.object.arguments[0]);
+      const member = t.memberExpression(uid, init.property, init.computed, init.optional);
+      const newDecl = t.variableDeclarator(decl.id, member);
+      return [tmpDecl, t.variableDeclaration(path.node.kind, [newDecl])];
+    }
+
+    // Pattern 3: const x = require('pkg'); (leave as-is)
+    if (isRequireCall(init) && t.isIdentifier(decl.id)) {
+      return null;
+    }
+
+    return null;
   }
 
   return {
-    name: 'rewrite-require-to-import',
+    name: 'inline-commonjs-require',
     visitor: {
-      Program(path, state) {
-        path.setData('enabled', shouldTransformFile(state));
-      },
-
-      // require('pkg'); at top-level -> import 'pkg';
-      ExpressionStatement(path) {
-        if (!path.parentPath.isProgram()) return;
-        const enabled = path.findParent((p) => p.isProgram()).getData('enabled');
-        if (!enabled) return;
-
-        const expr = path.node.expression;
-        if (!isRequireCall(expr)) return;
-
-        const lit = expr.arguments[0];
-        if (!shouldRewriteLiteral(lit)) return;
-
-        path.replaceWith(t.importDeclaration([], addJsExtIfRelative(lit)));
-      },
-
-      // const x = require('pkg');  const {a} = require('pkg');
+      // Only mutate top-level declarations
       VariableDeclaration(path) {
         if (!path.parentPath.isProgram()) return;
-        const enabled = path.findParent((p) => p.isProgram()).getData('enabled');
-        if (!enabled) return;
 
-        const newImports = [];
+        const replacements = [];
         const keep = [];
 
         for (const decl of path.node.declarations) {
-          const init = decl.init;
-          if (!isRequireCall(init)) {
-            keep.push(decl);
-            continue;
-          }
-
-          const lit = init.arguments[0];
-          if (!shouldRewriteLiteral(lit)) {
-            keep.push(decl); // keep original require()
-            continue;
-          }
-
-          const source = addJsExtIfRelative(lit);
-
-          if (t.isIdentifier(decl.id)) {
-            newImports.push(t.importDeclaration([t.importDefaultSpecifier(decl.id)], source));
-          } else if (t.isObjectPattern(decl.id)) {
-            const ns = path.scope.generateUidIdentifier('mod');
-            newImports.push(t.importDeclaration([t.importNamespaceSpecifier(ns)], source));
-            keep.push(t.variableDeclarator(decl.id, ns));
+          const res = transformDeclarator(path, decl);
+          if (res) {
+            replacements.push(...res);
           } else {
             keep.push(decl);
           }
         }
 
-        if (!newImports.length) return;
-        path.replaceWithMultiple(
-          keep.length ? [...newImports, t.variableDeclaration(path.node.kind, keep)] : newImports
-        );
+        if (replacements.length) {
+          const out = [...replacements];
+          if (keep.length) out.push(t.variableDeclaration(path.node.kind, keep));
+          path.replaceWithMultiple(out);
+        }
+      },
+
+      // Handle top-level assignments like: ({a} = require('pkg'));
+      ExpressionStatement(path) {
+        if (!path.parentPath.isProgram()) return;
+        const expr = path.node.expression;
+        if (!t.isAssignmentExpression(expr)) return;
+
+        // ({ a } = require('pkg'));
+        if (
+          (t.isObjectPattern(expr.left) || t.isArrayPattern(expr.left)) &&
+          isRequireCall(expr.right)
+        ) {
+          const { uid, tmpDecl } = createInlineRequire(path, expr.right.arguments[0]);
+          const assign = t.expressionStatement(
+            t.assignmentExpression(expr.operator, expr.left, uid)
+          );
+          path.replaceWithMultiple([tmpDecl, assign]);
+        }
+
+        // x = require('pkg').foo;
+        if (t.isMemberExpression(expr.right) && isRequireCall(expr.right.object)) {
+          const { uid, tmpDecl } = createInlineRequire(path, expr.right.object.arguments[0]);
+          const rhs = t.memberExpression(
+            uid,
+            expr.right.property,
+            expr.right.computed,
+            expr.right.optional
+          );
+          const assign = t.expressionStatement(
+            t.assignmentExpression(expr.operator, expr.left, rhs)
+          );
+          path.replaceWithMultiple([tmpDecl, assign]);
+        }
       },
     },
   };
