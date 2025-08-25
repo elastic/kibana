@@ -88,6 +88,7 @@ const streams: StreamPutItem[] = [
                   },
                 ],
               },
+              status: 'enabled',
             },
             {
               destination: 'logs.test2',
@@ -99,6 +100,7 @@ const streams: StreamPutItem[] = [
                   },
                 ],
               },
+              status: 'enabled',
             },
           ],
         },
