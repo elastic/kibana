@@ -7,6 +7,7 @@
 
 import { asTree, mergeTrees } from './tree';
 import { testContentPackEntry } from './test.utils';
+import { buildResolvers } from './helpers';
 
 describe('content pack tree helpers', () => {
   describe('asTree', () => {
@@ -175,7 +176,12 @@ describe('content pack tree helpers', () => {
         include: { objects: { all: {} } },
       });
 
-      const merged = mergeTrees({ existing, incoming });
+      const { merged } = mergeTrees({
+        base: undefined,
+        existing,
+        incoming,
+        resolverFactories: buildResolvers([]),
+      });
       expect(merged.request.stream.ingest.wired.routing).toEqual([
         { destination: 'root.a', where: { always: {} } },
         { destination: 'root.b', where: { always: {} } },
@@ -184,77 +190,6 @@ describe('content pack tree helpers', () => {
         existing: { type: 'keyword' },
         custom: { type: 'keyword' },
       });
-    });
-
-    it('throws on duplicate child destination', () => {
-      const existing = asTree({
-        root: 'root',
-        streams: [
-          testContentPackEntry({
-            name: 'root',
-            routing: [{ destination: 'root.a', where: { always: {} } }],
-          }),
-          testContentPackEntry({ name: 'root.a' }),
-        ],
-        include: { objects: { all: {} } },
-      });
-      const incoming = asTree({
-        root: 'root',
-        streams: [
-          testContentPackEntry({
-            name: 'root',
-            routing: [{ destination: 'root.a', where: { always: {} } }],
-          }),
-          testContentPackEntry({ name: 'root.a' }),
-        ],
-        include: { objects: { all: {} } },
-      });
-
-      expect(() => mergeTrees({ existing, incoming })).toThrow('[root.a] already exists');
-    });
-
-    it('throws on conflicting field mapping', () => {
-      const existing = asTree({
-        root: 'root',
-        streams: [testContentPackEntry({ name: 'root', fields: { custom: { type: 'keyword' } } })],
-        include: { objects: { all: {} } },
-      });
-      const incoming = asTree({
-        root: 'root',
-        streams: [testContentPackEntry({ name: 'root', fields: { custom: { type: 'long' } } })],
-        include: { objects: { all: {} } },
-      });
-
-      expect(() => mergeTrees({ existing, incoming })).toThrow(
-        'Cannot change mapping of [custom] for [root]'
-      );
-    });
-
-    it('throws on duplicate query', () => {
-      const existing = asTree({
-        root: 'root',
-        streams: [
-          testContentPackEntry({
-            name: 'root',
-            queries: [{ id: 'one', title: 'title', kql: { query: 'qty: one' } }],
-          }),
-        ],
-        include: { objects: { all: {} } },
-      });
-      const incoming = asTree({
-        root: 'root',
-        streams: [
-          testContentPackEntry({
-            name: 'root',
-            queries: [{ id: 'one', title: 'title', kql: { query: 'qty: two' } }],
-          }),
-        ],
-        include: { objects: { all: {} } },
-      });
-
-      expect(() => mergeTrees({ existing, incoming })).toThrow(
-        `Query [one | title] already exists on [root]`
-      );
     });
   });
 });

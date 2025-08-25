@@ -4,11 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { intersectionBy } from 'lodash';
-import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
-import { ROOT_STREAM_ID, isIncludeAll } from '@kbn/content-packs-schema';
+import { intersectionBy, omit } from 'lodash';
+import {
+  ConflictResolution,
+  ContentPackIncludedObjects,
+  ContentPackStream,
+  MergeableProperties,
+  MergeablePropertiesKeys,
+  ROOT_STREAM_ID,
+  isIncludeAll,
+} from '@kbn/content-packs-schema';
 import { ContentPackIncludeError } from '../error';
+import { QueryLink } from '../../../../common/assets';
+import { FieldDefinition, RoutingDefinition, StreamQuery, Streams } from '@kbn/streams-schema';
 
 export function withoutRootPrefix(root: string, name: string) {
   const prefix = `${root}.`;
@@ -116,5 +124,84 @@ export function scopeIncludedObjects({
         destination: withRootPrefix(root, routing.destination),
       })),
     },
+  };
+}
+
+export function asContentPackEntry({
+  stream,
+  queryLinks,
+}: {
+  stream: Streams.WiredStream.Definition;
+  queryLinks: QueryLink[];
+}): ContentPackStream {
+  return {
+    type: 'stream' as const,
+    name: stream.name,
+    request: {
+      stream: { ...omit(stream, ['name']) },
+      queries: queryLinks.map(({ query }) => query),
+      dashboards: [],
+    },
+  };
+}
+
+export type StreamResolverFactory<T> = (stream: string) => IdResolverFactory<T>;
+export type IdResolverFactory<T> = (id: string) => Resolver<T>;
+export type Resolver<T> = (existing?: T, incoming?: T) => { source: 'user' | 'system'; value?: T };
+
+function buildResolver<K extends MergeablePropertiesKeys>(
+  resolutions: ConflictResolution[],
+  predicate: (
+    stream: string,
+    id: string
+  ) => (resolution: ConflictResolution) => resolution is ConflictResolution<K>
+): StreamResolverFactory<MergeableProperties[K]> {
+  return (stream: string) =>
+    (id: string) =>
+    (existing?: MergeableProperties[K], incoming?: MergeableProperties[K]) => {
+      const resolution = resolutions.find(predicate(stream, id));
+      if (resolution) {
+        return { source: 'user', value: resolution.value };
+      }
+
+      return { source: 'system', value: existing };
+    };
+}
+
+export type ConflictResolverFactories = {
+  query: StreamResolverFactory<StreamQuery>;
+  field: StreamResolverFactory<FieldDefinition>;
+  routing: StreamResolverFactory<RoutingDefinition>;
+};
+
+export function buildResolvers(resolutions: ConflictResolution[]): ConflictResolverFactories {
+  return {
+    query: buildResolver<'query'>(
+      resolutions,
+      (stream, id) =>
+        (resolution): resolution is ConflictResolution<'query'> => {
+          return (
+            resolution.stream === stream && resolution.id === id && resolution.type === 'query'
+          );
+        }
+    ),
+    field: buildResolver<'field'>(
+      resolutions,
+      (stream, id) =>
+        (resolution): resolution is ConflictResolution<'field'> => {
+          return (
+            resolution.stream === stream && resolution.id === id && resolution.type === 'field'
+          );
+        }
+    ),
+    routing: buildResolver<'routing'>(
+      resolutions,
+      (stream, id) =>
+        (resolution): resolution is ConflictResolution<'routing'> => {
+          return (
+            resolution.stream === stream && resolution.id === id && resolution.type === 'routing'
+          );
+        }
+    ),
   };
 }
