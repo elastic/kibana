@@ -31,6 +31,8 @@ export interface CaseSummaryContentsProps {
   loading?: boolean;
 }
 
+const extraProps = { css: { alignSelf: 'flex-start' } };
+
 export const CaseSummaryContents: React.FC<CaseSummaryContentsProps> = ({
   title,
   onToggle,
@@ -47,8 +49,6 @@ export const CaseSummaryContents: React.FC<CaseSummaryContentsProps> = ({
       time: moment(summary.generatedAt).format('HH:mm'),
     };
   }, [summary]);
-
-  const extraProps = { css: { alignSelf: 'flex-start' } };
 
   return (
     <EuiPanel hasBorder hasShadow={false}>

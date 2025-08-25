@@ -26,9 +26,15 @@ export const CaseSummary = React.memo(({ caseId }: { caseId: string }) => {
     refetch: fetchCaseSummary,
   } = useGetCaseSummary(caseId, connectorId);
 
-  const handleCaseSummaryClick = useCallback(() => {
-    fetchCaseSummary();
-  }, [fetchCaseSummary]);
+  const handleCaseSummaryToggle = useCallback(
+    (isOpen: boolean) => {
+      setIsSummaryOpen(isOpen);
+      if (isOpen && !summary) {
+        fetchCaseSummary();
+      }
+    },
+    [fetchCaseSummary, summary]
+  );
 
   const { isAtLeastEnterprise } = useLicense();
 
@@ -40,12 +46,7 @@ export const CaseSummary = React.memo(({ caseId }: { caseId: string }) => {
     <EuiFlexItem grow={false} data-test-subj="caseSummary">
       <CaseSummaryContents
         title={i18n.CASE_SUMMARY}
-        onToggle={(isOpen) => {
-          setIsSummaryOpen(isOpen);
-          if (isOpen && !summary) {
-            handleCaseSummaryClick();
-          }
-        }}
+        onToggle={handleCaseSummaryToggle}
         isOpen={isSummaryOpen}
         summary={summary}
         error={summaryError}
