@@ -216,8 +216,29 @@ To use the `code_search` tool, you need to configure the MCP Dev Server to conne
 | `ELASTICSEARCH_ENDPOINT` | The URL of your Elasticsearch instance. | `http://localhost:9200` |
 | `ELASTICSEARCH_USERNAME` | The username for Elasticsearch authentication. | `elastic` |
 | `ELASTICSEARCH_PASSWORD` | The password for Elasticsearch authentication. | `changeme` |
+| `ELASTICSEARCH_CLOUD_ID` | The Cloud ID for the Elasticsearch instance. | |
 | `ELASTICSEARCH_API_KEY` | An API key for Elasticsearch authentication. | |
-| `ELASTICSEARCH_INDEX` | The name of the Elasticsearch index to use. | `semantic-code-search` |
+| `ELASTICSEARCH_INDEX` | The name of the Elasticsearch index to use. | `kibana-code-search` |
 | `ELASTICSEARCH_INFERENCE_ID` | The ID of the ELSER model to use. | `.elser_model_2` |
 
 You can set these variables in your shell, or by creating a `.env` file in the root of the Kibana project.
+
+## MCP configuration example for code search
+
+The example below is shows how to set the ENV variables for connection to a Elasticseach cloud instance:
+
+```ts
+{
+  "mcpServers": {
+    "Kibana Dev": {
+      "command": "bash",
+      "args": [
+        "-lc",
+        "source \"$NVM_DIR/nvm.sh\" && cd ${KIBANA_WORKSPACE} && nvm use --silent && ELASTICSEARCH_API_KEY=\"<API_KEY_GOES_HERE>\" ELASTICSEARCH_CLOUD_ID=\"<CLOUD_ID_GOES_HERE>\" node --no-experimental-require-module ./scripts/mcp_dev.js"
+      ]
+    }
+  }
+}
+```
+
+Contact @simianhacker to get connection details for a cloud instance that already has the Kibana codebase indexed.
