@@ -53,13 +53,7 @@ export const hasNodeDocumentsData = (
  */
 export const getNodeDocumentMode = (
   node: NodeViewModel
-):
-  | 'single-alert'
-  | 'single-event'
-  | 'single-entity'
-  | 'grouped-events'
-  | 'grouped-entities'
-  | 'na' => {
+): 'single-alert' | 'single-event' | 'entity' | 'grouped-events' | 'grouped-entities' | 'na' => {
   if (!hasNodeDocumentsData(node)) {
     return 'na';
   }
@@ -70,7 +64,7 @@ export const getNodeDocumentMode = (
   } else if (node.documentsData.length === 1 && node.documentsData[0].type === 'event') {
     return 'single-event';
   } else if (isEntityNode(node) && node.documentsData.length === 1) {
-    return 'single-entity';
+    return 'entity';
   } else if (isEntityNode(node) && node.documentsData.length > 1) {
     return 'grouped-entities';
   } else if (node.documentsData.length > 1) {
@@ -88,14 +82,18 @@ export const getSingleDocumentData = (
   node: NodeViewModel
 ): NodeDocumentDataViewModel | undefined => {
   const mode = getNodeDocumentMode(node);
-  if (!hasNodeDocumentsData(node) || (mode !== 'single-alert' && mode !== 'single-event')) {
+  if (
+    !hasNodeDocumentsData(node) ||
+    (mode !== 'single-alert' && mode !== 'single-event' && mode !== 'entity')
+  ) {
     return undefined;
   }
 
   // For single-alert we might have both event and alert documents. We prefer to return the alert document if it exists.
   const documentData =
     node.documentsData.find((doc) => doc.type === 'alert') ??
-    node.documentsData.find((doc) => doc.type === 'event');
+    node.documentsData.find((doc) => doc.type === 'event') ??
+    node.documentsData.find((doc) => doc.type === 'entity');
 
   return documentData;
 };

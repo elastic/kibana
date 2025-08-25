@@ -90,8 +90,8 @@ export const useEntityNodeExpandPopover = (
         ? 'hide'
         : 'show';
 
-      const shouldShowEntityDetailsListItem =
-        onShowEntityDetailsClick && getNodeDocumentMode(node.data) === 'single-entity';
+      const shouldDisableEntityDetailsListItem =
+        !onShowEntityDetailsClick || getNodeDocumentMode(node.data) !== 'entity';
 
       return [
         {
@@ -160,28 +160,25 @@ export const useEntityNodeExpandPopover = (
             onToggleExploreRelatedEntitiesClick(node, relatedEntitiesAction);
           },
         },
-        ...(shouldShowEntityDetailsListItem
-          ? ([
-              {
-                type: 'separator',
-              },
-              {
-                type: 'item',
-                iconType: 'expand',
-                testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-                label: i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
-                  {
-                    defaultMessage: 'Show entity details',
-                  }
-                ),
-                onClick: () => {
-                  onShowEntityDetailsClick(node);
-                },
-              },
-            ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>)
-          : []),
-      ];
+        {
+          type: 'separator',
+        },
+        {
+          type: 'item',
+          iconType: 'expand',
+          testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+          label: i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+            {
+              defaultMessage: 'Show entity details',
+            }
+          ),
+          disabled: shouldDisableEntityDetailsListItem,
+          onClick: () => {
+            onShowEntityDetailsClick?.(node);
+          },
+        },
+      ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
     },
     [
       onToggleActionsByEntityClick,

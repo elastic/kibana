@@ -9,10 +9,11 @@ import React from 'react';
 import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { TakeAction } from '../shared/components/take_action';
+import { GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ } from './constants';
 
 export const GenericEntityFlyoutFooter = ({ entityId }: { entityId: EntityEcs['id'] }) => {
   return (
-    <EuiFlyoutFooter>
+    <EuiFlyoutFooter data-test-subj={GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ}>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
