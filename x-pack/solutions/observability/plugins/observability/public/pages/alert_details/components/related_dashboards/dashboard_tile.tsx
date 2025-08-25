@@ -32,10 +32,12 @@ export function DashboardTile({
   dashboard,
   actionButtonProps,
   timeRange,
+  alertStartedAt,
 }: {
   dashboard: RelatedDashboard;
   actionButtonProps?: ActionButtonProps;
   timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
+  alertStartedAt: string;
 }) {
   const {
     services: {
@@ -59,6 +61,11 @@ export function DashboardTile({
             href={dashboardLocator?.getRedirectUrl({
               dashboardId: dashboard.id,
               timeRange,
+              passThroughContext: {
+                alert: {
+                  start: alertStartedAt,
+                },
+              },
             })}
             target="_blank"
           >

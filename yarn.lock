@@ -4072,6 +4072,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-context@link:x-pack/platform/packages/shared/kbn-alerting-context":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-example-plugin@link:x-pack/examples/alerting_example":
   version "0.0.0"
   uid ""

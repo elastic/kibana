@@ -20,6 +20,7 @@ interface RelatedDashboardsProps {
   isLoadingRelatedDashboards: boolean;
   onSuccessAddSuggestedDashboard: () => Promise<void>;
   timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
+  alertStartedAt: string;
 }
 
 export function RelatedDashboards({
@@ -29,6 +30,7 @@ export function RelatedDashboards({
   suggestedDashboards,
   onSuccessAddSuggestedDashboard,
   timeRange,
+  alertStartedAt,
 }: RelatedDashboardsProps) {
   const { onClickAddSuggestedDashboard, addingDashboardId } = useAddSuggestedDashboards({
     rule,
@@ -68,6 +70,7 @@ export function RelatedDashboards({
         dashboards={linkedDashboards}
         dataTestSubj="linked-dashboards"
         timeRange={timeRange}
+        alertStartedAt={alertStartedAt}
       />
       <DashboardTiles
         title={i18n.translate('xpack.observability.alertDetails.suggestedDashboards', {
@@ -77,6 +80,7 @@ export function RelatedDashboards({
         dashboards={suggestedDashboardsWithButton}
         dataTestSubj="suggested-dashboards"
         timeRange={timeRange}
+        alertStartedAt={alertStartedAt}
       />
     </div>
   );

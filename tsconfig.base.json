@@ -52,6 +52,8 @@
       "@kbn/alerting-api-integration-test-plugin/*": ["x-pack/platform/test/alerting_api_integration/common/plugins/alerts/*"],
       "@kbn/alerting-comparators": ["x-pack/platform/packages/shared/kbn-alerting-comparators"],
       "@kbn/alerting-comparators/*": ["x-pack/platform/packages/shared/kbn-alerting-comparators/*"],
+      "@kbn/alerting-context": ["x-pack/platform/packages/shared/kbn-alerting-context"],
+      "@kbn/alerting-context/*": ["x-pack/platform/packages/shared/kbn-alerting-context/*"],
       "@kbn/alerting-example-plugin": ["x-pack/examples/alerting_example"],
       "@kbn/alerting-example-plugin/*": ["x-pack/examples/alerting_example/*"],
       "@kbn/alerting-fixture-plugin": ["x-pack/platform/test/functional_with_es_ssl/plugins/alerts"],

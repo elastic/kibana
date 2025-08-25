@@ -17,6 +17,7 @@ import type {
   LensComponentForwardedProps,
   LensPublicCallbacks,
 } from './types';
+import type { XYLayerConfig } from '../visualizations/xy/types';
 
 function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
   const fns = [
@@ -71,4 +72,8 @@ export function apiPublishesInlineEditingCapabilities(
   api: unknown
 ): api is { canEditInline: boolean } {
   return isObject(api) && Object.hasOwn(api, 'canEditInline');
+}
+
+export function hasXYState(visualization: unknown): visualization is { layers: XYLayerConfig[] } {
+  return isObject(visualization) && Object.hasOwn(visualization, 'layers');
 }
