@@ -6,7 +6,7 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { ListIndexInfo } from './steps/list_indices';
+import type { ListIndexBasicInfo } from './steps/list_indices';
 import type { MappingField } from './utils/mappings';
 import { createIndexSelectorPrompt } from './index_explorer';
 
@@ -20,7 +20,7 @@ const mockIndices = [
   { index: TEST_INDEX_NAMES.LOGS },
   { index: TEST_INDEX_NAMES.METRICS },
   { index: TEST_INDEX_NAMES.TRACES },
-] as ListIndexInfo[];
+] as ListIndexBasicInfo[];
 
 const mockFields: Record<string, MappingField[]> = {
   [TEST_INDEX_NAMES.LOGS]: [
