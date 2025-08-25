@@ -19,7 +19,7 @@ module.exports = (_, options = {}) => {
             require.resolve('./defer_requires'),
             {
               ...deferRequiresOptions,
-              enabled: true,
+              enabled: false,
             },
           ],
         ],

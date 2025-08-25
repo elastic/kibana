@@ -31,6 +31,7 @@ export function groupConfigs({
           config,
           'coverage',
           'collectCoverage',
+          'collectCoverageFrom',
           'coverageDirectory',
           'coveragePathIgnorePatterns',
           'coverageProvider',

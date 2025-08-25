@@ -33,7 +33,7 @@ export async function getFullConfigs({
 
       log.debug(`Writing config file to disk: ${configPath}`);
 
-      await Fs.promises.writeFile(configPath, JSON.stringify(config), 'utf8');
+      await Fs.promises.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
       const options = await readConfig(argv, config, undefined, dir);
 
       return options;
