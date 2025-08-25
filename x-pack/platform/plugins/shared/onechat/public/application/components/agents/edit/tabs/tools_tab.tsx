@@ -7,12 +7,14 @@
 
 import React, { useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { Controller } from 'react-hook-form';
-import { ToolsSelection } from '../tools_selection';
+import type { ToolDefinition } from '@kbn/onechat-common';
+import type { Control, Controller } from 'react-hook-form';
+import type { ToolsSelection } from '../tools_selection';
+import type { AgentFormData } from '../agent_form';
 
 interface ToolsTabProps {
-  control: any;
-  tools: any[];
+  control: Control<AgentFormData>;
+  tools: ToolDefinition[];
   isLoading: boolean;
   isFormDisabled: boolean;
 }

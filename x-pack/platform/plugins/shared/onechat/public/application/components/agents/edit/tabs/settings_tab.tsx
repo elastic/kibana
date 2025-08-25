@@ -24,13 +24,15 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Control, FormState } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
+import type { AgentFormData } from '../agent_form';
 
 interface AgentSettingsTabProps {
-  control: any;
-  formState: any;
+  control: Control<AgentFormData>;
+  formState: FormState<AgentFormData>;
   isCreateMode: boolean;
   isFormDisabled: boolean;
 }
@@ -159,7 +161,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               render={({ field: { onChange, value } }) => (
                 <EuiMarkdownEditor
                   onChange={onChange}
-                  value={value}
+                  value={value ?? ''}
                   readOnly={isFormDisabled}
                   aria-labelledby={i18n.translate(
                     'xpack.onechat.agents.form.customInstructionsEditorLabel',

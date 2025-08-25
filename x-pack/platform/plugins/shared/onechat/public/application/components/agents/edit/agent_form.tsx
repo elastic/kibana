@@ -39,7 +39,7 @@ export interface AgentFormProps {
   agentId?: string;
 }
 
-type AgentFormData = Omit<AgentDefinition, 'type'>;
+export type AgentFormData = Omit<AgentDefinition, 'type'>;
 
 export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
   const { navigateToOnechatUrl } = useNavigation();
