@@ -32,6 +32,7 @@ export interface EsWorkflowExecution {
   context: Record<string, string>;
   workflowDefinition: WorkflowYaml;
   currentNodeId?: string; // The node currently being executed
+  stack: string[];
   createdAt: string;
   error: string | null;
   createdBy: string;
@@ -66,6 +67,7 @@ export interface EsWorkflowStepExecution {
   completedAt?: string;
   executionTimeMs?: number;
   topologicalIndex: number;
+  executionIndex: number;
   error?: string | null;
   output?: Record<string, any> | null;
   state?: Record<string, any>;
