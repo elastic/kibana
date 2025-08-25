@@ -69,6 +69,7 @@ export const WorkflowOnFailureSchema = z.object({
   'fallback-step': z.string().min(1).optional(),
   continue: z.boolean().optional(),
 });
+export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
 
 // Base step schema, with recursive steps property
 export const BaseStepSchema = z.object({

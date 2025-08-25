@@ -30,6 +30,11 @@ import type {
   ExitRetryNode,
 } from '../../types/execution';
 
+/**
+ * TODO: We don't have primitive RetryStep so far, but we may need it in the future.
+ * For now, we only use it internally when building the graph from the workflow definition.
+ * And only as a wrapper for steps that have 'on-failure' with 'retry' defined.
+ */
 interface RetryStep extends BaseStep {
   type: 'retry';
   steps: BaseStep[];
