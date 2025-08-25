@@ -9,29 +9,14 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
-import type {
-  ExecutorParamsSchema,
-  ExternalWorkflowServiceConfigurationSchema,
-  ExternalWorkflowServiceSecretConfigurationSchema,
-} from './schema';
-
-export type WorkflowsPublicConfigurationType = TypeOf<
-  typeof ExternalWorkflowServiceConfigurationSchema
->;
-export type WorkflowsSecretConfigurationType = TypeOf<
-  typeof ExternalWorkflowServiceSecretConfigurationSchema
->;
+import type { ExecutorParamsSchema } from './schema';
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type WorkflowsActionParamsType = ExecutorParams;
 
-export interface ExternalServiceCredentials {
-  config: WorkflowsPublicConfigurationType;
-  secrets: WorkflowsSecretConfigurationType;
-}
-
 export interface RunWorkflowParams {
   workflowId: string;
+  spaceId: string;
   alerts?: any[];
   inputs?: Record<string, unknown>;
   [key: string]: unknown;

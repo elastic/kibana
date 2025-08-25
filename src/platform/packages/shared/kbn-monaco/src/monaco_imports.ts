@@ -82,16 +82,12 @@ Object.defineProperties(monaco.editor, {
    * @description Registers language theme definition for a language
    */
   registerLanguageThemeResolver: {
-    value: (
-      langId: string,
-      languageThemeDefinition: CustomLangModuleType['languageThemeResolver'],
-      forceOverride?: boolean
-    ) => {
+    value: ((langId, languageThemeDefinition, forceOverride) => {
       if (!forceOverride && languageThemeResolverDefinitions.has(langId)) {
         throw new Error(`Language theme resolver for ${langId} is already registered`);
       }
       languageThemeResolverDefinitions.set(langId, languageThemeDefinition);
-    },
+    }) satisfies typeof monaco.editor.registerLanguageThemeResolver,
     enumerable: true,
     configurable: false,
   },
@@ -99,7 +95,10 @@ Object.defineProperties(monaco.editor, {
    * @description Returns language theme definition for a language
    */
   getLanguageThemeResolver: {
-    value: (langId: string) => languageThemeResolverDefinitions.get(langId),
+    value: ((langId) =>
+      languageThemeResolverDefinitions.get(
+        langId
+      )) satisfies typeof monaco.editor.getLanguageThemeResolver,
     enumerable: true,
     configurable: false,
   },

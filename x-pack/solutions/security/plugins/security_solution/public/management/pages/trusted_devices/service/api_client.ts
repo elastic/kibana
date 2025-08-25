@@ -5,36 +5,11 @@
  * 2.0.
  */
 
-import type {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import type { HttpStart } from '@kbn/core/public';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import type { ConditionEntry } from '../../../../../common/endpoint/types';
-import {
-  conditionEntriesToEntries,
-  entriesToConditionEntries,
-} from '../../../../common/utils/exception_list_items';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION } from '../constants';
-
-function readTransform(item: ExceptionListItemSchema): ExceptionListItemSchema {
-  return {
-    ...item,
-    entries: entriesToConditionEntries(item.entries) as ExceptionListItemSchema['entries'],
-  };
-}
-
-function writeTransform<T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema>(
-  item: T
-): T {
-  return {
-    ...item,
-    entries: conditionEntriesToEntries(item.entries as ConditionEntry[], true),
-  } as T;
-}
+import { readTransform, writeTransform } from './transforms';
 
 /**
  * Trusted Devices exceptions Api client class using ExceptionsListApiClient as base class
