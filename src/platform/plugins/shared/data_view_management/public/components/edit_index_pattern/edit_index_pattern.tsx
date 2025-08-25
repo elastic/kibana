@@ -199,7 +199,13 @@ export const EditIndexPattern = withRouter(
             deleteIndexPatternClick={() =>
               removeHandler(
                 [dataView as RemoveDataViewProps],
-                deleteModalMsg([dataView as RemoveDataViewProps], Boolean(dataView.namespaces))
+                deleteModalMsg({
+                  views: [dataView as RemoveDataViewProps],
+                  hasSpaces: Boolean(dataView.namespaces),
+                  relationships: {
+                    [dataView.id as RemoveDataViewProps['id']]: relationships,
+                  },
+                })
               )
             }
             defaultIndex={defaultIndex}
