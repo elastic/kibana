@@ -24,7 +24,7 @@ const RemoveAlertFromCaseModalComponent: React.FC<RemoveAlertModalProps> = ({
   onSuccess,
 }) => {
   const removalSuccessToast = i18n.translate(
-    'xpack.observability.alerts.actions.removeFromCaseSuccess',
+    'xpack.cases.caseView.alerts.actions.removeFromCaseSuccess',
     { defaultMessage: 'Alert removed from case' }
   );
 
