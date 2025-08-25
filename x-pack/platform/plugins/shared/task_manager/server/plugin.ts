@@ -25,6 +25,8 @@ import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IEventLoggerBase, IEventLogServiceBase } from '@kbn/event-log-types';
+
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -62,6 +64,12 @@ import {
 import { getElasticsearchAndSOAvailability } from './lib/get_es_and_so_availability';
 import { LicenseSubscriber } from './license_subscriber';
 
+export const EVENT_LOG_PROVIDER = 'taskManager';
+export const EVENT_LOG_ACTIONS = {
+  execute: 'execute',
+  executeStart: 'execute-start',
+};
+
 export interface TaskManagerSetupContract {
   /**
    * @deprecated
@@ -74,6 +82,7 @@ export interface TaskManagerSetupContract {
    */
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
   registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
+  setEventLogService: (eventLogService: IEventLogServiceBase) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -103,6 +112,7 @@ export interface TaskManagerPluginsStart {
 export interface TaskManagerPluginsSetup {
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
+  eventLog: IEventLogServiceBase;
 }
 
 const LogHealthForBackgroundTasksOnlyMinutes = 60;
@@ -137,6 +147,7 @@ export class TaskManagerPlugin
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
   private canEncryptSavedObjects: boolean;
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
+  private eventLogger?: IEventLoggerBase;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -286,7 +297,28 @@ export class TaskManagerPlugin
       registerCanEncryptedSavedObjects: (canEncrypt: boolean) => {
         this.canEncryptSavedObjects = canEncrypt;
       },
+      setEventLogService: (eventLogService: IEventLogServiceBase) => {
+        this.setEventLogService(eventLogService);
+      },
     };
+  }
+
+  private setEventLogService(eventLogService: IEventLogServiceBase) {
+    if (this.eventLogger) {
+      this.logger.warn(`setEventLogService() called more than once`);
+      return;
+    }
+
+    eventLogService.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+
+    this.eventLogger = eventLogService.getLogger({
+      event: {
+        provider: EVENT_LOG_PROVIDER,
+      },
+      kibana: {
+        server_uuid: this.taskManagerId,
+      },
+    });
   }
 
   public start(
@@ -383,6 +415,7 @@ export class TaskManagerPlugin
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
         taskPartitioner,
         startingCapacity,
+        eventLogger: this.eventLogger!,
       });
     }
 
