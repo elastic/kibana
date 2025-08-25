@@ -64,7 +64,3 @@ export interface DeanonymizationOutput {
 }
 
 export type DeanonymizedMessage = Message & { deanonymizations: Deanonymization[] };
-export interface AnonymizationRegexWorkerTaskPayload {
-  rules: RegexAnonymizationRule[];
-  records: Array<Record<string, string>>;
-}
