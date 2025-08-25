@@ -140,6 +140,17 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
+  async updateAllToLatestVersion(): Promise<void> {
+    const previouslyInstalledInferenceIds =
+      await this.docInstallClient.getPreviouslyInstalledInferenceIds();
+    this.logger.info(
+      `Updating product documentation to latest version for Inference IDs: ${previouslyInstalledInferenceIds}`
+    );
+    await Promise.all(
+      previouslyInstalledInferenceIds.map((inferenceId) => this.update({ inferenceId }))
+    );
+  }
+
   async uninstall(options: DocUninstallOptions): Promise<void> {
     const { request, wait = false, inferenceId } = options;
 
