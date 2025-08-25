@@ -501,7 +501,8 @@ export class ObservabilityAIAssistantClient {
         this.dependencies.inferenceClient.chatComplete({
           ...options,
           temperature: 0.25,
-          maxRetries: 0,
+          // minimum retries
+          maxRetries: 1,
           stream: true,
         })
       ).pipe(
