@@ -201,6 +201,12 @@ export const allowedExperimentalValues = Object.freeze({
   bulkFillRuleGapsEnabled: true,
 
   /**
+   * Allows users to see the advanced setting that changes the behavior of the suppression window on alert closure
+   */
+
+  continueSuppressionWindowAdvancedSettingEnabled: false,
+
+  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
