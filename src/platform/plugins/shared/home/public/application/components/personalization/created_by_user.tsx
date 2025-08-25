@@ -90,66 +90,60 @@ export const PersonalizedDashboardsCreatedByUser = ({
   const showEmptyState = items.length === 0;
 
   return (
-    <KibanaPageTemplate.Section
-      bottomBorder
-      paddingSize="xl"
-      aria-labelledby="homeDashboardsCreatedByMe__title"
-    >
-      <EuiPanel>
-        {showEmptyState ? (
-          <div style={{ textAlign: 'center' }}>
-            <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('home.dashboardsCreatedByMe.emptyTitle', {
-                  defaultMessage: "You haven't created any dashboards yet",
-                })}
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <p>
-                {i18n.translate('home.dashboardsCreatedByMe.emptyDescription', {
-                  defaultMessage: 'To get started, create a new dashboard to visualize your data.',
-                })}
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiButton
-              iconType="plusInCircle"
-              fill
-              href={addBasePath('/app/dashboards#/create')}
-              data-test-subj="createDashboardButton"
-            >
-              {i18n.translate('home.dashboardsCreatedByMe.createDashboardButton', {
-                defaultMessage: 'Create a dashboard',
+    <EuiPanel>
+      {showEmptyState ? (
+        <div style={{ textAlign: 'center' }}>
+          <EuiTitle size="xs">
+            <h4>
+              {i18n.translate('home.dashboardsCreatedByMe.emptyTitle', {
+                defaultMessage: "You haven't created any dashboards yet",
               })}
-            </EuiButton>
-          </div>
-        ) : (
-          <>
-            <EuiTitle size="s">
-              <h3>
-                {i18n.translate('home.dashboardsCreatedByMe.title', {
-                  defaultMessage: 'Dashboards created by me',
-                })}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiText size="xs">Showing {resultsCount}</EuiText>
-            <EuiInMemoryTable
-              tableCaption={i18n.translate('home.dashboardsCreatedByMe.caption', {
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            <p>
+              {i18n.translate('home.dashboardsCreatedByMe.emptyDescription', {
+                defaultMessage: 'To get started, create a new dashboard to visualize your data.',
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiButton
+            iconType="plusInCircle"
+            fill
+            href={addBasePath('/app/dashboards#/create')}
+            data-test-subj="createDashboardButton"
+          >
+            {i18n.translate('home.dashboardsCreatedByMe.createDashboardButton', {
+              defaultMessage: 'Create a dashboard',
+            })}
+          </EuiButton>
+        </div>
+      ) : (
+        <>
+          <EuiTitle size="s">
+            <h3>
+              {i18n.translate('home.dashboardsCreatedByMe.title', {
                 defaultMessage: 'Dashboards created by me',
               })}
-              responsiveBreakpoint={false}
-              items={items}
-              columns={columns}
-              rowHeader="title"
-              pagination={pagination}
-              onChange={onTableChange}
-            />
-          </>
-        )}
-      </EuiPanel>
-    </KibanaPageTemplate.Section>
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiText size="xs">Showing {resultsCount}</EuiText>
+          <EuiInMemoryTable
+            tableCaption={i18n.translate('home.dashboardsCreatedByMe.caption', {
+              defaultMessage: 'Dashboards created by me',
+            })}
+            responsiveBreakpoint={false}
+            items={items}
+            columns={columns}
+            rowHeader="title"
+            pagination={pagination}
+            onChange={onTableChange}
+          />
+        </>
+      )}
+    </EuiPanel>
   );
 };

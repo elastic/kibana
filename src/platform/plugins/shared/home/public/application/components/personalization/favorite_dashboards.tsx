@@ -91,66 +91,60 @@ export const HomeFavoriteDashboards = ({ dashboards, addBasePath }: FavoriteDash
   const showEmptyState = items.length === 0;
 
   return (
-    <KibanaPageTemplate.Section
-      bottomBorder
-      paddingSize="xl"
-      aria-labelledby="homeDashboardsCreatedByMe__title"
-    >
-      <EuiPanel>
-        {showEmptyState ? (
-          <div style={{ textAlign: 'center' }}>
-            <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('home.favoriteDashboards.emptyTitle', {
-                  defaultMessage: "You don't have any favorite dashboards yet",
-                })}
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <p>
-                {i18n.translate('home.favoriteDashboards.emptyDescription', {
-                  defaultMessage:
-                    'To add dashboards to your favorites, open the dashboards list and mark your favorites.',
-                })}
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiButton
-              fill
-              href={addBasePath('/app/dashboards#/list')}
-              data-test-subj="seeDashboardsListButton"
-            >
-              {i18n.translate('home.favoriteDashboards.seeDashboardsListButton', {
-                defaultMessage: 'See all dashboards',
+    <EuiPanel>
+      {showEmptyState ? (
+        <div style={{ textAlign: 'center' }}>
+          <EuiTitle size="xs">
+            <h4>
+              {i18n.translate('home.favoriteDashboards.emptyTitle', {
+                defaultMessage: "You don't have any favorite dashboards yet",
               })}
-            </EuiButton>
-          </div>
-        ) : (
-          <>
-            <EuiTitle size="s">
-              <h3>
-                {i18n.translate('home.favoriteDashboards.title', {
-                  defaultMessage: 'Favorite Dashboards',
-                })}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiText size="xs">Showing {resultsCount}</EuiText>
-            <EuiInMemoryTable
-              tableCaption={i18n.translate('home.favoriteDashboards.caption', {
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            <p>
+              {i18n.translate('home.favoriteDashboards.emptyDescription', {
+                defaultMessage:
+                  'To add dashboards to your favorites, open the dashboards list and mark your favorites.',
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiButton
+            fill
+            href={addBasePath('/app/dashboards#/list')}
+            data-test-subj="seeDashboardsListButton"
+          >
+            {i18n.translate('home.favoriteDashboards.seeDashboardsListButton', {
+              defaultMessage: 'See all dashboards',
+            })}
+          </EuiButton>
+        </div>
+      ) : (
+        <>
+          <EuiTitle size="s">
+            <h3>
+              {i18n.translate('home.favoriteDashboards.title', {
                 defaultMessage: 'Favorite Dashboards',
               })}
-              responsiveBreakpoint={false}
-              items={items}
-              columns={columns}
-              rowHeader="title"
-              pagination={pagination}
-              onChange={onTableChange}
-            />
-          </>
-        )}
-      </EuiPanel>
-    </KibanaPageTemplate.Section>
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiText size="xs">Showing {resultsCount}</EuiText>
+          <EuiInMemoryTable
+            tableCaption={i18n.translate('home.favoriteDashboards.caption', {
+              defaultMessage: 'Favorite Dashboards',
+            })}
+            responsiveBreakpoint={false}
+            items={items}
+            columns={columns}
+            rowHeader="title"
+            pagination={pagination}
+            onChange={onTableChange}
+          />
+        </>
+      )}
+    </EuiPanel>
   );
 };
