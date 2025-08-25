@@ -14,7 +14,7 @@ import { ConversationContent } from '../conversation_grid';
 import { RoundError } from './round_error';
 import { RoundIcon } from './round_icon';
 import { RoundLayout } from './round_layout';
-import { RoundResponse } from './round_response';
+import { MemoizedRoundResponse } from './round_response';
 
 export const ConversationRounds: React.FC<{}> = () => {
   const conversationRounds = useConversationRounds();
@@ -44,7 +44,7 @@ export const ConversationRounds: React.FC<{}> = () => {
                 isError ? (
                   <RoundError error={error} onRetry={retry} />
                 ) : (
-                  <RoundResponse response={response} steps={steps} isLoading={isLoading} />
+                  <MemoizedRoundResponse response={response} steps={steps} isLoading={isLoading} />
                 )
               }
             />

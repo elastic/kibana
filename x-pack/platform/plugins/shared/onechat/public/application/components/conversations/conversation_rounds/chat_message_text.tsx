@@ -7,7 +7,7 @@
 
 import { css } from '@emotion/css';
 import classNames from 'classnames';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   EuiCodeBlock,
   EuiTable,
@@ -24,6 +24,7 @@ import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
 // import { vizLanguagePlugin } from './markdown_plugins/viz_code_block';
 import { type PluggableList } from 'unified';
+import type { ConversationRoundStep } from '@kbn/onechat-common';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
@@ -31,6 +32,7 @@ import { esqlLanguagePlugin, loadingCursorPlugin, toolResultPlugin } from './mar
 
 interface Props {
   content: string;
+  steps: ConversationRoundStep[];
 }
 
 const cursorCss = css`
@@ -60,12 +62,28 @@ const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
  */
-export function ChatMessageText({ content }: Props) {
+function ChatMessageText({ content, steps }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
 
-  const conversationRounds = useConversationRounds();
+  // Use a ref to track the render count
+  const renderCount = useRef(1);
+
+  // This log will appear on every single render
+  console.log(
+    `ChatMessageText is RENDERING (render #${renderCount.current}). Content: "${content.substring(
+      0,
+      30
+    )}..."`
+  );
+
+  // Increment the render count after each render
+  useEffect(() => {
+    renderCount.current += 1;
+  });
+
+  // const conversationRounds = useConversationRounds();
   const { pluginsStart } = useOnechatServices();
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
@@ -132,8 +150,7 @@ export function ChatMessageText({ content }: Props) {
           return <p>Visualization requires a tool result ID.</p>;
         }
 
-        const toolResult = conversationRounds
-          .flatMap((r) => r.steps || [])
+        const toolResult = steps
           .filter((s) => s.type === 'tool_call')
           .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
           .find((r) => r.ui?.toolResultId === resultId && r.type === 'tabular_data') as
@@ -168,7 +185,7 @@ export function ChatMessageText({ content }: Props) {
       ],
       processingPluginList: processingPlugins,
     };
-  }, [conversationRounds, pluginsStart.dataViews, pluginsStart.lens, pluginsStart.uiActions]);
+  }, [pluginsStart.dataViews, pluginsStart.lens, pluginsStart.uiActions, steps]);
 
   return (
     <EuiText size="s" className={containerClassName}>
@@ -182,3 +199,5 @@ export function ChatMessageText({ content }: Props) {
     </EuiText>
   );
 }
+
+export const MemoizedChatMessageText = React.memo(ChatMessageText);

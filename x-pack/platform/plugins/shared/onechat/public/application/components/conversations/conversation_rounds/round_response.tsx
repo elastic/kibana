@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-common';
 import React from 'react';
 import { useTimer } from '../../../hooks/use_timer';
-import { ChatMessageText } from './chat_message_text';
+import { MemoizedChatMessageText } from './chat_message_text';
 import { RoundThinking } from './round_thinking';
 import { RoundTimer } from './round_timer';
 
@@ -20,7 +20,7 @@ export interface RoundResponseProps {
   isLoading: boolean;
 }
 
-export const RoundResponse: React.FC<RoundResponseProps> = ({
+const RoundResponse: React.FC<RoundResponseProps> = ({
   response: { message },
   steps,
   isLoading,
@@ -48,8 +48,10 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       )}
 
       <EuiFlexItem>
-        <ChatMessageText content={message} />
+        <MemoizedChatMessageText content={message} steps={steps} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+export const MemoizedRoundResponse = React.memo(RoundResponse);
