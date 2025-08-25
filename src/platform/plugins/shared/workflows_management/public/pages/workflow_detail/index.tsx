@@ -7,36 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiPageTemplate,
-  EuiSkeletonTitle,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID, type WorkflowDetailDto } from '@kbn/workflows';
+import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml_utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
-import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
-import { TestWorkflowModal } from '../../features/run_workflow/ui/test_workflow_modal';
-import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
 import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
 import { WorkflowExecution } from '../../features/workflow_execution_detail/ui/workflow_execution';
 import { useWorkflowExecution } from '../../entities/workflows/model/useWorkflowExecution';
+import { WorkflowDetailHeader } from './ui/workflow_detail_header';
+import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
+import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
+import { TestWorkflowModal } from '../../features/run_workflow/ui/test_workflow_modal';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../widgets/workflow_yaml_editor/ui').then((module) => ({
@@ -51,16 +38,15 @@ const WorkflowYAMLEditor = React.lazy(() =>
 // );
 
 export function WorkflowDetailPage({ id }: { id: string }) {
-  const { euiTheme } = useEuiTheme();
-  const { application, chrome, notifications, uiSettings } = useKibana().services;
+  const styles = useMemoCss(componentStyles);
+  const { application, chrome, uiSettings, notifications } = useKibana().services;
   const {
     data: workflow,
     isLoading: isLoadingWorkflow,
     error: workflowError,
   } = useWorkflowDetail(id);
-  const [workflowEventModalOpen, setWorkflowEventModalOpen] = useState(false);
-  const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
-  const { activeTab, setActiveTab, selectedExecutionId, selectedStepId } = useWorkflowUrlState();
+
+  const { activeTab, selectedExecutionId, selectedStepId, setActiveTab } = useWorkflowUrlState();
 
   // TODO: FIX: do not fetch execution twice
   const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
@@ -78,44 +64,23 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
   ]);
 
-  const isVisualEditorEnabled = uiSettings?.get<boolean>(
-    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
-    false
-  );
-
-  const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
-  const canExecuteWorkflow = application?.capabilities.workflowsManagement.executeWorkflow;
-  const canUpdateWorkflow = application?.capabilities.workflowsManagement.updateWorkflow;
-  const canDeleteWorkflow = application?.capabilities.workflowsManagement.deleteWorkflow;
-
-  const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
-  const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
-  const [hasChanges, setHasChanges] = useState(false);
-
-  const workflowYamlObject = useMemo(() => {
-    if (!workflowYaml) {
-      return null;
-    }
-    const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
-    if (result.error) {
-      return null;
-    }
-    return result.data;
-  }, [workflowYaml]);
-
-  useEffect(() => {
-    setWorkflowYaml(workflow?.yaml ?? '');
-    setHasChanges(false);
-  }, [workflow]);
-
-  const handleChange = (wfString: string) => {
-    setWorkflowYaml(wfString);
-    setHasChanges(originalWorkflowYaml !== wfString);
-  };
-
   const { updateWorkflow, runWorkflow } = useWorkflowActions();
+  const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
+  const canRunWorkflow =
+    Boolean(application?.capabilities.workflowsManagement.executeWorkflow) &&
+    Boolean(workflow?.enabled);
+  const canTestWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
 
   const handleSave = () => {
+    if (!id) {
+      notifications?.toasts.addError(new Error('Workflow is not loaded'), {
+        toastLifeTimeMs: 3000,
+        title: i18n.translate('workflows.workflowDetailHeader.error.workflowNotLoaded', {
+          defaultMessage: 'Workflow is not loaded',
+        }),
+      });
+      return;
+    }
     updateWorkflow.mutate({
       id,
       workflow: {
@@ -124,11 +89,23 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     });
   };
 
+  const [workflowEventModalOpen, setWorkflowEventModalOpen] = useState(false);
+  const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
+
   const handleRunClick = () => {
     setWorkflowEventModalOpen(true);
   };
 
   const handleRunWorkflow = (event: Record<string, any>) => {
+    if (!workflow) {
+      notifications?.toasts.addError(new Error('Workflow is not loaded'), {
+        toastLifeTimeMs: 3000,
+        title: i18n.translate('workflows.workflowDetailHeader.error.workflowNotLoaded', {
+          defaultMessage: 'Workflow is not loaded',
+        }),
+      });
+      return;
+    }
     runWorkflow.mutate(
       { id, inputs: event },
       {
@@ -152,61 +129,51 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     );
   };
 
-  const handleToggleWorkflow = useCallback(
-    (item: WorkflowDetailDto) => {
-      updateWorkflow.mutate(
-        {
-          id: item.id,
-          workflow: {
-            enabled: !item.enabled,
-          },
+  const handleToggleWorkflow = useCallback(() => {
+    if (!workflow) {
+      notifications?.toasts.addError(new Error('Workflow is not loaded'), {
+        toastLifeTimeMs: 3000,
+        title: i18n.translate('workflows.workflowDetailHeader.error.workflowNotLoaded', {
+          defaultMessage: 'Workflow is not loaded',
+        }),
+      });
+      return;
+    }
+    updateWorkflow.mutate(
+      {
+        id,
+        workflow: {
+          enabled: !workflow.enabled,
         },
-        {
-          onError: (err: unknown) => {
-            notifications?.toasts.addError(err as Error, {
-              toastLifeTimeMs: 3000,
-              title: 'Failed to update workflow',
-            });
-          },
-        }
-      );
-    },
-    [notifications?.toasts, updateWorkflow]
+      },
+      {
+        onError: (err: unknown) => {
+          notifications?.toasts.addError(err as Error, {
+            toastLifeTimeMs: 3000,
+            title: 'Failed to update workflow',
+          });
+        },
+      }
+    );
+  }, [notifications?.toasts, updateWorkflow, id, workflow]);
+
+  const isVisualEditorEnabled = uiSettings?.get<boolean>(
+    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+    false
   );
 
-  const renderWorkflowEditor = () => {
-    if (workflow === undefined) {
-      <EuiText>Failed to load workflow</EuiText>;
-    }
-    return (
-      <React.Suspense fallback={<EuiLoadingSpinner />}>
-        <WorkflowYAMLEditor
-          workflowId={workflow?.id ?? 'unknown'}
-          filename={`${workflow?.id ?? 'unknown'}.yaml`}
-          value={workflowYaml}
-          onChange={(v) => handleChange(v ?? '')}
-          lastUpdatedAt={workflow?.lastUpdatedAt}
-          hasChanges={hasChanges}
-          highlightStep={selectedStepId}
-          stepExecutions={execution?.stepExecutions}
-        />
-      </React.Suspense>
-    );
-    // {isVisualEditorEnabled && (
-    //   <EuiFlexItem>
-    //     {workflowYamlObject && (
-    //       <React.Suspense fallback={<EuiLoadingSpinner />}>
-    //         <WorkflowVisualEditor workflow={workflowYamlObject as WorkflowYaml} />
-    //       </React.Suspense>
-    //     )}
-    //   </EuiFlexItem>
-    // )}
-  };
-  const renderWorkflowExecutions = () => {
-    if (workflow === undefined) {
-      return <EuiText>Failed to load workflow</EuiText>;
-    }
-    return <WorkflowExecutionList workflow={workflow} />;
+  const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
+  const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  useEffect(() => {
+    setWorkflowYaml(workflow?.yaml ?? '');
+    setHasChanges(false);
+  }, [workflow]);
+
+  const handleChange = (wfString: string) => {
+    setWorkflowYaml(wfString);
+    setHasChanges(originalWorkflowYaml !== wfString);
   };
 
   if (workflowError) {
@@ -223,130 +190,44 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   return (
     <>
-      <EuiPageTemplate offset={0} minHeight={0} grow={false} css={{ flexGrow: 0 }}>
-        <EuiPageTemplate.Header
-          css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}
-          pageTitle={
-            <EuiSkeletonTitle
-              size="l"
-              isLoading={isLoadingWorkflow}
-              contentAriaLabel={workflow?.name}
-            >
-              <EuiTitle size="l">
-                <span>{workflow?.name}</span>
-              </EuiTitle>
-            </EuiSkeletonTitle>
-          }
-          tabs={[
-            {
-              label: 'Workflow',
-              prepend: <EuiIcon type="grid" />,
-              isSelected: activeTab === 'workflow',
-              onClick: () => setActiveTab('workflow'),
-            },
-            {
-              label: 'Executions',
-              prepend: <EuiIcon type="play" />,
-              isSelected: activeTab === 'executions',
-              onClick: () => setActiveTab('executions'),
-            },
-          ]}
-          restrictWidth={false}
-          rightSideGroupProps={{
-            css: {
-              // alignItems: 'center',
-            },
-          }}
-          rightSideItems={[
-            <EuiButton color="text" size="s" onClick={handleSave} disabled={!hasChanges}>
-              <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
-            </EuiButton>,
-            <EuiButtonIcon
-              color="success"
-              display="base"
-              iconType="play"
-              size="s"
-              onClick={handleRunClick}
-              disabled={!canExecuteWorkflow || !workflow?.enabled}
-              title={
-                !canExecuteWorkflow
-                  ? i18n.translate('workflows.workflowDetail.runWorkflow.disabled', {
-                      defaultMessage: 'You are not allowed to run workflows',
-                    })
-                  : !workflow?.enabled
-                  ? i18n.translate('workflows.workflowDetail.runWorkflow.disabled', {
-                      defaultMessage: 'Enable the workflow to run it',
-                    })
-                  : undefined
-              }
-            >
-              <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
-            </EuiButtonIcon>,
-            <EuiButtonIcon
-              display="base"
-              iconType="beaker"
-              size="s"
-              onClick={() => setTestWorkflowModalOpen(true)}
-            >
-              <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Test" ignoreTag />
-            </EuiButtonIcon>,
-            ...(workflow
-              ? [
-                  <div
-                    css={{
-                      width: '1px',
-                      height: '100%',
-                      margin: '4px 0',
-                      backgroundColor: euiTheme.colors.lightShade,
-                    }}
-                  />,
-                  <div css={{ height: '100%', display: 'flex', alignItems: 'center' }}>
-                    <EuiSwitch
-                      disabled={!canUpdateWorkflow}
-                      checked={workflow.enabled}
-                      onChange={() => handleToggleWorkflow(workflow)}
-                      label={
-                        workflow.enabled
-                          ? i18n.translate('workflows.workflowDetail.enabled', {
-                              defaultMessage: 'Enabled',
-                            })
-                          : i18n.translate('workflows.workflowDetail.disabled', {
-                              defaultMessage: 'Disabled',
-                            })
-                      }
-                    />
-                  </div>,
-                ]
-              : []),
-          ]}
-        />
-      </EuiPageTemplate>
-
-      <EuiFlexGroup gutterSize="none" css={{ flex: 1, height: '100%', minHeight: 0 }}>
+      <WorkflowDetailHeader
+        name={workflow?.name}
+        isLoading={isLoadingWorkflow}
+        activeTab={activeTab}
+        canRunWorkflow={canRunWorkflow}
+        canSaveWorkflow={canSaveWorkflow}
+        isEnabled={workflow?.enabled ?? false}
+        handleRunClick={handleRunClick}
+        handleSave={handleSave}
+        handleToggleWorkflow={handleToggleWorkflow}
+        canTestWorkflow={canTestWorkflow}
+        handleTestClick={() => setTestWorkflowModalOpen(true)}
+        handleTabChange={(tab) => {
+          setActiveTab(tab);
+        }}
+      />
+      <EuiFlexGroup gutterSize="none" css={styles.container}>
         {activeTab === 'executions' && (
-          <EuiFlexItem
-            css={{
-              flexBasis: '200px',
-              maxWidth: '200px',
-              flex: 1,
-              backgroundColor: euiTheme.colors.backgroundBasePlain,
-              borderRight: `1px solid ${euiTheme.colors.lightShade}`,
-            }}
-          >
-            {workflow && <WorkflowExecutionList workflow={workflow} />}
+          <EuiFlexItem css={styles.executionListColumn}>
+            <WorkflowExecutionList workflowId={workflow?.id ?? null} />
           </EuiFlexItem>
         )}
-        <EuiFlexItem css={{ flex: 1, overflow: 'hidden' }}>{renderWorkflowEditor()}</EuiFlexItem>
+        <EuiFlexItem css={styles.workflowEditorColumn}>
+          <React.Suspense fallback={<EuiLoadingSpinner />}>
+            <WorkflowYAMLEditor
+              workflowId={workflow?.id ?? 'unknown'}
+              filename={`${workflow?.id ?? 'unknown'}.yaml`}
+              value={workflowYaml}
+              onChange={(v) => handleChange(v ?? '')}
+              lastUpdatedAt={workflow?.lastUpdatedAt}
+              hasChanges={hasChanges}
+              highlightStep={selectedStepId}
+              stepExecutions={execution?.stepExecutions}
+            />
+          </React.Suspense>
+        </EuiFlexItem>
         {selectedExecutionId && (
-          <EuiFlexItem
-            css={{
-              flexBasis: '275px',
-              maxWidth: '275px',
-              flex: 1,
-              borderLeft: `1px solid ${euiTheme.colors.lightShade}`,
-              paddingBottom: '48px', // height of the validation errors bottom bar
-            }}
-          >
+          <EuiFlexItem css={styles.stepExecutionListColumn}>
             {workflow && (
               <WorkflowExecution
                 workflowExecutionId={selectedExecutionId}
@@ -356,7 +237,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-
       {workflowEventModalOpen && (
         <WorkflowEventModal
           onClose={() => setWorkflowEventModalOpen(false)}
@@ -372,3 +252,32 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     </>
   );
 }
+
+const componentStyles = {
+  container: css`
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+    flex-wrap: nowrap !important;
+  `,
+  executionListColumn: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexBasis: '200px',
+      maxWidth: '200px',
+      flex: 1,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      borderRight: `1px solid ${euiTheme.colors.borderBasePlain}`,
+    }),
+  workflowEditorColumn: css({
+    flex: 1,
+    overflow: 'hidden',
+  }),
+  stepExecutionListColumn: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexBasis: '275px',
+      maxWidth: '275px',
+      flex: 1,
+      borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
+      paddingBottom: '48px', // height of the validation errors bottom bar
+    }),
+};
