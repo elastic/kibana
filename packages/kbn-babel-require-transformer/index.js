@@ -1,12 +1,6 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
+/* Rewrites top-level require() to ESM imports for backend files only.
+   Skips absolute paths, .ts/.tsx specifiers, and setup_node_env/polyfills.
+   Adds .js to relative specifiers to satisfy ESM resolution when needed. */
 module.exports = function rewriteRequireToImport({ types: t }) {
   function isRequireCall(node) {
     return (
@@ -17,66 +11,93 @@ module.exports = function rewriteRequireToImport({ types: t }) {
     );
   }
 
+  // Skip: absolute paths, explicit TS files, and setup_node_env targets
+  const SKIP_SPEC = /^(\/|[A-Za-z]:[\\/])|\.tsx?$|(?:^|[\\/])setup_node_env(?:[\\/]|$)/;
+
+  function shouldTransformFile(state) {
+    const f = state.file?.opts?.filename || '';
+    // Backend sources only; avoid early boot and public/browser code.
+    if (!f) return false;
+    if (f.includes('/src/setup_node_env/')) return false;
+    if (f.includes('/scripts/')) return false;
+    if (f.includes('/public/')) return false;
+    // Apply to typical server-side code locations
+    return f.includes('/src/') || f.includes('/x-pack/') || f.includes('/packages/');
+  }
+
+  function addJsExtIfRelative(lit) {
+    const v = lit.value;
+    if ((v.startsWith('./') || v.startsWith('../')) && !/\.(m?js|cjs|json|node)$/.test(v)) {
+      return t.stringLiteral(v + '.js');
+    }
+    return lit;
+  }
+
+  function shouldRewriteLiteral(lit) {
+    return !SKIP_SPEC.test(lit.value);
+  }
+
   return {
     name: 'rewrite-require-to-import',
     visitor: {
-      // Handle: require('mod'); at the top-level
-      ExpressionStatement(path) {
-        const { node, parent } = path;
-        if (!t.isProgram(parent)) return;
-
-        if (isRequireCall(node.expression)) {
-          const source = node.expression.arguments[0];
-          path.replaceWith(t.importDeclaration([], source)); // import 'mod';
-        }
+      Program(path, state) {
+        path.setData('enabled', shouldTransformFile(state));
       },
 
-      // Handle variable declarations containing require() at the top-level
-      VariableDeclaration(path) {
-        const { node, parent } = path;
+      // require('pkg'); at top-level -> import 'pkg';
+      ExpressionStatement(path) {
+        if (!path.parentPath.isProgram()) return;
+        const enabled = path.findParent((p) => p.isProgram()).getData('enabled');
+        if (!enabled) return;
 
-        if (!t.isProgram(parent)) return; // only transform top-level
+        const expr = path.node.expression;
+        if (!isRequireCall(expr)) return;
+
+        const lit = expr.arguments[0];
+        if (!shouldRewriteLiteral(lit)) return;
+
+        path.replaceWith(t.importDeclaration([], addJsExtIfRelative(lit)));
+      },
+
+      // const x = require('pkg');  const {a} = require('pkg');
+      VariableDeclaration(path) {
+        if (!path.parentPath.isProgram()) return;
+        const enabled = path.findParent((p) => p.isProgram()).getData('enabled');
+        if (!enabled) return;
 
         const newImports = [];
-        const remainingDeclarators = [];
+        const keep = [];
 
-        for (const decl of node.declarations) {
+        for (const decl of path.node.declarations) {
           const init = decl.init;
-
           if (!isRequireCall(init)) {
-            // keep as-is
-            remainingDeclarators.push(decl);
+            keep.push(decl);
             continue;
           }
 
-          const source = init.arguments[0]; // StringLiteral
+          const lit = init.arguments[0];
+          if (!shouldRewriteLiteral(lit)) {
+            keep.push(decl); // keep original require()
+            continue;
+          }
+
+          const source = addJsExtIfRelative(lit);
 
           if (t.isIdentifier(decl.id)) {
-            // const x = require('mod') -> import x from 'mod';
             newImports.push(t.importDeclaration([t.importDefaultSpecifier(decl.id)], source));
-            // no remaining declarator needed
           } else if (t.isObjectPattern(decl.id)) {
-            // const { a, b } = require('mod')
-            // -> import * as _mod from 'mod'; const { a, b } = _mod;
-            const ns = path.scope.generateUidIdentifierBasedOnNode(source, 'mod');
+            const ns = path.scope.generateUidIdentifier('mod');
             newImports.push(t.importDeclaration([t.importNamespaceSpecifier(ns)], source));
-            remainingDeclarators.push(t.variableDeclarator(decl.id, ns));
+            keep.push(t.variableDeclarator(decl.id, ns));
           } else {
-            // Unhandled pattern (e.g., ArrayPattern) -> keep as-is
-            remainingDeclarators.push(decl);
+            keep.push(decl);
           }
         }
 
-        if (newImports.length === 0) return;
-
-        if (remainingDeclarators.length > 0) {
-          path.replaceWithMultiple([
-            ...newImports,
-            t.variableDeclaration(node.kind, remainingDeclarators),
-          ]);
-        } else {
-          path.replaceWithMultiple(newImports);
-        }
+        if (!newImports.length) return;
+        path.replaceWithMultiple(
+          keep.length ? [...newImports, t.variableDeclaration(path.node.kind, keep)] : newImports
+        );
       },
     },
   };
