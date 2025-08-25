@@ -38,7 +38,6 @@ export const InspectButton = ({ core }: Props) => {
   const [flyoutOverlayRef, setFlyoutOverlayRef] = useState<OverlayRef>();
 
   const buttonStyle = css`
-    background-color: ${isInspecting ? '#0a233c' : 'transparent'};
     & > .euiButtonEmpty__content > svg {
       margin-left: 6px;
     }
