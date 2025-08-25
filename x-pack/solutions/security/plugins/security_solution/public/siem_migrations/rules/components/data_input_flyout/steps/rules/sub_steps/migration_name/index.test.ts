@@ -43,7 +43,6 @@ function renderTestHook(args: Partial<MigrationNameStepProps> = {}) {
 }
 
 describe('useMigrationNameStep', () => {
-  const setMigrationName = jest.fn();
   beforeEach(() => {
     MockMigrationNameInputComp = jest.fn();
     mockUseGetCurrentUserProfile.mockReturnValue({
