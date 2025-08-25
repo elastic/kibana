@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { KibanaRequest, SavedObject } from '@kbn/core/server';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { numberToDuration } from '@kbn/reporting-common';
 import type { ScheduledReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId } from '.';
 import { SCHEDULED_REPORTING_EXECUTE_TYPE } from '.';
 import type { SavedReport } from '../store';
@@ -28,6 +30,17 @@ type ScheduledReportTaskInstance = Omit<TaskInstance, 'params'> & {
 export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskParams> {
   public get TYPE() {
     return SCHEDULED_REPORTING_EXECUTE_TYPE;
+  }
+
+  protected getQueueTimeout() {
+    const maxAttempts = this.getMaxAttempts();
+    const configuredTimeoutDuration: moment.Duration = numberToDuration(
+      this.opts.config.queue.timeout
+    );
+    // round up from ms to the nearest second
+    return moment.duration({
+      milliseconds: configuredTimeoutDuration.asMilliseconds() * maxAttempts.maxRetries,
+    });
   }
 
   protected async prepareJob(taskInstance: ConcreteTaskInstance): Promise<PrepareJobResults> {
@@ -62,7 +75,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           runAt,
           kibanaId: this.kibanaId!,
           kibanaName: this.kibanaName!,
-          queueTimeout: this.queueTimeout,
+          queueTimeout: this.getQueueTimeout().asMilliseconds(),
           scheduledReport,
           spaceId: reportSpaceId,
         })
@@ -82,7 +95,6 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
     }
 
     return {
-      isLastAttempt: false,
       jobId: jobId!,
       report,
       task: report?.toReportTaskJSON(),
@@ -91,7 +103,10 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
   }
 
   protected getMaxAttempts() {
-    return undefined;
+    return {
+      maxTaskAttempts: 1,
+      maxRetries: this.opts.config.capture.maxAttempts ?? 1,
+    };
   }
 
   protected async notify(
@@ -167,7 +182,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
   }
 
   public getTaskDefinition() {
-    const queueTimeout = this.getQueueTimeout();
+    const queueTimeout = this.getQueueTimeoutAsInterval();
     const maxConcurrency = this.getMaxConcurrency();
 
     return {
