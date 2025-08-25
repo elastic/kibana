@@ -70,9 +70,11 @@ export const nullUser: User = { username: null, full_name: null, email: null };
 export const transformNewCase = ({
   user,
   newCase,
+  isGeneratedByAssistant,
 }: {
   user: User;
   newCase: CasePostRequest;
+  isGeneratedByAssistant?: boolean;
 }): CaseTransformedAttributes => ({
   ...newCase,
   duration: null,
@@ -90,6 +92,7 @@ export const transformNewCase = ({
   customFields: newCase.customFields ?? [],
   observables: [],
   incremental_id: undefined,
+  is_generated_by_assistant: isGeneratedByAssistant,
 });
 
 export const transformCases = ({

@@ -150,6 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
           created_by: defaultUser,
           comment_id: null,
           owner: 'securitySolutionFixture',
+          is_generated_by_assistant: false,
           payload: {
             description: postedCase.description,
             title: postedCase.title,
