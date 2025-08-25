@@ -25,8 +25,14 @@ describe('ExitIfNodeImpl', () => {
     wfExecutionRuntimeManagerMock = {
       goToNextStep: jest.fn(),
       finishStep: jest.fn(),
+      exitScope: jest.fn(),
     } as any;
     impl = new ExitIfNodeImpl(step, wfExecutionRuntimeManagerMock);
+  });
+
+  it('should exit scope', async () => {
+    await impl.run();
+    expect(wfExecutionRuntimeManagerMock.exitScope).toHaveBeenCalledTimes(1);
   });
 
   it('should finish enterIfNode', async () => {
