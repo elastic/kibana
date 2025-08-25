@@ -347,6 +347,7 @@ describe('Alerts Client', () => {
     describe(`using ${label} for alert indices`, () => {
       beforeEach(() => {
         jest.clearAllMocks();
+        jest.restoreAllMocks();
         logger = loggingSystemMock.createLogger();
         alertsClientParams = {
           alertingEventLogger,
@@ -717,41 +718,6 @@ describe('Alerts Client', () => {
           });
         });
 
-        test('should index new alerts even if updatePersistedAlertsWithMaintenanceWindowIds fails', async () => {
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
-            ...alertsClientParams,
-            isServerless: true,
-          });
-
-          await alertsClient.initializeExecution(defaultExecutionOpts);
-
-          // Report 2 new alerts
-          const alertExecutorService = alertsClient.factory();
-          alertExecutorService.create('1').scheduleActions('default');
-          alertExecutorService.create('2').scheduleActions('default');
-
-          await alertsClient.processAlerts();
-          alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
-
-          maintenanceWindowsService.getMaintenanceWindows.mockRejectedValue(
-            'Failed to fetch maintenance windows'
-          );
-
-          const result = await alertsClient.persistAlerts();
-
-          expect(logger.error).toHaveBeenCalledWith(
-            'Error updating maintenance window IDs:',
-            'Failed to fetch maintenance windows'
-          );
-
-          expect(result).toEqual({
-            alertIds: [],
-            maintenanceWindowIds: [],
-          });
-        });
-
         test('should index new alerts with refresh: true in stateless', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
             ...alertsClientParams,
@@ -1075,10 +1041,9 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          expect(spy).toHaveBeenCalledTimes(5);
+          expect(spy).toHaveBeenCalledTimes(2);
           expect(spy).toHaveBeenNthCalledWith(1, 'active');
           expect(spy).toHaveBeenNthCalledWith(2, 'recovered');
-          expect(spy).toHaveBeenNthCalledWith(3, 'new');
 
           expect(logger.error).toHaveBeenCalledWith(
             `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts ${ruleInfo}.`,
@@ -1867,10 +1832,7 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
 
-          expect(await alertsClient.persistAlerts()).toStrictEqual({
-            alertIds: [],
-            maintenanceWindowIds: [],
-          });
+          await alertsClient.persistAlerts();
 
           expect(logger.debug).toHaveBeenCalledWith(
             `Resources registered and installed for test context but "shouldWrite" is set to false ${ruleInfo}.`,
@@ -2522,7 +2484,63 @@ describe('Alerts Client', () => {
       });
 
       describe('updatePersistedAlertsWithMaintenanceWindowIds', () => {
-        test('should update alerts with MW ids when provided with maintenance windows', async () => {
+        test('skips loading maintenance windows when there are no alerts', async () => {
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({});
+
+          const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
+
+          expect(maintenanceWindowsService.getMaintenanceWindows).not.toHaveBeenCalled();
+
+          expect(result).toEqual({ alertIds: [], maintenanceWindowIds: [] });
+        });
+
+        test('should not update alerts if none match the maintenenance window scoped query', async () => {
+          maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
+            maintenanceWindows: [
+              ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
+              { id: 'mw3' } as unknown as MaintenanceWindow,
+            ],
+            maintenanceWindowsWithoutScopedQueryIds: [],
+          });
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          const alert1 = new Alert('1');
+          const alert2 = new Alert('2');
+          const alert3 = new Alert('3');
+          const alert4 = new Alert('4');
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+            '1': alert1,
+            '2': alert2,
+            '3': alert3,
+            '4': alert4,
+          });
+
+          jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
+            // @ts-ignore
+            .mockResolvedValueOnce({});
+
+          const updateSpy = jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
+            // @ts-ignore
+            .mockResolvedValueOnce({});
+
+          const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
+
+          expect(alert1.getMaintenanceWindowIds()).toEqual([]);
+          expect(alert2.getMaintenanceWindowIds()).toEqual([]);
+          expect(alert3.getMaintenanceWindowIds()).toEqual([]);
+
+          expect(result).toEqual({ alertIds: [], maintenanceWindowIds: [] });
+          expect(updateSpy).not.toHaveBeenCalled();
+        });
+
+        test('should update alerts based on alert uuid with MW ids when provided with maintenance windows', async () => {
           maintenanceWindowsService.getMaintenanceWindows.mockReturnValueOnce({
             maintenanceWindows: [
               ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
@@ -2559,7 +2577,6 @@ describe('Alerts Client', () => {
             // @ts-ignore
             .mockResolvedValueOnce({});
 
-          // @ts-ignore - accessing private function
           const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
 
           expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
@@ -2576,6 +2593,123 @@ describe('Alerts Client', () => {
             alert2.getUuid(),
             alert3.getUuid(),
           ]);
+        });
+
+        test('should update alerts based on alert id with MW ids when provided with maintenance windows', async () => {
+          maintenanceWindowsService.getMaintenanceWindows.mockReturnValueOnce({
+            maintenanceWindows: [
+              ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
+              { id: 'mw3' } as unknown as MaintenanceWindow,
+            ],
+            maintenanceWindowsWithoutScopedQueryIds: [],
+          });
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          const alert1 = new Alert('1');
+          const alert2 = new Alert('2');
+          const alert3 = new Alert('3');
+          const alert4 = new Alert('4');
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+            '1': alert1,
+            '2': alert2,
+            '3': alert3,
+            '4': alert4,
+          });
+
+          jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
+            // @ts-ignore
+            .mockResolvedValueOnce({
+              mw1: [alert1.getId(), alert2.getId()],
+              mw2: [alert3.getId()],
+            });
+
+          const updateSpy = jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
+            // @ts-ignore
+            .mockResolvedValueOnce({});
+
+          const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
+
+          expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
+          expect(alert2.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
+          expect(alert3.getMaintenanceWindowIds()).toEqual(['mw3', 'mw2']);
+
+          expect(result).toEqual({
+            alertIds: [alert1.getId(), alert2.getId(), alert3.getId()],
+            maintenanceWindowIds: ['mw3', 'mw1', 'mw2'],
+          });
+
+          expect(updateSpy).toHaveBeenLastCalledWith([
+            alert1.getId(),
+            alert2.getId(),
+            alert3.getId(),
+          ]);
+        });
+
+        test('should handle errors update alerts with MW ids', async () => {
+          maintenanceWindowsService.getMaintenanceWindows.mockReturnValueOnce({
+            maintenanceWindows: [
+              ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
+              { id: 'mw3' } as unknown as MaintenanceWindow,
+            ],
+            maintenanceWindowsWithoutScopedQueryIds: [],
+          });
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          const alert1 = new Alert('1');
+          const alert2 = new Alert('2');
+          const alert3 = new Alert('3');
+          const alert4 = new Alert('4');
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+            '1': alert1,
+            '2': alert2,
+            '3': alert3,
+            '4': alert4,
+          });
+
+          jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
+            // @ts-ignore
+            .mockResolvedValueOnce({
+              mw1: [alert1.getId(), alert2.getId()],
+              mw2: [alert3.getId()],
+            });
+
+          const updateSpy = jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
+            // @ts-ignore
+            .mockImplementationOnce(() => {
+              throw new Error('Failed to update alerts with maintenance window IDs');
+            });
+
+          const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
+
+          expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
+          expect(alert2.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
+          expect(alert3.getMaintenanceWindowIds()).toEqual(['mw3', 'mw2']);
+
+          expect(result).toEqual({
+            alertIds: [],
+            maintenanceWindowIds: [],
+          });
+
+          expect(updateSpy).toHaveBeenLastCalledWith([
+            alert1.getId(),
+            alert2.getId(),
+            alert3.getId(),
+          ]);
+
+          expect(logger.error).toHaveBeenCalledWith(
+            `Error updating maintenance window IDs: Failed to update alerts with maintenance window IDs`,
+            logTags
+          );
         });
       });
 
