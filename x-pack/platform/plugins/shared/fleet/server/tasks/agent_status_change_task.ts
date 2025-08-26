@@ -27,7 +27,7 @@ import { SO_SEARCH_LIMIT } from '../constants';
 import { getAgentPolicySavedObjectType } from '../services/agent_policy';
 
 export const TYPE = 'fleet:agent-status-change-task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.1';
 const TITLE = 'Fleet Agent Status Change Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '1m';
