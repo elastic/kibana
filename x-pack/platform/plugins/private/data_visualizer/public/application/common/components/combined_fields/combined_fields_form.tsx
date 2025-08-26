@@ -19,23 +19,25 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-plugin/common';
+import type { IngestPipeline } from '@kbn/file-upload-plugin/common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { FileAnalysis } from '@kbn/file-upload';
+import { getFieldsFromMappings } from '@kbn/file-upload/file_upload_manager';
 import type { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
-import { SemanticTextForm } from './semantic_text';
 import { CombinedFieldLabel } from './combined_field_label';
 import { removeCombinedFieldsFromMappings, removeCombinedFieldsFromPipeline } from './utils';
+import { SemanticTextForm } from './semantic_text';
 
 interface Props {
-  mappingsString: string;
-  pipelineString: string;
-  onMappingsStringChange(mappings: string): void;
-  onPipelineStringChange(pipeline: string): void;
+  mappings: MappingTypeMapping;
+  pipelines: IngestPipeline[];
+  onMappingsChange(mappings: string): void;
+  onPipelinesChange(pipeline: IngestPipeline[]): void;
   combinedFields: CombinedField[];
   onCombinedFieldsChange(combinedFields: CombinedField[]): void;
-  results: FindFileStructureResponse;
   isDisabled: boolean;
+  filesStatus: FileAnalysis[];
 }
 
 interface State {
@@ -45,7 +47,7 @@ interface State {
 export type AddCombinedField = (
   combinedField: CombinedField,
   addToMappings: (mappings: MappingTypeMapping) => MappingTypeMapping,
-  addToPipeline: (pipeline: IngestPipeline) => IngestPipeline
+  addToPipelines: (pipelines: IngestPipeline[]) => IngestPipeline[]
 ) => void;
 
 export class CombinedFieldsForm extends Component<Props, State> {
@@ -67,17 +69,17 @@ export class CombinedFieldsForm extends Component<Props, State> {
 
   addCombinedField = (
     combinedField: CombinedField,
-    addToMappings: (mappings: MappingTypeMapping) => {},
-    addToPipeline: (pipeline: IngestPipeline) => {}
+    addToMappings: (mappings: MappingTypeMapping) => MappingTypeMapping,
+    addToPipelines: (pipelines: IngestPipeline[]) => IngestPipeline[]
   ) => {
-    const mappings = this.parseMappings();
-    const pipeline = this.parsePipeline();
+    const mappings = this.props.mappings;
+    const pipelines = this.props.pipelines;
+
+    const newPipelines = addToPipelines(pipelines);
+    this.props.onPipelinesChange(newPipelines);
 
     const newMappings = addToMappings(mappings);
-    const newPipeline = addToPipeline(pipeline);
-
-    this.props.onMappingsStringChange(JSON.stringify(newMappings, null, 2));
-    this.props.onPipelineStringChange(JSON.stringify(newPipeline, null, 2));
+    this.props.onMappingsChange(JSON.stringify(newMappings, null, 2));
 
     this.props.onCombinedFieldsChange([...this.props.combinedFields, combinedField]);
 
@@ -85,62 +87,25 @@ export class CombinedFieldsForm extends Component<Props, State> {
   };
 
   removeCombinedField = (index: number) => {
-    let mappings;
-    let pipeline;
-    try {
-      mappings = this.parseMappings();
-      pipeline = this.parsePipeline();
-    } catch (error) {
-      // how should remove error be surfaced?
-      return;
-    }
-
     const updatedCombinedFields = [...this.props.combinedFields];
     const removedCombinedFields = updatedCombinedFields.splice(index, 1);
 
-    this.props.onMappingsStringChange(
-      JSON.stringify(removeCombinedFieldsFromMappings(mappings, removedCombinedFields), null, 2)
+    this.props.onPipelinesChange(
+      this.props.pipelines.map((pipeline) =>
+        removeCombinedFieldsFromPipeline(pipeline, removedCombinedFields)
+      )
     );
-    this.props.onPipelineStringChange(
-      JSON.stringify(removeCombinedFieldsFromPipeline(pipeline, removedCombinedFields), null, 2)
+    this.props.onMappingsChange(
+      JSON.stringify(removeCombinedFieldsFromMappings(this.props.mappings, removedCombinedFields))
     );
     this.props.onCombinedFieldsChange(updatedCombinedFields);
   };
 
-  parseMappings() {
-    try {
-      return JSON.parse(this.props.mappingsString);
-    } catch (error) {
-      throw new Error(
-        i18n.translate('xpack.dataVisualizer.combinedFieldsForm.mappingsParseError', {
-          defaultMessage: 'Error parsing mappings: {error}',
-          values: { error: error.message },
-        })
-      );
-    }
-  }
-
-  parsePipeline() {
-    try {
-      if (this.props.pipelineString === '') {
-        return {
-          description: '',
-          processors: [],
-        };
-      }
-      return JSON.parse(this.props.pipelineString);
-    } catch (error) {
-      throw new Error(
-        i18n.translate('xpack.dataVisualizer.combinedFieldsForm.pipelineParseError', {
-          defaultMessage: 'Error parsing pipeline: {error}',
-          values: { error: error.message },
-        })
-      );
-    }
-  }
-
   hasNameCollision = (name: string) => {
-    if (this.props.results.column_names?.includes(name)) {
+    const fieldExists = getFieldsFromMappings(this.props.mappings).some(
+      (field) => field.name === name
+    );
+    if (fieldExists) {
       // collision with column name
       return true;
     }
@@ -152,8 +117,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
       return true;
     }
 
-    const mappings = this.parseMappings();
-    return Object.hasOwn(mappings.properties, name);
+    return Object.hasOwn(this.props.mappings?.properties ?? {}, name);
   };
 
   render() {
@@ -191,7 +155,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
           <GeoPointForm
             addCombinedField={this.addCombinedField}
             hasNameCollision={this.hasNameCollision}
-            results={this.props.results}
+            results={this.props.filesStatus ? this.props.filesStatus[0].results! : undefined}
           />
         ),
       },
@@ -202,7 +166,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
           <SemanticTextForm
             addCombinedField={this.addCombinedField}
             hasNameCollision={this.hasNameCollision}
-            results={this.props.results}
+            mappings={this.props.mappings}
           />
         ),
       },

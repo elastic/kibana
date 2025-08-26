@@ -149,7 +149,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
 
   async function indexData(index: string, pipelineId: string | undefined, data: InputData) {
     try {
-      const body = [];
+      const body: BulkRequest['body'] = [];
       for (let i = 0; i < data.length; i++) {
         body.push({ index: {} });
         body.push(data[i]);
@@ -200,7 +200,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   }
 
   function getFailures(items: any[], data: InputData): ImportFailure[] {
-    const failures = [];
+    const failures: ImportFailure[] = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item.index && item.index.error) {
