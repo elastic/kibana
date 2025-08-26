@@ -62,9 +62,8 @@ configs_csv=$(echo "$configs" | paste -sd, -)
 # Build selection args differently for unit (patterns) vs integration (config files)
 selection_args=()
 if [[ "$TEST_TYPE" == "unit" ]]; then
-  # For unit tests, groups provide glob patterns; pass them positionally to scripts/jest_all
-  # Convert newline-separated patterns to an array
-  mapfile -t selection_args < <(printf '%s\n' "$configs")
+  # For unit tests, groups provide glob patterns; pass them via --config CSV like integration
+  selection_args=("--config=$configs_csv")
 else
   # For integration tests, groups provide explicit jest config paths; pass via --config CSV
   selection_args=("--config=$configs_csv")
