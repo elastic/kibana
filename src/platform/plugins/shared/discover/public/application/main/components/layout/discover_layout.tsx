@@ -52,6 +52,7 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
+import { SpanOverviewCue } from '../observability_cues/span_overview_cue';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
@@ -446,6 +447,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             spaces={spaces}
             history={history}
           />
+          <SpanOverviewCue />
           <DiscoverResizableLayout
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
