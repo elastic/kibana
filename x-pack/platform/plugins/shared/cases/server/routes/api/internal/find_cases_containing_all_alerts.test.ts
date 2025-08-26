@@ -13,9 +13,7 @@ describe('findCasesContainingAllAlerts', () => {
     it('returns null when required alert not found', async () => {
       const casesClient = {
         attachments: {
-          getAllAlertsAttachToCase: jest.fn().mockResolvedValue([
-            { alertId: 'other-id' }, // shape only needs alertId for the logic
-          ]),
+          getAllAlertsAttachToCase: jest.fn().mockResolvedValue([{ id: 'other-id' }]),
         },
       } as unknown as CasesClient;
 
