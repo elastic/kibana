@@ -17,7 +17,7 @@ export const validate = (
   callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
-  messages.push(...validateCommandArguments(command, context, callbacks));
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   return messages;
 };

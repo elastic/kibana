@@ -38,7 +38,7 @@ export const validate = (
     );
   }
 
-  messages.push(...validateCommandArguments(command, context, callbacks));
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   return messages;
 };

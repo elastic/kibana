@@ -9,7 +9,7 @@
 import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
 import { errors, getFunctionDefinition } from '..';
-import { within } from '../../../..';
+import { FunctionDefinitionTypes, within } from '../../../..';
 import {
   isColumn,
   isFunctionExpression,
@@ -20,8 +20,8 @@ import {
   isParamLiteral,
 } from '../../../ast/is';
 import type { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
-import { getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
-import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage } from '../../../types';
+import { Location, getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
+import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage } from '../../../types';
 import { Walker } from '../../../walker';
 import type {
   FunctionDefinition,
@@ -41,15 +41,17 @@ import { isArrayType } from '../operators';
 export function validateFunction({
   fn,
   parentCommand,
+  ast,
   context,
   callbacks,
 }: {
   fn: ESQLFunction;
   parentCommand: ESQLCommand;
+  ast: ESQLAst;
   context: ICommandContext;
   callbacks: ICommandCallbacks;
 }): ESQLMessage[] {
-  return new FunctionValidator(fn, parentCommand, context, callbacks).messages;
+  return new FunctionValidator(fn, parentCommand, ast, context, callbacks).messages;
 }
 
 class FunctionValidator {
@@ -61,8 +63,10 @@ class FunctionValidator {
   constructor(
     private readonly fn: ESQLFunction,
     private readonly parentCommand: ESQLCommand,
+    private readonly ast: ESQLAst,
     private readonly context: ICommandContext,
-    private readonly callbacks: ICommandCallbacks
+    private readonly callbacks: ICommandCallbacks,
+    private readonly withinAggFunction: boolean = false
   ) {
     this.definition = getFunctionDefinition(fn.name);
     for (const arg of this.fn.args) {
@@ -100,7 +104,12 @@ class FunctionValidator {
     }
 
     if (!this.allowedHere) {
-      const { displayName } = getFunctionLocation(this.fn, this.parentCommand);
+      const { displayName } = getFunctionLocation(
+        this.fn,
+        this.parentCommand,
+        this.ast,
+        this.withinAggFunction
+      );
       this.report(errors.functionNotAllowedHere(this.fn, displayName));
     }
 
@@ -177,7 +186,14 @@ class FunctionValidator {
       const arg = removeInlineCasts(_arg);
       if (isFunctionExpression(arg)) {
         nestedErrors.push(
-          ...new FunctionValidator(arg, this.parentCommand, this.context, this.callbacks).messages
+          ...new FunctionValidator(
+            arg,
+            this.parentCommand,
+            this.ast,
+            this.context,
+            this.callbacks,
+            this.withinAggFunction || this.definition?.type === FunctionDefinitionTypes.AGG
+          ).messages
         );
       }
 
@@ -203,7 +219,12 @@ class FunctionValidator {
    * Checks if the function is available in the current context
    */
   private get allowedHere(): boolean {
-    const { location } = getFunctionLocation(this.fn, this.parentCommand);
+    const { location } = getFunctionLocation(
+      this.fn,
+      this.parentCommand,
+      this.ast,
+      this.withinAggFunction
+    );
     return this.definition?.locationsAvailable.includes(location) ?? false;
   }
 
@@ -275,7 +296,7 @@ function argMatchesParamType(
   // in our function definitions so we let it through here
   if (givenType === 'null') return true;
 
-  // all functions accept keyword literals for text parameters
+  // all functions accept keywords for text parameters
   if (bothStringTypes(givenType, expectedType)) return true;
 
   if (
@@ -303,7 +324,16 @@ function bothStringTypes(type1: string, type2: string): boolean {
 /**
  * Identifies the location ID of the function's position
  */
-function getFunctionLocation(fn: ESQLFunction, parentCommand: ESQLCommand) {
+function getFunctionLocation(
+  fn: ESQLFunction,
+  parentCommand: ESQLCommand,
+  ast: ESQLAst,
+  withinAggFunction: boolean
+) {
+  if (withinAggFunction && ast[0].name === 'ts') {
+    return { location: Location.STATS_TIMESERIES, displayName: 'Timeseries' };
+  }
+
   const option = Walker.find(parentCommand, (node) => isOptionNode(node) && within(fn, node));
 
   const displayName = (option ?? parentCommand).name;

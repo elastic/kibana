@@ -578,142 +578,6 @@ describe('function validation', () => {
       });
     });
 
-    describe('command/option support', () => {
-      it('validates command support', async () => {
-        setTestFunctions([
-          {
-            name: 'eval_fn',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.EVAL],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-          {
-            name: 'stats_fn',
-            type: FunctionDefinitionTypes.AGG,
-            description: '',
-            locationsAvailable: [Location.STATS],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-          {
-            name: 'row_fn',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.ROW],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-          {
-            name: 'where_fn',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.WHERE],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-          {
-            name: 'sort_fn',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.SORT],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-        ]);
-
-        const { expectErrors } = await setup();
-
-        await expectErrors('FROM a_index | EVAL EVAL_FN()', []);
-        await expectErrors('FROM a_index | SORT SORT_FN()', []);
-        await expectErrors('FROM a_index | STATS max(doubleField)', []);
-        await expectErrors('ROW ROW_FN()', []);
-        await expectErrors('FROM a_index | WHERE WHERE_FN()', []);
-
-        await expectErrors('FROM a_index | EVAL SORT_FN()', [
-          'Function [sort_fn] not allowed in [eval]',
-        ]);
-        await expectErrors('FROM a_index | SORT STATS_FN()', [
-          'Function [stats_fn] not allowed in [sort]',
-        ]);
-        await expectErrors('FROM a_index | STATS ROW_FN()', [
-          'Function [row_fn] not allowed in [stats]',
-        ]);
-        await expectErrors('ROW WHERE_FN()', ['Function [where_fn] not allowed in [row]']);
-        await expectErrors('FROM a_index | WHERE EVAL_FN()', [
-          'Function [eval_fn] not allowed in [where]',
-        ]);
-      });
-
-      it('validates option support', async () => {
-        setTestFunctions([
-          {
-            name: 'supports_by_option',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.EVAL, Location.STATS_BY],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-          {
-            name: 'does_not_support_by_option',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.EVAL],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-
-          {
-            name: 'agg_fn',
-            type: FunctionDefinitionTypes.AGG,
-            description: '',
-            locationsAvailable: [Location.STATS],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-        ]);
-        const { expectErrors } = await setup();
-        await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
-        await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
-          'Function [does_not_support_by_option] not allowed in [by]',
-        ]);
-      });
-    });
-
     describe('nested functions', () => {
       it('supports deep nesting', async () => {
         setTestFunctions([
@@ -749,6 +613,178 @@ describe('function validation', () => {
       });
 
       // @TODO — test function aliases
+    });
+  });
+
+  describe('command/option support', () => {
+    it('validates command support', async () => {
+      setTestFunctions([
+        {
+          name: 'eval_fn',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'stats_fn',
+          type: FunctionDefinitionTypes.AGG,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'row_fn',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.ROW],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'where_fn',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.WHERE],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'sort_fn',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.SORT],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+
+      await expectErrors('FROM a_index | EVAL EVAL_FN()', []);
+      await expectErrors('FROM a_index | SORT SORT_FN()', []);
+      await expectErrors('FROM a_index | STATS max(doubleField)', []);
+      await expectErrors('ROW ROW_FN()', []);
+      await expectErrors('FROM a_index | WHERE WHERE_FN()', []);
+
+      await expectErrors('FROM a_index | EVAL SORT_FN()', [
+        'Function [sort_fn] not allowed in [eval]',
+      ]);
+      await expectErrors('FROM a_index | SORT STATS_FN()', [
+        'Function [stats_fn] not allowed in [sort]',
+      ]);
+      await expectErrors('FROM a_index | STATS ROW_FN()', [
+        'Function [row_fn] not allowed in [stats]',
+      ]);
+      await expectErrors('ROW WHERE_FN()', ['Function [where_fn] not allowed in [row]']);
+      await expectErrors('FROM a_index | WHERE EVAL_FN()', [
+        'Function [eval_fn] not allowed in [where]',
+      ]);
+    });
+
+    it('validates option support', async () => {
+      setTestFunctions([
+        {
+          name: 'supports_by_option',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL, Location.STATS_BY],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'does_not_support_by_option',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+
+        {
+          name: 'agg_fn',
+          type: FunctionDefinitionTypes.AGG,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+      const { expectErrors } = await setup();
+      await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
+      await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
+        'Function [does_not_support_by_option] not allowed in [by]',
+      ]);
+    });
+
+    it('validates timeseries function locations', async () => {
+      setTestFunctions([
+        {
+          name: 'ts_function',
+          type: FunctionDefinitionTypes.TIME_SERIES_AGG,
+          description: '',
+          locationsAvailable: [Location.STATS_TIMESERIES],
+          signatures: [
+            {
+              params: [],
+              returnType: 'double',
+            },
+          ],
+        },
+        {
+          name: 'agg_function',
+          type: FunctionDefinitionTypes.AGG,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          signatures: [
+            {
+              params: [{ name: 'field', type: 'double', optional: false }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+
+      await expectErrors('TS a_index | STATS AGG_FUNCTION(TS_FUNCTION())', []);
+      await expectErrors('FROM a_index | STATS AGG_FUNCTION(TS_FUNCTION())', [
+        'Function [ts_function] not allowed in [stats]',
+      ]);
     });
   });
 

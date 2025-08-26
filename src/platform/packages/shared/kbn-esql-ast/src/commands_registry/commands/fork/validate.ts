@@ -48,7 +48,7 @@ export const validate = (
     });
   }
 
-  messages.push(...validateCommandArguments(command, context, callbacks));
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   for (const arg of command.args.flat()) {
     if (!Array.isArray(arg) && arg.type === 'query') {
