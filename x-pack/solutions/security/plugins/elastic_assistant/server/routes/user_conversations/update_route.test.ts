@@ -274,7 +274,7 @@ describe('Update conversation route', () => {
           type: ['change'],
         },
         message:
-          'User [id=my_profile_uid, name=elastic] has shared conversation [id=04128c15-0d1b-4716-a4c5-46997ac7f3bd, title="Welcome"] to users ([id=user1, name=User One], [id=user2, name=User Two])',
+          'User has shared conversation [id=04128c15-0d1b-4716-a4c5-46997ac7f3bd, title="Welcome"] to users ([id=user1, name=User One], [id=user2, name=User Two])',
       });
     });
 

@@ -123,10 +123,6 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
                     u.id !== authenticatedUser?.profile_uid &&
                     u.name !== authenticatedUser?.username
                 ),
-                user: {
-                  name: authenticatedUser?.username,
-                  id: authenticatedUser?.profile_uid,
-                },
                 outcome: AUDIT_OUTCOME.SUCCESS,
               })
             );
@@ -151,8 +147,6 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
               sharing: conversationSharedState,
               errorMessage: error.message,
             });
-            // @ts-ignore
-            const user = authenticatedUser ?? {};
             auditLogger?.log(
               conversationAuditEvent({
                 action:
@@ -161,12 +155,10 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
                     : ConversationAuditAction.SHARED,
                 id: request.body.id,
                 users: request.body.users.filter(
-                  (u) => u.id !== user?.profile_uid && u.name !== user?.username
+                  (u) =>
+                    u.id !== authenticatedUser?.profile_uid &&
+                    u.name !== authenticatedUser?.username
                 ),
-                user: {
-                  name: user?.username ?? 'unknown',
-                  id: user?.profile_uid,
-                },
                 outcome: AUDIT_OUTCOME.FAILURE,
                 error: err,
               })

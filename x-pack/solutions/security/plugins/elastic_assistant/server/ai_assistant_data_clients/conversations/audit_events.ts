@@ -49,7 +49,6 @@ export interface ConversationAuditEventParams {
   error?: Error;
   id?: string;
   title?: string;
-  user: User;
   users?: User[];
   outcome?: EcsEvent['outcome'];
 }
@@ -60,7 +59,6 @@ export function conversationAuditEvent({
   id,
   title,
   outcome,
-  user,
   users,
 }: ConversationAuditEventParams): AuditEvent {
   let doc = 'a conversation';
@@ -76,8 +74,8 @@ export function conversationAuditEvent({
   let message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `User ${formatUserAsString(user)} is ${progressive} ${doc}`
-    : `User ${formatUserAsString(user)} has ${past} ${doc}`;
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
   if (action === ConversationAuditAction.SHARED && users) {
     const usersMessage =
       users.length > 0
