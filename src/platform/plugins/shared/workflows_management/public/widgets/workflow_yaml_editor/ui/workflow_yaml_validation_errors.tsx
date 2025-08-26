@@ -107,12 +107,13 @@ export function WorkflowYAMLValidationErrors({
       isDisabled={validationErrors?.length === 0}
       css={styles.accordion}
     >
+      <div css={styles.separator} />
       <div css={styles.accordionContent} className="eui-yScrollWithShadows">
         <EuiFlexGroup direction="column" gutterSize="s">
           {sortedValidationErrors?.map((error, index) => (
-            <EuiFlexItem
+            <button
               key={`${error.lineNumber}-${error.column}-${error.message}-${index}-${error.severity}`}
-              css={styles.validationErrorRow}
+              css={styles.validationError}
               onClick={() => onErrorClick?.(error)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -120,7 +121,6 @@ export function WorkflowYAMLValidationErrors({
                   onErrorClick?.(error);
                 }
               }}
-              role="button"
               tabIndex={0}
             >
               <EuiFlexItem grow={false} css={styles.validationErrorLineNumber}>
@@ -149,7 +149,7 @@ export function WorkflowYAMLValidationErrors({
               <EuiFlexItem>
                 <span>{error.message}</span>
               </EuiFlexItem>
-            </EuiFlexItem>
+            </button>
           ))}
         </EuiFlexGroup>
       </div>
@@ -179,10 +179,16 @@ const componentStyles = {
       maxHeight: '200px',
       overflowY: 'auto',
       padding: euiTheme.size.s,
+      position: 'relative',
+    }),
+  separator: ({ euiTheme }: UseEuiTheme) =>
+    css({
       borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
-  validationErrorRow: (euiThemeContext: UseEuiTheme) =>
+  validationError: (euiThemeContext: UseEuiTheme) =>
     css({
+      // override default button styles
+      textAlign: 'left',
       fontSize: euiFontSize(euiThemeContext, 's').fontSize,
       cursor: 'pointer',
       display: 'flex',

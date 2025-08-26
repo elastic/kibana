@@ -22,13 +22,14 @@ import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 
 export const StepExecutionTimeline = ({
   logs,
-  backgroundColor,
+  backgroundColor: _backgroundColor,
 }: {
   logs: WorkflowExecutionLogEntry[];
   backgroundColor?: string;
 }) => {
   const getFormattedDateTime = useGetFormattedDateTime();
   const { euiTheme } = useEuiTheme();
+  const backgroundColor = _backgroundColor ?? euiTheme.colors.backgroundBasePlain;
   const items: EuiTimelineProps['items'] = useMemo(() => {
     return logs.map((log) => {
       let iconType: EuiIconType = 'info';
@@ -37,7 +38,7 @@ export const StepExecutionTimeline = ({
           type={iconType}
           color="subdued"
           css={{
-            backgroundColor: backgroundColor ?? euiTheme.colors.backgroundBasePlain,
+            backgroundColor,
             borderRadius: euiTheme.border.radius.medium,
           }}
         />
@@ -49,7 +50,7 @@ export const StepExecutionTimeline = ({
             type={iconType}
             color="danger"
             css={{
-              backgroundColor: backgroundColor ?? euiTheme.colors.backgroundBasePlain,
+              backgroundColor,
               borderRadius: euiTheme.border.radius.medium,
             }}
           />
@@ -62,7 +63,7 @@ export const StepExecutionTimeline = ({
             type={iconType}
             color="warning"
             css={{
-              backgroundColor: backgroundColor ?? euiTheme.colors.backgroundBasePlain,
+              backgroundColor,
               borderRadius: euiTheme.border.radius.medium,
             }}
           />
@@ -79,12 +80,6 @@ export const StepExecutionTimeline = ({
         icon,
       };
     });
-  }, [
-    backgroundColor,
-    euiTheme.border.radius.medium,
-    euiTheme.colors.backgroundBasePlain,
-    getFormattedDateTime,
-    logs,
-  ]);
+  }, [backgroundColor, euiTheme.border.radius.medium, getFormattedDateTime, logs]);
   return <EuiTimeline items={items} gutterSize="m" />;
 };
