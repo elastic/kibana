@@ -53,7 +53,7 @@ export const ESQLDataGridAccordion = ({
         .euiAccordion__childWrapper {
           flex: ${isAccordionOpen ? 1 : 'none'};
         }
-        padding: 0 ${euiTheme.size.base}
+        padding: 0 ${euiTheme.size.base};
         border-bottom: ${euiTheme.border.thin};
       `}
     >
