@@ -239,6 +239,7 @@ export function ContentFrameworkTable({
       initialPageSize={0}
       customRenderCellValue={cellValueRenderer}
       customRenderCellPopover={cellPopoverRenderer}
+      gridStyle={{ stripes: false, rowHover: 'none' }}
     />
   );
 }
