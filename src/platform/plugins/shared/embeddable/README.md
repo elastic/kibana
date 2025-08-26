@@ -33,7 +33,7 @@ embeddableSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
 
 Embeddables are rendered with `EmbeddableRenderer` React component.
 
-### Publishing packages
+### Common publishing packages
 An embeddable API is a plain old typescript object that implements any number of shared interfaces. A shared interface is defined by a publishing package. A publishing package also provides a type guard that is used to check if a given object fulfills the interface.
 
 The table below lists interface implemenations provided by `EmbeddableRenderer` React component. An embeddable does not need to implement these interfaces as they are already provided.
@@ -61,19 +61,27 @@ The table below lists optional publishing package interfaces. Embeddables may im
 | HasLibraryTransforms | Interface for linking to and unlinking from the library | ACTION_ADD_TO_LIBRARY, ACTION_UNLINK_FROM_LIBRARY |
 | HasReadOnlyCapabilities | Interface for showing the embeddable configuration for read only users | ACTION_SHOW_CONFIG_PANEL |
 | HasSupportedTriggers | Inteface for publishing supported triggers | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
-| HasVisualizeConfig | Interface for accessing Visualize embeddable state | ACTION_EDIT_IN_LENS, CONVERT_LEGACY_MARKDOWN_ACTION_ID, ACTION_DEPRECATION_BADGE |
-| LensApiCallbacks | Inteface implements Lens API | ADD_TO_EXISTING_CASE_ACTION_ID, ACTION_OPEN_IN_DISCOVER |
 | PublishesBlockingError | Interface for publishing unrecoverable errors | Embeddable panel to display error state |
 | PublishesDataLoading | Interface for publishing when embeddable is loading | Auto refresh |  
 | PublishesDataViews | Interface for accessing embeddable data views | Unified search bar type ahead, ACTION_CUSTOMIZE_PANEL, ACTION_EXPLORE_DATA |
 | PublishesDescription | Interface for accessing embeddable description | |
 | PublishesRendered | Interface for publishing rendered complete | |
 | PublishesSavedObjectId | Interface for surfacing saved object id | |
-| PublishesSavedSearch | Interface for accessing Discover session embeddable state | generateCsvReport | 
 | PublishesTimeRange | Interface for accessing time range state | CUSTOM_TIME_RANGE_BADGE |
 | PublishesTitle | Interface for accessing embeddable title | ACTION_CUSTOMIZE_PANEL |
 | PublishesUnifiedSearch | Interface for publishing unified search state | BADGE_FILTERS_NOTIFICATION |
 | PublishesUnsavedChanges | Interface for publishing when embeddable has unsaved changes | Dashboard unsaved chnages notification and reset |
+
+### Custom publishing packages
+Embeddables can expose interfaces unique to a single embeddable implemenation.
+The table below lists interfaces that only apply to single embeddable types.
+These interfaces may be used by actions to imperatively interact with specific embeddable types.
+
+| Interface | Description | Used by |
+| --------- | ----------- | --------- |
+| HasVisualizeConfig | Interface for accessing Visualize embeddable state | ACTION_EDIT_IN_LENS, CONVERT_LEGACY_MARKDOWN_ACTION_ID, ACTION_DEPRECATION_BADGE |
+| LensApiCallbacks | Inteface implements Lens API | ADD_TO_EXISTING_CASE_ACTION_ID, ACTION_OPEN_IN_DISCOVER |
+| PublishesSavedSearch | Interface for accessing Discover session embeddable state | generateCsvReport | 
 
 ### Embeddable panel
 The `EmbeddableRenderer` React component wraps the embeddable component in an embeddable panel. The embeddable panel provides UI elements for interacting with the embeddable.
