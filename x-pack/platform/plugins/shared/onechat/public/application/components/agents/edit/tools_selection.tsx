@@ -228,7 +228,6 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredTools, setFilteredTools] = useState<ToolDefinition[]>(tools);
   const [pageIndex, setPageIndex] = useState(0);
 
   const pageSize = 10;
@@ -243,9 +242,15 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     return result;
   }, [tools, showActiveOnly, selectedTools]);
 
-  useEffect(() => {
-    setFilteredTools(displayTools);
-  }, [displayTools]);
+  const filteredTools = useMemo(() => {
+    if (!searchQuery) {
+      return displayTools;
+    }
+
+    return EuiSearchBar.Query.execute(EuiSearchBar.Query.parse(searchQuery), displayTools, {
+      defaultFields: ['id', 'description', 'type'],
+    });
+  }, [searchQuery, displayTools]);
 
   useEffect(() => {
     setPageIndex(0);
@@ -314,19 +319,12 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
           searchThreshold: 1,
         },
       ],
-      onChange: ({ query, queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
+      onChange: ({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
         if (searchError) {
           return;
         }
 
-        const newItems = query
-          ? EuiSearchBar.Query.execute(query, displayTools, {
-              defaultFields: ['id', 'description', 'type'],
-            })
-          : displayTools;
-
         setSearchQuery(queryText);
-        setFilteredTools(newItems);
       },
       query: searchQuery,
     };
