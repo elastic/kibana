@@ -8,12 +8,16 @@
 import React, { useState, useCallback } from 'react';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { AISummary } from '@kbn/cases-ai';
-import * as i18n from './translations';
-import { useGetCaseSummary } from '../../../../containers/use_get_case_summary';
-import { useGetInferenceConnectors } from '../../../../containers/use_get_inference_connectors';
-import { useLicense } from '../../../../common/use_license';
+import * as i18n from '../translations';
+import { useGetCaseSummary } from '../../../containers/use_get_case_summary';
+import { useGetInferenceConnectors } from '../../../containers/use_get_inference_connectors';
+import { useLicense } from '../../../common/use_license';
 
-export const CaseSummary = React.memo(({ caseId }: { caseId: string }) => {
+export interface CaseSummaryProps {
+  caseId: string;
+}
+
+export const CaseSummary = ({ caseId }: CaseSummaryProps) => {
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const { data: connectorsResponse } = useGetInferenceConnectors();
   const connectorId =
@@ -54,6 +58,6 @@ export const CaseSummary = React.memo(({ caseId }: { caseId: string }) => {
       <EuiSpacer size="m" />
     </EuiFlexItem>
   );
-});
+};
 
 CaseSummary.displayName = 'CaseSummary';

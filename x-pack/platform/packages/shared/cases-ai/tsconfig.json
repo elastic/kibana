@@ -5,7 +5,8 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
@@ -15,5 +16,8 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/ai-assistant-icon",
+    "@kbn/i18n-react",
+  ]
 }

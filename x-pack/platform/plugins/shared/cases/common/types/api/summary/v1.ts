@@ -16,12 +16,10 @@ export const CaseSummaryRequestRt = rt.strict({
   connectorId: rt.string,
 });
 
-export const CaseSummaryResponseRt = rt.exact(
-  rt.partial({
-    /**
-     * response from LLM
-     */
-    content: rt.string,
-    generatedAt: rt.string,
-  })
-);
+export const CaseSummaryResponseRt = rt.strict({
+  /**
+   * response from LLM
+   */
+  content: rt.string,
+  generatedAt: rt.string,
+});

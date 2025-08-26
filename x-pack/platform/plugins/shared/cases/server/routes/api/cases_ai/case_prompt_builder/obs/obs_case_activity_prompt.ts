@@ -114,7 +114,7 @@ function getSLOsFromComments(comments: Attachments): Record<string, string> {
       const pageAttachment = comment.persistableStateAttachmentState;
       if (pageAttachment.type === PageAttachmentType.slo_history) {
         const sloCommentId = comment.id;
-        const sloLabel = (pageAttachment.url as { label: string }).label;
+        const sloLabel = (pageAttachment.url as { label?: string })?.label ?? '';
         if (sloCommentId && sloLabel) {
           slos[sloCommentId] = sloLabel;
         }
@@ -134,7 +134,7 @@ function getSyntheticsMonitorsFromComments(comments: Attachments): Record<string
       const pageAttachment = comment.persistableStateAttachmentState;
       if (pageAttachment.type === PageAttachmentType.synthetics_monitor) {
         const monitorCommentId = comment.id;
-        const monitorLabel = (pageAttachment.url as { label: string }).label;
+        const monitorLabel = (pageAttachment.url as { label?: string })?.label ?? '';
         if (monitorCommentId && monitorLabel) {
           syntheticsMonitors[monitorCommentId] = monitorLabel;
         }

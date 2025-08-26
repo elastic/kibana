@@ -22,8 +22,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 export interface AISummaryProps {
   title: string;
   summary?: {
-    content?: string;
-    generatedAt?: string;
+    content: string;
+    generatedAt: string;
   };
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
@@ -88,7 +88,7 @@ export const AISummary: React.FC<AISummaryProps> = ({
         onToggle={onToggle}
       >
         <EuiSpacer size="m" />
-        {summary?.content && (
+        {summary && (
           <EuiPanel
             hasBorder={false}
             hasShadow={false}
