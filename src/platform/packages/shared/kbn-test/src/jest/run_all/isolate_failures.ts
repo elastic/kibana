@@ -10,7 +10,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Config } from '@jest/types';
 import Path from 'path';
-import type { AggregatedResult } from '@jest/reporters';
+import type { SlimAggregatedResult } from './types';
 import { runJestWithConfig } from './run_jest_with_config';
 import { createTempJestConfig } from './create_temp_jest_config';
 
@@ -19,7 +19,7 @@ interface IsolateFailuresOptions {
   dataDir: string;
   log: ToolingLog;
   failedTestPath: string;
-  initialRunResults: AggregatedResult;
+  initialRunResults: SlimAggregatedResult;
 }
 
 /**
@@ -40,7 +40,7 @@ async function runJestWithFiles(
   });
 
   const resultsPath = Path.join(dataDir, `${configId}.results.json`);
-  const finalJestFlags = [...jestFlags, '--outputFile', resultsPath, ...testFiles];
+  const finalJestFlags = [...jestFlags, ...testFiles];
 
   return await runJestWithConfig({
     configPath: tempConfigPath,
@@ -52,7 +52,7 @@ async function runJestWithFiles(
 }
 
 function extractFailureDetails(
-  aggregated: AggregatedResult
+  aggregated: SlimAggregatedResult
 ): { testPath?: string; testName?: string; errorMessage?: string } | undefined {
   const testResults = aggregated.testResults;
   for (const testResult of testResults) {
@@ -85,7 +85,7 @@ function extractFailureDetails(
  * and (optionally) the specific test name. Ignores failures in other files.
  */
 function hasFailureInTarget(
-  aggregated: AggregatedResult,
+  aggregated: SlimAggregatedResult,
   targetPath: string,
   targetTestName?: string
 ): boolean {
@@ -145,6 +145,7 @@ export async function isolateFailures({
     [failedTestPath],
     ['--runInBand', '--silent']
   );
+
   if (isolatedFileRun.testResults.numFailedTests > 0) {
     const details = extractFailureDetails(isolatedFileRun.testResults);
     if (details?.testPath) log.error(`Test file: ${details.testPath}`);

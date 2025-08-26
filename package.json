@@ -1450,6 +1450,7 @@
     "@huggingface/hub": "^2.2.0",
     "@jest/console": "^29.7.0",
     "@jest/reporters": "^29.7.0",
+    "@jest/test-sequencer": "^30.0.5",
     "@jest/transform": "^29.6.1",
     "@jest/types": "^29.6.3",
     "@kayahr/text-encoding": "^1.3.0",

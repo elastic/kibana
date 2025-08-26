@@ -8,6 +8,7 @@
  */
 
 const { REPO_ROOT } = require('@kbn/repo-info');
+const Path = require('path');
 
 /** @type {import('jest').Config} */
 const config = {
@@ -16,6 +17,8 @@ const config = {
   collectCoverage: false,
   passWithNoTests: true,
   testSequencer: require.resolve('./test_sequencer'),
+  cacheDirectory: Path.join(REPO_ROOT, 'data', 'jest-all-cache'),
+  id: 'jest-all',
 };
 
 module.exports = config;

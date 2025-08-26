@@ -12,6 +12,7 @@ import type { AggregatedResult } from '@jest/test-result';
 import type { Config } from '@jest/types';
 import Fs from 'fs';
 import Path from 'path';
+import type { SlimAggregatedResult, SlimTestResult, SlimAssertionResult } from './types';
 
 /**
  * Custom Jest reporter that writes JSON results to a file specified by globalConfig.outputFile
@@ -35,6 +36,24 @@ export default class JsonReporter implements Reporter {
 
     await Fs.promises.mkdir(Path.dirname(outputPath), { recursive: true });
 
-    await Fs.promises.writeFile(outputPath, JSON.stringify(results ?? {}, null, 2), 'utf8');
+    const slim: SlimAggregatedResult = {
+      numFailedTests: results?.numFailedTests ?? 0,
+      testResults:
+        results?.testResults.map<SlimTestResult>((tr) => ({
+          testFilePath: tr.testFilePath,
+          numFailingTests: tr.numFailingTests,
+          failureMessage: tr.failureMessage ?? undefined,
+          testResults: (tr.testResults || []).map<SlimAssertionResult>((ar) => ({
+            status: ar.status as SlimAssertionResult['status'],
+            title: ar.title,
+            fullName: (ar as any).fullName,
+            failureMessages: ar.failureMessages,
+          })),
+        })) ?? [],
+    };
+
+    await Fs.promises.writeFile(outputPath, JSON.stringify(slim), 'utf8');
+
+    console.log(`Completed writing to ${outputPath}`);
   }
 }

@@ -185,7 +185,10 @@ export function runJestAll() {
 
         await Fs.promises.writeFile(
           initialRunConfigFilepath,
-          JSON.stringify(initialRunConfig),
+          JSON.stringify({
+            ...initialRunConfig,
+            name: 'jest-all',
+          }),
           'utf8'
         );
 
@@ -206,8 +209,6 @@ export function runJestAll() {
           log,
           jestFlags: [
             ...passthroughJestFlags,
-            '--outputFile',
-            initialRunResultsPath,
             ...(flags.isolate ? ['--bail'] : []),
             ...targetPaths,
           ],
@@ -216,7 +217,7 @@ export function runJestAll() {
 
         if (initialRunResults.testResults.numFailedTests === 0) {
           // all tests passed
-          return;
+          continue;
         }
 
         if (flags.isolate) {
@@ -258,15 +259,18 @@ export function runJestAll() {
 
         const secondRunResultsPath = Path.join(dir, `second_results.json`);
 
+        // Build retry flags: start from passthrough, remove --maxWorkers (not compatible with --runInBand)
+        // and ensure --runInBand appears exactly once.
+        let retryFlags = removeFlagWithValue(passthroughJestFlags, '--maxWorkers');
+        retryFlags = retryFlags.filter((f) => f !== '--runInBand');
+        retryFlags = ['--runInBand', ...retryFlags];
+
         const secondRunResult = await runJestWithConfig({
           configPath: initialRunConfigFilepath,
           dataDir: dir,
           log,
           jestFlags: [
-            ...passthroughJestFlags,
-            '--runInBand',
-            '--outputFile',
-            secondRunResultsPath,
+            ...retryFlags,
             // Re-run exactly the failed files from the initial run
             ...failedFiles,
           ],
@@ -330,6 +334,23 @@ function buildJestCliFlags(argv: Record<string, unknown>): string[] {
     }
   }
   return flags;
+}
+
+/**
+ * Remove a flag that takes a value, e.g. ['--maxWorkers','4'] → removed both.
+ */
+function removeFlagWithValue(flags: string[], flagName: string): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < flags.length; i++) {
+    const tok = flags[i];
+    if (tok === flagName) {
+      // skip this and the next token if it exists (assumed to be the value)
+      i += 1;
+      continue;
+    }
+    out.push(tok);
+  }
+  return out;
 }
 
 /**
