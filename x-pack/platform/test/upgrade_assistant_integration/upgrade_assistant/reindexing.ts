@@ -245,8 +245,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('reindexes old 7.0 index', async () => {
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/reindexed-v7-6.0-data`) // reusing the index previously migrated in v7->v8 UA tests
+        .post(`/api/upgrade_assistant/reindex`) // reusing the index previously migrated in v7->v8 UA tests
         .set('kbn-xsrf', 'xxx')
+        .send({
+          indexName: 'reindexed-v7-6.0-data',
+          newIndexName: generateNewIndexName('dummydata', versionService),
+        })
         .expect(200);
 
       expect(body.indexName).to.equal('reindexed-v7-6.0-data');

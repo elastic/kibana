@@ -194,11 +194,20 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const createNewIndex = async (reindexOp: ReindexSavedObject) => {
-    const { indexName, newIndexName } = reindexOp.attributes;
+    const { indexName, newIndexName, settings: settingsStr } = reindexOp.attributes;
 
     const flatSettings = await actions.getFlatSettings(indexName);
     if (!flatSettings) {
       throw error.indexNotFound(`Index ${indexName} does not exist.`);
+    }
+
+    let newSettings: IndexSettings;
+
+    try {
+      newSettings = settingsStr ? JSON.parse(settingsStr) : {};
+    } catch (err) {
+      log.error(err);
+      throw err;
     }
 
     const { settings = {} } = flatSettings;
@@ -210,17 +219,21 @@ export const reindexServiceFactory = (
       'index.refresh_interval': settings['index.refresh_interval'],
     };
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const settings_override = {
+      ...newSettings,
+      // Reindexing optimizations
+      'index.number_of_replicas': 0,
+      'index.refresh_interval': -1,
+    };
+
     let createIndex;
     try {
       createIndex = await esClient.transport.request<{ acknowledged: boolean }>({
         method: 'POST',
         path: `_create_from/${indexName}/${newIndexName}`,
         body: {
-          settings_override: {
-            // Reindexing optimizations
-            'index.number_of_replicas': 0,
-            'index.refresh_interval': -1,
-          },
+          settings_override,
         },
       });
       /**
