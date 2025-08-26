@@ -131,7 +131,7 @@ export function createBatches({
 
   // create index (update) operations for all transformed documents
   for (const document of documents) {
-    const idChanged = document._id !== document._source.originId;
+    const idChanged = document._source.originId && document._id !== document._source.originId;
     const bulkIndexOperationBody = createBulkIndexOperationTuple(
       document,
       typeIndexMap,
