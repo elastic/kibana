@@ -9,7 +9,11 @@ import { CasePromptBuilder } from '../prompt_builder';
 
 export class SecurityPromptBuilder extends CasePromptBuilder {
   protected getOpeningInstructions() {
-    return `Create a structured summary of this case.\n\n`;
+    return `Summarize this case.`;
+  }
+
+  protected override getCaseDetails(): string {
+    return this.getCaseMetadata();
   }
 
   protected getAnalysisInstructions(): string {

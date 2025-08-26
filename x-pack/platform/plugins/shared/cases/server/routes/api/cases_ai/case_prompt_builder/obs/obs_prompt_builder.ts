@@ -11,11 +11,11 @@ import { CasePromptBuilder } from '../prompt_builder';
 export class ObservabilityPromptBuilder extends CasePromptBuilder {
   protected getOpeningInstructions() {
     return `You are an expert Site Reliability Engineer (SRE) specialized in incident investigation.
-  Create a structured summary of the following case for your fellow Site Reliability Engineers.\n\n`;
+  Create a structured summary of the following case for your fellow Site Reliability Engineers.`;
   }
 
-  protected override getAdditionalContext(): string {
-    return buildCaseActivityPrompt(this.caseData);
+  protected override getCaseDetails(): string {
+    return [this.getCaseMetadata(), buildCaseActivityPrompt(this.caseData)].join('\n\n');
   }
 
   protected getAnalysisInstructions(): string {
@@ -27,6 +27,6 @@ export class ObservabilityPromptBuilder extends CasePromptBuilder {
   4. Any Synthetics monitors attached\n
   Apart from that, provide following numbers in bullet points: Alerts and SLOs, only if they are available in the format of <alerts_count> Alerts.\n
   Suggest next steps for investigation.\n\n
-  Addiontial instructions: Focus on investigation related details and avoid referring to specific users.\n\n`;
+  Addiontial instructions: Focus on investigation related details and avoid referring to specific users.`;
   }
 }

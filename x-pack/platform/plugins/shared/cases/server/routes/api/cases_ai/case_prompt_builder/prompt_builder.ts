@@ -12,7 +12,7 @@ export abstract class CasePromptBuilder {
 
   protected abstract getOpeningInstructions(): string;
 
-  protected getCaseOverview(): string {
+  protected getCaseMetadata(): string {
     const {
       title,
       description,
@@ -45,24 +45,21 @@ export abstract class CasePromptBuilder {
     }
 
     if (description) {
-      caseOverview += `## Description\n${description}\n\n`;
+      caseOverview += `## Description\n${description}`;
     }
 
     return caseOverview;
   }
 
-  protected getAdditionalContext(): string {
+  protected getCaseDetails(): string {
     return '';
   }
 
   protected abstract getAnalysisInstructions(): string;
 
   buildSummary(): string {
-    return [
-      this.getOpeningInstructions(),
-      this.getCaseOverview(),
-      this.getAdditionalContext(),
-      this.getAnalysisInstructions(),
-    ].join('\n\n');
+    return [this.getOpeningInstructions(), this.getCaseDetails(), this.getAnalysisInstructions()]
+      .filter((prompt) => prompt.trim() !== '')
+      .join('\n\n');
   }
 }
