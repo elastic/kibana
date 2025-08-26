@@ -26,8 +26,7 @@ export function SearchClassicNavigationProvider({ getService }: FtrProviderConte
     let found: WebElementWrapper | null = null;
     for (const subject of subjects) {
       const visibleText = await subject.getVisibleText();
-      const ariaLabel = await subject.getAttribute('aria-label');
-      if (visibleText === text || ariaLabel === text) {
+      if (visibleText === text) {
         found = subject;
         break;
       }
