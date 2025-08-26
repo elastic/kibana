@@ -15,7 +15,7 @@ import {
   CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
   FIELD_USAGE_EVENT_NAME,
   FIELD_USAGE_EVENT_TYPE,
-  FIELD_USAGE_FIELD_NAME,
+  FIELD_USAGE_FIELD_NAMES,
   FIELD_USAGE_FILTER_OPERATION,
 } from './discover_ebt_manager_registrations';
 import { ContextualProfileLevel } from '../context_awareness';
@@ -38,7 +38,7 @@ enum FieldUsageEventName {
 }
 interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
-  [FIELD_USAGE_FIELD_NAME]?: string[];
+  [FIELD_USAGE_FIELD_NAMES]?: string[];
   [FIELD_USAGE_FILTER_OPERATION]?: FilterOperation;
 }
 
@@ -112,7 +112,7 @@ export class ScopedDiscoverEBTManager {
         fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
       );
 
-      eventData[FIELD_USAGE_FIELD_NAME] = categorizedFields;
+      eventData[FIELD_USAGE_FIELD_NAMES] = categorizedFields;
     }
 
     if (filterOperation) {
