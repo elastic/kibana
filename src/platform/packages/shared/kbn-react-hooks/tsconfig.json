@@ -17,5 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/std",
+    "@kbn/code-editor",
+    "@kbn/kibana-utils-plugin",
   ]
 }
