@@ -9,6 +9,7 @@ import { LockManagerService } from '@kbn/lock-manager';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { type SavedObjectsClientContract } from '@kbn/core/server';
+import { isEmpty } from 'lodash';
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
@@ -27,6 +28,7 @@ import {
   type DefaultRuleType,
   type SyntheticsDefaultRule,
 } from '../../../common/types/default_alerts';
+
 export class DefaultRuleService {
   private settings?: DynamicSettingsAttributes;
 
@@ -64,6 +66,15 @@ export class DefaultRuleService {
    */
   public async setupDefaultRules(spaceId: string) {
     this.settings = await this.getSettings();
+    if (isEmpty(this.settings?.defaultConnectors)) {
+      this.server.logger.debug(
+        `Default connectors are not set. Skipping default rule setup for space ${spaceId}.`
+      );
+      return {
+        statusRule: null,
+        tlsRule: null,
+      };
+    }
     return this.acquireLockOrFail(async () => {
       const [statusRule, tlsRule] = await Promise.allSettled([
         this.setupStatusRule(spaceId),
@@ -88,8 +99,7 @@ export class DefaultRuleService {
     const minimumInterval = this.server.alerting.getConfig().minimumScheduleInterval;
     const minimumIntervalInMs = parseDuration(minimumInterval.value);
     const defaultIntervalInMs = parseDuration('1m');
-    const interval = minimumIntervalInMs < defaultIntervalInMs ? '1m' : minimumInterval.value;
-    return interval;
+    return minimumIntervalInMs < defaultIntervalInMs ? '1m' : minimumInterval.value;
   }
 
   private async setupStatusRule(spaceId: string) {
