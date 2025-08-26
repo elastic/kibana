@@ -31,6 +31,7 @@ import { performChecks } from '../helpers';
 import {
   ConversationAuditAction,
   conversationAuditEvent,
+  getAuditAction,
 } from '../../ai_assistant_data_clients/conversations/audit_events';
 
 export const updateConversationRoute = (router: ElasticAssistantPluginRouter) => {
@@ -112,10 +113,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
             });
             auditLogger?.log(
               conversationAuditEvent({
-                action:
-                  conversationSharedState === ConversationSharedState.Private
-                    ? ConversationAuditAction.PRIVATE
-                    : ConversationAuditAction.SHARED,
+                action: getAuditAction(conversationSharedState),
                 id: conversation?.id,
                 title: conversation?.title,
                 users: request.body.users.filter(

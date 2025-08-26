@@ -7,6 +7,7 @@
 
 import type { EcsEvent } from '@kbn/core/server';
 import type { User } from '@kbn/elastic-assistant-common';
+import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 import type { AuditEvent } from '@kbn/security-plugin/server';
 import type { ArrayElement } from '@kbn/utility-types';
 
@@ -31,17 +32,32 @@ export enum AUDIT_OUTCOME {
 export enum ConversationAuditAction {
   SHARED = 'security_assistant_conversation_shared',
   PRIVATE = 'security_assistant_conversation_private',
+  RESTRICTED = 'security_assistant_conversation_restricted',
 }
+
+export const getAuditAction = (
+  conversationSharedState: ConversationSharedState
+): ConversationAuditAction => {
+  if (conversationSharedState === ConversationSharedState.Private) {
+    return ConversationAuditAction.PRIVATE;
+  }
+  if (conversationSharedState === ConversationSharedState.Restricted) {
+    return ConversationAuditAction.RESTRICTED;
+  }
+  return ConversationAuditAction.SHARED;
+};
 
 type VerbsTuple = [string, string, string];
 const conversationEventVerbs: Record<ConversationAuditAction, VerbsTuple> = {
   [ConversationAuditAction.SHARED]: ['share', 'sharing', 'shared'],
+  [ConversationAuditAction.RESTRICTED]: ['restrict', 'restricting', 'restricted'],
   [ConversationAuditAction.PRIVATE]: ['make private', 'making private', 'made private'],
 };
 
 const conversationEventTypes: Record<ConversationAuditAction, ArrayElement<EcsEvent['type']>> = {
   [ConversationAuditAction.SHARED]: AUDIT_TYPE.CHANGE,
   [ConversationAuditAction.PRIVATE]: AUDIT_TYPE.CHANGE,
+  [ConversationAuditAction.RESTRICTED]: AUDIT_TYPE.CHANGE,
 };
 
 export interface ConversationAuditEventParams {
@@ -76,7 +92,10 @@ export function conversationAuditEvent({
     : outcome === 'unknown'
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
-  if (action === ConversationAuditAction.SHARED && users) {
+  if (
+    (action === ConversationAuditAction.SHARED || action === ConversationAuditAction.RESTRICTED) &&
+    users
+  ) {
     const usersMessage =
       users.length > 0
         ? ` to user${users.length > 1 ? 's' : ''} (${users

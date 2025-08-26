@@ -17,18 +17,18 @@ describe('conversationAuditEvent', () => {
   const user1: User = { name: 'Alice', id: '123' } as User;
   const user2: User = { name: 'Bob', id: '456' } as User;
 
-  it('should format message for shared conversation with users', () => {
+  it('should format message for restricted conversation with users', () => {
     const event = conversationAuditEvent({
-      action: ConversationAuditAction.SHARED,
+      action: ConversationAuditAction.RESTRICTED,
       id: '123',
       title: 'Test',
       users: [user1, user2],
       outcome: 'success',
     });
     expect(event.message).toEqual(
-      `User has shared conversation [id=123, title="Test"] to users ([id=123, name=Alice], [id=456, name=Bob])`
+      `User has restricted conversation [id=123, title="Test"] to users ([id=123, name=Alice], [id=456, name=Bob])`
     );
-    expect(event?.event?.action).toBe(ConversationAuditAction.SHARED);
+    expect(event?.event?.action).toBe(ConversationAuditAction.RESTRICTED);
     expect(event?.event?.category).toEqual([AUDIT_CATEGORY.DATABASE]);
     expect(event?.event?.type).toEqual([AUDIT_TYPE.CHANGE]);
     expect(event?.event?.outcome).toBe('success');

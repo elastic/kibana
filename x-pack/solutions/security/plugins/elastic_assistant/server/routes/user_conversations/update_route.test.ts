@@ -268,13 +268,13 @@ describe('Update conversation route', () => {
       expect(context.elasticAssistant.auditLogger?.log).toHaveBeenCalled();
       expect(context.elasticAssistant.auditLogger?.log).toHaveBeenCalledWith({
         event: {
-          action: 'security_assistant_conversation_shared',
+          action: 'security_assistant_conversation_restricted',
           category: ['database'],
           outcome: 'success',
           type: ['change'],
         },
         message:
-          'User has shared conversation [id=04128c15-0d1b-4716-a4c5-46997ac7f3bd, title="Welcome"] to users ([id=user1, name=User One], [id=user2, name=User Two])',
+          'User has restricted conversation [id=04128c15-0d1b-4716-a4c5-46997ac7f3bd, title="Welcome"] to users ([id=user1, name=User One], [id=user2, name=User Two])',
       });
     });
 
