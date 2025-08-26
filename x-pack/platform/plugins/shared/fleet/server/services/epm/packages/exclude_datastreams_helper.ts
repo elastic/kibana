@@ -23,10 +23,10 @@ export function shouldIncludePackageWithDatastreamTypes(
 /**
  * Filter data_streams and policy templates to respect excluded DataStreamTypes
  */
-export function filterOutExcludedDataStreamTypes(
-  packageList: Array<Installable<RegistrySearchResult>>,
+export function filterOutExcludedDataStreamTypes<T extends RegistrySearchResult>(
+  packageList: Array<Installable<T>>,
   excludeDataStreamTypes: string[] = []
-): Array<Installable<RegistrySearchResult>> {
+): Array<Installable<T>> {
   if (excludeDataStreamTypes.length > 0) {
     // filter out packages where all data streams have excluded types e.g. metrics
     return packageList.reduce((acc, pkg) => {
