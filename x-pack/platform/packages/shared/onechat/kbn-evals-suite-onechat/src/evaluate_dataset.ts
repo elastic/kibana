@@ -42,7 +42,7 @@ export function createEvaluateDataset({
   phoenixClient: KibanaPhoenixClient;
   chatClient: OnechatEvaluationChatClient;
 }): EvaluateDataset {
-  return async function evaluateEsqlDataset({
+  return async function evaluateDataset({
     dataset: { name, description, examples },
   }: {
     dataset: {
@@ -62,7 +62,7 @@ export function createEvaluateDataset({
         dataset,
         task: async ({ input, output, metadata }) => {
           const response = await chatClient.converse({
-            messages: input.question,
+            messages: [{ message: input.question }],
           });
 
           // Running correctness evaluator as part of the task since quantitative correctness evaluators need its output
@@ -84,25 +84,7 @@ export function createEvaluateDataset({
           };
         },
       },
-      [
-        {
-          name: 'Criteria',
-          kind: 'LLM',
-          evaluate: async ({ input, output, expected, metadata }) => {
-            const result = await evaluators
-              .criteria([`The response contains the following information: ${expected.expected}`])
-              .evaluate({
-                input,
-                expected,
-                output,
-                metadata,
-              });
-
-            return result;
-          },
-        },
-        ...createQuantitativeCorrectnessEvaluators(),
-      ]
+      createQuantitativeCorrectnessEvaluators()
     );
   };
 }
