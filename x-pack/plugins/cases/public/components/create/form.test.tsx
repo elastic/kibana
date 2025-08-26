@@ -134,7 +134,7 @@ describe('CreateCaseForm', () => {
   });
 
   it('should not render connectors on basic license', () => {
-    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />);
+    appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
     expect(screen.queryByTestId('caseConnectors')).not.toBeInTheDocument();
   });
 
@@ -143,9 +143,8 @@ describe('CreateCaseForm', () => {
       license: { type: 'gold' },
     });
 
-    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
-      wrapperProps: { license },
-    });
+    appMockRenderer = createAppMockRenderer({ license });
+    appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
 
     expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
   });
