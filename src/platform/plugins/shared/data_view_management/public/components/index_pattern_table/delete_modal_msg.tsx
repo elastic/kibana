@@ -88,12 +88,15 @@ const DeleteModalMsgRender: React.FC<ModalProps> = ({ views, hasSpaces, relation
       const relationsTable = (
         <div>
           {relationships[id].length === MAX_DISPLAYED_RELATIONSHIPS && (
-            <EuiText size="xs">
-              {i18n.translate('indexPatternManagement.dataViewTable.maxRelationshipsShown', {
-                defaultMessage: 'Only the first {maxRelationships} relationships are shown.',
-                values: { maxRelationships: MAX_DISPLAYED_RELATIONSHIPS },
-              })}
-            </EuiText>
+            <>
+              <EuiText size="xs">
+                {i18n.translate('indexPatternManagement.dataViewTable.maxRelationshipsShown', {
+                  defaultMessage: 'Only the first {maxRelationships} relationships are shown.',
+                  values: { maxRelationships: MAX_DISPLAYED_RELATIONSHIPS },
+                })}
+              </EuiText>
+              <EuiSpacer size="xs" />
+            </>
           )}
           <EuiBasicTable items={relationships[id]} columns={relationsColumns} />
         </div>
@@ -129,7 +132,11 @@ const DeleteModalMsgRender: React.FC<ModalProps> = ({ views, hasSpaces, relation
       isExpander: true,
       name: (
         <EuiScreenReaderOnly>
-          <span>View relationships</span>
+          <span>
+            {i18n.translate('indexPatternManagement.dataViewTable.viewRelationships', {
+              defaultMessage: 'View relationships',
+            })}
+          </span>
         </EuiScreenReaderOnly>
       ),
       render: (id: RemoveDataViewProps['id']) => {
