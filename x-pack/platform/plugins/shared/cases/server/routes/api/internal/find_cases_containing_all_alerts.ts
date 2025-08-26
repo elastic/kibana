@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { type IKibanaResponse } from '@kbn/core/server';
 import pLimit from 'p-limit';
 import { createCasesRoute } from '../create_cases_route';
@@ -13,16 +14,19 @@ import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { type CasesClient } from '../../../client';
 import { type caseApiV1 } from '../../../../common/types/api';
 
-const params = {};
-
 // cases modal shows 10 cases by default
 const MAX_CONCURRENT_CASES = 10;
 
 export const findCasesContainingAllAlertsRoute = createCasesRoute({
-  method: 'get',
+  method: 'post',
   path: INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
   security: DEFAULT_CASES_ROUTE_SECURITY,
-  params,
+  params: {
+    body: schema.object({
+      alertIds: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      caseIds: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+    }),
+  },
   routerOptions: {
     access: 'internal',
   },
@@ -31,7 +35,7 @@ export const findCasesContainingAllAlertsRoute = createCasesRoute({
     request,
     response,
   }): Promise<IKibanaResponse<{ casesWithAllAttachments: string[] }>> => {
-    const { alertIds, caseIds } = request.query as caseApiV1.FindCasesContainingAllAlertsRequest;
+    const { alertIds, caseIds } = request.body as caseApiV1.FindCasesContainingAllAlertsRequest;
 
     if (!caseIds || !alertIds) {
       return response.ok({

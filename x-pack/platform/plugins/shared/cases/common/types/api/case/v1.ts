@@ -537,9 +537,9 @@ export const FindCasesContainingAllAlertsRequestRt = rt.exact(
     /**
      * The IDs of the alerts to find cases for.
      */
-    alertIds: rt.intersection([rt.string, rt.array(rt.string)]),
+    alertIds: rt.union([rt.string, rt.array(rt.string)]),
     // The IDs of the cases to find alerts for.
-    caseIds: rt.intersection([rt.string, rt.array(rt.string)]),
+    caseIds: rt.union([rt.string, rt.array(rt.string)]),
   })
 );
 
