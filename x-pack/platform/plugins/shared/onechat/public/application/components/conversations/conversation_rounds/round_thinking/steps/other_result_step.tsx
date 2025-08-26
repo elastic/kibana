@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCodeBlock } from '@elastic/eui';
+import { EuiAccordion, EuiCodeBlock, useGeneratedHtmlId } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import React from 'react';
 
@@ -14,16 +15,27 @@ interface OtherResultStepProps {
 }
 
 export const OtherResultStep: React.FC<OtherResultStepProps> = ({ result }) => {
+  const resultContentId = useGeneratedHtmlId({ prefix: 'result-accordion-content' });
   return (
-    <EuiCodeBlock
-      language="json"
-      fontSize="s"
-      paddingSize="s"
-      isCopyable={false}
-      overflowHeight={150}
-      transparentBackground
+    <EuiAccordion
+      id={resultContentId}
+      buttonContent={i18n.translate(
+        'xpack.onechat.conversation.round.otherResultStep.accordionButton',
+        {
+          defaultMessage: 'View content',
+        }
+      )}
     >
-      {JSON.stringify(result, null, 2)}
-    </EuiCodeBlock>
+      <EuiCodeBlock
+        language="json"
+        fontSize="s"
+        paddingSize="s"
+        isCopyable={false}
+        overflowHeight={150}
+        transparentBackground
+      >
+        {JSON.stringify(result, null, 2)}
+      </EuiCodeBlock>
+    </EuiAccordion>
   );
 };

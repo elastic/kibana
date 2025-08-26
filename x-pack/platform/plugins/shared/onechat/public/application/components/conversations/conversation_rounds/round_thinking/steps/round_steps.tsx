@@ -81,6 +81,13 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
     .euiTitle {
       ${useEuiFontSize('s')}
       font-weight: ${euiTheme.font.weight.regular};
+
+      /*
+      Align the title with the step bullet
+      I can't find any other way to do this, vertical-align doesn't work here
+      */
+      position: relative;
+      top: -2px;
     }
 
     .euiStepNumber,
