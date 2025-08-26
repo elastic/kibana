@@ -46,7 +46,7 @@ export const metricStateDefaults: MetricStateDefaults = {
   titlesTextAlign: 'left',
   primaryAlign: 'right',
   secondaryAlign: 'right',
-  iconAlign: 'left',
+  iconAlign: 'right',
   valueFontMode: 'default',
   primaryPosition: 'bottom',
   titleWeight: 'bold',
@@ -66,7 +66,7 @@ export const METRIC_LAYOUT_BY_POSITION: Record<'bottom' | 'top', MetricLayoutWit
     titlesTextAlign: 'left',
     titleWeight: 'bold',
     primaryAlign: 'right',
-    iconAlign: 'left',
+    iconAlign: 'right',
     secondaryAlign: 'right',
   },
   top: {

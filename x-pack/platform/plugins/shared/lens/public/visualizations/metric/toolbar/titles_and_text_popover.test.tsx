@@ -249,7 +249,7 @@ describe('TitlesAndTextPopover', () => {
         titlesTextAlign: 'left',
         titleWeight: 'bold',
         primaryAlign: 'right',
-        iconAlign: 'left',
+        iconAlign: 'right',
         secondaryAlign: 'right',
       })
     );
