@@ -1,9 +1,6 @@
 # https://moonrepo.dev/docs/config/toolchain
 $schema: 'https://moonrepo.dev/schemas/toolchain.json'
 
-# Extend and inherit an external configuration file. Must be a valid HTTPS URL or file system path.
-# extends: './shared/toolchain.yml'
-
 node:
   version: 22.17.1
   packageManager: yarn
@@ -18,42 +15,3 @@ node:
   syncVersionManagerConfig: nvm
   dedupeOnLockfileChange: true # Dedupe dependencies when the lockfile changes.
   syncProjectWorkspaceDependencies: false
-
-# Configures how moon integrates with TypeScript.
-typescript:
-  # When `syncProjectReferences` is enabled and a dependent project reference
-  # *does not* have a `tsconfig.json`, automatically create one.
-  createMissingConfig: false
-
-  # Append the sources of each project reference to the `include` field
-  # of each applicable project's `tsconfig.json`.
-  includeProjectReferenceSources: false
-
-  # Append shared types (from the TypeScript root) to the `include` field
-  # of every project's `tsconfig.json`.
-  includeSharedTypes: true
-
-  # Name of `tsconfig.json` file in each project root.
-  projectConfigFileName: 'tsconfig.typecheck.json'
-
-  # Path to the TypeScript root, relative from the workspace root.
-  root: '.'
-
-  # Name of `tsconfig.json` file in the TypeScript root.
-  rootConfigFileName: 'tsconfig.json'
-
-  # Name of the config file in the workspace root that defines shared compiler
-  # options for all project reference based config files.
-  rootOptionsConfigFileName: 'tsconfig.options.json'
-
-  # Update a project's `tsconfig.json` to route the `outDir` compiler option
-  # to moon's `.moon/cache` directory.
-  routeOutDirToCache: false
-
-  # Sync a project's dependencies as project references within the
-  # project's `tsconfig.json` and the workspace root `tsconfig.json`.
-  syncProjectReferences: false
-
-  # Sync a project's project references as import aliases to the `paths`
-  # compiler option in each applicable project.
-  syncProjectReferencesToPaths: false

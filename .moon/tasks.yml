@@ -1,10 +1,6 @@
 $schema: https://moonrepo.dev/schemas/tasks.json
 
 fileGroups:
-  "globalIgnoreConfigs":
-    - "!.moon/**"
-    - "!package.json"
-    - "!yarn.lock"
   "globalTsConfigs":
     - "/tsconfig.json"
     - "/tsconfig.base.json"
