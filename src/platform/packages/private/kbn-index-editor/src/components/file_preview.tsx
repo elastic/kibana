@@ -46,7 +46,7 @@ interface FilePreviewItem {
   columnNames: Exclude<FindFileStructureResponse['column_names'], undefined>;
 }
 
-const FILE_PREVIEW_LIMIT = 10;
+const FILE_PREVIEW_ROWS_LIMIT = 10;
 
 export const FilesPreview: FC = () => {
   const { filesStatus, uploadStatus, fileClashes, deleteFile } = useFileUploadContext();
@@ -73,7 +73,7 @@ export const FilesPreview: FC = () => {
             return previewDocs(
               fileStatus.data,
               fileStatus.results?.ingest_pipeline!,
-              FILE_PREVIEW_LIMIT
+              FILE_PREVIEW_ROWS_LIMIT
             );
           }
         })
@@ -112,7 +112,10 @@ export const FilesPreview: FC = () => {
             dataView: dV,
             columnNames,
             mappings,
-            fileContents: status.fileContents.split('\n').slice(0, FILE_PREVIEW_LIMIT).join('\n'),
+            fileContents: status.fileContents
+              .split('\n')
+              .slice(0, FILE_PREVIEW_ROWS_LIMIT)
+              .join('\n'),
             filePreview: {},
           };
 
