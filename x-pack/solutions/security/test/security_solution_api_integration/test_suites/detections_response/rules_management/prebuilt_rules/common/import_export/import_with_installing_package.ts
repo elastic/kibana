@@ -16,7 +16,7 @@ import {
   deletePrebuiltRulesFleetPackage,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   PREBUILT_RULE_ASSET_A,
   PREBUILT_RULE_ASSET_B,

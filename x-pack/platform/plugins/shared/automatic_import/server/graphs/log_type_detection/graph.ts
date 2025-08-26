@@ -11,9 +11,9 @@ import type { LogFormatDetectionState } from '../../types';
 import { EX_ANSWER_LOG_TYPE } from './constants';
 import { handleLogFormatDetection } from './detection';
 import { handleCSV } from '../csv/csv';
-import { ESProcessorItem, SamplesFormat } from '../../../common';
+import type { ESProcessorItem, SamplesFormat } from '../../../common';
 import { getKVGraph } from '../kv/graph';
-import { LogDetectionGraphParams, LogDetectionBaseNodeParams } from './types';
+import type { LogDetectionGraphParams, LogDetectionBaseNodeParams } from './types';
 import { LogFormat } from '../../constants';
 import { getUnstructuredGraph } from '../unstructured/graph';
 

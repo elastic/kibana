@@ -25,8 +25,8 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { get } from 'lodash';
 
-import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
+import type { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -56,7 +56,7 @@ import {
   waitForRuleFailure,
   routeWithNamespace,
 } from '../../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { getMetricsRequest, getMetricsWithRetry } from '../../utils';
 

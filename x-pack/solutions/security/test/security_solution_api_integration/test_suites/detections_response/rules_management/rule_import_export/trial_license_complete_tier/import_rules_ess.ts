@@ -19,7 +19,7 @@ import {
 } from '../../../utils';
 import { deleteAllRules, createRule } from '../../../../../config/services/detections_response';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createConnector } from '../../../utils/connectors';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 

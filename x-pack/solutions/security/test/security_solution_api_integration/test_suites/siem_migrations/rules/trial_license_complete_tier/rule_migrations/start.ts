@@ -5,12 +5,9 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import {
-  SiemMigrationsAPIErrorResponse,
-  defaultOriginalRule,
-  ruleMigrationRouteHelpersFactory,
-} from '../../../utils';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { SiemMigrationsAPIErrorResponse } from '../../../utils';
+import { defaultOriginalRule, ruleMigrationRouteHelpersFactory } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

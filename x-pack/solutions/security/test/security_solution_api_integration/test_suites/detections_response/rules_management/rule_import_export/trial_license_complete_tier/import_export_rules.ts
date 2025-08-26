@@ -30,7 +30,7 @@ import {
 } from '../../../../../config/services/detections_response';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 // This test was meant to be more full flow, ensuring that
 // exported rules are able to be reimported as opposed to

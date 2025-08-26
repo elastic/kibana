@@ -6,9 +6,10 @@
  */
 
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
-import { UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { UpdateToolPayload, UpdateToolResponse } from '../../../../common/http_api/tools';
+import type { UpdateToolPayload, UpdateToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useOnechatServices } from '../use_onechat_service';

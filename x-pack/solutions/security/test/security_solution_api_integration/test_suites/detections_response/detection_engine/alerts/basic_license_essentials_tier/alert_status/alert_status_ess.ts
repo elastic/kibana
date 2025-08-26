@@ -15,7 +15,7 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { refreshIndex, setAlertStatus } from '../../../../utils';
 import {
   createAlertsIndex,
@@ -29,7 +29,7 @@ import {
   getRuleForAlertTesting,
 } from '../../../../../../config/services/detections_response';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../../config/services/common';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {

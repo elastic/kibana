@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { get } from 'lodash';
-import {
+import type {
   EqlRuleCreateProps,
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -24,7 +24,7 @@ import {
   waitForRuleSuccess,
   waitForAlertsToBePresent,
 } from '../../../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

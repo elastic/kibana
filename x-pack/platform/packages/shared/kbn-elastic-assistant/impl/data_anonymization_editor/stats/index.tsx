@@ -6,8 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { Replacements } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import React, { useMemo } from 'react';
 
 import styled from '@emotion/styled';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactText, useContext, useState } from 'react';
+import type { ReactText } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   EuiBasicTable,
   EuiFlexItem,

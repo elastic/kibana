@@ -6,8 +6,8 @@
  */
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { FtrConfigProviderContext } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { installMockPrebuiltRulesPackage } from '../../test_suites/detections_response/utils';
 import { services } from './services';
 export interface CreateTestConfigOptions {

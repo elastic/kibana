@@ -7,8 +7,8 @@
 
 import os from 'os';
 import { rmSync } from 'fs';
-import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import {
   ENDPOINT_PACKAGE_NAME,
   PREBUILT_RULES_PACKAGE_NAME,

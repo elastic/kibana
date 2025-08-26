@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  ReadPrebuiltRulesAndTimelinesStatusResponse,
-  PREBUILT_RULES_STATUS_URL,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
+import type { ReadPrebuiltRulesAndTimelinesStatusResponse } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
+import { PREBUILT_RULES_STATUS_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import { refreshSavedObjectIndices } from '../../refresh_index';

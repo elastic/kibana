@@ -13,7 +13,7 @@ import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterTerms } from './create_filter/terms';
 import { aggRareTermsFnName } from './rare_terms_fn';
-import { BaseAggParams } from '../types';
+import type { BaseAggParams } from '../types';
 
 import { KBN_FIELD_TYPES } from '../../..';
 

@@ -12,7 +12,7 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_ALERT_TAGS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { setAlertTags } from '../../../utils';
 import {
@@ -26,7 +26,7 @@ import {
   waitForRuleSuccess,
   getRuleForAlertTesting,
 } from '../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {

@@ -7,21 +7,19 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import semverCompare from 'semver/functions/compare';
-import semverValid from 'semver/functions/valid';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getPosturePolicy } from '../utils';
-import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
-import { AwsAccountType, NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
+import { updatePolicyWithInputs } from '../utils';
+import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
+import { RadioGroup } from '../../csp_boxed_radio_group';
+import type { AwsAccountType, UpdatePolicy } from '../types';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
-const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview20';
-const getAwsAccountType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
-): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type']?.value;
+const getAwsAccountType = (input: NewPackagePolicyInput): AwsAccountType | undefined =>
+  input.streams[0].vars?.['aws.account_type']?.value;
 
 const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
@@ -62,36 +60,38 @@ export const AwsAccountTypeSelect = ({
   packageInfo,
   disabled,
 }: {
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
-  // This will disable the aws org option for any version below 1.5.0-preview20 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
-  const isValidSemantic = semverValid(packageInfo.version);
-  const isAwsOrgDisabled = isValidSemantic
-    ? semverCompare(packageInfo.version, AWS_ORG_MINIMUM_PACKAGE_VERSION) < 0
-    : true;
+  const { awsOrganizationEnabled, awsPolicyType } = useCloudSetup();
 
   const awsAccountTypeOptions = useMemo(
-    () => getAwsAccountTypeOptions(isAwsOrgDisabled),
-    [isAwsOrgDisabled]
+    () => getAwsAccountTypeOptions(!awsOrganizationEnabled),
+    [awsOrganizationEnabled]
   );
 
+  const awsAccountType = useMemo(() => getAwsAccountType(input), [input]);
+
   useEffect(() => {
-    if (!getAwsAccountType(input)) {
+    if (!awsAccountType) {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
-          'aws.account_type': {
-            value: isAwsOrgDisabled ? AWS_SINGLE_ACCOUNT : AWS_ORGANIZATION_ACCOUNT,
-            type: 'text',
-          },
-        }),
+        updatedPolicy: updatePolicyWithInputs(
+          newPolicy,
+          awsPolicyType,
+
+          {
+            'aws.account_type': {
+              value: awsOrganizationEnabled ? AWS_ORGANIZATION_ACCOUNT : AWS_SINGLE_ACCOUNT,
+              type: 'text',
+            },
+          }
+        ),
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, updatePolicy]);
+  }, [awsAccountType, awsOrganizationEnabled, awsPolicyType, input, newPolicy, updatePolicy]);
 
   return (
     <>
@@ -102,7 +102,7 @@ export const AwsAccountTypeSelect = ({
         />
       </EuiText>
       <EuiSpacer size="l" />
-      {isAwsOrgDisabled && (
+      {!awsOrganizationEnabled && (
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
@@ -119,7 +119,7 @@ export const AwsAccountTypeSelect = ({
         options={awsAccountTypeOptions}
         onChange={(accountType) => {
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+            updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
               'aws.account_type': {
                 value: accountType,
                 type: 'text',

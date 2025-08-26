@@ -8,7 +8,7 @@
 import React from 'react';
 import { ThemeProvider, css } from '@emotion/react';
 import type { StoryObj, Meta } from '@storybook/react';
-import { Writable } from '@kbn/utility-types';
+import type { Writable } from '@kbn/utility-types';
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
 import type {
   EdgeViewModel,

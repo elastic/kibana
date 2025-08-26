@@ -7,7 +7,7 @@
 
 import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
-import { FtrProviderContext } from '../../configs/ftr_provider_context';
+import type { FtrProviderContext } from '../../configs/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService, getPageObjects } = providerContext;

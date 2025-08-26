@@ -8,10 +8,8 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
-  RuleExecutionStatus,
-  RuleExecutionStatusEnum,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { waitFor } from '../wait_for';
 import { routeWithNamespace } from '../route_with_namespace';
 

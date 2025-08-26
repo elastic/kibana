@@ -11,7 +11,7 @@ import {
   BulkActionTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { deleteAllRules } from '../../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,

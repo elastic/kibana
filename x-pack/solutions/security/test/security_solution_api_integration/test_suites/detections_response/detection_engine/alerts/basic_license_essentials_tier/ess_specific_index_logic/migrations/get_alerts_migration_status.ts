@@ -16,7 +16,7 @@ import {
 } from '../../../../../../../config/services/detections_response';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../../../config/services/common';
 
-import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');

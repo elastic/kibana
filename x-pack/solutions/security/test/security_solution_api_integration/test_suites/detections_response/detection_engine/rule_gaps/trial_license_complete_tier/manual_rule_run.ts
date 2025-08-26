@@ -8,8 +8,8 @@
 import expect from 'expect';
 
 import moment from 'moment';
-import { BackfillResponse } from '@kbn/alerting-plugin/common/routes/backfill/response';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { BackfillResponse } from '@kbn/alerting-plugin/common/routes/backfill/response';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams, scheduleRuleRun } from '../../../utils';
 import {
   createAlertsIndex,

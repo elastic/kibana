@@ -5,34 +5,32 @@
  * 2.0.
  */
 
-import {
+import type {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListItemSchema,
-  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
+import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import {
   ENDPOINT_ARTIFACT_LISTS,
-  ENDPOINT_ARTIFACT_LIST_IDS,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
-  ENDPOINT_LIST_NAME,
-  ENDPOINT_LIST_DESCRIPTION,
-  ENDPOINT_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { Response } from 'superagent';
+import type { Response } from 'superagent';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/trusted_apps/constants';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { EVENT_FILTER_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/event_filters/constants';
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/host_isolation_exceptions/constants';
 import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/blocklist/constants';
+import { TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/trusted_devices/constants';
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { isArtifactGlobal } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
-import { FtrProviderContext } from '../configs/ftr_provider_context';
-import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
+import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/endpoint_exceptions/constants';
+import type { FtrProviderContext } from '../configs/ftr_provider_context';
+import type { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
 
 export interface ArtifactTestData {
   artifact: ExceptionListItemSchema;
@@ -65,6 +63,17 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
 
         return res;
       };
+    }
+
+    async deleteList(
+      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+      supertest: TestAgent = this.supertest
+    ): Promise<void> {
+      await supertest
+        .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .then(this.getHttpResponseFailureHandler([404]));
     }
 
     async ensureListExists(
@@ -138,16 +147,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       overrides: Partial<CreateExceptionListItemSchema> = {},
       options?: ArtifactCreateOptions
     ): Promise<ArtifactTestData> {
-      await this.ensureListExists(
-        {
-          name: ENDPOINT_LIST_NAME,
-          description: ENDPOINT_LIST_DESCRIPTION,
-          list_id: ENDPOINT_LIST_ID,
-          type: ExceptionListTypeEnum.ENDPOINT,
-          namespace_type: 'agnostic',
-        },
-        options
-      );
+      await this.ensureListExists(ENDPOINT_EXCEPTIONS_LIST_DEFINITION, options);
       const endpointException =
         this.exceptionsGenerator.generateEndpointExceptionForCreate(overrides);
 
@@ -194,14 +194,27 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       return this.createExceptionItem(blocklist, options);
     }
 
+    async createTrustedDevice(
+      overrides: Partial<CreateExceptionListItemSchema> = {},
+      options?: ArtifactCreateOptions
+    ): Promise<ArtifactTestData> {
+      await this.ensureListExists(TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION, options);
+      const trustedDevice = this.exceptionsGenerator.generateTrustedDeviceForCreate(overrides);
+
+      return this.createExceptionItem(trustedDevice, options);
+    }
+
     async createArtifact(
-      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number] | typeof ENDPOINT_LIST_ID,
+      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
       overrides: Partial<CreateExceptionListItemSchema> = {},
       options?: ArtifactCreateOptions
     ): Promise<ArtifactTestData> {
       switch (listId) {
         case ENDPOINT_ARTIFACT_LISTS.trustedApps.id: {
           return this.createTrustedApp(overrides, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.trustedDevices.id: {
+          return this.createTrustedDevice(overrides, options);
         }
         case ENDPOINT_ARTIFACT_LISTS.eventFilters.id: {
           return this.createEventFilter(overrides, options);
@@ -212,7 +225,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
         case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
           return this.createHostIsolationException(overrides, options);
         }
-        case ENDPOINT_LIST_ID: {
+        case ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id: {
           return this.createEndpointException(overrides, options);
         }
         default:

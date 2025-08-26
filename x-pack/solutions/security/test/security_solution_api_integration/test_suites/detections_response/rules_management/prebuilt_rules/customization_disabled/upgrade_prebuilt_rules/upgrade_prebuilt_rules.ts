@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
+import type { QueryRuleCreateFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ModeEnum,
   PERFORM_RULE_UPGRADE_URL,
   PickVersionValuesEnum,
-  QueryRuleCreateFields,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import expect from 'expect';
 import { deleteAllRules } from '../../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObjectOfType,

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { EuiForm } from '@elastic/eui';
 
 import { FormProvider } from '../form_context';
 import { FormDataContextProvider } from '../form_data_context';
-import { FormHook } from '../types';
+import type { FormHook } from '../types';
 
 export interface Props {
   form: FormHook<any>;

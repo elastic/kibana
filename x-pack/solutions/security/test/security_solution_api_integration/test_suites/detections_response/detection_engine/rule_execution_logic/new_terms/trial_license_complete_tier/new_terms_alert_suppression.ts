@@ -20,7 +20,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
-import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 
@@ -37,7 +37,7 @@ import {
   setAlertStatus,
   dataGeneratorFactory,
 } from '../../../../utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 import type { IEsSearchResponse } from '@kbn/search-types';
 
 import type { SearchService, SendOptions } from '@kbn/ftr-common-functional-services';

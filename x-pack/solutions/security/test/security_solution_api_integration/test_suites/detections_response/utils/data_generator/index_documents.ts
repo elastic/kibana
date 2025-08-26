@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { v4 } from 'uuid';
 
 interface IndexDocumentsParams {
