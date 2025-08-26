@@ -547,7 +547,7 @@ export function getDiscoverStateContainer({
 
     const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     const scopedEbtManager = scopedEbtManager$.getValue();
-    if (scopedEbtManager && fields) {
+    if (scopedEbtManager) {
       await scopedEbtManager.trackSubmittingQueryEvent({
         fieldNames: fields,
         fieldsMetadata: services.fieldsMetadata,
