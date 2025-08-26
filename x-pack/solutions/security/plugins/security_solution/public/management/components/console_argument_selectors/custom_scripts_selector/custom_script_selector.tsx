@@ -21,9 +21,23 @@ interface CustomScriptSelectorState {
   isPopoverOpen: boolean;
 }
 
+/**
+ * Hook wrapper that adapts useGetCustomScripts to the expected signature
+ */
+const useCustomScriptsDataHook = (params: unknown) => {
+  const agentType = params as ResponseActionAgentType;
+  const result = useGetCustomScripts(agentType);
+  
+  return {
+    data: result.data || [],
+    isLoading: result.isLoading,
+    error: result.error,
+  };
+};
+
 export const CustomScriptSelector = memo<
   CommandArgumentValueSelectorProps<string, CustomScriptSelectorState>
->(({ value, valueText, onChange, store, command, requestFocus }) => {
+>(({ value, valueText, onChange, store, command, requestFocus, argName, argIndex }) => {
   // Extract agentType from command.meta instead of direct parameter
   const agentType = command.commandDefinition.meta?.agentType as ResponseActionAgentType;
 
@@ -35,7 +49,9 @@ export const CustomScriptSelector = memo<
       store={store}
       command={command}
       requestFocus={requestFocus}
-      useDataHook={useGetCustomScripts}
+      argName={argName}
+      argIndex={argIndex}
+      useDataHook={useCustomScriptsDataHook}
       hookParams={agentType}
       transformToOptions={transformCustomScriptsToOptions}
       config={CUSTOM_SCRIPTS_CONFIG}

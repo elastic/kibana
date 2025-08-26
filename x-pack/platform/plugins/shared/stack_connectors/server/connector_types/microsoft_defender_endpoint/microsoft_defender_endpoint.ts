@@ -54,6 +54,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   MicrosoftDefenderEndpointSecrets
 > {
   private readonly oAuthToken: OAuthTokenManager;
+  private readonly experimentalFeatures: ExperimentalFeatures;
 
   private readonly urls: {
     machines: string;

@@ -55,7 +55,7 @@ const usePendingActionsErrorToast = (
 
 export const PendingActionsSelector = memo<
   CommandArgumentValueSelectorProps<string, PendingActionsSelectorState>
->(({ value, valueText, onChange, store, command, requestFocus }) => {
+>(({ value, valueText, onChange, store, command, requestFocus, argName, argIndex }) => {
   // Extract agentType from command.meta instead of direct parameter
   const agentType = command.commandDefinition.meta?.agentType as ResponseActionAgentType;
   const endpointId = command.commandDefinition.meta?.endpointId;
@@ -68,6 +68,8 @@ export const PendingActionsSelector = memo<
       store={store}
       command={command}
       requestFocus={requestFocus}
+      argName={argName}
+      argIndex={argIndex}
       useDataHook={usePendingActionsDataHook}
       hookParams={{
         agentType,

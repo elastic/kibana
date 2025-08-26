@@ -29,6 +29,7 @@ export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
     execute: 'endpointResponseActionsConsole-commandList-Responseactions-execute',
     upload: 'endpointResponseActionsConsole-commandList-Responseactions-upload',
     scan: 'endpointResponseActionsConsole-commandList-Responseactions-scan',
+    cancel: 'endpointResponseActionsConsole-commandList-Responseactions-cancel',
     // Not implemented in Endpoint yet
     // runscript: 'endpointResponseActionsConsole-commandList-Responseactions-runscript',
   };

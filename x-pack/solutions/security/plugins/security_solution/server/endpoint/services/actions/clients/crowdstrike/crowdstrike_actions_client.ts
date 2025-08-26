@@ -609,4 +609,12 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     //   return;
     // }
   }
+
+  protected async resolveExternalActionId(actionId: string): Promise<string> {
+    return actionId;
+  }
+
+  protected extractExternalActionId(actionDetails: ActionDetails): string | undefined {
+    return actionDetails.id;
+  }
 }

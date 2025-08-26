@@ -24,9 +24,9 @@ export const useGenericErrorToast = (
       let message: string | undefined;
 
       const err = error;
-      if (err?.body?.message) {
-        message = err.body.message;
-        code = String(err.body.statusCode ?? code);
+      if (err?.body && typeof err.body === 'object' && 'message' in err.body) {
+        message = (err.body as any).message;
+        code = String((err.body as any).statusCode ?? code);
       } else {
         message = err?.message || String(err);
       }
