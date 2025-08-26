@@ -214,7 +214,12 @@ export function ProductDocSetting({
     ) : null;
 
   const ActionLink = (() => {
-    if (isLoading || showErrorCallout || kb?.inferenceModelState === InferenceModelState.NOT_INSTALLED) return null;
+    if (
+      isLoading ||
+      showErrorCallout ||
+      kb?.inferenceModelState === InferenceModelState.NOT_INSTALLED
+    )
+      return null;
 
     if (productDocStatus === 'installed') {
       return (
@@ -254,9 +259,7 @@ export function ProductDocSetting({
       </EuiLink>
     );
 
-    return canInstallProductDoc
-      ? installInner
-      : null;
+    return canInstallProductDoc ? installInner : null;
   })();
 
   return (
