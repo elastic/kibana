@@ -66,22 +66,24 @@ export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEvents
       description={logsDescription}
       id="traceContextLogEvents"
       children={
-        <LazySavedSearchComponent
-          query={query}
-          index={indexes.logs}
-          timeRange={savedSearchTimeRange}
-          dependencies={{
-            embeddable,
-            searchSource: dataService.search.searchSource,
-            dataViews: dataService.dataViews,
-          }}
-          displayOptions={{
-            solutionNavIdOverride: 'oblt',
-            enableDocumentViewer: false,
-            enableFilters: false,
-          }}
-          height="100%"
-        />
+        <div tabIndex={0} className="eui-yScrollWithShadows" style={{ maxHeight: '400px' }}>
+          <LazySavedSearchComponent
+            query={query}
+            index={indexes.logs}
+            timeRange={savedSearchTimeRange}
+            dependencies={{
+              embeddable,
+              searchSource: dataService.search.searchSource,
+              dataViews: dataService.dataViews,
+            }}
+            displayOptions={{
+              solutionNavIdOverride: 'oblt',
+              enableDocumentViewer: false,
+              enableFilters: false,
+            }}
+            height="100%"
+          />
+        </div>
       }
     />
   );
