@@ -34,18 +34,7 @@ let magicBytes = require('magic-bytes.js');
 const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
 const baseSafePaths = [join(REPO_ROOT, 'data'), join(REPO_ROOT, '.es')];
 
-const allowedExtensions = [
-  '.txt',
-  '.md',
-  '.log',
-  '.json',
-  '.yml',
-  '.yaml',
-  '.csv',
-  '.svg',
-  '.png',
-  ...(isDevOrCI ? ['.cjs', '.js', '.ts', '.jsonc'] : []),
-];
+const allowedExtensions = ['.txt', '.md', '.log', '.json', '.yml', '.yaml', '.csv', '.svg', '.png'];
 
 const tmpPath = tmpdir();
 
@@ -137,7 +126,11 @@ function getFileExtension(path) {
 }
 
 function validateFileExtension(path) {
-  if (isDevOrCI && devOrCIPaths.some((safePath) => path.startsWith(safePath))) {
+  if (
+    isDevOrCI &&
+    devOrCIPaths.some((safePath) => path?.startsWith(safePath)) &&
+    !process.env.KBN_ENABLE_HARDENED_FS
+  ) {
     return;
   }
 
@@ -304,7 +297,11 @@ function getSafePath(userPath) {
  * @throws {Error} - Throws if SVG sanitization fails
  */
 function validateAndSanitizeFileData(data, path) {
-  if (isDevOrCI && devOrCIPaths.some((safePath) => path.startsWith(safePath))) {
+  if (
+    isDevOrCI &&
+    devOrCIPaths.some((safePath) => path?.startsWith(safePath)) &&
+    !process.env.KBN_ENABLE_HARDENED_FS
+  ) {
     return data;
   }
   // Convert input to Buffer if needed
