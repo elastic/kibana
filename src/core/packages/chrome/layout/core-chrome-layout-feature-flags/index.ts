@@ -34,7 +34,7 @@ export const getSideNavVersion = (featureFlags: FeatureFlagsStart): LayoutProjec
 export const getLayoutVersion = (featureFlags: FeatureFlagsStart): LayoutFeatureFlag => {
   const featureFlag = featureFlags.getStringValue<LayoutFeatureFlag>(
     LAYOUT_FEATURE_FLAG_KEY,
-    'legacy-fixed'
+    'grid'
   );
   if (featureFlag !== 'legacy-fixed' && featureFlag !== 'grid') {
     throw new Error(
