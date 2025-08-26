@@ -13,11 +13,13 @@ import {
   Builder,
   EsqlQuery,
   isColumn,
+  isOptionNode,
   mutate,
+  synth,
   type ESQLCommand,
   type ESQLFunction,
+  type ESQLAstItem,
 } from '@kbn/esql-ast';
-import type { StatsCommandSummary } from '@kbn/esql-ast/src/mutate/commands/stats';
 import { isESQLFunction } from '@kbn/esql-ast/src/types';
 
 type NodeType = 'group' | 'leaf';
@@ -106,7 +108,11 @@ export const constructCascadeQuery = ({
     const { grouping } = mutate.commands.stats.summarizeCommand(ESQLQuery, statsCommand);
 
     Object.entries(grouping).forEach(([groupName, groupValue], _, groupingArr) => {
-      if (isColumn(groupValue.definition) && nodePath.includes(groupName)) {
+      if (
+        isColumn(groupValue.definition) &&
+        nodePath.includes(groupName) &&
+        nodePathMap[groupName]
+      ) {
         if (nodeType === 'leaf') {
           handleStatsByColumnLeafOperation(ESQLQuery, {
             [groupName]: nodePathMap[groupName],
@@ -121,7 +127,7 @@ export const constructCascadeQuery = ({
                 groupingArr.filter((arg) => isColumn(arg[1].definition)).length > 1)
             : hasMultipleColumns)
         ) {
-          handleStatsByColumnGroupOperation(ESQLQuery, statsCommand as StatsCommand, grouping, {
+          handleStatsByColumnGroupOperation(ESQLQuery, statsCommand as StatsCommand, {
             [groupName]: nodePathMap[groupName],
           });
           handled = true;
@@ -190,33 +196,53 @@ function handleStatsByColumnLeafOperation(
   });
 }
 
+/**
+ * Handles the stats command for a group operation that purely contained of column definitions by modifying the query and adding necessary commands.
+ * @param query The ESQL query to modify.
+ * @param statsCommand The original stats command to modify.
+ * @param columnInterpolationRecord A record of column names and their interpolated values.
+ */
 function handleStatsByColumnGroupOperation(
   query: EsqlQuery,
   statsCommand: StatsCommand,
-  statsGroupingSummary: StatsCommandSummary['grouping'],
   columnInterpolationRecord: Record<string, string>
 ) {
-  // TODO: ideally we'd want to modify the passed stats command,
-  // especially if for some reason it contains the column we want to group by
-  // we should remove it from the stats command
+  // Get the column names to exclude from the stats command
+  const columnsToExclude = Object.keys(columnInterpolationRecord);
 
-  // Modify existing stats command
-  // const modifiedStatsCommand = Builder.command({
-  //   name: 'stats',
-  //   args: [
-  //     Builder.expression.func.binary('==', [
-  //       Builder.expression.column({
-  //         args: [Builder.identifier({ name: byOptionArg.name })],
-  //       }),
-  //       Builder.expression.literal.string(columnInterpolationRecord[byOptionArg.name]),
-  //     ]),
-  //   ],
-  // });
+  // Create a modified stats command without the excluded columns as args
+  const modifiedStatsCommand = Builder.command({
+    name: 'stats',
+    args: statsCommand.args.map((statsCommandArg) => {
+      if (isOptionNode(statsCommandArg) && statsCommandArg.name === 'by') {
+        return Builder.option({
+          name: statsCommandArg.name,
+          args: statsCommandArg.args.reduce<Array<ESQLAstItem>>((acc, cur) => {
+            if (isColumn(cur) && !columnsToExclude.includes(cur.text)) {
+              acc.push(
+                Builder.expression.column({
+                  args: [Builder.identifier({ name: cur.name })],
+                })
+              );
+            }
+            return acc;
+          }, []),
+        });
+      }
+
+      // @ts-expect-error -- hack to avoid building any other args that the stats command has since we don't need to modify them
+      return synth.exp`${statsCommandArg?.text}`;
+    }),
+  });
+
+  // Get the position of the original stats command
+  const statsCommandIndex = query.ast.commands.findIndex((cmd) => cmd === statsCommand);
 
   // remove stats command
-  // mutate.generic.commands.remove(query.ast, statsCommand);
-  // insert modified stats command
-  // mutate.generic.commands.insert(query.ast, modifiedStatsCommand, 1);
+  mutate.generic.commands.remove(query.ast, statsCommand);
+
+  // insert modified stats command at same position previous one was at
+  mutate.generic.commands.insert(query.ast, modifiedStatsCommand, statsCommandIndex);
 
   // Add where command with current value
   const newCommands = Object.entries(columnInterpolationRecord).map(([key, value]) => {
