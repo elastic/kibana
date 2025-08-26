@@ -7,7 +7,7 @@
 
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
-import type { MigrationTaskItemsStats } from '../../../../../common/siem_migrations/model/migration.gen';
+import type { MigrationTaskItemsStats } from '../../../../../common/siem_migrations/model/common.gen';
 import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,

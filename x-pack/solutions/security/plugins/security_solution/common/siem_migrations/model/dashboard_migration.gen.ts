@@ -23,7 +23,7 @@ import {
   MigrationStatus,
   MigrationComments,
   MigrationTaskStats,
-} from './migration.gen';
+} from './common.gen';
 import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
 
 /**

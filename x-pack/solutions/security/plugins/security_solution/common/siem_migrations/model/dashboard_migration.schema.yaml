@@ -43,7 +43,7 @@ components:
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         last_execution:
           description: The last execution of the dashboard migration task.
-          $ref: './migration.schema.yaml#/components/schemas/MigrationLastExecution'
+          $ref: './common.schema.yaml#/components/schemas/MigrationLastExecution'
 
     DashboardMigrationDashboard:
       description: The dashboard migration document object.
@@ -84,14 +84,14 @@ components:
           $ref: '#/components/schemas/ElasticDashboard'
         translation_result:
           description: The rule translation result.
-          $ref: './migration.schema.yaml#/components/schemas/MigrationTranslationResult'
+          $ref: './common.schema.yaml#/components/schemas/MigrationTranslationResult'
         status:
           description: The status of the dashboard migration process.
-          $ref: './migration.schema.yaml#/components/schemas/MigrationStatus'
+          $ref: './common.schema.yaml#/components/schemas/MigrationStatus'
           default: pending
         comments:
           description: The comments for the migration including a summary from the LLM in markdown.
-          $ref: './migration.schema.yaml#/components/schemas/MigrationComments'
+          $ref: './common.schema.yaml#/components/schemas/MigrationComments'
         updated_at:
           type: string
           description: The moment of the last update
@@ -155,7 +155,7 @@ components:
 
     DashboardMigrationTaskStats:
       description: The dashboard migration task stats object.
-      $ref: './migration.schema.yaml#/components/schemas/MigrationTaskStats'
+      $ref: './common.schema.yaml#/components/schemas/MigrationTaskStats'
 
     DashboardMigrationTaskExecutionSettings:
       type: object

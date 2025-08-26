@@ -24,7 +24,7 @@ import {
   MigrationComments,
   MigrationTaskStats,
   MigrationLastExecution,
-} from './migration.gen';
+} from './common.gen';
 
 /**
  * The original rule vendor identifier.

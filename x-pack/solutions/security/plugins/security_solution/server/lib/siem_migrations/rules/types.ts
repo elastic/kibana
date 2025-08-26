@@ -7,7 +7,7 @@
 
 import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { MigrationTranslationResult } from '../../../../common/siem_migrations/model/migration.gen';
+import type { MigrationTranslationResult } from '../../../../common/siem_migrations/model/common.gen';
 import type {
   RuleMigration,
   RuleMigrationRule,

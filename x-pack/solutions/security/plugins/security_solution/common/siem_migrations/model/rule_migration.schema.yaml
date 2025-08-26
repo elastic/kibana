@@ -190,14 +190,14 @@ components:
           $ref: '#/components/schemas/ElasticRule'
         translation_result:
           description: The rule translation result.
-          $ref: './migration.schema.yaml#/components/schemas/MigrationTranslationResult'
+          $ref: './common.schema.yaml#/components/schemas/MigrationTranslationResult'
         status:
           description: The status of the rule migration process.
-          $ref: './migration.schema.yaml#/components/schemas/MigrationStatus'
+          $ref: './common.schema.yaml#/components/schemas/MigrationStatus'
           default: pending
         comments:
           description: The comments for the migration including a summary from the LLM in markdown.
-          $ref: './migration.schema.yaml#/components/schemas/MigrationComments'
+          $ref: './common.schema.yaml#/components/schemas/MigrationComments'
         updated_at:
           type: string
           description: The moment of the last update
@@ -208,7 +208,7 @@ components:
     RuleMigrationTaskStats:
       description: The rule migration task stats object.
       allOf:
-        - $ref: './migration.schema.yaml#/components/schemas/MigrationTaskStats'
+        - $ref: './common.schema.yaml#/components/schemas/MigrationTaskStats'
         - type: object
           properties:
             last_execution:
@@ -293,7 +293,7 @@ components:
           $ref: '#/components/schemas/ElasticRulePartial'
         comments:
           description: The comments for the migration including a summary from the LLM in markdown.
-          $ref: './migration.schema.yaml#/components/schemas/MigrationComments'
+          $ref: './common.schema.yaml#/components/schemas/MigrationComments'
 
     RuleMigrationRetryFilter:
       type: string
@@ -389,7 +389,7 @@ components:
     RuleMigrationLastExecution:
       description: The last execution of the rule migration task.
       allOf:
-        - $ref: './migration.schema.yaml#/components/schemas/MigrationLastExecution'
+        - $ref: './common.schema.yaml#/components/schemas/MigrationLastExecution'
         - type: object
           properties:
             skip_prebuilt_rules_matching:

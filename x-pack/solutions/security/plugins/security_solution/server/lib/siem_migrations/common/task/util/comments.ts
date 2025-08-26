@@ -6,7 +6,7 @@
  */
 
 import { SIEM_MIGRATIONS_ASSISTANT_USER } from '../../../../../../common/siem_migrations/constants';
-import type { MigrationComment } from '../../../../../../common/siem_migrations/model/migration.gen';
+import type { MigrationComment } from '../../../../../../common/siem_migrations/model/common.gen';
 
 export const cleanMarkdown = (markdown: string): string => {
   // Use languages known by the code block plugin

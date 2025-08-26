@@ -7,7 +7,7 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
-import type { MigrationTranslationResult as MigrationTranslationResultType } from '../../../../../common/siem_migrations/model/migration.gen';
+import type { MigrationTranslationResult as MigrationTranslationResultType } from '../../../../../common/siem_migrations/model/common.gen';
 import * as i18n from './translations';
 
 const COLORS = {
