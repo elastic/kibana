@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -19,11 +19,12 @@ import {
   EuiSkeletonTitle,
   EuiSwitch,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useMemoCss } from '@kbn/unified-search-plugin/public/use_memo_css';
+import { css } from '@emotion/react';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 
 interface WorkflowDetailHeaderProps {
@@ -55,7 +56,7 @@ export const WorkflowDetailHeader = ({
   handleTestClick,
   handleTabChange,
 }: WorkflowDetailHeaderProps) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
 
   const buttonGroupOptions: EuiButtonGroupOptionProps[] = useMemo(
     () => [
@@ -75,45 +76,16 @@ export const WorkflowDetailHeader = ({
   );
 
   return (
-    <EuiPageTemplate offset={0} minHeight={0} grow={false} css={{ flexGrow: 0 }}>
-      <EuiPageTemplate.Header
-        css={{
-          backgroundColor: euiTheme.colors.backgroundBasePlain,
-          overflow: 'hidden',
-          borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
-          '@media (max-width: 1024px)': {
-            flexDirection: 'column',
-          },
-        }}
-        restrictWidth={false}
-        bottomBorder={false}
-      >
-        <EuiPageHeaderSection
-          css={{
-            flexBasis: '40%',
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            width: '100%',
-          }}
-        >
+    <EuiPageTemplate offset={0} minHeight={0} grow={false}>
+      <EuiPageTemplate.Header css={styles.header} restrictWidth={false} bottomBorder={false}>
+        <EuiPageHeaderSection css={styles.headerSection}>
           <EuiSkeletonTitle
             size="l"
             isLoading={isLoading}
             contentAriaLabel={name}
-            css={{
-              minWidth: '200px',
-              display: 'inline-block',
-            }}
+            css={styles.skeletonTitle}
           >
-            <EuiTitle
-              size="l"
-              css={{
-                width: '100%',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: 'inline-block',
-              }}
-            >
+            <EuiTitle size="l" css={styles.title}>
               <span>{name}</span>
             </EuiTitle>
           </EuiSkeletonTitle>
@@ -143,39 +115,31 @@ export const WorkflowDetailHeader = ({
           }}
         >
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m">
-            <div css={{ height: '100%', display: 'flex', alignItems: 'center' }}>
-              <EuiSwitch
-                disabled={!canSaveWorkflow || isLoading}
-                checked={isEnabled}
-                onChange={() => handleToggleWorkflow()}
-                label={
-                  isEnabled
-                    ? i18n.translate('workflows.workflowDetailHeader.enabled', {
-                        defaultMessage: 'Enabled',
-                      })
-                    : i18n.translate('workflows.workflowDetailHeader.disabled', {
-                        defaultMessage: 'Disabled',
-                      })
-                }
-              />
-            </div>
-            <div
-              css={{
-                width: '1px',
-                margin: '4px 0',
-                backgroundColor: euiTheme.colors.lightShade,
-                alignSelf: 'stretch',
-              }}
+            <EuiSwitch
+              disabled={!canSaveWorkflow || isLoading}
+              checked={isEnabled}
+              onChange={() => handleToggleWorkflow()}
+              label={
+                isEnabled
+                  ? i18n.translate('workflows.workflowDetailHeader.enabled', {
+                      defaultMessage: 'Enabled',
+                    })
+                  : i18n.translate('workflows.workflowDetailHeader.disabled', {
+                      defaultMessage: 'Disabled',
+                    })
+              }
             />
+            <div css={styles.separator} />
             <EuiButtonIcon
               display="base"
               iconType="beaker"
               size="s"
               disabled={isLoading || !canTestWorkflow}
               onClick={handleTestClick}
-            >
-              <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Test" ignoreTag />
-            </EuiButtonIcon>
+              aria-label={i18n.translate('workflows.workflowDetailHeader.testWorkflow.ariaLabel', {
+                defaultMessage: 'Test workflow',
+              })}
+            />
             <EuiButtonIcon
               color="success"
               display="base"
@@ -194,9 +158,10 @@ export const WorkflowDetailHeader = ({
                     })
                   : undefined
               }
-            >
-              <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
-            </EuiButtonIcon>
+              aria-label={i18n.translate('workflows.workflowDetailHeader.runWorkflow.ariaLabel', {
+                defaultMessage: 'Run workflow',
+              })}
+            />
 
             <EuiButton
               fill
@@ -212,4 +177,39 @@ export const WorkflowDetailHeader = ({
       </EuiPageTemplate.Header>
     </EuiPageTemplate>
   );
+};
+
+const componentStyles = {
+  header: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      overflow: 'hidden',
+      borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
+      '@media (max-width: 1024px)': {
+        flexDirection: 'column',
+      },
+    }),
+  headerSection: css({
+    flexBasis: '40%',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    width: '100%',
+  }),
+  separator: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '1px',
+      margin: '4px 0',
+      backgroundColor: euiTheme.colors.borderBasePlain,
+      alignSelf: 'stretch',
+    }),
+  skeletonTitle: css({
+    minWidth: '200px',
+    display: 'inline-block',
+  }),
+  title: css({
+    width: '100%',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: 'inline-block',
+  }),
 };
