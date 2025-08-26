@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -13,7 +13,7 @@ import {
   IRouter,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { SearchHomepagePluginStart, SearchHomepagePluginSetup } from './types';
+import type { SearchHomepagePluginStart, SearchHomepagePluginSetup } from './types';
 import { defineRoutes } from './routes';
 
 export interface RouteDependencies {

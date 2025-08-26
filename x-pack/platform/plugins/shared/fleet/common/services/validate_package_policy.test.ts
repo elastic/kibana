@@ -1780,4 +1780,213 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toEqual(['Dataset contains invalid characters']);
     });
   });
+
+  describe('URL validation', () => {
+    it('should not return an error message for a valid URL', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://example.com',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with port', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://example.com:8080',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with userinfo', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://foo:bar@example.com',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with path', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'phony://example.com/path',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with query params', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://example.com/?foo=bar',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with IPv4', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://192.0.2.1',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with IPv6', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://[2001:db8::1]:443',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return an error message for an invalid URL', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'not-a-valid-url',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual([expect.stringContaining('Invalid URL format')]);
+    });
+
+    it('should not return an error message for a URL with allowed scheme', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://example.com',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+          url_allowed_schemes: ['https', 'http'],
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return an error message for a URL with disallowed scheme', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'ftp://example.com',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+          url_allowed_schemes: ['https', 'http'],
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual([expect.stringContaining('URL scheme "ftp" is not allowed')]);
+    });
+
+    it('should not validate empty URL values', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: '',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should validate required URL values', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: undefined,
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+          required: true,
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual([expect.stringContaining('is required')]);
+    });
+  });
 });

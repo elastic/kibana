@@ -11,7 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MetricVisValue } from './metric_value';
-import { MetricOptions, MetricStyle, VisParams } from '../../common/types';
+import type { MetricOptions, MetricStyle, VisParams } from '../../common/types';
 import { LabelPosition } from '../../common/constants';
 
 const baseMetric: MetricOptions = {

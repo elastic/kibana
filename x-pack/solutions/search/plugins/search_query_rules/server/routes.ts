@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { APIRoutes } from '../common/api_routes';
 
 import { DEFAULT_PAGE_VALUE } from '../common/pagination';

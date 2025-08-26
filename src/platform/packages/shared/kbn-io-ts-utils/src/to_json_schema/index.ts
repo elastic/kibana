@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { mapValues } from 'lodash';
-import { isParsableType, ParseableType } from '../parseable_types';
+import type { ParseableType } from '../parseable_types';
+import { isParsableType } from '../parseable_types';
 
 interface JSONSchemaObject {
   type: 'object';

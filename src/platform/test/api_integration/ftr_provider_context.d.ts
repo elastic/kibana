@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import type { GenericFtrProviderContext } from '@kbn/test';
 
-import { services } from './services';
+import type { services } from './services';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

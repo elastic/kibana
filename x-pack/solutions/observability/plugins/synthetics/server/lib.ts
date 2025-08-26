@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   SearchSearchRequestBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -19,11 +19,11 @@ import type {
 import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
-import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { SYNTHETICS_API_URLS, SYNTHETICS_INDEX_PATTERN } from '../common/constants';
-import { SyntheticsServerSetup } from './types';
+import type { SyntheticsServerSetup } from './types';
 
 export interface CountResponse {
   result: {

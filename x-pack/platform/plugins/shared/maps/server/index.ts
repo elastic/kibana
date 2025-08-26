@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-import { PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, MapsXPackConfig } from './config';
+import type { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
+import type { MapsXPackConfig } from './config';
+import { configSchema } from './config';
 
 export type {
   CountAggDescriptor,

@@ -11,7 +11,7 @@ import { Entity } from '../entity';
 import { Span } from './span';
 import { Transaction } from './transaction';
 import { Event } from './event';
-import { ApmApplicationMetricFields, ApmFields, GeoLocation, SpanParams } from './apm_fields';
+import type { ApmApplicationMetricFields, ApmFields, GeoLocation, SpanParams } from './apm_fields';
 import { generateLongIdWithSeed, generateLongId } from '../utils/generate_id';
 import { Metricset } from './metricset';
 import { ApmError } from './apm_error';

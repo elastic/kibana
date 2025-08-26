@@ -18,7 +18,7 @@ import {
   ALERT_INSTANCE_ID,
   TAGS,
 } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   describe('Observability alerts table configuration', function () {

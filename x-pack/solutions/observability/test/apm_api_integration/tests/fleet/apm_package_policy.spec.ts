@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   AGENT_CONFIG_PATH,
   AGENT_CONFIG_API_KEY_PATH,
@@ -15,13 +15,13 @@ import {
 import expect from '@kbn/expect';
 import { get } from 'lodash';
 import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { createEsClientForFtrConfig } from '@kbn/test';
 import {
   APM_AGENT_CONFIGURATION_INDEX,
   APM_SOURCE_MAP_INDEX,
 } from '@kbn/apm-sources-access-plugin/server';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createAgentPolicy,
   createPackagePolicy,

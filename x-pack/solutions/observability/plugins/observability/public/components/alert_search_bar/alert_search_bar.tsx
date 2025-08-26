@@ -12,12 +12,12 @@ import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { Filter, TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import { getEsQueryConfig, getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
 import { DEFAULT_QUERY_STRING, EMPTY_FILTERS } from './constants';
-import { ObservabilityAlertSearchBarProps } from './types';
+import type { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../utils/build_es_query';
 
 const toastTitle = i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {

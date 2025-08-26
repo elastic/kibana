@@ -26,7 +26,7 @@ import {
   flyoutIssueDetailsTitle,
 } from '../../../../common/translations';
 import { useQualityIssues } from '../../../hooks';
-import { QualityIssue } from '../../../../common/api_types';
+import type { QualityIssue } from '../../../../common/api_types';
 
 export const QualityIssueFieldInfo = ({
   fieldList,

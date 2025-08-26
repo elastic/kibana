@@ -8,12 +8,12 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
 import { syntheticsAddMonitorLocatorID } from '@kbn/observability-plugin/common';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
-import { ObservabilityOnboardingAppServices } from '../..';
+import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon } from '../shared/logo_icon';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 
@@ -186,7 +186,6 @@ export function useCustomCards(
       version: '',
       integration: '',
       isQuickstart: true,
-      release: isServerless ? 'preview' : undefined,
     },
     {
       id: 'kubernetes-quick-start',
@@ -282,7 +281,6 @@ export function useCustomCards(
       version: '',
       integration: '',
       isQuickstart: true,
-      release: isServerless ? 'preview' : undefined,
     },
     {
       id: 'apm-virtual',

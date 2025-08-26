@@ -8,7 +8,7 @@
 import { SCALING_TYPES, SOURCE_TYPES } from '../../../../../common/constants';
 import { BlendedVectorLayer } from './blended_vector_layer';
 import { ESSearchSource } from '../../../sources/es_search_source';
-import {
+import type {
   AbstractESSourceDescriptor,
   CustomIcon,
   ESGeoGridSourceDescriptor,

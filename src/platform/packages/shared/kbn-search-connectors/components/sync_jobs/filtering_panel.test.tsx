@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { FilteringRule } from '../..';
+import type { FilteringRule } from '../..';
 
 import { FilteringPanel } from './filtering_panel';
 

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../../layers';
+import type { LayerWizard, RenderWizardArguments } from '../../../layers';
 import { GeoJsonVectorLayer } from '../../../layers/vector_layer';
 import {
   LAYER_WIZARD_CATEGORY,
@@ -17,7 +17,7 @@ import {
   WIZARD_ID,
 } from '../../../../../common/constants';
 import { TopHitsLayerIcon } from '../../../layers/wizards/icons/top_hits_layer_icon';
-import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
+import type { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 import { ESSearchSource } from '../es_search_source';
 
 export const esTopHitsLayerWizardConfig: LayerWizard = {

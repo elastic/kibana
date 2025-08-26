@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
 import { monaco } from '../../../../monaco_imports';
-import { MonacoAutocompleteCommandDefinition } from '../types';
+import type { MonacoAutocompleteCommandDefinition } from '../types';
 import { offsetRangeToMonacoRange } from '../shared/utils';
 
 function escapeForStringLiteral(str: string): string {

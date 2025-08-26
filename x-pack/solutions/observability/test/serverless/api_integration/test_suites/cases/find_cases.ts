@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import expect from '@kbn/expect';
 import type { RoleCredentials } from '../../services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const svlCases = getService('svlCases');
