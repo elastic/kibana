@@ -6,7 +6,6 @@
  */
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import type { Node } from 'unist';
-import { visit } from 'unist-util-visit';
 import { css } from '@emotion/css';
 import React from 'react';
 import { ChartType } from '@kbn/visualization-utils';
@@ -18,26 +17,38 @@ import type { OnechatStartDependencies } from '../../../../types';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 
 export const toolResultPlugin = () => {
+  const visitor = (node: Node) => {
+    // Recurse into children first
+    if ('children' in node) {
+      const parent = node as Parent;
+      parent.children.forEach((child) => visitor(child));
+    }
+
+    // Only handle raw HTML mdast nodes
+    if ((node as any).type !== 'html') {
+      return;
+    }
+
+    const value = (node as any).value as string | undefined;
+    if (!value || !value.trim().toLowerCase().startsWith('<toolresult')) {
+      return;
+    }
+
+    // Extract attributes
+    const resultIdMatch = value.match(/result-id="([^"]*)"/i);
+    const chartTypeMatch = value.match(/chart-type="([^"]*)"/i);
+    const resultId = resultIdMatch ? resultIdMatch[1] : undefined;
+    const chartType = chartTypeMatch ? chartTypeMatch[1] : undefined;
+
+    // Transform the node from type `html` to custom `toolresult`
+    (node as any).type = 'toolresult';
+    (node as any).resultId = resultId;
+    (node as any).chartType = chartType;
+    delete (node as any).value; // remove the raw HTML value
+  };
+
   return (tree: Node) => {
-    visit(tree, 'html', (node: any) => {
-      const value = node.value as string;
-
-      if (value?.trim().startsWith('<toolresult')) {
-        // match attributes
-        const resultIdMatch = value.match(/result-id="([^"]*)"/);
-        const chartTypeMatch = value.match(/chart-type="([^"]*)"/);
-
-        const resultId = resultIdMatch ? resultIdMatch[1] : undefined;
-        const chartType = chartTypeMatch ? chartTypeMatch[1] : undefined;
-
-        // Transform the node from type `html` to `toolresult`
-        node.type = 'toolresult';
-        node.resultId = resultId;
-        node.chartType = chartType;
-
-        delete node.value; // remove the raw HTML value as it's no longer needed.
-      }
-    });
+    visitor(tree);
   };
 };
 
@@ -62,7 +73,7 @@ export function getToolResultHandler({
     const toolResult = steps
       .filter((s) => s.type === 'tool_call')
       .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
-      .find((r) => r.ui?.toolResultId === resultId && r.type === 'tabular_data') as
+      .find((r) => r.type === 'tabular_data' && r.ui?.toolResultId === resultId) as
       | TabularDataResult
       | undefined;
 

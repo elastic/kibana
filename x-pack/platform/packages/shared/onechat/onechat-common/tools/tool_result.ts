@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { ChartType } from '@kbn/visualization-utils';
+import { randomInt } from 'crypto';
+
 import type {
   SearchRequest,
   EsqlEsqlColumnInfo,
@@ -19,26 +22,22 @@ export enum ToolResultType {
   error = 'error',
 }
 
-interface ToolResultTypeBase {
-  type: ToolResultType;
-  data: Record<string, unknown>;
-  ui?: {
-    toolResultId: string;
-    description: string;
-    params: {
-      [key: string]: {
-        description: string;
-        type: string;
-        default: unknown;
-        options?: unknown[];
-        required?: boolean;
-      };
+interface ToolResultUI {
+  toolResultId: string;
+  description: string;
+  params: {
+    [key: string]: {
+      description: string;
+      type: string;
+      default: unknown;
+      options?: unknown[];
+      required?: boolean;
     };
-    example: string;
   };
+  example: string;
 }
 
-export interface ResourceResult extends ToolResultTypeBase {
+export interface ResourceResult {
   type: ToolResultType.resource;
   data: {
     reference: {
@@ -52,7 +51,7 @@ export interface ResourceResult extends ToolResultTypeBase {
   };
 }
 
-export interface TabularDataResult extends ToolResultTypeBase {
+export interface TabularDataResult {
   type: ToolResultType.tabularData;
   data: {
     esqlQuery: string;
@@ -61,19 +60,20 @@ export interface TabularDataResult extends ToolResultTypeBase {
       values: FieldValue[][];
     };
   };
+  ui?: ToolResultUI;
 }
 
-export interface QueryResult extends ToolResultTypeBase {
+export interface QueryResult {
   type: ToolResultType.query;
   data: { dsl: SearchRequest } | { esql: string };
 }
 
-export interface OtherResult extends ToolResultTypeBase {
+export interface OtherResult {
   type: ToolResultType.other;
   data: Record<string, unknown>;
 }
 
-export interface ErrorResult extends ToolResultTypeBase {
+export interface ErrorResult {
   type: ToolResultType.error;
   data: {
     message: string;
@@ -88,3 +88,27 @@ export type ToolResult =
   | QueryResult
   | OtherResult
   | ErrorResult;
+
+export function getTabularDataToolResultUI() {
+  const toolResultId = getToolResultId();
+  return {
+    toolResultId,
+    description:
+      'The result of executing the ESQL query can be visualized. Multiple chart types are available',
+    params: {
+      chartType: {
+        description: `Select the visualization type most suitable for representing the esql result. Choose based on the data structure and the insights you want to highlight.`,
+        type: 'string',
+        default: ChartType.Line,
+        options: Object.values(ChartType),
+        required: false,
+      },
+    },
+    example: `<toolresult result-id="${toolResultId}" chart-type="bar" />`,
+  };
+}
+
+const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+export function getToolResultId(len = 4): string {
+  return Array.from({ length: len }, () => charset[randomInt(charset.length)]).join('');
+}

@@ -10,7 +10,6 @@ import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import { getDocumentById } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { getToolResultId } from '../../utils/tool_result_id';
 
 const getDocumentByIdSchema = z.object({
   id: z.string().describe('ID of the document to retrieve'),
@@ -30,7 +29,6 @@ export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentB
         return {
           results: [
             {
-              toolResultId: getToolResultId(),
               type: ToolResultType.resource,
               data: {
                 reference: {
@@ -48,7 +46,6 @@ export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentB
       return {
         results: [
           {
-            toolResultId: getToolResultId(),
             type: ToolResultType.error,
             data: {
               message: `Document with ID '${result.id}' not found in index '${result.index}'`,

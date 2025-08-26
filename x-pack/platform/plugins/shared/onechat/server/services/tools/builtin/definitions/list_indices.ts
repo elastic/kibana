@@ -10,7 +10,6 @@ import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { listIndices } from '@kbn/onechat-genai-utils';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { getToolResultId } from '../../utils/tool_result_id';
 
 const listIndicesSchema = z.object({
   pattern: z
@@ -39,7 +38,10 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
     This parameter should only be used when you already know of a specific pattern to filter on,
     e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
     schema: listIndicesSchema,
-    handler: async ({ pattern, showDetails }, { esClient }) => {
+    handler: async ({ pattern, showDetails }, { esClient, logger }) => {
+      logger.debug(
+        `list indices tool called with pattern: ${pattern}, showDetails: ${showDetails}`
+      );
       const result = await listIndices({
         pattern,
         showDetails,
@@ -53,7 +55,6 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
       return {
         results: [
           {
-            toolResultId: getToolResultId(),
             type: ToolResultType.other,
             data: {
               indices: result,

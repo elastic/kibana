@@ -104,18 +104,18 @@ export function ChatMessageText({ content, stepsFromPrevRounds, stepsFromCurrent
           </EuiTableRowCell>
         );
       },
-      // toolresult: getToolResultHandler({
-      //   pluginsStart,
-      //   stepsFromCurrentRound,
-      //   stepsFromPrevRounds,
-      // }),
+      toolresult: getToolResultHandler({
+        pluginsStart,
+        stepsFromCurrentRound,
+        stepsFromPrevRounds,
+      }),
     };
 
     return {
       parsingPluginList: [
         loadingCursorPlugin,
         esqlLanguagePlugin,
-        // toolResultPlugin,
+        toolResultPlugin,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,

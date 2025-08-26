@@ -10,7 +10,6 @@ import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import { getIndexMappings } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { getToolResultId } from '../../utils/tool_result_id';
 
 const getIndexMappingsSchema = z.object({
   indices: z.array(z.string()).min(1).describe('List of indices to retrieve mappings for.'),
@@ -27,7 +26,6 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
       return {
         results: [
           {
-            toolResultId: getToolResultId(),
             type: ToolResultType.other,
             data: {
               mappings: result,

@@ -10,6 +10,7 @@ import { z } from '@kbn/zod';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { logger } from 'elastic-apm-node';
 import type { ListIndexBasicInfo } from './steps/list_indices';
 import { listIndices } from './steps/list_indices';
 import { getIndexMappings } from './steps/get_mappings';
@@ -43,12 +44,16 @@ export const indexExplorer = async ({
     esClient,
   });
 
+  logger.debug(`All indices: ${allIndices.map(({ index }) => index)}`);
+
   const selectedIndices = await selectIndices({
     indices: allIndices,
     nlQuery,
     model,
     limit,
   });
+
+  logger.debug(`Selected indices: ${selectedIndices.map(({ indexName }) => indexName)}`);
 
   const mappings = await getIndexMappings({
     indices: selectedIndices.map((index) => index.indexName),
