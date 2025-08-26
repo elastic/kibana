@@ -15,7 +15,7 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createChartSection } from './accessor/chart_section';
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
 
-const METRICS_DATA_SOURCE_PROFILE_ID = 'metrics-data-source-profile';
+const METRICS_DATA_SOURCE_PROFILE_ID = 'observability-metrics-data-source-profile';
 export const createMetricsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): MetricsExperienceDataSourceProfileProvider => ({
@@ -29,11 +29,14 @@ export const createMetricsDataSourceProfileProvider = (
   },
   resolve: (params) => {
     const metricsClient = services.metricsContextService.getMetricsExperienceClient();
+
+    const isValidQuery =
+      isOfAggregateQueryType(params.query) && params.query.esql.toLowerCase().includes('metrics');
+
     if (
-      params.rootContext.solutionType !== SolutionType.Observability &&
-      (!isOfAggregateQueryType(params.query) ||
-        !params.query.esql.toLowerCase().includes('metrics')) &&
-      !!metricsClient
+      params.rootContext.solutionType !== SolutionType.Observability ||
+      !isValidQuery ||
+      !metricsClient
     ) {
       return {
         isMatch: false,

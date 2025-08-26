@@ -183,8 +183,8 @@ export const MetricsExperienceGrid = ({
       id="unifiedMetricsExperienceGridPanel"
       toolbarCss={chartToolbarCss}
       toolbar={{
-        rightSide: rightSideComponents,
-        leftSide: actions,
+        leftSide: rightSideComponents,
+        rightSide: actions,
       }}
     >
       <section

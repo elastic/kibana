@@ -24,7 +24,7 @@ export const createChartSection =
       Component: (props) => (
         <UnifiedHistogramMetricsExperienceGrid {...props} client={metricsExperienceClient} />
       ),
-      replaceDefaultHistogram: !!metricsExperienceClient,
+      replaceDefaultChart: !!metricsExperienceClient,
       localStorageKeyPrefix: 'discover:metricsExperience',
     };
   };
