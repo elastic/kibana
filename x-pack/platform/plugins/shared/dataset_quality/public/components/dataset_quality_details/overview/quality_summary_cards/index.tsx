@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCode, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCode } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,13 +23,10 @@ import { Card } from './card';
 const degradedDocTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.details.degradedDocTooltip"
-    defaultMessage="Documents with the {ignoredProperty} property"
+    defaultMessage="Documents with the {ignoredProperty} property, usually due to malformed fields or exceeding the limit of total fields when {ignoredAboveSetting}."
     values={{
-      ignoredProperty: (
-        <EuiCode language="json" transparentBackground>
-          _ignored
-        </EuiCode>
-      ),
+      ignoredProperty: <EuiCode transparentBackground>_ignored</EuiCode>,
+      ignoredAboveSetting: <EuiCode transparentBackground>_ignore_above: false</EuiCode>,
     }}
   />
 );
@@ -37,7 +34,7 @@ const degradedDocTooltip = (
 const failedDocTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.details.failedDocTooltip"
-    defaultMessage="Documents that were rejected during ingestion — usually due to issues like mapping errors or pipeline failures"
+    defaultMessage="Documents that were rejected during ingestion, usually due to mapping errors or pipeline failures."
   />
 );
 
@@ -83,14 +80,8 @@ export default function QualitySummaryCards({
         <Card
           isDisabled={false}
           isSelected={selectedCard === 'degraded'}
-          title={
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>{overviewPanelDatasetQualityIndicatorDegradedDocs}</EuiFlexItem>
-              <EuiFlexItem>
-                <EuiIconTip content={degradedDocTooltip} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
+          title={overviewPanelDatasetQualityIndicatorDegradedDocs}
+          titleTooltipContent={degradedDocTooltip}
           kpiValue={totalDegradedDocsCount}
           footer={
             <EuiFlexGroup direction="row" gutterSize="s">
@@ -126,14 +117,8 @@ export default function QualitySummaryCards({
         {!dataStreamSettingsLoading && !(hasFailureStore && canUserReadFailureStore) ? (
           <Card
             isDisabled={true}
-            title={
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>{overviewPanelDatasetQualityIndicatorFailedDocs}</EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiIconTip content={failedDocTooltip} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
+            title={overviewPanelDatasetQualityIndicatorFailedDocs}
+            titleTooltipContent={failedDocTooltip}
             kpiValue={i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
               defaultMessage: 'No failure store',
             })}
@@ -155,14 +140,8 @@ export default function QualitySummaryCards({
           <Card
             isDisabled={false}
             isSelected={selectedCard === 'failed'}
-            title={
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>{overviewPanelDatasetQualityIndicatorFailedDocs}</EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiIconTip content={failedDocTooltip} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
+            title={overviewPanelDatasetQualityIndicatorFailedDocs}
+            titleTooltipContent={failedDocTooltip}
             kpiValue={totalFailedDocsCount}
             footer={
               <EuiFlexGroup direction="row" gutterSize="s">
