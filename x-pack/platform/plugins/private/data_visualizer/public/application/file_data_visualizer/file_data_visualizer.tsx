@@ -52,7 +52,7 @@ export const FileDataVisualizer: FC<Props> = ({
     return new FileUploadManager(
       fileUpload,
       coreStart.http,
-      data.dataViews,
+      data,
       services.notifications,
       autoAddInference ?? null,
       autoCreateDataView,
@@ -64,7 +64,7 @@ export const FileDataVisualizer: FC<Props> = ({
     autoAddInference,
     autoCreateDataView,
     coreStart.http,
-    data.dataViews,
+    data,
     existingIndex,
     fileUpload,
     indexSettings,
