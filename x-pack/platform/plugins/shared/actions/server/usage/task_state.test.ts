@@ -138,12 +138,12 @@ describe('telemetry task state', () => {
         count_active_email_connectors_by_service_type: { '.server-log': 10 },
         count_active_total: 11,
         count_by_type: { '.server-log': 12 },
-        count_connector_types_by_action_run_outcome_per_day: { '.server-log': { 'key': 11 } },
+        count_connector_types_by_action_run_outcome_per_day: { '.server-log': { key: 11 } },
         count_total: 14,
         error_messages: ['foo', 'bar'],
         has_errors: true,
         runs: 15,
-        count_gen_ai_provider_types: {'.server-log': 14},
+        count_gen_ai_provider_types: { '.server-log': 14 },
       };
       v2.schema.validate(state);
     });

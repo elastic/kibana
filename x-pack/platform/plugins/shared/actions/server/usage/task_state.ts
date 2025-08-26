@@ -78,10 +78,12 @@ export const stateSchemaByVersion = {
     }),
     schema: schema.object({
       has_errors: schema.boolean(),
-      error_messages: schema.maybe(schema.oneOf([
-        schema.recordOf(schema.string(), schema.any()),
-        schema.arrayOf(schema.string()),
-      ])),
+      error_messages: schema.maybe(
+        schema.oneOf([
+          schema.recordOf(schema.string(), schema.any()),
+          schema.arrayOf(schema.string()),
+        ])
+      ),
       runs: schema.number(),
       count_total: schema.number(),
       count_by_type: schema.recordOf(schema.string(), schema.number()),
