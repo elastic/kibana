@@ -65,7 +65,6 @@ function ofName(
           maximumFractionDigits: ALLOWED_DECIMAL_DIGITS,
         })
     ),
-    // @ts-expect-error - There’s a small mismatch between @formatjs type and Intl API that only applies to the date function, we’re ignoring that
     getDateTimeFormat: memoize((locale, opts) => new Intl.DateTimeFormat(locale, opts)),
     getPluralRules: memoize(
       (locale, opts) =>
