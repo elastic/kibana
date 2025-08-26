@@ -83,6 +83,7 @@ pageLoadAssetSize:
   inspector: 35060
   integrationAssistant: 21434
   interactiveSetup: 73070
+  intercepts: 26158
   kibanaOverview: 6339
   kibanaReact: 54762
   kibanaUsageCollection: 1736
@@ -119,6 +120,7 @@ pageLoadAssetSize:
   presentationPanel: 11484
   presentationUtil: 9000
   productDocBase: 3058
+  productIntercept: 23846
   profiling: 20716
   remoteClusters: 10170
   reporting: 58600

@@ -79,6 +79,7 @@ const indexWithLifecyclePolicy: Index = {
     action_time_millis: 1544187775867,
     step: 'complete',
     step_time_millis: 1544187775867,
+    skip: false,
   },
 };
 
@@ -112,6 +113,7 @@ const indexWithLifecycleError: Index = {
       type: 'illegal_argument_exception',
       reason: 'setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined',
     },
+    skip: false,
   },
 };
 const indexWithLifecyclePhaseDefinition: Index = {
@@ -145,6 +147,7 @@ const indexWithLifecyclePhaseDefinition: Index = {
       version: 1,
       modified_date_in_millis: 1544031699844,
     },
+    skip: false,
   },
 };
 const indexWithLifecycleWaitingStep: Index = {
@@ -178,6 +181,7 @@ const indexWithLifecycleWaitingStep: Index = {
       all_shards_active: false,
       number_of_replicas: 2,
     },
+    skip: false,
   },
 };
 const indexWithNonExistentPolicyError: Index = {
@@ -205,6 +209,7 @@ const indexWithNonExistentPolicyError: Index = {
       type: 'illegal_argument_exception',
       reason: 'policy [testy] does not exist',
     },
+    skip: false,
   },
 };
 

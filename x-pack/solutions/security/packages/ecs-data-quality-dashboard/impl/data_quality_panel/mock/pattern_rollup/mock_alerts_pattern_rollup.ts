@@ -21,6 +21,7 @@ export const alertIndexNoResults: PatternRollup = {
       managed: true,
       policy: '.alerts-ilm-policy',
       phase: 'hot',
+      skip: true,
     },
   },
   ilmExplainPhaseCounts: {
@@ -57,6 +58,7 @@ export const alertIndexWithAllResults: PatternRollup = {
       managed: true,
       policy: '.alerts-ilm-policy',
       phase: 'hot',
+      skip: true,
     },
   },
   ilmExplainPhaseCounts: {
