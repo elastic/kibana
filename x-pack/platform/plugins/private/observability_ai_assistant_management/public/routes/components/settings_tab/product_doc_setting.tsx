@@ -1,11 +1,4 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiText,
   EuiBadge,
@@ -26,7 +19,7 @@ import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/publ
 import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { useKibana } from '../../../hooks/use_kibana';
 
-const statusToButtonTextMap: Record<Exclude<InstallationStatus, 'error'>, string> = {
+const statusToLabelMap: Record<Exclude<InstallationStatus, 'error'>, string> = {
   installing: i18n.translate(
     'xpack.observabilityAiAssistantManagement.settingsPage.installingText',
     { defaultMessage: 'Installing...' }
@@ -53,8 +46,8 @@ export function ProductDocSetting({
   currentlyDeployedInferenceId: string | undefined;
 }) {
   const { overlays } = useKibana().services;
-  const [actionError, setActionError] = useState<string | null>(null);
   const { euiTheme } = useEuiTheme();
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const {
     status,
@@ -64,38 +57,45 @@ export function ProductDocSetting({
     uninstallProductDoc,
   } = knowledgeBase;
 
+  const kb = status?.value;
+  const kbProductDocStatus = kb?.productDocStatus;
+
   const canInstallProductDoc =
     currentlyDeployedInferenceId !== undefined &&
     !(knowledgeBase.isInstalling || knowledgeBase.isWarmingUpModel) &&
-    status?.value?.inferenceModelState === InferenceModelState.READY;
+    kb?.inferenceModelState === InferenceModelState.READY;
 
   const isLoading =
     isProductDocInstalling ||
     isProductDocUninstalling ||
-    status?.value?.productDocStatus === 'installing' ||
-    status?.value?.productDocStatus === 'uninstalling';
+    kbProductDocStatus === 'installing' ||
+    kbProductDocStatus === 'uninstalling';
 
   const productDocStatus: InstallationStatus =
-    isProductDocInstalling || status?.value?.productDocStatus === 'installing'
+    isProductDocInstalling || kbProductDocStatus === 'installing'
       ? 'installing'
-      : isProductDocUninstalling || status?.value?.productDocStatus === 'uninstalling'
+      : isProductDocUninstalling || kbProductDocStatus === 'uninstalling'
       ? 'uninstalling'
-      : status?.value?.productDocStatus ?? 'uninstalled';
+      : kbProductDocStatus ?? 'uninstalled';
 
-  const hasBackendError = status?.value?.productDocStatus === 'error';
+  const hasBackendError = kbProductDocStatus === 'error';
   const showErrorCallout = hasBackendError || Boolean(actionError);
 
-  const badgeColor: 'success' | 'default' | 'warning' = (() => {
-    if (productDocStatus === 'installed') return 'success';
-    if (hasBackendError) return 'warning';
-    return 'default';
-  })();
+  const badgeColor: 'success' | 'default' | 'warning' =
+    productDocStatus === 'installed' ? 'success' : hasBackendError ? 'warning' : 'default';
 
   const statusLabel = hasBackendError
     ? i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.notAvailableLabel', {
         defaultMessage: 'Not available',
       })
-    : statusToButtonTextMap[productDocStatus];
+    : statusToLabelMap[productDocStatus];
+
+  const linkCss = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: euiTheme.size.xs,
+    fontWeight: euiTheme.font.weight.regular,
+  } as const;
 
   const onClickInstall = useCallback(async () => {
     try {
@@ -105,12 +105,11 @@ export function ProductDocSetting({
       }
       await installProductDoc(currentlyDeployedInferenceId);
     } catch (e) {
+      const msg = e instanceof Error && e.message ? e.message : String(e);
       setActionError(
         i18n.translate(
           'xpack.observabilityAiAssistantManagement.settingsPage.productDocInstallErrorTitle',
-          {
-            defaultMessage: 'Elastic documentation failed to install',
-          }
+          { defaultMessage: 'Elastic documentation failed to install' }
         ) + `: ${msg}`
       );
     }
@@ -121,16 +120,12 @@ export function ProductDocSetting({
       .openConfirm(
         i18n.translate(
           'xpack.observabilityAiAssistantManagement.settingsPage.productDocUninstallConfirmText',
-          {
-            defaultMessage: `Are you sure you want to uninstall the Elastic documentation?`,
-          }
+          { defaultMessage: `Are you sure you want to uninstall the Elastic documentation?` }
         ),
         {
           title: i18n.translate(
             'xpack.observabilityAiAssistantManagement.settingsPage.productDocUninstallConfirmTitle',
-            {
-              defaultMessage: `Uninstalling Elastic documentation`,
-            }
+            { defaultMessage: `Uninstalling Elastic documentation` }
           ),
         }
       )
@@ -153,59 +148,66 @@ export function ProductDocSetting({
     }
   }, [installProductDoc, currentlyDeployedInferenceId]);
 
-  const linkCss = useMemo(
-    () =>
-      ({
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: euiTheme.size.xs,
-        fontWeight: euiTheme.font.weight.regular,
-      } as const),
-    [euiTheme]
+  const TechPreviewTip = (
+    <EuiIconTip
+      position="bottom"
+      content={i18n.translate(
+        'xpack.observabilityAiAssistantManagement.settingsPage.techPreviewAriaLabel',
+        { defaultMessage: 'Technical preview' }
+      )}
+      type="beaker"
+      size="s"
+    />
   );
 
-  const retryLink = useMemo(() => {
-    if (isLoading) return null;
-    if (!(showErrorCallout || hasBackendError)) return null;
+  const RetryLink =
+    !isLoading && showErrorCallout ? (
+      canInstallProductDoc ? (
+        <EuiLink
+          onClick={onRetry}
+          color="primary"
+          data-test-subj="productDocRetryLink"
+          css={linkCss}
+        >
+          <EuiIcon type="refresh" size="s" data-test-subj="productDocRetryIcon" />
+          <span>
+            {i18n.translate(
+              'xpack.observabilityAiAssistantManagement.settingsPage.retryLinkLabel',
+              { defaultMessage: 'Retry' }
+            )}
+          </span>
+        </EuiLink>
+      ) : (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.observabilityAiAssistantManagement.settingsPage.installDissabledTooltip',
+            { defaultMessage: 'Knowledge Base has to be installed first.' }
+          )}
+        >
+          <EuiTextColor color="subdued" component="span">
+            <EuiLink
+              onClick={onRetry}
+              color="primary"
+              data-test-subj="productDocRetryLink"
+              aria-disabled
+              css={linkCss}
+            >
+              <EuiIcon type="refresh" size="s" />
+              <span>
+                {i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.settingsPage.retryLinkLabel',
+                  { defaultMessage: 'Retry' }
+                )}
+              </span>
+            </EuiLink>
+          </EuiTextColor>
+        </EuiToolTip>
+      )
+    ) : null;
 
-    const label = i18n.translate(
-      'xpack.observabilityAiAssistantManagement.settingsPage.retryLinkLabel',
-      { defaultMessage: 'Retry' }
-    );
-
-    const link = (
-      <EuiLink
-        onClick={onRetry}
-        color="primary"
-        data-test-subj="productDocRetryLink"
-        aria-disabled={!canInstallProductDoc}
-        css={linkCss}
-      >
-        <EuiIcon type="refresh" size="s" data-test-subj="productDocRetryIcon" />
-
-        <span> {label}</span>
-      </EuiLink>
-    );
-
-    return canInstallProductDoc ? (
-      link
-    ) : (
-      <EuiToolTip
-        position="top"
-        content={i18n.translate(
-          'xpack.observabilityAiAssistantManagement.settingsPage.installDissabledTooltip',
-          { defaultMessage: 'Knowledge Base has to be installed first.' }
-        )}
-      >
-        <EuiTextColor color="subdued" component="span">
-          {link}
-        </EuiTextColor>
-      </EuiToolTip>
-    );
-  }, [isLoading, showErrorCallout, hasBackendError, canInstallProductDoc, onRetry, linkCss]);
-
-  const actionLink = useMemo(() => {
-    if (isLoading) return null;
+  const ActionLink = (() => {
+    if (isLoading || showErrorCallout) return null;
 
     if (productDocStatus === 'installed') {
       return (
@@ -216,16 +218,18 @@ export function ProductDocSetting({
           aria-label="Uninstall Elastic documentation"
           css={linkCss}
         >
-          <EuiIcon type="cross" size="s" />{' '}
-          {i18n.translate(
-            'xpack.observabilityAiAssistantManagement.settingsPage.uninstallLinkLabel',
-            { defaultMessage: 'Uninstall' }
-          )}
+          <EuiIcon type="cross" size="s" />
+          <span>
+            {i18n.translate(
+              'xpack.observabilityAiAssistantManagement.settingsPage.uninstallLinkLabel',
+              { defaultMessage: 'Uninstall' }
+            )}
+          </span>
         </EuiLink>
       );
     }
 
-    const link = (
+    const installInner = (
       <EuiLink
         onClick={onClickInstall}
         color="primary"
@@ -233,57 +237,38 @@ export function ProductDocSetting({
         aria-disabled={!canInstallProductDoc}
         css={linkCss}
       >
-        {canInstallProductDoc &&
-          status?.value?.inferenceModelState !== InferenceModelState.NOT_INSTALLED &&
-          !(showErrorCallout || hasBackendError) && (
-            <>
-              <EuiIcon type="download" size="s" />
-              <span>
-                {i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.settingsPage.installLinkLabel',
-                  { defaultMessage: 'Install' }
-                )}
-              </span>
-            </>
+        <EuiIcon type="download" size="s" />
+        <span>
+          {i18n.translate(
+            'xpack.observabilityAiAssistantManagement.settingsPage.installLinkLabel',
+            { defaultMessage: 'Install' }
           )}
+        </span>
       </EuiLink>
     );
 
-    return canInstallProductDoc ? (
-      link
-    ) : (
-      <EuiToolTip
-        position="top"
-        content={i18n.translate(
-          'xpack.observabilityAiAssistantManagement.settingsPage.installDissabledTooltip',
-          { defaultMessage: 'Knowledge Base has to be installed first.' }
-        )}
-      >
-        <EuiTextColor color="subdued" component="span">
-          {link}
-        </EuiTextColor>
-      </EuiToolTip>
-    );
-  }, [
-    isLoading,
-    productDocStatus,
-    onClickUninstall,
-    onClickInstall,
-    canInstallProductDoc,
-    status,
-    linkCss,
-    showErrorCallout,
-    hasBackendError,
-  ]);
+    if (!canInstallProductDoc || kb?.inferenceModelState === InferenceModelState.NOT_INSTALLED) {
+      return (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.observabilityAiAssistantManagement.settingsPage.installDissabledTooltip',
+            { defaultMessage: 'Knowledge Base has to be installed first.' }
+          )}
+        >
+          <EuiTextColor color="subdued" component="span">
+            {installInner}
+          </EuiTextColor>
+        </EuiToolTip>
+      );
+    }
 
-  const techPreviewLabel = i18n.translate(
-    'xpack.observabilityAiAssistantManagement.settingsPage.techPreviewAriaLabel',
-    { defaultMessage: 'Technical preview' }
-  );
+    return installInner;
+  })();
 
   return (
     <>
-      <div css={{ marginBottom: '16px', marginTop: '8px' }}>
+      <div css={{ marginBottom: 16, marginTop: 8 }}>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
@@ -292,18 +277,20 @@ export function ProductDocSetting({
                 'xpack.observabilityAiAssistantManagement.settingsPage.productDocStatusPrefix',
                 { defaultMessage: 'Elastic documentation ' }
               )}{' '}
-              <EuiIconTip position="bottom" content={techPreviewLabel} type="beaker" size="s" />
+              {TechPreviewTip}
               {i18n.translate(
                 'xpack.observabilityAiAssistantManagement.settingsPage.productDocStatus',
                 { defaultMessage: ' status:' }
               )}
             </EuiText>
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <EuiBadge color={badgeColor} data-test-subj="productDocStatusBadge">
               {statusLabel}
             </EuiBadge>
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             {isLoading && (
               <EuiLoadingSpinner
@@ -312,21 +299,16 @@ export function ProductDocSetting({
               />
             )}
           </EuiFlexItem>
-          {retryLink && <EuiFlexItem grow={false}>{retryLink}</EuiFlexItem>}
 
-          {actionLink && <EuiFlexItem grow={false}>{actionLink}</EuiFlexItem>}
+          {RetryLink && <EuiFlexItem grow={false}>{RetryLink}</EuiFlexItem>}
+          {ActionLink && <EuiFlexItem grow={false}>{ActionLink}</EuiFlexItem>}
         </EuiFlexGroup>
       </div>
-      {(showErrorCallout || hasBackendError) && (
-        <EuiCallOut
-          color="warning"
-          size="s"
-          style={{ width: 528, marginBottom: 16 }}
-          data-test-subj="productDocNotAvailableCallout"
-        >
+
+      {showErrorCallout && (
+        <EuiCallOut color="warning" size="s" style={{ width: 528, marginBottom: 16 }} data-test-subj="productDocNotAvailableCallout">
           <div style={{ display: 'flex', alignItems: 'flex-start', columnGap: 8 }}>
             <EuiIcon type="iInCircle" size="s" />
-
             <EuiText size="s">
               <p>
                 {i18n.translate(
@@ -336,7 +318,8 @@ export function ProductDocSetting({
                       'The Elastic Documentation is not available. Try doing ABC and DCE to side-load the product docs and make them available to Kibana.',
                   }
                 )}
-                {<br />}
+              </p>
+              <p>
                 {i18n.translate(
                   'xpack.observabilityAiAssistantManagement.settingsPage.productDocNotAvailableLine2Prefix',
                   { defaultMessage: 'Check our ' }
