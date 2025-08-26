@@ -185,20 +185,22 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
                 </EuiButton>
               </EuiForm>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h5>
-                  {i18n.translate('xpack.onechat.tools.testTool.responseTitle', {
-                    defaultMessage: 'Response',
-                  })}
-                </h5>
-              </EuiTitle>
+            <EuiFlexItem >
+              <div style={{ marginLeft: '30px' }}>
+                <EuiTitle size="s">
+                  <h5>
+                    {i18n.translate('xpack.onechat.tools.testTool.responseTitle', {
+                      defaultMessage: 'Response',
+                    })}
+                  </h5>
+                </EuiTitle>
+              </div>
               <EuiSpacer size="m" />
               <CodeEditor
                 languageId="json"
                 value={response}
                 fullWidth={true}
-                height="600px"
+                height="calc(100vh - 200px)"
                 options={{
                   readOnly: true,
                   fontSize: 14,
