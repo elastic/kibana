@@ -8,10 +8,8 @@
 import { useMemo, useCallback } from 'react';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import {
-  isApiESQLVariablesCompatible,
-  TypedLensSerializedState,
-} from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
+import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 
 export const useESQLVariables = ({
   parentApi,

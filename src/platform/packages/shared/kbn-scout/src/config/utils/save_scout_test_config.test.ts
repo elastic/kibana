@@ -9,9 +9,9 @@
 
 import path from 'path';
 import Fs from 'fs';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { saveScoutTestConfigOnDisk } from './save_scout_test_config';
-import { ServerlessProjectType } from '@kbn/es';
+import type { ServerlessProjectType } from '@kbn/es';
 
 const MOCKED_SCOUT_SERVERS_ROOT = '/mock/repo/root/scout/servers';
 

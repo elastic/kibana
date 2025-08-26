@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PassThrough, Readable, pipeline } from 'stream';
-import { Logger } from '../../../../utils/create_logger';
+import type { Readable } from 'stream';
+import { PassThrough, pipeline } from 'stream';
+import type { Logger } from '../../../../utils/create_logger';
 import { getSerializeTransform } from '../../../../shared/get_serialize_transform';
 import { getOtelDedotTransform } from './get_otel_dedot_transform';
 import { createTransactionMetricsAggregator } from '../../../aggregators/otel/create_transaction_metrics_aggregator';

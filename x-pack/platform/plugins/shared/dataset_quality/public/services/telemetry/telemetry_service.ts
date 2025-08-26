@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import { TelemetryServiceSetupParams, ITelemetryClient } from './types';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { TelemetryServiceSetupParams, ITelemetryClient } from './types';
 import { datasetQualityEbtEvents } from './telemetry_events';
 import { TelemetryClient } from './telemetry_client';
 

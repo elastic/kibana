@@ -6,7 +6,7 @@
  */
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { RuleSystemAction, SanitizedRuleAction } from '@kbn/alerting-types';
+import type { RuleSystemAction, SanitizedRuleAction } from '@kbn/alerting-types';
 
 import { convertAlertingRuleToSchedule } from './convert_alerting_rule_to_schedule';
 import { getInternalAttackDiscoveryScheduleMock } from '../../../../__mocks__/attack_discovery_schedules.mock';

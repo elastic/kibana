@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { listTypesRoute } from './list_types';

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Aspect } from './point_series';
+import type { Aspect } from './point_series';
 
 export function makeFakeXAspect() {
   return {

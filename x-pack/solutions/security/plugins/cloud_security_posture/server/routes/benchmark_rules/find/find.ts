@@ -5,17 +5,17 @@
  * 2.0.
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
+import type {
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
-  findCspBenchmarkRuleRequestSchema,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import { findCspBenchmarkRuleRequestSchema } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { findCspBenchmarkRuleRequestSchema as findCspBenchmarkRuleRequestSchemaV1 } from '@kbn/cloud-security-posture-common/schema/rules/v3';
 import type { FindCspBenchmarkRuleRequest as FindCspBenchmarkRuleRequestV1 } from '@kbn/cloud-security-posture-common/schema/rules/v3';
 import { findCspBenchmarkRuleRequestSchema as findCspBenchmarkRuleRequestSchemaV2 } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import type { FindCspBenchmarkRuleRequest as FindCspBenchmarkRuleRequestV2 } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import { FIND_CSP_BENCHMARK_RULE_ROUTE_PATH } from '../../../../common/constants';
-import { CspRouter } from '../../../types';
+import type { CspRouter } from '../../../types';
 import { findBenchmarkRuleHandler as findRuleHandlerV1 } from './v1';
 import { findBenchmarkRuleHandler as findRuleHandlerV2 } from './v2';
 import { findBenchmarkRuleHandler as findRuleHandlerV3 } from './v3';

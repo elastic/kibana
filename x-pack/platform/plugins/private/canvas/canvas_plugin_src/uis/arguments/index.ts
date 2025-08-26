@@ -36,7 +36,7 @@ import { colorPicker } from './color_picker';
 import { editor } from './editor';
 import { partitionLabels } from './partition_labels';
 
-import { SetupInitializer } from '../../plugin';
+import type { SetupInitializer } from '../../plugin';
 
 export const args = [
   axisConfig,

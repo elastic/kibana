@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ComponentProps, useCallback, useMemo, useState } from 'react';
-import { EuiPanel, EuiTabbedContentTab } from '@elastic/eui';
+import type { ComponentProps } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiTabbedContentTab } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   AlertFieldsTable,
   ScrollableFlyoutTabbedContent,
 } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
-import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
+import type { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { AlertOverview } from '../alert_overview/alert_overview';
 
 type TabId = 'overview' | 'table';

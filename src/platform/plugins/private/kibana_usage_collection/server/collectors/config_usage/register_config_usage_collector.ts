@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { ConfigUsageData, CoreUsageDataStart } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { ConfigUsageData, CoreUsageDataStart } from '@kbn/core/server';
 
 export function registerConfigUsageCollector(
   usageCollection: UsageCollectionSetup,

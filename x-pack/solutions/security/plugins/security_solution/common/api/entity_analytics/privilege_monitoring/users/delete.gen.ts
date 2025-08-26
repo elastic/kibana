@@ -27,7 +27,7 @@ export const DeletePrivMonUserResponse = z.object({
   /**
    * Indicates if the deletion was successful
    */
-  aknowledged: z.boolean().optional(),
+  acknowledged: z.boolean().optional(),
   /**
    * A message providing additional information about the deletion status
    */

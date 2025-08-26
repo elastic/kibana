@@ -6,7 +6,7 @@
  */
 
 import { matchExclusionPattern } from './data_source_exclusions';
-import { DataSourceExclusions } from '../../common/types';
+import type { DataSourceExclusions } from '../../common/types';
 
 describe('matchExclusionPattern', () => {
   it('should return the actions that should be excluded', () => {

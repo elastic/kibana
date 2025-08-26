@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback } from 'react';
-import { AllSeries } from '@kbn/exploratory-view-plugin/public';
+import type { AllSeries } from '@kbn/exploratory-view-plugin/public';
 import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
 import { useExpViewAttributes } from './use_exp_view_attrs';
-import { BreakdownItem } from '../../../../../typings/ui_filters';
+import type { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useDataView } from '../local_uifilters/use_data_view';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldnames';

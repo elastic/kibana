@@ -8,7 +8,7 @@
  */
 
 import type { StoredLinksEmbeddableState } from '../types';
-import { StoredLinksByValueState910 } from './bwc';
+import type { StoredLinksByValueState910 } from './bwc';
 import { transformOut } from './transform_out';
 
 describe('transformOut', () => {

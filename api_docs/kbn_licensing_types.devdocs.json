@@ -1,0 +1,865 @@
+{
+  "id": "@kbn/licensing-types",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/licensing-types",
+        "id": "def-common.ILicense",
+        "type": "Interface",
+        "tags": [],
+        "label": "ILicense",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.uid",
+            "type": "string",
+            "tags": [],
+            "label": "uid",
+            "description": [
+              "\nUID for license."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "\nThe validity status of the license."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.LicenseStatus",
+                "text": "LicenseStatus"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.isActive",
+            "type": "boolean",
+            "tags": [],
+            "label": "isActive",
+            "description": [
+              "\nDetermine if the status of the license is active."
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.expiryDateInMillis",
+            "type": "number",
+            "tags": [],
+            "label": "expiryDateInMillis",
+            "description": [
+              "\nUnix epoch of the expiration date of the license."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
+            ],
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.mode",
+            "type": "CompoundType",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "mode",
+            "description": [
+              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
+            ],
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": true,
+            "removeBy": "8.8.0",
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/common/license.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/common/license.ts"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.signature",
+            "type": "string",
+            "tags": [],
+            "label": "signature",
+            "description": [
+              "\nSignature of the license content."
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.isAvailable",
+            "type": "boolean",
+            "tags": [],
+            "label": "isAvailable",
+            "description": [
+              "\nDetermine if the license container has information."
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [
+              "\nReturns"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.PublicLicenseJSON",
+                "text": "PublicLicenseJSON"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.error",
+            "type": "string",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "\nA potential error denoting the failure of the license from being retrieved."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.getUnavailableReason",
+            "type": "Function",
+            "tags": [],
+            "label": "getUnavailableReason",
+            "description": [
+              "\nIf the license is not available, provides a string or Error containing the reason."
+            ],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.hasAtLeast",
+            "type": "Function",
+            "tags": [],
+            "label": "hasAtLeast",
+            "description": [
+              "\nDetermine if license type >= minimal required license type."
+            ],
+            "signature": [
+              "(minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/licensing-types",
+                "id": "def-common.ILicense.hasAtLeast.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "minimumLicenseRequired",
+                "description": [
+                  "the minimum valid license required for the given feature"
+                ],
+                "signature": [
+                  "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+                ],
+                "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.check",
+            "type": "Function",
+            "tags": [],
+            "label": "check",
+            "description": [
+              "\nFor a given plugin and license type, receive information about the status of the license."
+            ],
+            "signature": [
+              "(pluginName: string, minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => ",
+              {
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.LicenseCheck",
+                "text": "LicenseCheck"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/licensing-types",
+                "id": "def-common.ILicense.check.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pluginName",
+                "description": [
+                  "the name of the plugin"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/licensing-types",
+                "id": "def-common.ILicense.check.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "minimumLicenseRequired",
+                "description": [
+                  "the minimum valid license for operating the given plugin"
+                ],
+                "signature": [
+                  "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+                ],
+                "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.ILicense.getFeature",
+            "type": "Function",
+            "tags": [],
+            "label": "getFeature",
+            "description": [
+              "\nA specific API for interacting with the specific features of the license."
+            ],
+            "signature": [
+              "(name: string) => ",
+              {
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.LicenseFeature",
+                "text": "LicenseFeature"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/licensing-types",
+                "id": "def-common.ILicense.getFeature.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [
+                  "the name of the feature to interact with"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/licensing-types",
+        "id": "def-common.LicenseCheck",
+        "type": "Interface",
+        "tags": [],
+        "label": "LicenseCheck",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.LicenseCheck.state",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "\nThe state of checking the results of a license type meeting the license minimum."
+            ],
+            "signature": [
+              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.LicenseCheck.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [
+              "\nA message containing the reason for a license type not being valid."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/licensing-types",
+        "id": "def-common.LicenseFeature",
+        "type": "Interface",
+        "tags": [],
+        "label": "LicenseFeature",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.LicenseFeature.isAvailable",
+            "type": "boolean",
+            "tags": [],
+            "label": "isAvailable",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.LicenseFeature.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/licensing-types",
+        "id": "def-common.PublicLicense",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublicLicense",
+        "description": [
+          "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
+        ],
+        "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.PublicLicense.uid",
+            "type": "string",
+            "tags": [],
+            "label": "uid",
+            "description": [
+              "\nUID for license."
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.PublicLicense.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "\nThe validity status of the license."
+            ],
+            "signature": [
+              "\"active\" | \"invalid\" | \"expired\""
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.PublicLicense.expiryDateInMillis",
+            "type": "number",
+            "tags": [],
+            "label": "expiryDateInMillis",
+            "description": [
+              "\nUnix epoch of the expiration date of the license."
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.PublicLicense.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
+            ],
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.PublicLicense.mode",
+            "type": "CompoundType",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "mode",
+            "description": [
+              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
+            ],
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": true,
+            "removeBy": "8.8.0",
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/common/license.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/server/license_fetcher.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/common/has_license_info_changed.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/common/licensing/license_service.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/common/licensing/license_service.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/common/licensing/license_service.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/license/policy_config.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/license/policy_config.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/license/policy_config.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/licensing-types",
+        "id": "def-common.PublicLicenseJSON",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublicLicenseJSON",
+        "description": [
+          "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
+        ],
+        "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.PublicLicenseJSON.license",
+            "type": "Object",
+            "tags": [],
+            "label": "license",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.PublicLicense",
+                "text": "PublicLicense"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.PublicLicenseJSON.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.PublicFeatures",
+                "text": "PublicFeatures"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/licensing-types",
+            "id": "def-common.PublicLicenseJSON.signature",
+            "type": "string",
+            "tags": [],
+            "label": "signature",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/licensing-types",
+        "id": "def-common.LICENSE_TYPE",
+        "type": "Enum",
+        "tags": [],
+        "label": "LICENSE_TYPE",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/licensing-types",
+        "id": "def-common.LicenseCheckState",
+        "type": "Type",
+        "tags": [],
+        "label": "LicenseCheckState",
+        "description": [],
+        "signature": [
+          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
+        ],
+        "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/licensing-types",
+        "id": "def-common.LicenseStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "LicenseStatus",
+        "description": [],
+        "signature": [
+          "\"active\" | \"invalid\" | \"expired\""
+        ],
+        "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/licensing-types",
+        "id": "def-common.LicenseType",
+        "type": "Type",
+        "tags": [],
+        "label": "LicenseType",
+        "description": [],
+        "signature": [
+          "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+        ],
+        "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/licensing-types",
+        "id": "def-common.PublicFeatures",
+        "type": "Type",
+        "tags": [],
+        "label": "PublicFeatures",
+        "description": [
+          "\nProvides information about feature availability for the current license."
+        ],
+        "signature": [
+          "{ [x: string]: ",
+          {
+            "pluginId": "@kbn/licensing-types",
+            "scope": "common",
+            "docId": "kibKbnLicensingTypesPluginApi",
+            "section": "def-common.LicenseFeature",
+            "text": "LicenseFeature"
+          },
+          "; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

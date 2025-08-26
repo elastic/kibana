@@ -8,7 +8,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -22,7 +22,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -36,7 +36,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -50,7 +50,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -64,7 +64,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -78,7 +78,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -92,7 +92,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -106,7 +106,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -120,7 +120,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -134,7 +134,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -148,7 +148,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -162,7 +162,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -176,7 +176,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -190,7 +190,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -205,7 +205,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:timeline:runner:qa:serverless
         key: investigations:timeline:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -219,7 +219,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:saved-objects:runner:qa:serverless
         key: investigations:saved-objects:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -233,7 +233,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:overview:runner:qa:serverless
         key: explore:overview:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
