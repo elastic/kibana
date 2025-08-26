@@ -72,6 +72,7 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
+  INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -219,6 +220,19 @@ export const getInferenceConnectors = async (
     }
   );
   return decodeInferenceConnectorsResponse(response);
+};
+
+export const findCasesByAttachmentId = async (alertIds: string[], caseIds: string[]) => {
+  return KibanaServices.get().http.fetch<{}>(
+    `${INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL}`,
+    {
+      method: 'GET',
+      query: {
+        alertIds,
+        caseIds,
+      },
+    }
+  );
 };
 
 export const findCaseUserActions = async (
