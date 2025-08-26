@@ -199,6 +199,15 @@ query.sort(['field1', 'ASC'], ['field2', 'DESC']);
 query.where`status == ${status} AND count > ${threshold}`;
 ```
 
+You can chain them fluently:
+
+```ts
+const query = esql.from('index').where`status == ${status}`
+  .sort(['@timestamp', 'DESC'])
+  .keep('field1', 'field2')
+  .limit(50);
+```
+
 #### Output Methods
 
 ```ts
