@@ -1251,8 +1251,8 @@ export class CstToAstConverter {
     const command = this.createCommand<'rerank', ast.ESQLAstRerankCommand>('rerank', ctx);
 
     this.parseRerankQuery(ctx, command);
-    this.parseRerankFields(ctx, command);
-    this.parseRerankWithParameters(ctx, command);
+    this.parseRerankOnOption(ctx, command);
+    this.parseRerankWithOption(ctx, command);
 
     return command;
   }
@@ -1297,19 +1297,37 @@ export class CstToAstConverter {
    * Parses the ON fields list.
    * Handles: ... ON field1, field2 = X(field2, 2)
    */
-  private parseRerankFields(
+  private parseRerankOnOption(
     ctx: cst.RerankCommandContext,
     command: ast.ESQLAstRerankCommand
   ): void {
+    const onToken = ctx.ON();
     const rerankFieldsCtx = ctx.rerankFields();
-    command.fields = rerankFieldsCtx ? this.fromRerankFields(rerankFieldsCtx) : [];
+
+    if (!onToken || !rerankFieldsCtx) {
+      return;
+    }
+
+    const onOption = this.toOption(onToken.getText().toLowerCase(), rerankFieldsCtx);
+    const fields = this.fromRerankFields(rerankFieldsCtx);
+
+    onOption.args.push(...fields);
+    onOption.location.min = onToken.symbol.start;
+
+    const lastArg = lastItem(onOption.args);
+    if (lastArg) {
+      onOption.location.max = lastArg.location.max;
+    }
+
+    command.args.push(onOption);
+    command.fields = fields;
   }
 
   /**
    * Parses WITH parameters as a generic map.
    * Handles: ... WITH {inference_id: "model", scoreColumn: "score", ...}
    */
-  private parseRerankWithParameters(
+  private parseRerankWithOption(
     ctx: cst.RerankCommandContext,
     command: ast.ESQLAstRerankCommand
   ): void {
@@ -1320,7 +1338,7 @@ export class CstToAstConverter {
     }
 
     const withOption = this.fromCommandNamedParameters(namedParamsCtx);
-    if (withOption) {
+    if (withOption && !withOption.incomplete) {
       command.args.push(withOption);
     }
   }

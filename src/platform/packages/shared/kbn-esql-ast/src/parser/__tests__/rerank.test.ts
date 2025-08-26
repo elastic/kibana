@@ -41,6 +41,29 @@ describe('RERANK', () => {
       expect(ast.commands[1]).not.toHaveProperty('targetField');
     });
 
+    it('should parse ON clause as an option in the AST', () => {
+      const text = 'FROM movies | RERANK "star wars" ON title WITH { "inference_id" : "reranker" }';
+      const { ast } = EsqlQuery.fromSrc(text);
+      const rerankCmd = ast.commands[1] as ESQLAstRerankCommand;
+
+      const onOption = rerankCmd.args.find(
+        (arg): arg is ESQLCommandOption =>
+          'type' in arg && arg.type === 'option' && arg.name === 'on'
+      );
+
+      expect(onOption).toBeDefined();
+      expect(onOption).toMatchObject({
+        type: 'option',
+        name: 'on',
+        args: [
+          {
+            type: 'column',
+            name: 'title',
+          },
+        ],
+      });
+    });
+
     it('should parse RERANK with multiple fields', () => {
       const text =
         'FROM movies | RERANK "star wars" ON title, description, actors WITH { "inference_id" : "reranker" }';
@@ -157,7 +180,6 @@ describe('RERANK', () => {
       expect(ast.commands[1]).toMatchObject({
         type: 'command',
         name: 'rerank',
-        fields: [], // Parser returns empty fields when query is missing
       });
 
       expect(errors).toHaveLength(2);
@@ -179,6 +201,28 @@ describe('RERANK', () => {
       });
 
       expect(rerankCmd).not.toHaveProperty('inferenceId');
+    });
+
+    it('should handle missing ON clause', () => {
+      const text = 'FROM movies | RERANK "star wars" WITH { "inference_id" : "reranker" }';
+      const { ast, errors } = EsqlQuery.fromSrc(text);
+
+      expect(ast.commands[1]).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+      });
+      expect(errors).toHaveLength(1);
+    });
+
+    it('should handle incomplete WITH clause', () => {
+      const text = 'FROM movies | RERANK "star wars" ON title WITH';
+      const { ast, errors } = EsqlQuery.fromSrc(text);
+
+      expect(ast.commands[1]).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+      });
+      expect(errors).toHaveLength(1);
     });
 
     it('should handle malformed assignment syntax and catch an error', () => {
