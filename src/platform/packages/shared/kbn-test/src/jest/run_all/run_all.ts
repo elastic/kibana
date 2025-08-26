@@ -242,11 +242,21 @@ export function runJestAll() {
           process.exit(1);
         }
 
-        log.warning('First attempt failed, retrying without retries...');
+        log.warning('First attempt failed, retrying failed test files only...');
 
-        log.info(`Running Jest without retries for ${initialRunConfigFilepath}...`);
+        log.info(`Running Jest retry for failed files using ${initialRunConfigFilepath}...`);
 
-        const secondRunConfigFilepath = Path.join(dir, `jest.config.initial.json`);
+        // Derive failed test files from the initial aggregated results
+        const failedFiles = initialRunResults.testResults.testResults
+          .filter((tr) => tr.numFailingTests > 0)
+          .map((tr) => tr.testFilePath);
+
+        if (failedFiles.length === 0) {
+          log.info('No failed files detected in initial run; skipping retry run.');
+          continue;
+        }
+
+        const secondRunResultsPath = Path.join(dir, `second_results.json`);
 
         const secondRunResult = await runJestWithConfig({
           configPath: initialRunConfigFilepath,
@@ -254,13 +264,13 @@ export function runJestAll() {
           log,
           jestFlags: [
             ...passthroughJestFlags,
-            '--onlyFailures',
             '--runInBand',
             '--outputFile',
-            secondRunConfigFilepath,
-            ...targetPaths,
+            secondRunResultsPath,
+            // Re-run exactly the failed files from the initial run
+            ...failedFiles,
           ],
-          resultsPath: secondRunConfigFilepath,
+          resultsPath: secondRunResultsPath,
         });
 
         if (secondRunResult.testResults.numFailedTests) {

@@ -33,8 +33,6 @@ export default class JsonReporter implements Reporter {
 
     const outputPath = this._globalConfig.outputFile;
 
-    console.log(`Writing file to ${outputPath}`);
-
     await Fs.promises.mkdir(Path.dirname(outputPath), { recursive: true });
 
     await Fs.promises.writeFile(outputPath, JSON.stringify(results ?? {}, null, 2), 'utf8');
