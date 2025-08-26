@@ -108,15 +108,9 @@ export class ScopedDiscoverEBTManager {
       console.log({ fieldNames });
 
       // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
-      const categorizedFields: string[] = [];
-
-      for (const fieldName of fieldNames) {
-        if (fields[fieldName]?.short) {
-          categorizedFields.push(fieldName);
-        } else {
-          categorizedFields.push(NON_ECS_FIELD);
-        }
-      }
+      const categorizedFields = fieldNames.map((fieldName) =>
+        fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
+      );
 
       eventData[FIELD_USAGE_FIELD_NAME] = categorizedFields;
     }
