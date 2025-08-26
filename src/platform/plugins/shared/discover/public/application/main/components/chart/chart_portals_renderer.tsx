@@ -137,12 +137,12 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
   const chartSectionConfig = useMemo(
     () =>
       getChartConfigAccessor(() => ({
-        replaceDefaultHistogram: false,
+        replaceDefaultChart: false,
       }))(),
     [getChartConfigAccessor]
   );
 
-  return chartSectionConfig.replaceDefaultHistogram ? (
+  return chartSectionConfig.replaceDefaultChart ? (
     <CustomChartSectionWrapper
       stateContainer={stateContainer}
       panelsToggle={panelsToggle}
@@ -189,7 +189,7 @@ const CustomChartSectionWrapper = ({
   panelsToggle,
   chartSectionConfig,
 }: UnifiedHistogramChartProps & {
-  chartSectionConfig: Extract<ChartSectionConfiguration, { replaceDefaultHistogram: true }>;
+  chartSectionConfig: Extract<ChartSectionConfiguration, { replaceDefaultChart: true }>;
 }) => {
   const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(stateContainer);
 

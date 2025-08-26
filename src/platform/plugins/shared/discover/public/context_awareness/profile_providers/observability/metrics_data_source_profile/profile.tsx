@@ -16,7 +16,7 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
 
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
 
-const METRICS_DATA_SOURCE_PROFILE_ID = 'metrics-data-source-profile';
+const METRICS_DATA_SOURCE_PROFILE_ID = 'observability-metrics-data-source-profile';
 
 const LazyMetricsGridSection = dynamic(() => import('./dummy_metrics_grid'));
 
@@ -34,7 +34,7 @@ export const createMetricsDataSourceProfileProvider = (
     getChartSectionConfiguration: (prev) => () => ({
       ...(prev ? prev() : {}),
       Component: LazyMetricsGridSection,
-      replaceDefaultHistogram: true,
+      replaceDefaultChart: true,
       localStorageKeyPrefix: 'discover:metricsExperience',
     }),
   },

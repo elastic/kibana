@@ -368,6 +368,13 @@ export interface Profile {
   ) => TypedLensByValueInput['attributes'];
 
   /**
+   * Gets configuration for the Discover chart (UnifiedHistogram) section
+   * This allows modifying the chart section with a custom component
+   * @returns The custom configuration for the chart
+   */
+  getChartSectionConfiguration: () => ChartSectionConfiguration;
+
+  /**
    * Data grid
    */
 
@@ -443,10 +450,4 @@ export interface Profile {
    * Example use case is to overwrite the column header display name or to add icons to the column headers.
    */
   getColumnsConfiguration: () => CustomGridColumnsConfiguration;
-
-  /**
-   * Gets configuration for the Discover chart (UnifiedHistogram) section
-   * @returns The custom configuration for the chart
-   */
-  getChartSectionConfiguration: () => ChartSectionConfiguration;
 }

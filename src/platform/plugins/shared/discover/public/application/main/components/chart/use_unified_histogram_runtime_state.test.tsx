@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
-import { setTimeout } from 'timers/promises';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
@@ -32,14 +31,11 @@ describe('useUnifiedHistogramWithRuntimeState', () => {
       interval: 'auto',
       hideChart: false,
     });
-    const appState = stateContainer.appState;
-    const wrappedStateContainer = Object.create(appState);
-    wrappedStateContainer.update = jest.fn((newState) => appState.update(newState));
-    stateContainer.appState = wrappedStateContainer;
+
     return stateContainer;
   };
 
-  const renderUseUnifiedHistogramRuntimeState = async (
+  const renderUseUnifiedHistogramRuntimeState = (
     {
       stateContainer,
     }: {
@@ -61,8 +57,6 @@ describe('useUnifiedHistogramWithRuntimeState', () => {
       wrapper: Wrapper,
     });
 
-    await act(() => setTimeout(0));
-
     return { hook };
   };
 
@@ -70,16 +64,16 @@ describe('useUnifiedHistogramWithRuntimeState', () => {
     useDiscoverHistogramMock.mockImplementation(jest.fn());
   });
 
-  it('should return the current tab id', async () => {
+  it('should return the current tab id', () => {
     const stateContainer = getStateContainer();
-    const { hook } = await renderUseUnifiedHistogramRuntimeState({ stateContainer });
+    const { hook } = renderUseUnifiedHistogramRuntimeState({ stateContainer });
 
     expect(hook.result.current.currentTabId).toBe(stateContainer.getCurrentTab().id);
   });
 
-  it('should call selectRestorableTabRuntimeHistogramLayoutProps with correct arguments', async () => {
+  it('should call useDiscoverHistogramMock with correct arguments', () => {
     const stateContainer = getStateContainer();
-    await renderUseUnifiedHistogramRuntimeState({ stateContainer });
+    renderUseUnifiedHistogramRuntimeState({ stateContainer });
 
     expect(useDiscoverHistogramMock).toBeCalledWith(
       stateContainer,

@@ -24,6 +24,7 @@ export {
   UnifiedHistogramChart,
   type UnifiedHistogramChartProps,
   ChartSectionTemplate,
+  type ChartSectionTemplateProps,
   ToolbarSelector,
   type ToolbarSelectorProps,
   type SelectableEntry,

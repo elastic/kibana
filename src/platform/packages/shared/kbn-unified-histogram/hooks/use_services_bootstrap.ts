@@ -8,7 +8,6 @@
  */
 
 import { useMemo, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
 import { pick } from 'lodash';
 import { Subject } from 'rxjs';
 import type { UnifiedHistogramApi, UseUnifiedHistogramProps } from './use_unified_histogram';
@@ -20,7 +19,6 @@ import { getBreakdownField } from '../utils/local_storage_utils';
 
 export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
   const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
-  const [api, setApi] = useState<UnifiedHistogramApi>();
 
   const [stateService] = useState(() => {
     const { services, initialState, localStorageKeyPrefix } = props;
@@ -31,21 +29,19 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     });
   });
 
-  useMount(async () => {
-    setApi({
-      fetch: () => {
-        input$.next({ type: 'fetch' });
-      },
-      ...pick(
-        stateService,
-        'state$',
-        'setChartHidden',
-        'setTopPanelHeight',
-        'setTimeInterval',
-        'setTotalHits'
-      ),
-    });
-  });
+  const [api] = useState<UnifiedHistogramApi>(() => ({
+    fetch: () => {
+      input$.next({ type: 'fetch' });
+    },
+    ...pick(
+      stateService,
+      'state$',
+      'setChartHidden',
+      'setTopPanelHeight',
+      'setTimeInterval',
+      'setTotalHits'
+    ),
+  }));
 
   const {
     services,

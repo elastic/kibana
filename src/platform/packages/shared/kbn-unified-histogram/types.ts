@@ -241,9 +241,9 @@ export interface ChartSectionProps {
 export type ChartSectionConfiguration =
   | {
       Component: React.ComponentType<ChartSectionProps>;
-      replaceDefaultHistogram: true;
+      replaceDefaultChart: true;
       localStorageKeyPrefix: string;
     }
   | {
-      replaceDefaultHistogram: false;
+      replaceDefaultChart: false;
     };

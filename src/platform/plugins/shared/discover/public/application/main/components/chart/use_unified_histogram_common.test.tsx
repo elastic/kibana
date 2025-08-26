@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { act, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { selectTabRuntimeState } from '../../state_management/redux';
@@ -16,12 +16,7 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import type { UseUnifiedHistogramOptions } from './use_discover_histogram';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import { setTimeout } from 'timers/promises';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
-
-jest.mock('../../hooks/use_is_esql_mode', () => ({
-  useIsEsqlMode: jest.fn(() => false),
-}));
 
 describe('useUnifiedHistogramCommon', () => {
   const getStateContainer = () => {
@@ -30,14 +25,10 @@ describe('useUnifiedHistogramCommon', () => {
       interval: 'auto',
       hideChart: false,
     });
-    const appState = stateContainer.appState;
-    const wrappedStateContainer = Object.create(appState);
-    wrappedStateContainer.update = jest.fn((newState) => appState.update(newState));
-    stateContainer.appState = wrappedStateContainer;
     return stateContainer;
   };
 
-  const renderUseUnifiedHistogramCommon = async (
+  const renderUseUnifiedHistogramCommon = (
     {
       stateContainer,
       panelsToggle,
@@ -50,9 +41,12 @@ describe('useUnifiedHistogramCommon', () => {
       stateContainer: getStateContainer(),
     }
   ) => {
-    const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
+    const Wrapper = ({
+      children,
+      stateContainerProp,
+    }: React.PropsWithChildren<{ stateContainerProp: DiscoverStateContainer }>) => (
       <DiscoverTestProvider
-        stateContainer={stateContainer}
+        stateContainer={stateContainerProp}
         runtimeState={{ currentDataView: dataViewMockWithTimeField, adHocDataViews: [] }}
       >
         {children}
@@ -60,34 +54,34 @@ describe('useUnifiedHistogramCommon', () => {
     );
 
     const hook = renderHook(
-      () =>
+      ({ stateContainerProp, layoutProps }) =>
         useUnifiedHistogramCommon({
-          currentTabId: stateContainer.getCurrentTab().id,
-          stateContainer,
-          layoutProps: options?.initialLayoutProps,
+          currentTabId: stateContainerProp.getCurrentTab().id,
+          stateContainer: stateContainerProp,
+          layoutProps,
           panelsToggle,
         }),
       {
-        wrapper: Wrapper,
+        wrapper: ({ children }) => (
+          <Wrapper stateContainerProp={stateContainer}>{children}</Wrapper>
+        ),
+        initialProps: {
+          stateContainerProp: stateContainer,
+          layoutProps: options?.initialLayoutProps,
+        },
       }
     );
-
-    await act(() => setTimeout(0));
 
     return { hook };
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should update unifiedHistogramLayoutProps$ with new layoutProps', async () => {
+  it('should update unifiedHistogramLayoutProps$ with new layoutProps', () => {
     const layoutProps = {
       topPanelHeight: 50,
     };
 
     const stateContainer = getStateContainer();
-    await renderUseUnifiedHistogramCommon({
+    const { hook } = renderUseUnifiedHistogramCommon({
       stateContainer,
     });
 
@@ -98,11 +92,9 @@ describe('useUnifiedHistogramCommon', () => {
       ).unifiedHistogramLayoutProps$.getValue()
     ).toEqual(undefined);
 
-    await renderUseUnifiedHistogramCommon({
-      stateContainer,
-      options: {
-        initialLayoutProps: layoutProps,
-      },
+    hook.rerender({
+      stateContainerProp: stateContainer,
+      layoutProps,
     });
 
     expect(
@@ -113,9 +105,9 @@ describe('useUnifiedHistogramCommon', () => {
     ).toEqual(layoutProps);
   });
 
-  it('should clone panelsToggle if it is a valid React element', async () => {
+  it('should clone panelsToggle if it is a valid React element', () => {
     const stateContainer = getStateContainer();
-    const { hook } = await renderUseUnifiedHistogramCommon({
+    const { hook } = renderUseUnifiedHistogramCommon({
       stateContainer,
       panelsToggle: <div>Test Panels Toggle</div>,
     });
@@ -124,8 +116,8 @@ describe('useUnifiedHistogramCommon', () => {
     expect(clonedElement?.props.renderedFor).toBe('histogram');
   });
 
-  it('should return the isEsqlMode value from the useIsEsqlMode hook', async () => {
-    const { hook } = await renderUseUnifiedHistogramCommon();
+  it('should return the isEsqlMode value from the useIsEsqlMode hook', () => {
+    const { hook } = renderUseUnifiedHistogramCommon();
 
     expect(hook.result.current.isEsqlMode).toBe(false);
   });

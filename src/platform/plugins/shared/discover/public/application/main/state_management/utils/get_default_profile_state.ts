@@ -48,7 +48,7 @@ export const getDefaultProfileState = ({
         stateUpdate.hideChart = defaultState.hideChart;
       }
 
-      if (resetDefaultProfileState.hideSidebar) {
+      if (resetDefaultProfileState.hideSidebar && defaultState.hideSidebar !== undefined) {
         stateUpdate.hideSidebar = defaultState.hideSidebar;
       }
 
