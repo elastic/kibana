@@ -94,7 +94,7 @@ export default function QualitySummaryCards({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        {!dataStreamSettingsLoading && !hasFailureStore && canUserReadFailureStore ? (
+        {!dataStreamSettingsLoading && !(hasFailureStore && canUserReadFailureStore) ? (
           <Card
             isDisabled={true}
             title={overviewPanelDatasetQualityIndicatorFailedDocs}
@@ -102,15 +102,17 @@ export default function QualitySummaryCards({
               defaultMessage: 'No failure store',
             })}
             footer={
-              <EuiLink
-                href={locator?.getRedirectUrl(locatorParams)}
-                target="_blank"
-                external={false}
-              >
-                {i18n.translate('xpack.datasetQuality.enableFailureStore', {
-                  defaultMessage: 'Enable failure store',
-                })}
-              </EuiLink>
+              canUserReadFailureStore && (
+                <EuiLink
+                  href={locator?.getRedirectUrl(locatorParams)}
+                  target="_blank"
+                  external={false}
+                >
+                  {i18n.translate('xpack.datasetQuality.enableFailureStore', {
+                    defaultMessage: 'Enable failure store',
+                  })}
+                </EuiLink>
+              )
             }
           />
         ) : (

@@ -22,7 +22,6 @@ examples/feature_flags_example @elastic/kibana-core
 examples/field_formats_example @elastic/kibana-data-discovery
 examples/files_example @elastic/appex-sharedux
 examples/grid_example @elastic/kibana-presentation
-examples/guided_onboarding_example @elastic/appex-sharedux
 examples/hello_world @elastic/kibana-core
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
@@ -497,7 +496,6 @@ src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-
 src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
 src/platform/packages/shared/kbn-grok-ui @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
-src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
 src/platform/packages/shared/kbn-i18n-react @elastic/kibana-core
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
@@ -735,7 +733,6 @@ src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/platform/plugins/shared/expressions @elastic/kibana-visualizations
 src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 src/platform/plugins/shared/files @elastic/appex-sharedux
-src/platform/plugins/shared/guided_onboarding @elastic/appex-sharedux
 src/platform/plugins/shared/home @elastic/appex-sharedux
 src/platform/plugins/shared/inspector @elastic/kibana-presentation
 src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
@@ -1189,6 +1186,10 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
 /x-pack/platform/test/api_integration/apis/entity_manager @elastic/obs-entities
 
+# Metrics Experience
+/src/platform/plugins/shared/metrics_experience @elastic/obs-ux-infra_services-team
+/src/platform/test/api_integration/apis/metrics_experience @elastic/obs-ux-infra_services-team
+/src/platform/test/api_integration/fixtures/es_archiver/metrics_experience @elastic/obs-ux-infra_services-team
 
 # Data Discovery
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
@@ -1316,7 +1317,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/platform/test/functional/page_objects/lens_page.ts @elastic/kibana-visualizations
 /x-pack/platform/test/fixtures/es_archives/lens @elastic/kibana-visualizations
 /x-pack/platform/test/examples/embedded_lens @elastic/kibana-visualizations
-/x-pack/test/api_integration/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
+/x-pack/platform/test/api_integration/fixtures/kbn_archives/lens/ @elastic/kibana-visualizations
 /x-pack/platform/test/api_integration/apis/lens @elastic/kibana-visualizations
 /src/platform/test/plugin_functional/test_suites/custom_visualizations @elastic/kibana-visualizations
 /src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
@@ -1387,6 +1388,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 
 # Observability UI
+/x-pack/solutions/observability/test/README.md @elastic/observability-ui
+/x-pack/solutions/observability/test/serverless/README.md @elastic/observability-ui
 /x-pack/solutions/observability/test/serverless/api_integration/ftr_provider_context.d.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/serverless/api_integration/services/ @elastic/observability-ui
 /x-pack/solutions/observability/test/serverless/api_integration/configs/config.ts @elastic/observability-ui @elastic/appex-qa
@@ -1674,7 +1677,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/streams-program-team @elastic/obs-ux-logs-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/streams-program-team @elastic/obs-ux-logs-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/streams-program-team @elastic/obs-ux-logs-team
-/x-pack/test/api_integration/fixtures/kbn_archiver/streams @elastic/streams-program-team @elastic/obs-ux-logs-team
+/x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/streams-program-team @elastic/obs-ux-logs-team
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests @elastic/streams-program-team @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/streams @elastic/streams-program-team @elastic/obs-ux-logs-team
 
@@ -1946,7 +1949,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/serverless/functional/test_suites/management/index.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/test_suites/examples/index.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_page.ts @elastic/appex-qa
-/x-pack/test_serverless/README.md @elastic/appex-qa
+/x-pack/platform/test/README.md @elastic/appex-qa
+/x-pack/platform/test/serverless/README.md @elastic/appex-qa
 /x-pack/test_serverless/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/api_integration/test_suites/README.md @elastic/appex-qa
 /src/dev/code_coverage @elastic/appex-qa
@@ -1975,6 +1979,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/tsconfig.json @elastic/appex-qa
 /x-pack/platform/test/api_integration_basic/config.basic_license.ts @elastic/appex-qa
 /x-pack/platform/test/api_integration_basic/ftr_provider_context.d.ts @elastic/appex-qa
+/x-pack/solutions/security/test/README.md @elastic/appex-qa
 /x-pack/solutions/security/test/kibana.jsonc @elastic/appex-qa
 /x-pack/solutions/security/test/tsconfig.json @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/config.ts @elastic/appex-qa
@@ -2928,9 +2933,6 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 # EUI team
 /src/plugins/kibana_react/public/page_template/ @elastic/eui-team @elastic/appex-sharedux
 
-# Landing page for guided onboarding in Home plugin
-/src/plugins/home/public/application/components/guided_onboarding @elastic/appex-sharedux
-
 # Changes to translation files should not ping code reviewers
 x-pack/platform/plugins/private/translations/translations
 
@@ -2977,8 +2979,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/examples/state_sync/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/error_boundary/index.ts @elastic/appex-sharedux
 /src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
-/src/platform/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
-/x-pack/solutions/search/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
 /x-pack/platform/test/banners_functional @elastic/appex-sharedux
 /x-pack/platform/test/custom_branding @elastic/appex-sharedux
 /x-pack/platform/test/api_integration/apis/content_management @elastic/appex-sharedux

@@ -21,7 +21,6 @@ import {
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
-  AgentMode,
   type RoundInput,
   type ChatEvent,
   oneChatDefaultAgentId,
@@ -63,10 +62,6 @@ export interface ChatConverseParams {
    * If empty, will use the default agent id.
    */
   agentId?: string;
-  /**
-   * Agent mode to use for this round of conversation.
-   */
-  mode?: AgentMode;
   /**
    * Id of the genAI connector to use.
    * If empty, will use the default connector.
@@ -116,7 +111,6 @@ class ChatServiceImpl implements ChatService {
 
   converse({
     agentId = oneChatDefaultAgentId,
-    mode = AgentMode.normal,
     conversationId,
     connectorId,
     request,
@@ -127,7 +121,7 @@ class ChatServiceImpl implements ChatService {
     const { inference } = this;
     const isNewConversation = !conversationId;
 
-    return withConverseSpan({ agentId, mode, conversationId }, (span) => {
+    return withConverseSpan({ agentId, conversationId }, (span) => {
       return forkJoin({
         conversationClient: defer(async () =>
           this.conversationService.getScopedClient({ request })
@@ -157,7 +151,6 @@ class ChatServiceImpl implements ChatService {
           const agentEvents$ = executeAgent$({
             agentId,
             request,
-            mode,
             conversation$,
             nextInput,
             abortSignal,

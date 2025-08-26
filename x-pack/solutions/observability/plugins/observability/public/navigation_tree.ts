@@ -32,6 +32,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
         children: [
           {
             link: 'observability-overview',
+            title,
+            icon,
+            renderAs: 'home',
+            sideNavVersion: 'v2',
+          },
+          {
+            link: 'observability-overview',
+            sideNavVersion: 'v1',
           },
           {
             title: i18n.translate('xpack.observability.obltNav.discover', {
@@ -74,6 +82,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 {
                   link: 'streams' as const,
                   withBadge: true,
+                  badgeTypeV2: 'techPreview' as const,
                   badgeOptions: {
                     icon: 'beaker',
                     tooltip: i18n.translate('xpack.observability.obltNav.streamsBadgeTooltip', {
@@ -93,7 +102,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             children: [
               {
                 id: 'apm',
-                link: 'apm:services',
                 children: [
                   {
                     link: 'apm:service-map',
