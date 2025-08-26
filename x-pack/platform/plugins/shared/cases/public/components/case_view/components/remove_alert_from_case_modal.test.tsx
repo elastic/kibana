@@ -14,14 +14,17 @@ jest.mock('../../../containers/use_remove_alert_from_case');
 
 const useRemoveAlertFromCaseMock = useRemoveAlertFromCase as jest.Mock;
 
-describe('RemoveAlertFromCaseModal', () => {
-  const onClose = jest.fn();
-  const onSuccess = jest.fn();
-  const mutateAsync = jest.fn(() => Promise.resolve());
-  useRemoveAlertFromCaseMock.mockReturnValue({ mutateAsync });
+let onClose = jest.fn();
+let onSuccess = jest.fn();
+let mutateAsync = jest.fn(() => Promise.resolve());
 
+describe('RemoveAlertFromCaseModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    onClose = jest.fn();
+    onSuccess = jest.fn();
+    mutateAsync = jest.fn(() => Promise.resolve());
+    useRemoveAlertFromCaseMock.mockReturnValue({ mutateAsync });
   });
 
   it('renders modal with correct title and message', () => {
