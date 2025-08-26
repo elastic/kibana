@@ -266,6 +266,7 @@ export const WorkflowSchema = z.object({
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 
 export const WorkflowContextSchema = z.object({
+  spaceId: z.string(),
   workflowRunId: z.string(),
   event: z.any().optional(),
   consts: z.record(z.string(), z.any()).optional(),
@@ -278,7 +279,10 @@ export const WorkflowContextSchema = z.object({
   ),
   foreach: z
     .object({
+      items: z.array(z.any()),
+      index: z.number().int(),
       item: z.any(),
+      total: z.number().int(),
     })
     .optional(),
   now: z.date().optional(),

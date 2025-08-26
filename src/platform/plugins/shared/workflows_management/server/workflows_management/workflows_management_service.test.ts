@@ -9,7 +9,6 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { WorkflowStatus } from '@kbn/workflows';
 import { WORKFLOW_SAVED_OBJECT_TYPE } from '../saved_objects/workflow';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import { WorkflowsService } from './workflows_management_service';
@@ -27,7 +26,9 @@ describe('WorkflowsService', () => {
       create: jest.fn(),
       update: jest.fn(),
       get: jest.fn(),
+      bulkGet: jest.fn(),
       delete: jest.fn(),
+      asScopedToNamespace: jest.fn(),
     } as any;
 
     mockEsClient = {
@@ -43,6 +44,7 @@ describe('WorkflowsService', () => {
     mockLogger = loggerMock.create();
 
     const mockEsClientPromise = Promise.resolve(mockEsClient);
+    mockSavedObjectsClient.asScopedToNamespace.mockReturnValue(mockSavedObjectsClient);
     const mockGetSavedObjectsClient = jest.fn().mockResolvedValue(mockSavedObjectsClient);
 
     service = new WorkflowsService(
@@ -60,10 +62,33 @@ describe('WorkflowsService', () => {
   describe('deleteWorkflows', () => {
     it('should soft delete workflows by setting deleted_at timestamp', async () => {
       const workflowIds = ['workflow-1', 'workflow-2'];
+      const spaceId: string = 'default';
       const mockRequest = {} as any;
 
-      await service.deleteWorkflows(workflowIds, mockRequest);
+      mockSavedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'workflow-1',
+            type: WORKFLOW_SAVED_OBJECT_TYPE,
+            attributes: {
+              spaceId,
+            },
+            references: [],
+          },
+          {
+            id: 'workflow-2',
+            type: WORKFLOW_SAVED_OBJECT_TYPE,
+            attributes: {
+              spaceId,
+            },
+            references: [],
+          },
+        ],
+      });
 
+      await service.deleteWorkflows(workflowIds, spaceId, mockRequest);
+
+      expect(mockSavedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith(spaceId);
       expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('workflow-1');
       expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('workflow-2');
 
@@ -101,13 +126,13 @@ describe('WorkflowsService', () => {
             attributes: {
               name: 'Test Workflow',
               description: 'A test workflow',
-              status: WorkflowStatus.ACTIVE,
+              enabled: true,
               tags: [],
               yaml: '',
               definition: {},
               createdBy: 'system',
               lastUpdatedBy: 'system',
-              deleted: false,
+              deleted_at: null,
             },
             created_at: '2023-01-01T00:00:00Z',
             updated_at: '2023-01-01T00:00:00Z',
@@ -117,19 +142,22 @@ describe('WorkflowsService', () => {
         per_page: 100,
         page: 1,
       };
+      const spaceId: string = 'default';
 
       mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
       // Mock the searchWorkflowExecutions method
       jest.spyOn(service, 'searchWorkflowExecutions').mockResolvedValue({
         results: [],
-        _pagination: { offset: 0, limit: 100, total: 0 },
+        _pagination: { page: 1, limit: 100, total: 0 },
       });
 
-      await service.searchWorkflows({ limit: 100, offset: 0 });
+      await service.searchWorkflows({ limit: 100, page: 1 }, spaceId);
 
+      expect(mockSavedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith(spaceId);
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         type: WORKFLOW_SAVED_OBJECT_TYPE,
+        page: 1,
         perPage: 100,
         sortField: 'updated_at',
         sortOrder: 'desc',
@@ -160,15 +188,17 @@ definition:
       };
 
       const mockRequest = {} as any;
+      const spaceId: string = 'default';
 
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
 
       try {
-        await service.createWorkflow(mockWorkflow, mockRequest);
+        await service.createWorkflow(mockWorkflow, spaceId, mockRequest);
       } catch (error) {
         // Ignore errors from yaml parsing - we just want to verify the saved object structure
       }
 
+      expect(mockSavedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith(spaceId);
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         WORKFLOW_SAVED_OBJECT_TYPE,
         expect.objectContaining({
