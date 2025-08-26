@@ -79,6 +79,7 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   durationMs: number;
   toolsInvoked: {
     AlertCountsTool?: number;
+    AssetInventory?: number;
     GenerateESQLTool?: number;
     AskAboutESQLTool?: number;
     KnowledgeBaseRetrievalTool?: number;
@@ -134,6 +135,13 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
     toolsInvoked: {
       properties: {
         AlertCountsTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        AssetInventory: {
           type: 'long',
           _meta: {
             description: 'Number of times tool was invoked.',
