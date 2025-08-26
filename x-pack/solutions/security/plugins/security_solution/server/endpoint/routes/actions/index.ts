@@ -16,7 +16,6 @@ import { registerActionStateRoutes } from './state';
 import { registerActionListRoutes } from './list';
 import { registerResponseActionRoutes } from './response_actions';
 import { registerCustomScriptsRoute } from './custom_scripts_handler';
-import { registerPendingActionsRoute } from './pending_actions_handler';
 
 export function registerActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -31,6 +30,5 @@ export function registerActionRoutes(
   registerActionFileDownloadRoutes(router, endpointContext);
   registerActionFileInfoRoute(router, endpointContext);
   registerCustomScriptsRoute(router, endpointContext);
-  registerPendingActionsRoute(router, endpointContext);
   registerOrphanActionsSpaceRoute(router, endpointContext.service);
 }

@@ -7,7 +7,7 @@
 
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import type { CustomScript } from '../../../../../server/endpoint/services';
-import type { PendingActionsResponse } from '../../../hooks/response_actions/use_get_pending_actions';
+import type { ActionListApiResponse, ActionDetails } from '../../../../../common/endpoint/types';
 import type { BaseSelectorState } from './types';
 
 /**
@@ -80,17 +80,12 @@ export const transformCustomScriptsToOptions = (
 };
 
 /**
- * Type for individual pending action item (extracted from hook's response type)
- */
-export type PendingActionItem = PendingActionsResponse['data'][0];
-
-/**
- * Transform pending actions response to selectable options
+ * Transform pending actions response (using standard ActionListApiResponse) to selectable options
  */
 export const transformPendingActionsToOptions = (
-  response: PendingActionsResponse[],
+  response: ActionListApiResponse[],
   selectedValue?: string
-): EuiSelectableOption<Partial<{ description: string; actionItem: PendingActionItem }>>[] => {
+): EuiSelectableOption<Partial<{ description: string; actionItem: ActionDetails }>>[] => {
   // The hook returns a single response object, but our data parameter is an array
   // So we need to handle both cases
   if (!response || response.length === 0) {
@@ -110,13 +105,15 @@ export const transformPendingActionsToOptions = (
     return [];
   }
 
-  return (data as PendingActionItem[]).map((action: PendingActionItem) => {
+  return data.map((action: ActionDetails) => {
     const isChecked = action.id === selectedValue;
-    const hostName = action.agents?.[0]?.host?.name;
-    const timestamp = new Date(action['@timestamp']).toLocaleString();
+    const hostName = action.agents?.[0] ? action.hosts?.[action.agents[0]]?.name : undefined;
+    const timestamp = new Date(action.startedAt).toLocaleString();
     const command = action.command;
     const createdBy = action.createdBy;
-    const description = `${command} on ${hostName} by ${createdBy} at ${timestamp}`;
+    const description = `${command} on ${
+      hostName || 'Unknown host'
+    } by ${createdBy} at ${timestamp}`;
 
     return {
       label: action.id,

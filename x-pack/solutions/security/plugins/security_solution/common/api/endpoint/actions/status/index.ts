@@ -7,4 +7,3 @@
 
 export * from './status';
 export * from './status.gen';
-export * from './pending';
