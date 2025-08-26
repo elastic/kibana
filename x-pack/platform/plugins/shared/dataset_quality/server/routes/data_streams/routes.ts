@@ -480,15 +480,21 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
 
     const isServerless = (await getEsCapabilities()).serverless;
 
-    const defaultRetentionPeriod = await getDataStreamDefaultRetentionPeriod({
-      esClient: esClient.asSecondaryAuthUser,
-    });
     const dataStreamDetails = await getDataStreamDetails({
       esClient,
       dataStream,
       start,
       end,
       isServerless,
+    });
+
+    // If dataStreamDetails is empty, return empty object, otherwise append defaultRetentionPeriod
+    if (!dataStreamDetails || Object.keys(dataStreamDetails).length === 0) {
+      return {} as DataStreamDetails;
+    }
+
+    const defaultRetentionPeriod = await getDataStreamDefaultRetentionPeriod({
+      esClient: esClient.asSecondaryAuthUser,
     });
 
     return { ...dataStreamDetails, defaultRetentionPeriod };
