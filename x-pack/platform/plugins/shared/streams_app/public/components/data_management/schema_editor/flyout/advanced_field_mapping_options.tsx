@@ -14,13 +14,14 @@ import {
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldDefinitionConfigAdvancedParameters } from '@kbn/streams-schema';
 import { isSchema, recursiveRecord } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
 import type { SchemaField } from '../types';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useResizeCheckerUtils } from '../../../../hooks/use_resize_checker_utils';
 
 const label = i18n.translate('xpack.streams.advancedFieldMappingOptions.label', {
   defaultMessage: 'Advanced field mapping parameters',
@@ -43,6 +44,9 @@ export const AdvancedFieldMappingOptions = ({
 
   const [hasParsingError, { on: markAsParsingError, off: resetParsingErrorFlag }] =
     useBoolean(false);
+
+  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+  const divRef = useRef<HTMLDivElement>(null);
 
   const isInvalid = hasParsingError || !getValidFlag(field.additionalParameters);
 
@@ -87,25 +91,33 @@ export const AdvancedFieldMappingOptions = ({
           }
         >
           {isEditing ? (
-            <CodeEditor
-              height={120}
-              languageId="json"
-              value={jsonOptions}
-              onChange={(value) => {
-                try {
-                  const additionalParameters =
-                    value === ''
-                      ? undefined
-                      : (JSON.parse(value) as FieldDefinitionConfigAdvancedParameters);
-                  onChange({ additionalParameters });
-                  if (onValidate) onValidate(getValidFlag(additionalParameters));
-                  resetParsingErrorFlag();
-                } catch (error: unknown) {
-                  markAsParsingError();
-                  if (onValidate) onValidate(false);
-                }
-              }}
-            />
+            <div ref={divRef} style={{ width: '100%', height: 120, overflow: 'hidden' }}>
+              <CodeEditor
+                height={120}
+                languageId="json"
+                value={jsonOptions}
+                onChange={(value) => {
+                  try {
+                    const additionalParameters =
+                      value === ''
+                        ? undefined
+                        : (JSON.parse(value) as FieldDefinitionConfigAdvancedParameters);
+                    onChange({ additionalParameters });
+                    if (onValidate) onValidate(getValidFlag(additionalParameters));
+                    resetParsingErrorFlag();
+                  } catch (error: unknown) {
+                    markAsParsingError();
+                    if (onValidate) onValidate(false);
+                  }
+                }}
+                editorDidMount={(editor) => {
+                  if (divRef.current) {
+                    setupResizeChecker(divRef.current, editor, { flyoutMode: true });
+                  }
+                }}
+                editorWillUnmount={() => destroyResizeChecker()}
+              />
+            </div>
           ) : (
             <EuiCodeBlock language="json" isCopyable>
               {jsonOptions}

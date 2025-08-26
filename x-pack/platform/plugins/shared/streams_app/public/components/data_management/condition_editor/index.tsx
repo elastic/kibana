@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import type { EuiSelectOption } from '@elastic/eui';
 import {
@@ -34,6 +34,7 @@ import {
 } from '@kbn/streamlang';
 import { isPlainObject } from 'lodash';
 import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
+import { useResizeCheckerUtils } from '../../../hooks/use_resize_checker_utils';
 
 export type RoutingConditionEditorProps = ConditionEditorProps;
 
@@ -109,6 +110,9 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
 
+  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+  const divRef = useRef<HTMLDivElement>(null);
+
   const handleConditionChange = (updatedCondition: Condition) => {
     props.onConditionChange(emptyEqualsToAlways(updatedCondition));
   };
@@ -139,19 +143,26 @@ export function ConditionEditor(props: ConditionEditorProps) {
       }
     >
       {usingSyntaxEditor ? (
-        <CodeEditor
-          dataTestSubj="streamsAppConditionEditorCodeEditor"
-          height={200}
-          languageId="json"
-          value={JSON.stringify(condition, null, 2)}
-          onChange={(value) => {
-            try {
-              handleConditionChange(JSON.parse(value));
-            } catch (error: unknown) {
-              // do nothing
-            }
-          }}
-        />
+        <div ref={divRef} style={{ width: '100%', height: 200, overflow: 'hidden' }}>
+          <CodeEditor
+            dataTestSubj="streamsAppConditionEditorCodeEditor"
+            height={200}
+            languageId="json"
+            value={JSON.stringify(condition, null, 2)}
+            onChange={(value) => {
+              try {
+                handleConditionChange(JSON.parse(value));
+              } catch (error: unknown) {
+              }
+            }}
+            editorDidMount={(editor) => {
+              if (divRef.current) {
+                setupResizeChecker(divRef.current, editor);
+              }
+            }}
+            editorWillUnmount={() => destroyResizeChecker()}
+          />
+        </div>
       ) : isFilterCondition ? (
         <FilterForm condition={condition} onConditionChange={handleConditionChange} />
       ) : (

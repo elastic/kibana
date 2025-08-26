@@ -18,14 +18,36 @@ export const useResizeCheckerUtils = () => {
 
   const setupResizeChecker = (
     divElement: HTMLDivElement,
-    editor: monaco.editor.IStandaloneCodeEditor
+    editor: monaco.editor.IStandaloneCodeEditor,
+    options: { flyoutMode?: boolean } = {}
   ) => {
     if (resizeChecker.current) {
       resizeChecker.current.destroy();
     }
-    resizeChecker.current = new ResizeChecker(divElement);
+    
+    let targetElement = divElement;
+    
+    if (options.flyoutMode) {
+      const flyoutElement = divElement.closest('.euiFlyout') as HTMLDivElement;
+      if (flyoutElement) {
+        targetElement = flyoutElement;
+      }
+    }
+    
+    resizeChecker.current = new ResizeChecker(targetElement);
     resizeChecker.current.on('resize', () => {
-      editor.layout();
+      if (options.flyoutMode) {
+        const flyoutRect = targetElement.getBoundingClientRect();
+        const availableWidth = flyoutRect.width - 120;
+        
+        divElement.style.width = `${availableWidth}px`;
+        divElement.style.maxWidth = `${availableWidth}px`;
+        
+        const containerRect = divElement.getBoundingClientRect();
+        editor.layout({ width: availableWidth, height: containerRect.height });
+      } else {
+        editor.layout();
+      }
     });
   };
 
