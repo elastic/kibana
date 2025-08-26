@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -23,7 +24,10 @@ import {
   EuiButtonIcon,
   EuiDescriptionList,
   EuiSkeletonText,
+  EuiButtonEmpty,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/unified-search-plugin/public/use_memo_css';
 import { StatusBadge, getExecutionStatusIcon } from '../../../shared/ui';
 import { useStepExecution } from '../model/use_step_execution';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
@@ -46,6 +50,7 @@ export const WorkflowStepExecutionFlyout = ({
   goPrevious,
 }: WorkflowStepExecutionFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
 
   const { data: stepExecution, isLoading } = useStepExecution(workflowExecutionId, stepId);
 
@@ -125,29 +130,30 @@ export const WorkflowStepExecutionFlyout = ({
       pushMinBreakpoint="xl"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-          css={{
-            width: '100%',
-            borderBottom: `1px solid ${euiTheme.colors.lightShade}`,
-            padding: euiTheme.size.m,
-          }}
-        >
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" css={styles.flyoutHeader}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center">
-              <EuiButtonIcon
+              <EuiButtonEmpty
+                size="xs"
                 iconType="arrowLeft"
+                aria-label="Previous step"
                 onClick={goPrevious}
                 disabled={!goPrevious}
                 css={{ cursor: goPrevious ? 'pointer' : 'not-allowed' }}
-              />
-              <EuiButtonIcon
+              >
+                Previous
+              </EuiButtonEmpty>
+              <EuiButtonEmpty
+                size="xs"
                 iconType="arrowRight"
+                iconSide="right"
+                aria-label="Next step"
                 onClick={goNext}
                 disabled={!goNext}
                 css={{ cursor: goNext ? 'pointer' : 'not-allowed' }}
-              />
+              >
+                Next
+              </EuiButtonEmpty>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -155,14 +161,11 @@ export const WorkflowStepExecutionFlyout = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <div css={{ padding: euiTheme.size.m }}>
+        <div css={styles.titleContainer}>
           {isLoading && <EuiSkeletonText lines={1} />}
           {stepExecution && (
             <EuiTitle size="m">
-              <h2
-                id={complicatedFlyoutTitleId}
-                css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}
-              >
+              <h2 id={complicatedFlyoutTitleId} css={styles.title}>
                 {getExecutionStatusIcon(euiTheme, stepExecution.status)}
                 {stepExecution.stepId}
               </h2>
@@ -190,7 +193,7 @@ export const WorkflowStepExecutionFlyout = ({
             )}
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiTabs css={{ marginBottom: -13 }}>
+          <EuiTabs css={styles.tabs}>
             {tabs.map((tab, index) => (
               <EuiTab
                 onClick={() => setSelectedTabId(tab.id)}
@@ -205,7 +208,7 @@ export const WorkflowStepExecutionFlyout = ({
       </EuiFlyoutHeader>
 
       {/* hack to avoid white gradient overlaying the content */}
-      <EuiFlyoutBody banner={' '} css={{ padding: euiTheme.size.m }}>
+      <EuiFlyoutBody banner={' '} css={styles.flyoutBody}>
         {isLoading && <EuiSkeletonText lines={2} />}
         {selectedTabId === 'input' && renderInput()}
         {selectedTabId === 'output' && renderOutput()}
@@ -213,4 +216,30 @@ export const WorkflowStepExecutionFlyout = ({
       </EuiFlyoutBody>
     </EuiFlyout>
   );
+};
+
+const componentStyles = {
+  flyoutHeader: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
+      padding: euiTheme.size.s,
+    }),
+  titleContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.m,
+    }),
+  title: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      alignItems: 'center',
+      gap: euiTheme.size.s,
+    }),
+  tabs: css({
+    marginBottom: -13,
+  }),
+  flyoutBody: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.m,
+    }),
 };
