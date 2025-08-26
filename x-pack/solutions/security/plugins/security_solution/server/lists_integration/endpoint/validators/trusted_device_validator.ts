@@ -13,13 +13,14 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import { TrustedDeviceConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import { BaseValidator } from './base_validator';
+import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
 // Error constants following the established pattern
 const TRUSTED_DEVICE_EMPTY_VALUE_ERROR = 'Field value cannot be empty';
 const TRUSTED_DEVICE_DUPLICATE_FIELD_ERROR = 'Duplicate field entries are not allowed';
+const TRUSTED_DEVICE_DUPLICATE_OS_ERROR = 'Duplicate OS entries are not allowed';
 
 const TrustedDeviceFieldSchema = schema.oneOf([
   schema.literal(TrustedDeviceConditionEntryField.USERNAME),
@@ -65,9 +66,23 @@ const TrustedDeviceEntriesSchema = schema.arrayOf(TrustedDeviceEntrySchema, {
   },
 });
 
-/**
- * Schema to validate Trusted Device data for create and update.
- */
+const TrustedDeviceBasicDataSchema = BasicEndpointExceptionDataSchema.extends({
+  osTypes: schema.arrayOf(
+    schema.oneOf([schema.literal(OperatingSystem.WINDOWS), schema.literal(OperatingSystem.MAC)]),
+    {
+      minSize: 1,
+      maxSize: 2,
+      validate: (osTypes: string[]) => {
+        const duplicateOs = osTypes.filter((os, index) => osTypes.indexOf(os) !== index);
+        if (duplicateOs.length > 0) {
+          return `${TRUSTED_DEVICE_DUPLICATE_OS_ERROR}: ${duplicateOs.join(', ')}`;
+        }
+        return undefined;
+      },
+    }
+  ),
+});
+
 const TrustedDeviceDataSchema = schema.object(
   {
     entries: TrustedDeviceEntriesSchema,
@@ -92,47 +107,6 @@ export class TrustedDeviceValidator extends BaseValidator {
   private async validateTrustedDevicesFeatureEnabled(): Promise<void> {
     if (!this.endpointAppContext.experimentalFeatures.trustedDevices) {
       throw new EndpointArtifactExceptionValidationError('Trusted devices feature is not enabled');
-    }
-  }
-
-  /**
-   * Override base validation to allow both Windows and Mac OS types for trusted devices
-   * CRITICAL: This is the key difference from trusted apps which only allow single OS
-   */
-  protected async validateBasicData(item: ExceptionItemLikeOptions) {
-    const TrustedDeviceBasicDataSchema = schema.object(
-      {
-        name: schema.string({ minLength: 1, maxLength: 256 }),
-        description: schema.maybe(
-          schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })
-        ),
-        namespaceType: schema.literal('agnostic'),
-        // CRITICAL: Allow 1 or 2 OS types (Windows and/or Mac) - unlike base validator
-        osTypes: schema.arrayOf(
-          schema.oneOf([
-            schema.literal(OperatingSystem.WINDOWS),
-            schema.literal(OperatingSystem.MAC),
-          ]),
-          {
-            minSize: 1,
-            maxSize: 2,
-            validate: (osTypes: string[]) => {
-              const validOsTypes = [OperatingSystem.WINDOWS, OperatingSystem.MAC];
-              const invalidOs = osTypes.find((os) => !validOsTypes.includes(os as OperatingSystem));
-              return invalidOs
-                ? `Unsupported OS type: ${invalidOs}. Only Windows and Mac are supported for trusted devices.`
-                : undefined;
-            },
-          }
-        ),
-      },
-      { unknowns: 'ignore' }
-    );
-
-    try {
-      TrustedDeviceBasicDataSchema.validate(item);
-    } catch (error) {
-      throw new EndpointArtifactExceptionValidationError(error.message);
     }
   }
 
@@ -211,7 +185,11 @@ export class TrustedDeviceValidator extends BaseValidator {
   }
 
   private async validateTrustedDeviceData(item: ExceptionItemLikeOptions): Promise<void> {
-    await this.validateBasicData(item);
+    try {
+      TrustedDeviceBasicDataSchema.validate(item);
+    } catch (error) {
+      throw new EndpointArtifactExceptionValidationError(error.message);
+    }
 
     try {
       TrustedDeviceDataSchema.validate(item);
