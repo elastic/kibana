@@ -193,8 +193,13 @@ export class Home extends Component<HomeProps, State> {
   }
 
   private hideSolutions = () => {
-    this.props.localStorage.setItem(HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY, 'true');
-    this.setState({ hideSolutionsSection: false });
+    const current =
+      this.props.localStorage.getItem(HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY) === 'true';
+    this.props.localStorage.setItem(
+      HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY,
+      (!current).toString()
+    );
+    this.setState({ hideSolutionsSection: !current });
   };
 
   private renderNormal() {
@@ -302,6 +307,8 @@ export class Home extends Component<HomeProps, State> {
           onChangeDefaultRoute={() => {
             trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
           }}
+          onHideSolutionsSection={this.hideSolutions}
+          hideSolutionsSection={this.state.hideSolutionsSection}
         />
       </KibanaPageTemplate>
     );
