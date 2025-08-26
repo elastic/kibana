@@ -6,11 +6,8 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import {
-  AttachmentType,
-  type SuggestionContext,
-  type SuggestionHandlerResponse,
-} from '@kbn/cases-plugin/common';
+import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/common';
+import { type SuggestionContext, type SuggestionHandlerResponse } from '@kbn/cases-plugin/common';
 import type { SuggestionType } from '@kbn/cases-plugin/server';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AttachmentItem } from '@kbn/cases-plugin/common/types/domain/suggestion/v1';
@@ -78,7 +75,6 @@ export function getMonitorByServiceName(
     id: 'syntheticMonitorByServiceName',
     attachmentTypeId: '.page',
     owner: 'observability',
-
     handlers: {
       syntheticMonitorByServiceName: {
         tool: {
@@ -176,9 +172,7 @@ export function getMonitorByServiceName(
               spaces: source.meta.space_id,
               locationLabel: source.observer.geo.name,
               locationId: source.observer.name,
-              updated_at: '2025-08-19T07:44:35.940Z',
               urls: source.url.full,
-              projectId: '',
             };
           });
 
@@ -189,13 +183,16 @@ export function getMonitorByServiceName(
               } for the service: ${serviceNames.join(',')} `,
               payload: monitor,
               attachment: {
-                type: AttachmentType.persistableState,
+                type: 'persistableState' as Extract<
+                  CaseAttachmentWithoutOwner['type'],
+                  'persistableState'
+                >,
                 persistableStateAttachmentTypeId: '.page',
                 persistableStateAttachmentState: {
                   type: 'synthetics_history',
                   url: {
                     pathAndQuery: '<SOME_PATH_AND_QUERY>',
-                    label: 'payload.name',
+                    label: monitor.name,
                     actionLabel: i18n.translate('xpack.synthetics.addToCase.caseAttachmentLabel', {
                       defaultMessage: 'Go to Synthetics history',
                     }),

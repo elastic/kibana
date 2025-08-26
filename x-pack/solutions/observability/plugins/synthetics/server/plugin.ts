@@ -32,7 +32,7 @@ import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthet
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
 import { getMonitorByServiceName } from './cases/suggestion';
-import { SyntheticsSuggestion } from '../common/types';
+import type { SyntheticsSuggestion } from '../common/types';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
