@@ -13,6 +13,7 @@ import { useLicense } from './use_license';
 export interface UseCasesFeatures {
   isAlertsEnabled: boolean;
   isSyncAlertsEnabled: boolean;
+  isExtractObservablesEnabled: boolean;
   observablesAuthorized: boolean;
   connectorsAuthorized: boolean;
   caseAssignmentAuthorized: boolean;
@@ -42,6 +43,10 @@ export const useCasesFeatures = (): UseCasesFeatures => {
        * to explicitly set the sync to true
        */
       isSyncAlertsEnabled: !features.alerts.enabled ? false : features.alerts.sync,
+      isExtractObservablesEnabled:
+        !features.alerts.enabled && !features.observables.enabled
+          ? false
+          : features.alerts.extractObservables,
       metricsFeatures: features.metrics,
       caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum && assign,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
@@ -52,6 +57,7 @@ export const useCasesFeatures = (): UseCasesFeatures => {
     [
       features.alerts.enabled,
       features.alerts.sync,
+      features.alerts.extractObservables,
       features.metrics,
       hasLicenseGreaterThanPlatinum,
       assign,

@@ -45,6 +45,7 @@ interface SanitizedCaseConnector {
 interface SanitizedCaseSettings {
   settings: {
     syncAlerts: boolean;
+    extractObservables: boolean;
   };
 }
 
@@ -211,6 +212,7 @@ export const caseMigrations = {
         ...doc.attributes,
         settings: {
           syncAlerts: true,
+          extractObservables: true,
         },
       },
       references: doc.references || [],

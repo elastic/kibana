@@ -24,6 +24,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
+import { ExtractObservablesSwitch } from '../case_settings/extract_observables_switch';
 
 export interface CaseActionBarProps {
   caseData: CaseUI;
@@ -37,7 +38,12 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   onUpdateField,
 }) => {
   const { permissions } = useCasesContext();
-  const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
+  const {
+    isSyncAlertsEnabled,
+    isExtractObservablesEnabled,
+    metricsFeatures,
+    observablesAuthorized,
+  } = useCasesFeatures();
   const { euiTheme } = useEuiTheme();
 
   const { data: caseConnectors } = useGetCaseConnectors(caseData.id);
@@ -64,6 +70,15 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       onUpdateField({
         key: 'settings',
         value: { ...caseData.settings, syncAlerts },
+      }),
+    [caseData.settings, onUpdateField]
+  );
+
+  const onExtractObservablesChanged = useCallback(
+    (extractObservables: boolean) =>
+      onUpdateField({
+        key: 'settings',
+        value: { ...caseData.settings, extractObservables },
       }),
     [caseData.settings, onUpdateField]
   );
@@ -128,6 +143,21 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                 disabled={isLoading}
                 isSynced={caseData.settings.syncAlerts}
                 onSwitchChange={onSyncAlertsChanged}
+              />
+            </ActionBarStatusItem>
+          </EuiFlexItem>
+        ) : null}
+
+        {permissions.update && observablesAuthorized && isExtractObservablesEnabled ? (
+          <EuiFlexItem grow={false}>
+            <ActionBarStatusItem
+              title={i18n.EXTRACT_OBSERVABLES_LABEL}
+              dataTestSubj="case-view-extract-observables"
+            >
+              <ExtractObservablesSwitch
+                disabled={isLoading}
+                isExtracted={caseData.settings.extractObservables}
+                onSwitchChange={onExtractObservablesChanged}
               />
             </ActionBarStatusItem>
           </EuiFlexItem>

@@ -52,7 +52,12 @@ import type {
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
-  alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
+  alerts: {
+    sync?: boolean;
+    extractObservables?: boolean;
+    enabled?: boolean;
+    isExperimental?: boolean;
+  };
   metrics: SingleCaseMetricsFeature[];
   observables?: { enabled: boolean };
 }

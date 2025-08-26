@@ -137,7 +137,12 @@ const initialSort: GetSecurityAlertsTableProp<'initialSort'> = [
     },
   },
 ];
-const casesConfiguration = { featureId: CASES_FEATURE_ID, owner: [APP_ID], syncAlerts: true };
+const casesConfiguration = {
+  featureId: CASES_FEATURE_ID,
+  owner: [APP_ID],
+  syncAlerts: true,
+  extractObservables: true,
+};
 const emptyInputFilters: Filter[] = [];
 
 const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'services'>> = ({

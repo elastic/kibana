@@ -56,6 +56,7 @@ describe('utils', () => {
       // We remove the id as is randomly generated
       const toast = createUpdateSuccessToaster(caseBeforeUpdate, caseAfterUpdate, 'settings', {
         syncAlerts: true,
+        extractObservables: true,
       });
 
       expect(toast).toEqual({
@@ -72,6 +73,7 @@ describe('utils', () => {
         'settings',
         {
           syncAlerts: true,
+          extractObservables: true,
         }
       );
 
@@ -85,6 +87,7 @@ describe('utils', () => {
       // We remove the id as is randomly generated
       const toast = createUpdateSuccessToaster(caseBeforeUpdate, caseAfterUpdate, 'settings', {
         syncAlerts: false,
+        extractObservables: false,
       });
 
       expect(toast).toEqual({
@@ -112,7 +115,7 @@ describe('utils', () => {
     it('creates the correct toast when the status change, case has alerts, and sync alerts is off', () => {
       // We remove the id as is randomly generated
       const toast = createUpdateSuccessToaster(
-        { ...caseBeforeUpdate, settings: { syncAlerts: false } },
+        { ...caseBeforeUpdate, settings: { syncAlerts: false, extractObservables: true } },
         caseAfterUpdate,
         'status',
         'closed'
