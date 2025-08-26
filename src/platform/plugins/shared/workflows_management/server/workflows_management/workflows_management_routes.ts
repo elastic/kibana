@@ -585,7 +585,6 @@ export function defineRoutes(
             offset,
             sortField,
             sortOrder,
-            // todo: replace with separate endpoint
             stepId,
           },
           spaceId

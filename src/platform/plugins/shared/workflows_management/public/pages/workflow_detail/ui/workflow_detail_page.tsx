@@ -48,7 +48,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const { activeTab, selectedExecutionId, selectedStepId, setActiveTab } = useWorkflowUrlState();
 
-  // TODO: FIX: do not fetch execution twice
   const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
 
   chrome!.setBreadcrumbs([

@@ -10,12 +10,14 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import YAML from 'yaml';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import type { SchemasSettings } from 'monaco-yaml';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { useYamlValidation } from '../lib/use_yaml_validation';
@@ -24,11 +26,11 @@ import {
   getMonacoRangeFromYamlNode,
   navigateToErrorPosition,
 } from '../lib/utils';
-import type { WorkflowYAMLEditorProps } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import { getStepNode } from '../../../../common/lib/yaml_utils';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
+import type { YamlValidationError } from '../model/types';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -37,6 +39,22 @@ const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
 const useWorkflowJsonSchema = () => {
   return jsonSchema;
 };
+
+export interface WorkflowYAMLEditorProps {
+  workflowId?: string;
+  filename?: string;
+  readOnly?: boolean;
+  hasChanges?: boolean;
+  lastUpdatedAt?: Date;
+  highlightStep?: string;
+  stepExecutions?: EsWorkflowStepExecution[];
+  'data-testid'?: string;
+  value: string;
+  onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
+  onChange?: (value: string | undefined) => void;
+  onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
+  onSave?: (value: string) => void;
+}
 
 export const WorkflowYAMLEditor = ({
   workflowId,
@@ -54,16 +72,15 @@ export const WorkflowYAMLEditor = ({
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor | null>(
-    null
-  );
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const workflowJsonSchema = useWorkflowJsonSchema();
-  const schemas = useMemo(() => {
+  const schemas: SchemasSettings[] = useMemo(() => {
     return [
       {
         fileMatch: ['*'],
-        schema: workflowJsonSchema,
+        // casting here because zod-to-json-schema returns a more complex type than JSONSchema7 expected by monaco-yaml
+        schema: workflowJsonSchema as any,
         uri: WorkflowSchemaUri,
       },
     ];
@@ -90,10 +107,8 @@ export const WorkflowYAMLEditor = ({
       }
       validateVariables(editorRef.current);
       try {
-        if ('getValue' in model) {
-          const value = model.getValue();
-          yamlDocumentRef.current = YAML.parseDocument(value ?? '');
-        }
+        const value = model.getValue();
+        yamlDocumentRef.current = YAML.parseDocument(value ?? '');
       } catch (error) {
         yamlDocumentRef.current = null;
       }
@@ -164,7 +179,9 @@ export const WorkflowYAMLEditor = ({
     }
     const decorations = stepExecutions
       .map((stepExecution) => {
-        // @ts-expect-error - TODO: fix this
+        if (!yamlDocumentRef.current) {
+          return null;
+        }
         const stepNode = getStepNode(yamlDocumentRef.current, stepExecution.stepId);
         if (!stepNode) {
           return null;
@@ -275,7 +292,7 @@ export const WorkflowYAMLEditor = ({
     const setModelMarkers = monaco.editor.setModelMarkers;
     monaco.editor.setModelMarkers = function (model, owner, markers) {
       setModelMarkers.call(monaco.editor, model, owner, markers);
-      if (editorRef.current && !('getOriginalEditor' in editorRef.current)) {
+      if (editorRef.current) {
         handleMarkersChanged(editorRef.current, model.uri, markers, owner);
       }
     };
@@ -338,7 +355,6 @@ export const WorkflowYAMLEditor = ({
           editorDidMount={handleEditorDidMount}
           onChange={handleChange}
           options={editorOptions}
-          // @ts-expect-error - TODO: fix this
           schemas={schemas}
           suggestionProvider={completionProvider}
           {...props}
