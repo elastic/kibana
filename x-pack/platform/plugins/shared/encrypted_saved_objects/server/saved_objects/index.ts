@@ -7,17 +7,19 @@
 
 import pMap from 'p-map';
 
-import type {
-  ISavedObjectsPointInTimeFinder,
-  ISavedObjectsRepository,
-  ISavedObjectTypeRegistry,
-  SavedObject,
-  SavedObjectsBaseOptions,
-  SavedObjectsCreatePointInTimeFinderDependencies,
-  SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsServiceSetup,
-  StartServicesAccessor,
+import {
+  type ISavedObjectsPointInTimeFinder,
+  type ISavedObjectsRepository,
+  type ISavedObjectTypeRegistry,
+  type SavedObject,
+  type SavedObjectsBaseOptions,
+  type SavedObjectsCreatePointInTimeFinderDependencies,
+  type SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsErrorHelpers,
+  type SavedObjectsServiceSetup,
+  type StartServicesAccessor,
 } from '@kbn/core/server';
+import { errorContent } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsClientOptions,
@@ -36,6 +38,14 @@ interface SetupSavedObjectsParams {
   savedObjects: SavedObjectsServiceSetup;
   getStartServices: StartServicesAccessor;
 }
+
+// This is based off of the SavedObjectsErrorHelpers.createUnsupportedTypeError function
+// But uses a custom 'reason' aka message
+export const createUnsupportedEncryptedTypeError = (type: string) =>
+  SavedObjectsErrorHelpers.decorateBadRequestError(
+    new Error('Bad Request'),
+    `Type '${type}' is not registered as an encrypted type`
+  );
 
 export type ClientInstanciator = (
   options?: EncryptedSavedObjectsClientOptions
@@ -77,7 +87,7 @@ export function setupSavedObjects({
         const savedObject = await internalRepository.get(type, id, options);
 
         if (!service.isRegistered(savedObject.type)) {
-          return savedObject as SavedObject<T>;
+          throw createUnsupportedEncryptedTypeError(savedObject.type);
         }
 
         return {
@@ -107,7 +117,10 @@ export function setupSavedObjects({
               res.saved_objects,
               async (savedObject) => {
                 if (!service.isRegistered(savedObject.type)) {
-                  return savedObject;
+                  return {
+                    ...savedObject,
+                    error: errorContent(createUnsupportedEncryptedTypeError(savedObject.type)),
+                  };
                 }
 
                 const descriptor = {
