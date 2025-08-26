@@ -542,11 +542,6 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   try {
     const authzFleetAgentsAll = fleetContext.authz.fleet.allAgents;
 
-    if (data.required_versions && !authzFleetAgentsAll) {
-      throw new FleetUnauthorizedError(
-        `updating 'required_versions' requires Agents 'All' privilege`
-      );
-    }
     const requestSpaceId = spaceId;
 
     if (spaceIds?.length) {
@@ -574,7 +569,14 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       esClient,
       request.params.agentPolicyId,
       data,
-      { force, bumpRevision, user, spaceId, requestSpaceId }
+      {
+        force,
+        bumpRevision,
+        user,
+        spaceId,
+        requestSpaceId,
+        isRequiredVersionsAuthorized: authzFleetAgentsAll,
+      }
     );
 
     let item: any = agentPolicy;
