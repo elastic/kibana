@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Log dummy message
-        run: echo "I am working fine"
+        run: echo "I am working fine with the branch"
