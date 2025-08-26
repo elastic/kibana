@@ -64,11 +64,14 @@ The table below lists optional publishing package interfaces. Embeddables may im
 | PublishesBlockingError | Interface for publishing unrecoverable errors | Embeddable panel to display error state |
 | PublishesDataLoading | Interface for publishing when embeddable is loading | Auto refresh |  
 | PublishesDataViews | Interface for accessing embeddable data views | Unified search bar type ahead, ACTION_CUSTOMIZE_PANEL, ACTION_EXPLORE_DATA |
-| PublishesDescription | Interface for accessing embeddable description | |
+| PublishesDescription | Interface for accessing embeddable description | Panel title bar tooltip content, ACTION_CUSTOMIZE_PANEL |
+| PublishesWritableDescription | Interface for setting embeddable description | ACTION_CUSTOMIZE_PANEL |
 | PublishesRendered | Interface for publishing rendered complete | |
 | PublishesSavedObjectId | Interface for surfacing saved object id | |
-| PublishesTimeRange | Interface for accessing time range state | CUSTOM_TIME_RANGE_BADGE |
-| PublishesTitle | Interface for accessing embeddable title | ACTION_CUSTOMIZE_PANEL |
+| PublishesTimeRange | Interface for accessing time range state | ACTION_CUSTOMIZE_PANEL, CUSTOM_TIME_RANGE_BADGE |
+| PublishesWritableTimeRange | Interface for setting time range state | ACTION_CUSTOMIZE_PANEL |
+| PublishesTitle | Interface for accessing embeddable title | Panel title bar content, ACTION_CUSTOMIZE_PANEL |
+| PublishesWritableTitle | Interface for setting embeddable title | ACTION_CUSTOMIZE_PANEL |
 | PublishesUnifiedSearch | Interface for publishing unified search state | BADGE_FILTERS_NOTIFICATION |
 | PublishesUnsavedChanges | Interface for publishing when embeddable has unsaved changes | Dashboard unsaved chnages notification and reset |
 
@@ -103,7 +106,7 @@ The table below lists the UiActions registered to embeddable panel triggers.
 | ACTION_ADD_TO_LIBRARY | Converts by-value panel to by-reference panel and stores panel configuration to library | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
 | ACTION_CLONE_PANEL | Clones panel in page | CONTEXT_MENU_TRIGGER | |
 | ACTION_COPY_TO_DASHBOARD | Opens "copy to dashboard" modal | CONTEXT_MENU_TRIGGER | |
-| ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | CONTEXT_MENU_TRIGGER | PublishesDataViews, PublishesTitle |
+| ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | CONTEXT_MENU_TRIGGER | PublishesDataViews, PublishesDescription, PublishesWritableDescription, PublishesTitle, PublishesWritableTitle, PublishesTimeRange, PublishesWritableTimeRange |
 | ACTION_DEPRECATION_BADGE | Displays deprecation badge for Visualize embeddable input controls | PANEL_BADGE_TRIGGER | HasVisualizeConfig |
 | ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | CONTEXT_MENU_TRIGGER | HasVisualizeConfig |
 | ACTION_EDIT_PANEL | Opens embeddable editor | CONTEXT_MENU_TRIGGER | HasEditCapabilities |
