@@ -19,7 +19,7 @@ import type {
   ComposerSourceShorthand,
   ParametrizedComposerQueryTag,
 } from './types';
-import { ESQLSource } from '../types';
+import type { ESQLSource } from '../types';
 import { isSource } from '../ast/is';
 
 const esqlTag = ((templateOrQueryOrParamValues: any, ...maybeHoles: ComposerQueryTagHole[]) => {
