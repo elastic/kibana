@@ -210,8 +210,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     }
     const mdeError = error.response.data?.error;
     if (mdeError.code === 'ActiveRequestAlreadyExists') {
-      const actionIdMatch = mdeError.message.match(/[0-9a-fA-F-]{36}/);
-      return `${mdeError.message}. Please wait or force clear with 'cancel --id ${actionIdMatch?.[0]}'`;
+      return `${mdeError.message}. Please wait or force clear with 'cancel' response action`;
     }
 
     if (error.response.status === 401) {

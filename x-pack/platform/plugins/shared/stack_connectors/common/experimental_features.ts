@@ -18,7 +18,7 @@ export const allowedExperimentalValues = Object.freeze({
   inferenceConnectorOff: false,
   crowdstrikeConnectorRTROn: true,
   microsoftDefenderEndpointOn: true,
-  microsoftDefenderEndpointCancelOn: false,
+  microsoftDefenderEndpointCancelOn: true,
 });
 
 export type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

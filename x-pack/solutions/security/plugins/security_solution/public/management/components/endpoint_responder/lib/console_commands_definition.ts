@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
+import { PendingActionsSelector } from '../../console_argument_selectors/pending_actions_selector/pending_actions_selector';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
@@ -578,10 +579,10 @@ export const getEndpointConsoleCommands = ({
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
-      exampleUsage: 'cancel --id 12345',
+      exampleUsage: 'cancel --id="action-123-456-789"',
       exampleInstruction: i18n.translate(
         'xpack.securitySolution.endpointConsoleCommands.cancel.exampleInstruction',
-        { defaultMessage: 'Enter the id of the action to cancel' }
+        { defaultMessage: 'Select a pending action to cancel' }
       ),
       mustHaveArgs: true,
       args: {
@@ -589,9 +590,11 @@ export const getEndpointConsoleCommands = ({
           required: true,
           allowMultiples: false,
           about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.cancel.id.about', {
-            defaultMessage: 'The id of the action to cancel',
+            defaultMessage: 'The response action to cancel',
           }),
-          mustHaveValue: 'non-empty-string',
+          mustHaveValue: 'truthy',
+          selectorShowTextValue: true,
+          SelectorComponent: PendingActionsSelector,
           validate: emptyArgumentValidator,
         },
       },
@@ -787,6 +790,7 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
 }: {
   commandList: CommandDefinition[];
   microsoftDefenderEndpointRunScriptEnabled: boolean;
+  microsoftDefenderEndpointCancelEnabled: boolean;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
   const isMicrosoftDefenderEndpointEnabled = featureFlags.responseActionsMSDefenderEndpointEnabled;

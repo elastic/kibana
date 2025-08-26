@@ -103,6 +103,8 @@ export const CUSTOM_SCRIPTS_ROUTE = `${BASE_INTERNAL_ENDPOINT_ACTION_ROUTE}/cust
 
 /** Endpoint Actions Routes */
 export const ACTION_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_status`;
+export const PENDING_ACTIONS_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_status/pending`;
+
 export const ACTION_DETAILS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}`;
 export const ACTION_AGENT_FILE_INFO_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}`;
 export const ACTION_AGENT_FILE_DOWNLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}/download`;

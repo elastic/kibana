@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './status';
-export * from './status.gen';
-export * from './pending';
+export * from './pending_actions';

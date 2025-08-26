@@ -312,7 +312,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.1.2/8.19.2
    */
-  microsoftDefenderEndpointCancelEnabled: false,
+  microsoftDefenderEndpointCancelEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

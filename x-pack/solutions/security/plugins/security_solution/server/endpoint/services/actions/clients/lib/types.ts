@@ -207,9 +207,7 @@ export interface ResponseActionsClient {
   cancel: (
     actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
     options?: CommonResponseActionMethodOptions
-  ) => Promise<
-    ActionDetails
-  >;
+  ) => Promise<ActionDetails>;
 }
 
 /**

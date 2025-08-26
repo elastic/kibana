@@ -10,16 +10,16 @@ import {
   MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
-import {
-  type MicrosoftDefenderEndpointAgentDetailsParams,
-  type MicrosoftDefenderEndpointIsolateHostParams,
+import type {
+  MicrosoftDefenderEndpointAgentDetailsParams,
+  MicrosoftDefenderEndpointIsolateHostParams,
   MicrosoftDefenderEndpointCancelParams,
-  type MicrosoftDefenderEndpointMachine,
-  type MicrosoftDefenderEndpointMachineAction,
-  type MicrosoftDefenderEndpointGetActionsParams,
-  type MicrosoftDefenderEndpointGetActionsResponse,
-  type MicrosoftDefenderEndpointRunScriptParams,
-  type MicrosoftDefenderGetLibraryFilesResponse,
+  MicrosoftDefenderEndpointMachine,
+  MicrosoftDefenderEndpointMachineAction,
+  MicrosoftDefenderEndpointGetActionsParams,
+  MicrosoftDefenderEndpointGetActionsResponse,
+  MicrosoftDefenderEndpointRunScriptParams,
+  MicrosoftDefenderGetLibraryFilesResponse,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { groupBy } from 'lodash';
 import type { Readable } from 'stream';
@@ -42,6 +42,7 @@ import type {
   MicrosoftDefenderEndpointActionRequestCommonMeta,
   MicrosoftDefenderEndpointActionRequestFileMeta,
   MicrosoftDefenderEndpointLogEsDoc,
+  ResponseActionCancelParameters,
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
   UploadedFileInfo,
@@ -564,7 +565,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-      undefined,
+      ResponseActionCancelParameters,
       {},
       MicrosoftDefenderEndpointActionRequestCommonMeta
     > = {
@@ -576,14 +577,16 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
 
-      console.log({ actionRequest, options });
       if (!error) {
         try {
+          // Resolve the external action ID from the internal response action ID
+          const externalActionId = await this.resolveExternalActionId(actionRequest.parameters.id);
+
           const msActionResponse = await this.sendAction<
             MicrosoftDefenderEndpointMachineAction,
             MicrosoftDefenderEndpointCancelParams
           >(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION, {
-            actionId: actionRequest.parameters.id,
+            actionId: externalActionId,
             comment: this.buildExternalComment(reqIndexOptions),
           });
 
@@ -1005,5 +1008,60 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     }
 
     return agentResponse;
+  }
+
+  /**
+   * Resolves the external action ID from an internal response action ID for Microsoft Defender Endpoint.
+   * This fetches the action details and extracts the Microsoft-specific machineActionId.
+   */
+  protected async resolveExternalActionId(actionId: string): Promise<string> {
+    try {
+      this.log.debug(
+        `resolveExternalActionId: attempting to resolve external action ID for action [${actionId}]`
+      );
+
+      // Fetch the action details to get external action information
+      const actionDetails = await this.fetchActionDetails(actionId);
+
+      if (!actionDetails) {
+        throw new ResponseActionsClientError(`Action with ID [${actionId}] not found`, 404);
+      }
+
+      this.log.debug(
+        `resolveExternalActionId: fetched action details for [${actionId}]: command=${actionDetails.command}, agentType=${actionDetails.agentType}`
+      );
+
+      // Extract the Microsoft Defender machine action ID
+      const externalActionId = this.extractExternalActionId(actionDetails);
+
+      if (!externalActionId) {
+        throw new ResponseActionsClientError(
+          `Unable to resolve Microsoft Defender machine action ID for action [${actionId}]`,
+          400
+        );
+      }
+
+      return externalActionId;
+    } catch (error) {
+      this.log.error(`Failed to resolve external action ID for action [${actionId}]`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Extract Microsoft Defender Endpoint's machineActionId from action details.
+   * For Microsoft Defender Endpoint, the external action ID is stored in the meta field as machineActionId.
+   */
+  protected extractExternalActionId(actionDetails: ActionDetails): string | undefined {
+    // For Microsoft Defender Endpoint, the external action ID is stored in the meta field
+    const meta = (
+      actionDetails as ActionDetails & { meta?: MicrosoftDefenderEndpointActionRequestCommonMeta }
+    ).meta;
+
+    this.log.debug(
+      `extractExternalActionId: actionDetails.id=${actionDetails.id}, meta=${JSON.stringify(meta)}`
+    );
+
+    return meta?.machineActionId;
   }
 }
