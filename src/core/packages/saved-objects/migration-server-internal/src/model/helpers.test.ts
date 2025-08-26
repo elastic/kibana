@@ -423,6 +423,100 @@ describe('createBulkIndexOperationTuple', () => {
       ]
     `);
   });
+
+  it('includes if_seq_no and if_primary_term when useOptimisticConcurrencyControl is true', () => {
+    const document = {
+      _id: 'doc1',
+      _seq_no: 123,
+      _primary_term: 7,
+      _source: { type: 'foo', title: 'bar' },
+    };
+    const typeIndexMap = { foo: 'foo_index' };
+    expect(createBulkIndexOperationTuple(document, typeIndexMap, true)).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "index": Object {
+              "_id": "doc1",
+              "_index": "foo_index",
+              "if_seq_no": 123,
+              "if_primary_term": 7,
+            },
+          },
+          Object {
+            "title": "bar",
+            "type": "foo",
+          },
+        ]
+      `);
+  });
+
+  it('omits if_seq_no and if_primary_term when useOptimisticConcurrencyControl is false', () => {
+    const document = {
+      _id: 'doc2',
+      _seq_no: 456,
+      _primary_term: 8,
+      _source: { type: 'bar', title: 'baz' },
+    };
+    const typeIndexMap = { bar: 'bar_index' };
+    expect(createBulkIndexOperationTuple(document, typeIndexMap, false)).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "index": Object {
+              "_id": "doc2",
+              "_index": "bar_index",
+            },
+          },
+          Object {
+            "title": "baz",
+            "type": "bar",
+          },
+        ]
+      `);
+  });
+
+  it('does not include if_seq_no and if_primary_term if they do not exist and useOptimisticConcurrencyControl is true', () => {
+    const document = {
+      _id: 'doc3',
+      _source: { type: 'baz', title: 'qux' },
+    };
+    const typeIndexMap = { baz: 'baz_index' };
+    expect(createBulkIndexOperationTuple(document, typeIndexMap, true)).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "index": Object {
+              "_id": "doc3",
+              "_index": "baz_index",
+            },
+          },
+          Object {
+            "title": "qux",
+            "type": "baz",
+          },
+        ]
+      `);
+  });
+
+  it('does not include if_seq_no and if_primary_term if they do not exist and useOptimisticConcurrencyControl is false', () => {
+    const document = {
+      _id: 'doc4',
+      _source: { type: 'quux', title: 'corge' },
+    };
+    const typeIndexMap = { quux: 'quux_index' };
+    expect(createBulkIndexOperationTuple(document, typeIndexMap, false)).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "index": Object {
+              "_id": "doc4",
+              "_index": "quux_index",
+            },
+          },
+          Object {
+            "title": "corge",
+            "type": "quux",
+          },
+        ]
+      `);
+  });
 });
 
 describe('getMigrationType', () => {

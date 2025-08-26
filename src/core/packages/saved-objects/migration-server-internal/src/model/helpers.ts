@@ -281,7 +281,8 @@ export function buildRemoveAliasActions(
  */
 export const createBulkIndexOperationTuple = (
   doc: SavedObjectsRawDoc,
-  typeIndexMap: Record<string, string> = {}
+  typeIndexMap: Record<string, string> = {},
+  useOptimisticConcurrencyControl = true
 ): BulkIndexOperationTuple => {
   return [
     {
@@ -292,8 +293,10 @@ export const createBulkIndexOperationTuple = (
         }),
         // use optimistic concurrency control to ensure that outdated
         // documents are only overwritten once with the latest version
-        ...(typeof doc._seq_no !== 'undefined' && { if_seq_no: doc._seq_no }),
-        ...(typeof doc._primary_term !== 'undefined' && { if_primary_term: doc._primary_term }),
+        ...(typeof doc._seq_no !== 'undefined' &&
+          useOptimisticConcurrencyControl && { if_seq_no: doc._seq_no }),
+        ...(typeof doc._primary_term !== 'undefined' &&
+          useOptimisticConcurrencyControl && { if_primary_term: doc._primary_term }),
       },
     },
     doc._source,
