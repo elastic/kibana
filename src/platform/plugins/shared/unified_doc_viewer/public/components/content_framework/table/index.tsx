@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import type { EuiDataGridCellPopoverElementProps, EuiThemeFontSize } from '@elastic/eui';
-import { EuiSpacer, EuiText, useEuiFontSize } from '@elastic/eui';
+import { EuiSpacer, EuiText, useEuiFontSize, useResizeObserver } from '@elastic/eui';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 import { css } from '@emotion/react';
+import useWindowSize from 'react-use/lib/useWindowSize';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { FieldRow } from '../../doc_viewer_table/field_row';
 import { TableGrid } from '../../doc_viewer_table/table_grid';
@@ -138,6 +139,10 @@ export function ContentFrameworkTable({
 
   const isEsqlMode = Array.isArray(textBasedHits);
   const { fontSize: smallFontSize } = useEuiFontSize('s');
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+
+  useWindowSize(); // trigger re-render on window resize to recalculate the grid container height
+  const { width: containerWidth } = useResizeObserver(containerRef);
 
   const { fields, rows } = useMemo(
     () =>
@@ -229,22 +234,24 @@ export function ContentFrameworkTable({
   }
 
   return (
-    <TableGrid
-      data-test-subj="ContentFrameworkTableKeyValueDataGrid"
-      id={title}
-      containerWidth={800} // TODO make dynamic
-      rows={rows}
-      isEsqlMode={isEsqlMode}
-      filter={filter}
-      onAddColumn={onAddColumn}
-      onRemoveColumn={onRemoveColumn}
-      columns={columns}
-      onFindSearchTermMatch={() => null}
-      searchTerm={''}
-      initialPageSize={0}
-      customRenderCellValue={cellValueRenderer}
-      customRenderCellPopover={cellPopoverRenderer}
-      gridStyle={{ stripes: false, rowHover: 'none' }}
-    />
+    <div ref={setContainerRef}>
+      <TableGrid
+        data-test-subj="ContentFrameworkTableTableGrid"
+        id={title}
+        containerWidth={containerWidth}
+        rows={rows}
+        isEsqlMode={isEsqlMode}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+        columns={columns}
+        onFindSearchTermMatch={() => null}
+        searchTerm={''}
+        initialPageSize={0}
+        customRenderCellValue={cellValueRenderer}
+        customRenderCellPopover={cellPopoverRenderer}
+        gridStyle={{ stripes: false, rowHover: 'none' }}
+      />
+    </div>
   );
 }
