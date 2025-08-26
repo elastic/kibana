@@ -42,6 +42,7 @@ import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { SortOrder } from '@kbn/unified-data-table';
 import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
+import { isPlaceholderColumn } from './utils';
 import type { IndexEditorError } from './types';
 import { IndexEditorErrors } from './types';
 import { parsePrimitive } from './utils';
@@ -985,7 +986,11 @@ export class IndexUpdateService {
 
   public exit() {
     const hasUnsavedChanges = this._hasUnsavedChanges$.getValue();
-    if (hasUnsavedChanges) {
+    const unnsavedColumns = this._pendingColumnsToBeSaved$
+      .getValue()
+      .filter((col) => !isPlaceholderColumn(col.name));
+
+    if (hasUnsavedChanges || unnsavedColumns.length > 0) {
       this.setExitAttemptWithUnsavedChanges(true);
     } else {
       this.destroy();
