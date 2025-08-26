@@ -18,6 +18,7 @@ import {
   TRANSACTION_ID_FIELD,
   getSpanDocumentOverview,
 } from '@kbn/discover-utils';
+import type { TraceIndexes } from '@kbn/discover-utils/src';
 import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo, useState } from 'react';
@@ -28,7 +29,6 @@ import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { SpanLinks } from '../components/span_links';
 import { Trace } from '../components/trace';
 import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hooks/use_root_transaction';
-import type { TraceIndexes } from '../hooks/use_data_sources';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
 import { RootSpanProvider } from './hooks/use_root_span';
 import { allSpanFields, spanFields } from './resources/fields';

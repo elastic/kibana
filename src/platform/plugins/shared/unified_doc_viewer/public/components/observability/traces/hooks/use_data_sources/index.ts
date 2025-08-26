@@ -8,16 +8,9 @@
  */
 
 import createContainer from 'constate';
+import type { TraceIndexes } from '@kbn/discover-utils/src';
 
 type UseDataSourcesParams = DataSources;
-
-export interface TraceIndexes {
-  logs?: string;
-  apm: {
-    errors?: string;
-    traces?: string;
-  };
-}
 
 export interface DataSources {
   indexes: TraceIndexes;

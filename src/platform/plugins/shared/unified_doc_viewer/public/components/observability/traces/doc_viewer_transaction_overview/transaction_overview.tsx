@@ -19,6 +19,7 @@ import {
   getTransactionDocumentOverview,
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
+import type { TraceIndexes } from '@kbn/discover-utils/src';
 import { getFlattenedTransactionDocumentOverview } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
@@ -32,7 +33,6 @@ import { RootTransactionProvider } from './hooks/use_root_transaction';
 import { Trace } from '../components/trace';
 import { TransactionSummaryTitle } from './sub_components/transaction_summary_title';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
-import type { TraceIndexes } from '../hooks/use_data_sources';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
 import {
   DEFAULT_MARGIN_BOTTOM,

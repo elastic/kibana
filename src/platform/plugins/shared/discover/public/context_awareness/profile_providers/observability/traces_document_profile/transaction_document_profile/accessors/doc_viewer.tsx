@@ -9,11 +9,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  UnifiedDocViewerObservabilityTracesTransactionOverview,
-  type TraceIndexes,
-} from '@kbn/unified-doc-viewer-plugin/public';
+import { UnifiedDocViewerObservabilityTracesTransactionOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { TraceIndexes } from '@kbn/discover-utils/src';
 import type { DocumentProfileProvider } from '../../../../..';
 import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
 
