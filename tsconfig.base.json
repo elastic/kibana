@@ -2034,8 +2034,6 @@
       "@kbn/test-jest-helpers/*": ["src/platform/packages/shared/kbn-test-jest-helpers/*"],
       "@kbn/test-subj-selector": ["src/platform/packages/shared/kbn-test-subj-selector"],
       "@kbn/test-subj-selector/*": ["src/platform/packages/shared/kbn-test-subj-selector/*"],
-      "@kbn/test-suites-serverless": ["x-pack/test_serverless"],
-      "@kbn/test-suites-serverless/*": ["x-pack/test_serverless/*"],
       "@kbn/test-suites-src": ["src/platform/test"],
       "@kbn/test-suites-src/*": ["src/platform/test/*"],
       "@kbn/test-suites-xpack": ["x-pack/test"],

@@ -1589,7 +1589,6 @@
     "@kbn/test-eui-helpers": "link:src/platform/packages/private/kbn-test-eui-helpers",
     "@kbn/test-jest-helpers": "link:src/platform/packages/shared/kbn-test-jest-helpers",
     "@kbn/test-subj-selector": "link:src/platform/packages/shared/kbn-test-subj-selector",
-    "@kbn/test-suites-serverless": "link:x-pack/test_serverless",
     "@kbn/test-suites-src": "link:src/platform/test",
     "@kbn/test-suites-xpack": "link:x-pack/test",
     "@kbn/test-suites-xpack-chat": "link:x-pack/solutions/chat/test",
