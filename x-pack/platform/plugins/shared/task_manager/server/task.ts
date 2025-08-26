@@ -63,6 +63,7 @@ export interface RunContext {
    * is generated using the API key and passed as part of the run context.
    */
   fakeRequest?: KibanaRequest;
+  abortController: AbortController;
 }
 
 /**
