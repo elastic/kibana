@@ -5,9 +5,38 @@
  * 2.0.
  */
 
-import { getIsConversationOwner } from './sharing_helpers';
+import {
+  ConversationSharedState,
+  getConversationSharedState,
+  getIsConversationOwner,
+} from './sharing_helpers';
 import type { ConversationResponse, User } from '../schemas';
+import { alertConvo } from '@kbn/elastic-assistant/impl/mock/conversation';
+describe('getConversationSharedState', () => {
+  it('returns Private when conversation is undefined', () => {
+    expect(getConversationSharedState(undefined)).toBe(ConversationSharedState.PRIVATE);
+  });
 
+  it('returns Private when conversation id is empty', () => {
+    const convo = { ...alertConvo, id: '' };
+    expect(getConversationSharedState(convo)).toBe(ConversationSharedState.PRIVATE);
+  });
+
+  it('returns Global when users array is empty', () => {
+    const convo = { ...alertConvo, users: [] };
+    expect(getConversationSharedState(convo)).toBe(ConversationSharedState.SHARED);
+  });
+
+  it('returns Private when users array has length 1', () => {
+    const convo = { ...alertConvo, users: [alertConvo.createdBy] };
+    expect(getConversationSharedState(convo)).toBe(ConversationSharedState.PRIVATE);
+  });
+
+  it('returns Shared when users array has length > 1', () => {
+    const convo = { ...alertConvo, users: [alertConvo.createdBy, { id: 'user2' }] };
+    expect(getConversationSharedState(convo)).toBe(ConversationSharedState.RESTRICTED);
+  });
+});
 describe('getIsConversationOwner', () => {
   const user: User = { id: 'user1', name: 'Alice' };
   const otherUser: User = { id: 'user2', name: 'Bob' };
