@@ -58,5 +58,16 @@
     "@kbn/repo-info",
     "@kbn/es-archiver",
     "@kbn/kubernetes-security-plugin",
+    "@kbn/securitysolution-endpoint-exceptions-common",
+    "@kbn/securitysolution-lists-common",
+    "@kbn/openapi-common",
+    "@kbn/securitysolution-exceptions-common",
+    "@kbn/osquery-plugin",
+    "@kbn/search-types",
+    "@kbn/bfetch-plugin",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/spaces-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/es-query",
   ]
 }
