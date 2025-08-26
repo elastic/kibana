@@ -150,10 +150,7 @@ export class CasePlugin
 
     registerRoutes({
       router,
-      routes: [
-        ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
-        ...getInternalRoutes(this.userProfileService),
-      ],
+      routes: [...getExternalRoutes(), ...getInternalRoutes(this.userProfileService)],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       telemetryUsageCounter,
