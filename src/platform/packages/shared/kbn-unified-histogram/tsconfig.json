@@ -21,7 +21,6 @@
     "@kbn/es-query",
     "@kbn/presentation-publishing",
     "@kbn/inspector-plugin",
-    "@kbn/search-types",
     "@kbn/discover-utils",
     "@kbn/ui-actions-plugin",
     "@kbn/core-ui-settings-browser-mocks",
@@ -34,6 +33,9 @@
     "@kbn/visualization-utils",
     "@kbn/visualizations-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/lens-embeddable-utils"
+    "@kbn/lens-embeddable-utils",
+    "@kbn/esql-types",
+    "@kbn/controls-plugin",
+    "@kbn/search-types"
   ]
 }

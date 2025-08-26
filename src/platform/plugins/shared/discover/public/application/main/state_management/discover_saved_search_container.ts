@@ -11,6 +11,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
+import type { ControlPanelsState } from '@kbn/controls-plugin/public';
+import type { ESQLControlState } from '@kbn/esql-types';
 import type { FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType, updateFilterReferences } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
@@ -85,6 +87,8 @@ export interface DiscoverSavedSearchContainer {
    * Can be used to track if the saved search has been modified and displayed in the UI
    */
   getHasChanged$: () => BehaviorSubject<boolean>;
+
+  getHasReset$: () => BehaviorSubject<boolean>;
   /**
    * Get the current state of the saved search
    */
@@ -123,6 +127,8 @@ export interface DiscoverSavedSearchContainer {
    * @param params
    */
   updateVisContext: (params: { nextVisContext: UnifiedHistogramVisContext | undefined }) => void;
+
+  updateControlState: (params: { nextControlState: ControlPanelsState<ESQLControlState> }) => void;
 }
 
 export function getSavedSearchContainer({
@@ -138,6 +144,7 @@ export function getSavedSearchContainer({
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
   const savedSearchCurrent$ = new BehaviorSubject(copySavedSearch(initialSavedSearch));
   const hasChanged$ = new BehaviorSubject(false);
+  const hasReset$ = new BehaviorSubject(false);
   const set = (savedSearch: SavedSearch) => {
     addLog('[savedSearch] set', savedSearch);
     hasChanged$.next(false);
@@ -149,6 +156,7 @@ export function getSavedSearchContainer({
   const getInitial$ = () => savedSearchInitial$;
   const getCurrent$ = () => savedSearchCurrent$;
   const getHasChanged$ = () => hasChanged$;
+  const getHasReset$ = () => hasReset$;
   const getTitle = () => savedSearchCurrent$.getValue().title;
   const getId = () => savedSearchCurrent$.getValue().id;
 
@@ -293,10 +301,27 @@ export function getSavedSearchContainer({
     addLog('[savedSearch] updateVisContext done', nextSavedSearch);
   };
 
+  const updateControlState = ({
+    nextControlState,
+  }: {
+    nextControlState: ControlPanelsState<ESQLControlState> | undefined;
+  }) => {
+    const previousSavedSearch = getState();
+    const nextSavedSearch: SavedSearch = {
+      ...previousSavedSearch,
+      controlGroupJson: JSON.stringify(nextControlState),
+    };
+
+    assignNextSavedSearch({ nextSavedSearch });
+
+    addLog('[savedSearch] updateControlState done', nextSavedSearch);
+  };
+
   return {
     initUrlTracking,
     getCurrent$,
     getHasChanged$,
+    getHasReset$,
     getId,
     getInitial$,
     getState,
@@ -307,6 +332,7 @@ export function getSavedSearchContainer({
     update,
     updateTimeRange,
     updateVisContext,
+    updateControlState,
   };
 }
 
