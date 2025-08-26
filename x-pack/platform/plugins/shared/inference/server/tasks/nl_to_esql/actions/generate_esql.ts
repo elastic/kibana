@@ -16,8 +16,7 @@ import {
   MessageRole,
   OutputCompleteEvent,
   OutputEventType,
-  FunctionCallingMode,
-  ChatCompleteMetadata,
+  ToolChoiceType,
 } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import { InferenceClient } from '../../..';
@@ -25,6 +24,8 @@ import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/con
 import { EsqlDocumentBase } from '../doc_base';
 import { requestDocumentationSchema } from './shared';
 import type { NlToEsqlTaskEvent } from '../types';
+
+const MAX_CALLS = 5;
 
 export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   chatCompleteApi,
@@ -37,6 +38,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   logger,
   system,
   metadata,
+  maxCallsAllowed = MAX_CALLS,
 }: {
   connectorId: string;
   systemMessage: string;
@@ -48,12 +50,16 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   logger: Pick<Logger, 'debug'>;
   metadata?: ChatCompleteMetadata;
   system?: string;
-}) => {
+  maxCallsAllowed?: number;
+} & Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'>) => {
   return function askLlmToRespond({
     documentationRequest: { commands, functions },
+    callCount = 0,
   }: {
     documentationRequest: { commands?: string[]; functions?: string[] };
+    callCount?: number;
   }): Observable<NlToEsqlTaskEvent<TToolOptions>> {
+    const functionLimitReached = callCount >= maxCallsAllowed;
     const keywords = [...(commands ?? []), ...(functions ?? [])];
     const requestedDocumentation = docBase.getDocumentation(keywords);
     const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
@@ -120,14 +126,16 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
             toolCallId: fakeRequestDocsToolCall.toolCallId,
           },
         ],
-        toolChoice,
-        tools: {
-          ...tools,
-          request_documentation: {
-            description: 'Request additional ES|QL documentation if needed',
-            schema: requestDocumentationSchema,
-          },
-        },
+        toolChoice: !functionLimitReached ? toolChoice : ToolChoiceType.none,
+        tools: functionLimitReached
+          ? {}
+          : {
+              ...tools,
+              request_documentation: {
+                description: 'Request additional ES|QL documentation if needed',
+                schema: requestDocumentationSchema,
+              },
+            },
       }).pipe(
         withoutTokenCountEvents(),
         map((generateEvent) => {
@@ -144,18 +152,32 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         }),
         switchMap((generateEvent) => {
           if (isChatCompletionMessageEvent(generateEvent)) {
-            const onlyToolCall =
-              generateEvent.toolCalls.length === 1 ? generateEvent.toolCalls[0] : undefined;
+            const toolCalls = generateEvent.toolCalls as ToolCall[];
+            const onlyToolCall = toolCalls.length === 1 ? toolCalls[0] : undefined;
 
-            if (onlyToolCall?.function.name === 'request_documentation') {
-              const args = onlyToolCall.function.arguments;
+            if (onlyToolCall && onlyToolCall.function.name === 'request_documentation') {
+              if (functionLimitReached) {
+                return of({
+                  ...generateEvent,
+                  content: `You have reached the maximum number of documentation requests. Do not try to request documentation again for commands ${commands?.join(
+                    ', '
+                  )} and functions ${functions?.join(
+                    ', '
+                  )}. Try to answer the user's question using currently available information.`,
+                });
+              }
 
-              return askLlmToRespond({
-                documentationRequest: {
-                  commands: args.commands,
-                  functions: args.functions,
-                },
-              });
+              const args =
+                'arguments' in onlyToolCall.function ? onlyToolCall.function.arguments : undefined;
+              if (args && (args.commands?.length || args.functions?.length)) {
+                return askLlmToRespond({
+                  documentationRequest: {
+                    commands: args.commands ?? [],
+                    functions: args.functions ?? [],
+                  },
+                  callCount: callCount + 1,
+                });
+              }
             }
           }
 
