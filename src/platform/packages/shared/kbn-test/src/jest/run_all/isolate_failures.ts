@@ -219,15 +219,24 @@ export async function isolateFailures({
   const targetTestName = failing.testName;
 
   // Identify the root that contains the failed test
+  const rootDir = config.rootDir ? Path.resolve(String(config.rootDir)) : process.cwd();
   const normalizedFailedPath = Path.resolve(failedTestPath);
-  const normalizedRoots = roots.map((r) => Path.resolve(r));
+  // Resolve roots, honoring Jest's <rootDir> token and making paths absolute
+  const normalizedRoots = roots.map((r) => {
+    const replaced = r.includes('<rootDir>') ? r.replace(/<rootDir>/g, rootDir) : r;
+    return Path.isAbsolute(replaced) ? Path.resolve(replaced) : Path.resolve(rootDir, replaced);
+  });
   const containingRoot = normalizedRoots
     .filter((r) => normalizedFailedPath.startsWith(r + Path.sep) || normalizedFailedPath === r)
     .sort((a, b) => b.length - a.length)[0];
 
-  console.log({
-    containingRoot,
-  });
+  // Debug info (use log at debug level rather than console)
+  log.debug(
+    () =>
+      `isolate_failures: rootDir=${rootDir}, containingRoot=${containingRoot}, failedPath=${normalizedFailedPath}, roots=${JSON.stringify(
+        normalizedRoots
+      )}`
+  );
 
   // 1) Verify the file in isolation under only its containing root (if any)
   if (containingRoot) {

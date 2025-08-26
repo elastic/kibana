@@ -15,6 +15,7 @@ import { yargsOptions } from 'jest-cli';
 import { readConfig, readInitialOptions } from 'jest-config';
 import { castArray } from 'lodash';
 import pLimit from 'p-limit';
+import * as globby from 'globby';
 import yargs from 'yargs';
 import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import objectHash from 'object-hash';
@@ -78,12 +79,24 @@ export function runJestAll() {
         .map((v: unknown) => String(v))
         .filter((v: string) => v && v !== 'jest');
 
+      // Expand glob patterns in positional args to concrete file/dir paths (unit groups pass patterns)
+      const expandedTargetPaths: string[] = Array.from(
+        new Set(
+          targetPaths.flatMap((p) => globby.sync(p, { cwd: REPO_ROOT, absolute: true, dot: false }))
+        )
+      );
+      const effectiveTargetPaths =
+        expandedTargetPaths.length > 0 ? expandedTargetPaths : targetPaths;
+
       // --config is explicit; target paths must be provided positionally and are handled above
 
       // When no explicit configs are provided, try to discover configs by
       // walking upwards from each provided file/dir and looking for a jest.config.js
-      if (list.length === 0 && targetPaths.length > 0) {
-        const discoveredConfigs = discoverNearestJestConfigs({ targetPaths, repoRoot: REPO_ROOT });
+      if (list.length === 0 && effectiveTargetPaths.length > 0) {
+        const discoveredConfigs = discoverNearestJestConfigs({
+          targetPaths: effectiveTargetPaths,
+          repoRoot: REPO_ROOT,
+        });
 
         if (discoveredConfigs.length > 0) {
           log.debug(
@@ -106,7 +119,7 @@ export function runJestAll() {
         );
       }
 
-      if (!flags.config && !list.length && targetPaths.length === 0) {
+      if (!flags.config && !list.length && effectiveTargetPaths.length === 0) {
         // No configs resolved and no files/dirs provided
         throw new Error('No configs provided. Use --config <path1,path2,...> or pass files/dirs');
       }
@@ -177,7 +190,7 @@ export function runJestAll() {
 
         // Include targetPaths in the hash so runs with different path filters
         // get separate data directories and output files.
-        const hash = objectHash({ initialConfig, targetPaths });
+        const hash = objectHash({ initialConfig, targetPaths: effectiveTargetPaths });
 
         const dir = Path.join(dataDir, hash);
 
@@ -220,7 +233,7 @@ export function runJestAll() {
           jestFlags: [
             ...passthroughJestFlags,
             ...(flags.isolate ? ['--bail'] : []),
-            ...targetPaths,
+            ...effectiveTargetPaths,
           ],
           resultsPath: initialRunResultsPath,
         });
@@ -275,8 +288,41 @@ export function runJestAll() {
         retryFlags = retryFlags.filter((f) => f !== '--runInBand');
         retryFlags = ['--runInBand', ...retryFlags];
 
+        // Build a temporary retry config that limits roots to those containing the failed files
+        let retryConfigPath = initialRunConfigFilepath;
+        const originalRoots = (initialRunConfig.roots || []) as string[];
+        if (originalRoots.length > 0) {
+          const baseRootDir = initialRunConfig.rootDir
+            ? Path.resolve(String(initialRunConfig.rootDir))
+            : REPO_ROOT;
+          const normalizedRoots = originalRoots.map((r) => {
+            const replaced = r.includes('<rootDir>') ? r.replace(/<rootDir>/g, baseRootDir) : r;
+            return Path.isAbsolute(replaced)
+              ? Path.resolve(replaced)
+              : Path.resolve(baseRootDir, replaced);
+          });
+          const selectedRoots = new Set<string>();
+          for (const f of failedFiles) {
+            const abs = Path.resolve(f);
+            const containing = normalizedRoots
+              .filter((r) => abs.startsWith(r + Path.sep) || abs === r)
+              .sort((a, b) => b.length - a.length)[0];
+            if (containing) selectedRoots.add(containing);
+          }
+
+          const rootsForRetry =
+            selectedRoots.size > 0 ? Array.from(selectedRoots) : normalizedRoots;
+          const retryRunConfig = {
+            ...initialRunConfig,
+            roots: rootsForRetry,
+          } as Config.InitialOptions;
+
+          retryConfigPath = Path.join(dir, `jest.config.retry.json`);
+          await Fs.promises.writeFile(retryConfigPath, JSON.stringify(retryRunConfig), 'utf8');
+        }
+
         const secondRunResult = await runJestWithConfig({
-          configPath: initialRunConfigFilepath,
+          configPath: retryConfigPath,
           dataDir: dir,
           log,
           jestFlags: [
