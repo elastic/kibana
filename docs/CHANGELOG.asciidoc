@@ -126,7 +126,7 @@ Dashboards and Visualizations::
 * Fixes lost references when returning to unsaved dashboards with reference panels ({kibana-pull}231517[#231517]).
 * Fixes screen reader-only header in the Dashboards list ({kibana-pull}230470[#230470]).
 Discover::
-* Disables sorting for json-like fields in ES|QL mode ({kibana-pull}231289[#231289]).
+* Disables sorting for JSON-like fields in ES|QL mode ({kibana-pull}231289[#231289]).
 Elastic Security solution::
 For the Elastic Security 8.19.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana platform::
