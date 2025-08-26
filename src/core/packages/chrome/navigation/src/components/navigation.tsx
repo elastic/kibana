@@ -101,7 +101,7 @@ export const Navigation = ({
       css={css`
         display: flex;
       `}
-      data-test-subj={rest['data-test-subj']}
+      data-test-subj={rest['data-test-subj'] ?? 'navigation-root'}
     >
       <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo

@@ -23,7 +23,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 const getSectionIdTestSubj = (sectionId: NavigationId) => `~nav-item-${sectionId}`;
 
-const TIMEOUT_CHECK = 30000;
+const TIMEOUT_CHECK = 3000;
 
 export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getService'>) {
   const testSubjects = ctx.getService('testSubjects');
