@@ -39,6 +39,7 @@
     "requiredBundles": [
       "charts",
       "discover",
+      "esUiShared",
       "stackAlerts",
     ],
     "extraPublicDirs": [
