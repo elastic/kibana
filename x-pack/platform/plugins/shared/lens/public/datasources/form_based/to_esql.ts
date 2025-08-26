@@ -12,16 +12,9 @@ import { convertIntervalToEsInterval } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { partition } from 'lodash';
 import { isColumnOfType } from './operations/definitions/helpers';
-<<<<<<< HEAD
 import { convertToAbsoluteDateRange } from '../../utils';
-import { DateRange, OriginalColumn, ValueFormatConfig } from '../../../common/types';
-import { GenericIndexPatternColumn } from './form_based';
-=======
-import type { ValueFormatConfig } from './operations/definitions/column_types';
-import { convertToAbsoluteDateRange } from '../../utils';
-import type { DateRange, OriginalColumn } from '../../../common/types';
+import type { DateRange, OriginalColumn, ValueFormatConfig } from '../../../common/types';
 import type { GenericIndexPatternColumn } from './form_based';
->>>>>>> upstream/main
 import { operationDefinitionMap } from './operations';
 import type { DateHistogramIndexPatternColumn } from './operations/definitions';
 import type { IndexPattern } from '../../types';
