@@ -23,7 +23,7 @@ import { apiPrivileges } from '../../common/features';
 import {
   configurationSchema as esqlConfigSchema,
   configurationUpdateSchema as esqlConfigUpdateSchema,
-} from '../services/tools/esql/schemas';
+} from '../services/tools/persisted/tool_types/esql/schemas';
 import { getTechnicalPreviewWarning } from './utils';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Tool API');
