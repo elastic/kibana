@@ -11,10 +11,6 @@ import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { v4 as generateUuid } from 'uuid';
-import {
-  convertToSerializableGraph,
-  convertToWorkflowGraph,
-} from '../../common/lib/build_execution_graph/build_execution_graph';
 import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
 const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {
@@ -56,9 +52,6 @@ export class SchedulerService {
     spaceId: string,
     inputs: Record<string, any>
   ): Promise<string> {
-    const executionGraph = convertToWorkflowGraph(workflow.definition);
-    workflow.executionGraph = convertToSerializableGraph(executionGraph); // TODO: It's not good approach, it's temporary
-
     const workflowRunId = generateUuid();
     const context = {
       workflowRunId,
