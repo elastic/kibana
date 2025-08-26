@@ -9,7 +9,7 @@
 
 import type { CodeEditorProps, monaco } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useResizeChecker } from '@kbn/react-hooks';
 import type { DraftGrokExpression, GrokCollection } from '../models';
@@ -36,17 +36,16 @@ export const Expression = ({
   const grokEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
 
-  const onGrokEditorMount: CodeEditorProps['editorDidMount'] = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor) => {
-      grokEditorRef.current = editor;
-      setupResizeChecker(editor);
-    },
-    [setupResizeChecker]
-  );
+  const onGrokEditorMount: CodeEditorProps['editorDidMount'] = (
+    editor: monaco.editor.IStandaloneCodeEditor
+  ) => {
+    grokEditorRef.current = editor;
+    setupResizeChecker(editor);
+  };
 
-  const onGrokEditorWillUnmount: CodeEditorProps['editorWillUnmount'] = useCallback(() => {
+  const onGrokEditorWillUnmount: CodeEditorProps['editorWillUnmount'] = () => {
     destroyResizeChecker();
-  }, [destroyResizeChecker]);
+  };
 
   const onGrokEditorChange: CodeEditorProps['onChange'] = (value) => {
     draftGrokExpression.updateExpression(value);

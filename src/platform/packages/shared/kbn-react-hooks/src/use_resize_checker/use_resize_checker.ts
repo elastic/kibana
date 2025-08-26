@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useRef } from 'react';
+import { useRef, useCallback } from 'react';
 import type { monaco } from '@kbn/code-editor';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 
@@ -15,7 +15,7 @@ export const useResizeChecker = () => {
   const resizeChecker = useRef<ResizeChecker | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const setupResizeChecker = (
+  const setupResizeChecker = useCallback((
     editor: monaco.editor.IStandaloneCodeEditor,
     options: { flyoutMode?: boolean } = {}
   ) => {
@@ -46,13 +46,13 @@ export const useResizeChecker = () => {
         editor.layout();
       }
     });
-  };
+  }, []);
 
-  const destroyResizeChecker = () => {
+  const destroyResizeChecker = useCallback(() => {
     if (resizeChecker.current) {
       resizeChecker.current.destroy();
     }
-  };
+  }, []);
 
   return { containerRef, setupResizeChecker, destroyResizeChecker };
 };
