@@ -518,6 +518,7 @@ class AgentPolicyService {
       user,
       authorizationHeader,
       force,
+      forcePackagePolicyCreation,
     },
   }: {
     soClient: SavedObjectsClientContract;
@@ -531,7 +532,10 @@ class AgentPolicyService {
       spaceId: string;
       user?: AuthenticatedUser;
       authorizationHeader?: HTTPAuthorizationHeader | null;
+      /** Pass force to all following calls: package install, policy creation */
       force?: boolean;
+      /** Pass force only to package policy creation */
+      forcePackagePolicyCreation?: boolean;
     };
   }) {
     const logger = appContextService.getLogger().get('createWithPackagePolicies');
@@ -550,6 +554,7 @@ class AgentPolicyService {
       user,
       authorizationHeader,
       force,
+      forcePackagePolicyCreation,
     });
 
     const createdPackagePolicyIds = [];
