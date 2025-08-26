@@ -1161,6 +1161,42 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.GeneratedSignificantEventQuery",
+        "type": "Interface",
+        "tags": [],
+        "label": "GeneratedSignificantEventQuery",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.GeneratedSignificantEventQuery.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.GeneratedSignificantEventQuery.kql",
+            "type": "string",
+            "tags": [],
+            "label": "kql",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.Group",
         "type": "Interface",
         "tags": [],
@@ -2166,6 +2202,30 @@
           "RecursiveRecord"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/record_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.SignificantEventsGenerateResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "SignificantEventsGenerateResponse",
+        "description": [],
+        "signature": [
+          "Observable",
+          "<{ query: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GeneratedSignificantEventQuery",
+            "text": "GeneratedSignificantEventQuery"
+          },
+          "; } & { type: \"generated_query\"; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

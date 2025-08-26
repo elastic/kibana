@@ -200,15 +200,15 @@
                 "id": "def-common.FileUploadManager.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
-                "label": "dataViewsContract",
+                "label": "data",
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "dataViews",
+                    "pluginId": "data",
                     "scope": "public",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-public.DataViewsServicePublic",
-                    "text": "DataViewsServicePublic"
+                    "docId": "kibDataPluginApi",
+                    "section": "def-public.DataPublicPluginStart",
+                    "text": "DataPublicPluginStart"
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
@@ -301,6 +301,21 @@
                 "signature": [
                   "IndicesIndexSettings",
                   " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.Unnamed.$10",
+                "type": "Function",
+                "tags": [],
+                "label": "onIndexSearchable",
+                "description": [],
+                "signature": [
+                  "((indexName: string) => void) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
                 "deprecated": false,
@@ -1448,6 +1463,17 @@
             "type": "boolean",
             "tags": [],
             "label": "pipelinesJsonValid",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.indexSearchable",
+            "type": "boolean",
+            "tags": [],
+            "label": "indexSearchable",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
             "deprecated": false,
