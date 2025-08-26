@@ -68,6 +68,38 @@ function getMaterializedBabelOptions({ cwd, rootDir }) {
   return optionsJson;
 }
 
+/**
+ * Stably serialize Jest transform-related config that may affect output.
+ */
+function serializeJestTransformBits(cfg) {
+  try {
+    const transform = cfg && cfg.transform ? cfg.transform : {};
+    const keys = Object.keys(transform).sort();
+    const normTransform = {};
+    for (const k of keys) {
+      const v = transform[k];
+      if (Array.isArray(v)) {
+        normTransform[k] = [String(v[0]), v.length > 1 ? v[1] : null];
+      } else if (v != null) {
+        normTransform[k] = String(v);
+      } else {
+        normTransform[k] = null;
+      }
+    }
+
+    const tipRaw = Array.isArray(cfg && cfg.transformIgnorePatterns)
+      ? cfg.transformIgnorePatterns
+      : [];
+    const transformIgnorePatterns = tipRaw.map((p) =>
+      p && typeof p.toString === 'function' ? p.toString() : String(p)
+    );
+
+    return JSON.stringify({ transform: normTransform, transformIgnorePatterns });
+  } catch (_e) {
+    return '{}';
+  }
+}
+
 module.exports = {
   // Preserve all base transformer properties
   ...baseTransformer,
@@ -75,6 +107,7 @@ module.exports = {
   // Wrap getCacheKey to normalize the config string and rootDir before delegating
   getCacheKey(sourceText, sourcePath, transformOptions) {
     const cfg = (transformOptions && transformOptions.config) || {};
+
     const normalizedRoot = path.resolve(cfg.rootDir || process.cwd());
     const normalizedCwd = path.resolve(cfg.cwd || normalizedRoot);
 
@@ -92,6 +125,9 @@ module.exports = {
     hash.update('\0', 'utf8');
     // Materialized babel options
     hash.update(optionsJson);
+    hash.update('\0', 'utf8');
+    // Jest transform-related config
+    hash.update(serializeJestTransformBits(cfg));
     hash.update('\0', 'utf8');
     // Source text
     hash.update(String(sourceText || ''));

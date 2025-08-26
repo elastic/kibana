@@ -51,6 +51,86 @@ async function runJestWithFiles(
   });
 }
 
+/**
+ * Helper to run Jest with an override for roots and explicit test files.
+ */
+async function runJestWithRootsAndFiles(
+  baseConfig: Config.InitialOptions,
+  dataDir: string,
+  log: ToolingLog,
+  configId: string,
+  roots: string[],
+  testFiles: string[],
+  jestFlags: string[] = []
+) {
+  const cfg: Config.InitialOptions = { ...baseConfig, roots };
+  const tempConfigPath = await createTempJestConfig({
+    config: cfg,
+    dataDir,
+    configId,
+  });
+
+  const resultsPath = Path.join(dataDir, `${configId}.results.json`);
+  const finalJestFlags = [...jestFlags, ...testFiles];
+
+  return await runJestWithConfig({
+    configPath: tempConfigPath,
+    dataDir,
+    log,
+    jestFlags: finalJestFlags,
+    resultsPath,
+  });
+}
+
+/**
+ * Generic delta debugging helper: returns a 1-minimal subset that still triggers failure.
+ */
+async function ddmin<T>(
+  candidates: T[],
+  triggers: (subset: T[]) => Promise<boolean>
+): Promise<T[]> {
+  let n = 2;
+  let current = [...candidates];
+  while (current.length >= 2) {
+    const chunkSize = Math.ceil(current.length / n);
+    const subsets: T[][] = [];
+    for (let i = 0; i < current.length; i += chunkSize) {
+      subsets.push(current.slice(i, i + chunkSize));
+    }
+
+    let reduced = false;
+
+    // Test each subset
+    for (const subset of subsets) {
+      if (await triggers(subset)) {
+        current = subset;
+        n = Math.max(n - 1, 2);
+        reduced = true;
+        break;
+      }
+    }
+
+    if (reduced) continue;
+
+    // Test complements
+    for (const subset of subsets) {
+      const complement = current.filter((x) => !subset.includes(x));
+      if (complement.length > 0 && (await triggers(complement))) {
+        current = complement;
+        n = Math.max(n - 1, 2);
+        reduced = true;
+        break;
+      }
+    }
+
+    if (!reduced) {
+      if (n >= current.length) break;
+      n = Math.min(current.length, n * 2);
+    }
+  }
+  return current;
+}
+
 function extractFailureDetails(
   aggregated: SlimAggregatedResult
 ): { testPath?: string; testName?: string; errorMessage?: string } | undefined {
@@ -136,28 +216,104 @@ export async function isolateFailures({
     log.error('Unable to determine failing test results from aggregated results.');
     return null;
   }
-
-  const isolatedFileRun = await runJestWithFiles(
-    config,
-    dataDir,
-    log,
-    'verify-isolated-file',
-    [failedTestPath],
-    ['--runInBand', '--silent']
-  );
-
-  if (isolatedFileRun.testResults.numFailedTests > 0) {
-    const details = extractFailureDetails(isolatedFileRun.testResults);
-    if (details?.testPath) log.error(`Test file: ${details.testPath}`);
-    if (details?.testName) log.error(`Failed test: ${details.testName}`);
-    if (details?.errorMessage) log.error(`Error: ${details.errorMessage}`);
-    throw new Error(
-      `Test fails in isolation: ${details?.testPath || failedTestPath}${
-        details?.testName ? ` - ${details.testName}` : ''
-      }`
-    );
-  }
   const targetTestName = failing.testName;
+
+  // Identify the root that contains the failed test
+  const normalizedFailedPath = Path.resolve(failedTestPath);
+  const normalizedRoots = roots.map((r) => Path.resolve(r));
+  const containingRoot = normalizedRoots
+    .filter((r) => normalizedFailedPath.startsWith(r + Path.sep) || normalizedFailedPath === r)
+    .sort((a, b) => b.length - a.length)[0];
+
+  console.log({
+    containingRoot,
+  });
+
+  // 1) Verify the file in isolation under only its containing root (if any)
+  if (containingRoot) {
+    const runOneRoot = await runJestWithRootsAndFiles(
+      config,
+      dataDir,
+      log,
+      'verify-isolated-file-one-root',
+      [containingRoot],
+      [failedTestPath],
+      ['--runInBand', '--silent']
+    );
+
+    if (runOneRoot.testResults.numFailedTests > 0) {
+      const details = extractFailureDetails(runOneRoot.testResults);
+      if (details?.testPath) log.error(`Test file: ${details.testPath}`);
+      if (details?.testName) log.error(`Failed test: ${details.testName}`);
+      if (details?.errorMessage) log.error(`Error: ${details.errorMessage}`);
+      throw new Error(
+        `Test fails in isolation (single root): ${details?.testPath || failedTestPath}${
+          details?.testName ? ` - ${details.testName}` : ''
+        }`
+      );
+    }
+
+    // 2) Then verify the file with all roots present
+    if (normalizedRoots.length > 1) {
+      const runAllRoots = await runJestWithRootsAndFiles(
+        config,
+        dataDir,
+        log,
+        'verify-isolated-file-all-roots',
+        normalizedRoots,
+        [failedTestPath],
+        ['--runInBand', '--silent']
+      );
+
+      if (hasFailureInTarget(runAllRoots.testResults, failedTestPath, targetTestName)) {
+        // Other roots change behavior; find minimal culprit roots (besides containingRoot)
+        const otherRoots = normalizedRoots.filter((r) => r !== containingRoot);
+        const culpritRoots = await ddmin(otherRoots, async (subset) => {
+          const runSubset = await runJestWithRootsAndFiles(
+            config,
+            dataDir,
+            log,
+            'verify-isolated-file-roots-ddmin',
+            [containingRoot, ...subset],
+            [failedTestPath],
+            ['--runInBand', '--silent']
+          );
+          return hasFailureInTarget(runSubset.testResults, failedTestPath, targetTestName);
+        });
+
+        if (culpritRoots.length > 0) {
+          log.error(
+            `Identified minimal culprit root set of ${culpritRoots.length} dir(s) impacting the test:`
+          );
+          culpritRoots.forEach((r, i) => log.error(`  ${i + 1}. ${r}`));
+          return culpritRoots; // Return culprit roots immediately
+        }
+      }
+    }
+  } else {
+    // No containing root found; verify test file in isolation under base config
+    const isolatedFileRun = await runJestWithFiles(
+      config,
+      dataDir,
+      log,
+      'verify-isolated-file',
+      [failedTestPath],
+      ['--runInBand', '--silent']
+    );
+
+    if (isolatedFileRun.testResults.numFailedTests > 0) {
+      const details = extractFailureDetails(isolatedFileRun.testResults);
+      if (details?.testPath) log.error(`Test file: ${details.testPath}`);
+      if (details?.testName) log.error(`Failed test: ${details.testName}`);
+      if (details?.errorMessage) log.error(`Error: ${details.errorMessage}`);
+      throw new Error(
+        `Test fails in isolation: ${details?.testPath || failedTestPath}${
+          details?.testName ? ` - ${details.testName}` : ''
+        }`
+      );
+    }
+  }
+  // targetTestName already captured above
 
   // Build the list of test files that ran before the failing test
   const suites = initialRunResults.testResults;
@@ -199,50 +355,7 @@ export async function isolateFailures({
   }
 
   // Delta debugging to find a 1-minimal set of prior files that triggers the failure
-  const ddmin = async (c: string[]): Promise<string[]> => {
-    let n = 2;
-    let current = [...c];
-    while (current.length >= 2) {
-      const chunkSize = Math.ceil(current.length / n);
-      const subsets: string[][] = [];
-      for (let i = 0; i < current.length; i += chunkSize) {
-        subsets.push(current.slice(i, i + chunkSize));
-      }
-
-      let reduced = false;
-
-      // Test each subset
-      for (const subset of subsets) {
-        if (await triggersFailure(subset)) {
-          current = subset;
-          n = Math.max(n - 1, 2);
-          reduced = true;
-          break;
-        }
-      }
-
-      if (reduced) continue;
-
-      // Test complements
-      for (const subset of subsets) {
-        const complement = current.filter((x) => !subset.includes(x));
-        if (complement.length > 0 && (await triggersFailure(complement))) {
-          current = complement;
-          n = Math.max(n - 1, 2);
-          reduced = true;
-          break;
-        }
-      }
-
-      if (!reduced) {
-        if (n >= current.length) break;
-        n = Math.min(current.length, n * 2);
-      }
-    }
-    return current;
-  };
-
-  const minimalSet = await ddmin(priorFiles);
+  const minimalSet = await ddmin(priorFiles, triggersFailure);
   minimalSet.forEach((file) => {
     culprits.push(file);
     log.error(`Culprit test file: ${file}`);

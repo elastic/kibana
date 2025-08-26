@@ -19,6 +19,7 @@ import yargs from 'yargs';
 import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import objectHash from 'object-hash';
 import type { Config } from '@jest/types';
+import type { SlimAggregatedResult } from './types';
 import { expandConfigPaths } from './expand_config_paths';
 import { getFullConfigs } from './get_full_configs';
 import { groupConfigs } from './group_configs';
@@ -154,6 +155,16 @@ export function runJestAll() {
         log,
       });
 
+      // Collect failures across all configs to report at the end
+      const allFailures: Array<{
+        configPath: string;
+        failedFiles: Array<{
+          path: string;
+          failedTests: string[];
+          failureMessage?: string;
+        }>;
+      }> = [];
+
       for (let i = 0; i < fullConfigs.length; i++) {
         const jestConfig = fullConfigs[i];
 
@@ -187,7 +198,6 @@ export function runJestAll() {
           initialRunConfigFilepath,
           JSON.stringify({
             ...initialRunConfig,
-            name: 'jest-all',
           }),
           'utf8'
         );
@@ -278,10 +288,46 @@ export function runJestAll() {
         });
 
         if (secondRunResult.testResults.numFailedTests) {
-          throw new Error(`${secondRunResult.testResults.numFailedTests} tests failed`);
-        }
+          // Collect failing details for this config and continue with next config
+          const aggregated = secondRunResult.testResults as SlimAggregatedResult;
+          const failedFilesForConfig = aggregated.testResults
+            .filter((tr) => tr.numFailingTests > 0)
+            .map((tr) => ({
+              path: tr.testFilePath,
+              failedTests: (tr.testResults || [])
+                .filter((ar) => ar.status === 'failed')
+                .map((ar) => ar.fullName || ar.title || '(unnamed)'),
+              failureMessage: tr.failureMessage,
+            }));
 
-        log.success(`All tests passed`);
+          allFailures.push({
+            configPath: initialRunConfigFilepath,
+            failedFiles: failedFilesForConfig,
+          });
+        } else {
+          log.success(`All tests passed`);
+        }
+      }
+
+      // After running all configs, report any failures and fail the process
+      if (allFailures.length > 0) {
+        let totalFailedTests = 0;
+        for (const entry of allFailures) {
+          log.error(`Failures in config: ${entry.configPath}`);
+          for (const f of entry.failedFiles) {
+            totalFailedTests += f.failedTests.length || 1;
+            log.error(`  ${f.path}`);
+            if (f.failureMessage) {
+              log.error(`    ${f.failureMessage.split('\n')[0]}`);
+            }
+            for (const name of f.failedTests) {
+              log.error(`    ✖ ${name}`);
+            }
+          }
+        }
+        throw new Error(
+          `${totalFailedTests} test(s) failed across ${allFailures.length} config(s)`
+        );
       }
     },
     {
