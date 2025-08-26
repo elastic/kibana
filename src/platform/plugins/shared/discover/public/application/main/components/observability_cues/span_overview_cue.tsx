@@ -21,7 +21,6 @@ import {
   EuiCallOut,
   EuiButton,
   EuiLink,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
@@ -30,6 +29,16 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiButtonEmpty,
+  EuiTitle,
+  EuiText,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiPanel,
+  EuiImage,
+  EuiSwitch,
+  EuiPagination,
+  EuiSpacer,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
@@ -38,6 +47,8 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useSpanOverviewProbe } from './use_span_overview_probe';
 import { SPAN_OVERVIEW_CUE_FEATURE_FLAG_KEY } from '../../../../constants';
+
+const STORAGE_KEY = 'obs_traces_modal_dismissed';
 
 interface SpanOverviewCueProps {
   className?: string;
@@ -48,6 +59,8 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
   const { hasSpanData, isLoading } = useSpanOverviewProbe();
   const [isDismissed, setIsDismissed] = useState(false);
   const [showTourModal, setShowTourModal] = useState(false);
+  const [selectedHighlight, setSelectedHighlight] = useState(0);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   // Get current Discover state for navigation
   const dataViewId = useAppStateSelector((state) => state.dataSource?.dataViewId);
@@ -69,7 +82,11 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
     const showTour = urlParams.get('showObservabilityTour');
 
     if (showTour === 'true' && solutionType === 'oblt') {
-      setShowTourModal(true);
+      // Check if user has dismissed this modal before
+      const hasDismissed = localStorage.getItem(STORAGE_KEY) === '1';
+      if (!hasDismissed) {
+        setShowTourModal(true);
+      }
       // Clean up the URL parameter after showing the modal
       setTimeout(() => {
         urlParams.delete('showObservabilityTour');
@@ -139,6 +156,50 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
     true
   );
 
+  // Highlights data for the tour modal
+  const highlights = useMemo(
+    () => [
+      {
+        id: 'span',
+        title: 'Span overview at a glance',
+        blurb: "See a mini waterfall of parent and child spans in Discover's flyout.",
+        color: '#006BB4', // EUI blue
+        alt: 'Discover flyout with Span overview tab and mini waterfall.',
+      },
+      {
+        id: 'txn',
+        title: 'Transaction & Error details',
+        blurb: 'Get rich context for request flow and exceptions with dedicated tabs.',
+        color: '#00BFB3', // EUI teal
+        alt: 'Discover flyout with Transaction overview tab highlighted.',
+      },
+      {
+        id: 'corr',
+        title: 'Seamless trace correlation',
+        blurb: 'Pivot from spans to related logs and metrics for end-to-end visibility.',
+        color: '#6B73C7', // EUI purple
+        alt: 'Discover flyout showing link to related logs/metrics.',
+      },
+    ],
+    []
+  );
+
+  // Navigation helpers
+  const onPrev = useCallback(() => {
+    setSelectedHighlight((s) => (s + highlights.length - 1) % highlights.length);
+  }, [highlights.length]);
+
+  const onNext = useCallback(() => {
+    setSelectedHighlight((s) => (s + 1) % highlights.length);
+  }, [highlights.length]);
+
+  const onFinish = useCallback(() => {
+    if (dontShowAgain) {
+      localStorage.setItem(STORAGE_KEY, '1');
+    }
+    setShowTourModal(false);
+  }, [dontShowAgain]);
+
   // Don't render the callout if:
   // - Feature flag is disabled
   // - We're in Observability solution (not Classic)
@@ -187,19 +248,109 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
 
       {/* Tour Modal - render regardless of solution type */}
       {showTourModal && (
-        <EuiModal onClose={() => setShowTourModal(false)}>
+        <EuiModal onClose={() => setShowTourModal(false)} style={{ maxWidth: 920 }}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>Welcome to Observability View!</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>Discover more with Traces</EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
-            <p>This is where the tour content will go.</p>
-            <p>You can now access the Span overview and other observability features.</p>
-          </EuiModalBody>
+            <EuiFlexGroup gutterSize="l" responsive>
+              <EuiFlexItem grow={1}>
+                <EuiText color="subdued" size="s">
+                  <p>Explore these trace-focused enhancements in Observability:</p>
+                </EuiText>
+                <EuiSpacer size="m" />
+                <EuiListGroup>
+                  {highlights.map((h, i) => (
+                    <EuiListGroupItem
+                      key={h.id}
+                      label={
+                        <div>
+                          <strong>{h.title}</strong>
+                          <EuiText size="s" color="subdued">
+                            <p style={{ margin: 0 }}>{h.blurb}</p>
+                          </EuiText>
+                        </div>
+                      }
+                      isActive={selectedHighlight === i}
+                      onClick={() => setSelectedHighlight(i)}
+                      size="s"
+                      wrapText
+                    />
+                  ))}
+                </EuiListGroup>
 
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={() => setShowTourModal(false)}>Close</EuiButtonEmpty>
-          </EuiModalFooter>
+                <EuiFlexGroup
+                  gutterSize="s"
+                  alignItems="center"
+                  responsive={false}
+                  style={{ marginTop: 12 }}
+                  justifyContent="flexStart"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="arrowLeft"
+                      onClick={onPrev}
+                      aria-label="Previous highlight"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="arrowRight"
+                      onClick={onNext}
+                      aria-label="Next highlight"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiSwitch
+                      label="Don't show again"
+                      checked={dontShowAgain}
+                      onChange={(e) => setDontShowAgain(e.target.checked)}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      fill
+                      onClick={onFinish}
+                      data-test-subj="obsTracesModalCloseBtn"
+                    >
+                      Got it
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={1}>
+                <EuiPanel paddingSize="none" hasShadow>
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '300px',
+                      backgroundColor: highlights[selectedHighlight].color,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                      padding: '20px',
+                    }}
+                  >
+                    {highlights[selectedHighlight].title}
+                    <br />
+                    <span style={{ fontSize: '14px', fontWeight: 'normal', marginTop: '8px' }}>
+                      (Placeholder for {highlights[selectedHighlight].id} screenshot)
+                    </span>
+                  </div>
+                </EuiPanel>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalBody>
         </EuiModal>
       )}
     </>
