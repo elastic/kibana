@@ -283,6 +283,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         await openBulkImportFlyout();
         const entries = await prepareBulkImportData();
+        const saveButton = await testSubjects.find(ui.pages.kbManagementTab.bulkImportSaveButton);
+
+        expect(await saveButton.isEnabled()).to.be(false);
 
         await retry.try(async () => {
           await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
@@ -295,7 +298,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
           }
         });
 
-        await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
+        expect(await saveButton.isEnabled()).to.be(true);
+        await saveButton.click();
+
         const toastText = await retry.try(async () => {
           const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
           return await toast.getVisibleText();
