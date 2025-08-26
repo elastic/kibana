@@ -190,6 +190,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           subActionParams: {
             workflowId: params?.subActionParams?.workflowId || 'unknown',
             alerts: [],
+            spaceId,
           },
         };
       }
