@@ -11,7 +11,11 @@ import {
   getIsConversationOwner,
 } from './sharing_helpers';
 import type { ConversationResponse, User } from '../schemas';
-import { alertConvo } from '@kbn/elastic-assistant/impl/mock/conversation';
+export const alertConvo: Pick<ConversationResponse, 'id' | 'users' | 'createdBy'> = {
+  users: [{ name: 'elastic' }],
+  id: 'convo1',
+  createdBy: { id: 'user1', name: 'elastic' },
+};
 describe('getConversationSharedState', () => {
   it('returns Private when conversation is undefined', () => {
     expect(getConversationSharedState(undefined)).toBe(ConversationSharedState.PRIVATE);
