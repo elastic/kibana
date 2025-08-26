@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   useEuiTheme,
+  EuiTitle,
 } from '@elastic/eui';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import React from 'react';
@@ -110,6 +111,14 @@ export const WorkflowExecutionList = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart" css={containerCss}>
+      <EuiTitle size="xxs">
+        <h2>
+          <FormattedMessage
+            id="workflows.workflowExecutionList.title"
+            defaultMessage="Workflow Executions"
+          />
+        </h2>
+      </EuiTitle>
       {executions.results.map((execution) => (
         <WorkflowExecutionListItem
           key={execution.id}
