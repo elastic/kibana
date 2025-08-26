@@ -17,6 +17,7 @@ import { generateKibanaPackageTool } from '../tools/generate_package';
 import { listKibanaTeamsTool } from '../tools/list_teams';
 import { runUnitTestsTool } from '../tools/run_unit_tests';
 import { codeSearchTool } from '../tools/code_search';
+import { getDistinctValuesTool } from '../tools/get_distinct_values';
 
 run(async () => {
   const server = new McpServer({ name: 'mcp-dev-server', version: '1.0.0' });
@@ -26,6 +27,7 @@ run(async () => {
   addTool(server, listKibanaTeamsTool);
   addTool(server, runUnitTestsTool);
   addTool(server, codeSearchTool);
+  addTool(server, getDistinctValuesTool);
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
