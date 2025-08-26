@@ -29,7 +29,7 @@ export const ConsoleTutorialsGroup = () => {
       title: 'Search Basics',
       telemetryId: 'console_tutorials_search_basics',
       i18nID: 'xpack.searchHomepage.consoleTutorials.basicsDescription',
-      description: 'Build your first working search.',
+      description: 'Learn how to create an index and execute your first search.',
       request: consoleTutorials.basics,
       duration: 3,
     },
@@ -52,23 +52,25 @@ export const ConsoleTutorialsGroup = () => {
   ];
 
   return (
-    <EuiFlexGroup gutterSize="l" direction={'column'} alignItems="flexStart">
+    <EuiFlexGroup gutterSize="xl" direction={'column'} justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <span>
             {i18n.translate('xpack.searchHomepage.consoleTutorials.label', {
-              defaultMessage: 'Try search quickly in code',
+              defaultMessage: 'Get started with the API',
             })}
           </span>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="l" wrap>
+        <EuiFlexGroup gutterSize="l" wrap justifyContent="spaceEvenly">
           {tutorials.map((tutorial, index) => (
             <EuiFlexItem key={index} grow={false} style={{ minWidth: 300, maxWidth: 300 }}>
               <EuiCard
                 paddingSize="l"
+                display="plain"
                 title={tutorial.title}
+                titleSize="xs"
                 description={i18n.translate(tutorial.i18nID, {
                   defaultMessage: tutorial.description,
                 })}

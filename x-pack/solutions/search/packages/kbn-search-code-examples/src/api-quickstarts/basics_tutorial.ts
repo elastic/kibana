@@ -6,25 +6,25 @@
  */
 
 export const basicsTutorialCommands: string = `# Welcome to the Elasticsearch Basics Tutorial!
-# This tutorial will guide you through the fundamental operations in Elasticsearch
-# using API calls from within the Kibana Dev console.
+# This tutorial will guide you through the fundamental operations in Elasticsearch using API calls from within the Kibana Dev console.
 
-# After selecting a command, execute it by clicking the "Send Request" button or
-# pressing Ctrl+Enter or Cmd+Enter.
+# After selecting a command, execute it by clicking the "Send Request" button or pressing Ctrl+Enter or Cmd+Enter.
 
 # -----------------------------------------------
 # Step 1: Create a new index named 'kibana_sample_data_basics'
 # -----------------------------------------------
+
 PUT /kibana_sample_data_basics
 
-# Response includes a confirmation that the index was created.
+# The response includes a confirmation that the index was created.
 
 # -----------------------------------------------
 # Step 2: Verify the index exists
 # -----------------------------------------------
+
 GET /kibana_sample_data_basics
 
-# Response includes the index details, including mappings and settings.
+# The response includes the index details, including mappings and settings.
 
 # -----------------------------------------------
 # Step 3: Add data to your index
@@ -40,7 +40,7 @@ POST kibana_sample_data_basics/_doc
   "page_count": 470
 }
 
-# Response includes the unique document _id and other metadata.
+# The response includes the unique document _id and other metadata.
 
 # -----------------------------------------------
 # Step 4: Add multiple documents using the _bulk endpoint
@@ -60,7 +60,7 @@ POST /_bulk
 { "index" : { "_index" : "kibana_sample_data_basics" } }
 {"name": "The Handmaids Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}
 
-# Response includes a summary of successes and errors for each operation.
+# The response includes a summary of successes and errors for each operation.
 
 # -----------------------------------------------
 # Step 5: Use dynamic mapping
@@ -78,7 +78,7 @@ POST /kibana_sample_data_basics/_doc
   "language": "EN"
 }
 
-# Response includes a confirmation that the document was added.
+# The response includes a confirmation that the document was added.
 
 # -----------------------------------------------
 # Step 6: View the mapping for the kibana_sample_data_basics index
@@ -87,7 +87,7 @@ POST /kibana_sample_data_basics/_doc
 
 GET /kibana_sample_data_basics/_mapping
 
-# Response includes the new ‘language’ field in the mapping.
+# The response includes the new ‘language’ field in the mapping.
 
 # -----------------------------------------------
 # Step 7: Search all documents
@@ -96,7 +96,7 @@ GET /kibana_sample_data_basics/_mapping
 
 GET /kibana_sample_data_basics/_search
 
-# Response includes a list of all documents in the index.
+# The response includes a list of all documents in the index.
 
 # -----------------------------------------------
 # Step 8: Use match query
@@ -113,18 +113,16 @@ GET /kibana_sample_data_basics/_search
   }
 }
 
-# Response includes a list of matching documents for the "brave" search term.
+# The response includes a list of matching documents for the "brave" search term.
 
 # You can match against any field in these documents because this index uses dynamic mapping.
-# While dynamic mapping is helpful to get started, you may want to define explicit mappings
-# for better performance and control over your search behavior.
+# While dynamic mapping is helpful to get started, you may want to define explicit mappings for better performance and control over your search behavior.
 
 # -----------------------------------------------
 # Step 9: Explicit mappings
 # -----------------------------------------------
 # Create an index with explicit mappings to control which fields are indexed.
-# Fields not defined in the mapping will still be stored in the document's
-# _source field, but they won’t be indexed or searchable.
+# Fields not defined in the mapping will still be stored in the document's _source field, but they won’t be indexed or searchable.
 
 PUT /kibana_sample_data_basics_explicit_mapping
 {
@@ -138,14 +136,12 @@ PUT /kibana_sample_data_basics_explicit_mapping
   }
 }
 
-
 # Add a single document to the explicitly mapped index.
 
 POST /kibana_sample_data_basics_explicit_mapping/_doc
 {"name": "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268}
 
-# Since the explicit mapping only indexes the 'author' field,
-# searching by 'name' will not return any results.
+# Since the explicit mapping only indexes the 'author' field, searching by 'name' will not return any results.
 
 GET /kibana_sample_data_basics_explicit_mapping/_search
 {
@@ -178,13 +174,12 @@ GET /kibana_sample_data_basics*/_search
 DELETE /kibana_sample_data_basics
 DELETE /kibana_sample_data_basics_explicit_mapping
 
-# Response includes a confirmation that the indices were deleted.
+# The response includes a confirmation that the indices were deleted.
 
 # -----------------------------------------------
 # Conclusion
 # -----------------------------------------------
-# In this quickstart, you learned the basics of working with Elasticsearch
-# using the Kibana Dev Tools console. 
+# In this quickstart, you learned the basics of working with Elasticsearch using the Kibana Dev Tools console. 
 # You covered creating an index, indexing documents, searching, and managing mappings.
 
 # Empower your search with AI, learn about semantic search: https://www.elastic.co/docs/solutions/search/semantic-search/semantic-search-semantic-text
