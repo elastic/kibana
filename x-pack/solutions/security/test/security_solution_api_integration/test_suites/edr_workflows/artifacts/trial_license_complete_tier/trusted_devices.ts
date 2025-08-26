@@ -311,6 +311,36 @@ export default function ({ getService }: FtrProviderContext) {
               );
           });
 
+          it(`should error on [${trustedDeviceApiCall.method}] if duplicate OS types are used`, async () => {
+            const body = trustedDeviceApiCall.getBody();
+
+            body.os_types = ['windows', 'windows'];
+
+            await endpointPolicyManagerSupertest[trustedDeviceApiCall.method](
+              trustedDeviceApiCall.path
+            )
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/Duplicate OS entries are not allowed/));
+          });
+
+          it(`should error on [${trustedDeviceApiCall.method}] if duplicate Mac OS types are used`, async () => {
+            const body = trustedDeviceApiCall.getBody();
+
+            body.os_types = ['macos', 'macos'];
+
+            await endpointPolicyManagerSupertest[trustedDeviceApiCall.method](
+              trustedDeviceApiCall.path
+            )
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/Duplicate OS entries are not allowed/));
+          });
+
           // Test all supported trusted device fields
           for (const field of Object.values(TrustedDeviceConditionEntryField)) {
             it(`should allow valid ${field} field on [${trustedDeviceApiCall.method}]`, async () => {
@@ -451,9 +481,6 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anEndpointArtifactError)
               .expect(anErrorMessageWith(/invalid policy ids/));
           });
-
-          // NOTE: No advanced mode tests for trusted devices as it's not supported
-          // This is different from trusted apps which have advanced mode
         }
 
         for (const trustedDeviceApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
