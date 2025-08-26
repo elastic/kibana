@@ -38,14 +38,10 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
     .addNode('inlineQuery', inlineQueryNode)
     // TODO: .addNode('createDescription', createDescriptionNode) -> ask the LLM to create a description of the panel
     .addNode('selectIndexPattern', selectIndexPatternNode)
-
-    // Consider this block by the entire Assistant nlToEsql graph
     .addNode('translateQuery', translateQueryNode)
     .addNode('validation', validationNode)
     .addNode('fixQueryErrors', fixQueryErrorsNode)
-    .addNode('ecsMapping', ecsMappingNode) // Not sure about this one, maybe we should keep it anyway, tests need to be done
-    // Consider this block by the entire Assistant nlToEsql graph
-
+    .addNode('ecsMapping', ecsMappingNode)
     .addNode('translationResult', translationResultNode)
 
     // Edges

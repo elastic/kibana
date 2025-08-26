@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import type { LangSmithEvaluationOptions } from '../../../../../common/siem_migrations/model/common.gen';
 import type { DashboardMigrationsDataClient } from '../data/dashboard_migrations_data_client';
 import type { StoredDashboardMigrationDashboard } from '../types';
@@ -25,6 +25,7 @@ export interface DashboardMigrationInput
 }
 
 export interface DashboardMigrationTaskCreateClientParams {
+  request: KibanaRequest;
   currentUser: AuthenticatedUser;
   dataClient: DashboardMigrationsDataClient;
   dependencies: SiemMigrationsClientDependencies;

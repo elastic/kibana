@@ -14,6 +14,7 @@ import type { ChatModel } from '../../../common/task/util/actions_client_chat';
 import type { migrateDashboardConfigSchema, migrateDashboardState } from './state';
 import type { DashboardMigrationTelemetryClient } from '../dashboard_migrations_telemetry_client';
 import type { ParsedPanel } from '../../lib/parsers/types';
+import type { MigrationResources } from '../../../common/task/retrievers/resource_retriever';
 
 export type MigrateDashboardState = typeof migrateDashboardState.State;
 export type MigrateDashboardConfigSchema = (typeof migrateDashboardConfigSchema)['State'];
@@ -62,6 +63,7 @@ export type FailedPanelTranslations = Array<{
 
 export interface TranslatePanelNodeParams {
   panel: ParsedPanel;
+  resources: MigrationResources;
   index: number;
 }
 export type TranslatePanelNode = (

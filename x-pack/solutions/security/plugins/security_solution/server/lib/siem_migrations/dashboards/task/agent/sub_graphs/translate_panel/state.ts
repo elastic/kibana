@@ -14,9 +14,9 @@ import type { ParsedPanel } from '../../../../lib/parsers/types';
 
 export const translateDashboardPanelState = Annotation.Root({
   parsed_panel: Annotation<ParsedPanel>(),
+  resources: Annotation<MigrationResources>(),
   elastic_panel: Annotation<object | undefined>(), // The visualization panel object
   index_pattern: Annotation<string | undefined>(),
-  resources: Annotation<MigrationResources>(),
   includes_ecs_mapping: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
     default: () => false,

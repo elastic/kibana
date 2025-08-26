@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   ElasticDashboard,
   DashboardMigration,
@@ -40,13 +40,14 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
 
   constructor(
     public readonly migrationId: string,
+    protected readonly request: KibanaRequest,
     public readonly startedBy: AuthenticatedUser,
     public readonly abortController: AbortController,
     protected readonly data: DashboardMigrationsDataClient,
     protected readonly logger: Logger,
     protected readonly dependencies: SiemMigrationsClientDependencies
   ) {
-    super(migrationId, startedBy, abortController, data, logger, dependencies);
+    super(migrationId, request, startedBy, abortController, data, logger, dependencies);
     this.retriever = new DashboardMigrationsRetriever(this.migrationId, {
       data: this.data,
     });
@@ -54,7 +55,8 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
 
   /** Retrieves the connector and creates the migration agent */
   public async setup(connectorId: string): Promise<void> {
-    const { inferenceClient } = this.dependencies;
+    const { inferenceService } = this.dependencies;
+
     const model = await this.actionsClientChat.createModel({
       connectorId,
       migrationId: this.migrationId,
@@ -75,7 +77,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
     const esqlKnowledgeBase = new EsqlKnowledgeBase(
       connectorId,
       this.migrationId,
-      inferenceClient,
+      inferenceService.getClient({ request: this.request }),
       this.logger
     );
 

@@ -6,9 +6,13 @@
  */
 
 import { Send } from '@langchain/langgraph';
+import { DashboardResourceIdentifier } from '../../../../../../../../common/siem_migrations/dashboards/resources';
+import type { Vendor } from '../../../../../../../../common/siem_migrations/model/migration.gen';
+import type { MigrationResources } from '../../../../../common/task/retrievers/resource_retriever';
 import type { MigrateDashboardState, TranslatePanelNodeParams } from '../../types';
 import { getTranslatePanelGraph } from '../../sub_graphs/translate_panel';
 import type { TranslatePanelGraphParams } from '../../sub_graphs/translate_panel/types';
+import type { ParsedPanel } from '../../../../lib/parsers/types';
 
 export type TranslatePanelNode = ((
   params: TranslatePanelNodeParams
@@ -27,14 +31,13 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
   const translatePanelSubGraph = getTranslatePanelGraph(params);
   return {
     // Fan-in: the results of the individual panel translations are aggregated back into the overall dashboard state via state reducer.
-    node: async ({ panel, index }) => {
+    node: async ({ panel, resources, index }) => {
       try {
         if (!panel.query) {
           throw new Error('Panel query is missing');
         }
-        const output = await translatePanelSubGraph.invoke({ parsed_panel: panel });
+        const output = await translatePanelSubGraph.invoke({ parsed_panel: panel, resources });
         return {
-          // Fan-in: translated panels are concatenated by the state reducer, so the results can be aggregated later
           translated_panels: [
             {
               index,
@@ -44,7 +47,6 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
           ],
         };
       } catch (err) {
-        // Fan-in: failed panels are concatenated by the state reducer, so the results can be aggregated later
         return {
           failed_panel_translations: [
             {
@@ -61,10 +63,52 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
     conditionalEdge: (state: MigrateDashboardState) => {
       const panels = state.parsed_original_dashboard.panels ?? [];
       return panels.map((panel, i) => {
-        const translatePanelParams: TranslatePanelNodeParams = { panel, index: i };
+        const resources = filterIdentifiedResources(
+          state.original_dashboard.vendor,
+          state.resources,
+          panel
+        );
+        const translatePanelParams: TranslatePanelNodeParams = { panel, resources, index: i };
         return new Send('translatePanel', translatePanelParams);
       });
     },
     subgraph: translatePanelSubGraph, // Only for the diagram generation
   };
 };
+
+/**
+ * This function filters the stored resource data that have been received for the entire dashboard,
+ * and returns only the resources that have been identified for each specific panel query.
+ */
+function filterIdentifiedResources(
+  vendor: Vendor,
+  resources: MigrationResources,
+  panel: ParsedPanel
+): MigrationResources {
+  const resourceIdentifier = new DashboardResourceIdentifier(vendor);
+  const identifiedResources = resourceIdentifier.fromQuery(panel.query);
+
+  const { macros, lookups } = identifiedResources.reduce<{ macros: string[]; lookups: string[] }>(
+    (acc, { type, name }) => {
+      if (type === 'macro') {
+        acc.macros.push(name);
+      } else if (type === 'lookup') {
+        acc.lookups.push(name);
+      }
+      return acc;
+    },
+    { macros: [], lookups: [] }
+  );
+  const filteredResources: MigrationResources = {};
+
+  const macro = resources.macro?.filter((m) => macros.includes(m.name));
+  if (macro?.length) {
+    filteredResources.macro = macro;
+  }
+  const lookup = resources.lookup?.filter((l) => lookups.includes(l.name));
+  if (lookup?.length) {
+    filteredResources.lookup = lookup;
+  }
+
+  return filteredResources;
+}

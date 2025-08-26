@@ -29,6 +29,10 @@ export abstract class ResourceIdentifier<I> {
     this.identifier = identifiers[this.vendor];
   }
 
+  public fromQuery(query: string): RuleMigrationResourceBase[] {
+    return this.identifier(query);
+  }
+
   public abstract fromOriginal(
     item?: OriginalItem<I>
   ): RuleMigrationResourceBase[] | Promise<RuleMigrationResourceBase[]>;

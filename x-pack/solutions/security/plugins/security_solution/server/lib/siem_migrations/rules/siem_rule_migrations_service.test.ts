@@ -19,7 +19,8 @@ import {
 } from './data/__mocks__/mocks';
 import { mockCreateClient as mockTaskCreateClient, mockStopAll } from './task/__mocks__/mocks';
 import { waitFor } from '@testing-library/dom';
-import type { RuleMigrationsClientDependencies, RuleMigrationsCreateClientParams } from './types';
+import type { SiemMigrationsCreateClientParams } from '../common/types';
+import type { RuleMigrationsClientDependencies } from './types';
 
 jest.mock('./data/rule_migrations_data_service');
 jest.mock('./task/rule_migrations_task_service');
@@ -67,7 +68,7 @@ describe('SiemRuleMigrationsService', () => {
   });
 
   describe('when createClient is called', () => {
-    let createClientParams: RuleMigrationsCreateClientParams;
+    let createClientParams: SiemMigrationsCreateClientParams;
 
     beforeEach(() => {
       createClientParams = {

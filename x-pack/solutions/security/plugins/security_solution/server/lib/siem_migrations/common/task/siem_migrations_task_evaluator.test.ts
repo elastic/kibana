@@ -10,7 +10,7 @@ import { SiemMigrationTaskEvaluable } from './siem_migrations_task_evaluator';
 import type { Run, Example } from 'langsmith/schemas';
 import { createSiemMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { AuthenticatedUser } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import type { SiemMigrationsClientDependencies } from '../types';
 import { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
 
@@ -51,6 +51,7 @@ describe('SiemMigrationTaskEvaluator', () => {
     telemetry: {},
   } as unknown as SiemMigrationsClientDependencies;
 
+  const mockRequest = {} as unknown as KibanaRequest;
   const mockUser = {} as unknown as AuthenticatedUser;
 
   beforeAll(() => {
@@ -59,6 +60,7 @@ describe('SiemMigrationTaskEvaluator', () => {
 
     taskEvaluator = new SiemMigrationTaskEvaluator(
       'test-migration-id',
+      mockRequest,
       mockUser,
       abortController,
       mockRuleMigrationsDataClient,

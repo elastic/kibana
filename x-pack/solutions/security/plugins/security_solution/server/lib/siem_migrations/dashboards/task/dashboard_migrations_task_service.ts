@@ -20,6 +20,7 @@ export class DashboardMigrationsTaskService {
   }
 
   public createClient({
+    request,
     currentUser,
     dataClient,
     dependencies,
@@ -28,6 +29,7 @@ export class DashboardMigrationsTaskService {
       this.migrationsRunning,
       this.logger,
       dataClient,
+      request,
       currentUser,
       dependencies
     );

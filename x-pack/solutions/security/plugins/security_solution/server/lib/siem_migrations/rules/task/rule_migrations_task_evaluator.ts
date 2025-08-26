@@ -44,8 +44,7 @@ export class RuleMigrationTaskEvaluator extends SiemMigrationTaskEvaluable(
     },
 
     prebuilt_rule_match: ({ run, example }) => {
-      const runPrebuiltRuleId = (run?.outputs as MigrateRuleState)?.elastic_rule
-        ?.prebuilt_rule_id;
+      const runPrebuiltRuleId = (run?.outputs as MigrateRuleState)?.elastic_rule?.prebuilt_rule_id;
       const expectedPrebuiltRuleId = (example?.outputs as MigrateRuleState)?.elastic_rule
         ?.prebuilt_rule_id;
 

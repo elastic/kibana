@@ -12,7 +12,7 @@ import type { DashboardMigrationsDataClient } from './data/dashboard_migrations_
 import { DashboardMigrationsDataService } from './data/dashboard_migrations_data_service';
 import type { DashboardMigrationsTaskClient } from './task/dashboard_migrations_task_client';
 import { DashboardMigrationsTaskService } from './task/dashboard_migrations_task_service';
-import type { DashboardMigrationsCreateClientParams } from './types';
+import type { SiemMigrationsCreateClientParams } from '../common/types';
 
 export interface SiemDashboardsMigrationsSetupParams {
   esClusterClient: IClusterClient;
@@ -51,7 +51,7 @@ export class SiemDashboardMigrationsService {
     currentUser,
     spaceId,
     dependencies,
-  }: DashboardMigrationsCreateClientParams): SiemDashboardMigrationsClient {
+  }: SiemMigrationsCreateClientParams): SiemDashboardMigrationsClient {
     assert(currentUser, 'Current user must be authenticated');
     assert(this.esClusterClient, 'ES client not available, please call setup first');
 
@@ -63,7 +63,12 @@ export class SiemDashboardMigrationsService {
       dependencies,
     });
 
-    const taskClient = this.taskService.createClient({ currentUser, dataClient, dependencies });
+    const taskClient = this.taskService.createClient({
+      request,
+      currentUser,
+      dataClient,
+      dependencies,
+    });
 
     return { data: dataClient, task: taskClient };
   }

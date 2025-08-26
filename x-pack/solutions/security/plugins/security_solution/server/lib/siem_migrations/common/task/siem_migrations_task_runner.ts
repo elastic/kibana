@@ -6,7 +6,7 @@
  */
 
 import assert from 'assert';
-import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import { abortSignalToPromise, AbortError } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
@@ -56,21 +56,6 @@ const EXECUTOR_SLEEP = {
  **/
 const EXECUTOR_RECOVER_MAX_ATTEMPTS = 3 as const;
 
-export type SiemMigrationTaskRunnerConstructor<
-  M extends MigrationDocument = MigrationDocument, // The migration document type (rule migrations and dashboard migrations very similar but have differences)
-  I extends ItemDocument = ItemDocument, // The rule or dashboard document type
-  P extends object = {}, // The migration task input parameters schema
-  C extends object = {}, // The migration task config schema
-  O extends object = {} // The migration task output schema
-> = new (
-  migrationId: string,
-  startedBy: AuthenticatedUser,
-  abortController: AbortController,
-  data: SiemMigrationsDataClient<M, I>,
-  logger: Logger,
-  dependencies: SiemMigrationsClientDependencies
-) => SiemMigrationTaskRunner<M, I, P, C, O>;
-
 export class SiemMigrationTaskRunner<
   M extends MigrationDocument = MigrationDocument, // The migration document type (rule migrations and dashboard migrations very similar but have differences)
   I extends ItemDocument = ItemDocument, // The rule or dashboard document type
@@ -87,13 +72,14 @@ export class SiemMigrationTaskRunner<
 
   constructor(
     public readonly migrationId: string,
+    protected readonly request: KibanaRequest,
     public readonly startedBy: AuthenticatedUser,
     public readonly abortController: AbortController,
     protected readonly data: SiemMigrationsDataClient<M, I>,
     protected readonly logger: Logger,
     protected readonly dependencies: SiemMigrationsClientDependencies
   ) {
-    this.actionsClientChat = new ActionsClientChat(this.dependencies.actionsClient, this.logger);
+    this.actionsClientChat = new ActionsClientChat(this.request, this.dependencies, this.logger);
     this.abort = abortSignalToPromise(this.abortController.signal);
   }
 

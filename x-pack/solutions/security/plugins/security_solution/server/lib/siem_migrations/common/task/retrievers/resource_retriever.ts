@@ -59,7 +59,7 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
     }
 
     const resourceIdentifier = new this.ResourceIdentifier(migrationItem.vendor);
-    const resourcesIdentifiedFromRule = resourceIdentifier.fromOriginal(migrationItem);
+    const resourcesIdentifiedFromRule = await resourceIdentifier.fromOriginal(migrationItem);
 
     const macrosFound = new Map<string, MigrationDefinedResource>();
     const lookupsFound = new Map<string, MigrationDefinedResource>();

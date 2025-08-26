@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   ActionsClientChatBedrockConverse,
   ActionsClientChatOpenAI,
@@ -20,7 +19,9 @@ import type {
 } from '@kbn/langchain/server/language_models/gemini_chat';
 import type { CustomChatModelInput as ActionsClientSimpleChatModelParams } from '@kbn/langchain/server/language_models/simple_chat_model';
 import { InferenceChatModel } from '@kbn/inference-langchain';
+import { INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common/constants';
 import { TELEMETRY_SIEM_MIGRATION_ID } from './constants';
+import type { SiemMigrationsClientDependencies } from '../../types';
 
 export type ChatModel =
   | ActionsClientChatBedrockConverse
@@ -60,14 +61,19 @@ interface CreateModelParams {
 }
 
 export class ActionsClientChat {
-  constructor(private readonly actionsClient: ActionsClient, private readonly logger: Logger) {}
+  constructor(
+    private readonly request: KibanaRequest,
+    private readonly dependencies: SiemMigrationsClientDependencies,
+    private readonly logger: Logger
+  ) {}
 
   public async createModel({
     migrationId,
     connectorId,
     abortController,
   }: CreateModelParams): Promise<ChatModel> {
-    const connector = await this.actionsClient.get({ id: connectorId });
+    const { actionsClient, inferenceService, featureFlags } = this.dependencies;
+    const connector = await actionsClient.get({ id: connectorId });
     if (!connector) {
       throw new Error(`Connector not found: ${connectorId}`);
     }
@@ -75,16 +81,36 @@ export class ActionsClientChat {
       throw new Error(`Connector type not supported: ${connector.actionTypeId}`);
     }
 
+    const inferenceChatModelDisabled = await featureFlags.getBooleanValue(
+      INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+      false
+    );
+
     const llmType = this.getLLMType(connector.actionTypeId);
-    if (llmType === 'inference') {
-      // TODO: instantiate from inferenceService
-      throw new Error('Inference model creation not implemented yet');
+    if (!inferenceChatModelDisabled || llmType === 'inference') {
+      return inferenceService.getChatModel({
+        request: this.request,
+        connectorId,
+        chatModelOptions: {
+          // not passing specific `model`, we'll always use the connector default model
+          // temperature may need to be parametrized in the future
+          temperature: 0.05,
+          // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
+          maxRetries: 1,
+          // Disable streaming explicitly
+          disableStreaming: true,
+          // Set a hard limit of 50 concurrent requests
+          maxConcurrency: 50,
+          telemetryMetadata: { pluginId: TELEMETRY_SIEM_MIGRATION_ID, aggregateBy: migrationId },
+          signal: abortController.signal,
+        },
+      });
     }
 
     const ChatModelClass = this.getLLMClass(llmType);
 
     const model = new ChatModelClass({
-      actionsClient: this.actionsClient,
+      actionsClient,
       connectorId,
       llmType,
       model: connector.config?.defaultModel,

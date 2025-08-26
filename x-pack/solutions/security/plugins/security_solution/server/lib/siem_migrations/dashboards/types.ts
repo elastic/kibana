@@ -11,10 +11,6 @@ import type {
   DashboardMigrationDashboard,
 } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { Stored } from '../types';
-import type {
-  SiemMigrationsClientDependencies,
-  SiemMigrationsCreateClientParams,
-} from '../common/types';
 
 export interface DashboardMigrationAdapters {
   migrations: IndexPatternAdapter;
@@ -32,7 +28,3 @@ export type DashboardMigrationIndexNameProviders = Record<
 
 export type StoredDashboardMigration = Stored<DashboardMigration>;
 export type StoredDashboardMigrationDashboard = Stored<DashboardMigrationDashboard>;
-export type DashboardMigrationsClientDependencies = SiemMigrationsClientDependencies;
-
-export type DashboardMigrationsCreateClientParams =
-  SiemMigrationsCreateClientParams<DashboardMigrationsClientDependencies>;

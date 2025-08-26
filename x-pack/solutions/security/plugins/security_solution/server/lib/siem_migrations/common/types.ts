@@ -12,7 +12,9 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
-import type { InferenceClient } from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   DashboardMigration,
   DashboardMigrationDashboard,
@@ -23,20 +25,20 @@ import type {
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 
 export interface SiemMigrationsClientDependencies {
-  inferenceClient: InferenceClient;
+  inferenceService: InferenceServerStart;
   actionsClient: ActionsClient;
+  rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   packageService?: PackageService;
   telemetry: AnalyticsServiceSetup;
+  featureFlags: FeatureFlagsRequestHandlerContext;
 }
 
-export interface SiemMigrationsCreateClientParams<
-  D extends SiemMigrationsClientDependencies = SiemMigrationsClientDependencies
-> {
+export interface SiemMigrationsCreateClientParams {
   request: KibanaRequest;
   currentUser: AuthenticatedUser | null;
   spaceId: string;
-  dependencies: D;
+  dependencies: SiemMigrationsClientDependencies;
 }
 
 export type SiemMigrationsIndexNameProvider = () => Promise<string>;

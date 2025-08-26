@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import type { MigrationTaskItemsStats } from '../../../../../common/siem_migrations/model/migration.gen';
 import {
@@ -33,9 +33,9 @@ import type { SiemMigrationTaskEvaluatorClass } from './siem_migrations_task_eva
 export type MigrationsRunning<
   M extends MigrationDocument = StoredSiemMigration,
   I extends ItemDocument = ItemDocument,
-  P extends object = {}, // The migration task input parameters schema
-  C extends object = {}, // The migration task config schema
-  O extends object = {} // The migration task output schema
+  P extends object = {},
+  C extends object = {},
+  O extends object = {}
 > = Map<string, SiemMigrationTaskRunner<M, I, P, C, O>>;
 
 export abstract class SiemMigrationsTaskClient<
@@ -52,6 +52,7 @@ export abstract class SiemMigrationsTaskClient<
     protected migrationsRunning: MigrationsRunning<M, I, P, C, O>,
     private logger: Logger,
     private data: SiemMigrationsDataClient<M, I>,
+    private request: KibanaRequest,
     private currentUser: AuthenticatedUser,
     private dependencies: SiemMigrationsClientDependencies
   ) {}
@@ -82,6 +83,7 @@ export abstract class SiemMigrationsTaskClient<
     const abortController = new AbortController();
     const migrationTaskRunner = new this.TaskRunnerClass(
       migrationId,
+      this.request,
       this.currentUser,
       abortController,
       this.data,
@@ -247,6 +249,7 @@ export abstract class SiemMigrationsTaskClient<
     const migrationLogger = this.logger.get('evaluate');
     const migrationTaskEvaluator = new this.EvaluatorClass(
       evaluationId,
+      this.request,
       this.currentUser,
       abortController,
       this.data,
