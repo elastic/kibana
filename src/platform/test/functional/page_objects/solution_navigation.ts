@@ -38,13 +38,29 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     return 'v1';
   }
 
-  async function noopIfV2() {
+  async function isV2() {
     const version = await getSideNavVersion();
-    if (version === 'v2') {
-      log.debug('SolutionNavigation.noopIfV2 - skipping action for v2 sidenav');
+    return version === 'v2';
+  }
+
+  async function noopIfV2() {
+    if (await isV2()) {
+      log.debug('SolutionNavigation.sidenav - skipping action for v2 sidenav');
       return true;
     }
     return false;
+  }
+
+  async function expandMoreIfNeeded() {
+    if (!(await isV2())) return;
+
+    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: TIMEOUT_CHECK })) {
+      const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
+      const isExpanded = await moreMenuItem.getAttribute('aria-expanded');
+      if (isExpanded === 'false') {
+        await moreMenuItem.click();
+      }
+    }
   }
 
   async function getByVisibleText(
@@ -56,7 +72,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     let found: WebElementWrapper | null = null;
     for (const subject of subjects) {
       const visibleText = await subject.getVisibleText();
-      if (visibleText === text) {
+      const ariaLabel = await subject.getAttribute('aria-label');
+      if (visibleText === text || ariaLabel === text) {
         found = subject;
         break;
       }
@@ -74,15 +91,13 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     },
     // side nav related actions
     sidenav: {
-      async getVersion() {
-        return getSideNavVersion();
+      async isV2() {
+        return (await getSideNavVersion()) === 'v2';
       },
       async skipIfV2(mochaContext: Mocha.Context) {
-        const version = await getSideNavVersion();
-        if (version === 'v2') {
+        if (await isV2()) {
           log.debug('SolutionNavigation.sidenav.skipIfV2 - skipping test for v2 sidenav');
           mochaContext.skip();
-          return true;
         }
       },
       async expectLinkExists(
@@ -92,6 +107,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           | { text: string }
           | { panelNavLinkId: string }
       ) {
+        await expandMoreIfNeeded();
+
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`, {
             timeout: TIMEOUT_CHECK,
@@ -167,8 +184,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           });
         }
       },
-      async expectOnlyDefinedLinks(navItemIds: string[]) {
+      async expectOnlyDefinedLinks(navItemIds: string[], options?: { checkOrder?: boolean }) {
         const navItemIdRegEx = /nav-item-id-[^\s]+/g;
+        await expandMoreIfNeeded();
         const allSideNavLinks = await testSubjects.findAll('*nav-item-id-');
         const foundNavItemIds: string[] = [];
         for (const sideNavItem of allSideNavLinks) {
@@ -181,12 +199,19 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
         expect(foundNavItemIds).to.have.length(
           navItemIds.length,
-          'Found nav item list length does not match expected list of side nav items'
+          `Found nav item list length (${foundNavItemIds.length}) does not match expected length (${navItemIds.length}) of side nav items`
         );
-        for (let i = 0; i < foundNavItemIds.length; i++) {
-          expect(foundNavItemIds[i]).to.eql(
-            navItemIds[i],
-            `Nav item ${foundNavItemIds[i]} @ index ${i} does not match expected item ${navItemIds[i]}`
+        if (options?.checkOrder !== false) {
+          for (let i = 0; i < foundNavItemIds.length; i++) {
+            expect(foundNavItemIds[i]).to.eql(
+              navItemIds[i],
+              `Nav item ${foundNavItemIds[i]} @ index ${i} does not match expected item ${navItemIds[i]}`
+            );
+          }
+        } else {
+          expect([...foundNavItemIds].sort()).to.eql(
+            [...navItemIds].sort(),
+            `Nav item ids do not match expected set`
           );
         }
       },
