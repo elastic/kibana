@@ -26,11 +26,11 @@ export const CollectConfigContainer: React.FC<CollectConfigContainerProps> = ({
 
   useEffect(() => {
     (async () => {
-      const indexPatternSavedObjects = await start().plugins.data.indexPatterns.getCache();
+      const indexPatternSavedObjects = await start().plugins.data.dataViews.getCache();
       if (!isMounted()) return;
       setIndexPatterns(
         indexPatternSavedObjects
-          ? indexPatternSavedObjects.map((indexPattern) => ({
+          ? indexPatternSavedObjects.map((indexPattern: any) => ({
               id: indexPattern.id,
               title: indexPattern.attributes.title,
             }))

@@ -58,7 +58,7 @@ export interface GraphDependencies {
   licensing: LicensingPluginStart;
   chrome: ChromeStart;
   toastNotifications: ToastsStart;
-  indexPatterns: DataViewsContract;
+  dataViews: DataViewsContract;
   data: ReturnType<DataPlugin['start']>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   contentClient: ContentClient;

@@ -110,11 +110,11 @@ export function getEsaggs({
 }) {
   return getFunctionDefinition({
     getStartDependencies: async () => {
-      const [, , self] = await getStartServices();
-      const { indexPatterns, search, nowProvider } = self;
+      const [, { dataViews }, self] = await getStartServices();
+      const { search, nowProvider } = self;
       return {
         aggs: search.aggs,
-        indexPatterns,
+        indexPatterns: dataViews,
         searchSource: search.searchSource,
         getNow: () => nowProvider.get(),
       };

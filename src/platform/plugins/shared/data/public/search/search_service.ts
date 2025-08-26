@@ -246,7 +246,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
-    const aggs = this.aggsService.start({ fieldFormats, indexPatterns });
+    const aggs = this.aggsService.start({ fieldFormats, dataViews: indexPatterns });
 
     const warningsServices = {
       inspector,

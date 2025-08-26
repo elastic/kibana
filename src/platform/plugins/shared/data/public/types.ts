@@ -89,12 +89,6 @@ export interface DataPublicPluginStart {
   datatableUtilities: DatatableUtilitiesService;
 
   /**
-   * index patterns service
-   * {@link DataViewsContract}
-   * @deprecated Use dataViews service instead.  All index pattern interfaces were renamed.
-   */
-  indexPatterns: DataViewsContract;
-  /**
    * search service
    * {@link ISearchStart}
    */

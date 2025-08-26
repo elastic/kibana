@@ -39,7 +39,7 @@ export const WorkspaceRoute = ({
     addBasePath,
     setHeaderActionMenu,
     spaces,
-    indexPatterns: getIndexPatternProvider,
+    dataViews: getIndexPatternProvider,
     inspect,
     savedObjectsManagement,
     contentManagement,
