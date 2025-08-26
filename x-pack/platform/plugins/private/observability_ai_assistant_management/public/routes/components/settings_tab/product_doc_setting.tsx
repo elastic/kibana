@@ -234,7 +234,8 @@ export function ProductDocSetting({
         css={linkCss}
       >
         {canInstallProductDoc &&
-          status?.value?.inferenceModelState !== InferenceModelState.NOT_INSTALLED && (
+          status?.value?.inferenceModelState !== InferenceModelState.NOT_INSTALLED &&
+          !(showErrorCallout || hasBackendError) && (
             <>
               <EuiIcon type="download" size="s" />
               <span>
@@ -271,6 +272,8 @@ export function ProductDocSetting({
     canInstallProductDoc,
     status,
     linkCss,
+    showErrorCallout,
+    hasBackendError,
   ]);
 
   const techPreviewLabel = i18n.translate(
@@ -316,38 +319,42 @@ export function ProductDocSetting({
       </div>
       {(showErrorCallout || hasBackendError) && (
         <EuiCallOut
-          title={
-            <span style={{ fontWeight: 'normal' }}>
-              {i18n.translate(
-                'xpack.observabilityAiAssistantManagement.settingsPage.productDocNotAvailableLine1',
-                {
-                  defaultMessage:
-                    'The Elastic Documentation is not available. Try doing ABC and DCE to side-load the product docs and make them available to Kibana.',
-                }
-              )}
-              <br />
-              {i18n.translate(
-                'xpack.observabilityAiAssistantManagement.settingsPage.productDocNotAvailableLine2Prefix',
-                { defaultMessage: 'Check our ' }
-              )}
-              <EuiLink
-                href="https://www.elastic.co/docs/explore-analyze/ai-assistant#observability-ai-assistant-requirements"
-                target="_blank"
-                external
-              >
-                {i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.settingsPage.documentation',
-                  { defaultMessage: 'documentation' }
-                )}
-              </EuiLink>
-            </span>
-          }
           color="warning"
-          style={{ width: 528 }}
-          iconType="iInCircle"
           size="s"
+          style={{ width: 528, marginBottom: 16 }}
           data-test-subj="productDocNotAvailableCallout"
-        />
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', columnGap: 8 }}>
+            <EuiIcon type="iInCircle" size="s" />
+
+            <EuiText size="s">
+              <p>
+                {i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.settingsPage.productDocNotAvailableLine1',
+                  {
+                    defaultMessage:
+                      'The Elastic Documentation is not available. Try doing ABC and DCE to side-load the product docs and make them available to Kibana.',
+                  }
+                )}
+                {<br />}
+                {i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.settingsPage.productDocNotAvailableLine2Prefix',
+                  { defaultMessage: 'Check our ' }
+                )}
+                <EuiLink
+                  href="https://www.elastic.co/docs/explore-analyze/ai-assistant#observability-ai-assistant-requirements"
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.settingsPage.documentation',
+                    { defaultMessage: 'documentation' }
+                  )}
+                </EuiLink>
+              </p>
+            </EuiText>
+          </div>
+        </EuiCallOut>
       )}
     </>
   );
