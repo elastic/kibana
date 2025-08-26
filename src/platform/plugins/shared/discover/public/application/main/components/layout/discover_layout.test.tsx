@@ -123,7 +123,7 @@ async function mountComponent(
     onUpdateQuery: jest.fn(),
     savedSearch: savedSearchMock,
     searchSource: searchSourceMock,
-    state: { columns: [], query, hideChart: false, hideSidebar: false, interval: 'auto' },
+    state: { columns: [], query, hideChart: false, interval: 'auto' },
     stateContainer,
     setExpandedDoc: jest.fn(),
     updateDataViewList: jest.fn(),
