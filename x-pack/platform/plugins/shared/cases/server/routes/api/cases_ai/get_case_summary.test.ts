@@ -64,7 +64,7 @@ describe('getCaseSummaryRoute', () => {
   });
 
   it('throws error if inference client is not available', async () => {
-    const contextNoInference = {
+    const contextWithoutInferenceClient = {
       cases: {
         getCasesClient: jest.fn().mockResolvedValue(casesClientMock),
         getInferenceClient: jest.fn().mockResolvedValue(undefined),
@@ -77,7 +77,7 @@ describe('getCaseSummaryRoute', () => {
 
     await expect(
       // @ts-ignore
-      getCaseSummaryRoute.handler({ context: contextNoInference, request, response })
+      getCaseSummaryRoute.handler({ context: contextWithoutInferenceClient, request, response })
     ).rejects.toThrow('Failed to generate case summary: Error: Inference client is not available');
   });
 
