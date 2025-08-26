@@ -35,16 +35,16 @@ export const getCaseSummaryRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-
       const inferenceClient = await caseContext.getInferenceClient();
-      const caseId = request.params.case_id;
-      const connectorId = request.query.connectorId;
-      const caseData = await casesClient.cases.get({ id: caseId, includeComments: true });
-      const prompt = getCaseSummaryPrompt(caseData);
 
       if (!inferenceClient) {
         throw new Error('Inference client is not available');
       }
+
+      const caseId = request.params.case_id;
+      const connectorId = request.query.connectorId;
+      const caseData = await casesClient.cases.get({ id: caseId, includeComments: true });
+      const prompt = getCaseSummaryPrompt(caseData);
 
       const chatResponse = await inferenceClient.chatComplete({
         connectorId,
