@@ -44,13 +44,11 @@ generate_typescript() {
 }
 
 create_pull_request() {
-  echo "--- Differences found. Checking for an existing pull request."
+  echo "--- Differences found. Preparing PR creation data."
 
   # Configure Git with machine user
   KIBANA_MACHINE_USERNAME="kibanamachine"
-  git config --global user.name "$KIBANA_MACHINE_USERNAME"
-  git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
-
+  
   # Define PR details
   PR_TITLE='[One Discover][Logs UX] Update OpenTelemetry Semantic Conventions'
   PR_BODY='This PR updates the OpenTelemetry semantic conventions definitions to the latest version.
@@ -68,6 +66,62 @@ create_pull_request() {
 
 🤖 Generated automatically by Buildkite workflow'
 
+  # Create branch name for reference
+  BRANCH_NAME="otel_semconv_sync_$(date +%s)"
+
+  # Check DRY_RUN mode
+  if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
+    echo "🔍 DRY_RUN: Collected data for PR creation (no git operations performed):"
+    echo ""
+    echo "=== PR METADATA ==="
+    echo "Title: $PR_TITLE"
+    echo "Proposed Branch: $BRANCH_NAME"
+    echo "Target Base: main"
+    echo "Author: $KIBANA_MACHINE_USERNAME"
+    echo ""
+    echo "=== LABELS ==="
+    echo "- Team:obs-ux-logs"
+    echo "- release_note:skip"
+    echo "- backport:skip" 
+    echo "- otel-semantic-conventions"
+    echo ""
+    echo "=== ASSIGNEES & REVIEWERS ==="
+    echo "Assignee: elastic/obs-ux-logs-team"
+    echo "Reviewer: elastic/obs-ux-logs-team"
+    echo ""
+    echo "=== FILES TO COMMIT ==="
+    echo "- $OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
+    echo "- $OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts"
+    echo ""
+    echo "=== FILE CHANGES SUMMARY ==="
+    if [ -f "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml" ]; then
+      yaml_lines=$(wc -l < "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml")
+      echo "YAML file: $yaml_lines lines"
+    fi
+    if [ -f "$OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts" ]; then
+      ts_lines=$(wc -l < "$OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts")
+      echo "TypeScript file: $ts_lines lines"
+    fi
+    echo ""
+    echo "=== GIT DIFF SUMMARY ==="
+    echo "Changed files detected:"
+    git diff --name-only $GIT_SCOPE || echo "No git diff available"
+    echo ""
+    echo "=== COMMIT MESSAGE ==="
+    echo "Update OpenTelemetry semantic conventions"
+    echo ""
+    echo "- Updated resolved-semconv.yaml with latest OTel conventions"
+    echo "- Regenerated TypeScript definitions with new field metadata"  
+    echo "- Generated automatically by Buildkite workflow"
+    echo ""
+    echo "🔍 DRY_RUN: All PR data collected - no git operations or PR creation performed"
+    return 0
+  fi
+
+  # Normal mode: perform git operations
+  git config --global user.name "$KIBANA_MACHINE_USERNAME"
+  git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
+
   # Check if a PR already exists
   pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 1 --json title -q ".[].title")
 
@@ -79,7 +133,6 @@ create_pull_request() {
   echo "No existing PR found. Proceeding to create new PR."
 
   # Create branch with timestamp
-  BRANCH_NAME="otel_semconv_sync_$(date +%s)"
   git checkout -b "$BRANCH_NAME"
 
   # Add the changed files
@@ -162,8 +215,6 @@ main() {
   
   report_main_step "Creating pull request"
   create_pull_request
-  
-  report_main_step "OpenTelemetry semantic conventions sync completed successfully!"
 }
 
 main
