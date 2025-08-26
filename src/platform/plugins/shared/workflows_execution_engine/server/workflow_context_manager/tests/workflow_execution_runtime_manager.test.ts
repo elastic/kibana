@@ -129,6 +129,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       } as Partial<EsWorkflowStepExecution>);
       const fakeResult = { success: true, data: {} };
       await underTest.setStepResult({
+        input: {},
         output: fakeResult,
         error: null,
       });
