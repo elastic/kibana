@@ -17,18 +17,20 @@ export class ConnectorExecutor {
   public async execute(
     connectorType: string,
     connectorName: string,
-    inputs: Record<string, any>
+    inputs: Record<string, any>,
+    spaceId: string
   ): Promise<ActionTypeExecutorResult<unknown>> {
     if (!connectorType) {
       throw new Error('Connector type is required');
     }
 
-    return await this.runConnector(connectorName, inputs);
+    return await this.runConnector(connectorName, inputs, spaceId);
   }
 
   private async runConnector(
     connectorName: string,
-    connectorParams: Record<string, any>
+    connectorParams: Record<string, any>,
+    spaceId: string
   ): Promise<ActionTypeExecutorResult<unknown>> {
     let connectorId: string;
 
@@ -48,7 +50,7 @@ export class ConnectorExecutor {
     return await this.actionsClient.execute({
       id: connectorId,
       params: connectorParams,
-      spaceId: 'default', // Should be space aware
+      spaceId,
       requesterId: 'background_task', // This is a custom ID for testing purposes
     });
   }

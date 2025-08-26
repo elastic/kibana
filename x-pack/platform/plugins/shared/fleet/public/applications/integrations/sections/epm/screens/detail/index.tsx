@@ -57,7 +57,7 @@ import { InstallStatus } from '../../../../types';
 import { Error, Loading, HeaderReleaseBadge } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
-
+import { SideBarColumn } from '../../components/side_bar_column';
 import { PermissionsError } from '../../../../layouts';
 
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
@@ -66,7 +66,7 @@ import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
   BackLink,
-  IntegrationAgentPolicyCount,
+  IntegrationPolicyCount,
   UpdateIcon,
   IconPanel,
   LoadingIconPanel,
@@ -85,6 +85,7 @@ import { Configs } from './configs';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 import { InstallButton } from './settings/install_button';
 import { EditIntegrationFlyout } from './components/edit_integration_flyout';
+import { ErrorIconPanel } from './components/icon_panel';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -344,7 +345,9 @@ export function Detail() {
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="l">
             <FlexItemWithMaxHeight grow={false}>
-              {isLoading || !packageInfo ? (
+              {packageInfoError ? (
+                <ErrorIconPanel />
+              ) : isLoading || !packageInfo ? (
                 <LoadingIconPanel />
               ) : (
                 <IconPanel
@@ -356,46 +359,50 @@ export function Detail() {
               )}
             </FlexItemWithMaxHeight>
             <FlexItemWithMinWidth grow={true}>
-              <EuiFlexGroup direction="column" justifyContent="flexStart" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiText>
-                    {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                    <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup gutterSize="xs">
-                    {packageInfo?.type === 'content' ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="default">
-                          {i18n.translate('xpack.fleet.epm.contentPackageBadgeLabel', {
-                            defaultMessage: 'Content only',
-                          })}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    ) : (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="default">
-                          {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
-                            defaultMessage: 'Elastic Agent',
-                          })}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    )}
-                    {packageInfo?.release && packageInfo.release !== 'ga' ? (
-                      <EuiFlexItem grow={false}>
-                        <HeaderReleaseBadge release={getPackageReleaseLabel(packageInfo.version)} />
-                      </EuiFlexItem>
-                    ) : null}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              {packageInfo ? (
+                <EuiFlexGroup direction="column" justifyContent="flexStart" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiText>
+                      {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
+                      <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="xs">
+                      {packageInfo?.type === 'content' ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="default">
+                            {i18n.translate('xpack.fleet.epm.contentPackageBadgeLabel', {
+                              defaultMessage: 'Content only',
+                            })}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      ) : (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="default">
+                            {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
+                              defaultMessage: 'Elastic Agent',
+                            })}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
+                      {packageInfo?.release && packageInfo.release !== 'ga' ? (
+                        <EuiFlexItem grow={false}>
+                          <HeaderReleaseBadge
+                            release={getPackageReleaseLabel(packageInfo.version)}
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : null}
             </FlexItemWithMinWidth>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams]
+    [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams, packageInfoError]
   );
 
   const handleEditIntegrationClick = useCallback<ReactEventHandler>((ev) => {
@@ -541,11 +548,11 @@ export function Detail() {
                 ? [
                     { isDivider: true },
                     {
-                      label: i18n.translate('xpack.fleet.epm.usedByLabel', {
-                        defaultMessage: 'Agent policies',
+                      label: i18n.translate('xpack.fleet.epm.policiesCountLabel', {
+                        defaultMessage: 'Policies',
                       }),
-                      'data-test-subj': 'agentPolicyCount',
-                      content: <IntegrationAgentPolicyCount packageName={packageInfo.name} />,
+                      'data-test-subj': 'policyCount',
+                      content: <IntegrationPolicyCount packageName={packageInfo.name} />,
                     },
                   ]
                 : []),
@@ -811,15 +818,20 @@ export function Detail() {
         <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />
       ) : null}
       {packageInfoError ? (
-        <Error
-          title={
-            <FormattedMessage
-              id="xpack.fleet.epm.loadingIntegrationErrorTitle"
-              defaultMessage="Error loading integration details"
+        <EuiFlexGroup alignItems="flexStart">
+          <SideBarColumn grow={1} />
+          <EuiFlexItem>
+            <Error
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.epm.loadingIntegrationErrorTitle"
+                  defaultMessage="Error loading integration details"
+                />
+              }
+              error={packageInfoError.message}
             />
-          }
-          error={packageInfoError.message}
-        />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : isLoading || !packageInfo ? (
         <Loading />
       ) : (
