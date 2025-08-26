@@ -291,6 +291,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
+  nestedAggFunction: {
+    message: string;
+    type: { parentName: string; name: string };
+  };
   unknownAggregateFunction: {
     message: string;
     type: { type: string; value: string };

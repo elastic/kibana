@@ -51,7 +51,11 @@ export function validateFunction({
   context: ICommandContext;
   callbacks: ICommandCallbacks;
 }): ESQLMessage[] {
-  return new FunctionValidator(fn, parentCommand, ast, context, callbacks).messages;
+  const validator = new FunctionValidator(fn, parentCommand, ast, context, callbacks);
+
+  validator.validate();
+
+  return validator.messages;
 }
 
 class FunctionValidator {
@@ -66,7 +70,7 @@ class FunctionValidator {
     private readonly ast: ESQLAst,
     private readonly context: ICommandContext,
     private readonly callbacks: ICommandCallbacks,
-    private readonly withinAggFunction: boolean = false
+    private readonly parentAggFunction: string | undefined = undefined
   ) {
     this.definition = getFunctionDefinition(fn.name);
     for (const arg of this.fn.args) {
@@ -75,11 +79,13 @@ class FunctionValidator {
       );
       this.argLiteralsMask.push(isLiteral(arg));
     }
-
-    this.validate();
   }
 
-  private validate(): void {
+  /**
+   * Runs validation checks on the function. Once validation is complete,
+   * any errors found will be available in this.messages.
+   */
+  public validate(): void {
     if (this.definition && !this.licenseOk(this.definition.license)) {
       this.report(errors.licenseRequired(this.fn, this.definition.license!));
     }
@@ -103,14 +109,13 @@ class FunctionValidator {
       return;
     }
 
+    if (this.parentAggFunction && this.definition.type === FunctionDefinitionTypes.AGG) {
+      this.report(errors.nestedAggFunction(this.fn, this.parentAggFunction));
+      return;
+    }
+
     if (!this.allowedHere) {
-      const { displayName } = getFunctionLocation(
-        this.fn,
-        this.parentCommand,
-        this.ast,
-        this.withinAggFunction
-      );
-      this.report(errors.functionNotAllowedHere(this.fn, displayName));
+      this.report(errors.functionNotAllowedHere(this.fn, this.location.displayName));
     }
 
     if (!this.hasValidArity) {
@@ -182,19 +187,26 @@ class FunctionValidator {
    */
   private validateNestedFunctions(): ESQLMessage[] {
     const nestedErrors: ESQLMessage[] = [];
+
+    const parentAggFunction = this.parentAggFunction
+      ? this.parentAggFunction
+      : this.definition?.type === FunctionDefinitionTypes.AGG
+      ? this.definition?.name
+      : undefined;
+
     for (const _arg of this.fn.args.flat()) {
       const arg = removeInlineCasts(_arg);
       if (isFunctionExpression(arg)) {
-        nestedErrors.push(
-          ...new FunctionValidator(
-            arg,
-            this.parentCommand,
-            this.ast,
-            this.context,
-            this.callbacks,
-            this.withinAggFunction || this.definition?.type === FunctionDefinitionTypes.AGG
-          ).messages
+        const validator = new FunctionValidator(
+          arg,
+          this.parentCommand,
+          this.ast,
+          this.context,
+          this.callbacks,
+          parentAggFunction
         );
+        validator.validate();
+        nestedErrors.push(...validator.messages);
       }
 
       if (nestedErrors.length) {
@@ -219,13 +231,14 @@ class FunctionValidator {
    * Checks if the function is available in the current context
    */
   private get allowedHere(): boolean {
-    const { location } = getFunctionLocation(
-      this.fn,
-      this.parentCommand,
-      this.ast,
-      this.withinAggFunction
-    );
-    return this.definition?.locationsAvailable.includes(location) ?? false;
+    return this.definition?.locationsAvailable.includes(this.location.id) ?? false;
+  }
+
+  /**
+   * Gets information about the location of the current function
+   */
+  private get location(): { displayName: string; id: Location } {
+    return getFunctionLocation(this.fn, this.parentCommand, this.ast, !!this.parentAggFunction);
   }
 
   /**
@@ -331,16 +344,19 @@ function getFunctionLocation(
   withinAggFunction: boolean
 ) {
   if (withinAggFunction && ast[0].name === 'ts') {
-    return { location: Location.STATS_TIMESERIES, displayName: 'Timeseries' };
+    return {
+      id: Location.STATS_TIMESERIES,
+      displayName: 'agg_function_in_timeseries_context',
+    };
   }
 
   const option = Walker.find(parentCommand, (node) => isOptionNode(node) && within(fn, node));
 
   const displayName = (option ?? parentCommand).name;
 
-  const location = getLocationFromCommandOrOptionName(displayName);
+  const id = getLocationFromCommandOrOptionName(displayName);
 
-  return { location, displayName };
+  return { id, displayName };
 }
 
 /**

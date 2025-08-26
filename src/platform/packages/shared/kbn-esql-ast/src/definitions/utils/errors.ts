@@ -158,6 +158,16 @@ Expected one of:
           },
         }),
       };
+    case 'nestedAggFunction':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.nestedAggFunction', {
+          defaultMessage: 'Aggregation functions cannot be nested. Found {name} in {parentName}.',
+          values: {
+            parentName: out.parentName.toUpperCase(),
+            name: out.name.toUpperCase(),
+          },
+        }),
+      };
     case 'unknownAggregateFunction':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unknowAggregateFunction', {
@@ -324,6 +334,12 @@ export const errors = {
 
   tooManyForks: (command: ESQLCommand): ESQLMessage =>
     errors.byId('tooManyForks', command.location, {}),
+
+  nestedAggFunction: (fn: ESQLFunction, parentName: string): ESQLMessage =>
+    errors.byId('nestedAggFunction', fn.location, {
+      name: fn.name,
+      parentName,
+    }),
 
   unknownAggFunction: (
     node: ESQLColumn | ESQLIdentifier,

@@ -616,7 +616,7 @@ describe('function validation', () => {
     });
   });
 
-  describe('command/option support', () => {
+  describe('checks locations allowed', () => {
     it('validates command support', async () => {
       setTestFunctions([
         {
@@ -786,6 +786,57 @@ describe('function validation', () => {
         'Function [ts_function] not allowed in [stats]',
       ]);
     });
+  });
+
+  it('should flag nested aggregation functions', async () => {
+    setTestFunctions([
+      {
+        name: 'agg_function_1',
+        type: FunctionDefinitionTypes.AGG,
+        description: '',
+        locationsAvailable: [Location.STATS],
+        signatures: [
+          {
+            params: [{ name: 'field', type: 'keyword', optional: false }],
+            returnType: 'keyword',
+          },
+        ],
+      },
+      {
+        name: 'scalar_function',
+        type: FunctionDefinitionTypes.SCALAR,
+        description: '',
+        locationsAvailable: [Location.STATS],
+        signatures: [
+          {
+            params: [{ name: 'field', type: 'keyword', optional: false }],
+            returnType: 'keyword',
+          },
+        ],
+      },
+      {
+        name: 'agg_function_2',
+        type: FunctionDefinitionTypes.AGG,
+        description: '',
+        locationsAvailable: [Location.STATS],
+        signatures: [
+          {
+            params: [],
+            returnType: 'keyword',
+          },
+        ],
+      },
+    ]);
+
+    const { expectErrors } = await setup();
+
+    await expectErrors('FROM a_index | STATS AGG_FUNCTION_1(AGG_FUNCTION_2())', [
+      'Aggregation functions cannot be nested. Found AGG_FUNCTION_2 in AGG_FUNCTION_1.',
+    ]);
+
+    await expectErrors('FROM a_index | STATS AGG_FUNCTION_1(SCALAR_FUNCTION(AGG_FUNCTION_2()))', [
+      'Aggregation functions cannot be nested. Found AGG_FUNCTION_2 in AGG_FUNCTION_1.',
+    ]);
   });
 
   it('should ignore a function whose name is defined by a parameter', async () => {
