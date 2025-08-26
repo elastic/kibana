@@ -73,10 +73,11 @@ export const getValueInputPopover =
           }
 
           dataTableRef?.current?.closeCellPopover();
-          requestAnimationFrame(() => {
-            // openCellPopover takes care of checking the colIndex is out of bounds
-            dataTableRef?.current?.openCellPopover({ rowIndex, colIndex: colIndex + 1 });
-          });
+          if (columns.length > colIndex) {
+            requestAnimationFrame(() => {
+              dataTableRef?.current?.openCellPopover({ rowIndex, colIndex: colIndex + 1 });
+            });
+          }
         }
         if (event.key === 'Escape') {
           setInputValue(cellValue);
@@ -101,11 +102,9 @@ export const getValueInputPopover =
 
         if (dataTableRef.current) {
           dataTableRef.current.closeCellPopover();
-
-          // Cell needs to be focused again after popover close,
-          // Also focus must be put in another cell first for it to work.
-          dataTableRef.current.setFocusedCell({ rowIndex: 0, colIndex: 0 });
-          dataTableRef.current.setFocusedCell({ rowIndex, colIndex });
+          requestAnimationFrame(() => {
+            dataTableRef?.current?.setFocusedCell({ rowIndex, colIndex });
+          });
         }
 
         // Value is saved on component unmount
