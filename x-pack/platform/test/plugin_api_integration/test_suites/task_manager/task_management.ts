@@ -1150,5 +1150,30 @@ export default function ({ getService }: FtrProviderContext) {
         expect(scheduledTask.retryAt).to.be(null);
       });
     });
+
+    it('should disable a task that returns shouldDisableTask: true', async () => {
+      const task = await scheduleTask({
+        taskType: 'sampleRecurringTaskDisablesItself',
+        schedule: { interval: '1d' },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const [scheduledTask] = (await currentTasks()).docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.status).to.be('running');
+        expect(scheduledTask.startedAt).not.to.be(null);
+        expect(scheduledTask.retryAt).not.to.be(null);
+      });
+
+      await retry.try(async () => {
+        const currTasks = await currentTasks();
+
+        const [scheduledTask] = currTasks.docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.status).to.be('idle');
+        expect(scheduledTask.enabled).to.be(false);
+      });
+    });
   });
 }
