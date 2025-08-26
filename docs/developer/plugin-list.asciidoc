@@ -642,6 +642,10 @@ the infrastructure monitoring use-case within Kibana.
 |Team owner: Security Integrations Scalability
 
 
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/intercepts/README.md[intercepts]
+|Contains business logic and orchestration for displaying the intercept dialog suited to the needs of Kibana, and is made available so that other solution teams might leverage this to register and schedule an intercept of their choosing
+
+
 |{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/kubernetes_security/README.md[kubernetesSecurity]
 |This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
@@ -750,6 +754,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md[productDocBase]
 |This plugin contains the product documentation base service.
+
+
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/product_intercept/README.md[productIntercept]
+|This is a standalone plugin that leverages the intercept plugin to display product intercept used to gather information that is turn used to compute CSAT about user's experience of Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/profiling/README.md[profiling]
