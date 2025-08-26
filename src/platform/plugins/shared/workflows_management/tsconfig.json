@@ -8,7 +8,9 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/core",
