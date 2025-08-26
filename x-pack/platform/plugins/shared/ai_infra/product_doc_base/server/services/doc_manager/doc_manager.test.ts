@@ -32,9 +32,6 @@ const scheduleUninstallAllTaskMock = scheduleUninstallAllTask as jest.MockedFn<
 const scheduleEnsureUpToDateTaskMock = scheduleEnsureUpToDateTask as jest.MockedFn<
   typeof scheduleEnsureUpToDateTask
 >;
-const updateAllToLatestVersionTaskMock = updateAllToLatestVersionTask as jest.MockedFn<
-  typeof updateAllToLatestVersionTask
->;
 const waitUntilTaskCompletedMock = waitUntilTaskCompleted as jest.MockedFn<
   typeof waitUntilTaskCompleted
 >;
@@ -58,6 +55,12 @@ describe('DocumentationManager', () => {
 
     docInstallClient = {
       getInstallationStatus: jest.fn(),
+      getPreviouslyInstalledInferenceIds: jest
+        .fn()
+        .mockResolvedValue([
+          defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+          defaultInferenceEndpoints.ELSER,
+        ]),
     } as unknown as jest.Mocked<ProductDocInstallClient>;
 
     docManager = new DocumentationManager({
@@ -73,7 +76,6 @@ describe('DocumentationManager', () => {
     scheduleInstallAllTaskMock.mockReset();
     scheduleUninstallAllTaskMock.mockReset();
     scheduleEnsureUpToDateTaskMock.mockReset();
-    updateAllToLatestVersionTaskMock.mockReset();
     waitUntilTaskCompletedMock.mockReset();
     getTaskStatusMock.mockReset();
   });
@@ -207,6 +209,35 @@ describe('DocumentationManager', () => {
           outcome: 'unknown',
         },
       });
+    });
+  });
+
+  describe('#updateAll', () => {
+    beforeEach(() => {
+      getTaskStatusMock.mockResolvedValue('not_scheduled');
+
+      docInstallClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'uninstalled' },
+      } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
+    });
+
+    it('calls `scheduleEnsureUpToDateTask` for each inferenceId', async () => {
+      await docManager.updateAll();
+
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(2);
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      });
+
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
     });
   });
 
