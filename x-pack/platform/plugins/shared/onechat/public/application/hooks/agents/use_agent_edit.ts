@@ -11,7 +11,7 @@ import {
   ToolType,
   type AgentDefinition,
   type ToolSelection,
-  allToolsSelectionWildcard,
+  defaultAgentToolIds,
 } from '@kbn/onechat-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useOnechatServices } from '../use_onechat_service';
@@ -26,7 +26,7 @@ export type AgentEditState = Omit<AgentDefinition, 'type'>;
 const defaultToolSelection: ToolSelection[] = [
   {
     type: ToolType.builtin,
-    tool_ids: [allToolsSelectionWildcard],
+    tool_ids: [...defaultAgentToolIds],
   },
 ];
 
@@ -54,7 +54,11 @@ export function useAgentEdit({
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
 
-  const { tools, isLoading: toolsLoading, error: toolsError } = useToolsService();
+  const {
+    tools,
+    isLoading: toolsLoading,
+    error: toolsError,
+  } = useToolsService({ includeSystemTools: true });
   const sourceAgentId = searchParams.get(searchParamNames.sourceId);
   const isClone = Boolean(!editingAgentId && sourceAgentId);
   const agentId = editingAgentId || sourceAgentId || '';
