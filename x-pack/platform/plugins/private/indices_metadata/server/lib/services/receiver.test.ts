@@ -778,16 +778,13 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
       const iterator = receiver.getIlmsPolicies(['policy1'], 30);
       await expect(iterator.next()).rejects.toThrow('Elasticsearch error');
-      // Error logging only occurs for processing errors, not ES client errors
     });
   });
 
   describe('chunkStringsByMaxLength', () => {
     it('should properly chunk strings by maximum length', () => {
       const strings = ['short', 'medium-length', 'very-long-string-name'];
-      const receiver = new MetadataReceiver(logger, esClient);
 
-      // Access private method via type assertion
       const result = (receiver as any).chunkStringsByMaxLength(strings, 20);
 
       expect(result).toEqual([['short', 'medium-length'], ['very-long-string-name']]);
@@ -795,7 +792,6 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
     it('should handle empty strings array', () => {
       const strings: string[] = [];
-      const receiver = new MetadataReceiver(logger, esClient);
 
       const result = (receiver as any).chunkStringsByMaxLength(strings, 20);
 
@@ -804,7 +800,6 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
     it('should use default max length when not provided', () => {
       const strings = ['test'];
-      const receiver = new MetadataReceiver(logger, esClient);
 
       const result = (receiver as any).chunkStringsByMaxLength(strings);
 
