@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { keyBy, mapValues } from 'lodash';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 interface MonitoringStats {
   last_update: string;

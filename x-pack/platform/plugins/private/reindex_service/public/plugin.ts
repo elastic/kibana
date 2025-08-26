@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
 
 import { ReindexService } from './src/reindex_service';
 import type { ReindexServicePublicSetup, ReindexServicePublicStart } from './types';

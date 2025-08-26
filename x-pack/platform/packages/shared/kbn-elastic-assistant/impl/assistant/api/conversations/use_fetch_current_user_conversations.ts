@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import {
+import type { HttpSetup } from '@kbn/core/public';
+import type {
   InfiniteData,
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-  useInfiniteQuery,
 } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Conversation } from '../../../assistant_context/types';
+import type { Conversation } from '../../../assistant_context/types';
 
 export interface FetchConversationsResponse {
   page: number;

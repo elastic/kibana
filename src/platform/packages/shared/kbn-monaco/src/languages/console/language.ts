@@ -8,10 +8,10 @@
  */
 
 import { type ESQLCallbacks, suggest } from '@kbn/esql-validation-autocomplete';
-import { MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
 import { setupConsoleErrorsProvider } from './console_errors_provider';
 import { ConsoleWorkerProxyService } from './console_worker_proxy';
-import { monaco } from '../../monaco_imports';
+import type { monaco } from '../../monaco_imports';
 import { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from './constants';
 import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from '../esql';
 import { wrapAsMonacoSuggestions } from '../esql/lib/converters/suggestions';

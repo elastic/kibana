@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, ScopedHistory } from '@kbn/core/public';
+import type { CoreSetup, ScopedHistory } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';

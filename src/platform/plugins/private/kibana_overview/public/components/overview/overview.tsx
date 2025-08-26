@@ -8,8 +8,10 @@
  */
 
 import { snakeCase } from 'lodash';
-import React, { FC, useState, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiCard,
   EuiFlexGroup,
@@ -19,11 +21,10 @@ import {
   EuiTitle,
   EuiLoadingSpinner,
   useEuiMinBreakpoint,
-  UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import {
   useKibana,
   overviewPageActions,
@@ -36,8 +37,8 @@ import {
   RedirectAppLinksKibanaProvider,
 } from '@kbn/shared-ux-link-redirect-app';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { FetchResult } from '@kbn/newsfeed-plugin/public';
-import {
+import type { FetchResult } from '@kbn/newsfeed-plugin/public';
+import type {
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,
   FeatureCatalogueCategory,
@@ -45,7 +46,7 @@ import {
 import { withSuspense } from '@kbn/shared-ux-utility';
 import classNames from 'classnames';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
-import { AppPluginStartDependencies } from '../../types';
+import type { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
 import { ManageData } from '../manage_data';
 import { NewsFeed } from '../news_feed';

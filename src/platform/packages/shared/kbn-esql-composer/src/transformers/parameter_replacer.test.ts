@@ -8,8 +8,13 @@
  */
 
 import { ParameterReplacer } from './parameter_replacer';
-import { Builder, ESQLColumn } from '@kbn/esql-ast';
-import { ESQLFunction, ESQLParamLiteral, ESQLUnnamedParamLiteral } from '@kbn/esql-ast/src/types';
+import type { ESQLColumn } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-ast';
+import type {
+  ESQLFunction,
+  ESQLParamLiteral,
+  ESQLUnnamedParamLiteral,
+} from '@kbn/esql-ast/src/types';
 
 function createParamLiteral(
   paramType: 'named' | 'positional',

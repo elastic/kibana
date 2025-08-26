@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { file } from '../../common/file';
 
 export const importListItemSchema = t.exact(

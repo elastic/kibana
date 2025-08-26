@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { UsageStats } from './types';
+import type { IUiSettingsClient } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { UsageStats } from './types';
 import { REDACTED_KEYWORD } from '../../../common/constants';
 import { stackManagementSchema } from './schema';
 

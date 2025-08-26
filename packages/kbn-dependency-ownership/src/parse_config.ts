@@ -10,7 +10,8 @@ import { resolve } from 'path';
 import { readFileSync } from 'fs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { RenovatePackageRule, ruleFilter, packageFilter } from './rule';
+import type { RenovatePackageRule } from './rule';
+import { ruleFilter, packageFilter } from './rule';
 
 export const parseConfig = (() => {
   let cache: {

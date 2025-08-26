@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const COMPACT_COMPONENT_SELECTOR = 'alertSummaryWidgetCompact';
 const COMPACT_TIME_RANGE_TITLE_SELECTOR = 'timeRangeTitle';

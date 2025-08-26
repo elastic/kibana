@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,12 +14,11 @@ import {
   EuiToolTip,
   EuiHighlight,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiIcon,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { SystemPromptSettings } from '../../../../settings/use_settings_updater/use_system_prompt_updater';
+import type { SystemPromptSettings } from '../../../../settings/use_settings_updater/use_system_prompt_updater';
 import { TEST_IDS } from '../../../../constants';
 import * as i18n from './translations';
 import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../translations';
