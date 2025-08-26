@@ -60,7 +60,7 @@ The table below lists optional publishing package interfaces. Embeddables may im
 | HasInspectorAdapters | Interface for accessing embeddable inspector adaptors | ACTION_INSPECT_PANEL, ACTION_EXPORT_CSV |
 | HasLibraryTransforms | Interface for linking to and unlinking from the library | ACTION_ADD_TO_LIBRARY, ACTION_UNLINK_FROM_LIBRARY |
 | HasReadOnlyCapabilities | Interface for showing the embeddable configuration for read only users | ACTION_SHOW_CONFIG_PANEL |
-| HasSupportedTriggers | Inteface for publishing supported triggers | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
+| HasSupportedTriggers | Inteface for publishing drilldown triggers | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
 | PublishesBlockingError | Interface for publishing unrecoverable errors | Embeddable panel to display error state |
 | PublishesDataLoading | Interface for publishing when embeddable is loading | Auto refresh |  
 | PublishesDataViews | Interface for accessing embeddable data views | Unified search bar type ahead, ACTION_CUSTOMIZE_PANEL, ACTION_EXPLORE_DATA |
