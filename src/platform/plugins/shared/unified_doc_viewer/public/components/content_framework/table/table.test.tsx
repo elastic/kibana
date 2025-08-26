@@ -13,14 +13,21 @@ import type { ContentFrameworkTableProps } from '.';
 import { ContentFrameworkTable } from '.';
 import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { buildHitMock } from '../../../__mocks__';
+import userEvent from '@testing-library/user-event';
 
-// Mock EUI hooks and components if needed
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: () => ({ euiTheme: { font: { weight: { semiBold: 700 } } } }),
+  useEuiTheme: () => ({
+    euiTheme: {
+      font: { weight: { semiBold: 700 } },
+      border: { thin: '1px solid #ccc' },
+      size: { xs: '12px' },
+    },
+  }),
+  useEuiFontSize: () => ({ fontSize: '12px' }),
+  euiFontSize: (_themeContext: any, size: string) => ({ fontSize: size === 's' ? '12px' : '10px' }),
 }));
 
-// Mock plugin services
 jest.mock('../../../plugin', () => ({
   getUnifiedDocViewerServices: () => ({
     fieldsMetadata: {
@@ -35,17 +42,18 @@ jest.mock('../../../plugin', () => ({
   }),
 }));
 
-// Mock utils
 jest.mock('@kbn/discover-utils/src/utils/get_formatted_fields', () => ({
   getFormattedFields: () => ({
     fieldA: 'formattedA',
     fieldB: 'formattedB',
+    fieldC: 'formattedC',
   }),
 }));
 jest.mock('@kbn/discover-utils/src/utils/get_flattened_fields', () => ({
   getFlattenedFields: () => ({
     fieldA: 'valueA',
     fieldB: 'valueB',
+    fieldC: null,
   }),
 }));
 
@@ -67,7 +75,6 @@ const defaultProps: ContentFrameworkTableProps = {
     },
     fieldB: {
       title: 'Field B Title',
-      // No custom formatter
     },
   },
   dataView: mockDataView,
@@ -80,18 +87,9 @@ const defaultProps: ContentFrameworkTableProps = {
 };
 
 describe('ContentFrameworkTable', () => {
-  it('renders DataGrid with correct title', () => {
+  it('renders the table grid', () => {
     render(<ContentFrameworkTable {...defaultProps} />);
-    expect(screen.getByLabelText('Test Table')).toBeInTheDocument();
-  });
-
-  it('returns null if hit.flattened is empty', () => {
-    const props = {
-      ...defaultProps,
-      hit: { id: 'test-id', flattened: {}, raw: {} },
-    };
-    const { container } = render(<ContentFrameworkTable {...props} />);
-    expect(container.firstChild).toBeNull();
+    expect(screen.getByTestId('UnifiedDocViewerTableGrid')).toBeInTheDocument();
   });
 
   it('renders custom formatter for fieldA', () => {
@@ -105,22 +103,47 @@ describe('ContentFrameworkTable', () => {
   });
 
   it('does not render fields without value', () => {
+    render(
+      <ContentFrameworkTable
+        {...defaultProps}
+        fieldNames={['fieldA', 'fieldB', 'fieldC']}
+        fieldConfigurations={{
+          ...defaultProps.fieldConfigurations,
+          fieldC: { title: 'Field C Title' },
+        }}
+      />
+    );
+    expect(screen.queryByText('Field C Title')).not.toBeInTheDocument();
+  });
+
+  it('returns null if hit.flattened is empty', () => {
     const props = {
       ...defaultProps,
-      fieldNames: ['fieldA', 'fieldB', 'fieldC'],
-      fieldConfigurations: {
-        ...defaultProps.fieldConfigurations,
-        fieldC: { title: 'Field C Title' },
-      },
+      hit: { id: 'test-id', flattened: {}, raw: {} },
     };
-    jest.mock('@kbn/discover-utils/src/utils/get_flattened_fields', () => ({
-      getFlattenedFields: () => ({
-        fieldA: 'valueA',
-        fieldB: 'valueB',
-        fieldC: null,
-      }),
-    }));
-    render(<ContentFrameworkTable {...props} />);
-    expect(screen.queryByText('Field C Title')).not.toBeInTheDocument();
+    const { container } = render(<ContentFrameworkTable {...props} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('renders field descriptions if present', async () => {
+    render(<ContentFrameworkTable {...defaultProps} />);
+
+    const tableCell = screen.getByText('Field A Title');
+    await userEvent.hover(tableCell);
+    const expandPopoverButton = screen.getByTestId('euiDataGridCellExpandButton');
+    await userEvent.click(expandPopoverButton);
+
+    expect(screen.getByText('Custom description A')).toBeInTheDocument();
+  });
+
+  it('renders short description from metadata if no custom description', async () => {
+    render(<ContentFrameworkTable {...defaultProps} />);
+
+    const tableCell = screen.getByText('Field B Title');
+    await userEvent.hover(tableCell);
+    const expandPopoverButton = screen.getByTestId('euiDataGridCellExpandButton');
+    await userEvent.click(expandPopoverButton);
+
+    expect(screen.getByText('Short desc B')).toBeInTheDocument();
   });
 });
