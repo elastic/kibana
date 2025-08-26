@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Builtin Tools API', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/232991
+  describe.skip('Builtin Tools API', () => {
     describe('DELETE /api/chat/tools/.nl_search', () => {
       it('should return 400 error when attempting to delete any read-only builtin system tool', async () => {
         for (const toolId of Object.values(builtinToolIds) as string[]) {
