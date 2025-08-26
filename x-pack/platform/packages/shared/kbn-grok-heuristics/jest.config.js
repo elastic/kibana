@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { cli } from './cli';
-export { SampleParserClient } from './client';
-export { type LoghubQuery, createQueryMatcher, tokenize } from './src/validate_queries';
-export { type StreamLogGenerator } from './client/types';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-grok-heuristics'],
+};
