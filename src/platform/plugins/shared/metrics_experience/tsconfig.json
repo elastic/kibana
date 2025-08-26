@@ -6,7 +6,6 @@
   "include": ["../../../../typings/**/*", "public/**/*", "server/**/*", "common/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/config-schema",
     "@kbn/core",
     "@kbn/server-route-repository",
     "@kbn/kibana-react-plugin",
