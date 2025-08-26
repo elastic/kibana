@@ -11,6 +11,5 @@
     "@kbn/sse-utils-client",
     "@kbn/object-utils",
     "@kbn/grok-heuristics",
-    "@kbn/streams-plugin",
   ]
 }

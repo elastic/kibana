@@ -47,7 +47,6 @@
     "@kbn/traced-es-client",
     "@kbn/zod-helpers",
     "@kbn/inference-common",
-    "@kbn/core-elasticsearch-client-server-internal",
     "@kbn/std",
     "@kbn/core-http-server",
     "@kbn/core-saved-objects-api-server",
