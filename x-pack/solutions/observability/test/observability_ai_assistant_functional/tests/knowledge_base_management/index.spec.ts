@@ -190,7 +190,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         // Make changes but cancel
         await openUserInstructionFlyout();
         await toasts.dismissAll();
-        await setUserInstructionContent('Changed instruction');
+        await setUserInstructionContent('Changed instructions');
         await testSubjects.click(ui.pages.kbManagementTab.editEntryCancelButton);
 
         // Verify the original content remains unchanged
