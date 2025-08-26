@@ -62,18 +62,36 @@ export const ASSET_INVENTORY_TOOL: AssistantTool = {
 
           // Return simple text that's easier for AI to process
           const message = `Asset Information:
-- Entity ID: ${entity.entity?.id || 'N/A'}
+- Entity ID: ${entity.entity?.id || 'Not available'}
 - Name: ${entity.entity?.name || entityId}
-- Type: ${entity.entity?.type || 'unknown'}
+- Type: ${entity.entity?.type || 'unknown'} (${entity.entity?.sub_type || 'unknown subtype'})
 - Criticality: ${entity.asset?.criticality || 'unassigned'}
 - Last Seen: ${entity['@timestamp'] || 'unknown'}
-- Cloud Provider: ${entity.cloud?.provider || 'N/A'}
-- Region: ${entity.cloud?.region || 'N/A'}
-- Architecture: ${entity.host?.architecture || 'N/A'}
+
+Location & Infrastructure:
+- Cloud Provider: ${entity.cloud?.provider || 'Not available'}
+- Region: ${entity.cloud?.region || 'Not available'}
+- Availability Zone: ${entity.cloud?.availability_zone || 'Not available'}
+- Architecture: ${entity.host?.architecture || 'Not available'}
+- Machine Type: ${entity.cloud?.machine?.type || 'Not available'}
+
+Operating System:
+- OS Name: ${entity.host?.os?.name || 'Not available'}
+- OS Type: ${entity.host?.os?.type || 'Not available'}
+
+Ownership & Account:
+- Account Name: ${entity.cloud?.account?.name || 'Not available'}
+- Account ID: ${entity.cloud?.account?.id || 'Not available'}
+- Instance Name: ${entity.cloud?.instance?.name || 'Not available'}
+
+Network:
+- Host ID: ${entity.host?.id || 'Not available'}
+- IP Address: ${entity.host?.ip || 'Not available'}
+- MAC Address: ${entity.host?.mac || 'Not available'}
 
 The host ${entity.entity?.name || entityId} is a ${entity.entity?.type || 'unknown'} with ${
             entity.asset?.criticality || 'unassigned'
-          } business criticality, last seen on ${entity['@timestamp']}.`;
+          } business criticality, located in ${entity.cloud?.provider || 'unknown'} ${entity.cloud?.region || 'unknown region'}, owned by account "${entity.cloud?.account?.name || 'unknown'}", last seen on ${entity['@timestamp']}.`;
 
           console.log('🔍 Simple tool returning:', message);
           return message;
