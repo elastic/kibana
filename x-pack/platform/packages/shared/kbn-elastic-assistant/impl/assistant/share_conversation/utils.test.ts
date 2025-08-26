@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getConversationSharedState, getSharedIcon, ConversationSharedState } from './utils';
+import { getSharedIcon } from './utils';
+import { ConversationSharedState, getConversationSharedState } from '@kbn/elastic-assistant-common';
 import { alertConvo } from '../../mock/conversation';
 
 describe('getConversationSharedState', () => {

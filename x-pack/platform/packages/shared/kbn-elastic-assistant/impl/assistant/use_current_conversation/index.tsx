@@ -13,11 +13,14 @@ import type {
   RefetchOptions,
   RefetchQueryFilters,
 } from '@tanstack/react-query';
-import type { ApiConfig, PromptResponse, User } from '@kbn/elastic-assistant-common';
-import { getIsConversationOwner } from '@kbn/elastic-assistant-common';
+import type {
+  ApiConfig,
+  PromptResponse,
+  User,
+  ConversationSharedState,
+} from '@kbn/elastic-assistant-common';
+import { getIsConversationOwner, getConversationSharedState } from '@kbn/elastic-assistant-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { ConversationSharedState } from '../share_conversation/utils';
-import { getConversationSharedState } from '../share_conversation/utils';
 import type { FetchConversationsResponse } from '../api';
 import type { AIConnector } from '../../connectorland/connector_selector';
 import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';

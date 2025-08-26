@@ -16,8 +16,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { User } from '@kbn/elastic-assistant-common';
+import { ConversationSharedState, getConversationSharedState } from '@kbn/elastic-assistant-common';
 import { ShareUserSelect } from './share_user_select';
-import { ConversationSharedState, getConversationSharedState, getSharedIcon } from './utils';
+import { getSharedIcon } from './utils';
 import type { Conversation } from '../../..';
 import * as i18n from './translations';
 

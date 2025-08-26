@@ -10,7 +10,8 @@ import { EuiButton, EuiCallOut, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { getConversationSharedState, getSharedIcon } from '../share_conversation/utils';
+import { getConversationSharedState } from '@kbn/elastic-assistant-common';
+import { getSharedIcon } from '../share_conversation/utils';
 import { DUPLICATE } from '../use_conversation/translations';
 import type { DataStreamApis } from '../use_data_stream_apis';
 import type { Conversation } from '../../..';

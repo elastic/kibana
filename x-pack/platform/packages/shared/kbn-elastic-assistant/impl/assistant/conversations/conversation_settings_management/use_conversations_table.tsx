@@ -13,16 +13,13 @@ import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';
 import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import { ConversationSharedState, getConversationSharedState } from '@kbn/elastic-assistant-common';
 import {
   VISIBLE_PRIVATE,
   VISIBLE_RESTRICTED,
   VISIBLE_SHARED,
 } from '../../share_conversation/translations';
-import {
-  ConversationSharedState,
-  getConversationSharedState,
-  getSharedIcon,
-} from '../../share_conversation/utils';
+import { getSharedIcon } from '../../share_conversation/utils';
 import type { Conversation } from '../../../assistant_context/types';
 import type { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';

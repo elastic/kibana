@@ -12,8 +12,10 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import type { PromptResponse, User } from '@kbn/elastic-assistant-common';
-import { getCurrentConversationOwner } from '@kbn/elastic-assistant-common';
-import { ConversationSharedState } from '../../share_conversation/utils';
+import {
+  getCurrentConversationOwner,
+  ConversationSharedState,
+} from '@kbn/elastic-assistant-common';
 import { ShareSelect } from '../../share_conversation/share_select';
 import type { Conversation } from '../../../..';
 import * as i18n from './translations';

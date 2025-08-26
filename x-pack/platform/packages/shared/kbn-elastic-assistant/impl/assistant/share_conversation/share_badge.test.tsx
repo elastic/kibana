@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ShareBadge } from './share_badge';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { ConversationSharedState } from './utils';
+import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 import { welcomeConvo } from '../../mock/conversation';
 import type { IToasts } from '@kbn/core-notifications-browser';
 

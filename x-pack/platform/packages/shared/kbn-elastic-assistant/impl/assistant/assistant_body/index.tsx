@@ -19,7 +19,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { css } from '@emotion/react';
 import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
-import { ConversationSharedState } from '../share_conversation/utils';
+import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 import { SharedConversationOwnerCallout } from '../shared_conversation_callout/owner';
 import { EmptyConvo } from './empty_convo';
 import { WelcomeSetup } from './welcome_setup';

@@ -10,7 +10,8 @@ import { EuiCallOut, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { ConversationSharedState, getSharedIcon } from '../share_conversation/utils';
+import { ConversationSharedState } from '@kbn/elastic-assistant-common';
+import { getSharedIcon } from '../share_conversation/utils';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
   SHARED_CONVERSATION_CALLOUT,

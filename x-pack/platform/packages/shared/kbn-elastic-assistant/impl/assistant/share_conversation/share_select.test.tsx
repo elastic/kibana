@@ -10,7 +10,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { ShareSelect } from './share_select';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { welcomeConvo } from '../../mock/conversation';
-import { ConversationSharedState } from './utils';
+import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 
 const onUsersUpdate = jest.fn();
 const onSharedSelectionChange = jest.fn();

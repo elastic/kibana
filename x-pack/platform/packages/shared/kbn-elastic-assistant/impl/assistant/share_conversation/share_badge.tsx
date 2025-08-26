@@ -18,7 +18,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
-import { ConversationSharedState, getSharedIcon } from './utils';
+import { ConversationSharedState } from '@kbn/elastic-assistant-common';
+import { getSharedIcon } from './utils';
 import type { DataStreamApis } from '../use_data_stream_apis';
 import { useConversation } from '../use_conversation';
 import { ShareModal } from './share_modal';

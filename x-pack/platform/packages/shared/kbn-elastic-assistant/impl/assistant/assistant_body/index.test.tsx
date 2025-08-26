@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AssistantBody } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { ConversationSharedState } from '../share_conversation/utils';
+import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 import { welcomeConvo } from '../../mock/conversation';
 import type { HttpSetup } from '@kbn/core-http-browser';
 

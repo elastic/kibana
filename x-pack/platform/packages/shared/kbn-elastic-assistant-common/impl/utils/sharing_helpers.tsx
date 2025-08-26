@@ -5,7 +5,45 @@
  * 2.0.
  */
 
+import type { Conversation } from '@kbn/elastic-assistant';
 import type { ConversationResponse, User } from '../schemas';
+export enum ConversationSharedState {
+  // all users in the space
+  Shared = 'shared',
+  // selected users in the space
+  Restricted = 'restricted',
+  // not shared, only visible to conversation owner
+  Private = 'private',
+}
+
+/**
+ * Determines the shared state of a conversation based on the number of users.
+ * - If there are no users, the conversation is considered "Shared".
+ * - If there is one user, the conversation is "Private".
+ * - If there are multiple users, the conversation is "Restricted".
+ * @param conversation
+ */
+export const getConversationSharedState = (
+  conversation?: Pick<Conversation, 'id' | 'users'>
+): ConversationSharedState => {
+  if (!conversation || conversation?.id === '') {
+    // while loading or initializing, conversation is not shared
+    return ConversationSharedState.Private;
+  }
+
+  const conversationUsers = conversation?.users.length ?? 1;
+
+  switch (conversationUsers) {
+    case 0:
+      return ConversationSharedState.Shared;
+    case 1:
+      // length is 1, default to private
+      return ConversationSharedState.Private;
+    default:
+      // more than 1 user
+      return ConversationSharedState.Restricted;
+  }
+};
 
 export const getCurrentConversationOwner = (
   conversation?: Pick<ConversationResponse, 'createdBy' | 'users'>

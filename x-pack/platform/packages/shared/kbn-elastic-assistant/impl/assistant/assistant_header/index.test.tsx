@@ -14,7 +14,7 @@ import { alertConvo, welcomeConvo } from '../../mock/conversation';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { mockConnectors } from '../../mock/connectors';
 import { CLOSE } from './translations';
-import { ConversationSharedState } from '../share_conversation/utils';
+import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 
 const onConversationSelected = jest.fn();
 const mockConversations = {

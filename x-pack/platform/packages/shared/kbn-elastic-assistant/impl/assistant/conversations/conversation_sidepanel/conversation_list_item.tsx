@@ -9,11 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiListGroupItemExtraActionProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiListGroupItem } from '@elastic/eui';
-import {
-  ConversationSharedState,
-  getConversationSharedState,
-  getSharedIcon,
-} from '../../share_conversation/utils';
+import { ConversationSharedState, getConversationSharedState } from '@kbn/elastic-assistant-common';
+import { getSharedIcon } from '../../share_conversation/utils';
+
 import type { ConversationWithOwner } from '../../api';
 import type { Conversation } from '../../../..';
 import { ConversationSidePanelContextMenu } from './context_menu';

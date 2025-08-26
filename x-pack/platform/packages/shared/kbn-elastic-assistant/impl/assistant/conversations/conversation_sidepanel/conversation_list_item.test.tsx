@@ -10,7 +10,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ConversationListItem } from './conversation_list_item';
 import { MOCK_CURRENT_USER, welcomeConvo } from '../../../mock/conversation';
-import { ConversationSharedState, getSharedIcon } from '../../share_conversation/utils';
+import { getSharedIcon } from '../../share_conversation/utils';
+import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 
 const mockCopyUrl = jest.fn();
 const mockDuplicate = jest.fn();
