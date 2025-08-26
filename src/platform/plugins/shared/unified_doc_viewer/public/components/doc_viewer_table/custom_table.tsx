@@ -47,7 +47,7 @@ const GRID_PROPS: Pick<EuiDataGridProps, 'columnVisibility' | 'rowHeightsOptions
     fontSize: 's',
   },
 };
-interface Props {
+export interface CustomTableProps {
   id: string;
   containerWidth: number;
   rows: FieldRow[];
@@ -91,7 +91,7 @@ export function CustomTable({
   hidePinColumn = false,
   customRenderCellValue,
   customRenderCellPopover,
-}: Props) {
+}: CustomTableProps) {
   const styles = useMemoCss(componentStyles({ hideDataGridHeader: true }));
   const { toasts } = getUnifiedDocViewerServices();
 
