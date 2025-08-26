@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
-import type { ReactNode } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { RemoveDataViewProps } from '../edit_index_pattern';
 import { MAX_DISPLAYED_RELATIONSHIPS } from '../../constants';
