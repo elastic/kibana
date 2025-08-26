@@ -37,7 +37,6 @@ export const createMetricsDataSourceProfileProvider = (
   resolve: (params) => {
     // This filter still needs to be narrowed down to `FROM metrics-*` or `TS metrics-*`
     // and possibly other conditions
-
     const isValidQuery =
       isOfAggregateQueryType(params.query) && params.query.esql.toLowerCase().includes('metrics');
 
