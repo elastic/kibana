@@ -223,32 +223,6 @@ export interface Literals {
 }
 
 export interface ValidationErrors {
-  wrongArgumentType: {
-    message: string;
-    type: {
-      name: string;
-      argType: string;
-      value: string | number | Date;
-      givenType: string;
-    };
-  };
-  wrongArgumentNumber: {
-    message: string;
-    type: {
-      fn: string;
-      numArgs: number;
-      passedArgs: number;
-    };
-  };
-  wrongArgumentNumberTooMany: {
-    message: string;
-    type: {
-      fn: string;
-      numArgs: number;
-      passedArgs: number;
-      extraArgs: number;
-    };
-  };
   wrongNumberArgsExact: {
     message: string;
     type: {
@@ -281,15 +255,6 @@ export interface ValidationErrors {
       validSignatures: string[];
     };
   };
-  wrongArgumentNumberTooFew: {
-    message: string;
-    type: {
-      fn: string;
-      numArgs: number;
-      passedArgs: number;
-      missingArgs: number;
-    };
-  };
   unknownColumn: {
     message: string;
     type: { name: string | number };
@@ -302,25 +267,9 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
-  noNestedArgumentSupport: {
-    message: string;
-    type: { name: string; argType: string };
-  };
-  unsupportedFunctionForCommand: {
-    message: string;
-    type: { name: string; command: string };
-  };
-  unsupportedFunctionForCommandOption: {
-    message: string;
-    type: { name: string; command: string; option: string };
-  };
   functionNotAllowedHere: {
     message: string;
     type: { name: string; locationName: string };
-  };
-  unsupportedLiteralOption: {
-    message: string;
-    type: { name: string; value: string; supportedOptions: string };
   };
   unsupportedColumnTypeForCommand: {
     message: string;
@@ -338,10 +287,6 @@ export interface ValidationErrors {
     message: string;
     type: { value: string };
   };
-  unsupportedTypeForCommand: {
-    message: string;
-    type: { command: string; value: string; type: string };
-  };
   unknownPolicy: {
     message: string;
     type: { name: string };
@@ -358,14 +303,6 @@ export interface ValidationErrors {
     message: string;
     type: { command: string; value: string; expected: string };
   };
-  fnUnsupportedAfterCommand: {
-    message: string;
-    type: { function: string; command: string };
-  };
-  expectedConstant: {
-    message: string;
-    type: { fn: string; given: string };
-  };
   metadataBracketsDeprecation: {
     message: string;
     type: {};
@@ -377,30 +314,6 @@ export interface ValidationErrors {
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };
-  };
-  noAggFunction: {
-    message: string;
-    type: {
-      commandName: string;
-      expression: string;
-    };
-  };
-  expressionNotAggClosed: {
-    message: string;
-    type: {
-      commandName: string;
-      expression: string;
-    };
-  };
-  aggInAggFunction: {
-    message: string;
-    type: {
-      nestedAgg: string;
-    };
-  };
-  onlyWhereCommandSupported: {
-    message: string;
-    type: { fn: string };
   };
   invalidJoinIndex: {
     message: string;

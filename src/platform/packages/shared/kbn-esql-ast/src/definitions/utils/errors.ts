@@ -30,19 +30,6 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
   const out = values as unknown as Record<string, string>;
   // i18n validation wants to the values prop to be declared inline, so need to unpack and redeclare again all props
   switch (messageId) {
-    case 'wrongArgumentType':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.wrongArgumentType', {
-          defaultMessage:
-            'Argument of [{name}] must be [{argType}], found value [{value}] type [{givenType}]',
-          values: {
-            name: out.name,
-            argType: out.argType,
-            value: out.value,
-            givenType: out.givenType,
-          },
-        }),
-      };
     case 'unknownColumn':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unknownColumn', {
@@ -80,18 +67,6 @@ Expected one of:
             functionName: out.functionName,
             argTypes: out.argTypes,
             validSignatures: signatureList,
-          },
-        }),
-      };
-    case 'wrongArgumentNumber':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.wrongArgumentExactNumber', {
-          defaultMessage:
-            'Error: [{fn}] function expects exactly {numArgs, plural, one {one argument} other {{numArgs} arguments}}, got {passedArgs}.',
-          values: {
-            fn: out.fn,
-            numArgs: out.numArgs,
-            passedArgs: out.passedArgs,
           },
         }),
       };
@@ -133,40 +108,6 @@ Expected one of:
           },
         }),
       };
-    case 'wrongArgumentNumberTooMany':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.wrongArgumentTooManyNumber', {
-          defaultMessage:
-            'Error: [{fn}] function expects {extraArgs, plural, =0 {} other {no more than }}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, got {passedArgs}.',
-          values: {
-            fn: out.fn,
-            numArgs: out.numArgs,
-            passedArgs: out.passedArgs,
-            extraArgs: out.extraArgs,
-          },
-        }),
-      };
-    case 'wrongArgumentNumberTooFew':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.wrongArgumentTooFewNumber', {
-          defaultMessage:
-            'Error: [{fn}] function expects {missingArgs, plural, =0 {} other {at least }}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, got {passedArgs}.',
-          values: {
-            fn: out.fn,
-            numArgs: out.numArgs,
-            passedArgs: out.passedArgs,
-            missingArgs: out.missingArgs,
-          },
-        }),
-      };
-    case 'noNestedArgumentSupport':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.noNestedArgumentSupport', {
-          defaultMessage:
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
-          values: { name: out.name, argType: out.argType },
-        }),
-      };
     case 'unsupportedColumnTypeForCommand':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedColumnTypeForCommand', {
@@ -189,30 +130,6 @@ Expected one of:
           },
         }),
       };
-    case 'unsupportedFunctionForCommand':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedFunctionForCommand', {
-          defaultMessage: '{command} does not support function {name}',
-          values: {
-            command: out.command,
-            name: out.name,
-          },
-        }),
-      };
-    case 'unsupportedFunctionForCommandOption':
-      return {
-        message: i18n.translate(
-          'kbn-esql-ast.esql.validation.unsupportedFunctionforCommandOption',
-          {
-            defaultMessage: '{command} {option} does not support function {name}',
-            values: {
-              command: out.command,
-              option: out.option,
-              name: out.name,
-            },
-          }
-        ),
-      };
     case 'functionNotAllowedHere':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.functionNotAvailableInLocation', {
@@ -223,35 +140,11 @@ Expected one of:
           },
         }),
       };
-
-    case 'fnUnsupportedAfterCommand':
-      return {
-        type: 'error',
-        message: i18n.translate('kbn-esql-ast.esql.validation.fnUnsupportedAfterCommand', {
-          defaultMessage: '[{function}] function cannot be used after {command}',
-          values: {
-            function: out.function,
-            command: out.command,
-          },
-        }),
-      };
-
     case 'unknownInterval':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unknownInterval', {
           defaultMessage: `Unexpected time interval qualifier: ''{value}''`,
           values: {
-            value: out.value,
-          },
-        }),
-      };
-    case 'unsupportedTypeForCommand':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedTypeForCommand', {
-          defaultMessage: '{command} does not support [{type}] in expression [{value}]',
-          values: {
-            command: out.command,
-            type: out.type,
             value: out.value,
           },
         }),
@@ -300,30 +193,6 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'unsupportedLiteralOption':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedLiteralOption', {
-          defaultMessage:
-            'Invalid option [{value}] for {name}. Supported options: [{supportedOptions}].',
-          values: {
-            name: out.name,
-            value: out.value,
-            supportedOptions: out.supportedOptions,
-          },
-        }),
-        type: 'warning',
-      };
-    case 'expectedConstant':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.expectedConstantValue', {
-          defaultMessage: 'Argument of [{fn}] must be a constant, received [{given}]',
-          values: {
-            given: out.given,
-            fn: out.fn,
-          },
-        }),
-        type: 'error',
-      };
     case 'metadataBracketsDeprecation':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.metadataBracketsDeprecation', {
@@ -353,47 +222,6 @@ Expected one of:
           },
         }),
         type: 'error',
-      };
-    case 'noAggFunction':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.noAggFunction', {
-          defaultMessage:
-            'At least one aggregation function required in [{command}], found [{expression}]',
-          values: {
-            command: out.commandName.toUpperCase(),
-            expression: out.expression,
-          },
-        }),
-        type: 'error',
-      };
-    case 'expressionNotAggClosed':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.expressionNotAggClosed', {
-          defaultMessage:
-            'Cannot combine aggregation and non-aggregation values in [{command}], found [{expression}]',
-          values: {
-            command: out.commandName.toUpperCase(),
-            expression: out.expression,
-          },
-        }),
-        type: 'error',
-      };
-    case 'aggInAggFunction':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.aggInAggFunction', {
-          defaultMessage:
-            'The aggregation function [{nestedAgg}] cannot be used as an argument in another aggregation function',
-          values: {
-            nestedAgg: out.nestedAgg,
-          },
-        }),
-      };
-    case 'onlyWhereCommandSupported':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.onlyWhereCommandSupported', {
-          defaultMessage: '[{fn}] function is only supported in WHERE commands',
-          values: { fn: out.fn.toUpperCase() },
-        }),
       };
     case 'invalidJoinIndex':
       return {
@@ -497,12 +325,6 @@ export const errors = {
   tooManyForks: (command: ESQLCommand): ESQLMessage =>
     errors.byId('tooManyForks', command.location, {}),
 
-  expressionNotAggClosed: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
-    errors.byId('expressionNotAggClosed', fn.location, {
-      commandName: cmd.name,
-      expression: fn.text,
-    }),
-
   unknownAggFunction: (
     node: ESQLColumn | ESQLIdentifier,
     type: string = 'FieldAttribute'
@@ -510,11 +332,6 @@ export const errors = {
     errors.byId('unknownAggregateFunction', node.location, {
       value: node.name,
       type,
-    }),
-
-  aggInAggFunction: (fn: ESQLFunction): ESQLMessage =>
-    errors.byId('aggInAggFunction', fn.location, {
-      nestedAgg: fn.name,
     }),
 
   invalidJoinIndex: (identifier: ESQLSource): ESQLMessage =>
