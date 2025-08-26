@@ -18,7 +18,7 @@ import {
   EuiAutoSizer,
   EuiAutoSize,
 } from '@elastic/eui';
-import { MetricItem } from './metric_item/metric_item';
+import { METRIC_ITEM_HEIGHT, MetricItem } from './metric_item/metric_item';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
 import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import type { TrendRequest } from '../../../../../../../common/types';
@@ -44,11 +44,11 @@ import { MaybeMonitorDetailsFlyout } from './monitor_detail_flyout';
 import { OverviewGridCompactView } from './compact_view/overview_grid_compact_view';
 import { ViewButtons } from './view_buttons/view_buttons';
 
-const ITEM_HEIGHT = 182;
-const ROW_COUNT = 4;
+const ITEM_HEIGHT = METRIC_ITEM_HEIGHT + 12;
 const MAX_LIST_HEIGHT = 800;
 const MIN_BATCH_SIZE = 20;
 const LIST_THRESHOLD = 12;
+const MIN_CARD_WIDTH = 400;
 
 interface ListItem {
   configId: string;
@@ -66,6 +66,8 @@ export const OverviewGrid = memo(
       pageState,
       groupBy: { field: groupField },
     } = useSelector(selectOverviewState);
+
+    const [rowCount, setRowCount] = useState(5);
 
     const trendData = useSelector(selectOverviewTrends);
     const { perPage } = pageState;
@@ -96,17 +98,17 @@ export const OverviewGrid = memo(
     }, [dispatch, maxItem, monitorsSortedByStatus, trendData]);
 
     const listHeight = Math.min(
-      ITEM_HEIGHT * Math.ceil(monitorsSortedByStatus.length / ROW_COUNT),
+      ITEM_HEIGHT * Math.ceil(monitorsSortedByStatus.length / rowCount),
       MAX_LIST_HEIGHT
     );
 
     const listItems: ListItem[][] = useMemo(() => {
       const acc: ListItem[][] = [];
-      for (let i = 0; i < monitorsSortedByStatus.length; i += ROW_COUNT) {
-        acc.push(monitorsSortedByStatus.slice(i, i + ROW_COUNT));
+      for (let i = 0; i < monitorsSortedByStatus.length; i += rowCount) {
+        acc.push(monitorsSortedByStatus.slice(i, i + rowCount));
       }
       return acc;
-    }, [monitorsSortedByStatus]);
+    }, [monitorsSortedByStatus, rowCount]);
 
     const listRef: React.LegacyRef<FixedSizeList<ListItem[][]>> | undefined = React.createRef();
     useEffect(() => {
@@ -167,6 +169,10 @@ export const OverviewGrid = memo(
                         threshold={LIST_THRESHOLD}
                       >
                         {({ onItemsRendered, ref }) => {
+                          // set min row count to based on width to ensure cards are not too small
+                          // min is 1 and max is 5
+                          setRowCount(Math.max(1, Math.min(5, Math.floor(width / MIN_CARD_WIDTH))));
+
                           return (
                             <FixedSizeList
                               // pad computed height to avoid clipping last row's drop shadow
@@ -195,20 +201,20 @@ export const OverviewGrid = memo(
                                     {listData[listIndex].map((_, idx) => (
                                       <EuiFlexItem
                                         data-test-subj="syntheticsOverviewGridItem"
-                                        key={listIndex * ROW_COUNT + idx}
+                                        key={listIndex * rowCount + idx}
                                       >
                                         <MetricItem
                                           monitor={
-                                            monitorsSortedByStatus[listIndex * ROW_COUNT + idx]
+                                            monitorsSortedByStatus[listIndex * rowCount + idx]
                                           }
                                           onClick={setFlyoutConfigCallback}
                                         />
                                       </EuiFlexItem>
                                     ))}
-                                    {listData[listIndex].length % ROW_COUNT !== 0 &&
+                                    {listData[listIndex].length % rowCount !== 0 &&
                                       // Adds empty items to fill out row
                                       Array.from({
-                                        length: ROW_COUNT - listData[listIndex].length,
+                                        length: rowCount - listData[listIndex].length,
                                       }).map((_, idx) => <EuiFlexItem key={idx} />)}
                                   </EuiFlexGroup>
                                 );
@@ -230,7 +236,7 @@ export const OverviewGrid = memo(
             {groupField === 'none' &&
               loaded &&
               // display this footer when user scrolls to end of list
-              currentIndex * ROW_COUNT + ROW_COUNT >= monitorsSortedByStatus.length && (
+              currentIndex * rowCount + rowCount >= monitorsSortedByStatus.length && (
                 <>
                   <EuiSpacer />
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

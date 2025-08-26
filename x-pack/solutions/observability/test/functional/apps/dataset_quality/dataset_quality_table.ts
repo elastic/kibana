@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
+import expect from '@kbn/expect';
+import originalExpect from 'expect';
 import { DatasetQualityFtrProviderContext } from './config';
 import {
   createFailedLogRecord,
@@ -24,6 +25,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
+    'discover',
   ]);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -179,7 +181,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       expect(datasetNameColCellTexts[0]).to.eql(apacheAccessDatasetHumanName);
     });
 
-    it('goes to log explorer page when opened', async () => {
+    it('goes to log discover page when opened', async () => {
       const rowIndexToOpen = 1;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
@@ -188,11 +190,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const datasetName = (await datasetNameCol.getCellTexts())[rowIndexToOpen];
       await (await actionsCol.getCellChildren('a'))[rowIndexToOpen].click(); // Click "Open"
 
-      // Confirm dataset selector text in observability logs explorer
+      // Confirm dataset selector text in discover
       await retry.try(async () => {
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.eql(datasetName);
+        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+        originalExpect(datasetSelectorText).toMatch(`logs-${datasetName}-${defaultNamespace}`);
       });
 
       // Return to Dataset Quality Page
