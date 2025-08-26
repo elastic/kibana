@@ -17,7 +17,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensStateMetricSharedProps, getLensAPIMetricSharedProps } from './utils';
-import { LensApiMetricOperation, LensApiSumMetricOperation } from '../../schema/metric_ops';
+import type { LensApiMetricOperation, LensApiSumMetricOperation } from '../../schema/metric_ops';
 
 function ofName(
   field: string,

@@ -29,7 +29,7 @@ import type {
 import { v4 as uuid } from 'uuid';
 
 import { fromCountAPItoLensState, fromCountLensStateToAPI } from './count';
-import {
+import type {
   LensApiAllMetricOperations,
   LensApiCountMetricOperation,
   LensApiCounterRateOperation,
@@ -65,7 +65,7 @@ import { fromDifferencesAPItoLensState, fromDifferencesLensStateToAPI } from './
 import { fromCumulativeSumAPItoLensState, fromCumulativeSumLensStateToAPI } from './cumulative_sum';
 import { fromCounterRateAPItoLensState, fromCounterRateLensStateToAPI } from './counter_rate';
 import { fromMovingAverageAPItoLensState, fromMovingAverageLensStateToAPI } from './moving_average';
-import { AnyMetricLensStateColumn, ReferableMetricLensStateColumn } from './types';
+import type { AnyMetricLensStateColumn, ReferableMetricLensStateColumn } from './types';
 import { isAPIColumnOfType, isApiColumnOfReferableType, isLensStateColumnOfType } from './utils';
 
 /**

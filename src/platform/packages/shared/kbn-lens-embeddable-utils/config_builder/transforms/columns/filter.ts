@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Query } from '@kbn/es-query';
-import { LensApiFilterType } from '../../schema/filter';
+import type { Query } from '@kbn/es-query';
+import type { LensApiFilterType } from '../../schema/filter';
 
 export function fromFilterAPIToLensState(filter: LensApiFilterType | undefined): Query | undefined {
   if (!filter) {

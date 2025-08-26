@@ -8,7 +8,7 @@
  */
 
 import type { MovingAverageIndexPatternColumn } from '@kbn/lens-plugin/public';
-import {
+import type {
   LensApiMovingAverageOperation,
   LensApiFieldMetricOperations,
 } from '../../schema/metric_ops';

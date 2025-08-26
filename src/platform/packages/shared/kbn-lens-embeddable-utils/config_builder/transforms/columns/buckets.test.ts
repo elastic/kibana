@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   FiltersIndexPatternColumn,
   DateHistogramIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
-import {
+import type {
   LensApiFiltersOperation,
   LensApiDateHistogramOperation,
   LensApiRangeOperation,
   LensApiTermsOperation,
 } from '../../schema/bucket_ops';
 import { fromBucketLensApiToLensState, fromBucketLensStateToAPI } from './buckets';
-import { AnyMetricLensStateColumn } from './types';
-import { LensApiAllMetricOperations } from '../../schema/metric_ops';
+import type { AnyMetricLensStateColumn } from './types';
+import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 
 describe('Buckets Transforms', () => {
   describe('fromBucketLensApiToLensState', () => {

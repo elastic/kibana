@@ -10,7 +10,7 @@
 import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiTermsOperation } from '../../schema/bucket_ops';
 import { LENS_TERMS_MISSING_BUCKET_DEFAULT, LENS_TERMS_SIZE_DEFAULT } from '../../schema/constants';
-import { LensApiAllMetricOperations } from '../../schema/metric_ops';
+import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState } from './format';
 import { isColumnOfReferableType } from './utils';
 

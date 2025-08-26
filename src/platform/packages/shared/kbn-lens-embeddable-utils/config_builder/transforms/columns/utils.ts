@@ -10,16 +10,16 @@
 import type { DataType, TimeScaleUnit } from '@kbn/visualizations-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { fromFilterAPIToLensState, fromFilterLensStateToAPI } from './filter';
-import {
+import type {
   LensApiAllMetricOperations,
   LensApiReferableMetricOperations,
 } from '../../schema/metric_ops';
-import {
+import type {
   AnyLensStateColumn,
   AnyMetricLensStateColumn,
   ReferableMetricLensStateColumn,
 } from './types';
-import { LensApiAllOperations } from '../../schema';
+import type { LensApiAllOperations } from '../../schema';
 
 export const LENS_EMPTY_AS_NULL_DEFAULT_VALUE = false;
 

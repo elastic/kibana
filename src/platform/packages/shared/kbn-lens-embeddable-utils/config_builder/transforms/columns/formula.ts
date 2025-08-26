@@ -8,7 +8,7 @@
  */
 
 import type { FormulaIndexPatternColumn } from '@kbn/lens-plugin/public';
-import { LensApiFormulaOperation } from '../../schema/metric_ops';
+import type { LensApiFormulaOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 

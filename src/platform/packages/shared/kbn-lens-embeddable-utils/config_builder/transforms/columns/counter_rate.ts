@@ -11,7 +11,7 @@ import type {
   CounterRateIndexPatternColumn,
   FieldBasedIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
-import { LensApiCounterRateOperation } from '../../schema/metric_ops';
+import type { LensApiCounterRateOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 

@@ -13,7 +13,7 @@ import type {
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
-import {
+import type {
   LensApiBucketOperations,
   LensApiDateHistogramOperation,
   LensApiFiltersOperation,
@@ -31,8 +31,8 @@ import {
   fromRangeOrHistogramLensStateToAPI,
 } from './range';
 import { fromTermsLensApiToLensState, fromTermsLensStateToAPI } from './top_values';
-import { AnyBucketLensStateColumn, AnyMetricLensStateColumn } from './types';
-import { LensApiAllMetricOperations } from '../../schema/metric_ops';
+import type { AnyBucketLensStateColumn, AnyMetricLensStateColumn } from './types';
+import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 
 export function fromBucketLensApiToLensState(
   options: LensApiFiltersOperation,
