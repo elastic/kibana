@@ -192,6 +192,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              disabled={files.length === 0}
               data-test-subj="knowledgeBaseBulkImportFlyoutSaveButton"
               fill
               isLoading={isLoading}
