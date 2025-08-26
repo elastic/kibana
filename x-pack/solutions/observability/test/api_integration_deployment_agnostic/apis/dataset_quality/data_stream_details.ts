@@ -114,11 +114,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(resp.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
       });
 
-      it('returns {} if matching data stream is not available', async () => {
+      it('returns only the defaultRetentionPeriod if matching data stream is not available', async () => {
         const nonExistentDataSet = 'Non-existent';
         const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
         const resp = await callApiAs(supertestEditorWithCookieCredentials, nonExistentDataStream);
-        expect(resp.body).empty();
+        // The retention period is defined at cluster level so it should be returned even if the data stream doesn't exist
+        expect(resp.body).to.eql({ defaultRetentionPeriod: '30d' });
       });
 
       it('returns service.name and host.name correctly', async () => {

@@ -140,7 +140,6 @@ export const useDatasetQualityDetailsState = () => {
     integrationDashboardsLoading: state.matches(
       'initializing.checkAndLoadIntegrationAndDashboards.loadingIntegrationDashboards'
     ),
-    failureStoreUpdating: state.matches('initializing.failureStoreUpdate.updating'),
   }));
 
   const isQualityIssueFlyoutOpen = useSelector(service, (state) =>
