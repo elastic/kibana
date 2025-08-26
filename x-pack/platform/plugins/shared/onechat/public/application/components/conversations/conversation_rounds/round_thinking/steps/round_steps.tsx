@@ -38,16 +38,16 @@ const otherResultTitle = i18n.translate('xpack.onechat.conversation.thinking.oth
 });
 
 const getToolResultTitle = (toolResult: ToolResult) => {
-  if (toolResult.type === ToolResultType.resource) {
-    return resourceResultTitle;
+  switch (toolResult.type) {
+    case ToolResultType.resource:
+      return resourceResultTitle;
+    case ToolResultType.tabularData:
+      return tabularResultTitle;
+    case ToolResultType.query:
+      return queryResultTitle;
+    default:
+      return otherResultTitle;
   }
-  if (toolResult.type === ToolResultType.tabularData) {
-    return tabularResultTitle;
-  }
-  if (toolResult.type === ToolResultType.query) {
-    return queryResultTitle;
-  }
-  return otherResultTitle;
 };
 
 interface ToolResultDisplayProps {
@@ -55,20 +55,19 @@ interface ToolResultDisplayProps {
 }
 
 const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult }) => {
-  // TODO: Add resource result step once we can reliably access the reference ID
-  // if (toolResult.type === ToolResultType.resource) {
-  //   return <ResourceResultStep result={toolResult} />;
-  // }
-  if (toolResult.type === ToolResultType.query) {
-    return <QueryResultStep result={toolResult} />;
+  switch (toolResult.type) {
+    // TODO: Add resource result step once we can reliably access the reference ID
+    // case ToolResultType.resource:
+    //   return <ResourceResultStep result={toolResult} />;
+    case ToolResultType.query:
+      return <QueryResultStep result={toolResult} />;
+    case ToolResultType.tabularData:
+      return <TabularDataResultStep result={toolResult} />;
+    default:
+      // Other results
+      // Also showing Resource results as Other results for now as JSON blobs
+      return <OtherResultStep result={toolResult} />;
   }
-  if (toolResult.type === ToolResultType.tabularData) {
-    return <TabularDataResultStep result={toolResult} />;
-  }
-
-  // Other results
-  // Also showing Resource results as Other results for now as JSON blobs
-  return <OtherResultStep result={toolResult} />;
 };
 
 interface RoundStepsProps {
