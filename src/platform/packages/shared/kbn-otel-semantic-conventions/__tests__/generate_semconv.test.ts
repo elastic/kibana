@@ -323,7 +323,10 @@ describe('generate_semconv', () => {
 
       expect(result.stats.registryGroups).toBe(0);
       expect(result.stats.metricGroups).toBe(0);
-      expect(result.totalFields).toEqual({});
+      expect(result.registryFields).toEqual({});
+      expect(result.metricFields).toEqual({});
+      // totalFields will still contain hardcoded fields
+      expect(Object.keys(result.totalFields)).toEqual(Object.keys(result.hardcodedFields));
     });
   });
 
@@ -358,7 +361,10 @@ describe('generate_semconv', () => {
       const result = processSemconvYaml(tempYamlFile);
 
       expect(result.stats.totalGroups).toBe(0);
-      expect(result.totalFields).toEqual({});
+      expect(result.registryFields).toEqual({});
+      expect(result.metricFields).toEqual({});
+      // totalFields should only contain hardcoded fields
+      expect(Object.keys(result.totalFields)).toEqual(Object.keys(result.hardcodedFields));
     });
 
     it('should throw error for invalid YAML file', () => {
@@ -504,10 +510,10 @@ describe('generate_semconv', () => {
         type: 'keyword',
       });
 
-      expect(result.hardcodedFields['resource.attributes.*']).toEqual({
-        name: 'resource.attributes.*',
-        description: expect.stringContaining('Resource attributes'),
-        type: 'passthrough',
+      expect(result.hardcodedFields['scope.name']).toEqual({
+        name: 'scope.name',
+        description: 'The name of the instrumentation scope that produced the span.',
+        type: 'keyword',
       });
     });
 
