@@ -95,4 +95,6 @@ export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
+  SignificantEventsGenerateResponse,
+  GeneratedSignificantEventQuery,
 } from './src/api/significant_events';

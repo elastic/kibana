@@ -49,7 +49,6 @@ export interface EnhancedDataStreamFromEs extends IndicesDataStream {
     manage_data_stream_lifecycle: boolean;
     read_failure_store: boolean;
   };
-  index_mode?: string | null;
 }
 
 export interface DataStream {

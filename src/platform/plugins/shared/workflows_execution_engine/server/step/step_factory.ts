@@ -22,6 +22,8 @@ import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manage
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import { WaitStepImpl } from './wait_step/wait_step';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -30,12 +32,16 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_eve
 // import { MergeStepImpl } from './merge-step'; // To be created
 
 export class StepFactory {
+  constructor(
+    private contextManager: WorkflowContextManager,
+    private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
+    private workflowRuntime: WorkflowExecutionRuntimeManager,
+    private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
+    private workflowTaskManager: WorkflowTaskManager
+  ) {}
+
   public create<TStep extends BaseStep>(
-    step: TStep, // TODO: TStep must refer to a node type, not BaseStep (IfElseNode, ForeachNode, etc.)
-    contextManager: WorkflowContextManager,
-    connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
-    workflowState: WorkflowExecutionRuntimeManager,
-    workflowLogger: IWorkflowEventLogger // Assuming you have a logger interface
+    step: TStep // TODO: TStep must refer to a node type, not BaseStep (IfElseNode, ForeachNode, etc.)
   ): StepImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
 
@@ -45,24 +51,41 @@ export class StepFactory {
 
     switch (stepType) {
       case 'enter-foreach':
-        return new EnterForeachNodeImpl(step as any, workflowState, contextManager, workflowLogger);
+        return new EnterForeachNodeImpl(
+          step as any,
+          this.workflowRuntime,
+          this.contextManager,
+          this.workflowLogger
+        );
       case 'exit-foreach':
-        return new ExitForeachNodeImpl(step as any, workflowState, workflowLogger);
+        return new ExitForeachNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
       case 'enter-if':
-        return new EnterIfNodeImpl(step as any, workflowState, contextManager, workflowLogger);
+        return new EnterIfNodeImpl(
+          step as any,
+          this.workflowRuntime,
+          this.contextManager,
+          this.workflowLogger
+        );
       case 'enter-condition-branch':
-        return new EnterConditionBranchNodeImpl(workflowState);
+        return new EnterConditionBranchNodeImpl(this.workflowRuntime);
       case 'exit-condition-branch':
-        return new ExitConditionBranchNodeImpl(step as any, workflowState);
+        return new ExitConditionBranchNodeImpl(step as any, this.workflowRuntime);
       case 'exit-if':
-        return new ExitIfNodeImpl(step as any, workflowState);
+        return new ExitIfNodeImpl(step as any, this.workflowRuntime);
+      case 'wait':
+        return new WaitStepImpl(
+          step as any,
+          this.workflowRuntime,
+          this.workflowLogger,
+          this.workflowTaskManager
+        );
       case 'atomic':
         return new AtomicStepImpl(
           step as any,
-          contextManager,
-          connectorExecutor,
-          workflowState,
-          workflowLogger
+          this.contextManager,
+          this.connectorExecutor,
+          this.workflowRuntime,
+          this.workflowLogger
         );
       case 'parallel':
       // return new ParallelStepImpl(step as ParallelStep, contextManager);

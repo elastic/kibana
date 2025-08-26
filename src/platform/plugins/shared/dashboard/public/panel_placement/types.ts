@@ -31,6 +31,18 @@ export interface PanelPlacementProps {
   sectionId?: string; // section where panel is being placed
 }
 
-export type GetPanelPlacementSettings<SerializedState extends object = object> = (
+export interface PanelResizeSettings {
+  minWidth?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  maxHeight?: number;
+}
+
+export type PanelSettings = Partial<{
+  placementSettings: PanelPlacementSettings;
+  resizeSettings: PanelResizeSettings;
+}>;
+
+export type GetPanelSettings<SerializedState extends object = object> = (
   serializedState?: SerializedPanelState<SerializedState>
-) => MaybePromise<PanelPlacementSettings>;
+) => MaybePromise<PanelSettings>;

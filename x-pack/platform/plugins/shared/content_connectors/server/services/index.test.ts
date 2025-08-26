@@ -498,7 +498,7 @@ describe('AgentlessConnectorsInfraService', () => {
               supports_agentless: true,
             }),
           ]),
-          options: expect.objectContaining({ force: true }),
+          options: expect.objectContaining({ forcePackagePolicyCreation: true }),
         })
       );
 

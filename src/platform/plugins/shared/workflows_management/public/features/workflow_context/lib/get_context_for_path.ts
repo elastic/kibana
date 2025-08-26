@@ -18,6 +18,7 @@ import { getSchemaAtPath, inferZodType } from '../../../../common/lib/zod_utils'
 
 function getRootContextSchema(definition: WorkflowYaml) {
   return z.object({
+    spaceId: z.string(),
     workflowRunId: z.string(),
     now: z.date(),
     event: EventSchema,

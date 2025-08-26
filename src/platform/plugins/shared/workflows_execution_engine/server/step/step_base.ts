@@ -26,12 +26,17 @@ export interface BaseStep {
   if?: string;
   foreach?: string;
   timeout?: number;
+  spaceId: string;
 }
 
 export type StepDefinition = BaseStep;
 
 export interface StepImplementation {
   run(): Promise<void>;
+}
+
+export interface StepErrorCatcher {
+  catchError(): Promise<void>;
 }
 
 export abstract class StepBase<TStep extends BaseStep> implements StepImplementation {
@@ -65,13 +70,15 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
 
     try {
       const result = await this._run();
-      await this.workflowExecutionRuntime.setStepResult(stepId, result);
+      await this.workflowExecutionRuntime.setStepResult(result);
     } catch (error) {
       const result = await this.handleFailure(error);
-      await this.workflowExecutionRuntime.setStepResult(stepId, result);
+      await this.workflowExecutionRuntime.setStepResult(result);
     } finally {
       await this.workflowExecutionRuntime.finishStep(stepId);
     }
+
+    this.workflowExecutionRuntime.goToNextStep();
   }
 
   // Subclasses implement this to execute the step logic
