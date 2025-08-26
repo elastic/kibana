@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimeseriesVisParams } from '../../../types';
+import type { TimeseriesVisParams } from '../../../types';
 
 // TODO: replace with explicit callback in each component
 export const createTextHandler = (

@@ -16,9 +16,9 @@ import {
 import { css } from '@emotion/css';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 
-import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { some } from 'lodash';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { AttackDiscoveryStatusIndicator } from './attack_discovery_status_indicator';

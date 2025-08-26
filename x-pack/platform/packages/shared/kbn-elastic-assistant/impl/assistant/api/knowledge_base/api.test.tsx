@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 
 import { getKnowledgeBaseStatus, postKnowledgeBase } from './api';
 import { API_VERSIONS } from '@kbn/spaces-plugin/common';

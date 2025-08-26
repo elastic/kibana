@@ -14,7 +14,7 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
 } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../../definitions/types';
 import { getDateLiterals } from '../../../definitions/utils';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';

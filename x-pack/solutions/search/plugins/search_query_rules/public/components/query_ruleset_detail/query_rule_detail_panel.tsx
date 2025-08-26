@@ -7,14 +7,14 @@
 
 import React, { useEffect } from 'react';
 
-import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryRuleDraggableList } from './query_rule_draggable_list/query_rule_draggable_list';
 import { QueryRuleFlyout } from './query_rule_flyout/query_rule_flyout';
 import { useGenerateRuleId } from '../../hooks/use_generate_rule_id';
-import { SearchQueryRulesQueryRule } from '../../types';
+import type { SearchQueryRulesQueryRule } from '../../types';
 import { RulesetDetailEmptyPrompt } from '../empty_prompt/ruleset_detail_empty_prompt';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';

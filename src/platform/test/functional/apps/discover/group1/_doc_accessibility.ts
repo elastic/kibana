@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -50,9 +50,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rowActions = await dataGrid.getRowActions();
       await rowActions[0].click();
       await header.waitUntilLoadingHasFinished();
+      // Skip to main content button
       await browser.pressKeys(browser.keys.TAB);
-      await browser.pressKeys(browser.keys.SPACE);
+      await browser.pressKeys(browser.keys.ENTER);
       await browser.pressKeys(browser.keys.TAB);
+
       const tableTab = await testSubjects.find('docViewerTab-doc_view_table');
       const activeElement = await find.activeElement();
       expect(await tableTab.getAttribute('data-test-subj')).to.eql(

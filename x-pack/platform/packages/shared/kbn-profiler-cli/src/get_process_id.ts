@@ -31,7 +31,7 @@ export async function getProcessId({
 }: {
   ports: number[];
   grep: boolean | string;
-}): Promise<number> {
+}): Promise<number | undefined> {
   if (grep) {
     const candidates = await getNodeProcesses(typeof grep === 'boolean' ? '' : grep);
 
@@ -63,5 +63,5 @@ export async function getProcessId({
     }
   }
 
-  throw new Error(`Kibana process id not found at ports ${ports.join(', ')}`);
+  return undefined;
 }

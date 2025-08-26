@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DeprecationsDetails, GetDeprecationsContext } from '@kbn/core/server';
+import type { DeprecationsDetails, GetDeprecationsContext } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { ILM_POLICY_NAME, INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';

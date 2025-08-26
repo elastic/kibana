@@ -9,7 +9,7 @@
 
 import { URL } from 'url';
 import { Observable } from 'rxjs';
-import { TelemetryPluginStart, TelemetryPluginSetup } from './plugin';
+import type { TelemetryPluginStart, TelemetryPluginSetup } from './plugin';
 
 export type Setup = jest.Mocked<TelemetryPluginSetup>;
 export type Start = jest.Mocked<TelemetryPluginStart>;

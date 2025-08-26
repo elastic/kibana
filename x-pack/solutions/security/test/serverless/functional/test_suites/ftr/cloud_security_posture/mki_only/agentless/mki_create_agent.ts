@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION_QUALITY_GATES } from '../../../../constants';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -18,7 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'cisAddIntegration',
   ]);
 
-  const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
+  const CIS_AWS_OPTION_TEST_ID = 'cloudSetupAwsTestId';
 
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
@@ -34,9 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it(`should create agentless-agent`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
-      await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION_QUALITY_GATES
-      );
+      await cisIntegration.navigateToAddIntegrationCspmPage();
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
@@ -78,9 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should create default agent-based agent`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
 
-      await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION_QUALITY_GATES
-      );
+      await cisIntegration.navigateToAddIntegrationCspmPage();
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);

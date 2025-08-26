@@ -11,7 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { StartServices } from '../../types';
+import type { StartServices } from '../../types';
 
 export function confirmModalPromise(
   message = '',

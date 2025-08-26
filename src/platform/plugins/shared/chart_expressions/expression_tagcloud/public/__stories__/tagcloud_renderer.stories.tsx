@@ -11,10 +11,10 @@ import React from 'react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { from } from 'rxjs';
 import { tagcloudRenderer } from '../expression_renderers';
-import { TagcloudRendererConfig } from '../../common/types';
+import type { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
 import { palettes } from '../__mocks__/palettes';
-import { ExpressionTagcloudRendererDependencies } from '../plugin';
+import type { ExpressionTagcloudRendererDependencies } from '../plugin';
 
 const config: TagcloudRendererConfig = {
   visType: 'tagcloud',

@@ -21,6 +21,8 @@
     "*/plugins/**/*",
     "plugins/**/*",
     "security_solution_cypress/cypress/**/*",
+    "security_solution_api_integration/**/*",
+    "security_solution_endpoint/**/*",
     "*/packages/**/*",
     "*/*/packages/**/*",
   ],
@@ -57,10 +59,17 @@
     "@kbn/repo-info",
     "@kbn/es-archiver",
     "@kbn/task-manager-plugin",
+    "@kbn/openapi-common",
+    "@kbn/spaces-plugin",
+    "@kbn/securitysolution-exceptions-common",
+    "@kbn/securitysolution-endpoint-exceptions-common",
+    "@kbn/securitysolution-lists-common",
+    "@kbn/osquery-plugin",
     "@kbn/serverless-security-settings",
     "@kbn/rison",
     "@kbn/core-chrome-browser",
     "@kbn/openapi-common",
-    "@kbn/spaces-plugin"
+    "@kbn/spaces-plugin",
+    "@kbn/management-settings-ids"
   ]
 }

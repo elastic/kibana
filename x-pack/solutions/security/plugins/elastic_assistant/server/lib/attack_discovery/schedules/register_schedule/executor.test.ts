@@ -8,7 +8,8 @@
 import { EcsVersion } from '@elastic/ecs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
 

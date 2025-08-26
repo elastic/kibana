@@ -8,18 +8,21 @@
  */
 
 import { isRunningResponse } from '@kbn/data-plugin/public';
-import { DataView, DataViewType } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { MutableRefObject, useEffect, useRef } from 'react';
-import { catchError, filter, lastValueFrom, map, Observable, of } from 'rxjs';
-import {
-  UnifiedHistogramFetchStatus,
+import type { MutableRefObject } from 'react';
+import { useEffect, useRef } from 'react';
+import type { Observable } from 'rxjs';
+import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
+import type {
   UnifiedHistogramHitsContext,
   UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
 } from '../../../types';
+import { UnifiedHistogramFetchStatus } from '../../../types';
 import { useStableCallback } from '../../../hooks/use_stable_callback';
 
 export const useTotalHits = ({

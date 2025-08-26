@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, KibanaRequest, type IKibanaResponse } from '@kbn/core/server';
+import type { IRouter, KibanaRequest, IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { asyncForEach } from '@kbn/std';
 import { Client } from 'langsmith';
@@ -14,21 +14,23 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { getPrompt } from '@kbn/security-ai-prompts';
+import type {
+  ExecuteConnectorRequestBody,
+  ContentReferencesStore,
+} from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   newContentReferencesStore,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
-  ExecuteConnectorRequestBody,
   INTERNAL_API_ACCESS,
   PostEvaluateBody,
   PostEvaluateResponse,
   DefendInsightType,
   INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
-  ContentReferencesStore,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
-import { StructuredTool } from '@langchain/core/tools';
+import type { StructuredTool } from '@langchain/core/tools';
 import { omit } from 'lodash/fp';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { HumanMessage } from '@langchain/core/messages';
@@ -44,8 +46,8 @@ import {
 } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
-import { AssistantDataClients } from '../../lib/langchain/executors/types';
-import { AssistantToolParams, ElasticAssistantRequestHandlerContext } from '../../types';
+import type { AssistantDataClients } from '../../lib/langchain/executors/types';
+import type { AssistantToolParams, ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
 import {
   createOrUpdateEvaluationResults,
@@ -54,17 +56,15 @@ import {
   setupEvaluationIndex,
 } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
-import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import type { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { evaluateAttackDiscovery } from '../../lib/attack_discovery/evaluation';
-import {
-  DefaultAssistantGraph,
-  getDefaultAssistantGraph,
-} from '../../lib/langchain/graphs/default_assistant_graph/graph';
+import type { DefaultAssistantGraph } from '../../lib/langchain/graphs/default_assistant_graph/graph';
+import { getDefaultAssistantGraph } from '../../lib/langchain/graphs/default_assistant_graph/graph';
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
 import { PrepareIndicesForAssistantGraphEvaluations } from './prepare_indices_for_evaluations/graph_type/assistant';
-import { ConfigSchema } from '../../config_schema';
+import type { ConfigSchema } from '../../config_schema';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes

@@ -14,7 +14,8 @@ import type {
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensMetricConfig } from '../types';
+import type { BuildDependencies, LensAttributes, LensMetricConfig } from '../types';
+import { DEFAULT_LAYER_ID } from '../types';
 import {
   addLayerColumn,
   addLayerFormulaColumns,
@@ -29,7 +30,7 @@ import {
   getHistogramColumn,
   getValueColumn,
 } from '../columns';
-import { LensApiState } from '../schema';
+import type { LensApiState } from '../schema';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';

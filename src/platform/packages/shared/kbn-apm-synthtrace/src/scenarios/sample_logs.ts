@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogDocument, Serializable } from '@kbn/apm-synthtrace-client';
+import type { LogDocument } from '@kbn/apm-synthtrace-client';
+import { Serializable } from '@kbn/apm-synthtrace-client';
 import { SampleParserClient } from '@kbn/sample-log-parser';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {

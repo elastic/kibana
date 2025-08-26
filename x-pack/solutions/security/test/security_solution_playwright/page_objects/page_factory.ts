@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { EntityAnalyticsPage } from './entity_analytics_po';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management_po';
 import { RuleDetailsPage } from './rule_details_page_po';
