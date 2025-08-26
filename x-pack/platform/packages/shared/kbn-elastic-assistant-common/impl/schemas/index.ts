@@ -38,6 +38,9 @@ export * from './attack_discovery/schedules.gen';
 // Defend insight Schemas
 export * from './defend_insights';
 
+// Risk Score Schemas
+export * from './risk_score';
+
 // Chat Schemas
 export * from './chat/post_chat_complete_route.gen';
 

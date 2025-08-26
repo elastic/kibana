@@ -1,0 +1,91 @@
+openapi: 3.0.0
+info:
+  title: Risk Score Summary API
+  version: '1'
+paths:
+  /internal/elastic_assistant/risk_score/explain:
+    post:
+      operationId: ExplainRiskScoreRoute
+      x-codegen-enabled: true
+      description: Explain the risk score for a given entity using an LLM connector.
+      summary: Generate a textual explanation of how the risk score was calculate for a given entity
+      tags:
+        - entity_analytics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - identifier
+                - identifierKey
+                - apiConfig
+                - alertsIndexPattern
+                - anonymizationFields
+                - size
+              properties:
+                identifier:
+                  type: string
+                identifierKey:
+                  type: string
+                alertsIndexPattern:
+                  type: string
+                anonymizationFields:
+                  items:
+                    $ref: '../anonymization_fields/bulk_crud_anonymization_fields_route.schema.yaml#/components/schemas/AnonymizationFieldResponse'
+                  type: array
+                apiConfig:
+                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+                  description: LLM API configuration.
+                connectorName:
+                  type: string
+                start:
+                  type: string
+                end:
+                  type: string
+                langSmithProject:
+                  type: string
+                langSmithApiKey:
+                  type: string
+                replacements:
+                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+                size:
+                  type: number
+
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - summary
+                  - detailedExplanation
+                  - recommendations
+                properties:
+                  summary:
+                    type: string
+                  detailedExplanation:
+                    type: string
+                  recommendations: 
+                    type: string
+                  replacements:
+                    $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+                  
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+

@@ -6,6 +6,10 @@
  */
 
 import { useMemo } from 'react';
+import type {
+  ExplainRiskScoreRouteRequestBody,
+  ExplainRiskScoreRouteResponse,
+} from '@kbn/elastic-assistant-common';
 import type { PrivMonPrivilegesResponse } from '../../../common/api/entity_analytics/privilege_monitoring/privileges.gen';
 import type {
   CreateEntitySourceResponse,
@@ -459,7 +463,15 @@ export const useEntityAnalyticsRoutes = () => {
         body: JSON.stringify(params),
       });
 
+    const fetchRiskScoreAiSummary = (params: ExplainRiskScoreRouteRequestBody) =>
+      http.fetch<ExplainRiskScoreRouteResponse>('/internal/elastic_assistant/risk_score/explain', {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+
     return {
+      fetchRiskScoreAiSummary,
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
       initRiskEngine,
