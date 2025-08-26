@@ -98,7 +98,7 @@ export class SiemMigrationTaskRunner<
   }
 
   /** Optional initialization logic */
-  protected async initialize() {}
+  async initialize() {}
 
   public async run(invocationConfig: RunnableConfig<C>): Promise<void> {
     assert(this.telemetry, 'telemetry is missing please call setup() first');
@@ -181,6 +181,12 @@ export class SiemMigrationTaskRunner<
     }
   }
 
+  /* Prepares the invokable task with raw input and output. */
+  async prepareTaskInvoke(input: P, config: RunnableConfig<C>) {
+    assert(this.task, 'Migration task is not defined');
+    return this.task(input, config);
+  }
+
   /** Creates the task invoke function, the input is prepared and the output is processed as a migrationItem */
   private createTaskInvoke = async (
     migrationItem: I,
@@ -188,8 +194,7 @@ export class SiemMigrationTaskRunner<
   ): Promise<Invoke<I>> => {
     const input = await this.prepareTaskInput(migrationItem);
     return async () => {
-      assert(this.task, 'Migration task is not defined');
-      const output = await this.task(input, config);
+      const output = await this.prepareTaskInvoke(input, config);
       return this.processTaskOutput(migrationItem, output);
     };
   };

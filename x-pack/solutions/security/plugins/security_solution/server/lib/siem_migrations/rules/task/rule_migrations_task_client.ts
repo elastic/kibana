@@ -20,6 +20,7 @@ import type { MigrateRuleConfigSchema } from './agent/types';
 import { RuleMigrationTaskEvaluator } from './rule_migrations_task_evaluator';
 
 export type RuleMigrationsRunning = Map<string, RuleMigrationTaskRunner>;
+
 export class RuleMigrationsTaskClient extends SiemMigrationsTaskClient<
   RuleMigration,
   RuleMigrationRule,

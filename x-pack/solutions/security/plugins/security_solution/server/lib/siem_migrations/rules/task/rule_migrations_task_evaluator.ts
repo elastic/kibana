@@ -6,14 +6,24 @@
  */
 
 import { distance } from 'fastest-levenshtein';
-import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
-import type { MigrateRuleState } from './agent/types';
+import type { MigrateRuleConfigSchema, MigrateRuleState } from './agent/types';
 import type { CustomEvaluator } from '../../common/task/siem_migrations_task_evaluator';
-import { SiemMigrationTaskEvaluable } from '../../common/task/siem_migrations_task_evaluator';
+import { SiemMigrationsBaseEvaluator } from '../../common/task/siem_migrations_task_evaluator';
+import type {
+  RuleMigration,
+  RuleMigrationRule,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
-export class RuleMigrationTaskEvaluator extends SiemMigrationTaskEvaluable(
-  RuleMigrationTaskRunner
-) {
+export type RuleMigrationTaskInput = Pick<MigrateRuleState, 'id' | 'original_rule' | 'resources'>;
+export type RuleMigrationTaskOutput = MigrateRuleState;
+
+export class RuleMigrationTaskEvaluator extends SiemMigrationsBaseEvaluator<
+  RuleMigration,
+  RuleMigrationRule,
+  RuleMigrationTaskInput,
+  MigrateRuleConfigSchema,
+  RuleMigrationTaskOutput
+> {
   protected readonly evaluators: Record<string, CustomEvaluator> = {
     custom_query_accuracy: ({ run, example }) => {
       const runQuery = (run?.outputs as MigrateRuleState)?.elastic_rule?.query;

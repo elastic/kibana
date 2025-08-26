@@ -87,7 +87,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   }
 
   /** Initializes the retriever populating ELSER indices. It may take a few minutes */
-  protected async initialize() {
+  async initialize() {
     await this.retriever.initialize();
   }
 
@@ -111,5 +111,9 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
       translation_result: migrationOutput.translation_result,
       comments: migrationOutput.comments,
     };
+  }
+
+  getMigrateItemTask() {
+    return this.createMigrateItemTask();
   }
 }

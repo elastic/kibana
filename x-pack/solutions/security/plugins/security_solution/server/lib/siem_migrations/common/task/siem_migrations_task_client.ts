@@ -28,7 +28,7 @@ import type {
   SiemMigrationTaskStopResult,
 } from './types';
 import type { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
-import type { SiemMigrationTaskEvaluatorClass } from './siem_migrations_task_evaluator';
+import type { SiemMigrationsBaseEvaluator } from './siem_migrations_task_evaluator';
 
 export type MigrationsRunning<
   M extends MigrationDocument = StoredSiemMigration,
@@ -46,7 +46,7 @@ export abstract class SiemMigrationsTaskClient<
   O extends object = {} // The migration task output schema
 > {
   protected abstract readonly TaskRunnerClass: typeof SiemMigrationTaskRunner<M, I, P, C, O>;
-  protected abstract readonly EvaluatorClass?: SiemMigrationTaskEvaluatorClass<M, I, P, C, O>;
+  protected abstract readonly EvaluatorClass?: SiemMigrationsBaseEvaluator<M, I, P, C, O>;
 
   constructor(
     protected migrationsRunning: MigrationsRunning<M, I, P, C, O>,
@@ -245,7 +245,8 @@ export abstract class SiemMigrationsTaskClient<
     const { evaluationId, langsmithOptions, connectorId, invocationConfig, abortController } =
       params;
     const migrationLogger = this.logger.get('evaluate');
-    const migrationTaskEvaluator = new this.EvaluatorClass(
+
+    const taskRunner = new this.TaskRunnerClass(
       evaluationId,
       this.currentUser,
       abortController,
@@ -253,6 +254,13 @@ export abstract class SiemMigrationsTaskClient<
       migrationLogger,
       this.dependencies
     );
+
+    const migrationTaskEvaluator = new this.EvaluatorClass(
+      taskRunner,
+      this.dependencies,
+      this.logger
+    );
+
     await migrationTaskEvaluator.evaluate({
       connectorId,
       langsmithOptions,
