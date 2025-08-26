@@ -12,13 +12,13 @@ import {
   IngestDocument,
   IngestProcessorContainer,
   IngestSimulateRequest,
-  IngestPipelineSimulation,
   IngestSimulateDocumentResult,
   SimulateIngestRequest,
   IndicesIndexState,
   SimulateIngestResponse,
   SimulateIngestSimulateIngestDocumentResult,
   FieldCapsResponse,
+  type IngestPipelineProcessorResult,
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
@@ -854,14 +854,13 @@ const computeMappingProperties = (detectedFields: NamedFieldDefinitionConfig[]) 
  * Guard helpers
  */
 const isSuccessfulProcessor = (
-  processor: IngestPipelineSimulation
-): processor is WithRequired<IngestPipelineSimulation, 'doc' | 'tag'> =>
+  processor: IngestPipelineProcessorResult
+): processor is WithRequired<IngestPipelineProcessorResult, 'doc' | 'tag'> =>
   processor.status === 'success' && !!processor.tag;
 
 const isSkippedProcessor = (
-  processor: IngestPipelineSimulation
-): processor is WithRequired<IngestPipelineSimulation, 'tag'> =>
-  // @ts-expect-error Looks like the IngestPipelineSimulation.status is not typed correctly and misses the 'skipped' status
+  processor: IngestPipelineProcessorResult
+): processor is WithRequired<IngestPipelineProcessorResult, 'tag'> =>
   processor.status === 'skipped';
 
 const isMappingFailure = (entry: SimulateIngestSimulateIngestDocumentResult) =>
