@@ -66,16 +66,13 @@ export function createEvaluateDataset({
           });
 
           // Running correctness evaluator as part of the task since quantitative correctness evaluators need its output
-          let correctnessAnalysis = null;
-          if (!response.errors?.length) {
-            const correctnessResult = await evaluators.correctnessAnalysis().evaluate({
-              input,
-              expected: output,
-              output: response,
-              metadata,
-            });
-            correctnessAnalysis = correctnessResult.metadata;
-          }
+          const correctnessResult = await evaluators.correctnessAnalysis().evaluate({
+            input,
+            expected: output,
+            output: response,
+            metadata,
+          });
+          const correctnessAnalysis = correctnessResult.metadata;
 
           return {
             errors: response.errors,
