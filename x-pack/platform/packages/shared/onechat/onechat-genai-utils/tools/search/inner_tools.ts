@@ -12,11 +12,11 @@ import type { ScopedModel } from '@kbn/onechat-server';
 import type { ResourceResult, TabularDataResult } from '@kbn/onechat-common/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { RelevanceSearchResult } from '../relevance_search';
 import { relevanceSearch } from '../relevance_search';
 import { naturalLanguageSearch } from '../nl_search';
-import type { MatchResult } from '../steps/perform_match_search';
 
-const convertMatchResult = (result: MatchResult): ResourceResult => {
+const convertMatchResult = (result: RelevanceSearchResult): ResourceResult => {
   return {
     type: ToolResultType.resource,
     data: {
@@ -25,9 +25,7 @@ const convertMatchResult = (result: MatchResult): ResourceResult => {
         index: result.index,
       },
       partial: true,
-      content: {
-        highlights: result.highlights,
-      },
+      content: result.content,
     },
   };
 };
@@ -72,7 +70,7 @@ export const createRelevanceSearchTool = ({
           .number()
           .optional()
           .default(10)
-          .describe('Number of documents to return. Defaults to 10.'),
+          .describe('Maximum number of documents to return. Defaults to 10.'),
       }),
       description: `Find relevant documents in an index based on a simple fulltext search.
 
