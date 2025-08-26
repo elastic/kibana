@@ -88,6 +88,7 @@ export interface AIAssistantServiceOpts {
   taskManager: TaskManagerSetupContract;
   pluginStop$: Subject<void>;
   productDocManager: Promise<ProductDocBaseStartContract['management']>;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export interface CreateAIAssistantClientParams {
@@ -95,7 +96,6 @@ export interface CreateAIAssistantClientParams {
   spaceId: string;
   currentUser: AuthenticatedUser | null;
   licensing: Promise<LicensingApiRequestHandlerContext>;
-  telemetry: AnalyticsServiceSetup;
 }
 
 export type CreateDataStream = (params: {
@@ -610,7 +610,7 @@ export class AIAssistantService {
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
       getTrainedModelsProvider: opts.getTrainedModelsProvider,
-      telemetry: opts.telemetry,
+      telemetry: this.options.telemetry,
     });
   }
 

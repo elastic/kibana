@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { IndexEntryType } from '@kbn/elastic-assistant-common';
-import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
+import type { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
+import type { EsIndexEntry } from '../ai_assistant_data_clients/knowledge_base/types';
 
 const INTEGRATION_KNOWLEDGE_INDEX_NAME = '.integration_knowledge';
 
@@ -22,7 +23,7 @@ export const checkIntegrationKnowledgeIndexEntryExists = async ({
   logger: Logger;
 }): Promise<boolean> => {
   try {
-    const results = await kbDataClient.findDocuments({
+    const results = await kbDataClient.findDocuments<EsIndexEntry>({
       page: 1,
       perPage: 1,
       filter: `type:index AND index:${INTEGRATION_KNOWLEDGE_INDEX_NAME}`,
@@ -64,9 +65,9 @@ export const ensureIntegrationKnowledgeIndexEntry = async (
           field: 'content',
           name: 'Integration Knowledge',
           description:
-            'Integration knowledge base containing semantic information about integrations installed via Fleet',
+            'Integration knowledge base containing semantic information about integrations installed via Fleet. Use this tool to search for information about integrations, integration configurations, troubleshooting guides, and best practices',
           queryDescription:
-            'Use this tool to search for information about integrations, integration configurations, troubleshooting guides, and best practices',
+            'Key terms to retrieve relevant integration details, like integration name, configuration values the user is having issues with, and/or any other general keywords',
           global: true,
           users: [],
         },

@@ -138,7 +138,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           spaceId: getSpaceId(),
           logger: this.logger,
           licensing: context.licensing,
-          telemetry: core.analytics,
           currentUser,
           elserInferenceId: params?.elserInferenceId,
           manageGlobalKnowledgeBaseAIAssistant:
@@ -160,7 +159,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           logger: this.logger,
           currentUser,
           adhocAttackDiscoveryDataClient: this.adhocAttackDiscoveryDataClient,
-          telemetry: core.analytics,
         });
       }),
 
@@ -179,7 +177,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
-          telemetry: core.analytics,
         });
       }),
 
@@ -190,7 +187,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
-          telemetry: core.analytics,
         });
       }),
 
@@ -201,7 +197,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
-          telemetry: core.analytics,
         });
       }),
 
@@ -212,7 +207,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
-          telemetry: core.analytics,
         });
       }),
 
@@ -224,7 +218,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           logger: this.logger,
           currentUser,
           contentReferencesEnabled: params?.contentReferencesEnabled,
-          telemetry: core.analytics,
         });
       }),
     };
