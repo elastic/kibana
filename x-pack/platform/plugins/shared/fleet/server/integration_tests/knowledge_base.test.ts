@@ -243,13 +243,9 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     // Wait for indexing
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Verify that old version content is no longer available
-    const oldVersionResult = await getPackageKnowledgeBaseFromIndex(
-      esClient,
-      'test-package',
-      '1.0.0'
-    );
-    expect(oldVersionResult).toHaveLength(0);
+    // Verify that old version content is no longer available by getting it again and checking that every item is the new version
+    const result = await getPackageKnowledgeBaseFromIndex(esClient, 'test-package');
+    expect(result.every((item) => item.version)).toBe('2.0.0');
 
     // Verify that new version content is available
     const newVersionResult = await getPackageKnowledgeBase({

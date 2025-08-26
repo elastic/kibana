@@ -567,11 +567,7 @@ export async function getPackageInfo({
   // If package is installed and esClient is available, include knowledge base assets
   if (savedObject && esClient) {
     try {
-      const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(
-        esClient,
-        pkgName,
-        resolvedPkgVersion
-      );
+      const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(esClient, pkgName);
       if (knowledgeBaseItems.length > 0) {
         // Add knowledge base paths in the format expected by groupPathsByService
         const knowledgeBasePaths = knowledgeBaseItems.map(

@@ -86,23 +86,12 @@ export async function saveKnowledgeBaseContentToIndex({
 
 export async function getPackageKnowledgeBaseFromIndex(
   esClient: ElasticsearchClient,
-  pkgName: string,
-  pkgVersion?: string
+  pkgName: string
 ): Promise<KnowledgeBaseItem[]> {
   try {
-    let query: any;
-
-    if (pkgVersion) {
-      query = {
-        bool: {
-          must: [{ match: { package_name: pkgName } }, { match: { version: pkgVersion } }],
-        },
-      };
-    } else {
-      query = {
-        match: { package_name: pkgName },
-      };
-    }
+    const query = {
+      match: { package_name: pkgName },
+    };
 
     const response = await esClient.search({
       index: INTEGRATION_KNOWLEDGE_INDEX,
