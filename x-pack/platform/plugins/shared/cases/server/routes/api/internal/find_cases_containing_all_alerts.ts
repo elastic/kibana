@@ -10,9 +10,8 @@ import pLimit from 'p-limit';
 import { createCasesRoute } from '../create_cases_route';
 import { INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL } from '../../../../common/constants';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-import { withSpan } from '@kbn/apm-utils';
-import { CasesClient } from '../../../client';
-import { caseApiV1 } from '../../../../common/types/api';
+import { type CasesClient } from '../../../client';
+import { type caseApiV1 } from '../../../../common/types/api';
 
 const params = {};
 
@@ -46,32 +45,25 @@ export const findCasesContainingAllAlertsRoute = createCasesRoute({
       });
     }
 
-    return withSpan(
-      {
-        name: 'get_cases_by_attachment',
-      },
-      async () => {
-        const caseIdsToCheck = Array.isArray(caseIds) ? caseIds : [caseIds];
+    const caseIdsToCheck = Array.isArray(caseIds) ? caseIds : [caseIds];
 
-        const alertIdSet = new Set(alertIds);
-        const casesContext = await context.cases;
-        const casesClient = await casesContext.getCasesClient();
+    const alertIdSet = new Set(alertIds);
+    const casesContext = await context.cases;
+    const casesClient = await casesContext.getCasesClient();
 
-        const limit = pLimit(MAX_CONCURRENT_CASES);
+    const limit = pLimit(MAX_CONCURRENT_CASES);
 
-        const results: Array<string | null> = await Promise.all(
-          caseIdsToCheck.map((caseId) => {
-            return limit(async () => await processCase(casesClient, caseId, alertIdSet));
-          })
-        );
-
-        return response.ok({
-          body: {
-            casesWithAllAttachments: results.filter((id): id is string => id !== null),
-          },
-        });
-      }
+    const results: Array<string | null> = await Promise.all(
+      caseIdsToCheck.map((caseId) => {
+        return limit(async () => processCase(casesClient, caseId, alertIdSet));
+      })
     );
+
+    return response.ok({
+      body: {
+        casesWithAllAttachments: results.filter((id): id is string => id !== null),
+      },
+    });
   },
 });
 
@@ -87,7 +79,8 @@ export const processCase = async (
   caseId: string,
   alertIds: Set<string>
 ) => {
-  const caseSet = new Set<string>();
+  const caseAlertIds = new Set<string>();
+
   const alertsForCase = await casesClient.attachments.getAllAlertsAttachToCase({
     caseId,
   });
@@ -98,12 +91,12 @@ export const processCase = async (
   // we must walk the case's attached alerts
   for (const alert of alertsForCase) {
     if (alertIds.has(alert.id)) {
-      caseSet.add(alert.id);
+      caseAlertIds.add(alert.id);
     }
   }
 
   // `caseSet` will only contain matched IDs, if the ID count is the same the case contains all selected alerts
-  if (alertIds.size === caseSet.size) {
+  if (alertIds.size === caseAlertIds.size) {
     return caseId;
   }
 
