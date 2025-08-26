@@ -1160,7 +1160,7 @@ owner: elastic`,
           pkgName: 'nginx',
           pkgVersion: '1.0.0',
         })
-      ).rejects.toThrowError(PackageNotFoundError);
+      ).rejects.toThrow(PackageNotFoundError);
     });
 
     it('should do nothing if no excluded data streams', async () => {
