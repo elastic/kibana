@@ -232,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@skipInServerlessMKI throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+      it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
         await deleteAllPrebuiltRuleAssets(es, log);
         // Install base prebuilt detection rule
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
