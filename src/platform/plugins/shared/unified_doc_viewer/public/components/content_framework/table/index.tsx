@@ -7,19 +7,92 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
-import { EuiText } from '@elastic/eui';
+import type { EuiDataGridCellPopoverElementProps, EuiThemeFontSize } from '@elastic/eui';
+import { EuiSpacer, EuiText, useEuiFontSize } from '@elastic/eui';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
+import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../plugin';
-import type { KeyValueDataGridField } from './components/key_value_data_grid';
-import { KeyValueDataGrid } from './components/key_value_data_grid';
+import { FieldRow } from '../../doc_viewer_table/field_row';
+import { TableGrid } from '../../doc_viewer_table/table_grid';
+
+export interface TableFieldConfiguration {
+  name: string;
+  value: unknown;
+  description?: string;
+  valueCellContent?: React.ReactNode;
+}
+
+function renderNamePopover(
+  fieldName: string,
+  fieldConfig: TableFieldConfiguration,
+  cellActions: React.ReactNode
+) {
+  return (
+    <>
+      <EuiText size="s" className="eui-textTruncate">
+        {fieldName}
+      </EuiText>
+      {fieldConfig?.description && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" className="eui-textTruncate">
+            {fieldConfig.description}
+          </EuiText>
+        </>
+      )}
+      {cellActions}
+    </>
+  );
+}
+
+function renderValuePopover(
+  fieldConfig: TableFieldConfiguration,
+  cellActions: React.ReactNode,
+  fontSize: EuiThemeFontSize['fontSize']
+) {
+  return (
+    <>
+      <EuiText
+        css={
+          fontSize
+            ? css`
+                * {
+                  font-size: ${fontSize} !important;
+                }
+              `
+            : undefined
+        }
+      >
+        {fieldConfig?.valueCellContent}
+      </EuiText>
+      {cellActions}
+    </>
+  );
+}
+
+const FormattedValue = ({ value }: { value: string }) => (
+  <EuiText
+    className="eui-textTruncate"
+    size="xs"
+    // Value returned from formatFieldValue is always sanitized
+    dangerouslySetInnerHTML={{ __html: value }}
+  />
+);
 
 export interface ContentFrameworkTableProps
   extends Pick<
     DocViewRenderProps,
-    'hit' | 'dataView' | 'columnsMeta' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
+    | 'hit'
+    | 'dataView'
+    | 'columnsMeta'
+    | 'textBasedHits'
+    | 'filter'
+    | 'onAddColumn'
+    | 'onRemoveColumn'
+    | 'columns'
   > {
   fieldNames: string[];
   fieldConfigurations?: Record<string, FieldConfiguration>;
@@ -39,9 +112,9 @@ export function ContentFrameworkTable({
   fieldNames,
   fieldConfigurations,
   dataView,
-  columnsMeta,
   columns,
   title,
+  textBasedHits,
   filter,
   onAddColumn,
   onRemoveColumn,
@@ -63,58 +136,109 @@ export function ContentFrameworkTable({
     [dataView, fieldFormats, hit, fieldNames]
   );
 
+  const isEsqlMode = Array.isArray(textBasedHits);
+  const { fontSize: smallFontSize } = useEuiFontSize('s');
+
+  const { fields, rows } = useMemo(
+    () =>
+      fieldNames.reduce(
+        (acc, fieldName) => {
+          const value = flattenedHit[fieldName];
+          const fieldConfiguration = fieldConfigurations?.[fieldName];
+          const fieldDescription =
+            fieldConfiguration?.description || fieldsMetadata[fieldName]?.short;
+          const formattedValue = formattedHit[fieldName];
+
+          if (!value) return acc;
+
+          acc.fields[fieldName] = {
+            name: fieldConfiguration?.title || fieldName,
+            value,
+            description: fieldDescription,
+            valueCellContent: fieldConfiguration?.formatter ? (
+              <>{fieldConfiguration.formatter(value, formattedValue)}</>
+            ) : (
+              <FormattedValue value={formattedValue} />
+            ),
+          };
+
+          acc.rows.push(
+            new FieldRow({
+              name: fieldName,
+              displayNameOverride: fieldName,
+              flattenedValue: value,
+              hit,
+              dataView,
+              fieldFormats,
+              isPinned: false,
+              columnsMeta: {},
+            })
+          );
+
+          return acc;
+        },
+        { fields: {} as Record<string, TableFieldConfiguration>, rows: [] as FieldRow[] }
+      ),
+    [
+      dataView,
+      fieldConfigurations,
+      fieldFormats,
+      fieldNames,
+      fieldsMetadata,
+      flattenedHit,
+      formattedHit,
+      hit,
+    ]
+  );
+
+  const cellValueRenderer = useCallback(
+    ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+      const fieldName = rows[rowIndex]?.name;
+      const fieldConfig = fields[fieldName];
+
+      if (!fieldConfig) return null;
+      if (columnId === 'name') {
+        return fieldConfig.name;
+      }
+      return fieldConfig.valueCellContent;
+    },
+    [rows, fields]
+  );
+
+  const cellPopoverRenderer = useCallback(
+    (props: EuiDataGridCellPopoverElementProps) => {
+      const { columnId, cellActions, rowIndex } = props;
+      const fieldName = rows[rowIndex]?.name;
+      const fieldConfig = fields[fieldName];
+      if (!fieldConfig) return null;
+      if (columnId === 'name') {
+        return renderNamePopover(fieldName, fieldConfig, cellActions);
+      }
+      return renderValuePopover(fieldConfig, cellActions, smallFontSize);
+    },
+    [rows, fields, smallFontSize]
+  );
+
   if (Object.keys(hit.flattened).length === 0) {
     return null;
   }
 
-  const FormattedValue = ({ value }: { value: string }) => (
-    <EuiText
-      className="eui-textTruncate"
-      size="xs"
-      // Value returned from formatFieldValue is always sanitized
-      dangerouslySetInnerHTML={{ __html: value }}
-    />
-  );
-
-  const fields: Record<string, KeyValueDataGridField> = fieldNames.reduce<
-    Record<string, KeyValueDataGridField>
-  >((acc, fieldName) => {
-    const value = flattenedHit[fieldName];
-    const fieldConfiguration = fieldConfigurations?.[fieldName];
-    const fieldDescription = fieldConfiguration?.description || fieldsMetadata[fieldName]?.short;
-    const formattedValue = formattedHit[fieldName];
-
-    if (!value) return acc;
-
-    acc[fieldName] = {
-      name: fieldConfiguration?.title || fieldName,
-      value,
-      description: fieldDescription,
-      valueCellContent: fieldConfiguration?.formatter ? (
-        <>{fieldConfiguration?.formatter(value, formattedValue)}</>
-      ) : (
-        <FormattedValue value={formattedValue} />
-      ),
-    };
-
-    return acc;
-  }, {});
-
   return (
-    <div>
-      <KeyValueDataGrid
-        hit={hit}
-        fields={fields}
-        dataView={dataView}
-        columns={columns}
-        columnsMeta={columnsMeta}
-        onAddColumn={onAddColumn}
-        onRemoveColumn={onRemoveColumn}
-        filter={filter}
-        isEsqlMode={false}
-        title={title}
-        data-test-subj="ContentFrameworkTableKeyValueDataGrid"
-      />
-    </div>
+    <TableGrid
+      data-test-subj="ContentFrameworkTableKeyValueDataGrid"
+      id={title}
+      containerWidth={800} // TODO make dynamic
+      rows={rows}
+      isEsqlMode={isEsqlMode}
+      filter={filter}
+      onAddColumn={onAddColumn}
+      onRemoveColumn={onRemoveColumn}
+      columns={columns}
+      onFindSearchTermMatch={() => null}
+      searchTerm={''}
+      initialPageSize={0}
+      customRenderCellValue={cellValueRenderer}
+      customRenderCellPopover={cellPopoverRenderer}
+    />
   );
 }
