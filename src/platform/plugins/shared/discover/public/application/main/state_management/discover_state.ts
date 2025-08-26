@@ -538,21 +538,17 @@ export function getDiscoverStateContainer({
     let fields: string[] = [];
 
     if (isOfAggregateQueryType(payload.query)) {
-      console.log('ES|QL');
       fields = getQueryColumnsFromESQLQuery(payload.query.esql);
     } else if (isOfQueryType(payload.query) && typeof payload.query.query === 'string') {
-      console.log('KQL');
       fields = getKqlFieldNamesFromExpression(payload.query?.query);
     }
 
     const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     const scopedEbtManager = scopedEbtManager$.getValue();
-    if (scopedEbtManager) {
-      await scopedEbtManager.trackSubmittingQueryEvent({
-        fieldNames: fields,
-        fieldsMetadata: services.fieldsMetadata,
-      });
-    }
+    await scopedEbtManager.trackSubmittingQueryEvent({
+      fieldNames: fields,
+      fieldsMetadata: services.fieldsMetadata,
+    });
 
     if (isUpdate === false) {
       // remove the search session if the given query is not just updated
