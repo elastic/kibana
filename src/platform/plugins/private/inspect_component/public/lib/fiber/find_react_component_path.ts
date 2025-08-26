@@ -51,11 +51,12 @@ export const findReactComponentPath = (
           }
         }
 
+        const oneLetterHtmlTags = ['p', 'b', 'i', 'q', 'u', 's'];
         /** Remove wrappers. */
         if (
           type &&
           !COMPONENT_PATH_IGNORED_TYPES.some((t) => type.includes(t)) &&
-          type.length > 1
+          (type.length > 1 || oneLetterHtmlTags.includes(type))
         ) {
           path.push(type);
         }
