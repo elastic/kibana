@@ -14,13 +14,13 @@ import { extractNonAggregatableDatasets } from './extract_non_aggregatable_datas
 
 export async function getNonAggregatableDataStreams({
   esClient,
-  types,
+  types = ['logs'],
   start,
   end,
   dataStream,
 }: {
   esClient: ElasticsearchClient;
-  types: DataStreamType[];
+  types?: DataStreamType[];
   start: number;
   end: number;
   dataStream?: string;
