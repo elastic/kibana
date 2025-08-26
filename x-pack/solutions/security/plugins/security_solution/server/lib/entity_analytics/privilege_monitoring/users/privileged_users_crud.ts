@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { UpdatePrivMonUserRequestBody } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
@@ -15,6 +14,12 @@ import type {
 } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import type { PrivMonUserSource } from '../types';
+import {
+  findUserByUsername,
+  isUserLimitReached,
+  createUserDocument,
+  updateUserWithSource,
+} from './utils';
 
 export const createPrivilegedUsersCrudService = ({
   deps,
@@ -23,43 +28,38 @@ export const createPrivilegedUsersCrudService = ({
   const esClient = deps.clusterClient.asCurrentUser;
 
   const create = async (
-    user: CreatePrivMonUserRequestBody,
+    userInput: CreatePrivMonUserRequestBody,
     source: PrivMonUserSource,
-    maxUsersAllowed: number
+    maxPrivilegedUsersAllowed: number,
+    opts?: {
+      refresh?: boolean;
+    }
   ): Promise<CreatePrivMonUserResponse> => {
-    const currentUserCount = await esClient.count({
-      index,
-      query: {
-        term: {
-          'user.is_privileged': true,
-        },
-      },
-    });
+    const username = userInput.user?.name;
 
-    if (currentUserCount.count >= maxUsersAllowed) {
-      throw new Error(`Cannot create user: Maximum user limit of ${maxUsersAllowed} reached`);
+    if (!username) {
+      throw new Error('Username is required');
     }
 
-    const doc = merge(user, {
-      user: {
-        is_privileged: true,
-      },
-      labels: {
-        sources: [source],
-      },
-    });
+    // Check if user already exists
+    const existingUser = await findUserByUsername(esClient, index, username);
 
-    const res = await esClient.index({
-      index,
-      refresh: 'wait_for',
-      document: doc,
-    });
-
-    const newUser = await get(res._id);
-    if (!newUser) {
-      throw new Error(`Failed to create user: ${res._id}`);
+    if (existingUser) {
+      // User exists, update with new source
+      return updateUserWithSource(esClient, index, existingUser, source, userInput, get);
     }
-    return newUser;
+
+    // Check user limit before creating new user
+    const limitReached = await isUserLimitReached(esClient, index, maxPrivilegedUsersAllowed);
+
+    if (limitReached) {
+      throw new Error(
+        `Cannot add user: maximum limit of ${maxPrivilegedUsersAllowed} privileged users reached`
+      );
+    }
+
+    // Create new user document
+    return createUserDocument(esClient, index, userInput, source, get);
   };
 
   const get = async (id: string): Promise<MonitoredUserDoc | undefined> => {
