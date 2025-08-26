@@ -10,10 +10,10 @@ import { tool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
 
-const DESCRIPTION = 'Get information about a host or entity from the asset inventory';
+const DESCRIPTION = 'Get information about an asset from the asset inventory (hosts, users, services, etc.)';
 
 const simpleSchema = z.object({
-  entityId: z.string().describe('Host name or entity ID to look up'),
+  entityId: z.string().describe('Asset identifier to look up (host name, user name, entity ID, or ARN)'),
 });
 
 export const ASSET_INVENTORY_TOOL: AssistantTool = {
@@ -44,6 +44,7 @@ export const ASSET_INVENTORY_TOOL: AssistantTool = {
                   { match: { 'entity.name': entityId } },
                   { match: { 'host.name': entityId } },
                   { match: { 'entity.id': entityId } },
+                  { match: { 'user.name': entityId } },
                 ],
               },
             },
@@ -79,7 +80,7 @@ Cloud & Account:
 - Account Name: ${entity.cloud?.account?.name || 'Not available'}
 - Account ID: ${entity.cloud?.account?.id || 'Not available'}`;
 
-          // Add Host-specific information
+          // Add type-specific information
           if (entityType === 'Host') {
             message += `
 
@@ -97,6 +98,17 @@ Network:
 - Host ID: ${entity.host?.id || 'Not available'}
 - IP Address: ${entity.host?.ip || 'Not available'}
 - MAC Address: ${entity.host?.mac || 'Not available'}`;
+          } else if (entityType === 'User' || entity.user?.name) {
+            message += `
+
+User Details:
+- Username: ${entity.user?.name || 'Not available'}
+- Domain: ${entity.user?.domain || 'Not available'}
+- Email: ${entity.user?.email || 'Not available'}
+- Full Name: ${entity.user?.full_name || 'Not available'}
+- User ID: ${entity.user?.id || 'Not available'}
+- Roles: ${Array.isArray(entity.user?.roles) ? entity.user.roles.join(', ') : entity.user?.roles || 'Not available'}
+- User Hash: ${entity.user?.hash || 'Not available'}`;
           }
 
           // Add summary based on entity type
@@ -110,6 +122,12 @@ Network:
 The host ${entity.entity?.name || entityId} is a ${entityType} (${entitySubType}) with ${
               entity.asset?.criticality || 'unassigned'
             } business criticality, located in ${location}, owned by account "${entity.cloud?.account?.name || 'unknown'}", last seen on ${entity['@timestamp']}.`;
+          } else if (entityType === 'User' || entity.user?.name) {
+            message += `
+
+The user ${entity.entity?.name || entity.user?.name || entityId} is a ${entityType} (${entitySubType}) with ${
+              entity.asset?.criticality || 'unassigned'
+            } business criticality${entity.user?.domain ? ` in domain "${entity.user.domain}"` : ''}, associated with account "${entity.cloud?.account?.name || 'unknown'}", last seen on ${entity['@timestamp']}.`;
           } else {
             message += `
 
