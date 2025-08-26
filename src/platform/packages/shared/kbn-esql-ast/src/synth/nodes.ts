@@ -8,8 +8,8 @@
  */
 
 import { Builder } from '../builder';
-import {
-  ESQLColumn
+import type {
+  ESQLColumn,
   ESQLDecimalLiteral,
   ESQLIntegerLiteral,
   ESQLParamLiteral,
