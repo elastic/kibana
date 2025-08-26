@@ -6188,6 +6188,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/grok-heuristics@link:x-pack/platform/packages/shared/kbn-grok-heuristics":
+  version "0.0.0"
+  uid ""
+
 "@kbn/grok-ui@link:src/platform/packages/shared/kbn-grok-ui":
   version "0.0.0"
   uid ""
@@ -8181,10 +8185,6 @@
   uid ""
 
 "@kbn/test-subj-selector@link:src/platform/packages/shared/kbn-test-subj-selector":
-  version "0.0.0"
-  uid ""
-
-"@kbn/test-suites-serverless@link:x-pack/test_serverless":
   version "0.0.0"
   uid ""
 
@@ -25842,9 +25842,9 @@ node-gyp-build-optional-packages@5.2.2:
     detect-libc "^2.0.1"
 
 node-gyp-build@^4.2.2:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.5.0.tgz#7a64eefa0b21112f89f58379da128ac177f20e40"
-  integrity sha512-2iGbaQBV+ITgCz76ZEjmhUKAKVf7xfY1sRl4UiKQspfZMH2h06SyhNsnSVy50cwkFQDGLyif6m/6uFXHkOZ6rg==
+  version "4.8.4"
+  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.8.4.tgz#8a70ee85464ae52327772a90d66c6077a900cfc8"
+  integrity sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==
 
 node-int64@^0.4.0:
   version "0.4.0"
