@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-import { ResourceIdentifier } from '../../common/resources';
-import type { SiemMigrationResourceBase } from '../../model/common.gen';
-import type { OriginalRule } from '../../model/rule_migration.gen';
-
-export class RuleResourceIdentifier extends ResourceIdentifier<OriginalRule> {
-  public fromOriginal(rule: OriginalRule): SiemMigrationResourceBase[] {
-    const originalRule = rule;
-    return this.identifier(originalRule.query);
-  }
-}
+export { RuleResourceIdentifier } from './rule_resource_identifier';

@@ -69,10 +69,10 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
               return {
                 migration_id: migrationId,
                 original_dashboard: {
-                  id: originalDashboard.id as string,
-                  title: originalDashboard.label ?? originalDashboard.title ?? '',
-                  description: originalDashboard.description ?? '',
-                  data: originalDashboard['eai:data'] ?? '<empty/>',
+                  id: originalDashboard.id,
+                  title: originalDashboard.label ?? originalDashboard.title,
+                  description: originalDashboard.description ?? originalDashboard.title,
+                  data: originalDashboard['eai:data'],
                   format: 'xml',
                   vendor: 'splunk',
                   last_updated: originalDashboard.updated ?? new Date().toISOString(),
