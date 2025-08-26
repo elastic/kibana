@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

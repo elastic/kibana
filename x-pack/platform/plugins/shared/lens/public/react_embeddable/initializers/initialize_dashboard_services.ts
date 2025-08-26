@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import {
+import type {
   HasLibraryTransforms,
   PublishesWritableTitle,
   PublishesWritableDescription,
   SerializedTitles,
   StateComparators,
   initializeTitleManager,
-  titleComparators,
 } from '@kbn/presentation-publishing';
+import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
-import { BehaviorSubject, Observable, map, merge } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import { isTextBasedLanguage } from '../helper';
 import type {
   LensComponentProps,
@@ -30,7 +31,7 @@ import type {
   LensSerializedState,
 } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
-import { StateManagementConfig } from './initialize_state_management';
+import type { StateManagementConfig } from './initialize_state_management';
 
 // Convenience type for the serialized props of this initializer
 type SerializedProps = SerializedTitles & LensPanelProps & LensOverrides & LensSharedProps;

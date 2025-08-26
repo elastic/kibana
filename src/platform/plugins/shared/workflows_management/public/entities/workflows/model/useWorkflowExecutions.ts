@@ -8,7 +8,7 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WorkflowExecutionListDto } from '@kbn/workflows';
+import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import { useQuery } from '@tanstack/react-query';
 
 export function useWorkflowExecutions(workflowId: string | null) {

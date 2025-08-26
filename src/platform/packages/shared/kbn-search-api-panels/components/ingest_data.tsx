@@ -14,10 +14,10 @@ import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IngestPipelinePanel } from './ingest_pipelines/ingest_pipeline_panel';
 import { CodeBox } from './code_box';
-import { LanguageDefinition } from '../types';
+import type { LanguageDefinition } from '../types';
 import { OverviewPanel } from './overview_panel';
 import { IngestionsPanel } from './ingestions_panel';
 interface IngestDataProps {

@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common/constants';
-import { SupertestWithRoleScopeType } from '../../services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');

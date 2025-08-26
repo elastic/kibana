@@ -8,8 +8,9 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedHistogramFetchStatus } from '..';
 import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../types';
 import {

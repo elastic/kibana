@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 export type Item = UserContentCommonSchema;

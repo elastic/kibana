@@ -8,12 +8,13 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
+import type { WebElement, WebDriver } from 'selenium-webdriver';
+import { By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { ToolingLog } from '@kbn/tooling-log';
-import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../remote/browsers';

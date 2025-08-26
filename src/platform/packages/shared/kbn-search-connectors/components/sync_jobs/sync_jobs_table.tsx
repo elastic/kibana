@@ -9,27 +9,20 @@
 
 import React, { useState } from 'react';
 
-import {
-  CriteriaWithPagination,
-  EuiBadge,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButtonIcon,
-  EuiCode,
-  EuiIcon,
-  EuiToolTip,
-  Pagination,
-} from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn, Pagination } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiCode, EuiIcon, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ConnectorSyncJob, isSyncCancellable, SyncJobType, SyncStatus } from '../..';
+import type { ConnectorSyncJob, SyncJobType, SyncStatus } from '../..';
+import { isSyncCancellable } from '../..';
 
 import { syncJobTypeToText, syncStatusToColor, syncStatusToText } from '../..';
 import { durationToText, getSyncJobDuration } from '../../utils/duration_to_text';
 import { FormattedDateTime } from '../../utils/formatted_date_time';
 import { SyncJobFlyout } from './sync_job_flyout';
-import { CancelSyncJobModal, CancelSyncModalProps } from './sync_job_cancel_modal';
+import type { CancelSyncModalProps } from './sync_job_cancel_modal';
+import { CancelSyncJobModal } from './sync_job_cancel_modal';
 
 interface SyncJobHistoryTableProps {
   isLoading?: boolean;

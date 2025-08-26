@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { elasticModelDictionary } from '@kbn/inference-common';
-import { PromptArray, Prompt, GetPromptArgs, GetPromptsByGroupIdArgs } from './types';
+import type { PromptArray, Prompt, GetPromptArgs, GetPromptsByGroupIdArgs } from './types';
 import { getProviderFromActionTypeId } from './utils';
 import { promptSavedObjectType } from './saved_object_mappings';
 

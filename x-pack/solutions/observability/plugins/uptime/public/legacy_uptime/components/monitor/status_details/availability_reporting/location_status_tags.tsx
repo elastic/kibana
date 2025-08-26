@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
 import { useEuiTheme } from '@elastic/eui';
-import { MonitorLocation } from '../../../../../../common/runtime_types';
+import type { MonitorLocation } from '../../../../../../common/runtime_types';
 import { SHORT_TIMESPAN_LOCALE, SHORT_TS_LOCALE } from '../../../../../../common/constants';
 import { AvailabilityReporting } from '..';
 import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';

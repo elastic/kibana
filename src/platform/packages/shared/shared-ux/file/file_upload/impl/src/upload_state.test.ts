@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { of, delay, merge, tap, mergeMap } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import type {
@@ -16,7 +16,7 @@ import type {
   BaseFilesClient as FilesClient,
 } from '@kbn/shared-ux-file-types';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
-import { ImageMetadataFactory } from '@kbn/shared-ux-file-util';
+import type { ImageMetadataFactory } from '@kbn/shared-ux-file-util';
 
 import { UploadState } from './upload_state';
 

@@ -12,8 +12,10 @@ import type {
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
 } from '../api';
-import { Message, MessageRole } from '../messages';
-import { ToolChoiceType, ToolDefinition, ToolResponseOf } from '../tools';
+import type { Message } from '../messages';
+import { MessageRole } from '../messages';
+import type { ToolDefinition, ToolResponseOf } from '../tools';
+import { ToolChoiceType } from '../tools';
 
 declare const mockApi: ChatCompleteAPI;
 const minimalMessages: Message[] = [{ role: MessageRole.User, content: 'hello' }];

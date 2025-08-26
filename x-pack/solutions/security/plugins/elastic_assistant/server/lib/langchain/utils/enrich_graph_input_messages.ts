@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { BaseMessage, HumanMessage } from '@langchain/core/messages';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage } from '@langchain/core/messages';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { promptGroupId } from '../../prompt/local_prompt_object';
 import { getPrompt, promptDictionary } from '../../prompt';
 

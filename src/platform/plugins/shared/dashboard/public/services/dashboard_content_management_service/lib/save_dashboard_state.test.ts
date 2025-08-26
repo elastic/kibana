@@ -10,7 +10,7 @@
 import { getSampleDashboardState } from '../../../mocks';
 import { contentManagementService, coreServices, dataService } from '../../kibana_services';
 import { saveDashboardState } from './save_dashboard_state';
-import { DashboardPanel } from '../../../../server';
+import type { DashboardPanel } from '../../../../server';
 
 contentManagementService.client.create = jest.fn().mockImplementation(({ options }) => {
   if (options.id === undefined) {

@@ -12,7 +12,7 @@ import React from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 enum IpRangeTypes {
   MASK = 'mask',

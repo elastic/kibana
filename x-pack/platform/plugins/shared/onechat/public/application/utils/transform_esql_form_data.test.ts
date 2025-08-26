@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { EsqlToolDefinition, ToolType } from '@kbn/onechat-common';
-import { CreateToolPayload } from '../../../common/http_api/tools';
+import type { EsqlToolDefinition } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/onechat-common';
+import type { CreateToolPayload } from '../../../common/http_api/tools';
 import {
   transformEsqlFormDataForCreate,
   transformEsqlFormDataForUpdate,
   transformEsqlToolToFormData,
   transformFormDataToEsqlTool,
 } from './transform_esql_form_data';
-import { OnechatEsqlToolFormData } from '../components/tools/esql/form/types/esql_tool_form_types';
+import type { OnechatEsqlToolFormData } from '../components/tools/esql/form/types/esql_tool_form_types';
 
 describe('transformEsqlFormData', () => {
   let mockFormData: OnechatEsqlToolFormData;
