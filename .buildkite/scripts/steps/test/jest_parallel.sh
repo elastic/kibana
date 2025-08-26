@@ -73,7 +73,12 @@ cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings --no-experimenta
 if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
   cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
 fi
-cmd=$cmd"\" node ./scripts/jest_all ${selection_args[*]} $parallelism --coverage=false --passWithNoTests"
+
+if [[ "$TEST_TYPE" == "unit" ]]; then
+  cmd=$cmd"\" node ./scripts/jest_all ${selection_args[*]} $parallelism --coverage=false --passWithNoTests"
+else
+  cmd=$cmd"\" node ./scripts/jest ${selection_args[*]} $parallelism --coverage=false --passWithNoTests"
+fi
 
 echo "actual full command is:"
 echo "$cmd"
