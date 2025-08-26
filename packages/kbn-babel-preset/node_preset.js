@@ -25,7 +25,6 @@ module.exports = (_, options = {}) => {
           ],
         ],
       },
-      require('./common_preset'),
       [
         require.resolve('@babel/preset-env'),
         {
@@ -54,6 +53,7 @@ module.exports = (_, options = {}) => {
           ...(options['@babel/preset-env'] || {}),
         },
       ],
+      [require('./common_preset'), options],
     ],
   };
 };

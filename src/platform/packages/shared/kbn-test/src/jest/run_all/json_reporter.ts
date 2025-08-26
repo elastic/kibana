@@ -53,7 +53,5 @@ export default class JsonReporter implements Reporter {
     };
 
     await Fs.promises.writeFile(outputPath, JSON.stringify(slim), 'utf8');
-
-    console.log(`Completed writing to ${outputPath}`);
   }
 }

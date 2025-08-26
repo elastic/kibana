@@ -18,7 +18,6 @@ module.exports = (
 ) => {
   return {
     presets: [
-      [require('./common_preset'), options],
       [
         require.resolve('@babel/preset-env'),
         {
@@ -31,6 +30,7 @@ module.exports = (
           browserslistEnv: api.env('production') ? 'production' : 'dev',
         },
       ],
+      [require('./common_preset'), options],
     ],
     plugins: [
       // Conditionally include babel-plugin-transform-require-default
