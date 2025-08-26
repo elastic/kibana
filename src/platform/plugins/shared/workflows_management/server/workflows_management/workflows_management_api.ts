@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
-import type { SchedulerService } from '../scheduler/scheduler_service';
 import type { WorkflowsService } from './workflows_management_service';
 import type { LogSearchResult } from './lib/workflow_logger';
 
@@ -92,13 +91,8 @@ export interface GetStepLogsParams {
 export class WorkflowsManagementApi {
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private schedulerService: SchedulerService | null = null,
     private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
   ) {}
-
-  public setSchedulerService(schedulerService: SchedulerService) {
-    this.schedulerService = schedulerService;
-  }
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
     return await this.workflowsService.searchWorkflows(params, spaceId);
@@ -161,9 +155,6 @@ export class WorkflowsManagementApi {
     spaceId: string,
     inputs: Record<string, any>
   ): Promise<string> {
-    if (!this.schedulerService) {
-      throw new Error('Scheduler service not set');
-    }
     const context = {
       ...inputs,
       spaceId,
@@ -178,9 +169,6 @@ export class WorkflowsManagementApi {
     inputs: Record<string, any>,
     spaceId: string
   ): Promise<string> {
-    if (!this.schedulerService) {
-      throw new Error('Scheduler service not set');
-    }
     const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
 
     if (parsedYaml.error) {
