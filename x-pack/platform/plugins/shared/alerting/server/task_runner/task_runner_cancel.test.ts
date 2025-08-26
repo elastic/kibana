@@ -479,9 +479,13 @@ describe('Task Runner Cancel', () => {
 
   function testLogger() {
     expect(logger.debug).toHaveBeenCalledTimes(8);
-    expect(logger.debug).toHaveBeenNthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      tags: ['1', 'test'],
-    });
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        tags: ['1', 'test'],
+      }
+    );
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `Cancelling rule type test with id 1 - execution exceeded rule type timeout of 5m`,

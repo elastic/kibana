@@ -159,7 +159,9 @@ describe('test protection updates note handler', () => {
       );
 
       expect(mockResponse.ok).toHaveBeenCalled();
-      expect(mockSavedObjectClient.update).toHaveBeenCalledWith(...mockedSOSuccessfulUpdateResponse);
+      expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
+        ...mockedSOSuccessfulUpdateResponse
+      );
     });
 
     it('should return the note if one exists', async () => {

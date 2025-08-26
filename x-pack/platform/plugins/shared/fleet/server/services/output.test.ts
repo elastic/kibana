@@ -1185,9 +1185,13 @@ describe('Output Service', () => {
       });
 
       expect(soClient.update).toHaveBeenCalledTimes(2);
-      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), outputIdToUuid('output-test'), {
-        is_default: true,
-      });
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        outputIdToUuid('output-test'),
+        {
+          is_default: true,
+        }
+      );
       expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-output'),
@@ -1264,9 +1268,13 @@ describe('Output Service', () => {
       });
 
       expect(soClient.update).toHaveBeenCalledTimes(2);
-      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), outputIdToUuid('output-test'), {
-        is_default_monitoring: true,
-      });
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        outputIdToUuid('output-test'),
+        {
+          is_default_monitoring: true,
+        }
+      );
       expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-monitoring-output'),

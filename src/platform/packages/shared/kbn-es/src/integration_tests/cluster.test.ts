@@ -335,33 +335,33 @@ describe('#start(installPath)', () => {
   test('rejects when bin/elasticsearch exists with 0 before starting', async () => {
     mockEsBin({ exitCode: 0, start: false });
 
-    await expect(
-      new Cluster({ log }).start(installPath, esClusterExecOptions)
-    ).rejects.toThrow('ES exited without starting');
+    await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
+      'ES exited without starting'
+    );
   });
 
   test('rejects when bin/elasticsearch exists with 143 before starting', async () => {
     mockEsBin({ exitCode: 143, start: false });
 
-    await expect(
-      new Cluster({ log }).start(installPath, esClusterExecOptions)
-    ).rejects.toThrow('ES exited without starting');
+    await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
+      'ES exited without starting'
+    );
   });
 
   test('rejects when bin/elasticsearch exists with 130 before starting', async () => {
     mockEsBin({ exitCode: 130, start: false });
 
-    await expect(
-      new Cluster({ log }).start(installPath, esClusterExecOptions)
-    ).rejects.toThrow('ES exited without starting');
+    await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
+      'ES exited without starting'
+    );
   });
 
   test('rejects when bin/elasticsearch exists with 1 before starting', async () => {
     mockEsBin({ exitCode: 1, start: false });
 
-    await expect(
-      new Cluster({ log }).start(installPath, esClusterExecOptions)
-    ).rejects.toThrow('ES exited with code 1');
+    await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
+      'ES exited with code 1'
+    );
   });
 
   test('resolves when bin/elasticsearch logs "started"', async () => {
@@ -409,9 +409,9 @@ describe('#start(installPath)', () => {
   test(`rejects if waitUntilClusterReady() rejects`, async () => {
     mockEsBin({ start: true });
     waitUntilClusterReadyMock.mockRejectedValue(new Error('foo'));
-    await expect(
-      new Cluster({ log }).start(installPath, esClusterExecOptions)
-    ).rejects.toThrow('foo');
+    await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
+      'foo'
+    );
   });
 
   test('rejects if #start() was called previously', async () => {

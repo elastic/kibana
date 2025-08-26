@@ -299,7 +299,10 @@ describe('AlertsClient', () => {
 
       expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(2);
       expect(getAlertIndicesAliasMock).toHaveBeenNthCalledWith(1, ['siem.esqlRule']);
-      expect(getAlertIndicesAliasMock).toHaveBeenNthCalledWith(2, ['.es-query', 'logs.alert.document.count']);
+      expect(getAlertIndicesAliasMock).toHaveBeenNthCalledWith(2, [
+        '.es-query',
+        'logs.alert.document.count',
+      ]);
     });
 
     test('should fetch alert fields correctly', async () => {

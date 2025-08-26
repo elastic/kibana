@@ -493,9 +493,7 @@ paths:
       },
     };
 
-    expect(() => compileTemplate(vars, template)).toThrow(
-      'YAMLException: duplicated mapping key'
-    );
+    expect(() => compileTemplate(vars, template)).toThrow('YAMLException: duplicated mapping key');
   });
 });
 

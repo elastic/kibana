@@ -1249,9 +1249,7 @@ describe('#decryptAttributes', () => {
           { ...encryptedAttributes, attrThree: 2 },
           { user: mockUser }
         )
-      ).rejects.toThrow(
-        'Encrypted "attrThree" attribute should be a string, but found number'
-      );
+      ).rejects.toThrow('Encrypted "attrThree" attribute should be a string, but found number');
     });
 
     it('fails to decrypt if encrypted attribute is not correct', async () => {

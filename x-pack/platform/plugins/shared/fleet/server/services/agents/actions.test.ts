@@ -315,9 +315,9 @@ describe('Agent actions', () => {
         },
       } as any);
       const soClient = savedObjectsClientMock.create();
-      await expect(() =>
-        cancelAgentAction(esClient, soClient, 'i-do-not-exists')
-      ).rejects.toThrow(/Action not found/);
+      await expect(() => cancelAgentAction(esClient, soClient, 'i-do-not-exists')).rejects.toThrow(
+        /Action not found/
+      );
     });
 
     it('should create one CANCEL action for each UPGRADE action found', async () => {

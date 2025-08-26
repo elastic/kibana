@@ -65,7 +65,9 @@ describe('useCreateMaintenanceWindow', () => {
     await act(async () => {
       await result.current.mutate(maintenanceWindow);
     });
-    await waitFor(() => expect(mockAddSuccess).toHaveBeenCalledWith("Created maintenance window 'test'"));
+    await waitFor(() =>
+      expect(mockAddSuccess).toHaveBeenCalledWith("Created maintenance window 'test'")
+    );
   });
 
   it('should call onError if api fails', async () => {

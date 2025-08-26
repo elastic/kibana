@@ -522,7 +522,9 @@ describe('bulkEnableRules', () => {
         'Successfully enabled schedules for underlying tasks: id1'
       );
       expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith('Failure to enable schedules for underlying tasks: id2');
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failure to enable schedules for underlying tasks: id2'
+      );
 
       expect(result).toStrictEqual({
         errors: [],
@@ -852,9 +854,7 @@ describe('bulkEnableRules', () => {
         throw new Error('Error');
       });
 
-      await expect(rulesClient.bulkEnableRules({ filter: 'fake_filter' })).rejects.toThrow(
-        'Error'
-      );
+      await expect(rulesClient.bulkEnableRules({ filter: 'fake_filter' })).rejects.toThrow('Error');
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');

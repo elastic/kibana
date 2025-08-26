@@ -205,9 +205,9 @@ describe('AssetCriticalityService', () => {
         (mockAssetCriticalityDataClient.search as jest.Mock)
           .mockReset()
           .mockRejectedValueOnce(new Error('foo'));
-        await expect(() =>
-          service.getCriticalitiesByIdentifiers([baseIdentifier])
-        ).rejects.toThrow('foo');
+        await expect(() => service.getCriticalitiesByIdentifiers([baseIdentifier])).rejects.toThrow(
+          'foo'
+        );
       });
     });
   });

@@ -797,8 +797,12 @@ describe('UninstallTokenService', () => {
 
             await uninstallTokenService.checkTokenValidityForAllPolicies();
 
-            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
-            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith({
+            expect(
+              esoClientMock.createPointInTimeFinderDecryptedAsInternalUser
+            ).toHaveBeenCalledTimes(1);
+            expect(
+              esoClientMock.createPointInTimeFinderDecryptedAsInternalUser
+            ).toHaveBeenCalledWith({
               filter:
                 'fleet-uninstall-tokens.id: "test-so-id" or fleet-uninstall-tokens.id: "test-so-id-two"',
               perPage: 10000,
@@ -816,7 +820,9 @@ describe('UninstallTokenService', () => {
 
             await uninstallTokenService.checkTokenValidityForAllPolicies();
 
-            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+            expect(
+              esoClientMock.createPointInTimeFinderDecryptedAsInternalUser
+            ).toHaveBeenCalledTimes(2);
 
             expect(
               esoClientMock.createPointInTimeFinderDecryptedAsInternalUser
@@ -893,9 +899,9 @@ describe('UninstallTokenService', () => {
 
           mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
-          await expect(
-            uninstallTokenService.checkTokenValidityForAllPolicies()
-          ).rejects.toThrow('Unknown error happened while checking Uninstall Tokens validity');
+          await expect(uninstallTokenService.checkTokenValidityForAllPolicies()).rejects.toThrow(
+            'Unknown error happened while checking Uninstall Tokens validity'
+          );
         });
       });
 

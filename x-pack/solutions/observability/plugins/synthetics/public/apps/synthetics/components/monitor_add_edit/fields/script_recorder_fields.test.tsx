@@ -61,7 +61,10 @@ describe('<ScriptRecorderFields />', () => {
     });
 
     await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith({ scriptText: testScript, fileName: 'samplescript.js' });
+      expect(onChange).toHaveBeenCalledWith({
+        scriptText: testScript,
+        fileName: 'samplescript.js',
+      });
     });
   });
 

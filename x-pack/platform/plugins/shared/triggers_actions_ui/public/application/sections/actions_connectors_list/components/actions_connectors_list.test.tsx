@@ -398,7 +398,10 @@ describe('actions_connectors_list', () => {
 
       await setup();
 
-      expect(mockedEditItem).toHaveBeenCalledWith(selectedConnector, EditConnectorTabs.Configuration);
+      expect(mockedEditItem).toHaveBeenCalledWith(
+        selectedConnector,
+        EditConnectorTabs.Configuration
+      );
       expect(mockedCreateHref).toHaveBeenCalledWith({ pathname: '/connectors' });
       expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/connectors');
       replaceStateSpy.mockRestore();

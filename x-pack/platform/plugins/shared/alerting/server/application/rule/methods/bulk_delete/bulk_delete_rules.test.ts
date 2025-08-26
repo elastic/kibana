@@ -515,7 +515,9 @@ describe('bulkDelete', () => {
         'Successfully deleted schedules for underlying tasks: id1'
       );
       expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith('Failure to delete schedules for underlying tasks: id2');
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failure to delete schedules for underlying tasks: id2'
+      );
     });
 
     test('should not throw an error if taskManager throw an error', async () => {
@@ -619,9 +621,7 @@ describe('bulkDelete', () => {
         statuses: [{ id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
       });
 
-      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow(
-        'Error'
-      );
+      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow('Error');
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');

@@ -795,7 +795,11 @@ describe('IndexPatterns', () => {
       expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-      expect(indexPatterns.get).toHaveBeenCalledWith(indexPatternObj.id, displayErrors, refreshFields);
+      expect(indexPatterns.get).toHaveBeenCalledWith(
+        indexPatternObj.id,
+        displayErrors,
+        refreshFields
+      );
       expect(indexPatterns.refreshFields).toHaveBeenCalledWith(dataView, displayErrors);
     });
 

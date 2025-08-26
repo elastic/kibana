@@ -82,9 +82,9 @@ describe('bulk_delete', () => {
 
       expect.assertions(2);
 
-      expect(() =>
-        retrieveFilesIgnoringNotFound([otherErrorResult], ['abc'], mockLogger)
-      ).toThrow(otherError);
+      expect(() => retrieveFilesIgnoringNotFound([otherErrorResult], ['abc'], mockLogger)).toThrow(
+        otherError
+      );
       expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 

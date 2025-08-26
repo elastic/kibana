@@ -136,9 +136,7 @@ describe('Versioned route', () => {
         .addVersion({ version: '1', validate: false }, handlerFn)
         .addVersion({ version: '1', validate: false }, handlerFn)
         .addVersion({ version: '3', validate: false }, handlerFn)
-    ).toThrow(
-      `Version "1" handler has already been registered for the route [get] [/test/{id}]`
-    );
+    ).toThrow(`Version "1" handler has already been registered for the route [get] [/test/{id}]`);
   });
 
   it('only allows versions that are numbers greater than 0 for internal APIs', () => {

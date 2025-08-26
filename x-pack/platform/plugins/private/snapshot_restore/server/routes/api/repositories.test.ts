@@ -316,9 +316,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     it('should throw if ES error', async () => {
       nodesInfoFn.mockRejectedValueOnce(new Error('Error getting cluster stats'));
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrow(
-        'Error getting cluster stats'
-      );
+      await expect(router.runRequest(mockRequest)).rejects.toThrow('Error getting cluster stats');
     });
   });
 

@@ -301,7 +301,9 @@ describe('SLOs Page', () => {
 
         button.click();
 
-        expect(mockNavigate).toHaveBeenCalledWith(`${paths.sloEdit(sloList.results.at(0)?.id || '')}`);
+        expect(mockNavigate).toHaveBeenCalledWith(
+          `${paths.sloEdit(sloList.results.at(0)?.id || '')}`
+        );
       });
 
       it('allows creating a new rule for an SLO', async () => {

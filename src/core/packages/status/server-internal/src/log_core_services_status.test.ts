@@ -142,7 +142,10 @@ describe('logCoreStatusChanges', () => {
     expect(l.error).toHaveBeenCalledTimes(3);
     expect(l.error).toHaveBeenNthCalledWith(1, 'savedObjects service is now unavailable: Unavail!');
     expect(l.info).toHaveBeenNthCalledWith(1, 'elasticsearch service is now available: Avail!');
-    expect(l.error).toHaveBeenNthCalledWith(2, 'elasticsearch service is now unavailable: Unavail!');
+    expect(l.error).toHaveBeenNthCalledWith(
+      2,
+      'elasticsearch service is now unavailable: Unavail!'
+    );
     expect(l.info).toHaveBeenNthCalledWith(2, 'elasticsearch service is now available: Avail!');
     expect(l.info).toHaveBeenNthCalledWith(3, 'savedObjects service is now available: Avail!');
     expect(l.error).toHaveBeenNthCalledWith(
@@ -240,12 +243,21 @@ describe('logCoreStatusChanges', () => {
     // the first 3 messages are the max allowed per interval
     expect(l.info).toHaveBeenNthCalledWith(1, 'elasticsearch service is now available: attempt #1');
     expect(l.error).toHaveBeenNthCalledWith(1, 'savedObjects service is now unavailable: Unavail!');
-    expect(l.error).toHaveBeenNthCalledWith(2, 'elasticsearch service is now unavailable: attempt #2');
+    expect(l.error).toHaveBeenNthCalledWith(
+      2,
+      'elasticsearch service is now unavailable: attempt #2'
+    );
     expect(l.info).toHaveBeenNthCalledWith(2, 'elasticsearch service is now available: attempt #3');
     // the next 4 messages are throttled (emitted after 10ms)
-    expect(l.error).toHaveBeenNthCalledWith(3, 'elasticsearch service is now unavailable: attempt #4');
+    expect(l.error).toHaveBeenNthCalledWith(
+      3,
+      'elasticsearch service is now unavailable: attempt #4'
+    );
     expect(l.info).toHaveBeenNthCalledWith(3, 'elasticsearch service is now available: attempt #5');
-    expect(l.error).toHaveBeenNthCalledWith(4, 'elasticsearch service is now unavailable: attempt #6');
+    expect(l.error).toHaveBeenNthCalledWith(
+      4,
+      'elasticsearch service is now unavailable: attempt #6'
+    );
     expect(l.info).toHaveBeenNthCalledWith(4, 'elasticsearch service is now available: attempt #7');
 
     // these messages exceed the maxThrottledMessages quota, truncated + warning
@@ -254,6 +266,9 @@ describe('logCoreStatusChanges', () => {
       '7 other status updates from [elasticsearch] have been truncated to avoid flooding the logs'
     );
     // and the last message, after the buffered / truncated ones
-    expect(l.info).toHaveBeenNthCalledWith(5, 'elasticsearch service is now available: attempt #15');
+    expect(l.info).toHaveBeenNthCalledWith(
+      5,
+      'elasticsearch service is now available: attempt #15'
+    );
   });
 });

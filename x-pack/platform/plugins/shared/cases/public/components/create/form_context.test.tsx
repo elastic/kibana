@@ -299,7 +299,9 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toHaveBeenCalledWith({ request: { ...sampleDataWithoutTags, tags: sampleTags } });
+      expect(postCase).toHaveBeenCalledWith({
+        request: { ...sampleDataWithoutTags, tags: sampleTags },
+      });
     });
 
     it('should post a case on submit click with the selected severity', async () => {

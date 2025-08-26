@@ -383,9 +383,7 @@ describe('UpdateSLO', () => {
 
       const newIndicator = createAPMTransactionErrorRateIndicator({ index: 'new-index-*' });
 
-      await expect(
-        updateSLO.execute(originalSlo.id, { indicator: newIndicator })
-      ).rejects.toThrow(
+      await expect(updateSLO.execute(originalSlo.id, { indicator: newIndicator })).rejects.toThrow(
         "Missing ['read', 'view_index_metadata'] privileges on the source index [new-index-*]"
       );
     });
@@ -400,9 +398,9 @@ describe('UpdateSLO', () => {
 
       const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
 
-      await expect(
-        updateSLO.execute(originalSlo.id, { indicator: newIndicator })
-      ).rejects.toThrow('Transform install error');
+      await expect(updateSLO.execute(originalSlo.id, { indicator: newIndicator })).rejects.toThrow(
+        'Transform install error'
+      );
 
       expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
       expect(
@@ -425,9 +423,9 @@ describe('UpdateSLO', () => {
 
       const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
 
-      await expect(
-        updateSLO.execute(originalSlo.id, { indicator: newIndicator })
-      ).rejects.toThrow('summary transform start error');
+      await expect(updateSLO.execute(originalSlo.id, { indicator: newIndicator })).rejects.toThrow(
+        'summary transform start error'
+      );
 
       expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();

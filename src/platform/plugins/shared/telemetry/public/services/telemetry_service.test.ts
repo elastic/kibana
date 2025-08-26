@@ -366,7 +366,10 @@ describe('TelemetryService', () => {
 
     it('calls expected URL with expected headers', async () => {
       await telemetryService.updateLastReported();
-      expect(telemetryService['http'].put).toHaveBeenCalledWith(LastReportedRoute, INTERNAL_VERSION);
+      expect(telemetryService['http'].put).toHaveBeenCalledWith(
+        LastReportedRoute,
+        INTERNAL_VERSION
+      );
     });
   });
 });

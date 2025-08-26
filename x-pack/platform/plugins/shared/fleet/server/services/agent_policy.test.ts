@@ -312,9 +312,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           is_protected: true,
         })
-      ).rejects.toThrow(
-        new FleetUnauthorizedError('Tamper protection requires Platinum license')
-      );
+      ).rejects.toThrow(new FleetUnauthorizedError('Tamper protection requires Platinum license'));
     });
 
     it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {
@@ -1208,9 +1206,7 @@ describe('Agent policy', () => {
         agentPolicyService.update(soClient, esClient, 'test-id', {
           is_protected: true,
         })
-      ).rejects.toThrow(
-        new HostedAgentPolicyRestrictionRelatedError('Cannot update is_protected')
-      );
+      ).rejects.toThrow(new HostedAgentPolicyRestrictionRelatedError('Cannot update is_protected'));
     });
 
     it('should call audit logger', async () => {
@@ -1267,9 +1263,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           is_protected: true,
         })
-      ).rejects.toThrow(
-        new FleetUnauthorizedError('Tamper protection requires Platinum license')
-      );
+      ).rejects.toThrow(new FleetUnauthorizedError('Tamper protection requires Platinum license'));
     });
 
     it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {

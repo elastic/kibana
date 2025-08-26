@@ -170,9 +170,7 @@ describe('FindSLO', () => {
     describe('Cursor Pagination', () => {
       it("throws an error when 'size' > 5000", async () => {
         await expect(findSLO.execute({ size: '5000' })).resolves.not.toThrow();
-        await expect(findSLO.execute({ size: '5001' })).rejects.toThrow(
-          'size limit set to 5000'
-        );
+        await expect(findSLO.execute({ size: '5001' })).rejects.toThrow('size limit set to 5000');
       });
     });
   });

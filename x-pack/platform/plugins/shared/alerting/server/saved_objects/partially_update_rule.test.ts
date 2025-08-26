@@ -54,9 +54,9 @@ describe('partiallyUpdateRule', () => {
       test('should handle SO errors', async () => {
         soClient.update.mockRejectedValueOnce(new Error('wops'));
 
-        await expect(
-          partiallyUpdateRule(soClient, MockRuleId, DefaultAttributes)
-        ).rejects.toThrow('wops');
+        await expect(partiallyUpdateRule(soClient, MockRuleId, DefaultAttributes)).rejects.toThrow(
+          'wops'
+        );
       });
 
       test('should handle the version option', async () => {

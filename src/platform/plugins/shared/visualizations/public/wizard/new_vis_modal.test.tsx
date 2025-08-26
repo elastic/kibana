@@ -139,7 +139,9 @@ describe('NewVisModal', () => {
     it('should open the editor for visualizations without search', async () => {
       renderNewVisModal();
       await userEvent.click(screen.getByText('Vis Type 1'));
-      expect(window.location.assign).toHaveBeenCalledWith('testbasepath/app/visualize#/create?type=vis');
+      expect(window.location.assign).toHaveBeenCalledWith(
+        'testbasepath/app/visualize#/create?type=vis'
+      );
     });
 
     it('passes through editor params to the editor URL', async () => {

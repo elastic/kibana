@@ -46,7 +46,10 @@ describe('useRestoreHistory', () => {
 
       renderHook(() => useWorkpadHistory());
 
-      expect(history.replace).toHaveBeenCalledWith(history.location.pathname, encode(state.persistent));
+      expect(history.replace).toHaveBeenCalledWith(
+        history.location.pathname,
+        encode(state.persistent)
+      );
       expect(history.push).not.toHaveBeenCalled();
     });
 
@@ -156,7 +159,10 @@ describe('useRestoreHistory', () => {
       mockGetState.mockReturnValue(newState);
       rerender();
 
-      expect(history.push).toHaveBeenCalledWith(history.location.pathname, encode(newState.persistent));
+      expect(history.push).toHaveBeenCalledWith(
+        history.location.pathname,
+        encode(newState.persistent)
+      );
     });
 
     test('does nothing if new state matches location state', () => {

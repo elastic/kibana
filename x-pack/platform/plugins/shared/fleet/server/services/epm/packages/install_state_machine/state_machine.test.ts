@@ -429,9 +429,9 @@ describe('handleState', () => {
       context,
     });
 
-    await expect(
-      handleState('state1', testDefinition, testDefinition.context)
-    ).rejects.toThrow('Precondition failed');
+    await expect(handleState('state1', testDefinition, testDefinition.context)).rejects.toThrow(
+      'Precondition failed'
+    );
 
     expect(mockPreTransition).toHaveBeenCalled();
     expect(mockOnTransition1).not.toHaveBeenCalled();

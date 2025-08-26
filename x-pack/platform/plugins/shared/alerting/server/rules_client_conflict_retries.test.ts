@@ -139,13 +139,18 @@ async function update(success: boolean) {
     });
   } catch (err) {
     // only checking the warn messages in this test
-    expect(logger.warn).toHaveBeenLastCalledWith(`rulesClient.update('rule-id') conflict, exceeded retries`);
+    expect(logger.warn).toHaveBeenLastCalledWith(
+      `rulesClient.update('rule-id') conflict, exceeded retries`
+    );
     return expectConflict(success, err, 'create');
   }
   expectSuccess(success, 2, 'create');
 
   // only checking the debug messages in this test
-  expect(logger.debug).toHaveBeenNthCalledWith(1, `rulesClient.update('rule-id') conflict, retrying ...`);
+  expect(logger.debug).toHaveBeenNthCalledWith(
+    1,
+    `rulesClient.update('rule-id') conflict, retrying ...`
+  );
 }
 
 async function updateApiKey(success: boolean) {

@@ -182,7 +182,10 @@ describe('EndpointMetadataService', () => {
       unitedIndexQuery.runtime_mappings.status.script.source = expect.any(String);
 
       expect(esClient.search).toHaveBeenCalledWith(unitedIndexQuery);
-      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(expect.anything(), agentPolicyIds);
+      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(
+        expect.anything(),
+        agentPolicyIds
+      );
       expect(metadataListResponse).toEqual({
         data: [
           {

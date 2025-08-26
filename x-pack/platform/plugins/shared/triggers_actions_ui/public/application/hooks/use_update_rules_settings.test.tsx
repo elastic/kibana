@@ -103,6 +103,8 @@ describe('useUpdateRuleSettings', () => {
       });
     });
 
-    await waitFor(() => expect(mockAddDanger).toHaveBeenCalledWith('Failed to update rules settings.'));
+    await waitFor(() =>
+      expect(mockAddDanger).toHaveBeenCalledWith('Failed to update rules settings.')
+    );
   });
 });

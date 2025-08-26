@@ -161,9 +161,7 @@ describe('RulesSettingsFlappingClient', () => {
         lookBackWindow: 19,
         statusChangeThreshold: 3,
       })
-    ).rejects.toThrow(
-      'savedObjectsClient errored trying to update flapping settings: failed!!'
-    );
+    ).rejects.toThrow('savedObjectsClient errored trying to update flapping settings: failed!!');
   });
 
   test('throws if new flapping setting fails verification', async () => {
