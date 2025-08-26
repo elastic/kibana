@@ -105,6 +105,7 @@ export class ScopedDiscoverEBTManager {
         fieldsMetadata,
         fieldNames,
       });
+      console.log({ fieldNames });
 
       // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
       const categorizedFields: string[] = [];
@@ -123,7 +124,7 @@ export class ScopedDiscoverEBTManager {
     if (filterOperation) {
       eventData[FIELD_USAGE_FILTER_OPERATION] = filterOperation;
     }
-
+    console.log({ FIELD_USAGE_EVENT_TYPE, eventData });
     this.reportEvent(FIELD_USAGE_EVENT_TYPE, eventData);
   }
 

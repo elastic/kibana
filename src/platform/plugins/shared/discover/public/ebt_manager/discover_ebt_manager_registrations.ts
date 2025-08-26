@@ -66,9 +66,17 @@ export const registerDiscoverEBTManagerAnalytics = (
         },
       },
       [FIELD_USAGE_FIELD_NAME]: {
-        type: 'keyword',
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              "Field name if it is part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
+          },
+        },
         _meta: {
-          description: "Field name if it's a part of ECS schema",
+          description:
+            "Field names if they are part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
           optional: true,
         },
       },
