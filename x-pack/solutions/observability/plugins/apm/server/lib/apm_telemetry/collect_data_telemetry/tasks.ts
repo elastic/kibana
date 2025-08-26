@@ -79,6 +79,11 @@ import type { IndicesStatsResponse, TelemetryClient } from '../telemetry_client'
 import { RollupInterval } from '../../../../common/rollup';
 import type { SavedApmCustomDashboard } from '../../../../common/custom_dashboards';
 import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../../../common/custom_dashboards';
+import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+import {
+  filterByAgent,
+  settingDefinitions,
+} from '../../../../common/agent_configuration/setting_definitions';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
@@ -542,10 +547,10 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'agent_configuration',
-    executor: async ({ indices, telemetryClient }) => {
-      const agentConfigurationCount = await telemetryClient.search({
+    executor: async ({ telemetryClient }) => {
+      const agentConfigurations = await telemetryClient.search({
         index: APM_AGENT_CONFIGURATION_INDEX,
-        size: 0,
+        size: 1000,
         timeout,
         track_total_hits: true,
       });
@@ -553,7 +558,32 @@ export const tasks: TelemetryTask[] = [
       return {
         counts: {
           agent_configuration: {
-            all: agentConfigurationCount.hits.total.value,
+            all: agentConfigurations.hits.total.value,
+            agents: agentConfigurations.hits.hits.map((hit) => {
+              const agentConfig = hit._source as AgentConfiguration;
+              const settingsDefinitionByAgent = settingDefinitions.filter(
+                filterByAgent(agentConfig.agent_name as AgentName)
+              );
+              const predefinedSettingsKeys = new Set();
+              settingsDefinitionByAgent.forEach((setting) => {
+                predefinedSettingsKeys.add(setting.key);
+              });
+              const predefinedSettings: string[] = [];
+              const advancedSettings: string[] = [];
+              Object.keys(agentConfig.settings).forEach((key) => {
+                if (predefinedSettingsKeys.has(key)) {
+                  predefinedSettings.push(key);
+                } else {
+                  advancedSettings.push(key);
+                }
+              });
+              return {
+                agent_name: agentConfig.agent_name,
+                has_error: !!agentConfig.error,
+                settings: predefinedSettings,
+                advanced_settings: advancedSettings,
+              };
+            }),
           },
         },
       };

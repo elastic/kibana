@@ -102,7 +102,14 @@ export interface APMUsage {
     error: TimeframeMap;
     metric: TimeframeMap;
     onboarding: TimeframeMap;
-    agent_configuration: TimeframeMapAll;
+    agent_configuration: TimeframeMapAll & {
+      agents: Array<{
+        agent_name: string;
+        has_error: boolean;
+        settings: string[];
+        advanced_settings: string[];
+      }>;
+    };
     max_transaction_groups_per_service: TimeframeMap1d;
     max_error_groups_per_service: TimeframeMap1d;
     traces: TimeframeMap;
