@@ -18,7 +18,6 @@ import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
 } from './constants';
-
 export interface GetCloudConnectorRemoteRoleTemplateParams {
   input: NewPackagePolicyInput;
   cloud: Pick<
@@ -117,6 +116,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
  */
 export const updatePolicyWithAwsCloudConnectorCredentials = (
   packagePolicy: NewPackagePolicy,
+  input: NewPackagePolicyInput,
   credentials: Record<string, string>
 ): NewPackagePolicy => {
   if (!credentials) return packagePolicy;
@@ -127,38 +127,52 @@ export const updatePolicyWithAwsCloudConnectorCredentials = (
     updatedPolicy.inputs = [];
   }
 
-  // Update all inputs that have the credential fields
-  updatedPolicy.inputs = updatedPolicy.inputs.map((input) => {
-    if (!input.vars) return input;
+  if (!input.streams[0].vars) return updatedPolicy;
 
-    const updatedVars = { ...input.vars };
+  const updatedVars = { ...input.streams[0].vars };
 
-    // Update role_arn
-    if (credentials[CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN]) {
-      updatedVars[CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN].value =
-        credentials[CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN];
-    }
-    // Update external_id
-    if (credentials[CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID]) {
-      updatedVars[CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID].value =
-        credentials[CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID];
-    }
-    // Update aws.role_arn
-    if (credentials[CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
-      updatedVars[CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN].value =
-        credentials[CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN];
-    }
-    // Update aws.credentials.external_id
-    if (credentials[CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
-      updatedVars[CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID].value =
-        credentials[CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID];
-    }
+  // Update role_arn
+  if (credentials[CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN]) {
+    updatedVars[CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN].value =
+      credentials[CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN];
+  }
+  // Update external_id
+  if (credentials[CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID]) {
+    updatedVars[CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID].value =
+      credentials[CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID];
+  }
+  // Update aws.role_arn
+  if (credentials[CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
+    updatedVars[CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN].value =
+      credentials[CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN];
+  }
+  // Update aws.credentials.external_id
+  if (credentials[CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
+    updatedVars[CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID].value =
+      credentials[CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID];
+  }
 
-    return {
-      ...input,
-      vars: updatedVars,
-    };
-  });
+  updatedPolicy.inputs = [
+    ...updatedPolicy.inputs
+      .map((i) => {
+        if (i.enabled && i.streams[0].enabled) {
+          return {
+            ...i,
+            streams: i.streams.map((s) => {
+              if (s.enabled) {
+                return {
+                  ...s,
+                  vars: updatedVars,
+                };
+              }
+              return s; // Return the original stream if not enabled
+            }),
+          };
+        }
+        return i; // Return the original input if not enabled
+      })
+      .filter(Boolean), // Filter out undefined values
+  ];
 
   return updatedPolicy;
 };

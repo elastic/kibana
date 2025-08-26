@@ -137,16 +137,15 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 export const updateAgentlessCloudConnectorConfig = (
   packagePolicy: NewPackagePolicy,
   newAgentPolicy: NewAgentPolicy,
-  setNewAgentPolicy: (policy: NewAgentPolicy) => void,
-  setPackagePolicy: (policy: NewPackagePolicy) => void
+  setNewAgentPolicy: (policy: NewAgentPolicy) => void
 ) => {
   const input = packagePolicy.inputs?.filter(
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
   )[0];
 
-  const enabled = input?.streams?.[0]?.vars?.['aws.supports_cloud_connectors']?.value;
   if (
-    newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled &&
+    newAgentPolicy.agentless?.cloud_connectors?.enabled !==
+      packagePolicy.supports_cloud_connector &&
     newAgentPolicy?.supports_agentless
   ) {
     let targetCsp;
@@ -168,29 +167,21 @@ export const updateAgentlessCloudConnectorConfig = (
           cloud_connectors: undefined,
         },
       });
-
-      setPackagePolicy({
-        ...packagePolicy,
-        supports_cloud_connector: false,
-      });
       return;
     }
 
-    if (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled) {
+    if (
+      newAgentPolicy.agentless?.cloud_connectors?.enabled !== packagePolicy.supports_cloud_connector
+    ) {
       setNewAgentPolicy({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
           cloud_connectors: {
-            enabled,
+            enabled: packagePolicy.supports_cloud_connector ?? false,
             target_csp: targetCsp,
           },
         },
-      });
-
-      setPackagePolicy({
-        ...packagePolicy,
-        supports_cloud_connector: true,
       });
     }
   }
@@ -438,12 +429,7 @@ export function useOnSubmit({
     }
   }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
 
-  updateAgentlessCloudConnectorConfig(
-    packagePolicy,
-    newAgentPolicy,
-    setNewAgentPolicy,
-    setPackagePolicy
-  );
+  updateAgentlessCloudConnectorConfig(packagePolicy, newAgentPolicy, setNewAgentPolicy);
 
   const onSaveNavigate = useOnSaveNavigate({
     queryParamsPolicyId,

@@ -38,7 +38,7 @@ export interface AWSCloudConnectorFormProps {
   packageInfo: PackageInfo;
   updatePolicy: UpdatePolicy;
   isEditPage?: boolean;
-  hasInvalidRequiredVars: boolean;
+  hasInvalidRequiredVars?: boolean;
   cloud?: CloudSetup;
   cloudProvider?: string;
   isOrganization?: boolean;

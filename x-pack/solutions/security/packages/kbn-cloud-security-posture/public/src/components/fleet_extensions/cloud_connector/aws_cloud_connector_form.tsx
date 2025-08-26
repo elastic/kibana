@@ -69,7 +69,7 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
           packageInfo={packageInfo}
           onChange={(key, value) => {
             updatePolicy({
-              updatedPolicy: updatePolicyWithAwsCloudConnectorCredentials(newPolicy, {
+              updatedPolicy: updatePolicyWithAwsCloudConnectorCredentials(newPolicy, input, {
                 [key]: value,
               }),
             });

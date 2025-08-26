@@ -27,6 +27,14 @@ export interface AwsCloudConnectorOptions {
   value: string;
 }
 
+// Define field sequence order
+const FIELD_SEQUENCE = [
+  'role_arn',
+  'aws.role_arn',
+  'aws.credentials.external_id',
+  'external_id',
+] as const;
+
 export const getAwsCloudConnectorsCredentialsFormOptions = (
   inputVars?: PackagePolicyConfigRecord | undefined
 ) => {
@@ -45,47 +53,58 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (
     dataTestSubj: string;
   })[] = [];
 
+  // Create a map of all available fields
+  const availableFields = new Map<string, AwsCloudConnectorOptions>();
+
+  if (inputVars.role_arn) {
+    availableFields.set('role_arn', {
+      id: 'role_arn',
+      label: AWS_CLOUD_CONNECTOR_FIELD_LABELS.role_arn,
+      type: 'text' as const,
+      dataTestSubj: 'awsCloudConnectorRoleArnInput',
+      value: inputVars.role_arn.value,
+    });
+  }
+
   if (inputVars['aws.role_arn']) {
-    fields.push({
+    availableFields.set('aws.role_arn', {
       id: 'aws.role_arn',
       label: AWS_CLOUD_CONNECTOR_FIELD_LABELS.role_arn,
       type: 'text' as const,
       dataTestSubj: 'awsCloudConnectorRoleArnInput',
-      value: inputVars['aws.role_arn'].value || '',
+      value: inputVars['aws.role_arn'].value,
     });
   }
 
   if (inputVars['aws.credentials.external_id']) {
-    fields.push({
+    availableFields.set('aws.credentials.external_id', {
       id: 'aws.credentials.external_id',
       label: AWS_CLOUD_CONNECTOR_FIELD_LABELS.external_id,
       type: 'password' as const,
       dataTestSubj: 'awsCloudConnectorExternalId',
       isSecret: true,
-      value: inputVars['aws.credentials.external_id'].value || '',
-    });
-  }
-
-  if (inputVars.role_arn) {
-    fields.push({
-      id: 'role_arn',
-      label: AWS_CLOUD_CONNECTOR_FIELD_LABELS.role_arn,
-      type: 'text' as const,
-      dataTestSubj: 'awsCloudConnectorRoleArnInput',
-      value: inputVars.role_arn.value || '',
+      value: inputVars['aws.credentials.external_id'].value,
     });
   }
 
   if (inputVars.external_id) {
-    fields.push({
+    availableFields.set('external_id', {
       id: 'external_id',
       label: AWS_CLOUD_CONNECTOR_FIELD_LABELS.external_id,
       type: 'password' as const,
       dataTestSubj: 'awsCloudConnectorExternalId',
       isSecret: true,
-      value: inputVars.external_id.value || '',
+      value: inputVars.external_id.value,
     });
   }
+
+  // Build fields array in sequence order
+  FIELD_SEQUENCE.forEach((fieldId) => {
+    const field = availableFields.get(fieldId);
+    if (field) {
+      fields.push(field);
+    }
+  });
 
   return fields;
 };

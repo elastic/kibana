@@ -30,7 +30,6 @@ export const CloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           packageInfo={packageInfo}
           updatePolicy={updatePolicy}
           isEditPage={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
           cloud={cloud}
           cloudProvider={cloudProvider}
         />
