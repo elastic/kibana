@@ -37,8 +37,8 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import {
   type QueryHistoryItem,
   getHistoryItems,
-  MAX_HISTORY_QUERIES_NUMBER,
   dateFormat,
+  getStorageStats,
 } from '../history_local_storage';
 import { type ESQLEditorDeps, HistoryTabId } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
@@ -354,8 +354,6 @@ export function QueryList({
       vertical-align: top;
       border: none;
     }
-    border-bottom-left-radius: ${euiTheme.border.radius.medium};
-    border-top-left-radius: ${euiTheme.border.radius.medium};
     max-height: ${height}px;
     overflow-y: auto;
     ${scrollBarStyles}
@@ -620,10 +618,16 @@ export function HistoryAndStarredQueriesTabs({
             >
               <p>
                 {selectedTabId === 'history-queries-tab'
-                  ? i18n.translate('esqlEditor.history.historyItemslimit', {
-                      defaultMessage: 'Showing last {historyItemsLimit} queries',
-                      values: { historyItemsLimit: MAX_HISTORY_QUERIES_NUMBER },
-                    })
+                  ? (() => {
+                      const stats = getStorageStats();
+                      return i18n.translate('esqlEditor.history.historyItemsStorage', {
+                        defaultMessage: 'Showing {queryCount} queries ({storageSizeKB}KB used)',
+                        values: {
+                          queryCount: stats.queryCount,
+                          storageSizeKB: stats.storageSizeKB,
+                        },
+                      });
+                    })()
                   : i18n.translate('esqlEditor.history.starredItemslimit', {
                       defaultMessage:
                         'Showing {starredItemsCount} queries (max {starredItemsLimit})',
