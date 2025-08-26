@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110891
-
-import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { BooleanRelation } from '@kbn/es-query';
+import type {
+  RangeSelectContext,
+  ValueClickContext,
+  MultiValueClickContext,
+} from '@kbn/embeddable-plugin/public';
 import { ChartsPlugin } from './plugin';
 
 export const plugin = () => new ChartsPlugin();
@@ -39,42 +40,17 @@ export { useActiveCursor } from './services/active_cursor';
 
 export interface ClickTriggerEvent {
   name: 'filter';
-  data: {
-    data: Array<{
-      table: Pick<Datatable, 'rows' | 'columns'>;
-      column: number;
-      row: number;
-      value: any;
-    }>;
-    timeFieldName?: string;
-    negate?: boolean;
-  };
+  data: ValueClickContext['data'];
 }
 
 export interface BrushTriggerEvent {
   name: 'brush';
-  data: {
-    table: Datatable;
-    column: number;
-    range: number[];
-    timeFieldName?: string;
-  };
+  data: RangeSelectContext['data'];
 }
 
 export interface MultiClickTriggerEvent {
   name: 'multiFilter';
-  data: {
-    data: Array<{
-      table: Pick<Datatable, 'rows' | 'columns'>;
-      cells: Array<{
-        column: number;
-        row: number;
-      }>;
-      relation?: BooleanRelation;
-    }>;
-    timeFieldName?: string;
-    negate?: boolean;
-  };
+  data: MultiValueClickContext['data'];
 }
 
 export type {

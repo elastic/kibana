@@ -16,7 +16,7 @@
     "@kbn/data-plugin",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/palettes",
-    "@kbn/es-query",
+    "@kbn/embeddable-plugin",
   ],
   "exclude": [
     "target/**/*",
