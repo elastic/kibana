@@ -185,7 +185,7 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
                 </EuiButton>
               </EuiForm>
             </EuiFlexItem>
-            <EuiFlexItem >
+            <EuiFlexItem>
               <div style={{ marginLeft: '30px' }}>
                 <EuiTitle size="s">
                   <h5>
@@ -200,7 +200,7 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
                 languageId="json"
                 value={response}
                 fullWidth={true}
-                height="calc(100vh - 200px)"
+                height="calc(100vh - 275px)"
                 options={{
                   readOnly: true,
                   fontSize: 14,
