@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { useController } from 'react-hook-form';
 import { EuiFormRow, EuiLink } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
@@ -22,8 +22,7 @@ export const JsonEditor = () => {
   const {
     core: { docLinks },
   } = useKibana();
-  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
-  const divRef = useRef<HTMLDivElement>(null);
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
   const { field, fieldState } = useController<ProcessorFormState, 'processors'>({
     name: 'processors',
     rules: {
@@ -99,7 +98,7 @@ export const JsonEditor = () => {
       isInvalid={fieldState.invalid}
       fullWidth
     >
-      <div ref={divRef} style={{ width: '100%', height: 200, overflow: 'hidden' }}>
+      <div ref={containerRef} style={{ width: '100%', height: 200, overflow: 'hidden' }}>
         <CodeEditor
           value={serializeXJson(field.value, '[]')}
           onChange={(value) => field.onChange(deserializeJson(value))}
@@ -109,12 +108,8 @@ export const JsonEditor = () => {
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsAriaLabel',
             { defaultMessage: 'Ingest pipeline processors editor' }
           )}
-          editorDidMount={(editor) => {
-            if (divRef.current) {
-              setupResizeChecker(divRef.current, editor);
-            }
-          }}
-          editorWillUnmount={() => destroyResizeChecker()}
+          editorDidMount={setupResizeChecker}
+          editorWillUnmount={destroyResizeChecker}
         />
       </div>
     </EuiFormRow>

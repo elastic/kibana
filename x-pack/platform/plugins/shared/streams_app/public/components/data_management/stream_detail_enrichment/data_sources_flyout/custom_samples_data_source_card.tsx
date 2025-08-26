@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { EuiCallOut, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { isSchema } from '@kbn/streams-schema';
@@ -35,8 +35,7 @@ export const CustomSamplesDataSourceCard = ({
     snapshot.matches('disabled')
   );
 
-  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
-  const divRef = useRef<HTMLDivElement>(null);
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
 
   const handleChange = (params: Partial<CustomSamplesDataSourceWithUIAttributes>) => {
     dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
@@ -74,13 +73,13 @@ export const CustomSamplesDataSourceCard = ({
           fullWidth
           style={{ minWidth: 0, maxWidth: '100%', flex: '1 1 auto', boxSizing: 'border-box' }}
         >
-          <div
-            ref={divRef}
-            style={{
-              width: '100%',
-              height: 200,
-              overflow: 'hidden',
-              minWidth: 0,
+          <div 
+            ref={containerRef} 
+            style={{ 
+              width: '100%', 
+              height: 200, 
+              overflow: 'hidden', 
+              minWidth: 0, 
               maxWidth: '100%',
               flex: '1 1 0%',
               boxSizing: 'border-box',
@@ -96,11 +95,7 @@ export const CustomSamplesDataSourceCard = ({
                 tabSize: 2,
                 readOnly: isDisabled,
               }}
-              editorDidMount={(editor) => {
-                if (divRef.current) {
-                  setupResizeChecker(divRef.current, editor, { flyoutMode: true });
-                }
-              }}
+              editorDidMount={(editor) => setupResizeChecker(editor, { flyoutMode: true })}
               editorWillUnmount={() => destroyResizeChecker()}
             />
           </div>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import type { EuiSelectOption } from '@elastic/eui';
 import {
@@ -110,8 +110,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
 
-  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
-  const divRef = useRef<HTMLDivElement>(null);
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
 
   const handleConditionChange = (updatedCondition: Condition) => {
     props.onConditionChange(emptyEqualsToAlways(updatedCondition));
@@ -143,7 +142,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
       }
     >
       {usingSyntaxEditor ? (
-        <div ref={divRef} style={{ width: '100%', height: 200, overflow: 'hidden' }}>
+        <div ref={containerRef} style={{ width: '100%', height: 200, overflow: 'hidden' }}>
           <CodeEditor
             dataTestSubj="streamsAppConditionEditorCodeEditor"
             height={200}
@@ -154,12 +153,8 @@ export function ConditionEditor(props: ConditionEditorProps) {
                 handleConditionChange(JSON.parse(value));
               } catch (error: unknown) {}
             }}
-            editorDidMount={(editor) => {
-              if (divRef.current) {
-                setupResizeChecker(divRef.current, editor);
-              }
-            }}
-            editorWillUnmount={() => destroyResizeChecker()}
+            editorDidMount={setupResizeChecker}
+            editorWillUnmount={destroyResizeChecker}
           />
         </div>
       ) : isFilterCondition ? (

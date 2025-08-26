@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldDefinitionConfigAdvancedParameters } from '@kbn/streams-schema';
 import { isSchema, recursiveRecord } from '@kbn/streams-schema';
@@ -45,8 +45,7 @@ export const AdvancedFieldMappingOptions = ({
   const [hasParsingError, { on: markAsParsingError, off: resetParsingErrorFlag }] =
     useBoolean(false);
 
-  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
-  const divRef = useRef<HTMLDivElement>(null);
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
 
   const isInvalid = hasParsingError || !getValidFlag(field.additionalParameters);
 
@@ -91,7 +90,7 @@ export const AdvancedFieldMappingOptions = ({
           }
         >
           {isEditing ? (
-            <div ref={divRef} style={{ width: '100%', height: 120, overflow: 'hidden' }}>
+            <div ref={containerRef} style={{ width: '100%', height: 120, overflow: 'hidden' }}>
               <CodeEditor
                 height={120}
                 languageId="json"
@@ -110,12 +109,8 @@ export const AdvancedFieldMappingOptions = ({
                     if (onValidate) onValidate(false);
                   }
                 }}
-                editorDidMount={(editor) => {
-                  if (divRef.current) {
-                    setupResizeChecker(divRef.current, editor, { flyoutMode: true });
-                  }
-                }}
-                editorWillUnmount={() => destroyResizeChecker()}
+                editorDidMount={(editor) => setupResizeChecker(editor, { flyoutMode: true })}
+                editorWillUnmount={destroyResizeChecker}
               />
             </div>
           ) : (

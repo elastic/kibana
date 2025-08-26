@@ -11,24 +11,25 @@ import type { monaco } from '@kbn/monaco';
 
 /**
  * Hook that returns functions for setting up and destroying a {@link ResizeChecker}
- * for a Monaco editor.
+ * for a Monaco editor. Handles ref creation internally for better reusability.
  */
 export const useResizeCheckerUtils = () => {
   const resizeChecker = useRef<ResizeChecker | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const setupResizeChecker = (
-    divElement: HTMLDivElement,
     editor: monaco.editor.IStandaloneCodeEditor,
     options: { flyoutMode?: boolean } = {}
   ) => {
     if (resizeChecker.current) {
       resizeChecker.current.destroy();
     }
-
-    let targetElement = divElement;
-
+    
+    let targetElement = containerRef.current;
+    if (!targetElement) return;
+    
     if (options.flyoutMode) {
-      const flyoutElement = divElement.closest('.euiFlyout') as HTMLDivElement;
+      const flyoutElement = targetElement.closest('.euiFlyout') as HTMLDivElement;
       if (flyoutElement) {
         targetElement = flyoutElement;
       }
@@ -36,14 +37,14 @@ export const useResizeCheckerUtils = () => {
 
     resizeChecker.current = new ResizeChecker(targetElement);
     resizeChecker.current.on('resize', () => {
-      if (options.flyoutMode) {
+      if (options.flyoutMode && containerRef.current) {
         const flyoutRect = targetElement.getBoundingClientRect();
         const availableWidth = flyoutRect.width - 120;
-
-        divElement.style.width = `${availableWidth}px`;
-        divElement.style.maxWidth = `${availableWidth}px`;
-
-        const containerRect = divElement.getBoundingClientRect();
+        
+        containerRef.current.style.width = `${availableWidth}px`;
+        containerRef.current.style.maxWidth = `${availableWidth}px`;
+        
+        const containerRect = containerRef.current.getBoundingClientRect();
         editor.layout({ width: availableWidth, height: containerRect.height });
       } else {
         editor.layout();
@@ -57,5 +58,5 @@ export const useResizeCheckerUtils = () => {
     }
   };
 
-  return { setupResizeChecker, destroyResizeChecker };
+  return { containerRef, setupResizeChecker, destroyResizeChecker };
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { useController } from 'react-hook-form';
 import { EuiFormRow, EuiLink } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
@@ -18,8 +18,7 @@ import type { ProcessorFormState } from '../../types';
 export const DissectPatternDefinition = () => {
   const { core } = useKibana();
   const esDocUrl = core.docLinks.links.ingest.dissectKeyModifiers;
-  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
-  const divRef = useRef<HTMLDivElement>(null);
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
 
   const { field, fieldState } = useController<ProcessorFormState, 'pattern'>({
     name: 'pattern',
@@ -64,7 +63,7 @@ export const DissectPatternDefinition = () => {
       error={error?.message}
       fullWidth
     >
-      <div ref={divRef} style={{ width: '100%', height: 75, overflow: 'hidden' }}>
+      <div ref={containerRef} style={{ width: '100%', height: 75, overflow: 'hidden' }}>
         <CodeEditor
           value={serialize(field.value)}
           onChange={(value) => field.onChange(deserialize(value))}
@@ -75,12 +74,8 @@ export const DissectPatternDefinition = () => {
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsAriaLabel',
             { defaultMessage: 'Pattern editor' }
           )}
-          editorDidMount={(editor) => {
-            if (divRef.current) {
-              setupResizeChecker(divRef.current, editor);
-            }
-          }}
-          editorWillUnmount={() => destroyResizeChecker()}
+          editorDidMount={setupResizeChecker}
+          editorWillUnmount={destroyResizeChecker}
         />
       </div>
     </EuiFormRow>

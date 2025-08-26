@@ -158,7 +158,7 @@ const DraggablePatternInput = ({
   onChange,
   onRemove,
 }: DraggablePatternInputProps) => {
-  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+  const resizeCheckerSetup = useResizeCheckerUtils();
   return (
     <EuiDraggable
       index={idx}
@@ -189,8 +189,7 @@ const DraggablePatternInput = ({
                 grokCollection={grokCollection}
                 dataTestSubj="streamsAppPatternExpression"
                 onChange={onChange}
-                onEditorMount={(editor, divElement) => setupResizeChecker(divElement, editor)}
-                onEditorWillUnmount={() => destroyResizeChecker()}
+                resizeChecker={resizeCheckerSetup}
               />
             </EuiFlexItem>
             {onRemove && (

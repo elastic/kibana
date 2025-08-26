@@ -13,6 +13,12 @@ import React, { useRef, useState, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { DraftGrokExpression, GrokCollection } from '../models';
 
+type ResizeCheckerSetup = {
+  containerRef: React.RefObject<HTMLDivElement>;
+  setupResizeChecker: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  destroyResizeChecker: () => void;
+};
+
 export const Expression = ({
   grokCollection,
   draftGrokExpression,
@@ -21,6 +27,7 @@ export const Expression = ({
   dataTestSubj,
   onEditorMount,
   onEditorWillUnmount,
+  resizeChecker,
 }: {
   grokCollection: GrokCollection;
   draftGrokExpression: DraftGrokExpression;
@@ -29,6 +36,7 @@ export const Expression = ({
   dataTestSubj?: string;
   onEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor, divElement: HTMLDivElement) => void;
   onEditorWillUnmount?: () => void;
+  resizeChecker?: ResizeCheckerSetup;
 }) => {
   const [suggestionProvider] = useState(() => {
     return grokCollection.getSuggestionProvider();
@@ -38,6 +46,7 @@ export const Expression = ({
 
   const grokEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const divRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = resizeChecker?.containerRef || divRef;
 
   const onGrokEditorMount: CodeEditorProps['editorDidMount'] = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -45,15 +54,21 @@ export const Expression = ({
       if (onEditorMount && divRef.current) {
         onEditorMount(editor, divRef.current);
       }
+      if (resizeChecker) {
+        resizeChecker.setupResizeChecker(editor);
+      }
     },
-    [onEditorMount]
+    [onEditorMount, resizeChecker]
   );
 
   const onGrokEditorWillUnmount: CodeEditorProps['editorWillUnmount'] = useCallback(() => {
     if (onEditorWillUnmount) {
       onEditorWillUnmount();
     }
-  }, [onEditorWillUnmount]);
+    if (resizeChecker) {
+      resizeChecker.destroyResizeChecker();
+    }
+  }, [onEditorWillUnmount, resizeChecker]);
 
   const onGrokEditorChange: CodeEditorProps['onChange'] = (value) => {
     draftGrokExpression.updateExpression(value);
@@ -62,11 +77,12 @@ export const Expression = ({
 
   return (
     <div
-      ref={divRef}
+      ref={containerRef}
       style={{
         width: '100%',
         height,
         overflow: 'hidden',
+        minWidth: 0,
       }}
     >
       <CodeEditor
