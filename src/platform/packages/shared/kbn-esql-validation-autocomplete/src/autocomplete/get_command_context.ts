@@ -49,7 +49,13 @@ export const getCommandContext = async (
       return {
         histogramBarTarget,
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
-        variables: await callbacks?.getVariables?.(),
+        variables: callbacks?.getVariables?.(),
+      };
+    case 'inlinestats':
+      return {
+        histogramBarTarget: (await callbacks?.getPreferences?.())?.histogramBarTarget || 50,
+        supportsControls: callbacks?.canSuggestVariables?.() ?? false,
+        variables: callbacks?.getVariables?.(),
       };
     case 'fork':
       const enrichPolicies = await helpers.getPolicies();

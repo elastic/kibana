@@ -243,7 +243,7 @@ export async function getFunctionArgsSuggestions(
       (cmdArg) => !Array.isArray(cmdArg) && cmdArg.location.max >= node.location.max
     );
     const finalCommandArgIndex =
-      command.name !== 'stats'
+      command.name !== 'stats' && command.name !== 'inlinestats'
         ? -1
         : commandArgIndex < 0
         ? Math.max(command.args.length - 1, 0)
@@ -258,7 +258,7 @@ export async function getFunctionArgsSuggestions(
     );
 
     if (
-      command.name !== 'stats' ||
+      (command.name !== 'stats' && command.name !== 'inlinestats') ||
       (isOptionNode(finalCommandArg) && finalCommandArg.name === 'by')
     ) {
       // ignore the current function
@@ -380,7 +380,7 @@ export async function getFunctionArgsSuggestions(
       (getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
         ['where', 'eval'].includes(command.name) &&
         !FULL_TEXT_SEARCH_FUNCTIONS.includes(fnDefinition.name)) ||
-      (command.name === 'stats' &&
+      (['stats', 'inlinestats'].includes(command.name) &&
         typesToSuggestNext.some((t) => t && t.type === 'date' && t.constantOnly === true))
     )
       suggestions.push(
@@ -393,7 +393,7 @@ export async function getFunctionArgsSuggestions(
 
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
-    if (command.name !== 'stats') {
+    if (command.name !== 'stats' && command.name !== 'inlinestats') {
       if (isLiteral(arg) && isNumericType(arg.literalType)) {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
