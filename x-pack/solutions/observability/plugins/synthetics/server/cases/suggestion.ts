@@ -13,59 +13,7 @@ import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AttachmentItem } from '@kbn/cases-plugin/common/types/domain/suggestion/v1';
 import type { OverviewStatusMetaData } from '../../common/runtime_types';
 import type { SyntheticsSuggestion } from '../../common/types';
-export interface SyntheticsAggregationsResponse {
-  aggregations: {
-    by_monitor: {
-      doc_count_error_upper_bound: number;
-      sum_other_doc_count: number;
-      buckets: MonitorBucket[];
-    };
-  };
-}
-
-export interface MonitorBucket {
-  key: string; // monitor name
-  doc_count: number;
-  latest_run: {
-    hits: {
-      total: {
-        value: number;
-        relation: string;
-      };
-      max_score: number | null;
-      hits: Array<{
-        _index: string;
-        _id: string;
-        _score: number | null;
-        _source: SyntheticsMonitorSource;
-        sort: number[];
-      }>;
-    };
-  };
-}
-
-export interface SyntheticsMonitorSource {
-  monitor: {
-    name: string;
-    type: string;
-    id: string;
-    status?: string;
-  };
-  url: {
-    full: string;
-  };
-  observer: {
-    geo: {
-      name: string;
-    };
-    name: string;
-  };
-  '@timestamp': string;
-  config_id: string;
-  meta: {
-    space_id: string[];
-  };
-}
+import type { SyntheticsAggregationsResponse } from './types';
 
 export function getMonitorByServiceName(
   coreStart: CoreStart,
@@ -150,7 +98,6 @@ export function getMonitorByServiceName(
               },
             },
           });
-          // MetricItem
 
           const uniqueMonitor = (
             results.aggregations as SyntheticsAggregationsResponse['aggregations']
