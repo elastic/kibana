@@ -14,10 +14,7 @@ import { asPrettyString, getHighlightHtml, shortenDottedString } from '../utils'
 import { FieldFormat } from '../field_format';
 import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
-
-const emptyLabel = i18n.translate('fieldFormats.string.emptyLabel', {
-  defaultMessage: '(empty)',
-});
+import { EMPTY_LABEL, NULL_LABEL } from '../constants/replacement_labels';
 
 const TRANSFORM_OPTIONS = [
   {
@@ -111,9 +108,12 @@ export class StringFormat extends FieldFormat {
     });
   }
 
-  textConvert: TextContextTypeConvert = (val: string | number, options) => {
+  textConvert: TextContextTypeConvert = (val, options) => {
     if (val === '') {
-      return emptyLabel;
+      return EMPTY_LABEL;
+    }
+    if (val == null || val === '__missing__') {
+      return NULL_LABEL;
     }
     switch (this.param('transform')) {
       case 'lower':
@@ -135,7 +135,10 @@ export class StringFormat extends FieldFormat {
 
   htmlConvert: HtmlContextTypeConvert = (val, { hit, field } = {}) => {
     if (val === '') {
-      return `<span class="ffString__emptyValue">${emptyLabel}</span>`;
+      return `<span class="ffString__emptyValue">${EMPTY_LABEL}</span>`;
+    }
+    if (val === null || val === '__missing__') {
+      return `<span class="ffString__emptyValue">${NULL_LABEL}</span>`;
     }
 
     return hit?.highlight?.[field?.name!]

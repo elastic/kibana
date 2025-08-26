@@ -142,12 +142,9 @@ export const getFormattedRow = (
     (formattedInfo, { id }) => {
       const record = formattedInfo.row[id];
       if (
-        record != null &&
-        // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
-        (!isPrimitive(record) ||
-          (id === xAccessor && xScaleType === 'ordinal') ||
-          id === splitColumnAccessor ||
-          id === splitRowAccessor)
+        (id === xAccessor && xScaleType === 'ordinal') ||
+        id === splitColumnAccessor ||
+        id === splitRowAccessor
       ) {
         const formattedValue = columnsFormatters[id]?.convert(record) ?? '';
         invertedRawValueMap.get(id)?.set(formattedValue, record);
