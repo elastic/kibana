@@ -166,6 +166,7 @@ export const EUI_MAIN_COMPONENTS = [
   'EuiFlexGroup',
   'EuiFlexItem',
   'EuiTitle',
+  'EuiPopover',
 ];
 
 export const EUI_COMPONENTS_DOCS_MAP = new Map<string, string>([
