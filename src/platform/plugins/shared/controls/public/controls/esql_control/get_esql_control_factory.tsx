@@ -42,7 +42,8 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       const defaultControlManager = initializeDefaultControlManager(initialState);
       const selections = initializeESQLControlSelections(
         initialState,
-        controlGroupApi.controlFetch$(uuid)
+        controlGroupApi.controlFetch$(uuid),
+        defaultControlManager.api.setDataLoading
       );
 
       const onSaveControl = (updatedState: ESQLControlState) => {
