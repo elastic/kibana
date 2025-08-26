@@ -25,6 +25,18 @@ export type Evaluator = (args: { run: Run; example: Example }) => EvaluationResu
 type CustomEvaluatorResult = Omit<EvaluationResult, 'key'>;
 export type CustomEvaluator = (args: { run: Run; example: Example }) => CustomEvaluatorResult;
 
+export type SiemMigrationEvaluatorConstructor<
+  M extends MigrationDocument = MigrationDocument,
+  I extends ItemDocument = ItemDocument,
+  P extends object = {},
+  C extends object = {},
+  O extends object = {}
+> = new (
+  taskRunner: SiemMigrationTaskRunner<M, I, P, C, O>,
+  dependencies: SiemMigrationsClientDependencies,
+  logger: Logger
+) => SiemMigrationsBaseEvaluator<M, I, P, C, O>;
+
 export abstract class SiemMigrationsBaseEvaluator<
   M extends MigrationDocument = MigrationDocument,
   I extends ItemDocument = ItemDocument,
