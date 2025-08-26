@@ -108,12 +108,12 @@ describe('ProductDocSetting', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('productDocStatusBadge')).toHaveTextContent('Not Installed');
+      expect(screen.getByTestId('productDocStatusBadge')).toHaveTextContent('Not installed');
       expect(screen.getByTestId('productDocActionLink')).toHaveTextContent('Install');
     });
   });
 
-  it('renders a disabled install link when the model is NOT_INSTALLED', async () => {
+  it('dont render an install link when the model is NOT_INSTALLED', async () => {
     const mockKnowledgeBase = createMockKnowledgeBase({
       isInstalling: false,
       isWarmingUpModel: false,
@@ -140,13 +140,11 @@ describe('ProductDocSetting', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('productDocStatusBadge')).toHaveTextContent('Not Installed');
+      expect(screen.getByTestId('productDocStatusBadge')).toHaveTextContent('Not installed');
     });
 
-    const link = screen.getByTestId('productDocActionLink');
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('aria-disabled', 'true');
-    expect(link).toHaveTextContent('');
+    const link = screen.queryByTestId('productDocActionLink');
+    expect(link).not.toBeInTheDocument();
   });
 
   it('shows Retry link and warning callout on backend error and retries install', async () => {

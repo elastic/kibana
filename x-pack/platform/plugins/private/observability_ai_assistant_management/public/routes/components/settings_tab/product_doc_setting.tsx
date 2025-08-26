@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React, { useCallback, useState } from 'react';
 import {
   EuiText,
@@ -34,7 +41,7 @@ const statusToLabelMap: Record<Exclude<InstallationStatus, 'error'>, string> = {
   ),
   uninstalled: i18n.translate(
     'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocButtonLabel',
-    { defaultMessage: 'Not Installed' }
+    { defaultMessage: 'Not installed' }
   ),
 };
 
@@ -207,7 +214,7 @@ export function ProductDocSetting({
     ) : null;
 
   const ActionLink = (() => {
-    if (isLoading || showErrorCallout) return null;
+    if (isLoading || showErrorCallout || kb?.inferenceModelState === InferenceModelState.NOT_INSTALLED) return null;
 
     if (productDocStatus === 'installed') {
       return (
@@ -247,23 +254,9 @@ export function ProductDocSetting({
       </EuiLink>
     );
 
-    if (!canInstallProductDoc || kb?.inferenceModelState === InferenceModelState.NOT_INSTALLED) {
-      return (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate(
-            'xpack.observabilityAiAssistantManagement.settingsPage.installDissabledTooltip',
-            { defaultMessage: 'Knowledge Base has to be installed first.' }
-          )}
-        >
-          <EuiTextColor color="subdued" component="span">
-            {installInner}
-          </EuiTextColor>
-        </EuiToolTip>
-      );
-    }
-
-    return installInner;
+    return canInstallProductDoc
+      ? installInner
+      : null;
   })();
 
   return (
@@ -306,7 +299,12 @@ export function ProductDocSetting({
       </div>
 
       {showErrorCallout && (
-        <EuiCallOut color="warning" size="s" style={{ width: 528, marginBottom: 16 }} data-test-subj="productDocNotAvailableCallout">
+        <EuiCallOut
+          color="warning"
+          size="s"
+          style={{ width: 528, marginBottom: 16 }}
+          data-test-subj="productDocNotAvailableCallout"
+        >
           <div style={{ display: 'flex', alignItems: 'flex-start', columnGap: 8 }}>
             <EuiIcon type="iInCircle" size="s" />
             <EuiText size="s">
