@@ -155,6 +155,8 @@ export const createHandler =
       });
     } catch (e) {
       log.error(e);
+      log.error(`Request host: ${requestHost}`);
+      log.error(`Legacy hosts: ${hosts.join(', ')}`);
       log.warn(`Could not connect to ES node [${host}]`);
 
       const hasMultipleHosts = hosts.length > 1;
