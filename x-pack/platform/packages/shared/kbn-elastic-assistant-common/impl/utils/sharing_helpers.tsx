@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Conversation } from '@kbn/elastic-assistant';
 import type { ConversationResponse, User } from '../schemas';
 export enum ConversationSharedState {
   // all users in the space
@@ -24,7 +23,7 @@ export enum ConversationSharedState {
  * @param conversation
  */
 export const getConversationSharedState = (
-  conversation?: Pick<Conversation, 'id' | 'users'>
+  conversation?: Pick<ConversationResponse, 'id' | 'users'>
 ): ConversationSharedState => {
   if (!conversation || conversation?.id === '') {
     // while loading or initializing, conversation is not shared
