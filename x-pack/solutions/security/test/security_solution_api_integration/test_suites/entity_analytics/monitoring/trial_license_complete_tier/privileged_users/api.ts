@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(500);
-        expect(res.body.message).to.match(/Maximum user limit of \d+ reached/);
+        expect(res.body.message).to.match(/maximum limit of \d+ privileged users reached/);
       });
       it('should update a user', async () => {
         log.info(`updating a user`);
