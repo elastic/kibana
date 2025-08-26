@@ -13,7 +13,7 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 
 export default {
   component: WorkflowDetailHeader,
-  title: 'WorkflowDetailHeader',
+  title: 'Workflows Management/Workflow Detail Header',
   decorators: [kibanaReactDecorator],
 };
 

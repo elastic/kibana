@@ -14,7 +14,7 @@ import { WorkflowExecutionListItem } from './workflow_execution_list_item';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 
 const meta: Meta = {
-  title: 'Workflow Execution List Item',
+  title: 'Workflows Management/Workflow Execution List/Workflow Execution List Item',
   render: (args) => (
     <div style={{ width: '275px' }}>
       <WorkflowExecutionListItem {...args} />
