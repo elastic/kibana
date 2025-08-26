@@ -161,6 +161,7 @@ export function useYamlValidation({
 
         // Set markers on the model for the problems panel
         monaco.editor.setModelMarkers(model, 'mustache-validation', markers);
+        setError(null);
       } catch (e) {
         setError(e as Error);
       }
