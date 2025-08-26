@@ -57,9 +57,9 @@ const EXPECTED_PROMPT_CONTENT = {
 } as const;
 
 const EXPECTED_FIELD_LISTS = {
-  LOGS: '@timestamp ,message ,host.name ,http.response.status_code',
-  METRICS: '@timestamp ,system.cpu.total.pct ,system.memory.used.pct ,host.name',
-  TRACES: '@timestamp ,trace.id ,span.duration.us ,service.name',
+  LOGS: '@timestamp, message, host.name, http.response.status_code',
+  METRICS: '@timestamp, system.cpu.total.pct, system.memory.used.pct, host.name',
+  TRACES: '@timestamp, trace.id, span.duration.us, service.name',
 } as const;
 
 describe('createIndexSelectorPrompt', () => {

@@ -99,23 +99,32 @@ export const createIndexSelectorPrompt = ({
   nlQuery: string;
   limit?: number;
 }): string => {
+  /*
+  Will result in blocks like:
+  --------
+  - my_index: A description of this index
+
+  - other_index: Fields: foo, foo.bar, baz
+  --------
+   */
+  const indicesAndDescriptions = indices
+    .map((index) => {
+      const indexMapping = mappings[index.index];
+      const fieldPaths: string[] = fields[index.index].map((mappingField) => {
+        return mappingField.path;
+      });
+      const description = indexMapping?._meta?.description || `Fields: ${fieldPaths.join(', ')}`;
+      return `- ${index.index}: ${description}`;
+    })
+    .join('\n\n');
+
   return `You are an AI assistant for the Elasticsearch company.
        based on a natural language query from the user, your task is to select up to ${limit} most relevant indices from a list of indices.
 
        *The natural language query is:* ${nlQuery}
 
        *List of indices with their descriptions:*
-       ${indices
-         .map((index) => {
-           const indexMapping = mappings[index.index];
-           const fieldPaths: string[] = fields[index.index].map((mappingField) => {
-             return mappingField.path;
-           });
-           const description =
-             indexMapping?._meta?.description || `Fields: ${fieldPaths.join(' ,')}`;
-           return `- ${index.index}: ${description}`;
-         })
-         .join('\n\n')}
+       ${indicesAndDescriptions}
 
        Based on the natural language query and the index descriptions, please return the most relevant indices with your reasoning.
        Remember, you should select at maximum ${limit} indices.
