@@ -7,8 +7,8 @@
 
 import React, { useState, useCallback } from 'react';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { AISummary } from '@kbn/cases-ai';
 import * as i18n from './translations';
-import { CaseSummaryContents } from './contents';
 import { useGetCaseSummary } from '../../../../containers/use_get_case_summary';
 import { useGetInferenceConnectors } from '../../../../containers/use_get_inference_connectors';
 import { useLicense } from '../../../../common/use_license';
@@ -44,11 +44,11 @@ export const CaseSummary = React.memo(({ caseId }: { caseId: string }) => {
 
   return (
     <EuiFlexItem grow={false} data-test-subj="caseSummary">
-      <CaseSummaryContents
+      <AISummary
         title={i18n.CASE_SUMMARY}
-        onToggle={handleCaseSummaryToggle}
-        isOpen={isSummaryOpen}
         summary={summary}
+        isOpen={isSummaryOpen}
+        onToggle={handleCaseSummaryToggle}
         error={summaryError}
       />
       <EuiSpacer size="m" />

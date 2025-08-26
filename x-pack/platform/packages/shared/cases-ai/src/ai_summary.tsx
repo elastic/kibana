@@ -19,25 +19,26 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export interface CaseSummaryContentsProps {
+export interface AISummaryProps {
   title: string;
-  onToggle: (isOpen: boolean) => void;
-  isOpen: boolean;
   summary?: {
     content?: string;
     generatedAt?: string;
   };
+  isOpen: boolean;
+  onToggle: (isOpen: boolean) => void;
   error: Error | null;
   loading?: boolean;
 }
 
-const extraProps = { css: { alignSelf: 'flex-start' } };
+const accoridonProps = { css: { alignSelf: 'flex-start' } };
+const textProps = { css: { marginTop: 2, marginBottom: 1 } };
 
-export const CaseSummaryContents: React.FC<CaseSummaryContentsProps> = ({
+export const AISummary: React.FC<AISummaryProps> = ({
   title,
-  onToggle,
-  isOpen,
   summary,
+  isOpen,
+  onToggle,
   error,
   loading,
 }) => {
@@ -53,24 +54,24 @@ export const CaseSummaryContents: React.FC<CaseSummaryContentsProps> = ({
   return (
     <EuiPanel hasBorder hasShadow={false}>
       <EuiAccordion
-        id="caseSummaryContainer"
-        arrowProps={extraProps}
+        id="aiSummaryContainer"
+        arrowProps={accoridonProps}
         buttonContent={
-          <EuiFlexGroup wrap responsive={false} gutterSize="m" data-test-subj="caseSummaryButton">
+          <EuiFlexGroup wrap responsive={false} gutterSize="m" data-test-subj="aiSummaryButton">
             <EuiFlexItem grow={false}>
               <EuiSpacer size="xs" />
               <AssistantIcon size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiText css={{ marginTop: 2, marginBottom: 1 }}>
+                <EuiText {...textProps}>
                   <h5>{title}</h5>
                 </EuiText>
               </EuiFlexGroup>
               {isOpen && summary && summaryDateTime && (
                 <EuiText size="xs" color="subdued">
                   <FormattedMessage
-                    id="xpack.cases.caseSummary.description"
+                    id="xpack.aiSummary.description"
                     defaultMessage="Generated on {date} at {time}"
                     values={{
                       date: summaryDateTime.date,
@@ -92,7 +93,7 @@ export const CaseSummaryContents: React.FC<CaseSummaryContentsProps> = ({
             hasBorder={false}
             hasShadow={false}
             color="subdued"
-            data-test-subj="caseSummaryResponse"
+            data-test-subj="aiSummaryResponse"
           >
             <EuiMarkdownFormat textSize="s">{summary.content}</EuiMarkdownFormat>
           </EuiPanel>
@@ -102,11 +103,11 @@ export const CaseSummaryContents: React.FC<CaseSummaryContentsProps> = ({
             hasBorder={false}
             hasShadow={false}
             color="danger"
-            data-test-subj="caseSummaryResponseError"
+            data-test-subj="aiSummaryResponseError"
           >
             <FormattedMessage
-              id="xpack.cases.caseSummary.error"
-              defaultMessage="Error fetching case summary"
+              id="xpack.aiSummary.error"
+              defaultMessage="Error fetching AI summary"
             />
           </EuiPanel>
         )}
@@ -115,4 +116,4 @@ export const CaseSummaryContents: React.FC<CaseSummaryContentsProps> = ({
   );
 };
 
-CaseSummaryContents.displayName = 'CaseSummaryContents';
+AISummary.displayName = 'AISummary';
