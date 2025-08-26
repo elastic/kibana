@@ -8,11 +8,11 @@
 import type { ConversationResponse, User } from '../schemas';
 export enum ConversationSharedState {
   // all users in the space
-  Shared = 'shared',
+  SHARED = 'shared',
   // selected users in the space
-  Restricted = 'restricted',
+  RESTRICTED = 'restricted',
   // not shared, only visible to conversation owner
-  Private = 'private',
+  PRIVATE = 'private',
 }
 
 /**
@@ -27,20 +27,20 @@ export const getConversationSharedState = (
 ): ConversationSharedState => {
   if (!conversation || conversation?.id === '') {
     // while loading or initializing, conversation is not shared
-    return ConversationSharedState.Private;
+    return ConversationSharedState.PRIVATE;
   }
 
   const conversationUsers = conversation?.users.length ?? 1;
 
   switch (conversationUsers) {
     case 0:
-      return ConversationSharedState.Shared;
+      return ConversationSharedState.SHARED;
     case 1:
       // length is 1, default to private
-      return ConversationSharedState.Private;
+      return ConversationSharedState.PRIVATE;
     default:
       // more than 1 user
-      return ConversationSharedState.Restricted;
+      return ConversationSharedState.RESTRICTED;
   }
 };
 

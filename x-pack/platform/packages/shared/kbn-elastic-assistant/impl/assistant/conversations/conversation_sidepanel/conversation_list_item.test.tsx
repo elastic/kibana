@@ -90,7 +90,7 @@ describe('ConversationListItem', () => {
     );
     expect(
       screen.getByTestId(`conversation-icon-${ownerConvo.title}`).getAttribute('data-euiicon-type')
-    ).toBe(getSharedIcon(ConversationSharedState.Shared));
+    ).toBe(getSharedIcon(ConversationSharedState.SHARED));
   });
 
   it('Non-owner restricted convo: renders correct icon title/type', () => {
@@ -109,7 +109,7 @@ describe('ConversationListItem', () => {
     );
     expect(
       screen.getByTestId(`conversation-icon-${ownerConvo.title}`).getAttribute('data-euiicon-type')
-    ).toBe(getSharedIcon(ConversationSharedState.Restricted));
+    ).toBe(getSharedIcon(ConversationSharedState.RESTRICTED));
   });
 
   it('calls onConversationSelected when clicked', () => {

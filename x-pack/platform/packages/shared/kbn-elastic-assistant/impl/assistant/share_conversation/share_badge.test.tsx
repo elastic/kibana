@@ -27,7 +27,7 @@ jest.mock('./share_modal', () => ({
 
 const toastsMock = { addSuccess: jest.fn(), addError: jest.fn() } as unknown as IToasts;
 const defaultProps = {
-  conversationSharedState: ConversationSharedState.Private,
+  conversationSharedState: ConversationSharedState.PRIVATE,
   selectedConversation: welcomeConvo,
   isConversationOwner: true,
   refetchCurrentUserConversations: mockRefetchCurrentUserConversations,
@@ -67,7 +67,7 @@ describe('ShareBadge', () => {
       </TestProviders>
     );
     fireEvent.click(screen.getByTestId('shareBadgeButton'));
-    const sharedOption = screen.getByTestId(ConversationSharedState.Restricted);
+    const sharedOption = screen.getByTestId(ConversationSharedState.RESTRICTED);
     fireEvent.click(sharedOption);
     await waitFor(() => {
       expect(screen.getByTestId('share-modal')).toBeInTheDocument();
@@ -77,11 +77,11 @@ describe('ShareBadge', () => {
   it('calls unshareConversation when Private is selected', async () => {
     render(
       <TestProviders providerContext={{ toasts: toastsMock }}>
-        <ShareBadge {...defaultProps} conversationSharedState={ConversationSharedState.Shared} />
+        <ShareBadge {...defaultProps} conversationSharedState={ConversationSharedState.SHARED} />
       </TestProviders>
     );
     fireEvent.click(screen.getByTestId('shareBadgeButton'));
-    const privateOption = screen.getByTestId(ConversationSharedState.Private);
+    const privateOption = screen.getByTestId(ConversationSharedState.PRIVATE);
     fireEvent.click(privateOption);
     await waitFor(() => {
       expect(mockUpdateConversationUsers).toHaveBeenCalled();
@@ -92,11 +92,11 @@ describe('ShareBadge', () => {
   it('calls shareConversationGlobal when Global is selected', async () => {
     render(
       <TestProviders providerContext={{ toasts: toastsMock }}>
-        <ShareBadge {...defaultProps} conversationSharedState={ConversationSharedState.Private} />
+        <ShareBadge {...defaultProps} conversationSharedState={ConversationSharedState.PRIVATE} />
       </TestProviders>
     );
     fireEvent.click(screen.getByTestId('shareBadgeButton'));
-    const globalOption = screen.getByTestId(ConversationSharedState.Shared);
+    const globalOption = screen.getByTestId(ConversationSharedState.SHARED);
     fireEvent.click(globalOption);
     await waitFor(() => {
       expect(mockUpdateConversationUsers).toHaveBeenCalled();

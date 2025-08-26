@@ -22,7 +22,7 @@ const mockConversations = {
   [welcomeConvo.title]: { ...welcomeConvo, isConversationOwner: true },
 };
 const testProps = {
-  conversationSharedState: ConversationSharedState.Private,
+  conversationSharedState: ConversationSharedState.PRIVATE,
   conversationsLoaded: true,
   selectedConversation: welcomeConvo,
   title: 'Test Title',

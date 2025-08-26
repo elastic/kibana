@@ -95,29 +95,29 @@ const ShareSelectComponent: React.FC<Props> = ({
   const items = useMemo<Array<EuiSuperSelectOption<ConversationSharedState>>>(
     () => [
       {
-        value: ConversationSharedState.Private,
+        value: ConversationSharedState.PRIVATE,
         inputDisplay: renderSelectedOption(
           i18n.PRIVATE,
-          getSharedIcon(ConversationSharedState.Private)
+          getSharedIcon(ConversationSharedState.PRIVATE)
         ),
         dropdownDisplay: renderOption(i18n.PRIVATE, i18n.VISIBLE_PRIVATE),
-        'data-test-subj': ConversationSharedState.Private,
+        'data-test-subj': ConversationSharedState.PRIVATE,
       },
       {
-        value: ConversationSharedState.Shared,
-        'data-test-subj': ConversationSharedState.Shared,
+        value: ConversationSharedState.SHARED,
+        'data-test-subj': ConversationSharedState.SHARED,
         inputDisplay: renderSelectedOption(
           i18n.SHARED,
-          getSharedIcon(ConversationSharedState.Shared)
+          getSharedIcon(ConversationSharedState.SHARED)
         ),
         dropdownDisplay: renderOption(i18n.SHARED, i18n.VISIBLE_SHARED),
       },
       {
-        value: ConversationSharedState.Restricted,
-        'data-test-subj': ConversationSharedState.Restricted,
+        value: ConversationSharedState.RESTRICTED,
+        'data-test-subj': ConversationSharedState.RESTRICTED,
         inputDisplay: renderSelectedOption(
           i18n.RESTRICTED,
-          getSharedIcon(ConversationSharedState.Restricted)
+          getSharedIcon(ConversationSharedState.RESTRICTED)
         ),
         dropdownDisplay: renderOption(i18n.RESTRICTED, i18n.VISIBLE_RESTRICTED),
       },
@@ -135,7 +135,7 @@ const ShareSelectComponent: React.FC<Props> = ({
         onChange={onChange}
         valueOfSelected={value}
       />
-      {value === ConversationSharedState.Restricted && (
+      {value === ConversationSharedState.RESTRICTED && (
         <>
           <EuiSpacer />
           <ShareUserSelect

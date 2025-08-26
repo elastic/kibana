@@ -112,9 +112,9 @@ export const useConversationsTable = () => {
             const conversationSharedState = getConversationSharedState(conversation);
             const icon = getSharedIcon(conversationSharedState);
             const tooltipContent =
-              conversationSharedState === ConversationSharedState.Shared
+              conversationSharedState === ConversationSharedState.SHARED
                 ? VISIBLE_SHARED
-                : conversationSharedState === ConversationSharedState.Restricted
+                : conversationSharedState === ConversationSharedState.RESTRICTED
                 ? VISIBLE_RESTRICTED
                 : VISIBLE_PRIVATE;
             return (

@@ -38,10 +38,10 @@ export enum ConversationAuditAction {
 export const getAuditAction = (
   conversationSharedState: ConversationSharedState
 ): ConversationAuditAction => {
-  if (conversationSharedState === ConversationSharedState.Private) {
+  if (conversationSharedState === ConversationSharedState.PRIVATE) {
     return ConversationAuditAction.PRIVATE;
   }
-  if (conversationSharedState === ConversationSharedState.Restricted) {
+  if (conversationSharedState === ConversationSharedState.RESTRICTED) {
     return ConversationAuditAction.RESTRICTED;
   }
   return ConversationAuditAction.SHARED;

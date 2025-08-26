@@ -106,7 +106,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
             });
             telemetry.reportEvent(CONVERSATION_SHARED_SUCCESS_EVENT.eventType, {
               sharing: conversationSharedState,
-              ...(conversationSharedState === ConversationSharedState.Restricted
+              ...(conversationSharedState === ConversationSharedState.RESTRICTED
                 ? // if restricted, track number of additional users added (minus the owner)
                   { total: request.body.users.length - 1 }
                 : {}),
@@ -148,7 +148,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
             auditLogger?.log(
               conversationAuditEvent({
                 action:
-                  conversationSharedState === ConversationSharedState.Private
+                  conversationSharedState === ConversationSharedState.PRIVATE
                     ? ConversationAuditAction.PRIVATE
                     : ConversationAuditAction.SHARED,
                 id: request.body.id,

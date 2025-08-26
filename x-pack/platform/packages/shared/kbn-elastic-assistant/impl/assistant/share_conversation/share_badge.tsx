@@ -52,32 +52,32 @@ const ShareBadgeComponent: React.FC<Props> = ({
   const items = useMemo<Array<EuiSelectableOption<ShareBadgeOptionData>>>(
     () => [
       {
-        checked: conversationSharedState === ConversationSharedState.Private ? 'on' : undefined,
-        key: ConversationSharedState.Private,
+        checked: conversationSharedState === ConversationSharedState.PRIVATE ? 'on' : undefined,
+        key: ConversationSharedState.PRIVATE,
         data: {
           description: i18n.VISIBLE_PRIVATE,
         },
-        'data-test-subj': ConversationSharedState.Private,
+        'data-test-subj': ConversationSharedState.PRIVATE,
         label: i18n.PRIVATE,
         isGroupLabel: false,
       },
       {
-        checked: conversationSharedState === ConversationSharedState.Shared ? 'on' : undefined,
-        key: ConversationSharedState.Shared,
+        checked: conversationSharedState === ConversationSharedState.SHARED ? 'on' : undefined,
+        key: ConversationSharedState.SHARED,
         data: {
           description: i18n.VISIBLE_SHARED,
         },
-        'data-test-subj': ConversationSharedState.Shared,
+        'data-test-subj': ConversationSharedState.SHARED,
         label: i18n.SHARED,
         isGroupLabel: false,
       },
       {
-        checked: conversationSharedState === ConversationSharedState.Restricted ? 'on' : undefined,
-        key: ConversationSharedState.Restricted,
+        checked: conversationSharedState === ConversationSharedState.RESTRICTED ? 'on' : undefined,
+        key: ConversationSharedState.RESTRICTED,
         data: {
           description: i18n.VISIBLE_RESTRICTED,
         },
-        'data-test-subj': ConversationSharedState.Restricted,
+        'data-test-subj': ConversationSharedState.RESTRICTED,
         label: i18n.RESTRICTED,
         isGroupLabel: false,
       },
@@ -149,16 +149,16 @@ const ShareBadgeComponent: React.FC<Props> = ({
   >(
     (_options, _event, selectedOption) => {
       if (
-        selectedOption.key === ConversationSharedState.Private &&
-        conversationSharedState !== ConversationSharedState.Private
+        selectedOption.key === ConversationSharedState.PRIVATE &&
+        conversationSharedState !== ConversationSharedState.PRIVATE
       ) {
         unshareConversation();
       } else if (
-        selectedOption.key === ConversationSharedState.Shared &&
-        conversationSharedState !== ConversationSharedState.Shared
+        selectedOption.key === ConversationSharedState.SHARED &&
+        conversationSharedState !== ConversationSharedState.SHARED
       ) {
         shareConversationGlobal();
-      } else if (selectedOption.key === ConversationSharedState.Restricted) {
+      } else if (selectedOption.key === ConversationSharedState.RESTRICTED) {
         setIsModalOpen(true);
       }
       setIsPopoverOpen(false);

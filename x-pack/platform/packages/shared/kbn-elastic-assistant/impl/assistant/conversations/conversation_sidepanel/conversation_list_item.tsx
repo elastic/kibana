@@ -64,7 +64,7 @@ export const ConversationListItem: React.FC<Props> = ({
   );
 
   const shouldShowIcon = useMemo(
-    () => isAssistantSharingEnabled && conversationSharedState !== ConversationSharedState.Private,
+    () => isAssistantSharingEnabled && conversationSharedState !== ConversationSharedState.PRIVATE,
     [isAssistantSharingEnabled, conversationSharedState]
   );
   const { iconType, iconColor, iconTitle } = useMemo(

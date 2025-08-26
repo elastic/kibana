@@ -46,9 +46,9 @@ describe('ShareSelect', () => {
     fireEvent.click(screen.getByTestId('shareSelect'));
 
     await act(async () => {
-      fireEvent.click(screen.getByTestId(ConversationSharedState.Shared));
+      fireEvent.click(screen.getByTestId(ConversationSharedState.SHARED));
     });
-    expect(onSharedSelectionChange).toHaveBeenCalledWith(ConversationSharedState.Shared);
+    expect(onSharedSelectionChange).toHaveBeenCalledWith(ConversationSharedState.SHARED);
   });
 
   it('renders ShareUserSelect when Shared is selected', async () => {
@@ -60,7 +60,7 @@ describe('ShareSelect', () => {
     fireEvent.click(screen.getByTestId('shareSelect'));
 
     await act(async () => {
-      fireEvent.click(screen.getByTestId(ConversationSharedState.Restricted));
+      fireEvent.click(screen.getByTestId(ConversationSharedState.RESTRICTED));
     });
     expect(screen.getByTestId('share_user_select')).toBeInTheDocument();
   });

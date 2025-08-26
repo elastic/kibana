@@ -16,7 +16,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 const baseProps = {
   allSystemPrompts: [],
   comments: <div data-test-subj="comments">{'Test comments'}</div>,
-  conversationSharedState: ConversationSharedState.Private,
+  conversationSharedState: ConversationSharedState.PRIVATE,
   currentConversation: welcomeConvo,
   currentSystemPromptId: undefined,
   handleOnConversationSelected: jest.fn(),
@@ -83,7 +83,7 @@ describe('AssistantBody', () => {
   it('shows owner callout when conversation is shared and user is owner', () => {
     render(
       <TestProviders>
-        <AssistantBody {...baseProps} conversationSharedState={ConversationSharedState.Shared} />
+        <AssistantBody {...baseProps} conversationSharedState={ConversationSharedState.SHARED} />
       </TestProviders>
     );
     expect(screen.getByTestId('ownerSharedConversationCallout')).toBeInTheDocument();
@@ -95,7 +95,7 @@ describe('AssistantBody', () => {
         <AssistantBody
           {...baseProps}
           isConversationOwner={false}
-          conversationSharedState={ConversationSharedState.Shared}
+          conversationSharedState={ConversationSharedState.SHARED}
         />
       </TestProviders>
     );

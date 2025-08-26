@@ -9,11 +9,11 @@ import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 
 export const getSharedIcon = (sharedState: ConversationSharedState): string => {
   switch (sharedState) {
-    case ConversationSharedState.Shared:
+    case ConversationSharedState.SHARED:
       return 'globe';
-    case ConversationSharedState.Restricted:
+    case ConversationSharedState.RESTRICTED:
       return 'users';
-    case ConversationSharedState.Private:
+    case ConversationSharedState.PRIVATE:
       return 'lock';
     default:
       return 'lock';

@@ -144,10 +144,10 @@ export const AssistantBody: FunctionComponent<Props> = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {isConversationOwner && conversationSharedState !== ConversationSharedState.Private && (
+        {isConversationOwner && conversationSharedState !== ConversationSharedState.PRIVATE && (
           <SharedConversationOwnerCallout
             id={currentConversation?.id ?? ''}
-            isGloballyShared={conversationSharedState === ConversationSharedState.Shared}
+            isGloballyShared={conversationSharedState === ConversationSharedState.SHARED}
           />
         )}
       </EuiFlexItem>

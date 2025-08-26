@@ -39,12 +39,12 @@ const SharedConversationOwnerCalloutComponent: React.FC<{
     () =>
       isGloballyShared
         ? {
-            icon: getSharedIcon(ConversationSharedState.Shared),
+            icon: getSharedIcon(ConversationSharedState.SHARED),
             title: i18n.CONVERSATION_SHARED_TITLE,
             description: i18n.OWNERSHIP_CALLOUT,
           }
         : {
-            icon: getSharedIcon(ConversationSharedState.Restricted),
+            icon: getSharedIcon(ConversationSharedState.RESTRICTED),
             title: i18n.CONVERSATION_RESTRICTED_TITLE,
             description: i18n.OWNERSHIP_CALLOUT_RESTRICTED,
           },
