@@ -394,4 +394,9 @@ export type LensApiHistogramOperation = typeof bucketHistogramOperationSchema.ty
 export type LensApiRangeOperation = typeof bucketRangesOperationSchema.type;
 export type LensApiFiltersOperation = typeof bucketFiltersOperationSchema.type;
 
-export type LensApiBucketOperations = LensApiDateHistogramOperation | LensApiTermsOperation | LensApiHistogramOperation | LensApiRangeOperation | LensApiFiltersOperation;
+export type LensApiBucketOperations =
+  | LensApiDateHistogramOperation
+  | LensApiTermsOperation
+  | LensApiHistogramOperation
+  | LensApiRangeOperation
+  | LensApiFiltersOperation;
