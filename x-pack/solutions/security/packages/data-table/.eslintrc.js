@@ -93,14 +93,11 @@ const RESTRICTED_IMPORTS_PATHS = [
   },
 ];
 
-// root directory of the project dynamically calculated
-const ROOT_DIR = process.cwd();
-const ROOT_CLIMB_STRING = path.relative(__dirname, ROOT_DIR); // e.g. ../../../../..
-
 /** @type {import('eslint').Linter.Config} */
-const rootConfig = require(`${ROOT_CLIMB_STRING}/.eslintrc`); // eslint-disable-line import/no-dynamic-require
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+const rootConfig = require('../../../../../.eslintrc');
 
-const clonedRootConfig = JSON.parse(JSON.stringify(rootConfig));
+const clonedRootConfig = structuredClone(rootConfig);
 
 const overridesWithNoRestrictedImportRule = clonedRootConfig.overrides.filter(
   (override) => override.rules && 'no-restricted-imports' in override.rules
@@ -182,7 +179,7 @@ function getAssignableDifference(inputPath, targetDir) {
 const absOverrides = overridesWithNoRestrictedImportRule.map((override) => ({
   ...override,
   files: override.files.map((fileOrGlob) => {
-    return path.resolve(ROOT_DIR, fileOrGlob);
+    return path.resolve('../../../../../', fileOrGlob);
   }),
 }));
 
