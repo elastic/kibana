@@ -13,6 +13,7 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.19.2>>
 * <<release-notes-8.19.1>>
 * <<release-notes-8.19.0>>
+* <<release-notes-8.18.6>>
 * <<release-notes-8.18.5>>
 * <<release-notes-8.18.4>>
 * <<release-notes-8.18.3>>
@@ -570,6 +571,43 @@ Search::
 * Fixes an issue in Search Playground where context limit errors were not handled well when using the Elastic Managed LLM ({kibana-pull}225360[#225360]).
 * Adjusts the `z-index` of the app menu header to not conflict with the Persistent Console ({kibana-pull}224708[#224708]).
 
+[[release-notes-8.18.6]]
+== {kib} 8.18.6
+
+The 8.18.6 release includes the following fixes.
+
+[float]
+[[enhancement-v8.18.6]]
+=== Enhancements
+Kibana security::
+* Improves error messages when your {kib} session fails to refresh a token ({kibana-pull}231118[#231118]).
+Machine Learning::
+* Improves error handling in Anomaly Explorer when fetching table data fails and category definition fails ({kibana-pull}231779[#231779]).
+
+[float]
+[[fixes-v8.18.6]]
+=== Fixes
+Alerting::
+* Fixes an issue where maintenance windows with scoped queries were not being correctly applied to all rule types ({kibana-pull}232307[#232307]).
+Cases::
+* Hides Case connectors in the **Create case** workflow based on your license ({kibana-pull}232506[#232506]).
+* Fixes inconsistencies in case activity statistics ({kibana-pull}231948[#231948]).
+Dashboards and Visualizations::
+* Fixes empty **Create tag** tooltip in dashboard details ({kibana-pull}232853[#232853]).
+Data ingestion and Fleet::
+* Ensures transform index templates include `index.mapping.ignore_malformed: true` to prevent failures due to invalid values in source indices in Fleet ({kibana-pull}232439[#232439]).
+Elastic Observability solution::
+* Adds a note about supported Helm versions to the onboarding flow ({kibana-pull}232618[#232618]).
+Elastic Security solution::
+For the Elastic Security 8.18.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+Kibana security::
+* Fixes positioning of the **Add rule** popover on the **Role Mappings** page ({kibana-pull}231551[#231551]).
+* Removes the default port from the interactive setup cluster address form, unless specified ({kibana-pull}230582[#230582]).
+Machine Learning::
+* Updates the prompt text for the `mv_slice` feature ({kibana-pull}231870[#231870]).
+* Ensures that failed validation does not alter other fields in the AI Connector form ({kibana-pull}230321[#230321]).
+Management::
+* Fixes an issue where the **Restore Status** tab was not showing results when only system indices were restored ({kibana-pull}232839[#232839]).
 
 [[release-notes-8.18.5]]
 == {kib} 8.18.5
