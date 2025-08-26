@@ -17,6 +17,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import {
   WORKFLOWS_EXECUTION_LOGS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
@@ -52,6 +53,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private unsecureActionsClient: IUnsecuredActionsClient | null = null;
   private api: WorkflowsManagementApi | null = null;
+  private spaces?: SpacesServiceStart | null = null;
   // TODO: replace with esClient promise from core
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -69,19 +71,19 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       // Create workflows service function for the connector
       const getWorkflowsService = async (request: KibanaRequest) => {
         // Return a function that will be called by the connector
-        return async (workflowId: string, inputs: Record<string, unknown>) => {
+        return async (workflowId: string, spaceId: string, inputs: Record<string, unknown>) => {
           if (!this.api) {
             throw new Error('Workflows management API not initialized');
           }
 
           // Get the workflow first
-          const workflow = await this.api.getWorkflow(workflowId);
+          const workflow = await this.api.getWorkflow(workflowId, spaceId);
           if (!workflow) {
             throw new Error(`Workflow not found: ${workflowId}`);
           }
 
           // Run the workflow, @tb: maybe switch to scheduler?
-          return await this.api.runWorkflow(workflow, inputs);
+          return await this.api.runWorkflow(workflow, spaceId, inputs);
         };
       };
 
@@ -128,33 +130,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           },
         },
       });
-
-      plugins.taskManager.registerTaskDefinitions({
-        'workflow:run': {
-          title: 'Run Workflow',
-          description: 'Executes a workflow immediately',
-          timeout: '5m',
-          maxAttempts: 1,
-          createTaskRunner: ({ taskInstance }) => {
-            return {
-              async run() {
-                // Get dependencies when the task actually runs
-                const [, pluginsStart] = await core.getStartServices();
-                const { workflowsExecutionEngine } =
-                  pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
-
-                return workflowsExecutionEngine.executeWorkflow(
-                  taskInstance.params.workflow,
-                  taskInstance.params.context
-                );
-              },
-              async cancel() {
-                // Cancel function for the task
-              },
-            };
-          },
-        },
-      });
     }
 
     // Register saved object types
@@ -176,7 +151,12 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     const getSavedObjectsClient = () =>
       core
         .getStartServices()
-        .then(([coreStart]) => coreStart.savedObjects.createInternalRepository());
+        .then(([coreStart]) => coreStart.savedObjects.getUnsafeInternalClient());
+
+    const getWorkflowExecutionEngine = () =>
+      core
+        .getStartServices()
+        .then(([, pluginsStart]) => (pluginsStart as any).workflowsExecutionEngine);
 
     this.workflowsService = new WorkflowsService(
       esClientPromise,
@@ -187,10 +167,11 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       WORKFLOWS_EXECUTION_LOGS_INDEX,
       this.config.logging.console
     );
-    this.api = new WorkflowsManagementApi(this.workflowsService);
+    this.api = new WorkflowsManagementApi(this.workflowsService, null, getWorkflowExecutionEngine);
+    this.spaces = plugins.spaces?.spacesService;
 
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger);
+    defineRoutes(router, this.api, this.logger, this.spaces!);
 
     return {
       management: this.api,
@@ -202,6 +183,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
     this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
 
+    // Initialize workflow task scheduler with the start contract
     // Initialize workflow task scheduler with the start contract
     this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);
 
