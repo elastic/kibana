@@ -27,6 +27,8 @@ const UserProfilesSearchComponent: React.FC<Props> = ({
   const { data: userProfiles, isLoading } = useSuggestUserProfiles({
     forbiddenUsers,
     searchTerm,
+    // ensure we give length to search beyond the selected users
+    size: selectedUsers.length + 5,
   });
 
   const onChange = useCallback(
