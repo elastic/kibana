@@ -20,12 +20,8 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { memoize } from 'lodash';
-<<<<<<< HEAD
-import { ValueFormatConfig } from '../../../../../common';
-import { OperationDefinition } from '.';
-=======
+import type { ValueFormatConfig } from '../../../../../common';
 import type { OperationDefinition } from '.';
->>>>>>> upstream/main
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,

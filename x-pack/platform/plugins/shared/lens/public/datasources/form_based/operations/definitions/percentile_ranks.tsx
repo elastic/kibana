@@ -13,12 +13,8 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_RANK_ID, PERCENTILE_RANK_NAME } from '@kbn/lens-formula-docs';
-<<<<<<< HEAD
 import type { ValueFormatConfig } from '../../../../../common';
-import { OperationDefinition } from '.';
-=======
 import type { OperationDefinition } from '.';
->>>>>>> upstream/main
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
