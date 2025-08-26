@@ -180,12 +180,13 @@ const createCheckboxColumn = (
   ),
 });
 
-const createToolDetailsColumn = (euiTheme: any, includeType: boolean = true) => ({
-  field: 'id',
-  name: labels.tools.toolIdLabel,
-  sortable: includeType,
-  width: includeType ? '60%' : undefined,
-  render: (_: any, tool: ToolDefinition) => (
+interface ToolDetailsColumnProps {
+  tool: ToolDefinition;
+}
+
+const ToolDetailsColumn: React.FC<ToolDetailsColumnProps> = ({ tool }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiText
         size="s"
@@ -199,7 +200,15 @@ const createToolDetailsColumn = (euiTheme: any, includeType: boolean = true) => 
         {truncateAtNewline(tool.description)}
       </EuiText>
     </EuiFlexGroup>
-  ),
+  );
+};
+
+const createToolDetailsColumn = ({ includeType = true }: { includeType?: boolean }) => ({
+  field: 'id',
+  name: labels.tools.toolIdLabel,
+  sortable: includeType,
+  width: includeType ? '60%' : undefined,
+  render: (tool: ToolDefinition) => <ToolDetailsColumn tool={tool} />,
 });
 
 const createTypeColumn = () => ({
@@ -226,7 +235,6 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   showGroupedView = true,
   onShowGroupedViewChange,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
 
@@ -357,20 +365,20 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   const flatTableColumns = useMemo(
     () => [
       createCheckboxColumn(selectedTools, handleToggleTool, disabled),
-      createToolDetailsColumn(euiTheme, true),
+      createToolDetailsColumn({ includeType: true }),
       createTypeColumn(),
       createTagsColumn(),
     ],
-    [selectedTools, handleToggleTool, disabled, euiTheme]
+    [selectedTools, handleToggleTool, disabled]
   );
 
   const groupedTableColumns = useMemo(
     () => [
       createCheckboxColumn(selectedTools, handleToggleTool, disabled),
-      createToolDetailsColumn(euiTheme, false),
+      createToolDetailsColumn({ includeType: false }),
       createTagsColumn(),
     ],
-    [selectedTools, handleToggleTool, disabled, euiTheme]
+    [selectedTools, handleToggleTool, disabled]
   );
 
   if (toolsLoading) {
