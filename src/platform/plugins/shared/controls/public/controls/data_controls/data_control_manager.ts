@@ -32,6 +32,7 @@ export const defaultDataControlComparators: StateComparators<DefaultDataControlS
   ...defaultControlComparators,
   dataViewId: 'referenceEquality',
   fieldName: 'referenceEquality',
+  useGlobalFilters: (a, b) => a ?? true === b ?? true,
 };
 
 export const initializeDataControlManager = async <EditorState extends object = {}>(

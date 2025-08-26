@@ -36,7 +36,7 @@ export type DataControlApi = HasEditCapabilities &
   AppliesFilters & {
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
-    useGlobalFilters$: PublishingSubject<DefaultDataControlState['useGlobalFilters']>;
+    useGlobalFilters$: PublishingSubject<boolean>;
   };
 
 export interface CustomOptionsComponentProps<
