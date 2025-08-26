@@ -2496,20 +2496,6 @@
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexManagement",
-            "id": "def-common.EnhancedDataStreamFromEs.index_mode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "index_mode",
-            "description": [],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

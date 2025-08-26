@@ -48,8 +48,13 @@ export interface Props {
 }
 
 const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj$ }) => {
-  const { activeNodes$, selectedPanelNode, setSelectedPanelNode, isFeedbackBtnVisible$ } =
-    useNavigationService();
+  const {
+    activeNodes$,
+    selectedPanelNode,
+    setSelectedPanelNode,
+    isFeedbackBtnVisible$,
+    isSideNavCollapsed,
+  } = useNavigationService();
 
   const dataTestSubj = useObservable(dataTestSubj$ ?? EMPTY, undefined);
 
@@ -93,7 +98,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj$ }) => {
             <EuiFlexItem>{renderNodes(navigationTree.body)}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiCollapsibleNavBeta.Body>
-        {isFeedbackBtnVisible && (
+        {isFeedbackBtnVisible && !isSideNavCollapsed && (
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiSpacer size="s" />
