@@ -40,6 +40,12 @@
       "observabilityAIAssistant",
       "lens"
     ],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationPanel", "savedObjects"]
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "presentationPanel",
+      "savedObjects",
+      "presentationUtil"
+    ]
   }
 }

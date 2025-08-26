@@ -89,6 +89,7 @@ describe('savedObjectToItem', () => {
         ],
         options: {
           hidePanelTitles: true,
+          fetchOnlyVisible: true,
           useMargins: false,
           syncColors: false,
           syncTooltips: false,

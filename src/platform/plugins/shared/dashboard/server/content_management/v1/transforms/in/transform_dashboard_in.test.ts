@@ -38,6 +38,7 @@ describe('transformDashboardIn', () => {
       description: 'description',
       kibanaSavedObjectMeta: { searchSource: { query: { query: 'test', language: 'KQL' } } },
       options: {
+        fetchOnlyVisible: true,
         hidePanelTitles: true,
         useMargins: false,
         syncColors: false,

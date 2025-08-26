@@ -12,7 +12,7 @@ import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { useMemoCss } from '@kbn/unified-search-plugin/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classNames from 'classnames';
 import React, { useLayoutEffect, useMemo } from 'react';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';

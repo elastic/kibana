@@ -22,8 +22,8 @@ import { coreServices } from '../services/kibana_services';
 
 // SERIALIZED STATE ONLY TODO: This could be simplified by using src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts
 export function initializeSettingsManager(
-  initialState: DashboardState,
-  viewMode$: PublishingSubject<ViewMode>
+  viewMode$: PublishingSubject<ViewMode>,
+  initialState?: DashboardState
 ) {
   const syncColors$ = new BehaviorSubject<boolean>(
     initialState?.syncColors ?? DEFAULT_DASHBOARD_STATE.syncColors

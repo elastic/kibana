@@ -26,7 +26,7 @@ import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
-import { useMemoCss } from '@kbn/unified-search-plugin/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
 import { DASHBOARD_APP_ID } from '../../common/constants';
