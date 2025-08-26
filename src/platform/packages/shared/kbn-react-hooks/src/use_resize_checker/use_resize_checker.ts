@@ -8,17 +8,20 @@
  */
 
 import { useRef, useCallback } from 'react';
-import type { monaco } from '@kbn/code-editor';
-import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
+import type { monaco } from '@kbn/monaco';
 
+/**
+ * Custom resize detection hook that doesn't depend on external plugins
+ * Uses native ResizeObserver API for efficient resize detection
+ */
 export const useResizeChecker = () => {
-  const resizeChecker = useRef<ResizeChecker | null>(null);
+  const resizeObserver = useRef<ResizeObserver | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const setupResizeChecker = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor, options: { flyoutMode?: boolean } = {}) => {
-      if (resizeChecker.current) {
-        resizeChecker.current.destroy();
+      if (resizeObserver.current) {
+        resizeObserver.current.disconnect();
       }
 
       let targetElement = containerRef.current;
@@ -31,8 +34,7 @@ export const useResizeChecker = () => {
         }
       }
 
-      resizeChecker.current = new ResizeChecker(targetElement);
-      resizeChecker.current.on('resize', () => {
+      resizeObserver.current = new ResizeObserver(() => {
         if (options.flyoutMode && containerRef.current) {
           const flyoutRect = targetElement.getBoundingClientRect();
           const availableWidth = flyoutRect.width - 120;
@@ -44,13 +46,16 @@ export const useResizeChecker = () => {
           editor.layout();
         }
       });
+
+      resizeObserver.current.observe(targetElement);
     },
     []
   );
 
   const destroyResizeChecker = useCallback(() => {
-    if (resizeChecker.current) {
-      resizeChecker.current.destroy();
+    if (resizeObserver.current) {
+      resizeObserver.current.disconnect();
+      resizeObserver.current = null;
     }
   }, []);
 
