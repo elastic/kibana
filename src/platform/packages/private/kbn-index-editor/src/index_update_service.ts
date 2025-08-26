@@ -42,6 +42,7 @@ import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { SortOrder } from '@kbn/unified-data-table';
 import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
+import type { IndexEditorError } from './types';
 import { IndexEditorErrors } from './types';
 import { parsePrimitive } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
@@ -176,8 +177,8 @@ export class IndexUpdateService {
   private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
   public readonly isFetching$: Observable<boolean> = this._isFetching$.asObservable();
 
-  private readonly _error$ = new BehaviorSubject<IndexEditorErrors | null>(null);
-  public readonly error$: Observable<IndexEditorErrors | null> = this._error$.asObservable();
+  private readonly _error$ = new BehaviorSubject<IndexEditorError | null>(null);
+  public readonly error$: Observable<IndexEditorError | null> = this._error$.asObservable();
 
   private readonly _exitAttemptWithUnsavedChanges$ = new BehaviorSubject<boolean>(false);
   public readonly exitAttemptWithUnsavedChanges$ =
@@ -586,7 +587,13 @@ export class IndexUpdateService {
               this.destroy();
               // Close the flyout after successful save
             } else {
-              this._error$.next(IndexEditorErrors.PARTIAL_SAVING_ERROR);
+              const errorDetail = response.items
+                .map((item) => Object.values(item)[0])
+                .filter((res) => res.error)
+                .map((res) => `- ${res.error?.type}: ${res.error?.reason}`)
+                .join('\n');
+
+              this.setError(IndexEditorErrors.PARTIAL_SAVING_ERROR, errorDetail);
             }
 
             const savedIds = new Set(
@@ -614,7 +621,7 @@ export class IndexUpdateService {
             });
           },
           error: () => {
-            this._error$.next(IndexEditorErrors.GENERIC_SAVING_ERROR);
+            this.setError(IndexEditorErrors.GENERIC_SAVING_ERROR);
             this._isSaving$.next(false);
           },
         })
@@ -904,6 +911,17 @@ export class IndexUpdateService {
 
   public discardUnsavedChanges() {
     this.addAction('discard-unsaved-changes');
+  }
+
+  public setError(errorId: IndexEditorErrors | null, details?: string) {
+    if (errorId) {
+      this._error$.next({
+        id: errorId,
+        details,
+      });
+    } else {
+      this._error$.next(null);
+    }
   }
 
   public destroy() {

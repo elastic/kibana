@@ -67,7 +67,15 @@ export interface KibanaContextExtra {
   storage: Storage;
 }
 
+export interface IndexEditorError {
+  id: IndexEditorErrors;
+  details?: string;
+}
+
 export enum IndexEditorErrors {
   GENERIC_SAVING_ERROR = 'genericSavingError',
   PARTIAL_SAVING_ERROR = 'partialSavingError',
+  FILE_REJECTION_ERROR = 'fileRejectionError',
+  FILE_TOO_BIG_ERROR = 'fileTooBigError',
+  FILE_UPLOAD_ERROR = 'fileUploadError',
 }

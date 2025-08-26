@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { KibanaContextExtra } from '../types';
 import { IndexEditorErrors } from '../types';
 
-const errorMessages: Record<IndexEditorErrors, string> = {
+const errorTitles: Record<IndexEditorErrors, string> = {
   [IndexEditorErrors.GENERIC_SAVING_ERROR]: i18n.translate(
     'indexEditor.flyout.error.genericSavingError',
     {
@@ -29,6 +28,24 @@ const errorMessages: Record<IndexEditorErrors, string> = {
       defaultMessage: 'Some of the changes made to the index were not saved.',
     }
   ),
+  [IndexEditorErrors.FILE_REJECTION_ERROR]: i18n.translate(
+    'indexEditor.flyout.error.fileRejectionError',
+    {
+      defaultMessage: 'Some of the selected files were rejected.',
+    }
+  ),
+  [IndexEditorErrors.FILE_TOO_BIG_ERROR]: i18n.translate(
+    'indexEditor.flyout.error.fileTooBigError',
+    {
+      defaultMessage: 'Some of the selected files are too big to be imported.',
+    }
+  ),
+  [IndexEditorErrors.FILE_UPLOAD_ERROR]: i18n.translate(
+    'indexEditor.flyout.error.fileUploadError',
+    {
+      defaultMessage: 'An error occurred while uploading the files.',
+    }
+  ),
 };
 
 export const ErrorCallout = () => {
@@ -38,18 +55,21 @@ export const ErrorCallout = () => {
 
   const error = useObservable(indexUpdateService.error$, null);
 
+  const onDismiss = useCallback(() => {
+    indexUpdateService.setError(null);
+  }, [indexUpdateService]);
+
   return error ? (
     <EuiCallOut
-      title={
-        <FormattedMessage
-          id="indexEditor.flyout.callout.title"
-          defaultMessage="There was an error"
-        />
-      }
+      title={errorTitles[error.id]}
       iconType="error"
       color="danger"
+      onDismiss={onDismiss}
+      css={{
+        minBlockSize: 'unset',
+      }}
     >
-      <p>{errorMessages[error]}</p>
+      <p css={{ whiteSpace: 'pre-line' }}>{error.details}</p>
     </EuiCallOut>
   ) : null;
 };

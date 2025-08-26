@@ -20,13 +20,16 @@ import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PropsWithChildren } from 'react';
 import React, { type FC, useCallback } from 'react';
+import type { FileRejection } from 'react-dropzone';
 import { useDropzone } from 'react-dropzone';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@kbn/i18n';
 import { getOverrideConfirmation } from './modals/override_warning_modal';
 import { EmptyPrompt } from './empty_prompt';
 import { FilesPreview } from './file_preview';
 import type { KibanaContextExtra } from '../types';
+import { IndexEditorErrors } from '../types';
 
 const acceptedFileFormats = ['.csv'];
 
@@ -65,6 +68,27 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     (uploadStatus.overallImportStatus === STATUS.COMPLETED && isSaving);
   const overallImportProgress = uploadStatus.overallImportProgress;
 
+  const filesTooBig = filesStatus.filter((f) => f.fileTooLarge);
+  if (filesTooBig.length > 0) {
+    const errorDetail = i18n.translate('indexEditor.filePicker.sizeError', {
+      defaultMessage:
+        'The following files exceed the maximum allowed size of {maxSize}: \n {files}',
+      values: {
+        maxSize: filesTooBig[0].fileSizeInfo.maxFileSizeFormatted,
+        files: filesTooBig
+          .map((file) => `- ${file.fileName} (${file.fileSizeInfo.fileSizeFormatted})`)
+          .join('\n'),
+      },
+    });
+
+    indexUpdateService.setError(IndexEditorErrors.FILE_TOO_BIG_ERROR, errorDetail);
+  }
+
+  if (uploadStatus.overallImportStatus === STATUS.FAILED) {
+    const errorDetail = uploadStatus.errors.map((error) => `- ${error.title}`).join('\n');
+    indexUpdateService.setError(IndexEditorErrors.FILE_UPLOAD_ERROR, errorDetail);
+  }
+
   const onFilesSelected = useCallback(
     async (files: File[]) => {
       if (!files?.length) {
@@ -83,7 +107,21 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     [services, indexUpdateService, fileUploadManager]
   );
 
+  const onDropRejected = useCallback(
+    (fileRejections: FileRejection[]) => {
+      const errorDetail = fileRejections
+        .map(
+          (rejection) =>
+            `${rejection.file.name}: ${rejection.errors.map((e) => e.message).join(', ')}`
+        )
+        .join('\n');
+      indexUpdateService.setError(IndexEditorErrors.FILE_REJECTION_ERROR, errorDetail);
+    },
+    [indexUpdateService]
+  );
+
   const { getRootProps, getInputProps, isDragActive, inputRef } = useDropzone({
+    onDropRejected,
     onDrop: onFilesSelected,
     accept: acceptedFileFormats,
     multiple: true,
