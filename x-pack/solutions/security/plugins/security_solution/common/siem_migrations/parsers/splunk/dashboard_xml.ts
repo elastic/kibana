@@ -87,13 +87,11 @@ export class SplunkXmlDashboardParser {
       allPanels.forEach((panel, panelIndex) => {
         if (!panel) return;
 
-        // Use deep search to find query element (equivalent to .//query in Python)
         const queryElement = this.findDeep(panel, 'query') as string[] | undefined;
         if (!Array.isArray(queryElement) || !queryElement[0]) return;
 
         const query = queryElement[0].toString().trim();
 
-        // Extract panel title using deep search (equivalent to .//title in Python)
         let title = '';
         const titleElement = this.findDeep(panel, 'title') as string[] | undefined;
         if (Array.isArray(titleElement) && titleElement.length > 0) {
@@ -220,7 +218,7 @@ export class SplunkXmlDashboardParser {
     return typeMap[chartType] || 'table';
   }
 
-  // Unified deep search method (equivalent to Python's .// XPath expressions)
+  /** Unified deep search method (equivalent to XML's .// XPath expressions) */
   private findDeep(
     source: SplunkXmlElement,
     elementName: string,
@@ -249,7 +247,6 @@ export class SplunkXmlDashboardParser {
       }
     }
 
-    // Search recursively in all properties
     for (const key of Object.keys(source)) {
       const value = source[key];
 
