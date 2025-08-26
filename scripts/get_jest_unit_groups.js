@@ -8,19 +8,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Ensure Node env (ts-node/register, Babel, tsconfig paths, etc.)
-require('../src/setup_node_env');
+/**
+ * Jest unit test groups and their glob patterns.
+ * The script at scripts/get_jest_unit_groups reads this file and prints JSON for CI to consume.
+ */
+
+/**
+ * @typedef {Object} JestUnitGroup
+ * @property {string} name - Display name of the group.
+ * @property {string[]} patterns - Glob patterns that select configs/files for this group.
+ */
+
+/** @type {JestUnitGroup[]} */
+var UNIT_TEST_GROUPS = [
+  {
+    name: 'OSS',
+    patterns: ['src/**/jest.config.js', 'packages/**/jest.config.js', 'examples/**/jest.config.js'],
+  },
+  {
+    name: 'Platform X-Pack',
+    patterns: [
+      'x-pack/{build_chromium,dev-tools,examples,packages,performance,platform,scripts,test,test_serverless}/**/jest.config.js',
+    ],
+  },
+  {
+    name: 'Observability',
+    patterns: ['x-pack/solutions/observability/**/jest.config.js'],
+  },
+  {
+    name: 'Security Solution',
+    patterns: ['x-pack/solutions/security/**/jest.config.js'],
+  },
+  {
+    name: 'Onechat',
+    patterns: ['x-pack/solutions/chat/**/jest.config.js'],
+  },
+  {
+    name: 'Search',
+    patterns: ['x-pack/solutions/search/**/jest.config.js'],
+  },
+];
+
+module.exports = { UNIT_TEST_GROUPS };
 
 function main() {
-  // Import TypeScript source that exports unit test groups via @kbn/test
-  var UNIT_TEST_GROUPS = require('@kbn/test/src/jest/run_all/groups').UNIT_TEST_GROUPS;
-
-  // Minimal validation and output
-  if (!Array.isArray(UNIT_TEST_GROUPS)) {
-    console.error('UNIT_TEST_GROUPS not found or not an array');
-    process.exit(1);
-  }
-
   var output = {
     groups: UNIT_TEST_GROUPS.map(function (g) {
       return { name: g.name, patterns: g.patterns };

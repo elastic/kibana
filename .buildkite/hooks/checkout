@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Always land directly on the target commit without an initial checkout of default branch
+if [[ ! -d .git ]]; then
+  git init .
+  git remote add origin "$BUILDKITE_REPO"
+
+  # If you’re OK with shallow + partial:
+  git -c protocol.version=2 fetch --no-tags --depth=50 --filter=blob:none origin "${BUILDKITE_COMMIT}"
+  git checkout -f --detach "${BUILDKITE_COMMIT}"
+else
+  git -c protocol.version=2 fetch --prune origin "${BUILDKITE_COMMIT}:${BUILDKITE_COMMIT}"
+  git checkout -f --detach "${BUILDKITE_COMMIT}"
+fi
+
+# Single clean is enough on a fresh pod
+git clean -ffxdq
