@@ -7,8 +7,8 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
-import { FleetRequestHandlerContext } from '../../types';
-import { CloudProvider } from '../../../common/types/models/cloud_connector';
+import type { FleetRequestHandlerContext } from '../../types';
+import type { CloudProvider } from '../../../common/types/models/cloud_connector';
 
 import { cloudConnectorService } from '../../services';
 
