@@ -59,11 +59,22 @@ echo "--- Grouping and running configs via scripts/jest_all.js"
 # Build a comma-separated list for --config
 configs_csv=$(echo "$configs" | paste -sd, -)
 
+# Build selection args differently for unit (patterns) vs integration (config files)
+selection_args=()
+if [[ "$TEST_TYPE" == "unit" ]]; then
+  # For unit tests, groups provide glob patterns; pass them positionally to scripts/jest_all
+  # Convert newline-separated patterns to an array
+  mapfile -t selection_args < <(printf '%s\n' "$configs")
+else
+  # For integration tests, groups provide explicit jest config paths; pass via --config CSV
+  selection_args=("--config=$configs_csv")
+fi
+
 cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings --no-experimental-require-module"
 if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
   cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
 fi
-cmd=$cmd"\" node ./scripts/jest_all --config=\"$configs_csv\" $parallelism --coverage=false --passWithNoTests"
+cmd=$cmd"\" node ./scripts/jest_all ${selection_args[*]} $parallelism --coverage=false --passWithNoTests"
 
 echo "actual full command is:"
 echo "$cmd"

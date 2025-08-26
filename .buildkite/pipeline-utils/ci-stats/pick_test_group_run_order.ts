@@ -10,6 +10,7 @@
 import * as Fs from 'fs';
 
 import * as globby from 'globby';
+import { execFileSync } from 'child_process';
 import minimatch from 'minimatch';
 
 import { load as loadYaml } from 'js-yaml';
@@ -389,7 +390,7 @@ export async function pickTestGroupRunOrder() {
   console.log('test run order is determined by builds:');
   console.dir(sources, { depth: Infinity, maxArrayLength: Infinity });
 
-  const unit = getRunGroup(bk, types, UNIT_TYPE);
+  // We still compute integration via ci-stats, but unit groups will be sourced from a script
   const integration = getRunGroup(bk, types, INTEGRATION_TYPE);
 
   let configCounter = 0;
@@ -441,8 +442,28 @@ export async function pickTestGroupRunOrder() {
     }
   }
 
+  // Collect unit groups from script; groups contain path patterns rather than config paths
+  const unitGroupsFromScript = (() => {
+    const out = execFileSync('node', ['scripts/get_jest_unit_groups.js'], {
+      encoding: 'utf8',
+    });
+    const parsed = JSON.parse(out);
+    if (!parsed || !Array.isArray(parsed.groups)) {
+      throw new Error('get_jest_unit_groups returned unexpected JSON');
+    }
+    return parsed.groups as Array<{ name: string; patterns: string[] }>;
+  })();
+
+  // Build a minimal unit artifact that jest_parallel.sh can consume. Each group's names are glob patterns.
+  const unitArtifact = {
+    groups: unitGroupsFromScript.map((g) => ({ names: g.patterns })),
+  };
+
   // write the config for each step to an artifact that can be used by the individual jest jobs
-  Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
+  Fs.writeFileSync(
+    'jest_run_order.json',
+    JSON.stringify({ unit: unitArtifact, integration }, null, 2)
+  );
   bk.uploadArtifacts('jest_run_order.json');
 
   if (ftrConfigsIncluded) {
@@ -451,33 +472,33 @@ export async function pickTestGroupRunOrder() {
     bk.uploadArtifacts('ftr_run_order.json');
   }
 
+  // Single step for unit tests using parallelism equal to group count. Buildkite sets BUILDKITE_PARALLEL_JOB.
+  const unitStep: BuildkiteStep = {
+    label: 'Jest Tests',
+    command: getRequiredEnv('JEST_UNIT_SCRIPT'),
+    parallelism: unitGroupsFromScript.length,
+    timeout_in_minutes: 120,
+    key: 'jest',
+    agents: {
+      ...expandAgentQueue('n2-4-spot'),
+    },
+    env: {
+      SCOUT_TARGET_TYPE: 'local',
+    },
+    retry: {
+      automatic: [
+        { exit_status: '-1', limit: 3 },
+        ...(JEST_CONFIGS_RETRY_COUNT > 0
+          ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+          : []),
+      ],
+    },
+  };
+
   // upload the step definitions to Buildkite
   bk.uploadSteps(
     [
-      unit.count > 0
-        ? {
-            label: 'Jest Tests',
-            command: getRequiredEnv('JEST_UNIT_SCRIPT'),
-            parallelism: unit.count,
-            timeout_in_minutes: 120,
-            key: 'jest',
-            agents: {
-              ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 85,
-            },
-            env: {
-              SCOUT_TARGET_TYPE: 'local',
-            },
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
-              ],
-            },
-          }
-        : [],
+      unitStep,
       integration.count > 0
         ? {
             label: 'Jest Integration Tests',
