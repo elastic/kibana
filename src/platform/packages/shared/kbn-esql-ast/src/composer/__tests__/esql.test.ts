@@ -51,6 +51,107 @@ describe('"esql" tag query construction', () => {
       commands: [{ name: 'from' }, { name: 'where' }, { name: 'limit' }],
     });
   });
+
+  test('allows to parametrize tagged template with closure and param hole', () => {
+    const closure = 10;
+    const hole = 42;
+    const query = esql({ closure })`FROM index | WHERE foo > ${{ hole }} | LIMIT ?closure`;
+
+    expect(query.print()).toBe('FROM index | WHERE foo > ?hole | LIMIT ?closure');
+    expect(query.getParams()).toEqual({ hole: 42, closure: 10 });
+  });
+});
+
+describe('query construction from string', () => {
+  test('can construct a static query', () => {
+    const query = esql('FROM index | WHERE foo > 42 | LIMIT 10');
+
+    expect(query).toBeInstanceOf(ComposerQuery);
+    expect(query.print()).toBe('FROM index | WHERE foo > 42 | LIMIT 10');
+  });
+
+  test('can construct a parametrized query', () => {
+    const input = 42;
+    const limit = 10;
+    const query = esql('FROM index | WHERE foo > ?input | LIMIT ?limit', { input, limit });
+
+    expect(query.print('basic')).toBe('FROM index | WHERE foo > ?input | LIMIT ?limit');
+    expect(query.getParams()).toEqual({ input: 42, limit: 10 });
+  });
+
+  test('can supply params in wrapper function', () => {
+    const input = 42;
+    const limit = 10;
+    const query = esql({ limit })('FROM index | WHERE foo > ?input | LIMIT ?limit', { input });
+
+    expect(query.print('basic')).toBe('FROM index | WHERE foo > ?input | LIMIT ?limit');
+    expect(query.getParams()).toEqual({ input: 42, limit: 10 });
+  });
+});
+
+describe('query.from()', () => {
+  test('errors on no arguments', () => {
+    expect(() => {
+      // @ts-expect-error - .from() requires at least one argument
+      esql.from();
+    }).toThrow();
+  });
+
+  test('can create a query with one source', () => {
+    const query = esql.from('index');
+
+    expect(query.print()).toBe('FROM index');
+  });
+
+  test('can provide AST nodes as arguments', () => {
+    const query = esql.from(esql.src('index', 'cluster1'), esql.src('index2', void 0, 'selector'));
+
+    expect(query.print()).toBe('FROM cluster1:index, index2::selector');
+  });
+
+  test('can create a query with with multiple sources', () => {
+    const query = esql.from('index, index2, cluster:index3');
+
+    expect(query.print()).toBe('FROM index, index2, cluster:index3');
+    expect(query.ast).toMatchObject({
+      type: 'query',
+      commands: [
+        {
+          name: 'from',
+          args: [
+            { type: 'source', index: { type: 'literal', value: 'index' } },
+            { type: 'source', index: { type: 'literal', value: 'index2' } },
+            {
+              type: 'source',
+              prefix: { type: 'literal', value: 'cluster' },
+              index: { type: 'literal', value: 'index3' },
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  test('index with selector', () => {
+    const query = esql.from('index::selector');
+
+    expect(query.print()).toBe('FROM index::selector');
+    expect(query.ast).toMatchObject({
+      type: 'query',
+      commands: [
+        {
+          name: 'from',
+          args: [
+            {
+              type: 'source',
+              index: { type: 'literal', value: 'index' },
+              selector: { type: 'literal', value: 'selector' },
+            },
+          ],
+        },
+      ],
+    });
+  });
 });
 
 describe('processing holes', () => {
