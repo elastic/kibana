@@ -149,8 +149,9 @@ export const findReactComponentPath = (
   domElement: HTMLElement | SVGElement
 ): FindReactComponentPathResult | undefined => {
   const path: string[] = [];
-  let current: HTMLElement | null =
-    domElement instanceof HTMLElement ? domElement : domElement.parentElement;
+  const lastElement = domElement instanceof HTMLElement ? domElement : domElement.parentElement;
+  let lastElementFiberType: string | null = null;
+  let current: HTMLElement | null = lastElement;
   let firstUserDefinedComponent: string | null = null;
 
   while (current && !firstUserDefinedComponent) {
@@ -161,6 +162,9 @@ export const findReactComponentPath = (
         const type = getFiberType(fiberCursor);
 
         if (type) {
+          if (!lastElementFiberType && fiberCursor._debugSource) {
+            lastElementFiberType = type;
+          }
           if (!isIgnored(type)) {
             path.push(type);
           }
@@ -186,9 +190,19 @@ export const findReactComponentPath = (
     };
   }
 
-  const reversedPath = path.reverse().slice(1);
+  const reversedPath = path.slice().reverse();
+  // Remove firstUserDefinedComponent
+  const slicedPath = reversedPath.slice(1);
+  const lastElementFiberTypeIndex = slicedPath.findIndex(
+    (component) => component === lastElementFiberType
+  );
+  // Keep everything up to and including lastElementFiberType
+  const newPath =
+    lastElementFiberTypeIndex !== -1
+      ? slicedPath.slice(0, lastElementFiberTypeIndex + 1)
+      : slicedPath;
 
-  const filteredPath = reversedPath.filter((component, index) => {
+  const filteredPath = newPath.filter((component, index) => {
     const isEuiMainComponent = EUI_MAIN_COMPONENTS.includes(component);
     // Spacers only make sense if they are the main component
     if (isEuiMainComponent && component !== 'EuiSpacer') {
@@ -196,7 +210,7 @@ export const findReactComponentPath = (
     } else if (isHtmlTag(component) || isEui(component)) {
       // Keep if it's the first or last component in the path
       // TODO: Handle cases where the last component was an EUI component that can't have children or their children are an internal implementation (e.g EuiButton -> Button) - don't return HTML elements after that.
-      return index === 0 || index === reversedPath.length - 1;
+      return index === 0 || index === newPath.length - 1;
     }
   });
 
