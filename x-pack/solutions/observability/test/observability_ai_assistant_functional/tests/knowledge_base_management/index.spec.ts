@@ -246,7 +246,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         log.debug(`File saved to: ${tempFilePath}`);
 
         try {
-          await common.setFileInputPath(tempFilePath);
+          const fileInput = await find.byCssSelector('input[type="file"]');
+          await fileInput.type(tempFilePath);
         } catch (error) {
           log.debug(`Error uploading file: ${error}`);
           throw error;
@@ -285,8 +286,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await openBulkImportFlyout();
 
         const entries = await prepareBulkImportData();
-        await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
+
         await retry.try(async () => {
+          await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
           const fileInput = await find.byCssSelector('input[type="file"]');
           const value = await fileInput.getAttribute('value');
           if (!value || !value.includes('bulk_import.ndjson')) {
@@ -295,6 +297,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             log.debug('Value: ', value);
           }
         });
+
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
 
         const toastText = await retry.try(async () => {
