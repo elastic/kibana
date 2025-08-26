@@ -24,7 +24,6 @@ export const CancelActionResult = memo<
     const { id, comment } = command.args.args;
     const agentType = command.commandDefinition?.meta?.agentType;
 
-    console.log({ command, agentType, endpointId });
     return endpointId
       ? {
           agent_type: agentType,

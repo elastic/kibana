@@ -590,7 +590,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             comment: this.buildExternalComment(reqIndexOptions),
           });
 
-          console.log({ msActionResponse });
           if (msActionResponse?.data?.id) {
             reqIndexOptions.meta = { machineActionId: msActionResponse.data.id };
           } else {

@@ -6,4 +6,3 @@
  */
 
 export * from './pending_actions_selector';
-export * from './use_pending_actions_error_toast';
