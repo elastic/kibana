@@ -232,6 +232,7 @@ export function TableGrid({
   return (
     <EuiDataGrid
       key={`fields-table-${id}`}
+      data-test-subj="UnifiedDocViewerTableGrid"
       {...getGridProps(gridStyle)}
       aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
         defaultMessage: 'Field values',
