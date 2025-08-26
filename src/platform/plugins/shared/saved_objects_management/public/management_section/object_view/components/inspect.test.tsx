@@ -14,6 +14,10 @@ import type { InspectProps } from './inspect';
 import { Inspect } from './inspect';
 import type { SavedObjectWithMetadata } from '../../../../common';
 
+jest.mock('@kbn/code-editor', () => {
+  return jest.requireActual('@kbn/code-editor');
+});
+
 describe('Inspect component', () => {
   let defaultProps: { object: SavedObjectWithMetadata };
   const shallowRender = (overrides: Partial<SavedObjectWithMetadata> = {}) => {
@@ -21,6 +25,7 @@ describe('Inspect component', () => {
       <Inspect {...defaultProps} {...overrides} />
     ) as unknown as ShallowWrapper<InspectProps>;
   };
+
   beforeEach(() => {
     defaultProps = {
       object: {

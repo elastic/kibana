@@ -35,6 +35,10 @@ describe('JsonEditorWithMessageVariables', () => {
 
   beforeEach(() => jest.resetAllMocks());
 
+  afterAll(() => {
+    jest.resetAllMocks();
+  });
+
   test('renders variables with double braces by default', () => {
     const wrapper = mountWithIntl(<JsonEditorWithMessageVariables {...props} />);
 
