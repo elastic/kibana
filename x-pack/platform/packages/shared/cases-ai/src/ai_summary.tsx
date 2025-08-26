@@ -87,29 +87,34 @@ export const AISummary: React.FC<AISummaryProps> = ({
         isDisabled={loading}
         onToggle={onToggle}
       >
-        <EuiSpacer size="m" />
         {summary && (
-          <EuiPanel
-            hasBorder={false}
-            hasShadow={false}
-            color="subdued"
-            data-test-subj="aiSummaryResponse"
-          >
-            <EuiMarkdownFormat textSize="s">{summary.content}</EuiMarkdownFormat>
-          </EuiPanel>
+          <>
+            <EuiSpacer size="m" />
+            <EuiPanel
+              hasBorder={false}
+              hasShadow={false}
+              color="subdued"
+              data-test-subj="aiSummaryResponse"
+            >
+              <EuiMarkdownFormat textSize="s">{summary.content}</EuiMarkdownFormat>
+            </EuiPanel>
+          </>
         )}
         {error && (
-          <EuiPanel
-            hasBorder={false}
-            hasShadow={false}
-            color="danger"
-            data-test-subj="aiSummaryResponseError"
-          >
-            <FormattedMessage
-              id="xpack.aiSummary.error"
-              defaultMessage="Error fetching AI summary"
-            />
-          </EuiPanel>
+          <>
+            <EuiSpacer size="m" />
+            <EuiPanel
+              hasBorder={false}
+              hasShadow={false}
+              color="danger"
+              data-test-subj="aiSummaryResponseError"
+            >
+              <FormattedMessage
+                id="xpack.aiSummary.error"
+                defaultMessage="Error fetching AI summary"
+              />
+            </EuiPanel>
+          </>
         )}
       </EuiAccordion>
     </EuiPanel>

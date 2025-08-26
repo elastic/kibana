@@ -237,6 +237,6 @@ export const TOTAL_USERS_ASSIGNED = (total: number) =>
     values: { total },
   });
 
-export const CASE_SUMMARY = i18n.translate('xpack.cases.caseSummary.title', {
+export const CASE_SUMMARY_TITLE = i18n.translate('xpack.cases.caseSummary.title', {
   defaultMessage: 'Case summary',
 });

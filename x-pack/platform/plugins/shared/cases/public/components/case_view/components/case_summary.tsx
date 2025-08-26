@@ -18,12 +18,15 @@ export interface CaseSummaryProps {
 }
 
 export const CaseSummary = ({ caseId }: CaseSummaryProps) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+
   const { data: connectorsResponse } = useGetInferenceConnectors();
   const connectorId =
     connectorsResponse?.connectors && connectorsResponse.connectors.length > 0
       ? connectorsResponse.connectors[0].connectorId
       : '';
+
   const {
     data: summary,
     error: summaryError,
@@ -31,10 +34,12 @@ export const CaseSummary = ({ caseId }: CaseSummaryProps) => {
   } = useGetCaseSummary(caseId, connectorId);
 
   const handleCaseSummaryToggle = useCallback(
-    (isOpen: boolean) => {
+    async (isOpen: boolean) => {
       setIsSummaryOpen(isOpen);
       if (isOpen && !summary) {
-        fetchCaseSummary();
+        setIsLoading(true);
+        await fetchCaseSummary();
+        setIsLoading(false);
       }
     },
     [fetchCaseSummary, summary]
@@ -49,11 +54,12 @@ export const CaseSummary = ({ caseId }: CaseSummaryProps) => {
   return (
     <EuiFlexItem grow={false} data-test-subj="caseSummary">
       <AISummary
-        title={i18n.CASE_SUMMARY}
+        title={i18n.CASE_SUMMARY_TITLE}
         summary={summary}
         isOpen={isSummaryOpen}
         onToggle={handleCaseSummaryToggle}
         error={summaryError}
+        loading={isLoading}
       />
       <EuiSpacer size="m" />
     </EuiFlexItem>
