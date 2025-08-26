@@ -53,16 +53,16 @@ export function validateFunction({
 }
 
 class FunctionValidator {
-  private definition: FunctionDefinition | undefined;
-  private argTypes: (SupportedDataType | 'unknown')[] = [];
-  private argLiteralsMask: boolean[] = [];
-  private _messages: ESQLMessage[] = [];
+  private readonly definition: FunctionDefinition | undefined;
+  private readonly argTypes: (SupportedDataType | 'unknown')[] = [];
+  private readonly argLiteralsMask: boolean[] = [];
+  private readonly _messages: ESQLMessage[] = [];
 
   constructor(
-    private fn: ESQLFunction,
-    private parentCommand: ESQLCommand,
-    private context: ICommandContext,
-    private callbacks: ICommandCallbacks
+    private readonly fn: ESQLFunction,
+    private readonly parentCommand: ESQLCommand,
+    private readonly context: ICommandContext,
+    private readonly callbacks: ICommandCallbacks
   ) {
     this.definition = getFunctionDefinition(fn.name);
     for (const arg of this.fn.args) {
