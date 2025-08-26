@@ -6,11 +6,11 @@
  */
 
 import { EuiComboBox, EuiFormRow, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useToolsTags } from '../../../../hooks/tools/use_tool_tags';
 import { ToolFormSection } from '../components/tool_form_section';
+import { i18nMessages } from '../i18n';
 import type { EsqlToolFormData } from '../types/tool_form_types';
 
 export const Labels = () => {
@@ -21,25 +21,23 @@ export const Labels = () => {
   } = useFormContext<EsqlToolFormData>();
   return (
     <ToolFormSection
-      title="Labels"
+      title={i18nMessages.toolLabels.documentation.title}
       icon="tag"
-      description="Labels help with filtering, search, and bulk selection — they don't affect how tools behave."
+      description={i18nMessages.toolLabels.documentation.description}
       documentation={{
-        title: 'Tool labels',
+        title: i18nMessages.toolLabels.documentation.documentationLink,
         href: 'https://www.elastic.co/guide/en/enterprise-search/current/tool-labels.html',
       }}
     >
       <EuiFormRow
-        label={i18n.translate('xpack.onechat.tools.newTool.tagsLabel', {
-          defaultMessage: 'Labels',
-        })}
+        label={i18nMessages.toolLabels.form.label}
         labelAppend={
           <EuiText size="xs" color="subdued">
-            Optional
+            {i18nMessages.optionalFieldLabel}
           </EuiText>
         }
         isInvalid={!!errors.labels}
-        helpText={'Some labels may automatically be added by Elastic.'}
+        helpText={i18nMessages.toolLabels.form.helpText}
         error={errors.labels?.message as string}
       >
         <Controller
@@ -47,9 +45,7 @@ export const Labels = () => {
           name="labels"
           render={({ field: { value, onChange, ref, ...field }, fieldState: { invalid } }) => (
             <EuiComboBox
-              placeholder={i18n.translate('xpack.onechat.tools.newTool.tagsPlaceholder', {
-                defaultMessage: 'Add or create labels',
-              })}
+              placeholder={i18nMessages.toolLabels.form.placeholder}
               options={tags.map((tag: string) => ({ label: tag }))}
               selectedOptions={value.map((tag: string) => ({ label: tag }))}
               onChange={(selectedOptions) => {

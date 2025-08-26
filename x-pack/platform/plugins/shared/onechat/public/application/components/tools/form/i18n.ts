@@ -43,4 +43,150 @@ export const i18nMessages = {
   noParamsMessage: i18n.translate('xpack.onechat.tools.newTool.noParamsMessage', {
     defaultMessage: 'Add parameters or infer them from your ES|QL query.',
   }),
+  optionalFieldLabel: i18n.translate('xpack.onechat.tools.newTool.optionalFieldLabel', {
+    defaultMessage: 'Optional',
+  }),
+  documentationLinkLabel: i18n.translate('xpack.onechat.tools.newTool.documentationLinkLabel', {
+    defaultMessage: 'Documentation',
+  }),
+  systemReferences: {
+    documentation: {
+      title: i18n.translate('xpack.onechat.tools.newTool.systemReferences.title', {
+        defaultMessage: 'System references',
+      }),
+      description: i18n.translate('xpack.onechat.tools.newTool.systemReferences.description', {
+        defaultMessage:
+          'These values are used by agents and configurations, not shown to end users.',
+      }),
+      fieldsHelp: {
+        title: i18n.translate('xpack.onechat.tools.newTool.systemReferences.fieldsHelp.title', {
+          defaultMessage: 'What are these fields?',
+        }),
+        toolId: {
+          label: i18n.translate(
+            'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.toolId.label',
+            {
+              defaultMessage: 'Tool ID',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.toolId.description',
+            {
+              defaultMessage: 'Unique ID for reference the tool in code or configurations.',
+            }
+          ),
+        },
+        description: {
+          label: i18n.translate(
+            'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.description.label',
+            {
+              defaultMessage: 'Description',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.description.description',
+            {
+              defaultMessage:
+                'Shapes tool behavior and agent understanding. Start with a short human-friendly summary — the first ~50 characters appear in the tool list.',
+            }
+          ),
+        },
+      },
+      toolBasicsDocumentationLink: i18n.translate(
+        'xpack.onechat.tools.newTool.toolBasics.documentationLink',
+        {
+          defaultMessage: 'Tool basics',
+        }
+      ),
+    },
+    form: {
+      toolId: {
+        label: i18n.translate('xpack.onechat.tools.newTool.form.toolIdLabel', {
+          defaultMessage: 'Tool ID',
+        }),
+        helpText: i18n.translate('xpack.onechat.tools.newTool.form.toolIdHelpText', {
+          defaultMessage: 'Must be lowercase with no spaces.',
+        }),
+      },
+      description: {
+        label: i18n.translate('xpack.onechat.tools.newTool.form.descriptionLabel', {
+          defaultMessage: 'Description',
+        }),
+      },
+    },
+  },
+  toolLabels: {
+    documentation: {
+      title: i18n.translate('xpack.onechat.tools.newTool.labels.title', {
+        defaultMessage: 'Labels',
+      }),
+      description: i18n.translate('xpack.onechat.tools.newTool.labels.description', {
+        defaultMessage:
+          "Labels help with filtering, search, and bulk selection — they don't affect how tools behave.",
+      }),
+      documentationLink: i18n.translate(
+        'xpack.onechat.tools.newTool.labels.toolLabelsDocumentationLink',
+        {
+          defaultMessage: 'Tool labels',
+        }
+      ),
+    },
+    form: {
+      label: i18n.translate('xpack.onechat.tools.newTool.labels.formLabel', {
+        defaultMessage: 'Labels',
+      }),
+      helpText: i18n.translate('xpack.onechat.tools.newTool.labels.formHelpText', {
+        defaultMessage: 'Some labels may automatically be added by Elastic.',
+      }),
+      placeholder: i18n.translate('xpack.onechat.tools.newTool.labels.formPlaceholder', {
+        defaultMessage: 'Add or create labels',
+      }),
+    },
+  },
+  configuration: {
+    documentation: {
+      title: i18n.translate('xpack.onechat.tools.newTool.configuration.title', {
+        defaultMessage: 'Configuration',
+      }),
+      description: i18n.translate('xpack.onechat.tools.newTool.configuration.description', {
+        defaultMessage: 'Set up how the tool works, including its logic and any needed parameters.',
+      }),
+      documentationLink: i18n.translate(
+        'xpack.onechat.tools.newTool.configuration.documentationLink',
+        {
+          defaultMessage: 'Configuring a tool',
+        }
+      ),
+      esqlOnlyCallout: i18n.translate('xpack.onechat.tools.newTool.configuration.esqlOnlyCallout', {
+        defaultMessage: 'Currently ES|QL only',
+      }),
+    },
+    form: {
+      type: {
+        label: i18n.translate('xpack.onechat.tools.newTool.configuration.form.type.label', {
+          defaultMessage: 'Type',
+        }),
+        esqlOption: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.type.esqlOption',
+          {
+            defaultMessage: 'ES|QL',
+          }
+        ),
+      },
+      esql: {
+        queryLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.esql.queryLabel',
+          {
+            defaultMessage: 'ES|QL Query',
+          }
+        ),
+        parametersLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.esql.parametersLabel',
+          {
+            defaultMessage: 'ES|QL Parameters',
+          }
+        ),
+      },
+    },
+  },
 };

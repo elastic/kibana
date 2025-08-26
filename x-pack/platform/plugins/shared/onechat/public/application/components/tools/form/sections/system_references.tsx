@@ -16,13 +16,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { i18nMessages } from '../i18n';
 import { ToolFormSection } from '../components/tool_form_section';
 import { ToolFormMode } from '../tool_form';
 import type { EsqlToolFormData } from '../types/tool_form_types';
-
 export interface SystemReferencesProps {
   mode: ToolFormMode;
 }
@@ -35,9 +34,9 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
 
   return (
     <ToolFormSection
-      title="System references"
+      title={i18nMessages.systemReferences.documentation.title}
       icon="bullseye"
-      description="These values are used by agents and configurations, not shown to end users."
+      description={i18nMessages.systemReferences.documentation.description}
       content={
         <EuiFlexGroup
           direction="column"
@@ -47,23 +46,26 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
           `}
         >
           <EuiText color={euiTheme.colors.textHeading}>
-            <h4>What are these fields?</h4>
+            <h4>{i18nMessages.systemReferences.documentation.fieldsHelp.title}</h4>
           </EuiText>
           <EuiFlexItem grow={0}>
             <EuiText size="s">
-              <strong>Tool ID</strong>
+              <strong>{i18nMessages.systemReferences.documentation.fieldsHelp.toolId.label}</strong>
               <EuiTextColor color="subdued">
-                <div>Unique ID for reference the tool in code or configurations.</div>
+                <div>
+                  {i18nMessages.systemReferences.documentation.fieldsHelp.toolId.description}
+                </div>
               </EuiTextColor>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={0}>
             <EuiText size="s">
-              <strong>Description</strong>
+              <strong>
+                {i18nMessages.systemReferences.documentation.fieldsHelp.description.label}
+              </strong>
               <EuiTextColor color="subdued">
                 <div>
-                  Shapes tool behavior and agent understanding. Start with a short human-friendly
-                  summary — the first ~50 characters appear in the tool list.
+                  {i18nMessages.systemReferences.documentation.fieldsHelp.description.description}
                 </div>
               </EuiTextColor>
             </EuiText>
@@ -71,17 +73,15 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
         </EuiFlexGroup>
       }
       documentation={{
-        title: 'Tool basics',
+        title: i18nMessages.systemReferences.documentation.toolBasicsDocumentationLink,
         href: 'https://www.elastic.co/guide/en/enterprise-search/current/tool-basics.html',
       }}
     >
       <EuiFormRow
         isDisabled={mode === ToolFormMode.Edit}
-        label={i18n.translate('xpack.onechat.tools.newTool.toolIdLabel', {
-          defaultMessage: 'Tool ID',
-        })}
+        label={i18nMessages.systemReferences.form.toolId.label}
         isInvalid={!!errors.toolId}
-        helpText={'Must be lowercase with no spaces.'}
+        helpText={i18nMessages.systemReferences.form.toolId.helpText}
         error={errors.toolId?.message}
       >
         <Controller
@@ -98,12 +98,10 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('xpack.onechat.tools.newTool.descriptionLabel', {
-          defaultMessage: 'Description',
-        })}
+        label={i18nMessages.systemReferences.form.description.label}
         labelAppend={
           <EuiText size="xs" color="subdued">
-            Optional
+            {i18nMessages.optionalFieldLabel}
           </EuiText>
         }
         isInvalid={!!errors.description}
@@ -114,9 +112,7 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
           name="description"
           render={({ field }) => (
             <EuiMarkdownEditor
-              aria-label={i18n.translate('xpack.onechat.tools.newTool.descriptionAriaLabel', {
-                defaultMessage: 'Description',
-              })}
+              aria-label={i18nMessages.systemReferences.form.description.label}
               height={482}
               {...field}
             />

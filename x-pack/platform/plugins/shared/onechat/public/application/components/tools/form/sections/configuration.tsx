@@ -6,13 +6,13 @@
  */
 
 import { EuiCallOut, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EsqlEditorField } from '../components/esql_editor_field';
-import { ToolFormSection } from '../components/tool_form_section';
-import type { EsqlToolFormData } from '../types/tool_form_types';
 import { EsqlParams } from '../components/esql_params';
+import { ToolFormSection } from '../components/tool_form_section';
+import { i18nMessages } from '../i18n';
+import type { EsqlToolFormData } from '../types/tool_form_types';
 
 export const Configuration = () => {
   const {
@@ -21,38 +21,42 @@ export const Configuration = () => {
   } = useFormContext<EsqlToolFormData>();
   return (
     <ToolFormSection
-      title="Configuration"
+      title={i18nMessages.configuration.documentation.title}
       icon="code"
-      description="Set up how the tool works, including its logic and any needed parameters."
-      content={<EuiCallOut title="Currently ES|QL only" iconType="info" size="s" />}
+      description={i18nMessages.configuration.documentation.description}
+      content={
+        <EuiCallOut
+          title={i18nMessages.configuration.documentation.esqlOnlyCallout}
+          iconType="info"
+          size="s"
+        />
+      }
       documentation={{
-        title: 'Configuring a tool',
+        title: i18nMessages.configuration.documentation.documentationLink,
         href: 'https://www.elastic.co/guide/en/enterprise-search/current/configuring-tools.html',
       }}
     >
-      <EuiFormRow label="Type" error={errors.type?.message}>
+      <EuiFormRow label={i18nMessages.configuration.form.type.label} error={errors.type?.message}>
         <Controller
           control={control}
           name="type"
           render={({ field: { ref, ...field } }) => (
             <EuiSelect
               disabled
-              options={[{ text: 'ES|QL', value: 'esql' }]}
+              options={[{ text: i18nMessages.configuration.form.type.esqlOption, value: 'esql' }]}
               {...field}
               inputRef={ref}
             />
           )}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('xpack.onechat.tools.newTool.esqlLabel', {
-          defaultMessage: 'ES|QL Query',
-        })}
-        isInvalid={!!errors.esql}
-      >
+      <EuiFormRow label={i18nMessages.configuration.form.esql.queryLabel} isInvalid={!!errors.esql}>
         <EsqlEditorField />
       </EuiFormRow>
-      <EuiFormRow label="ES|QL Parameters" isInvalid={!!errors.params}>
+      <EuiFormRow
+        label={i18nMessages.configuration.form.esql.parametersLabel}
+        isInvalid={!!errors.params}
+      >
         <EsqlParams />
       </EuiFormRow>
     </ToolFormSection>
