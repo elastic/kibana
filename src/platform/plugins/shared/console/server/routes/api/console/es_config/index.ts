@@ -10,7 +10,7 @@
 import type { EsConfigApiResponse } from '../../../../../common/types/api_responses';
 import type { RouteDependencies } from '../../..';
 
-export const registerEsConfigRoute = ({ router, services }: RouteDependencies): void => {
+export const registerEsConfigRoute = ({ router, proxy }: RouteDependencies): void => {
   router.get(
     {
       path: '/api/console/es_config',
@@ -23,13 +23,9 @@ export const registerEsConfigRoute = ({ router, services }: RouteDependencies): 
       validate: false,
     },
     async (ctx, req, res) => {
-      const cloudUrl = services.esLegacyConfigService.getCloudUrl();
-      if (cloudUrl) {
-        const body: EsConfigApiResponse = { host: cloudUrl, allHosts: [cloudUrl] };
-
-        return res.ok({ body });
-      }
-      const { hosts } = await services.esLegacyConfigService.readConfig();
+      // Use the same method as the proxy to get consistent hosts
+      const legacyConfig = await proxy.readLegacyESConfig();
+      const { hosts } = legacyConfig;
 
       const body: EsConfigApiResponse = {
         host: hosts[0],
