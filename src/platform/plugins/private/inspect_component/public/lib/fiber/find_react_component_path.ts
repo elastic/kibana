@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DebugSource, ReactFiberNode } from './types';
-import { COMPONENT_PATH_IGNORED_TYPES } from '../constants';
+import type { ComponentType } from 'react';
+import type { ReactFiberNode } from './types';
+import { COMPONENT_PATH_IGNORED_TYPES, EUI_MAIN_COMPONENTS } from '../constants';
 import { getFiberType } from './get_fiber_type';
 import { getFiberFromDomElement } from './get_fiber_from_dom_element';
 
@@ -22,6 +23,13 @@ interface FindReactComponentPathResult {
   sourceComponent: string;
 }
 
+const isEui = (input: string) => input.startsWith('Eui');
+
+const isHtmlElement = (input: ComponentType | string) =>
+  typeof input === 'string' && /^[a-z]+$/.test(input);
+
+const isIgnored = (input: string) => COMPONENT_PATH_IGNORED_TYPES.some((t) => input.includes(t));
+
 /**
  * Find React component path from DOM element.
  * @param {HTMLElement | SVGElement} domElement The DOM element.
@@ -31,36 +39,25 @@ export const findReactComponentPath = (
   domElement: HTMLElement | SVGElement
 ): FindReactComponentPathResult | undefined => {
   const path: string[] = [];
-  let source: DebugSource | null | undefined;
   let current: HTMLElement | null =
     domElement instanceof HTMLElement ? domElement : domElement.parentElement;
+  let firstUserDefinedComponent: string | null = null;
 
-  while (current && source !== null) {
+  while (current && !firstUserDefinedComponent) {
     const fiber = getFiberFromDomElement(current);
-
     if (fiber) {
       let fiberCursor: ReactFiberNode | null | undefined = fiber;
-      while (fiberCursor && source !== null) {
+      while (fiberCursor && !firstUserDefinedComponent) {
         const type = getFiberType(fiberCursor);
 
-        if (fiberCursor._debugSource) {
-          if (source === undefined) {
-            source = fiberCursor._debugSource;
-          } else if (source.fileName !== fiberCursor._debugSource.fileName) {
-            source = null;
+        if (type) {
+          if (!isIgnored(type)) {
+            path.push(type);
+          }
+          if (!isHtmlElement(type) && !isEui(type) && !isIgnored(type)) {
+            firstUserDefinedComponent = type;
           }
         }
-
-        const oneLetterHtmlTags = ['p', 'b', 'i', 'q', 'u', 's'];
-        /** Remove wrappers. */
-        if (
-          type &&
-          !COMPONENT_PATH_IGNORED_TYPES.some((t) => type.includes(t)) &&
-          (type.length > 1 || oneLetterHtmlTags.includes(type))
-        ) {
-          path.push(type);
-        }
-
         fiberCursor = fiberCursor._debugOwner;
       }
     }
@@ -72,27 +69,28 @@ export const findReactComponentPath = (
     return undefined;
   }
 
-  if (path.length === 1) {
+  if (path.length === 1 && firstUserDefinedComponent) {
     return {
-      sourceComponent: path[0],
+      sourceComponent: firstUserDefinedComponent,
       path: null,
     };
   }
 
-  const [sourceComponent, ...rest] = path.reverse();
+  const reversedPath = path.reverse().slice(1);
 
-  let restItems = rest;
-
-  /**
-   * React will always include the literal DOM element rendered, even if it's a component, (e.g. EuiPanel > div).
-   * Trim off the DOM element if we have a literal component.
-   */
-  if (rest.length > 1 && /^[a-z]/.test(rest[rest.length - 1])) {
-    restItems = rest.slice(0, -1);
-  }
+  const filteredPath = reversedPath.filter((component, index) => {
+    const isEuiMainComponent = EUI_MAIN_COMPONENTS.includes(component);
+    if (isEuiMainComponent) {
+      return true;
+    } else if (isHtmlElement(component) || isEui(component)) {
+      // Keep if it's the first or last component in the path
+      // TODO: Handle cases where the last component was an EUI component that can't have children - don't return HTML elements after that
+      return index === 0 || index === reversedPath.length - 1;
+    }
+  });
 
   return {
-    path: [sourceComponent + ' : ', ...restItems.join(' > ')].join(''),
-    sourceComponent,
+    path: [firstUserDefinedComponent + ' : ', ...filteredPath.join(' > ')].join(''),
+    sourceComponent: firstUserDefinedComponent ? firstUserDefinedComponent : path[0],
   };
 };
