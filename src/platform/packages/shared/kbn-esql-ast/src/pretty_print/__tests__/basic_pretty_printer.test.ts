@@ -930,6 +930,10 @@ describe('unary operator precedence and grouping', () => {
     assertReprint('ROW NOT (a > b)', 'ROW NOT a > b');
   });
 
+  test('NOT should parenthesize OR expressions on the right side', () => {
+    assertReprint('ROW NOT a OR NOT (a == b OR b == c)');
+  });
+
   test('unary minus should parenthesize addition', () => {
     assertReprint('ROW -(a + b)');
   });
