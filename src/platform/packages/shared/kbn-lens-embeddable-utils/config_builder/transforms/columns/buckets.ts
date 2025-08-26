@@ -73,19 +73,19 @@ export function fromBucketLensApiToLensState(
 export function fromBucketLensStateToAPI(
   column: FiltersIndexPatternColumn,
   columns: { column: LensApiAllMetricOperations; id: string }[]
-): LensApiFiltersOperation | undefined;
+): LensApiFiltersOperation;
 export function fromBucketLensStateToAPI(
   column: DateHistogramIndexPatternColumn,
   columns: { column: LensApiAllMetricOperations; id: string }[]
-): LensApiDateHistogramOperation | undefined;
+): LensApiDateHistogramOperation;
 export function fromBucketLensStateToAPI(
   column: RangeIndexPatternColumn,
   columns: { column: LensApiAllMetricOperations; id: string }[]
-): LensApiRangeOperation | undefined;
+): LensApiRangeOperation;
 export function fromBucketLensStateToAPI(
   column: TermsIndexPatternColumn,
   columns: { column: LensApiAllMetricOperations; id: string }[]
-): LensApiTermsOperation | undefined;
+): LensApiTermsOperation;
 export function fromBucketLensStateToAPI(
   column: AnyBucketLensStateColumn,
   columns: { column: LensApiAllMetricOperations; id: string }[]

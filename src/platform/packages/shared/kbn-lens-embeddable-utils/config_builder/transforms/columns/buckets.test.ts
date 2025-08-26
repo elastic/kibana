@@ -18,18 +18,35 @@ import {
   LensApiDateHistogramOperation,
   LensApiRangeOperation,
   LensApiTermsOperation,
-  LensApiBucketOperations,
 } from '../../schema/bucket_ops';
 import { fromBucketLensApiToLensState, fromBucketLensStateToAPI } from './buckets';
-import { AnyBucketLensStateColumn } from './types';
+import { AnyMetricLensStateColumn } from './types';
+import { LensApiAllMetricOperations } from '../../schema/metric_ops';
 
 describe('Buckets Transforms', () => {
-  const metricColumns = [
-    { column: { operation: 'sum', field: 'value' }, id: 'metricCol1' },
-    { column: { operation: 'average', field: 'score' }, id: 'metricCol2' },
-  ];
-
   describe('fromBucketLensApiToLensState', () => {
+    const metricColumns: { column: AnyMetricLensStateColumn; id: string }[] = [
+      {
+        column: {
+          operationType: 'sum',
+          sourceField: 'value',
+          dataType: 'number',
+          label: 'Sum of value',
+          isBucketed: false,
+        },
+        id: 'metricCol1',
+      },
+      {
+        column: {
+          operationType: 'average',
+          sourceField: 'score',
+          dataType: 'number',
+          label: 'Average of score',
+          isBucketed: false,
+        },
+        id: 'metricCol2',
+      },
+    ];
     it('should transform filters API to lens state', () => {
       const input: LensApiFiltersOperation = {
         operation: 'filters',
@@ -76,14 +93,18 @@ describe('Buckets Transforms', () => {
       expect(result.params.size).toBe(5);
     });
 
-    it('should return undefined for unsupported operation', () => {
-      const input = { operation: 'unsupported' } as LensApiBucketOperations;
-      const result = fromBucketLensApiToLensState(input, metricColumns);
-      expect(result).toBeUndefined();
+    it('should throw for unsupported operation', () => {
+      expect(() =>
+        fromBucketLensApiToLensState({ operation: 'unsupported', field: 'value' } as any, [])
+      ).toThrowError('Unsupported bucket operation');
     });
   });
 
   describe('fromBucketLensStateToAPI', () => {
+    const metricColumns: { column: LensApiAllMetricOperations; id: string }[] = [
+      { column: { operation: 'sum', field: 'value' }, id: 'metricCol1' },
+      { column: { operation: 'average', field: 'score' }, id: 'metricCol2' },
+    ];
     it('should transform filters lens state to API', () => {
       const input: FiltersIndexPatternColumn = {
         operationType: 'filters',
@@ -171,10 +192,10 @@ describe('Buckets Transforms', () => {
       expect(result.size).toBe(5);
     });
 
-    it('should return undefined for unsupported lens state', () => {
-      const input = { operationType: 'unsupported' } as AnyBucketLensStateColumn;
-      const result = fromBucketLensStateToAPI(input, metricColumns);
-      expect(result).toBeUndefined();
+    it('should throw for unsupported operation', () => {
+      expect(() =>
+        fromBucketLensStateToAPI({ operationType: 'unsupported', sourceField: 'value' } as any, [])
+      ).toThrowError('Unsupported bucket operation');
     });
   });
 });
