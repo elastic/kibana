@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiBadge, EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useScreenContext } from '../../../hooks/use_screen_context';
 
 export const BadgeStatus = ({
   status,
@@ -19,6 +20,10 @@ export const BadgeStatus = ({
 }) => {
   const { color, dataTestSubj, labels } = badgeMapping[status || 'unknown'];
   const label = isBrowserType && labels.browser ? labels.browser : labels.default;
+
+  useScreenContext({
+    screenDescription: `The user is viewing the monitor status based on the last test run. The current status is ${label}.`,
+  });
 
   return (
     <EuiBadge
