@@ -15,7 +15,8 @@ import type { BaseSelectorState } from './types';
  */
 export const createSelectionHandler = <T extends BaseSelectorState>(
   onChange: Function,
-  state: T
+  state: T,
+  onSelectionChange?: (option: EuiSelectableOption | undefined, state: T) => void
 ) => {
   return (
     _newOptions: EuiSelectableOption[],
@@ -23,23 +24,29 @@ export const createSelectionHandler = <T extends BaseSelectorState>(
     changedOption: EuiSelectableOption
   ) => {
     if (changedOption.checked === 'on') {
+      const newState = {
+        ...state,
+        isPopoverOpen: false,
+        selectedOption: changedOption.data,
+      };
       onChange({
         value: changedOption.label,
         valueText: changedOption.label,
-        store: {
-          ...state,
-          isPopoverOpen: false,
-        },
+        store: newState,
       });
+      onSelectionChange?.(changedOption, newState);
     } else {
+      const newState = {
+        ...state,
+        isPopoverOpen: false,
+        selectedOption: undefined,
+      };
       onChange({
         value: '',
         valueText: '',
-        store: {
-          ...state,
-          isPopoverOpen: false,
-        },
+        store: newState,
       });
+      onSelectionChange?.(undefined, newState);
     }
   };
 };
@@ -67,6 +74,7 @@ export const transformCustomScriptsToOptions = (
       label: script.name,
       description: script.description,
       checked: isChecked ? 'on' : undefined,
+      data: script,
     };
   });
 };

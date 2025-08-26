@@ -15,6 +15,7 @@ import type { CommandArgumentValueSelectorProps } from '../../console/types';
  */
 export interface BaseSelectorState {
   isPopoverOpen: boolean;
+  selectedOption?: unknown;
 }
 
 /**
@@ -59,4 +60,6 @@ export interface BaseArgumentSelectorProps<
     error: IHttpFetchError<unknown> | null,
     notifications: NotificationsStart
   ) => void;
+  testIdPrefix?: string;
+  onSelectionChange?: (option: EuiSelectableOption<TOption> | undefined, state: TState) => void;
 }

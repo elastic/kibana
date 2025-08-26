@@ -46,6 +46,8 @@ const BaseArgumentSelectorComponent = <
   transformToOptions,
   config,
   useErrorToast,
+  testIdPrefix,
+  onSelectionChange,
 }: BaseArgumentSelectorProps<TData, TOption, TState>) => {
   const {
     services: { notifications },
@@ -75,33 +77,40 @@ const BaseArgumentSelectorComponent = <
 
   const handleSelection = useCallback(
     (newOptions: EuiSelectableOption[], _event: unknown, changedOption: EuiSelectableOption) => {
-      const handler = createSelectionHandler(onChange, state);
+      const handler = createSelectionHandler(onChange, state, onSelectionChange);
       handler(newOptions, _event, changedOption);
     },
-    [onChange, state]
+    [onChange, state, onSelectionChange]
   );
 
-  const renderOption = useCallback((option: EuiSelectableOption<TOption>) => {
-    const hasDescription = 'description' in option && option.description;
-    return (
-      <>
-        <EuiText size="s" css={SHARED_TRUNCATION_STYLE}>
-          <strong data-test-subj={`${option.label}-label`}>{option.label}</strong>
-        </EuiText>
-        {hasDescription && (
-          <EuiToolTip position="right" content={String(option.description)}>
-            <EuiText data-test-subj={`${option.label}-description`} color="subdued" size="s">
-              <small css={SHARED_TRUNCATION_STYLE}>{String(option.description)}</small>
-            </EuiText>
-          </EuiToolTip>
-        )}
-      </>
-    );
-  }, []);
+  const renderOption = useCallback(
+    (option: EuiSelectableOption<TOption>) => {
+      const hasDescription = 'description' in option && option.description;
+      const testId = testIdPrefix ? `${testIdPrefix}-` : '';
+      return (
+        <div data-test-subj={`${testId}script`}>
+          <EuiText size="s" css={SHARED_TRUNCATION_STYLE}>
+            <strong data-test-subj={`${option.label}-label`}>{option.label}</strong>
+          </EuiText>
+          {hasDescription && (
+            <EuiToolTip position="right" content={String(option.description)}>
+              <EuiText data-test-subj={`${option.label}-description`} color="subdued" size="s">
+                <small css={SHARED_TRUNCATION_STYLE}>{String(option.description)}</small>
+              </EuiText>
+            </EuiToolTip>
+          )}
+        </div>
+      );
+    },
+    [testIdPrefix]
+  );
 
   if (isAwaitingRenderDelay || (isLoading && !error)) {
-    return <EuiLoadingSpinner />;
+    const testId = testIdPrefix ? `${testIdPrefix}-` : '';
+    return <EuiLoadingSpinner data-test-subj={`${testId}loading`} size="m" />;
   }
+
+  const testId = testIdPrefix ? `${testIdPrefix}-` : '';
 
   return (
     <EuiPopover
@@ -111,7 +120,9 @@ const BaseArgumentSelectorComponent = <
         padding: 0,
         minWidth: config.minWidth,
       }}
+      data-test-subj={testId.slice(0, -1)}
       closePopover={handleClosePopover}
+      panelProps={{ 'data-test-subj': `${testId}popoverPanel` }}
       button={
         <EuiToolTip content={config.tooltipText} position="top" display="block">
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
