@@ -24,6 +24,8 @@ export interface OnechatPluginSetup {
      * Register a custom data type component descriptor
      */
     register: (descriptor: DataTypeComponentDescriptor) => void;
+    list: () => Array<string>;
+    clear: () => void;
   };
 }
 

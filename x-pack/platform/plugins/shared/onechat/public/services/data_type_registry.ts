@@ -23,6 +23,13 @@ export class DataTypeRegistry {
   }
 
   /**
+   * List all registered descriptors' IDs
+   */
+  list(): Array<string> {
+    return Array.from(this.descriptors.keys());
+  }
+
+  /**
    * Clear all registered descriptors
    */
   clear(): void {

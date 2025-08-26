@@ -49,6 +49,7 @@ export class OnechatPlugin
 
   setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
     const isOnechatUiEnabled = core.uiSettings.get<boolean>(ONECHAT_UI_SETTING_ID, false);
+    this.logger.info(`Onechat UI setting is ${isOnechatUiEnabled ? 'enabled' : 'disabled'}`);
 
     if (isOnechatUiEnabled) {
       registerApp({
@@ -66,6 +67,8 @@ export class OnechatPlugin
       return {
         dataTypeRegistry: {
           register: (descriptor) => this.dataTypeRegistry.register(descriptor),
+          list: () => this.dataTypeRegistry.list(),
+          clear: () => this.dataTypeRegistry.clear(),
         },
       };
     }
@@ -73,6 +76,10 @@ export class OnechatPlugin
     return {
       dataTypeRegistry: {
         register: () => {},
+        list: () => {
+          return [] as string[];
+        },
+        clear: () => {},
       },
     };
   }
