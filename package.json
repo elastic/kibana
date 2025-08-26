@@ -1324,7 +1324,7 @@
     "pretty-ms": "6.0.0",
     "prop-types": "^15.8.1",
     "proxy-from-env": "1.1.0",
-    "puppeteer": "24.14.0",
+    "puppeteer": "24.17.0",
     "query-string": "^6.13.2",
     "rbush": "^4.0.1",
     "re2js": "0.4.3",
