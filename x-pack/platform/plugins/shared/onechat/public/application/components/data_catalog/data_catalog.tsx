@@ -8,7 +8,7 @@
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-export interface DataTypeComponentDescriptor {
+export interface DataTypeComponent {
   /** Data type this descriptor handles */
   getDataType(): string;
   /** Display name for the data type */

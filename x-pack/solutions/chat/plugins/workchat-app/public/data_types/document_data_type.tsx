@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import type { DataTypeComponentDescriptor } from '@kbn/onechat-plugin/public/application/components/data_catalog/data_catalog';
+import type { DataTypeComponent } from '@kbn/onechat-plugin/public/application/components/data_catalog/data_catalog';
 
 /**
  * Icon component for document data type
@@ -17,7 +17,7 @@ const DocumentIcon = () => <EuiIcon type="document" />;
 /**
  * Custom data type descriptor for document data
  */
-export class DocumentDataTypeDescriptor implements DataTypeComponentDescriptor {
+export class DocumentDataType implements DataTypeComponent {
   getDataType(): string {
     return 'document';
   }

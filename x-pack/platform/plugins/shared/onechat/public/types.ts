@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
-import type { DataTypeComponentDescriptor } from './application/components/data_catalog/data_catalog';
+import type { DataTypeComponent } from './application/components/data_catalog/data_catalog';
 
 export interface ConfigSchema {}
 
@@ -23,7 +23,7 @@ export interface OnechatPluginSetup {
     /**
      * Register a custom data type component descriptor
      */
-    register: (descriptor: DataTypeComponentDescriptor) => void;
+    register: (descriptor: DataTypeComponent) => void;
     list: () => Array<string>;
     clear: () => void;
   };

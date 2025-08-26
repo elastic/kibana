@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { WorkspaceDataTypeDescriptor } from './workspace_data_type';
-export { DocumentDataTypeDescriptor } from './document_data_type';
+export { WorkspaceDataType } from './workspace_data_type';
+export { DocumentDataType } from './document_data_type';

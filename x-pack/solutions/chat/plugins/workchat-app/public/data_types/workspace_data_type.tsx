@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import type { DataTypeComponentDescriptor } from '@kbn/onechat-plugin/public/application/components/data_catalog/data_catalog';
+import type { DataTypeComponent } from '@kbn/onechat-plugin/public/application/components/data_catalog/data_catalog';
 
 /**
  * Icon component for workspace data type
@@ -17,7 +17,7 @@ const WorkspaceIcon = () => <EuiIcon type="workspace" />;
 /**
  * Custom data type descriptor for workspace data
  */
-export class WorkspaceDataTypeDescriptor implements DataTypeComponentDescriptor {
+export class WorkspaceDataType implements DataTypeComponent {
   getDataType(): string {
     return 'workspace';
   }

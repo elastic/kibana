@@ -17,7 +17,7 @@ import { registerApp } from './application';
 import { ChatService, ConversationService, AgentService, type WorkChatServices } from './services';
 import { IntegrationService } from './services/integration/integration_service';
 import { IntegrationRegistry } from './services/integration/integration_registry';
-import { WorkspaceDataTypeDescriptor, DocumentDataTypeDescriptor } from './data_types';
+import { WorkspaceDataType, DocumentDataType } from './data_types';
 
 export class WorkChatAppPlugin
   implements
@@ -51,8 +51,8 @@ export class WorkChatAppPlugin
     });
 
     // Register custom data type descriptors
-    onechat.dataTypeRegistry.register(new WorkspaceDataTypeDescriptor());
-    onechat.dataTypeRegistry.register(new DocumentDataTypeDescriptor());
+    onechat.dataTypeRegistry.register(new WorkspaceDataType());
+    onechat.dataTypeRegistry.register(new DocumentDataType());
 
     return {
       integrations: {

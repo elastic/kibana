@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { DataTypeComponentDescriptor } from '../application/components/data_catalog/data_catalog';
+import type { DataTypeComponent } from '../application/components/data_catalog/data_catalog';
 
 export class DataTypeRegistry {
-  private descriptors = new Map<string, DataTypeComponentDescriptor>();
+  private descriptors = new Map<string, DataTypeComponent>();
 
   /**
    * Register a data type component descriptor
    */
-  register(descriptor: DataTypeComponentDescriptor): void {
+  register(descriptor: DataTypeComponent): void {
     if (this.descriptors.has(descriptor.getDataType())) {
       throw new Error(
         `DataTypeComponentDescriptor with id '${descriptor.getDataType()}' is already registered`
