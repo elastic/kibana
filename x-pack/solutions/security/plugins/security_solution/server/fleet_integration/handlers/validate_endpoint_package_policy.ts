@@ -24,7 +24,7 @@ export const validateEndpointPackagePolicy = (inputs: NewPackagePolicyInput[]) =
       }
 
       const maxAllowedDate = getControlledArtifactCutoffDate();
-      if (parsedDate.isBefore(maxAllowedDate)) {
+      if (parsedDate.startOf('day').isBefore(maxAllowedDate.clone().startOf('day'))) {
         throw createManifestVersionError(
           'Global manifest version is too far in the past. Please use either "latest" or a date within the last 18 months. The earliest valid date is October 1, 2023, in UTC time.'
         );

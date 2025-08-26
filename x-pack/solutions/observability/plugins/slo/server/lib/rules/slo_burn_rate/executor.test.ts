@@ -34,6 +34,10 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { sloDefinitionSchema } from '@kbn/slo-schema';
+import {
+  getErrorSource,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running/errors';
 import { get } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -189,8 +193,8 @@ describe('BurnRateRuleExecutor', () => {
       soClientMock.find.mockRejectedValue(new SLONotFound('SLO [non-existent] not found'));
       const executor = getRuleExecutor(basePathMock);
 
-      await expect(
-        executor({
+      try {
+        await executor({
           params: someRuleParamsWithWindows({ sloId: 'non-existent' }),
           startedAt: new Date(),
           startedAtOverridden: false,
@@ -198,14 +202,23 @@ describe('BurnRateRuleExecutor', () => {
           executionId: 'irrelevant',
           logger: loggerMock,
           previousStartedAt: null,
-          rule: {} as SanitizedRuleConfig,
+          rule: {
+            id: '123-456',
+            name: 'an slo rule',
+          } as SanitizedRuleConfig,
           spaceId: 'irrelevant',
           state: {},
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           getTimeRange,
           isServerless: false,
-        })
-      ).rejects.toThrowError();
+        });
+        throw new Error('the executor ran successfully, but should not have');
+      } catch (err) {
+        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+        expect(err.message).toBe(
+          'Rule "an slo rule" 123-456 is referencing an SLO which cannot be found: "non-existent": SLO [non-existent] not found'
+        );
+      }
     });
 
     it('returns early when the slo is disabled', async () => {

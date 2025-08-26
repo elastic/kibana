@@ -91,7 +91,7 @@ export const checkEmptyAssigneesStateInAlertDetailsFlyout = () => {
 };
 
 export const alertsTableMoreActionsAreNotAvailable = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.disabled');
 };
 
 export const asigneesMenuItemsAreNotAvailable = () => {

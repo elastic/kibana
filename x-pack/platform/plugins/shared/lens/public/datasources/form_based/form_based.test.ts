@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { SavedObjectReference } from '@kbn/core/public';
-import { isFragment } from 'react-is';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { FormBasedPersistedState, FormBasedPrivateState } from './types';
@@ -191,6 +190,10 @@ const dateRange = {
   fromDate: '2022-03-17T08:25:00.000Z',
   toDate: '2022-04-17T08:25:00.000Z',
 };
+
+function isFragment(element: unknown): element is ReactElement {
+  return React.isValidElement(element) && element.type === React.Fragment;
+}
 
 describe('IndexPattern Data Source', () => {
   let baseState: FormBasedPrivateState;

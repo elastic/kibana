@@ -259,7 +259,7 @@ services:
     image: {kib-docker-image}
     environment:
       SERVER_NAME: kibana.example.org
-      ELASTICSEARCH_HOSTS: '["http://es01:9200","http://es02:9200","http://es03:9200"]'
+      ELASTICSEARCH_HOSTS: '["<HOST_1>:9200","<HOST_2>:9200","<HOST_3>:9200"]'
 ----------------------------------------------------------
 
 Since environment variables are translated to CLI arguments, they take

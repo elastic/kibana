@@ -6,7 +6,11 @@
  */
 
 import { LAST_BREADCRUMB, RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
-import { RULES_MANAGEMENT_URL } from '../urls/rules_management';
+import {
+  INSTALL_PREBUILT_RULES_URL,
+  RULES_MANAGEMENT_URL,
+  RULES_UPGRADE_URL,
+} from '../urls/rules_management';
 import { resetRulesTableState } from './common';
 import { visit } from './navigation';
 
@@ -19,4 +23,13 @@ export function openRuleManagementPageViaBreadcrumbs(): void {
   cy.log('Navigate back to rules table via breadcrumbs');
   cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).not(LAST_BREADCRUMB).click();
   cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).filter(LAST_BREADCRUMB).should('exist');
+}
+
+export function visitAddRulesPage(): void {
+  visit(INSTALL_PREBUILT_RULES_URL);
+}
+
+export function visitRulesUpgradeTable(): void {
+  visit(RULES_UPGRADE_URL);
+  cy.url().should('include', RULES_UPGRADE_URL);
 }

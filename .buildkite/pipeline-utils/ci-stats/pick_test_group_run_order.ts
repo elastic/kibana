@@ -488,7 +488,7 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 80,
+              diskSizeGb: 85,
             },
             retry: {
               automatic: [

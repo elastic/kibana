@@ -127,28 +127,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 
   const onButtonClick = useCallback(() => {
-    setPopover(!isPopoverOpen);
-  }, [isPopoverOpen]);
+    setPopover((current) => !current);
+  }, []);
 
   const closePopover = useCallback((): void => {
     setPopover(false);
   }, []);
-
-  const button = useMemo(() => {
-    return (
-      <EuiToolTip position="top" content={i18n.MORE_ACTIONS}>
-        <EuiButtonIcon
-          aria-label={ariaLabel}
-          data-test-subj="timeline-context-menu-button"
-          size="s"
-          iconType="boxesHorizontal"
-          data-popover-open={isPopoverOpen}
-          onClick={onButtonClick}
-          isDisabled={disabled}
-        />
-      </EuiToolTip>
-    );
-  }, [disabled, onButtonClick, ariaLabel, isPopoverOpen]);
 
   const refetchAll = useCallback(() => {
     const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
@@ -280,6 +264,26 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     [alertTagsPanels, alertAssigneesPanels, items]
   );
 
+  const button = useMemo(() => {
+    const hasItems = !!items.length;
+    const tooltipContent = hasItems ? i18n.MORE_ACTIONS : i18n.INSUFFICIENT_PRIVILEGES;
+
+    return (
+      <EuiToolTip position="top" content={tooltipContent}>
+        <EuiButtonIcon
+          aria-label={ariaLabel}
+          data-test-subj="timeline-context-menu-button"
+          size="s"
+          iconType="boxesHorizontal"
+          data-popover-open={isPopoverOpen}
+          onClick={onButtonClick}
+          isDisabled={disabled || !hasItems}
+          color={isPopoverOpen ? 'primary' : 'text'}
+        />
+      </EuiToolTip>
+    );
+  }, [ariaLabel, isPopoverOpen, onButtonClick, disabled, items.length]);
+
   const osqueryFlyout = useMemo(() => {
     return (
       <OsqueryFlyout
@@ -293,28 +297,26 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   return (
     <>
-      {items.length > 0 && (
-        <div key="actions-context-menu">
-          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            <EuiPopover
-              id="singlePanel"
-              button={button}
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-              repositionOnScroll
-            >
-              <EuiContextMenu
-                size="s"
-                initialPanelId={0}
-                panels={panels}
-                data-test-subj="actions-context-menu"
-              />
-            </EuiPopover>
-          </EventsTdContent>
-        </div>
-      )}
+      <div key="actions-context-menu">
+        <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+          <EuiPopover
+            id="singlePanel"
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+            repositionOnScroll
+          >
+            <EuiContextMenu
+              size="s"
+              initialPanelId={0}
+              panels={panels}
+              data-test-subj="actions-context-menu"
+            />
+          </EuiPopover>
+        </EventsTdContent>
+      </div>
       {openAddExceptionFlyout &&
         ruleId &&
         ruleRuleId &&

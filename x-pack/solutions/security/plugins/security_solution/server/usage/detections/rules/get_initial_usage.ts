@@ -12,6 +12,7 @@ import type {
   SingleEventLogStatusMetric,
   SingleEventMetric,
   AlertSuppressionUsage,
+  UpgradeableRulesSummary,
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {
@@ -128,6 +129,30 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     legacy_investigation_fields: 0,
     alert_suppression: initialAlertSuppression,
   },
+  elastic_customized_total: {
+    enabled: 0,
+    disabled: 0,
+    alerts: 0,
+    cases: 0,
+    legacy_notifications_enabled: 0,
+    legacy_notifications_disabled: 0,
+    notifications_enabled: 0,
+    notifications_disabled: 0,
+    legacy_investigation_fields: 0,
+    alert_suppression: initialAlertSuppression,
+  },
+  elastic_noncustomized_total: {
+    enabled: 0,
+    disabled: 0,
+    alerts: 0,
+    cases: 0,
+    legacy_notifications_enabled: 0,
+    legacy_notifications_disabled: 0,
+    notifications_enabled: 0,
+    notifications_disabled: 0,
+    legacy_investigation_fields: 0,
+    alert_suppression: initialAlertSuppression,
+  },
   custom_total: {
     enabled: 0,
     disabled: 0,
@@ -202,4 +227,23 @@ export const getInitialMaxAvgMin = (): MaxAvgMin => ({
   max: 0.0,
   avg: 0.0,
   min: 0.0,
+});
+
+/**
+ * Returns the initial usage statistics for rule upgrade status.
+ *
+ * The returned object contains default values for the total number of upgradeable rules,
+ * the number of customized rules, and the counts of enabled and disabled rules.
+ *
+ * @returns {UpgradeableRulesSummary} An object with initial values for rule upgrade status:
+ * - `total`: The total number of upgradeable rules (default is 0).
+ * - `customized`: The number of customized upgradeable rules (default is 0).
+ * - `enabled`: The number of enabled upgradeable rules (default is 0).
+ * - `disabled`: The number of disabled upgradeable rules (default is 0).
+ */
+export const getInitialRuleUpgradeStatus = (): UpgradeableRulesSummary => ({
+  total: 0,
+  customized: 0,
+  enabled: 0,
+  disabled: 0,
 });

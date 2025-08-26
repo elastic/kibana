@@ -24,7 +24,7 @@ import {
   EventSchema,
 } from './types';
 import { SAVED_OBJECT_REL_PRIMARY } from './types';
-import { Doc, InternalFields } from './es/cluster_client_adapter';
+import type { Doc, DocWithOptionalId, InternalFields } from './es/cluster_client_adapter';
 
 type SystemLogger = Plugin['systemLogger'];
 
@@ -68,7 +68,7 @@ export class EventLogger implements IEventLogger {
   }
 
   // non-blocking, but spawns an async task to do the work
-  logEvent(eventProperties: IEvent): void {
+  logEvent(eventProperties: IEvent, id?: string): void {
     const event: IEvent = {};
     const fixedProperties = {
       ecs: {
@@ -95,7 +95,8 @@ export class EventLogger implements IEventLogger {
       return;
     }
 
-    const doc: Doc = {
+    const doc: DocWithOptionalId = {
+      id,
       index: this.esContext.esNames.dataStream,
       body: validatedEvent,
     };
@@ -182,8 +183,12 @@ function validateEvent(eventLogService: IEventLogService, event: IEvent): IValid
 
 export const EVENT_LOGGED_PREFIX = `event logged: `;
 
-function logEventDoc(logger: Logger, doc: Doc): void {
-  logger.info(`event logged: ${JSON.stringify(doc.body)}`);
+function logEventDoc(logger: Logger, doc: DocWithOptionalId): void {
+  if (doc.id) {
+    logger.info(`event logged: ${JSON.stringify({ id: doc.id, ...doc.body })}`);
+  } else {
+    logger.info(`event logged: ${JSON.stringify(doc.body)}`);
+  }
 }
 
 function logUpdateEventDoc(logger: Logger, docs: Array<Required<Doc>>): void {

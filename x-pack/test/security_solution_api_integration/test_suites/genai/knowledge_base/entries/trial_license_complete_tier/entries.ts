@@ -17,7 +17,6 @@ import {
   setupKnowledgeBase,
 } from '../utils/helpers';
 import { removeServerGeneratedProperties } from '../utils/remove_server_generated_properties';
-import { MachineLearningProvider } from '../../../../../../functional/services/ml';
 import { documentEntry, indexEntry, globalDocumentEntry } from './mocks/entries';
 import { secOnlySpacesAll, secOnlySpacesAllAssistantMinimalAll } from '../utils/auth/users';
 import {
@@ -33,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
-  const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
+  const ml = getService('ml');
 
   describe('@ess Basic Security AI Assistant Knowledge Base Entries', () => {
     before(async () => {

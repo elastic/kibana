@@ -38,6 +38,7 @@ interface Props {
   showPerPageOptions?: boolean;
   showSparkPlots?: boolean;
   onChangeRenderedItems?: (items: FormattedSpanMetricGroup[]) => void;
+  saveTableOptionsToUrl?: boolean;
 }
 
 export type FormattedSpanMetricGroup = SpanMetricGroup & {
@@ -57,6 +58,7 @@ export function DependenciesTable({
   initialPageSize,
   showSparkPlots,
   onChangeRenderedItems,
+  saveTableOptionsToUrl = true,
 }: Props) {
   const { isLarge } = useBreakpoints();
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
@@ -145,6 +147,7 @@ export function DependenciesTable({
             showPerPageOptions={showPerPageOptions}
             initialPageSize={initialPageSize}
             onChangeRenderedItems={onChangeRenderedItems}
+            saveTableOptionsToUrl={saveTableOptionsToUrl}
           />
         </OverviewTableContainer>
       </EuiFlexItem>

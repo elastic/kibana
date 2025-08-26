@@ -56,6 +56,7 @@ export {
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
   profilingFetchTopNFunctionsFromStacktraces,
+  enableDiagnosticMode,
 } from './ui_settings_keys';
 
 export {

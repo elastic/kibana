@@ -26,7 +26,7 @@ import {
 } from '@kbn/discover-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
   apiCanAccessViewMode,
   apiHasType,
@@ -54,6 +54,7 @@ import {
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import { LocatorParams } from '@kbn/reporting-common/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getI18nStrings } from './strings';
 
 export interface PanelActionDependencies {

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createTestConfig } from '../../../../../../config/serverless/config.base';
+import { createCompleteTierTestConfig } from '../../../configs/serverless/rules_management.complete.config';
 
-export default createTestConfig({
+export default createCompleteTierTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName: 'Rules Management - Rule Update Integration Tests - Serverless Env - Complete Tier',

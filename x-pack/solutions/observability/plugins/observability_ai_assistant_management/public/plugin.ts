@@ -6,11 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { Subscription } from 'rxjs';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { ManagementApp } from '@kbn/management-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 import type {
   ObservabilityAIAssistantPublicSetup,
@@ -36,6 +39,7 @@ export interface StartDependencies {
   serverless?: ServerlessPluginStart;
   productDocBase?: ProductDocBasePluginStart;
   ml: MlPluginSetup;
+  licensing: LicensingPluginStart;
 }
 
 export interface ConfigSchema {
@@ -54,6 +58,8 @@ export class AiAssistantManagementObservabilityPlugin
     >
 {
   private readonly config: ConfigSchema;
+  private registeredApp?: ManagementApp;
+  private licensingSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.config = context.config.get();
@@ -82,7 +88,7 @@ export class AiAssistantManagementObservabilityPlugin
     }
 
     if (observabilityAIAssistant) {
-      management.sections.section.kibana.registerApp({
+      this.registeredApp = management.sections.section.kibana.registerApp({
         id: 'observabilityAiAssistantManagement',
         title,
         hideFromSidebar: true,
@@ -97,12 +103,31 @@ export class AiAssistantManagementObservabilityPlugin
           });
         },
       });
+
+      // Default to disabled until license check runs in start()
+      this.registeredApp.disable();
     }
 
     return {};
   }
 
-  public start() {
+  public start(coreStart: CoreStart, { licensing }: StartDependencies) {
+    if (licensing) {
+      this.licensingSubscription = licensing.license$.subscribe((license) => {
+        const isEnterprise = license?.hasAtLeast('enterprise');
+
+        if (isEnterprise) {
+          this.registeredApp?.enable();
+        } else {
+          this.registeredApp?.disable();
+        }
+      });
+    }
+
     return {};
+  }
+
+  public stop() {
+    this.licensingSubscription?.unsubscribe();
   }
 }

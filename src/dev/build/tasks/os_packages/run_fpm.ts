@@ -23,7 +23,6 @@ export async function runFpm(
 ) {
   const linux = config.getPlatform('linux', architecture);
   const version = config.getBuildVersion();
-  build.setBuildArch(architecture);
 
   const resolveWithTrailingSlash = (...paths: string[]) => `${resolve(...paths)}/`;
 

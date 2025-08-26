@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { epmRouteService } from '@kbn/fleet-plugin/common';
 import {
   PerformRuleInstallationResponseBody,
   PERFORM_RULE_INSTALLATION_URL,
   BOOTSTRAP_PREBUILT_RULES_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common/detection_engine/constants';
+import {
+  ELASTIC_SECURITY_RULE_ID,
+  PREBUILT_RULES_PACKAGE_NAME,
+} from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
@@ -70,19 +74,24 @@ export const installSpecificPrebuiltRulesRequest = (rules: Array<typeof SAMPLE_P
     },
   });
 
-export const getAvailablePrebuiltRulesCount = () => {
-  cy.log('Get prebuilt rules count');
-  return getPrebuiltRulesStatus().then(({ body }) => {
-    const prebuiltRulesCount = body.rules_installed + body.rules_not_installed;
+export const getInstalledPrebuiltRulesCount = () => {
+  cy.log('Get installed prebuilt rules count');
 
-    return prebuiltRulesCount;
-  });
+  return getPrebuiltRulesStatus().then(({ body }) => body.rules_installed);
+};
+
+export const getAvailableToInstallPrebuiltRulesCount = () => {
+  cy.log('Get available to install prebuilt rules count');
+
+  return getPrebuiltRulesStatus().then(
+    ({ body }) => body.rules_installed + body.rules_not_installed
+  );
 };
 
 export const waitTillPrebuiltRulesReadyToInstall = () => {
   cy.waitUntil(
     () => {
-      return getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      return getAvailableToInstallPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
         return availablePrebuiltRulesCount > 0;
       });
     },
@@ -187,15 +196,8 @@ export const preventPrebuiltRulesPackageInstallation = () => {
   cy.intercept('POST', BOOTSTRAP_PREBUILT_RULES_URL, {});
 };
 
-/**
- * Installs a prepared mock prebuilt rules package `security_detection_engine`.
- * Installing it up front prevents installing the real package when making API requests.
- */
-export const installMockPrebuiltRulesPackage = (): void => {
-  cy.fixture(
-    'security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip',
-    'binary'
-  )
+const installByUploadPrebuiltRulesPackage = (packagePath: string): void => {
+  cy.fixture(packagePath, 'binary')
     .then(Cypress.Blob.binaryStringToBlob)
     .then((blob) => {
       rootRequest({
@@ -214,6 +216,29 @@ export const installMockPrebuiltRulesPackage = (): void => {
   if (!Cypress.env(IS_SERVERLESS)) {
     refreshSavedObjectIndices();
   }
+};
+
+/**
+ * Installs a prepared mock prebuilt rules package `security_detection_engine`.
+ * Installing it up front prevents installing the real package when making API requests.
+ */
+export const installMockPrebuiltRulesPackage = (): void => {
+  cy.log('Install mock prebuilt rules package');
+
+  installByUploadPrebuiltRulesPackage(
+    'security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip'
+  );
+};
+
+export const deleteMockPrebuiltRulesPackage = (): Cypress.Chainable<Cypress.Response<unknown>> => {
+  return rootRequest({
+    method: 'DELETE',
+    url: `/api/fleet/epm/packages/security_detection_engine/99.0.0`,
+    headers: {
+      'elastic-api-version': '2023-10-31',
+      'kbn-xsrf': 'xxxx',
+    },
+  });
 };
 
 /**
@@ -248,3 +273,50 @@ export const createAndInstallMockedPrebuiltRules = (
   // Install rules into Kibana as `alerts` SOs
   return installSpecificPrebuiltRulesRequest(ruleAssets);
 };
+
+const MAX_DELETE_FLEET_PACKAGE_RETRIES = 2;
+const DELETE_FLEET_PACKAGE_DELAY_MS = 5000;
+
+const deleteFleetPackage = (
+  packageName: string,
+  retries = MAX_DELETE_FLEET_PACKAGE_RETRIES,
+  delayMs = DELETE_FLEET_PACKAGE_DELAY_MS
+): Cypress.Chainable<Cypress.Response<unknown>> => {
+  const deleteWithRetries = (tried = 0): Cypress.Chainable<Cypress.Response<unknown>> => {
+    if (tried > retries) {
+      throw new Error(`Error deleting ${packageName} package`);
+    }
+
+    return rootRequest({
+      method: 'DELETE',
+      // Using an empty string for package version.
+      // It's required only for cache cleaning and shouldn't impact the workflow.
+      url: epmRouteService.getRemovePath(packageName, ''),
+      body: JSON.stringify({ force: true }),
+      failOnStatusCode: false,
+    }).then((response) => {
+      if (response.status === 200) {
+        cy.log(`Deleted ${packageName} package (was installed)`);
+        return;
+      } else if (
+        response.status === 400 &&
+        (response.body as { message?: string }).message === `${packageName} is not installed`
+      ) {
+        cy.log(`Deleted ${packageName} package (was not installed)`, response.body);
+        return;
+      } else {
+        cy.log(`Error deleting ${packageName} package`, response.body);
+        cy.wait(delayMs).then(() => deleteWithRetries(tried + 1));
+      }
+
+      if (!Cypress.env(IS_SERVERLESS)) {
+        refreshSavedObjectIndices();
+      }
+    });
+  };
+
+  return deleteWithRetries();
+};
+
+export const deletePrebuiltRulesFleetPackage = (): Cypress.Chainable<Cypress.Response<unknown>> =>
+  deleteFleetPackage(PREBUILT_RULES_PACKAGE_NAME);

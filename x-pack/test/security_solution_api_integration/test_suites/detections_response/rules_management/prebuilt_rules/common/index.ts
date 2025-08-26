@@ -12,6 +12,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     this.tags('skipFIPS');
     loadTestFile(require.resolve('./import_export'));
     loadTestFile(require.resolve('./install_prebuilt_rules'));
+    loadTestFile(require.resolve('./prebuilt_rules_package'));
     loadTestFile(require.resolve('./status'));
   });
 };

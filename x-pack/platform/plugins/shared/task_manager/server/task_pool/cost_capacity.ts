@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import { isNullish } from 'utility-types';
 import { DEFAULT_CAPACITY } from '../config';
 import { TaskDefinition } from '../task';
 import { TaskRunner } from '../task_running';
@@ -69,7 +70,7 @@ export class CostCapacity implements ICapacity {
     taskDefinition?: TaskDefinition | null
   ): number {
     const allAvailableCapacity = this.capacity - this.usedCapacity(tasksInPool);
-    if (taskDefinition && taskDefinition.maxConcurrency) {
+    if (taskDefinition && !isNullish(taskDefinition.maxConcurrency)) {
       // calculate the max capacity that can be used for this task type based on cost
       const maxCapacityForType = taskDefinition.maxConcurrency * taskDefinition.cost;
       return Math.max(

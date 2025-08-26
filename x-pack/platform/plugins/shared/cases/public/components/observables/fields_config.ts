@@ -27,7 +27,27 @@ export const normalizeValueType = (value: string): keyof typeof fieldsConfig.val
   return 'generic';
 };
 
-const DOMAIN_REGEX = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,}$/;
+/**
+ * DOMAIN REGEX breakdown:
+ *
+ * (?=.{1,253}$)
+ *    Ensures the total length of the domain name is between 1 and 253 characters.
+ *
+ * ((?!.*--)([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)\.)+
+ *    Matches one or more labels separated by dots. Each label:
+ *      - Begins and ends with an alphanumeric character (`[a-zA-Z0-9]`).
+ *      - Can contain hyphens (`-`) but not consecutively or at the start/end.
+ *      - Has a maximum length of 63 characters.
+ *
+ * [a-zA-Z]{2,63}
+ *    Ensures the top-level domain (TLD) is alphabetic and between 2 and 63 characters long
+ *
+ * \.?$
+ *    Matched domains ending with dot (.) as they are valid domains
+ *    @see https://datatracker.ietf.org/doc/html/rfc1034#:~:text=When%20a%20user,ISI.EDU%20domain
+ */
+const DOMAIN_REGEX =
+  /^(?=.{1,253}$)((?!.*--)([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)\.)+[a-zA-Z]{2,63}\.?$/;
 const GENERIC_REGEX = /^[a-zA-Z0-9._:/\\-]+$/;
 
 const notStringError = (path: string) => ({

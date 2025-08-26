@@ -118,6 +118,14 @@ export function createTelemetryConfigurationTaskConfig() {
             configArtifact.ingest_pipelines_stats_config;
         }
 
+        if (configArtifact.health_diagnostic_config) {
+          log.debug('Updating health diagnostic configuration');
+          telemetryConfiguration.health_diagnostic_config = {
+            ...telemetryConfiguration.health_diagnostic_config,
+            ...configArtifact.health_diagnostic_config,
+          };
+        }
+
         await taskMetricsService.end(trace);
 
         log.l('Updated TelemetryConfiguration', { configuration: telemetryConfiguration });

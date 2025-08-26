@@ -10,10 +10,14 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.18.5>>
+* <<release-notes-8.18.4>>
 * <<release-notes-8.18.3>>
 * <<release-notes-8.18.2>>
 * <<release-notes-8.18.1>>
 * <<release-notes-8.18.0>>
+* <<release-notes-8.17.10>>
+* <<release-notes-8.17.9>>
 * <<release-notes-8.17.8>>
 * <<release-notes-8.17.7>>
 * <<release-notes-8.17.6>>
@@ -99,17 +103,109 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.18.5]]
+== {kib} 8.18.5
+
+The 8.18.5 release includes the following fixes.
+
+[float]
+[[fixes-v8.18.5]]
+=== Fixes
+Dashboards and Visualizations::
+* Fixes an issue with the plus sign `+` not being properly encoded when it's part of a date math expression ({kibana-pull}230469[#230469]).
+* Fixes an issue in Firefox preventing you from scrolling in the Lens editor flyout ({kibana-pull}228625[#228625]).
+* Fixes an issue preventing you from saving linked TSVB visualizations when changing data views ({kibana-pull}228685[#228685]).
+* Fixes a console error occurring when adding a Region map visualization to a dashboard ({kibana-pull}228669[#228669]).
+Data ingestion and Fleet::
+* Fixes an issue that could cause some SSL configurations set using the UI to be overridden ({kibana-pull}230758[#230758]).
+* Fixes an issue where the SSL configuration isn't properly added to agent policies with pre-configured output types ({kibana-pull}230211[#230211]).
+* Fixes agentless integrations using 'organization', 'division', or 'team' data fields being overwritten by package agentless metadata on the agent policy ({kibana-pull}230479[#230479]).
+Discover::
+* Improves performance of breakdown field search ({kibana-pull}229335[#229335]).
+* Enables the **Save query** button after making changes ({kibana-pull}229053[#229053]).
+* Fixes the field being picked for fetching stats in the sidebar popover ({kibana-pull}228969[#228969]).
+* Fixes an issue where some Discover **Copy to clipboard** actions only worked when accessing Kibana in a secure browser context ({kibana-pull}229531[#229531]).
+Elastic Observability solution::
+* Prevents from performing destructive actions using Elastic AI Assistant ({kibana-pull}229497[#229497]).
+* Fixes an issue with column sorting in the **Services** Errors table ({kibana-pull}229199[#229199]).
+* Fixes an issue with dependencies infinitely loading when no data exists ({kibana-pull}228094[#228094]).
+* Fixes an error in Uptime occurring when filters are missing in the parameters of a rule created using the API ({kibana-pull}229422[#229422]).
+Elastic Security solution::
+For the Elastic Security 8.18.5 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes an issue with overlapping action icons in the **Data views** menu when on mobile ({kibana-pull}229771[#229771]).
+* Fixes a display issue with counter indicators on toast messages ({kibana-pull}229300[#229300]).
+* Fixes an issue leading to some features not being visible when updating a space solution view to Classic ({kibana-pull}230385[#230385]).
+Machine Learning::
+* Removes `removeIfExists` from the synchronization task scheduler ({kibana-pull}228783[#228783]).
+
+
+[[release-notes-8.18.4]]
+== {kib} 8.18.4
+
+The 8.18.4 release includes the following known issues and fixes.
+
+[float]
+[[known-issues-8.18.4]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-230275]
+
+[float]
+[[fixes-v8.18.4]]
+=== Fixes
+Alerting::
+* Fixes an issue causing reports to fail with an invalid header error ({kibana-pull}225919[#225919]).
+Dashboards and Visualizations::
+* Fixes an issue with dashboard sharing links where copied links were not shortened and some users were unable to copy links in new spaces ({kibana-pull}227625[#227625]).
+Data ingestion and Fleet::
+* Fixes an issue with agentless integration policies appearing under the Agent-based section ({kibana-pull}225767[#225767]).
+* Fixes an issue where the background task was not deleting some unenrolled agents ({kibana-pull}224808[#224808]).
+Discover::
+* Prevents selected document from changing when resizing the **Document** flyout with a keyboard ({kibana-pull}225594[#225594]).
+Elastic Observability solution::
+* Fixes sparklines in the **Dependencies** table ({kibana-pull}227211[#227211]).
+* Shows **Uptime Monitors** in the Observability solution view when enabled in Advanced Settings ({kibana-pull}226999[#226999]).
+* Fixes response handling of the `get_apm_dependencies` tool call in the AI Assistant ({kibana-pull}226601[#226601]).
+* Fixes the **Span details** flyout on the APM **Operations** page ({kibana-pull}226423[#226423]).
+* Collapses query tool calls when using Claude ({kibana-pull}226078[#226078]).
+* Fixes `Unable to load page` error on the APM **Operations** page ({kibana-pull}226036[#226036]).
+* Fixes `Unable to load page` error on the APM Settings **Schema** page ({kibana-pull}225481[#225481]).
+* Fixes `Unable to load page` error on the APM Settings **Agent Explorer** page ({kibana-pull}225071[#225071]).
+* Fixes unexpected error on some panels of the EDOT JVM metrics dashboard ({kibana-pull}224052[#224052]).
+Elastic Security solution::
+For the Elastic Security 8.18.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Prevents navigation feedback popup from reappearing in each session ({kibana-pull}227199[#227199]).
+* Hides the header and side navigation when printing or exporting a dashboard with **Print layout** selected ({kibana-pull}227095[#227095]).
+Search::
+* Fixes handling of context limit errors in Playground when using the Elastic Managed LLM ({kibana-pull}225360[#225360]).
+
 [[release-notes-8.18.3]]
 == {kib} 8.18.3
 
-The 8.18.3 release includes the following fixes.
+The 8.18.3 release includes the following known issues and fixes.
 
 IMPORTANT: The 8.18.3 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory for more details].
 
 [float]
 [[known-issues-8.18.3]]
 === Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
+include::CHANGELOG.asciidoc[tag=known-issue-227976]
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
+include::CHANGELOG.asciidoc[tag=known-issue-2088]
+
+// tag::known-issue-230275[]
+.Issues with rules occur when xpack.alerting.rules.run.alerts.max is set to a value greater than 5000.
+[%collapsible]
+====
+*Details* +
+If you've set `xpack.alerting.rules.run.alerts.max` to a value greater than `5000`, you will encounter `Result window is too large` error messages when a maintenance window is active.
+*Workaround* +
+To mitigate the issue, set `xpack.alerting.rules.run.alerts.max` to a value equal to or less than `5000`.
+====
+// end::known-issue-230275[]
 
 [float]
 [[enhancement-v8.18.3]]
@@ -134,6 +230,7 @@ Alerting::
 * Fixes an issue causing Kibana to keep restarting when the `cancelAlertsOnRuleTimeout` Kibana configuration setting was set to `false` ({kibana-pull}222263[#222263]).
 * Resolves multiple issues in the Watcher UI that were introduced in 8.18.0 and 8.18.1. This includes the table not displaying more than 10 watches, an error banner appearing unexpectedly in certain scenarios, and the search bar functionality not working as expected ({kibana-pull}223898[#223898]).
 * Fixes an issue causing the interface to freeze when an error occurred after deleting a connector ({kibana-pull}221958[#221958]).
+* Fixes an issue that caused errors when rules ran during an active maintenance window that had filters and a matching rule category ({kibana-pull}221702[#221702]).
 
 Dashboards and Visualizations::
 * Fixes an issue that prevented navigating through pages when inspecting a chart's data ({kibana-pull}223537[#223537]).
@@ -179,7 +276,10 @@ The 8.18.2 release includes the following known issues and fixes.
 [[known-issues-8.18.2]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
+include::CHANGELOG.asciidoc[tag=known-issue-320]
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
+include::CHANGELOG.asciidoc[tag=known-issue-2088]
 
 // tag::known-issue-222127[]
 .Upgrading Kibana from 8.x to 8.18.2 fails due to a configuration conflict in the kibana.yml file.
@@ -231,9 +331,11 @@ The 8.18.1 release includes the following known issues, enhancements and fixes.
 [[known-issues-8.18.1]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 include::CHANGELOG.asciidoc[tag=known-issue-320]
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
+include::CHANGELOG.asciidoc[tag=known-issue-2088]
 
 [float]
 [[enhancement-v8.18.1]]
@@ -274,6 +376,8 @@ Review the following information about the {kib} 8.18.0 release.
 [[known-issues-8.18.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
+
 // tag::known-issue-320[]
 .Errors in rule executions occur when maintenance windows have filters.
 [%collapsible]
@@ -283,6 +387,9 @@ Errors occur when rules run during an active maintenance window that has filters
 
 *Workaround* +
 Remove any filters added to the active maintenance window.
+
+*Resolved* +
+This issue is resolved in 8.18.3.
 
 ====
 // end::known-issue-320[]
@@ -352,6 +459,26 @@ For more information, check:
 
 ====
 // end::known-issue-220339[]
+
+// tag::known-issue-2088[]
+.Observability AI Assistant - Elastic Managed LLM may be automatically selected as default connector
+[%collapsible]
+====
+*Details* +
+The Elastic Managed LLM may be automatically selected as your default connector because of existing connector selection logic. 
+This can occur if you had not previously specified a connector for any of the following reasons:
+
+- You only had one connector available and it was always automatically picked for your conversations.
+- You had multiple connectors available but didn’t make a specific selection and used the automatically picked connector for your conversations.
+- You previously selected a connector but cleared your browser's local storage or switched browsers or devices.
+
+_And:_
+
+- All of your existing connector names come after the “Elastic Managed LLM connector" when sorted alphabetically.
+
+For more information, check https://github.com/elastic/docs-content/issues/2088[#2088]
+====
+// end::known-issue-2088[]
 
 // tag::known-issue-211850[]
 .Upgrade Assistant - Rollup jobs need to be stopped before rollup indices are reindexed.
@@ -617,12 +744,84 @@ Machine Learning::
 * AiOps: Fixes Log Rate Analysis embeddable error on the Alerts page ({kibana-pull}203093[#203093]).
 * Initializes saved objects on trained model page load ({kibana-pull}201426[#201426]).
 
+[[release-notes-8.17.10]]
+== {kib} 8.17.10
+
+The 8.17.10 release includes the following fixes.
+
+[float]
+[[fixes-v8.17.10]]
+=== Fixes
+Dashboards and Visualizations::
+* Fixes an issue with the plus sign `+` not being properly encoded when it's part of a date math expression ({kibana-pull}230469[#230469]).
+* Fixes an issue in Firefox preventing you from scrolling in the Lens editor flyout ({kibana-pull}228625[#228625]).
+* Fixes an issue in reports where a PNG or PDF export would offset and clip part of the visualization in Lens ({kibana-pull}228603[#228603]).
+* Fixes an issue preventing you from saving linked TSVB visualizations when changing data views ({kibana-pull}228685[#228685]).
+Data ingestion and Fleet::
+* Fixes an issue that could cause some SSL configurations set using the UI to be overridden ({kibana-pull}230758[#230758]).
+* Fixes an issue where the SSL configuration isn't properly added to agent policies with pre-configured output types ({kibana-pull}230211[#230211]).
+Discover::
+* Fixes the field being picked for fetching stats in the sidebar popover ({kibana-pull}228969[#228969]).
+Elastic Observability solution::
+* Fixes an issue with column sorting in the **Services** Errors table ({kibana-pull}229199[#229199]).
+* Fixes an issue with dependencies infinitely loading when no data exists ({kibana-pull}228094[#228094]).
+Kibana platform::
+* Fixes a display issue with counter indicators on toast messages ({kibana-pull}229300[#229300]).
+* Fixes an issue leading to some features not being visible when updating a space solution view to Classic ({kibana-pull}230385[#230385]).
+* Decreases the loading time drastically when loading Index Management component templates ({kibana-pull}228709[#228709]).
+
+
+[[release-notes-8.17.9]]
+== {kib} 8.17.9
+
+The 8.17.9 release includes the following fixes.
+
+[float]
+[[fixes-v8.17.9]]
+=== Fixes
+Alerting::
+* Fixes an issue causing reports to fail with an invalid header error ({kibana-pull}225919[#225919]).
+Dashboards and Visualizations::
+* Fixes an issue with dashboard sharing links where copied links were not shortened and some users were unable to copy links in new spaces ({kibana-pull}227625[#227625]).
+Data ingestion and Fleet::
+* Fixes error on the **Agents** tab when a tag is added to an agent while the **No Tags** filter is selected ({kibana-pull}225413[#225413]).
+Discover::
+* Prevents selected document from changing when resizing the **Document** flyout with a keyboard ({kibana-pull}225594[#225594]).
+Elastic Observability solution::
+* Sets environment name length when creating an ML job ({kibana-pull}225973[#225973]).
+* Fixes SLO federated view issue when remote clusters and index name listed exceed 4096 bytes ({kibana-pull}224478[#224478]).
+Machine Learning::
+* Fixes the handling of time range in embedded anomaly swim lane ({kibana-pull}225803[#225803]).
+* Resets to the default value when the `lookbackInterval` field is empty ({kibana-pull}225249[#225249]).
+
 [[release-notes-8.17.8]]
 == {kib} 8.17.8
 
-The 8.17.8 release includes the following fixes.
+The 8.17.8 release includes the following known issues and fixes.
 
 IMPORTANT: The 8.17.8 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory for more details].
+
+[float]
+[[known-issues-8.17.8]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
+
+
+// tag::known-issue-227976[]
+.Dashboard Copy link doesn't work when sharing from a space other than the default space
+[%collapsible]
+====
+**This issue is resolved in versions 8.19.0, 8.18.4, and 8.17.9** ({kibana-pull}227625[#227625]).
+
+*Details* +
+When attempting to share a dashboard from a space that isn't the default space, the **Copy link** action never completes.
+
+*Workaround* +
+To avoid this issue, don't upgrade {kib} to one of the affected versions, or upgrade to a higher version that includes a fix for it.
+
+====
+// end::known-issue-227976[]
 
 [float]
 [[fixes-v8.17.8]]
@@ -656,7 +855,13 @@ Installation and upgrade::
 [[release-notes-8.17.7]]
 == {kib} 8.17.7
 
-The 8.17.7 release includes the following enhancements and fixes.
+The 8.17.7 release includes the following known issues, enhancements, and fixes.
+
+[float]
+[[known-issues-8.17.7]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.17.7]]
@@ -690,13 +895,14 @@ Kibana security::
 The 8.17.6 release contains fixes for potential security vulnerabilities. See our https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
 ====
 
-The 8.17.6 release includes the following enhancements and fixes.
+The 8.17.6 release includes the following known issues, enhancements, and fixes.
 
 [float]
 [[known-issues-8.17.6]]
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.17.6]]
@@ -736,13 +942,14 @@ Management::
 [[release-notes-8.17.5]]
 == {kib} 8.17.5
 
-The 8.17.5 release includes the following enhancements and fixes.
+The 8.17.5 release includes the following known issues, enhancements, and fixes.
 
 [float]
 [[known-issues-8.17.5]]
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.17.5]]
@@ -787,13 +994,14 @@ Management::
 [[release-notes-8.17.4]]
 == {kib} 8.17.4
 
-The 8.17.4 release includes the following fixes.
+The 8.17.4 release includes the following known issues and bug fixes.
 
 [float]
 [[known-issues-8.17.4]]
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.17.4]]
@@ -812,13 +1020,14 @@ Management::
 
 [[release-notes-8.17.3]]
 == {kib} 8.17.3
-The 8.17.3 release includes the following bug fixes.
+The 8.17.3 release includes the following known issues and bug fixes.
 
 [float]
 [[known-issues-8.17.3]]
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.17.3]]
@@ -839,13 +1048,14 @@ Sharing::
 
 [[release-notes-8.17.2]]
 == {kib} 8.17.2
-The 8.17.2 release includes the following bug fixes.
+The 8.17.2 release includes the following known issues and bug fixes.
 
 [float]
 [[known-issues-8.17.2]]
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.17.2]]
@@ -868,6 +1078,8 @@ The 8.17.1 release includes the following known issues, enhancements, and bug fi
 include::CHANGELOG.asciidoc[tag=known-issue-206400]
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.17.1]]
@@ -905,6 +1117,8 @@ The 8.17.0 release includes the following known issues.
 include::CHANGELOG.asciidoc[tag=known-issue-187254]
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 // tag::known-issue-206400[]
 .Upgrade Assistant displays configured source mode in mappings as critical deprecation issue.
@@ -1051,7 +1265,13 @@ Kibana platform::
 [[release-notes-8.16.6]]
 == {kib} 8.16.6
 
-The 8.16.6 release includes the following enhancements and fixes.
+The 8.16.6 release includes the following known issues, enhancements, and fixes.
+
+[float]
+[[known-issues-8.16.6]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.16.6]]
@@ -1082,7 +1302,13 @@ Management::
 [[release-notes-8.16.5]]
 == {kib} 8.16.5
 
-The 8.16.5 release includes the following enhancements and bug fixes.
+The 8.16.5 release includes the following known issues, enhancements, and bug fixes.
+
+[float]
+[[known-issues-8.16.5]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.16.5]]
@@ -1118,7 +1344,13 @@ Machine Learning::
 [[release-notes-8.16.4]]
 == {kib} 8.16.4
 
-The 8.16.4 release includes the following bug fixes.
+The 8.16.4 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.16.4]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.16.4]]
@@ -1149,10 +1381,17 @@ Kibana security::
 * Fixes breaks in YAML parsing by using single quotes in Structured log template ({kibana-pull}209736[#209736]).
 * Adds missing fields to input manifest templates ({kibana-pull}208768[#208768]).
 * Adds missing fields into AWS S3 manifest ({kibana-pull}208080[#208080]).
+
 [[release-notes-8.16.3]]
 == {kib} 8.16.3
 
-The 8.16.3 release includes the following bug fixes.
+The 8.16.3 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.16.3]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.16.3]]
@@ -1177,7 +1416,13 @@ Kibana security::
 [[release-notes-8.16.2]]
 == {kib} 8.16.2
 
-The 8.16.2 release includes the following enhancements and bug fixes.
+The 8.16.2 release includes the following known issues, enhancements, and bug fixes.
+
+[float]
+[[known-issues-8.16.2]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.16.2]]
@@ -1223,7 +1468,13 @@ Machine Learning::
 [[release-notes-8.16.1]]
 == {kib} 8.16.1
 
-The 8.16.1 release includes the following bug fixes.
+The 8.16.1 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.16.1]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.16.1]]
@@ -1253,6 +1504,7 @@ The 8.16.0 release includes the following known issues.
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-187254]
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [discrete]
 [[known-199902]]
@@ -1661,7 +1913,13 @@ Management::
 [[release-notes-8.15.5]]
 == {kib} 8.15.5
 
-The 8.15.5 release includes the following bug fixes.
+The 8.15.5 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.15.5]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.15.5]]
@@ -1682,7 +1940,13 @@ Platform::
 [[release-notes-8.15.4]]
 == {kib} 8.15.4
 
-The 8.15.4 release includes the following bug fixes.
+The 8.15.4 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.15.4]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.15.4]]
@@ -1710,7 +1974,13 @@ Management::
 [[release-notes-8.15.3]]
 == {kib} 8.15.3
 
-The 8.15.3 release includes the following bug fixes.
+The 8.15.3 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.15.3]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.15.3]]
@@ -1747,7 +2017,13 @@ Machine Learning::
 [[release-notes-8.15.2]]
 == {kib} 8.15.2
 
-The 8.15.2 release includes the following enhancements and bug fixes.
+The 8.15.2 release includes the following known issues, enhancements, and bug fixes.
+
+[float]
+[[known-issues-8.15.2]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.15.2]]
@@ -1794,7 +2070,13 @@ Machine Learning::
 [[release-notes-8.15.1]]
 == {kib} 8.15.1
 
-The 8.15.1 release includes the following bug fixes.
+The 8.15.1 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.15.1]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 // [float]
 // [[enhancement-v8.15.1]]
@@ -1876,6 +2158,22 @@ If you used the *Incoming Webhook* app in Microsoft Teams to generate a webhook 
 Use the *Workflows* app in Microsoft Teams to create a new webhook URL, as described in <<configuring-teams>>.
 Update your Microsoft Teams connector to use the new URL before the end of December 2024.
 ====
+
+// tag::known-issue-1991[]
+.PDF and PNG reports time out and fail with an invalid header error if server.protocol is set to http2
+[%collapsible]
+====
+*Details* +
+If you've changed the <<settings,`server.protocol`>> value to `http2`, PDF and PNG reports will fail when you export them from the dashboard, visualization, or Canvas workpad that you're generating a report for.
+
+*Workaround* +
+To temporarily resolve the issue, set `server.protocol` to `http1`. 
+
+*Resolved* +
+This issue is resolved in 8.17.9, 8.18.4, 8.19.0 and later. 
+
+====
+// end::known-issue-1991[]
 
 [discrete]
 [[known-189283]]

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../../../../config/serverless/config.base.essentials';
+import { createEssentialsTierTestConfig } from '../../../configs/serverless/rules_management.essentials.config';
 
-export default createTestConfig({
+export default createEssentialsTierTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Rules Management - Prebuilt Rules (Customization Disabled) Integration Tests - Serverless Env Essentials Tier',
+      'Rules Management - Prebuilt Rules (Common) Integration Tests - Serverless Env Essentials Tier',
   },
 });

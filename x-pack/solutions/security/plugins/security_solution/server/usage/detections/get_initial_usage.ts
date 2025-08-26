@@ -8,7 +8,11 @@
 import type { DetectionMetrics } from './types';
 
 import { getInitialMlJobUsage } from './ml_jobs/get_initial_usage';
-import { getInitialEventLogUsage, getInitialRulesUsage } from './rules/get_initial_usage';
+import {
+  getInitialEventLogUsage,
+  getInitialRuleUpgradeStatus,
+  getInitialRulesUsage,
+} from './rules/get_initial_usage';
 // eslint-disable-next-line no-restricted-imports
 import { getInitialLegacySiemSignalsUsage } from './legacy_siem_signals/get_initial_usage';
 
@@ -24,6 +28,7 @@ export const getInitialDetectionMetrics = (): DetectionMetrics => ({
     detection_rule_detail: [],
     detection_rule_usage: getInitialRulesUsage(),
     detection_rule_status: getInitialEventLogUsage(),
+    elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
   },
   legacy_siem_signals: getInitialLegacySiemSignalsUsage(),
 });

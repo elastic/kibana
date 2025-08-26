@@ -7,8 +7,18 @@
 
 import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
-export function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
-  fireEvent.click(comboBoxToggleButton);
+export async function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
+  // Skip actions if the combobox has been opened already
+  if (
+    document.querySelector('[role="listbox"]') ||
+    document.querySelector('.euiComboBoxOptionsList__empty')
+  ) {
+    return;
+  }
+
+  await act(() => {
+    fireEvent.click(comboBoxToggleButton);
+  });
 
   return waitFor(() => {
     const listWithOptionsElement = document.querySelector('[role="listbox"]');
@@ -30,14 +40,14 @@ type SelectEuiComboBoxOptionParameters =
       optionIndex?: undefined;
     };
 
-export function selectEuiComboBoxOption({
+export async function selectEuiComboBoxOption({
   comboBoxToggleButton,
   optionIndex,
   optionText,
 }: SelectEuiComboBoxOptionParameters): Promise<void> {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
+  await showEuiComboBoxOptions(comboBoxToggleButton);
 
+  await act(async () => {
     const options = Array.from(
       document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
     );
@@ -57,6 +67,17 @@ export function selectEuiComboBoxOption({
     } else {
       fireEvent.click(options[optionIndex]);
     }
+  });
+
+  if (document.querySelector('[role="listbox"]')) {
+    await act(() => {
+      fireEvent.click(comboBoxToggleButton);
+    });
+  }
+
+  // wait for the combobox options popover to disappear
+  return waitFor(() => {
+    expect(document.querySelector('[role="listbox"]')).not.toBeInTheDocument();
   });
 }
 
