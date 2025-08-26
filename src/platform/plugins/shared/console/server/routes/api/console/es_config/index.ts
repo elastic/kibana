@@ -24,15 +24,15 @@ export const registerEsConfigRoute = ({ router, services, proxy }: RouteDependen
     },
     async (ctx, req, res) => {
       const cloudUrl = services.esLegacyConfigService.getCloudUrl();
-      
+
       // Always get the actual proxy hosts for allHosts
       const legacyConfig = await proxy.readLegacyESConfig();
       const { hosts } = legacyConfig;
-      
+
       if (cloudUrl) {
-        const body: EsConfigApiResponse = { 
-          host: cloudUrl, 
-          allHosts: hosts  // Use actual proxy hosts, not cloudUrl
+        const body: EsConfigApiResponse = {
+          host: cloudUrl,
+          allHosts: hosts, // Use actual proxy hosts, not cloudUrl
         };
 
         return res.ok({ body });
