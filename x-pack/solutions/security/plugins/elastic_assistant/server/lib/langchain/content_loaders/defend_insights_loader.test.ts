@@ -9,11 +9,23 @@ import type { Document } from 'langchain/document';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
+import { appContextService } from '../../../services/app_context';
 import { getDefendInsightsDocsCount, loadDefendInsights } from './defend_insights_loader';
+
+jest.mock('../../../services/app_context');
 
 const mockKbDataClient = {
   addKnowledgeBaseDocuments: jest.fn().mockResolvedValue([{ foo: 'bar' }]),
 } as unknown as AIAssistantKnowledgeBaseDataClient;
+
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getRegisteredFeatures.mockImplementation(() => {
+  const original = jest.requireActual('../../../services/app_context');
+  return {
+    ...original.appContextService.getRegisteredFeatures(),
+    defendInsightsPolicyResponseFailure: true,
+  };
+});
 
 describe('defend_insights_loader', () => {
   beforeEach(() => {
