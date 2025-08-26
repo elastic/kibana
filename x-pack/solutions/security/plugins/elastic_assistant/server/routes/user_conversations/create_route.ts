@@ -15,6 +15,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 
+import { CONVERSATION_DUPLICATED_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { performChecks } from '../helpers';
@@ -63,6 +64,16 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
             return assistantResponse.error({
               body: `conversation with title: "${request.body.title}" was not created`,
               statusCode: 400,
+            });
+          }
+          if (createdConversation.title.startsWith('[Duplicate]')) {
+            const telemetry = ctx.elasticAssistant.telemetry;
+            const firstUserMessage = createdConversation.messages?.find((m) => m.role === 'user');
+            const isSourceConversationOwner =
+              firstUserMessage?.user?.name === checkResponse.currentUser?.username ||
+              firstUserMessage?.user?.id === checkResponse.currentUser?.profile_uid;
+            telemetry.reportEvent(CONVERSATION_DUPLICATED_EVENT.eventType, {
+              isSourceConversationOwner,
             });
           }
           return response.ok({
