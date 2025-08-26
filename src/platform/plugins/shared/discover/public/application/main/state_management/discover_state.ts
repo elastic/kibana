@@ -535,7 +535,7 @@ export function getDiscoverStateContainer({
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => {
-    let fields;
+    let fields: string[] = [];
 
     if (isOfAggregateQueryType(payload.query)) {
       console.log('ES|QL');
