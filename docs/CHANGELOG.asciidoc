@@ -589,9 +589,6 @@ Machine Learning::
 === Fixes
 Alerting::
 * Fixes an issue where maintenance windows with scoped queries were not being correctly applied to all rule types ({kibana-pull}232307[#232307]).
-Cases::
-* Hides Case connectors in the **Create case** workflow based on your license ({kibana-pull}232506[#232506]).
-* Fixes inconsistencies in case activity statistics ({kibana-pull}231948[#231948]).
 Dashboards and Visualizations::
 * Fixes empty **Create tag** tooltip in dashboard details ({kibana-pull}232853[#232853]).
 Data ingestion and Fleet::
@@ -599,7 +596,7 @@ Data ingestion and Fleet::
 Elastic Observability solution::
 * Adds a note about supported Helm versions to the onboarding flow ({kibana-pull}232618[#232618]).
 Elastic Security solution::
-For the Elastic Security 8.18.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+For the Elastic Security 8.18.6 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana security::
 * Fixes positioning of the **Add rule** popover on the **Role Mappings** page ({kibana-pull}231551[#231551]).
 * Removes the default port from the interactive setup cluster address form, unless specified ({kibana-pull}230582[#230582]).
