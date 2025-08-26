@@ -33,19 +33,50 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
   const statusColor = shouldShowWarning ? 'warning' : 'success';
   const iconType = shouldShowWarning ? 'alert' : 'checkInCircleFilled';
 
+  const statusMessage = shouldShowWarning
+    ? i18n.translate('xpack.onechat.activeToolsStatus.warningStatusMessage', {
+        defaultMessage: 'Warning status: {count} active tools',
+        values: { count: activeToolsCount },
+      })
+    : i18n.translate('xpack.onechat.activeToolsStatus.goodStatusMessage', {
+        defaultMessage: 'Good status: {count} active tools',
+        values: { count: activeToolsCount },
+      });
+
   return (
-    <EuiPanel hasBorder={true} hasShadow={false} paddingSize="m">
+    <EuiPanel
+      hasBorder={true}
+      hasShadow={false}
+      paddingSize="m"
+      aria-label={i18n.translate('xpack.onechat.activeToolsStatus.panelLabel', {
+        defaultMessage: 'Active tools status panel',
+      })}
+      role="region"
+    >
       <EuiFlexGroup alignItems="center" gutterSize="l">
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={iconType} color={statusColor} size="m" />
+                  <EuiIcon
+                    type={iconType}
+                    color={statusColor}
+                    size="m"
+                    aria-label={
+                      shouldShowWarning
+                        ? i18n.translate('xpack.onechat.activeToolsStatus.warningStatusIcon', {
+                            defaultMessage: 'Warning status icon',
+                          })
+                        : i18n.translate('xpack.onechat.activeToolsStatus.successStatusIcon', {
+                            defaultMessage: 'Success status icon',
+                          })
+                    }
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="m" color={statusColor}>
-                    <strong>
+                    <strong aria-label={statusMessage}>
                       {i18n.translate('xpack.onechat.activeToolsStatus.title', {
                         defaultMessage: 'You have {count} active tools',
                         values: { count: activeToolsCount },
@@ -65,12 +96,22 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink href="#">
+              <EuiLink
+                href="#"
+                aria-label={i18n.translate('xpack.onechat.activeToolsStatus.learnMoreAriaLabel', {
+                  defaultMessage: 'Learn more about active tools management',
+                })}
+              >
                 <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
                   {i18n.translate('xpack.onechat.activeToolsStatus.learnMore', {
                     defaultMessage: 'Learn more',
                   })}
-                  <EuiIcon type="popout" />
+                  <EuiIcon
+                    type="popout"
+                    aria-label={i18n.translate('xpack.onechat.activeToolsStatus.externalLinkIcon', {
+                      defaultMessage: 'External link',
+                    })}
+                  />
                 </EuiFlexGroup>
               </EuiLink>
             </EuiFlexItem>
@@ -89,6 +130,10 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
                   defaultMessage: 'Active tools',
                 })}
                 valueText={`${activeToolsCount}/${warningThreshold}`}
+                aria-label={i18n.translate('xpack.onechat.activeToolsStatus.progressAriaLabel', {
+                  defaultMessage: 'Progress: {current} out of {max} active tools',
+                  values: { current: activeToolsCount, max: warningThreshold },
+                })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
