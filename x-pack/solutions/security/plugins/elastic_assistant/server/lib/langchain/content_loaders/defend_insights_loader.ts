@@ -16,6 +16,8 @@ import pMap from 'p-map';
 
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { DEFEND_INSIGHTS_POLICY_RESPONSE_FAILURE } from '../../../routes/knowledge_base/constants';
+import { appContextService } from '../../../services/app_context';
+import { DEFAULT_PLUGIN_NAME } from '../../../routes/helpers';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
 
 /**
@@ -25,6 +27,15 @@ export const loadDefendInsights = async (
   kbDataClient: AIAssistantKnowledgeBaseDataClient,
   logger: Logger
 ): Promise<boolean> => {
+  const isPolicyResponseFailureEnabled =
+    appContextService.getRegisteredFeatures(
+      DEFAULT_PLUGIN_NAME
+    ).defendInsightsPolicyResponseFailure;
+
+  if (!isPolicyResponseFailureEnabled) {
+    return true;
+  }
+
   try {
     const subdirectories = [
       {
