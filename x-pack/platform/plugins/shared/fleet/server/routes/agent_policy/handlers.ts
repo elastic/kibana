@@ -540,6 +540,13 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   logger.debug(`updating policy [${request.params.agentPolicyId}] in space [${spaceId}]`);
 
   try {
+    const authzFleetAgentsAll = fleetContext.authz.fleet.allAgents;
+
+    if (data.required_versions && !authzFleetAgentsAll) {
+      throw new FleetUnauthorizedError(
+        `updating 'required_versions' requires Agents 'All' privilege`
+      );
+    }
     const requestSpaceId = spaceId;
 
     if (spaceIds?.length) {
