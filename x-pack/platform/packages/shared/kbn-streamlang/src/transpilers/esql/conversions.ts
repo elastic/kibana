@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
+import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
 import type { StreamlangProcessorDefinition } from '../../../types/processors';
 import type {
   RenameProcessor,
@@ -25,194 +27,238 @@ import {
 } from '../../../types/conditions';
 
 import type { ESQLTranspilationOptions } from '.';
-
-// Helper to format values for ES|QL literal arguments (e.g., "string", true, 123)
-function formatValueForESQLLiteral(value: any): string {
+function literalFromAny(value: any): ESQLAstItem {
   if (typeof value === 'string') {
-    return JSON.stringify(value); // Handles escaping quotes
+    return Builder.expression.literal.string(value);
   }
-  if (typeof value === 'boolean' || typeof value === 'number') {
-    return String(value);
+  if (typeof value === 'number') {
+    return Number.isInteger(value)
+      ? Builder.expression.literal.integer(value)
+      : Builder.expression.literal.decimal(value);
+  }
+  if (typeof value === 'boolean') {
+    return Builder.expression.literal.boolean(value);
   }
   if (value === null || value === undefined) {
-    return 'null';
+    return Builder.expression.literal.nil();
   }
-  return JSON.stringify(value); // Fallback for objects/arrays if they can be compared
+  // Fallback to string representation for complex objects
+  return Builder.expression.literal.string(JSON.stringify(value));
 }
 
-function conditionToESQL(condition: Condition): string {
+function conditionToESQL(condition: Condition, isNested = false): ESQLAstItem {
   if (isFilterCondition(condition)) {
-    const field = condition.field;
+    const field = Builder.expression.column(condition.field);
 
     if ('eq' in condition) {
-      return `${field} == ${formatValueForESQLLiteral(condition.eq)}`;
+      return Builder.expression.func.binary('==', [field, literalFromAny(condition.eq)]);
     }
     if ('neq' in condition) {
-      return `${field} != ${formatValueForESQLLiteral(condition.neq)}`;
+      return Builder.expression.func.binary('!=', [field, literalFromAny(condition.neq)]);
     }
     if ('gt' in condition) {
-      return `${field} > ${formatValueForESQLLiteral(condition.gt)}`;
+      return Builder.expression.func.binary('>', [field, literalFromAny(condition.gt)]);
     }
     if ('gte' in condition) {
-      return `${field} >= ${formatValueForESQLLiteral(condition.gte)}`;
+      return Builder.expression.func.binary('>=', [field, literalFromAny(condition.gte)]);
     }
     if ('lt' in condition) {
-      return `${field} < ${formatValueForESQLLiteral(condition.lt)}`;
+      return Builder.expression.func.binary('<', [field, literalFromAny(condition.lt)]);
     }
     if ('lte' in condition) {
-      return `${field} <= ${formatValueForESQLLiteral(condition.lte)}`;
+      return Builder.expression.func.binary('<=', [field, literalFromAny(condition.lte)]);
     }
     if ('exists' in condition) {
       if (condition.exists === true) {
-        return `${field} IS NOT NULL`;
+        return Builder.expression.func.unary('IS NOT NULL', field);
       } else {
-        return `${field} IS NULL`;
+        return Builder.expression.func.unary('IS NULL', field);
       }
     }
-    if ('range' in condition) {
-      if (condition.range) {
-        const parts: string[] = [];
-        if (condition.range.gt !== undefined)
-          parts.push(`${field} > ${formatValueForESQLLiteral(condition.range.gt)}`);
-        if (condition.range.gte !== undefined)
-          parts.push(`${field} >= ${formatValueForESQLLiteral(condition.range.gte)}`);
-        if (condition.range.lt !== undefined)
-          parts.push(`${field} < ${formatValueForESQLLiteral(condition.range.lt)}`);
-        if (condition.range.lte !== undefined)
-          parts.push(`${field} <= ${formatValueForESQLLiteral(condition.range.lte)}`);
-        return `(${parts.join(' AND ')})`;
-      }
+    if ('range' in condition && condition.range) {
+      const parts: ESQLAstItem[] = [];
+      if (condition.range.gt !== undefined)
+        parts.push(
+          Builder.expression.func.binary('>', [field, literalFromAny(condition.range.gt)])
+        );
+      if (condition.range.gte !== undefined)
+        parts.push(
+          Builder.expression.func.binary('>=', [field, literalFromAny(condition.range.gte)])
+        );
+      if (condition.range.lt !== undefined)
+        parts.push(
+          Builder.expression.func.binary('<', [field, literalFromAny(condition.range.lt)])
+        );
+      if (condition.range.lte !== undefined)
+        parts.push(
+          Builder.expression.func.binary('<=', [field, literalFromAny(condition.range.lte)])
+        );
+
+      if (parts.length === 1) return parts[0];
+      return parts.reduce((acc, part) => Builder.expression.func.binary('and', [acc, part]));
     }
     if ('contains' in condition) {
-      return `${field} LIKE %${formatValueForESQLLiteral(condition.contains)}%`;
+      return Builder.expression.func.call('LIKE', [
+        field,
+        Builder.expression.literal.string(`%${condition.contains}%`),
+      ]);
     }
     if ('startsWith' in condition) {
-      return `${field} LIKE ${formatValueForESQLLiteral(condition.startsWith)}%`;
+      return Builder.expression.func.call('LIKE', [
+        field,
+        Builder.expression.literal.string(`${condition.startsWith}%`),
+      ]);
     }
     if ('endsWith' in condition) {
-      return `${field} LIKE %${formatValueForESQLLiteral(condition.endsWith)}`;
+      return Builder.expression.func.call('LIKE', [
+        field,
+        Builder.expression.literal.string(`%${condition.endsWith}`),
+      ]);
     }
   } else if (isAndCondition(condition)) {
-    const andConditions = condition.and.map((c) => conditionToESQL(c));
-    return `(${andConditions.join(' AND ')})`;
+    const andConditions = condition.and.map((c) => conditionToESQL(c, true));
+    return andConditions.reduce((acc, cond) => Builder.expression.func.binary('and', [acc, cond]));
   } else if (isOrCondition(condition)) {
-    const orConditions = condition.or.map((c) => conditionToESQL(c));
-    return `(${orConditions.join(' OR ')})`;
+    const orConditions = condition.or.map((c) => conditionToESQL(c, true));
+    return orConditions.reduce((acc, cond) => Builder.expression.func.binary('or', [acc, cond]));
   } else if (isNotCondition(condition)) {
-    const notCondition = conditionToESQL(condition.not);
-    return `NOT(${notCondition})`;
+    const notCondition = conditionToESQL(condition.not, true);
+    return Builder.expression.func.unary('NOT', notCondition);
   } else if (isAlwaysCondition(condition)) {
-    return 'true';
+    return Builder.expression.literal.boolean(true);
   }
 
-  return 'false';
+  return Builder.expression.literal.boolean(false);
 }
 
-function convertProcessorToESQL(processor: StreamlangProcessorDefinition): string | null {
-  let esqlCommand: string | null = null;
-  let conditionExpression: string | null = null;
-
-  if (processor.where) {
-    conditionExpression = conditionToESQL(processor.where);
-  }
+function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand | null {
+  const whereExpression = processor.where ? conditionToESQL(processor.where) : null;
 
   switch (processor.action) {
     case 'rename':
       const renameProcessor = processor as RenameProcessor;
-      // Assuming `renameProcessor.from` and `renameProcessor.to` are available columns in ES|QL
-      // TODO: Check if `renameProcessor.ignore_missing` can be implemented
-      // TODO: Check if `renameProcessor.override` can be implemented
-      esqlCommand = `RENAME ${renameProcessor.from} AS ${renameProcessor.to}`;
-      break;
+      return Builder.command({
+        name: 'rename',
+        args: [
+          Builder.expression.func.binary('as', [
+            Builder.expression.column(renameProcessor.from),
+            Builder.expression.column(renameProcessor.to),
+          ]),
+        ],
+      });
 
     case 'set':
-      // TODO: Check if `setProcessor.copy_from` can be implemented
-      // TODO: Check if `setProcessor.override` can be implemented
       const setProcessor = processor as SetProcessor;
-      const setValue = formatValueForESQLLiteral(setProcessor.value);
-      esqlCommand = `EVAL ${setProcessor.to} = ${setValue}`;
-      break;
+      const valueExpression = literalFromAny(setProcessor.value);
+      const assignment = whereExpression
+        ? Builder.expression.func.call('CASE', [whereExpression, valueExpression])
+        : valueExpression;
+
+      return Builder.command({
+        name: 'eval',
+        args: [
+          Builder.expression.func.binary('=', [
+            Builder.expression.column(setProcessor.to),
+            assignment,
+          ]),
+        ],
+      });
 
     case 'grok':
-      // TODO: Warn when there are multiple GROK patterns, as ES|QL only supports one pattern per GROK command
       const grokProcessor = processor as GrokProcessor;
-      // Use ES|QL's triple quotes for GROK arguments to handle patterns with spaces or special characters
-      const grokPatterns = grokProcessor.patterns.map((p) => `"""${p}"""`).join(', ');
-      esqlCommand = `GROK ${grokProcessor.from} ${grokPatterns}`;
-      break;
+      return Builder.command({
+        name: 'grok',
+        args: [
+          Builder.expression.column(grokProcessor.from),
+          Builder.expression.literal.string(grokProcessor.patterns[0]),
+        ],
+      });
 
     case 'dissect':
-      // TODO: Check if `dissectProcessor.append_separator` can be implemented
-      // TODO: Check if `dissectProcessor.ignore_missing` can be implemented
       const dissectProcessor = processor as DissectProcessor;
-      // Use ES|QL's triple quotes for DISSECT arguments to handle patterns with spaces or special characters
-      esqlCommand = `DISSECT ${dissectProcessor.from} """${dissectProcessor.pattern}"""`;
-      break;
+      return Builder.command({
+        name: 'dissect',
+        args: [
+          Builder.expression.column(dissectProcessor.from),
+          Builder.expression.literal.string(dissectProcessor.pattern),
+        ],
+      });
 
     case 'date':
       const dateProcessor = processor as DateProcessor;
-      const dateParseExpressions = dateProcessor.formats.map(
-        (f) => `DATE_PARSE(${JSON.stringify(f)}, ${dateProcessor.from})`
+      const dateParseExpressions = dateProcessor.formats.map((f) =>
+        Builder.expression.func.call('DATE_PARSE', [
+          Builder.expression.literal.string(f),
+          Builder.expression.column(dateProcessor.from),
+        ])
       );
-      // Use COALESCE to handle multiple date formats
-      const coalesceArgs = dateParseExpressions.join(',\n    '); // Join with comma and indented newline
-      const coalesceDateParse = `COALESCE(\n    ${coalesceArgs}\n  )`;
+      const coalesceDateParse = Builder.expression.func.call('COALESCE', dateParseExpressions);
       const targetDateField = dateProcessor.to || dateProcessor.from;
-      esqlCommand = `EVAL ${targetDateField} = DATE_FORMAT(${JSON.stringify(
-        dateProcessor.output_format || 'yyyy-MM-dd'
-      )}, ${coalesceDateParse})`;
-      break;
+
+      return Builder.command({
+        name: 'eval',
+        args: [
+          Builder.expression.func.binary('=', [
+            Builder.expression.column(targetDateField),
+            Builder.expression.func.call('DATE_FORMAT', [
+              Builder.expression.literal.string(dateProcessor.output_format || 'yyyy-MM-dd'),
+              coalesceDateParse,
+            ]),
+          ]),
+        ],
+      });
 
     case 'append':
       const appendProcessor = processor as AppendProcessor;
-      // Assuming `appendProcessor.to` will always be an available column in ES|QL
-      // TODO: Check the behavior when there are multiple values in `appendProcessor.value`
-      // TODO: See if `appenProcessor.allow_duplicates` being true or false could be implemented
-      esqlCommand = `EVAL ${appendProcessor.to} = MV_APPEND(${
-        appendProcessor.to
-      }, ${formatValueForESQLLiteral(appendProcessor.value)})`;
-      break;
+      return Builder.command({
+        name: 'eval',
+        args: [
+          Builder.expression.func.binary('=', [
+            Builder.expression.column(appendProcessor.to),
+            Builder.expression.func.call('MV_APPEND', [
+              Builder.expression.column(appendProcessor.to),
+              literalFromAny(appendProcessor.value),
+            ]),
+          ]),
+        ],
+      });
 
     case 'manual_ingest_pipeline':
-      esqlCommand = `// Manual ingest pipeline processors not supported in ES|QL`;
-      break;
+      return Builder.command({
+        name: 'eval',
+        args: [Builder.expression.literal.string('__MANUAL_INGEST_PIPELINE_PLACEHOLDER__')],
+      });
 
     default:
       return null;
   }
+}
 
-  // If there's a condition and the command is an EVAL, wrap it in a CASE statement
-  if (conditionExpression && esqlCommand && esqlCommand.startsWith('EVAL ')) {
-    // Extract the field and value part from EVAL statement: EVAL field = value
-    const evalRegex = /^EVAL\s+([^=]+)=\s*(.*)$/s;
-    const match = esqlCommand.match(evalRegex);
-
-    if (match && match[1] && match[2]) {
-      const field = match[1].trim();
-      const valueExpression = match[2].trim();
-      // Format CASE arguments on the same line
-      return `EVAL ${field} = CASE(
-    ${conditionExpression}, ${valueExpression}
-  )`;
-    }
-  }
-
-  return esqlCommand;
+function replacePlaceholdersWithComments(esqlQuery: string): string {
+  return esqlQuery.replace(
+    /\|\s*EVAL\s+"__MANUAL_INGEST_PIPELINE_PLACEHOLDER__"/g,
+    '| // Manual ingest pipeline processors not supported in ES|QL'
+  );
 }
 
 export function convertStreamlangDSLToESQLCommands(
   actionSteps: StreamlangProcessorDefinition[],
   transpilationOptions?: ESQLTranspilationOptions
 ): string {
-  const commands: string[] = [];
+  const esqlAstCommands: ESQLAstCommand[] = [];
 
   actionSteps.forEach((actionStep) => {
-    // TODO: Check/Test a variety of nested where and where not
     const processorCommand = convertProcessorToESQL(actionStep);
     if (processorCommand) {
-      commands.push(processorCommand);
+      esqlAstCommands.push(processorCommand);
     }
   });
 
-  return commands.join('\n| ');
+  const query = Builder.expression.query(esqlAstCommands);
+  let baseEsql = BasicPrettyPrinter.multiline(query);
+
+  // Replace placeholders with comments
+  baseEsql = replacePlaceholdersWithComments(baseEsql);
+
+  return baseEsql;
 }
