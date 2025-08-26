@@ -50,17 +50,5 @@ export const validate = (
     });
   }
 
-  // Validate that inference ID is provided
-  if (!rerankCommand.inferenceId) {
-    messages.push({
-      location: command.location,
-      text: i18n.translate('kbn-esql-ast.esql.validation.rerankMissingInferenceId', {
-        defaultMessage: '[RERANK] Inference endpoint must be specified using WITH clause.',
-      }),
-      type: 'error',
-      code: 'rerankMissingInferenceId',
-    });
-  }
-
   return messages;
 };

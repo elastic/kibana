@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import type { ESQLAstRerankCommand } from '../../types';
+import type { ESQLAstRerankCommand, ESQLCommandOption } from '../../types';
 
 describe('RERANK', () => {
   describe('basic parsing', () => {
@@ -211,6 +211,52 @@ describe('RERANK', () => {
       });
 
       expect(errors).toHaveLength(1);
+    });
+  });
+
+  describe('WITH clause with multiple parameters', () => {
+    it('should parse WITH clause containing multiple parameters including scoreColumn', () => {
+      const text =
+        'FROM movies | RERANK "star wars" ON title, overview=SUBSTRING(overview, 0, 100), actors WITH {"inferenceId":"rerankerInferenceId", "scoreColumn":"rerank_score""}';
+      const { ast } = EsqlQuery.fromSrc(text);
+      const rerankCmd = ast.commands[1] as ESQLAstRerankCommand;
+
+      expect(rerankCmd).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+        query: {
+          type: 'literal',
+          value: '"star wars"',
+        },
+      });
+
+      expect(rerankCmd.fields).toHaveLength(3);
+      expect(rerankCmd.fields[0]).toMatchObject({ type: 'column', name: 'title' });
+      expect(rerankCmd.fields[1]).toMatchObject({ type: 'function', name: '=' });
+      expect(rerankCmd.fields[2]).toMatchObject({ type: 'column', name: 'actors' });
+
+      const withOption = rerankCmd.args.find(
+        (arg): arg is ESQLCommandOption =>
+          'type' in arg && arg.type === 'option' && arg.name === 'with'
+      );
+
+      expect(withOption).toBeDefined();
+
+      if (withOption) {
+        const mapArg = withOption.args[0] as any;
+        expect(mapArg.type).toBe('map');
+        expect(mapArg.entries).toHaveLength(2);
+
+        // Check that all three keys are present
+        const keys = mapArg.entries.map((entry: any) => entry.key.value);
+        expect(keys).toContain('"inferenceId"');
+        expect(keys).toContain('"scoreColumn"');
+
+        // Check that all three values are correct
+        const values = mapArg.entries.map((entry: any) => entry.value.value);
+        expect(values).toContain('"rerankerInferenceId"');
+        expect(values).toContain('"rerank_score"');
+      }
     });
   });
 });

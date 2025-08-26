@@ -1252,7 +1252,7 @@ export class CstToAstConverter {
 
     this.parseRerankQuery(ctx, command);
     this.parseRerankFields(ctx, command);
-    this.parseRerankInferenceId(ctx, command);
+    this.parseRerankWithParameters(ctx, command);
 
     return command;
   }
@@ -1306,10 +1306,10 @@ export class CstToAstConverter {
   }
 
   /**
-   * Parses WITH parameters and extracts inference_id.
-   * Handles: ... WITH {"inference_id": "model"}
+   * Parses WITH parameters as a generic map.
+   * Handles: ... WITH {inference_id: "model", scoreColumn: "score", ...}
    */
-  private parseRerankInferenceId(
+  private parseRerankWithParameters(
     ctx: cst.RerankCommandContext,
     command: ast.ESQLAstRerankCommand
   ): void {
@@ -1320,11 +1320,7 @@ export class CstToAstConverter {
     }
 
     const withOption = this.fromCommandNamedParameters(namedParamsCtx);
-    const map = withOption.args[0] as ast.ESQLMap | undefined;
-    const inferenceIdExpr = this.getMapEntry(map, 'inference_id');
-
-    if (withOption && inferenceIdExpr) {
-      command.inferenceId = inferenceIdExpr as ast.ESQLIdentifierOrParam;
+    if (withOption) {
       command.args.push(withOption);
     }
   }
@@ -1793,16 +1789,6 @@ export class CstToAstConverter {
     withOption.incomplete = map.incomplete;
 
     return withOption;
-  }
-
-  /**
-   * Looks up a key inside an ES|QL map expression and returns its value if present.
-   */
-  private getMapEntry(
-    map: ast.ESQLMap | undefined,
-    key: string
-  ): ast.ESQLAstExpression | undefined {
-    return map?.entries.find((entry) => entry.key.valueUnquoted === key)?.value;
   }
 
   private collectInlineCast(ctx: cst.InlineCastContext): ast.ESQLInlineCast {

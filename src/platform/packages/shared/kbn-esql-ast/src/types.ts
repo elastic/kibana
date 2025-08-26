@@ -132,7 +132,6 @@ export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
 export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
   query: ESQLLiteral | ESQLUnknownItem;
   fields: ESQLAstField[];
-  inferenceId: ESQLIdentifierOrParam;
   targetField?: ESQLColumn;
 }
 
