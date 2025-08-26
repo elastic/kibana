@@ -73,6 +73,7 @@ export interface TableGridProps {
   customRenderCellValue?: RenderCellValue;
   customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
   gridStyle?: EuiDataGridStyle;
+  hideDataGridHeader?: boolean;
 }
 
 const MIN_NAME_COLUMN_WIDTH = 150;
@@ -100,8 +101,9 @@ export function TableGrid({
   customRenderCellValue,
   customRenderCellPopover,
   gridStyle,
+  hideDataGridHeader = false,
 }: TableGridProps) {
-  const styles = useMemoCss(componentStyles({ hideDataGridHeader: true }));
+  const styles = useMemoCss(componentStyles({ hideDataGridHeader }));
   const { toasts } = getUnifiedDocViewerServices();
 
   const onToggleColumn = useMemo(() => {
