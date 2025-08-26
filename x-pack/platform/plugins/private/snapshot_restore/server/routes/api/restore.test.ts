@@ -27,6 +27,10 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
     });
   });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   /**
    * ES APIs used by these endpoints
    */
@@ -103,6 +107,19 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: expectedResponse,
       });
+    });
+
+    it('should include expand_wildcards parameter when calling indices.recovery', async () => {
+      await router.runRequest({
+        method: 'get',
+        path: addBasePath('restores'),
+      });
+
+      expect(indicesRecoveryFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          expand_wildcards: 'all',
+        })
+      );
     });
 
     it('should return empty array if no repositories returned from ES', async () => {
