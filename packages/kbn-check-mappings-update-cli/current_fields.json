@@ -1116,9 +1116,6 @@
     "updatedBy"
   ],
   "slo": [
-    "artifacts",
-    "artifacts.dashboards",
-    "artifacts.dashboards.refId",
     "budgetingMethod",
     "description",
     "enabled",

@@ -3644,17 +3644,6 @@
   "slo": {
     "dynamic": false,
     "properties": {
-      "artifacts": {
-        "properties": {
-          "dashboards": {
-            "properties": {
-              "refId": {
-                "type": "keyword"
-              }
-            }
-          }
-        }
-      },
       "budgetingMethod": {
         "type": "keyword"
       },
@@ -4296,9 +4285,6 @@
         },
         "type": "text"
       },
-      "enabled": {
-        "type": "boolean"
-      },
       "lastUpdatedBy": {
         "type": "keyword"
       },
@@ -4310,6 +4296,9 @@
           }
         },
         "type": "text"
+      },
+      "enabled": {
+        "type": "boolean"
       },
       "tags": {
         "type": "keyword"
