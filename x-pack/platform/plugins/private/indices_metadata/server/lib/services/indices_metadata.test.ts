@@ -385,7 +385,10 @@ describe('Indices Metadata - IndicesMetadataService', () => {
       const taskDefinition =
         taskManager.registerTaskDefinitions.mock.calls[0][0]['IndicesMetadata:IndicesMetadataTask'];
       taskInstance = { state: { lastRun: '2023-01-01' } } as unknown as ConcreteTaskInstance;
-      taskRunner = taskDefinition.createTaskRunner({ taskInstance });
+      taskRunner = taskDefinition.createTaskRunner({
+        taskInstance,
+        abortController: new AbortController(),
+      });
 
       configurationService.getIndicesMetadataConfiguration$.mockReturnValue({
         subscribe: jest.fn().mockImplementation((callback) => {
