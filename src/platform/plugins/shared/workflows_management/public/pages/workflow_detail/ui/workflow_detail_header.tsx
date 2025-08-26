@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useMemoCss } from '@kbn/unified-search-plugin/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 

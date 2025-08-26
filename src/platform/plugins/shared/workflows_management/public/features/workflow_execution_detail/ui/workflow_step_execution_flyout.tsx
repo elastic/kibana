@@ -27,7 +27,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/unified-search-plugin/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { StatusBadge, getExecutionStatusIcon } from '../../../shared/ui';
 import { useStepExecution } from '../model/use_step_execution';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
