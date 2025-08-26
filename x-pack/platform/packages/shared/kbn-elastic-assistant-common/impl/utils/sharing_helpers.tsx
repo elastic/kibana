@@ -7,11 +7,11 @@
 
 import type { ConversationResponse, User } from '../schemas';
 export enum ConversationSharedState {
-  // all users in the space
+  // shared with all users in the space
   SHARED = 'shared',
-  // selected users in the space
+  // restricted to selected users in the space
   RESTRICTED = 'restricted',
-  // not shared, only visible to conversation owner
+  // private, only visible to conversation owner
   PRIVATE = 'private',
 }
 
