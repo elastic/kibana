@@ -120,7 +120,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/230988
-    describe.skip('User instruction management', () => {
+    describe('User instruction management', () => {
       async function openUserInstructionFlyout() {
         await testSubjects.click(ui.pages.kbManagementTab.editUserInstructionButton);
         await testSubjects.exists(ui.pages.kbManagementTab.saveEntryButton);
@@ -139,10 +139,18 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       async function setUserInstructionContent(content?: string) {
         const editor = await find.byCssSelector(`#${ui.pages.kbManagementTab.entryMarkdownEditor}`);
-        await editor.clearValue();
-        if (content) {
-          await editor.type(content);
-        }
+        await retry.try(async () => {
+          await editor.clearValue();
+          if (content) {
+            await editor.type(content);
+          }
+          const actualValue = await editor.getAttribute('value');
+          if (actualValue !== (content ?? '')) {
+            throw new Error(
+              `Expected editor value to be "${content ?? ''}" but found "${actualValue}"`
+            );
+          }
+        });
       }
 
       before(async () => {
@@ -201,7 +209,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/231420
-    describe.skip('Bulk import knowledge base entries', () => {
+    describe('Bulk import knowledge base entries', () => {
       const tempDir = os.tmpdir();
       const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
 
@@ -278,11 +286,19 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         const entries = await prepareBulkImportData();
         await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
-
+        await retry.try(async () => {
+          const fileInput = await find.byCssSelector('input[type="file"]');
+          const value = (await fileInput.getAttribute('value')) ?? '';
+          if (!value.includes('bulk_import.ndjson')) {
+            throw new Error(`File not bound yet: ${value}`);
+          }
+        });
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
 
-        const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
-        const toastText = await toast.getVisibleText();
+        const toastText = await retry.try(async () => {
+          const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
+          return await toast.getVisibleText();
+        });
         expect(toastText).to.eql('Successfully imported ' + entries.length + ' items');
 
         const finalCount = await getKnowledgeBaseEntryCount();

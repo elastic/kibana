@@ -27,7 +27,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('tool: recall', function () {
     // fails/flaky on MKI, see https://github.com/elastic/kibana/issues/232588
-    this.tags(['failsOnMKI']);
 
     before(async () => {
       await deployTinyElserAndSetupKb(getService);
