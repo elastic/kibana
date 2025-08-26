@@ -12,6 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
+  const es = getService('es');
 
   describe('ES|QL Tools API', () => {
     const createdToolIds: string[] = [];
@@ -126,13 +127,37 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('POST /api/chat/tools/_execute', () => {
+      const testIndex = 'test-onechat-index';
+
       before(async () => {
+        await es.indices.create({
+          index: testIndex,
+          mappings: {
+            properties: {
+              name: { type: 'text' },
+              age: { type: 'integer' },
+              '@timestamp': { type: 'date' },
+            },
+          },
+        });
+        await es.bulk({
+          body: [
+            { index: { _index: testIndex } },
+            { name: 'Test Case 1', age: 25, '@timestamp': '2023-01-01T00:00:00Z' },
+            { index: { _index: testIndex } },
+            { name: 'Test Case 2', age: 30, '@timestamp': '2023-01-02T00:00:00Z' },
+            { index: { _index: testIndex } },
+            { name: 'Test Case 3', age: 35, '@timestamp': '2023-01-03T00:00:00Z' },
+          ],
+        });
+        await es.indices.refresh({ index: testIndex });
+
         const testTool = {
           type: 'esql',
           description: 'A test tool',
           tags: ['test'],
           configuration: {
-            query: 'FROM .internal.alerts-observability.logs.alerts-default-000001 | LIMIT 3',
+            query: `FROM ${testIndex} | LIMIT 3`,
             params: {},
           },
           id: 'execute-test-tool',
@@ -159,6 +184,10 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(response.body).to.have.property('results');
+      });
+
+      after(async () => {
+        await es.indices.delete({ index: testIndex });
       });
     });
 
