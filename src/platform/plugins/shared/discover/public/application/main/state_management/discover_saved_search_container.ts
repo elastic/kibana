@@ -333,7 +333,7 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
   // at least one change in saved search attributes
   const hasChangesInSavedSearch = [...keys].some((key) => {
     if (
-      ['usesAdHocDataView', 'hideChart', 'hideSidebar'].includes(key) &&
+      ['usesAdHocDataView', 'hideChart'].includes(key) &&
       typeof prevSavedSearch[key] === 'undefined' &&
       nextSavedSearchWithoutSearchSource[key] === false
     ) {

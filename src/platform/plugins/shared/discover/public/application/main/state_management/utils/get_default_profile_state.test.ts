@@ -35,7 +35,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: true,
           hideChart: false,
-          hideSidebar: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -50,7 +49,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: true,
           hideChart: false,
-          hideSidebar: false,
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -66,7 +64,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: true,
-          hideSidebar: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -81,7 +78,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
-          hideSidebar: false,
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -99,7 +95,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
-          hideSidebar: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -127,7 +122,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
-          hideSidebar: false,
         },
         dataView: emptyDataView,
       }).getPostFetchState({
@@ -158,7 +152,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: true,
           breakdownField: false,
           hideChart: false,
-          hideSidebar: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -179,7 +172,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
-          hideSidebar: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({

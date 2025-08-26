@@ -27,10 +27,6 @@ export const createMetricsDataSourceProfileProvider = (
   restrictedToProductFeature: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   isExperimental: true,
   profile: {
-    getDefaultAppState: (prev) => (params) => ({
-      ...(prev ? prev(params) : {}),
-      hideSidebar: true,
-    }),
     getChartSectionConfiguration: (prev) => () => ({
       ...(prev ? prev() : {}),
       Component: LazyMetricsGridSection,

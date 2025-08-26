@@ -56,8 +56,8 @@ describe('useServicesBootstrap', () => {
 
     expect(createStateServiceMock).toBeCalledTimes(1);
     expect(getBreakdownFieldMock).toBeCalledTimes(1);
-    expect(useStatePropsMock).toBeCalledTimes(2);
-    expect(useRequestParamsMock).toBeCalledTimes(2);
+    expect(useStatePropsMock).toBeCalledTimes(1);
+    expect(useRequestParamsMock).toBeCalledTimes(1);
 
     expect(hook.result.current.api).not.toBeUndefined();
     expect(hook.result.current.input$).not.toBeUndefined();

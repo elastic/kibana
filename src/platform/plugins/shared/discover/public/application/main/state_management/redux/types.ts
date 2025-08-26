@@ -74,7 +74,6 @@ export interface TabState extends TabItem {
     rowHeight: boolean;
     breakdownField: boolean;
     hideChart: boolean;
-    hideSidebar: boolean;
   };
   documentsRequest: DocumentsRequest;
   totalHitsRequest: TotalHitsRequest;

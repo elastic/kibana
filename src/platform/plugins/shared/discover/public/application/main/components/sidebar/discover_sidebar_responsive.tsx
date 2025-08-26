@@ -14,7 +14,7 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
-import { filter, of, take } from 'rxjs';
+import { of } from 'rxjs';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import {
@@ -26,7 +26,6 @@ import {
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
 import type { Filter } from '@kbn/es-query';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
@@ -47,7 +46,6 @@ import {
   useDataViewsForPicker,
   useInternalStateDispatch,
 } from '../../state_management/redux';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 
 const EMPTY_FIELD_COUNTS = {};
 
@@ -402,44 +400,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     },
     [dispatch, setFieldListUiState]
   );
-
-  const isSidebarHidden = useAppStateSelector((state) => {
-    return state.hideSidebar;
-  });
-
-  const toggleSidebar = useCallback(
-    (state: SidebarToggleState) => {
-      const shouldToggle = (isSidebarHidden ?? false) !== state.isCollapsed;
-      if (shouldToggle) {
-        state.toggle?.(!state.isCollapsed, false);
-      }
-    },
-    [isSidebarHidden]
-  );
-
-  useEffect(() => {
-    // After the component mounts, we want to ensure the sidebar state is correctly set for the current context
-    const currentState = sidebarToggleState$.getValue();
-    toggleSidebar(currentState);
-  }, [sidebarToggleState$, isSidebarHidden, toggleSidebar]);
-
-  useEffectOnce(() => {
-    // When this component mounts, sidebarToggleState$.toggle may not have been initialized yet.
-    // This ensures `toggle` is called and the sidebar hidden status from the context is initialized
-    const subscription = sidebarToggleState$
-      .pipe(
-        filter((state) => !!state.toggle),
-        // call toggleSidebar only once after `toggle` is initialized
-        take(1)
-      )
-      .subscribe((currentState) => {
-        toggleSidebar(currentState);
-      });
-
-    return () => {
-      return subscription.unsubscribe();
-    };
-  });
 
   return (
     <EuiFlexGroup

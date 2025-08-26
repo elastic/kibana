@@ -57,7 +57,6 @@ export const defaultTabState: Omit<TabState, keyof TabItem> = {
     rowHeight: false,
     breakdownField: false,
     hideChart: false,
-    hideSidebar: false,
   },
   documentsRequest: {
     loadingStatus: LoadingStatus.Uninitialized,

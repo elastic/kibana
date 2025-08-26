@@ -39,7 +39,6 @@ describe('getStateDefaults', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
-        "hideSidebar": undefined,
         "interval": "auto",
         "query": undefined,
         "rowHeight": undefined,

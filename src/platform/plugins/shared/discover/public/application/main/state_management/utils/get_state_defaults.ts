@@ -70,7 +70,6 @@ export function getStateDefaults({
     interval: 'auto',
     filters: cloneDeep(searchSource?.getOwnField('filter')) as DiscoverAppState['filters'],
     hideChart: chartHidden,
-    hideSidebar: undefined, // TODO: do we want to start saving it in Discover Session SO?
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,

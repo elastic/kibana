@@ -48,10 +48,6 @@ export const getDefaultProfileState = ({
         stateUpdate.hideChart = defaultState.hideChart;
       }
 
-      if (resetDefaultProfileState.hideSidebar && defaultState.hideSidebar !== undefined) {
-        stateUpdate.hideSidebar = defaultState.hideSidebar;
-      }
-
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
     },
 

@@ -298,7 +298,6 @@ describe('Test discover app state container', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
-        hideSidebar: false,
         rowHeight: false,
         breakdownField: false,
       });
@@ -306,7 +305,6 @@ describe('Test discover app state container', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: true,
-        hideSidebar: true,
         rowHeight: true,
         breakdownField: true,
       });
@@ -319,7 +317,6 @@ describe('Test discover app state container', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
-        hideSidebar: false,
         rowHeight: false,
         breakdownField: false,
       });
@@ -327,7 +324,6 @@ describe('Test discover app state container', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: true,
-        hideSidebar: true,
         rowHeight: true,
         breakdownField: true,
       });
@@ -340,7 +336,6 @@ describe('Test discover app state container', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
-        hideSidebar: false,
         rowHeight: false,
         breakdownField: false,
       });
@@ -348,7 +343,6 @@ describe('Test discover app state container', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: true,
-        hideSidebar: true,
         rowHeight: false,
         breakdownField: true,
       });
@@ -361,7 +355,6 @@ describe('Test discover app state container', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
-        hideSidebar: false,
         rowHeight: false,
         breakdownField: false,
       });
@@ -369,7 +362,6 @@ describe('Test discover app state container', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: false,
-        hideSidebar: true,
         rowHeight: true,
         breakdownField: true,
       });
@@ -388,7 +380,6 @@ describe('Test discover app state container', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
-        hideSidebar: false,
         rowHeight: false,
         breakdownField: false,
       });
@@ -396,7 +387,6 @@ describe('Test discover app state container', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
-        hideSidebar: false,
         rowHeight: false,
         breakdownField: false,
       });
