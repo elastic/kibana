@@ -200,7 +200,7 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
                 languageId="json"
                 value={response}
                 fullWidth={true}
-                height="calc(100vh - 275px)"
+                height="75vh"
                 options={{
                   readOnly: true,
                   fontSize: 14,
