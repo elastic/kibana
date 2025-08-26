@@ -10,6 +10,7 @@
 import type {
   EuiDataGridCellPopoverElementProps,
   EuiDataGridProps,
+  EuiDataGridStyle,
   RenderCellValue,
   UseEuiTheme,
 } from '@elastic/eui';
@@ -32,21 +33,27 @@ import {
 } from './table_cell_actions';
 import type { UseTableFiltersReturn } from './table_filters';
 
-const GRID_PROPS: Pick<EuiDataGridProps, 'columnVisibility' | 'rowHeightsOptions' | 'gridStyle'> = {
-  columnVisibility: {
-    visibleColumns: ['name', 'value'],
-    setVisibleColumns: () => null,
-  },
-  rowHeightsOptions: { defaultHeight: 'auto' },
-  gridStyle: {
-    border: 'horizontal',
-    stripes: true,
-    rowHover: 'highlight',
-    header: 'underline',
-    cellPadding: 'm',
-    fontSize: 's',
-  },
-};
+function getGridProps(
+  gridStyle?: EuiDataGridStyle
+): Pick<EuiDataGridProps, 'columnVisibility' | 'rowHeightsOptions' | 'gridStyle'> {
+  return {
+    columnVisibility: {
+      visibleColumns: ['name', 'value'],
+      setVisibleColumns: () => null,
+    },
+    rowHeightsOptions: { defaultHeight: 'auto' },
+    gridStyle: {
+      border: 'horizontal',
+      stripes: true,
+      rowHover: 'highlight',
+      header: 'underline',
+      cellPadding: 'm',
+      fontSize: 's',
+      ...(gridStyle ?? {}),
+    },
+  };
+}
+
 export interface TableGridProps {
   id: string;
   containerWidth: number;
@@ -65,6 +72,7 @@ export interface TableGridProps {
   hidePinColumn?: boolean;
   customRenderCellValue?: RenderCellValue;
   customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
+  gridStyle?: EuiDataGridStyle;
 }
 
 const MIN_NAME_COLUMN_WIDTH = 150;
@@ -91,6 +99,7 @@ export function TableGrid({
   hidePinColumn = false,
   customRenderCellValue,
   customRenderCellPopover,
+  gridStyle,
 }: TableGridProps) {
   const styles = useMemoCss(componentStyles({ hideDataGridHeader: true }));
   const { toasts } = getUnifiedDocViewerServices();
@@ -223,7 +232,7 @@ export function TableGrid({
   return (
     <EuiDataGrid
       key={`fields-table-${id}`}
-      {...GRID_PROPS}
+      {...getGridProps(gridStyle)}
       aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
         defaultMessage: 'Field values',
       })}
