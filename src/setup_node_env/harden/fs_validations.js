@@ -126,10 +126,6 @@ function getFileExtension(path) {
 }
 
 function validateFileExtension(path) {
-  if (isDevOrCI && !process.env.KBN_ENABLE_HARDENED_FS) {
-    return;
-  }
-
   const hasAllowedExtension = allowedExtensions.some((ext) => path.toLowerCase().endsWith(ext));
 
   if (!hasAllowedExtension) {
@@ -293,9 +289,6 @@ function getSafePath(userPath) {
  * @throws {Error} - Throws if SVG sanitization fails
  */
 function validateAndSanitizeFileData(data, path) {
-  if (isDevOrCI && !process.env.KBN_ENABLE_HARDENED_FS) {
-    return data;
-  }
   // Convert input to Buffer if needed
   let dataBuffer;
 

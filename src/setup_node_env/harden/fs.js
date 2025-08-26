@@ -25,8 +25,8 @@ const shouldEnableHardenedFs = () => {
 
   // If the hardening config is not set or disabled, we also skip
   return (
-    // Boolean(hardeningConfig?.enabled) &&
-    !isJestTest || (isJestTest && process.env.KBN_ENABLE_HARDENED_FS)
+    Boolean(hardeningConfig?.enabled) &&
+    (!isJestTest || (isJestTest && process.env.KBN_ENABLE_HARDENED_FS))
   );
 };
 

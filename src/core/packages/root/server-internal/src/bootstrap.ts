@@ -67,6 +67,8 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
     fsEventBus.emit(FS_CONFIG_EVENT, {
       ...fsHardeningConfig,
       safe_paths: [...loggerFilePath, ...safePaths],
+      // For testing purposes, we enable hardened fs by default
+      enabled: true,
     });
   });
 
