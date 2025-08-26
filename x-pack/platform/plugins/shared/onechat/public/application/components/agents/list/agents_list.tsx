@@ -107,6 +107,7 @@ export const AgentsList: React.FC = () => {
           name: actionLabels.chat,
           description: actionLabels.chatDescription,
           isPrimary: true,
+          showOnHover: true,
           href: (agent) =>
             createOnechatUrl(appPaths.chat.new, { [searchParamNames.agentId]: agent.id }),
         },
@@ -118,12 +119,15 @@ export const AgentsList: React.FC = () => {
           isPrimary: true,
           showOnHover: true,
           href: (agent) => createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
+          // Don't display edit action for default agent
+          available: (agent) => agent.id !== oneChatDefaultAgentId,
         },
         {
           type: 'icon',
           icon: 'copy',
           name: actionLabels.clone,
           description: actionLabels.cloneDescription,
+          showOnHover: true,
           href: (agent) =>
             createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
         },
