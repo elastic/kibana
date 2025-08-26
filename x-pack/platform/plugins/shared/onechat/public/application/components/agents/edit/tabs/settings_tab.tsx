@@ -48,13 +48,18 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   return (
     <>
       <EuiSpacer size="l" />
-      <EuiFlexGroup direction="row" gutterSize="xl" alignItems="flexStart">
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="xl"
+        alignItems="flexStart"
+        aria-labelledby="system-references-section-title"
+      >
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiIcon type="bullseye" />
               <EuiTitle size="xs">
-                <h2>
+                <h2 id="system-references-section-title">
                   {i18n.translate('xpack.onechat.agents.form.settings.systemReferencesTitle', {
                     defaultMessage: 'System References',
                   })}
@@ -64,7 +69,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             <EuiText size="s" color="subdued">
               {i18n.translate('xpack.onechat.agents.form.settings.systemReferencesDescription', {
                 defaultMessage:
-                  'Used behind the scenes to identify and guide the agent’s behavior. Not shown to end users.',
+                  "Used behind the scenes to identify and guide the agent's behavior. Not shown to end users.",
               })}
             </EuiText>
             <EuiSpacer size="s" />
@@ -100,7 +105,15 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               </EuiFlexGroup>
             </EuiPanel>
             <EuiSpacer size="s" />
-            <EuiLink href="#">
+            <EuiLink
+              href="#"
+              aria-label={i18n.translate(
+                'xpack.onechat.agents.form.settings.systemReferencesLearnMoreAriaLabel',
+                {
+                  defaultMessage: 'Learn more about agent basics in documentation',
+                }
+              )}
+            >
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
                 {i18n.translate('xpack.onechat.agents.form.settings.systemReferencesLearnMore', {
                   defaultMessage: 'Documentation -  Agent basics',
@@ -140,6 +153,9 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                       : ''
                   }
                   isInvalid={!!formState.errors.id}
+                  aria-label={i18n.translate('xpack.onechat.agents.form.idAriaLabel', {
+                    defaultMessage: 'Agent ID input field',
+                  })}
                 />
               )}
             />
@@ -178,13 +194,18 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
       <EuiHorizontalRule />
 
-      <EuiFlexGroup direction="row" gutterSize="xl" alignItems="flexStart">
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="xl"
+        alignItems="flexStart"
+        aria-labelledby="labels-section-title"
+      >
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiIcon type="tag" />
               <EuiTitle size="xs">
-                <h2>
+                <h2 id="labels-section-title">
                   {i18n.translate('xpack.onechat.agents.form.settings.labelsTitle', {
                     defaultMessage: 'Labels',
                   })}
@@ -230,6 +251,9 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   isDisabled={isFormDisabled || labelsLoading}
                   isClearable
                   isLoading={labelsLoading}
+                  aria-label={i18n.translate('xpack.onechat.agents.form.labelsAriaLabel', {
+                    defaultMessage: 'Agent labels selection',
+                  })}
                 />
               )}
             />
@@ -239,13 +263,18 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
       <EuiHorizontalRule />
 
-      <EuiFlexGroup direction="row" gutterSize="xl" alignItems="flexStart">
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="xl"
+        alignItems="flexStart"
+        aria-labelledby="presentation-section-title"
+      >
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiIcon type="brush" />
               <EuiTitle size="xs">
-                <h2>
+                <h2 id="presentation-section-title">
                   {i18n.translate('xpack.onechat.agents.form.settings.presentationTitle', {
                     defaultMessage: 'Presentation',
                   })}
@@ -294,7 +323,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     'xpack.onechat.agents.form.settings.presentationAvatarDescription',
                     {
                       defaultMessage:
-                        'Customize the agent’s avatar color and symbol (emoji or 2-letter code) to help visually distinguish and identify it in the UI.',
+                        "Customize the agent's avatar color and symbol (emoji or 2-letter code) to help visually distinguish and identify it in the UI.",
                     }
                   )}
                 </EuiText>
@@ -324,6 +353,9 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   inputRef={ref}
                   disabled={isFormDisabled}
                   isInvalid={!!formState.errors.name}
+                  aria-label={i18n.translate('xpack.onechat.agents.form.nameAriaLabel', {
+                    defaultMessage: 'Agent display name input field',
+                  })}
                 />
               )}
             />
@@ -344,6 +376,9 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   rows={4}
                   disabled={isFormDisabled}
                   isInvalid={!!formState.errors.configuration?.instructions}
+                  aria-label={i18n.translate('xpack.onechat.agents.form.descriptionAriaLabel', {
+                    defaultMessage: 'Agent display description text area',
+                  })}
                 />
               )}
             />
@@ -367,7 +402,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   name="avatar_color"
                   control={control}
                   render={({ field: { onChange, value } }) => (
-                    <EuiColorPicker onChange={onChange} color={value} disabled={isFormDisabled} />
+                    <EuiColorPicker
+                      onChange={onChange}
+                      color={value}
+                      disabled={isFormDisabled}
+                      aria-label={i18n.translate('xpack.onechat.agents.form.avatarColorAriaLabel', {
+                        defaultMessage: 'Agent avatar color picker',
+                      })}
+                    />
                   )}
                 />
               </EuiFormRow>
@@ -392,6 +434,12 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                       inputRef={ref}
                       disabled={isFormDisabled}
                       isInvalid={!!formState.errors.name}
+                      aria-label={i18n.translate(
+                        'xpack.onechat.agents.form.avatarSymbolAriaLabel',
+                        {
+                          defaultMessage: 'Agent avatar symbol input field',
+                        }
+                      )}
                     />
                   )}
                 />

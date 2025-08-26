@@ -59,9 +59,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
             defaultMessage: 'Agent updated successfully',
           })
     );
-    if (isCreateMode) {
-      navigateToOnechatUrl(appPaths.agents.edit({ agentId: agent.id }));
-    }
+
+    navigateToOnechatUrl(appPaths.agents.list);
   };
 
   const onSaveError = (err: Error) => {
@@ -290,7 +289,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
           ...(!isCreateMode
             ? [
                 <EuiButton
-                  onClick={() => navigateToOnechatUrl(appPaths.chat.new)}
+                  onClick={() =>
+                    navigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: agentId! }))
+                  }
                   iconType="comment"
                   isLoading={isSubmitting}
                   disabled={isFormDisabled || !formState.isValid}
