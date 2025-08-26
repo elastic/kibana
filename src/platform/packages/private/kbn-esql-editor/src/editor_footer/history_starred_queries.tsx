@@ -354,6 +354,8 @@ export function QueryList({
       vertical-align: top;
       border: none;
     }
+    border-bottom-left-radius: ${euiTheme.border.radius.medium};
+    border-top-left-radius: ${euiTheme.border.radius.medium};
     max-height: ${height}px;
     overflow-y: auto;
     ${scrollBarStyles}
