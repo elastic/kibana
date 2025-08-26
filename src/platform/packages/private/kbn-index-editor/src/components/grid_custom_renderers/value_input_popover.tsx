@@ -95,7 +95,7 @@ export const getValueInputPopover =
       [isPlaceholder, docId, cellValue, columnId]
     );
 
-    const onSubmit = useCallback(
+    const closePopover = useCallback(
       (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
@@ -121,7 +121,7 @@ export const getValueInputPopover =
     if (!isPlaceholder) {
       return (
         <EuiFocusTrap autoFocus={true} initialFocus="input">
-          <EuiForm component="form" onSubmit={onSubmit}>
+          <EuiForm component="form" onSubmit={closePopover}>
             <EuiToolTip position="top" content={error}>
               <InputComponent
                 data-test-subj="indexEditorCellValueInput"
