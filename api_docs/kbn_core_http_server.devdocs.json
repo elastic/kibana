@@ -4481,18 +4481,6 @@
                 "path": "src/platform/plugins/shared/data_view_management/server/routes/resolve_index.ts"
               },
               {
-                "plugin": "guidedOnboarding",
-                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/guide_state_routes.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/plugin_state_routes.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/config_routes.ts"
-              },
-              {
                 "plugin": "savedObjectsManagement",
                 "path": "src/platform/plugins/shared/saved_objects_management/server/routes/find.ts"
               },
@@ -8635,10 +8623,6 @@
               {
                 "plugin": "ftrApis",
                 "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/update.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/plugin_state_routes.ts"
               },
               {
                 "plugin": "workflowsManagement",

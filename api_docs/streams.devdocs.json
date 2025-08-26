@@ -1219,7 +1219,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"failed\" | \"skipped\" | \"parsed\" | \"partially_parsed\""
+              "\"failed\" | \"parsed\" | \"partially_parsed\" | \"skipped\""
             ],
             "path": "x-pack/platform/plugins/shared/streams/server/routes/internal/streams/processing/simulation_handler.ts",
             "deprecated": false,

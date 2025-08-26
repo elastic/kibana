@@ -8540,7 +8540,7 @@
             "label": "createWithPackagePolicies",
             "description": [],
             "signature": [
-              "({ soClient, esClient, agentPolicy, packagePolicies, options: { hasFleetServer, withSysMonitoring, monitoringEnabled, spaceId, user, authorizationHeader, force, }, }: { soClient: ",
+              "({ soClient, esClient, agentPolicy, packagePolicies, options: { hasFleetServer, withSysMonitoring, monitoringEnabled, spaceId, user, authorizationHeader, force, forcePackagePolicyCreation, }, }: { soClient: ",
               "SavedObjectsClientContract",
               "; esClient: ",
               "ElasticsearchClient",
@@ -8564,7 +8564,7 @@
               "AuthenticatedUser",
               " | undefined; authorizationHeader?: ",
               "HTTPAuthorizationHeader",
-              " | null | undefined; force?: boolean | undefined; }; }) => Promise<",
+              " | null | undefined; force?: boolean | undefined; forcePackagePolicyCreation?: boolean | undefined; }; }) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -8611,7 +8611,7 @@
                   "AuthenticatedUser",
                   " | undefined; authorizationHeader?: ",
                   "HTTPAuthorizationHeader",
-                  " | null | undefined; force?: boolean | undefined; }; }"
+                  " | null | undefined; force?: boolean | undefined; forcePackagePolicyCreation?: boolean | undefined; }; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
