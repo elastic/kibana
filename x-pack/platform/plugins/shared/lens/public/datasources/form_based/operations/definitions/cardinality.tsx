@@ -7,8 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSwitch, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
@@ -140,12 +139,13 @@ export const cardinalityOperation: OperationDefinition<
       },
     };
   },
-  getAdvancedOptions: ({
+  getAdvancedOptions: function UniqueValueAdvancedOptions({
     layer,
     columnId,
     currentColumn,
     paramEditorUpdater,
-  }: ParamEditorProps<CardinalityIndexPatternColumn>) => {
+  }: ParamEditorProps<CardinalityIndexPatternColumn>) {
+    const { euiTheme } = useEuiTheme();
     return [
       {
         dataTestSubj: 'hide-zero-values',
@@ -160,7 +160,7 @@ export const cardinalityOperation: OperationDefinition<
             }
             labelProps={{
               style: {
-                fontWeight: euiThemeVars.euiFontWeightMedium,
+                fontWeight: euiTheme.font.weight.medium,
               },
             }}
             checked={Boolean(currentColumn.params?.emptyAsNull)}

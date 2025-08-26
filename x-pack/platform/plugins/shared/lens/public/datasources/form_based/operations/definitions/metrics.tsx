@@ -7,8 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSwitch, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   AVG_ID,
@@ -181,12 +180,13 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
-    getAdvancedOptions: ({
+    getAdvancedOptions: function UniqueValueAdvancedOptions({
       layer,
       columnId,
       currentColumn,
       paramEditorUpdater,
-    }: ParamEditorProps<T>) => {
+    }: ParamEditorProps<T>) {
+      const { euiTheme } = useEuiTheme();
       if (!hideZeroOption) return [];
       return [
         {
@@ -202,7 +202,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
               }
               labelProps={{
                 style: {
-                  fontWeight: euiThemeVars.euiFontWeightMedium,
+                  fontWeight: euiTheme.font.weight.medium,
                 },
               }}
               checked={Boolean(currentColumn.params?.emptyAsNull)}

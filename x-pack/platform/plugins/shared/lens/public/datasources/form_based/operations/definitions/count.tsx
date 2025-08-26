@@ -7,8 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
@@ -145,12 +144,13 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       },
     };
   },
-  getAdvancedOptions: ({
+  getAdvancedOptions: function CountAdvancedOptions({
     layer,
     columnId,
     currentColumn,
     paramEditorUpdater,
-  }: ParamEditorProps<CountIndexPatternColumn>) => {
+  }: ParamEditorProps<CountIndexPatternColumn>) {
+    const { euiTheme } = useEuiTheme();
     return [
       {
         dataTestSubj: 'hide-zero-values',
@@ -165,7 +165,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
             }
             labelProps={{
               style: {
-                fontWeight: euiThemeVars.euiFontWeightMedium,
+                fontWeight: euiTheme.font.weight.medium,
               },
             }}
             checked={Boolean(currentColumn.params?.emptyAsNull)}
