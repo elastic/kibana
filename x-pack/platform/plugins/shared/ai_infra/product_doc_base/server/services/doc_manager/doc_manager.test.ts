@@ -32,6 +32,9 @@ const scheduleUninstallAllTaskMock = scheduleUninstallAllTask as jest.MockedFn<
 const scheduleEnsureUpToDateTaskMock = scheduleEnsureUpToDateTask as jest.MockedFn<
   typeof scheduleEnsureUpToDateTask
 >;
+const updateAllToLatestVersionTaskMock = updateAllToLatestVersionTask as jest.MockedFn<
+  typeof updateAllToLatestVersionTask
+>;
 const waitUntilTaskCompletedMock = waitUntilTaskCompleted as jest.MockedFn<
   typeof waitUntilTaskCompleted
 >;
@@ -70,6 +73,7 @@ describe('DocumentationManager', () => {
     scheduleInstallAllTaskMock.mockReset();
     scheduleUninstallAllTaskMock.mockReset();
     scheduleEnsureUpToDateTaskMock.mockReset();
+    updateAllToLatestVersionTaskMock.mockReset();
     waitUntilTaskCompletedMock.mockReset();
     getTaskStatusMock.mockReset();
   });

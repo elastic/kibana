@@ -71,6 +71,11 @@ export const SUPPORTED_TRAINED_MODELS = {
     description: 'Tiny ELSER model',
     modelTypes: ['pytorch'],
   },
+  TINY_MULTILINGUAL_E5_SMALL: {
+    name: 'pt_tiny_multilingual_e5_small',
+    description: 'Tiny/Dummy E5 model (multilingual_e5_small)',
+    modelTypes: ['text_embedding'],
+  },
 } as const;
 export type SupportedTrainedModelNamesType =
   (typeof SUPPORTED_TRAINED_MODELS)[keyof typeof SUPPORTED_TRAINED_MODELS]['name'];

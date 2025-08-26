@@ -20,8 +20,9 @@ import { chatClient, kibanaClient, logger } from '../../services';
 const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
 const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 const ELASTIC_DOCS_UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
+const ELASTIC_DOCS_UPDATE_ALL_API_PATH = '/internal/product_doc_base/update_all';
 
-const inferenceId = defaultInferenceEndpoints.ELSER;
+const inferenceId = defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
 
 describe('Retrieve documentation function', () => {
   before(async () => {

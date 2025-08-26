@@ -18,17 +18,23 @@ import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base'
 // tiny models
 export const TINY_ELSER_MODEL_ID = SUPPORTED_TRAINED_MODELS.TINY_ELSER.name;
 export const TINY_TEXT_EMBEDDING_MODEL_ID = SUPPORTED_TRAINED_MODELS.TINY_TEXT_EMBEDDING.name;
+export const TINY_MULTILINGUAL_E5_SMALL_MODEL_ID =
+  SUPPORTED_TRAINED_MODELS.TINY_MULTILINGUAL_E5_SMALL.name;
 
 // tiny inference endpoints
 export const TINY_ELSER_INFERENCE_ID = 'pt_tiny_elser_inference_id';
 export const TINY_TEXT_EMBEDDING_INFERENCE_ID = 'pt_tiny_text_embedding_inference_id';
+export const TINY_MULTILINGUAL_E5_SMALL_INFERENCE_ID = 'pt_tiny_multilingual_e5_small_inference_id';
 
 export async function importModel(
   getService: DeploymentAgnosticFtrProviderContext['getService'],
   {
     modelId,
   }: {
-    modelId: typeof TINY_ELSER_MODEL_ID | typeof TINY_TEXT_EMBEDDING_MODEL_ID;
+    modelId:
+      | typeof TINY_ELSER_MODEL_ID
+      | typeof TINY_TEXT_EMBEDDING_MODEL_ID
+      | typeof TINY_MULTILINGUAL_E5_SMALL_MODEL_ID;
   }
 ) {
   const ml = getService('ml');
@@ -61,7 +67,10 @@ export async function startModelDeployment(
   {
     modelId,
   }: {
-    modelId: typeof TINY_ELSER_MODEL_ID | typeof TINY_TEXT_EMBEDDING_MODEL_ID;
+    modelId:
+      | typeof TINY_ELSER_MODEL_ID
+      | typeof TINY_TEXT_EMBEDDING_MODEL_ID
+      | typeof TINY_MULTILINGUAL_E5_SMALL_MODEL_ID;
   }
 ) {
   const ml = getService('ml');
@@ -112,6 +121,43 @@ export function createTinyElserInferenceEndpoint(
     modelId: TINY_ELSER_MODEL_ID,
     inferenceId,
     taskType: 'sparse_embedding',
+  });
+}
+
+export function createTinyMultilingualE5SmallInferenceEndpoint(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  { inferenceId }: { inferenceId: string }
+) {
+  const es = getService('es');
+  const log = getService('log');
+  return createInferenceEndpoint({
+    es,
+    log,
+    modelId: TINY_MULTILINGUAL_E5_SMALL_MODEL_ID,
+    inferenceId,
+    taskType: 'text_embedding',
+  });
+}
+
+export async function setupTinyMultilingualE5SmallModelAndInferenceEndpoint(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  await retryOnTimeout(() =>
+    importModel(getService, { modelId: TINY_MULTILINGUAL_E5_SMALL_MODEL_ID })
+  );
+  await retryOnTimeout(() =>
+    createTinyMultilingualE5SmallInferenceEndpoint(getService, {
+      inferenceId: TINY_MULTILINGUAL_E5_SMALL_INFERENCE_ID,
+    })
+  );
+}
+
+async function teardownTinyMultilingualE5SmallModelAndInferenceEndpoint(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  await deleteModel(getService, { modelId: TINY_MULTILINGUAL_E5_SMALL_MODEL_ID });
+  await deleteInferenceEndpoint(getService, {
+    inferenceId: TINY_MULTILINGUAL_E5_SMALL_INFERENCE_ID,
   });
 }
 
@@ -253,6 +299,20 @@ export async function stopTinyElserModel(
     log.info(`Knowledge base model (${TINY_ELSER_MODEL_ID}) stopped.`);
   } catch (e) {
     log.error(`Could not stop knowledge base model (${TINY_ELSER_MODEL_ID}): ${e}`);
+  }
+}
+
+export async function stopTinyMultilingualE5SmallModel(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  const log = getService('log');
+  const ml = getService('ml');
+
+  try {
+    await ml.api.stopTrainedModelDeploymentES(TINY_MULTILINGUAL_E5_SMALL_INFERENCE_ID, true);
+    log.info(`Knowledge base model (${TINY_MULTILINGUAL_E5_SMALL_MODEL_ID}) stopped.`);
+  } catch (e) {
+    log.error(`Could not stop knowledge base model (${TINY_MULTILINGUAL_E5_SMALL_MODEL_ID}): ${e}`);
   }
 }
 

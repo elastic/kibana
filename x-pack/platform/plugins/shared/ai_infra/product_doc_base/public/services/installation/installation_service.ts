@@ -16,6 +16,7 @@ import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
+  UPDATE_ALL_API_PATH,
 } from '../../../common/http_api/installation';
 
 export class InstallationService {
@@ -60,6 +61,12 @@ export class InstallationService {
     const response = await this.http.post<UninstallResponse>(UNINSTALL_ALL_API_PATH, {
       body: JSON.stringify({ inferenceId }),
     });
+
+    return response;
+  }
+
+  async updateAll(): Promise<PerformInstallResponse> {
+    const response = await this.http.post<PerformInstallResponse>(UPDATE_ALL_API_PATH);
 
     return response;
   }
