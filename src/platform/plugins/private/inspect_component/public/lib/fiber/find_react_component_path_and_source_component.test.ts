@@ -57,7 +57,7 @@ describe('findReactComponentPathAndSourceComponent', () => {
 
   it('should return null when path is empty', () => {
     const fiberNode = createMockFiberNode('div', mockElement);
-    mockGetFiberType.mockReturnValue('div'); // HTML tag that gets ignored in path construction
+    mockGetFiberType.mockReturnValue('div');
 
     const result = findReactComponentPathAndSourceComponent(fiberNode);
 
@@ -71,7 +71,7 @@ describe('findReactComponentPathAndSourceComponent', () => {
     const result = findReactComponentPathAndSourceComponent(fiberNode);
 
     expect(result).toEqual({
-      path: 'TestComponent : ',
+      path: 'TestComponent',
       sourceComponent: {
         type: 'TestComponent',
         domElement: mockElement,

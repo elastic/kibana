@@ -63,6 +63,13 @@ export const findReactComponentPathAndSourceComponent = (
     return null;
   }
 
+  if (path.length === 1) {
+    return {
+      path: firstUserDefinedComponentTypeAndDomElement.type,
+      sourceComponent: firstUserDefinedComponentTypeAndDomElement,
+    };
+  }
+
   const reversedPath = path.slice().reverse();
   // Remove source component from the path
   const slicedPath = reversedPath.slice(1);

@@ -58,38 +58,39 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
     [euiTheme.colors.backgroundFilledText, euiTheme.levels.toast]
   );
 
-  const handlePointerMove = useCallback(
-    (event: PointerEvent) => {
-      const target = getElementFromPoint(event);
+  const handlePointerMove = useCallback((event: PointerEvent) => {
+    const target = getElementFromPoint(event);
 
-      if (!target) {
-        return;
-      }
+    if (!target) {
+      return;
+    }
 
-      const { top, left, width, height } = target.getBoundingClientRect();
-      const fiberNode = findFirstFiberWithDebugSource(target);
+    const { top, left, width, height } = target.getBoundingClientRect();
+    const fiberNode = findFirstFiberWithDebugSource(target);
 
-      if (!fiberNode) {
-        return;
-      }
+    if (!fiberNode) {
+      return;
+    }
 
-      setTargetFiberNodeWithDomElement(fiberNode);
+    setTargetFiberNodeWithDomElement(fiberNode);
 
-      const pathInfo = findReactComponentPathAndSourceComponent(fiberNode);
+    const pathInfo = findReactComponentPathAndSourceComponent(fiberNode);
 
-      if (pathInfo?.path && pathInfo.path !== componentPath) {
-        setComponentPath(pathInfo.path);
-        setSourceComponent(pathInfo.sourceComponent);
-      }
+    if (!pathInfo) {
+      setComponentPath(null);
+      setSourceComponent(null);
+      return;
+    }
 
-      setHighlightPosition({
-        width: `${width}px`,
-        height: `${height}px`,
-        transform: `translate(${left}px, ${top}px)`,
-      });
-    },
-    [componentPath]
-  );
+    setComponentPath(pathInfo?.path);
+    setSourceComponent(pathInfo?.sourceComponent);
+
+    setHighlightPosition({
+      width: `${width}px`,
+      height: `${height}px`,
+      transform: `translate(${left}px, ${top}px)`,
+    });
+  }, []);
 
   const handleClickAtPositionOfInspectedElement = useCallback(
     async (event: MouseEvent) => {
