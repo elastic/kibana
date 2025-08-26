@@ -503,6 +503,7 @@ export async function getPackageInfo({
   skipArchive = false,
   ignoreUnverified = false,
   prerelease,
+  esClient,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -511,6 +512,7 @@ export async function getPackageInfo({
   skipArchive?: boolean;
   ignoreUnverified?: boolean;
   prerelease?: boolean;
+  esClient?: ElasticsearchClient;
 }): Promise<PackageInfo> {
   const cacheResult = getPackageInfoCache(pkgName, pkgVersion);
   if (cacheResult) {
@@ -560,13 +562,38 @@ export async function getPackageInfo({
   }
 
   // add properties that aren't (or aren't yet) on the package
+  let allPaths = paths || [];
+
+  // If package is installed and esClient is available, include knowledge base assets
+  if (savedObject && esClient) {
+    try {
+      const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(
+        esClient,
+        pkgName,
+        resolvedPkgVersion
+      );
+      if (knowledgeBaseItems.length > 0) {
+        // Add knowledge base paths in the format expected by groupPathsByService
+        const knowledgeBasePaths = knowledgeBaseItems.map(
+          (item) => `${pkgName}-${resolvedPkgVersion}/elasticsearch/knowledge_base/${item.fileName}`
+        );
+        allPaths = [...allPaths, ...knowledgeBasePaths];
+      }
+    } catch (error) {
+      // Log warning but don't fail the entire request
+      appContextService
+        .getLogger()
+        .warn(`Error retrieving knowledge base assets for package ${pkgName}: ${error.message}`);
+    }
+  }
+
   const additions: EpmPackageAdditions = {
     latestVersion:
       latestPackage?.version && semverGte(latestPackage.version, resolvedPkgVersion)
         ? latestPackage.version
         : resolvedPkgVersion,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
-    assets: Registry.groupPathsByService(paths || []),
+    assets: Registry.groupPathsByService(allPaths),
     notice: Registry.getNoticePath(paths || []),
     licensePath: Registry.getLicensePath(paths || []),
     keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,

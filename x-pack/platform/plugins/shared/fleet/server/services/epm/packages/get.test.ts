@@ -1417,6 +1417,155 @@ owner: elastic`,
         expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
     });
+
+    describe('knowledge base assets', () => {
+      it('should include knowledge base assets when package is installed and esClient is provided', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createInternalClient();
+
+        // Mock installed package
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: 'epm-packages',
+          references: [],
+          attributes: {
+            install_version: '1.0.0',
+            install_status: 'installed',
+            install_started_at: '2022-01-01T00:00:00.000Z',
+          },
+        });
+
+        // Mock knowledge base items from index
+        const mockKnowledgeBaseItems = [
+          {
+            fileName: 'knowledge.md',
+            content: 'Knowledge base content',
+            path: 'knowledge_base/knowledge.md',
+          },
+        ];
+
+        mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex.mockResolvedValue(
+          mockKnowledgeBaseItems
+        );
+
+        // Mock groupPathsByService to return the expected structure
+        const mockGroupedAssets = {
+          kibana: undefined,
+          elasticsearch: {
+            knowledge_base: [
+              {
+                service: 'elasticsearch',
+                type: 'knowledge_base',
+                file: 'knowledge.md',
+                pkgkey: 'my-package-1.0.0',
+              },
+            ],
+          },
+        } as any;
+        MockRegistry.groupPathsByService.mockReturnValue(mockGroupedAssets);
+
+        const result = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+          esClient,
+        });
+
+        // Verify that groupPathsByService was called with paths including knowledge base
+        expect(MockRegistry.groupPathsByService).toHaveBeenCalledWith(
+          expect.arrayContaining(['my-package-1.0.0/elasticsearch/knowledge_base/knowledge.md'])
+        );
+
+        expect(result.assets.elasticsearch?.knowledge_base).toEqual([
+          {
+            service: 'elasticsearch',
+            type: 'knowledge_base',
+            file: 'knowledge.md',
+            pkgkey: 'my-package-1.0.0',
+          },
+        ]);
+      });
+
+      it('should not include knowledge base assets when package is not installed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createInternalClient();
+
+        // Mock not installed package
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+        await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+          esClient,
+        });
+
+        expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).not.toHaveBeenCalled();
+
+        // Verify that groupPathsByService was called with original paths only
+        expect(MockRegistry.groupPathsByService).toHaveBeenCalledWith([]);
+      });
+
+      it('should not include knowledge base assets when esClient is not provided', async () => {
+        const soClient = savedObjectsClientMock.create();
+
+        // Mock installed package
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: 'epm-packages',
+          references: [],
+          attributes: {
+            install_version: '1.0.0',
+            install_status: 'installed',
+            install_started_at: '2022-01-01T00:00:00.000Z',
+          },
+        });
+
+        await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+          // No esClient provided
+        });
+
+        expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).not.toHaveBeenCalled();
+
+        // Verify that groupPathsByService was called with original paths only
+        expect(MockRegistry.groupPathsByService).toHaveBeenCalledWith([]);
+      });
+
+      it('should handle errors gracefully when retrieving knowledge base fails', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createInternalClient();
+
+        // Mock installed package
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: 'epm-packages',
+          references: [],
+          attributes: {
+            install_version: '1.0.0',
+            install_status: 'installed',
+            install_started_at: '2022-01-01T00:00:00.000Z',
+          },
+        });
+
+        // Mock knowledge base retrieval failure
+        mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex.mockRejectedValue(
+          new Error('ES error')
+        );
+
+        await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+          esClient,
+        });
+
+        // Should continue and call groupPathsByService with original paths only
+        expect(MockRegistry.groupPathsByService).toHaveBeenCalledWith([]);
+      });
+    });
   });
 
   describe('getAgentTemplateAssetsMap', () => {
