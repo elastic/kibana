@@ -23,10 +23,6 @@ jest.mock('../../../../app_context', () => ({
       info: jest.fn(),
       debug: jest.fn(),
     }),
-    getO11yAndSecurityAssistantsStatus: jest.fn().mockResolvedValue({
-      securityAssistantStatus: true,
-      observabilityAssistantStatus: true,
-    }),
   },
 }));
 
@@ -51,6 +47,12 @@ describe('stepSaveKnowledgeBase', () => {
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     savedObjectsClient = savedObjectsClientMock.create();
     jest.clearAllMocks();
+
+    // Mock saveKnowledgeBaseContentToIndex to return mock document IDs
+    const mockSaveKnowledgeBase = saveKnowledgeBaseContentToIndex as jest.MockedFunction<
+      typeof saveKnowledgeBaseContentToIndex
+    >;
+    mockSaveKnowledgeBase.mockResolvedValue(['mock-id-1', 'mock-id-2']);
   });
 
   const createMockArchiveIterator = (entries: ArchiveEntry[]): ArchiveIterator => ({
@@ -188,30 +190,6 @@ describe('stepSaveKnowledgeBase', () => {
         },
       ],
     });
-  });
-
-  it('should not save when assistants are disabled', async () => {
-    // Mock assistants as disabled
-    const { appContextService } = jest.requireMock('../../../../app_context');
-    appContextService.getO11yAndSecurityAssistantsStatus.mockResolvedValueOnce({
-      securityAssistantStatus: false,
-      observabilityAssistantStatus: false,
-    });
-
-    const entries: ArchiveEntry[] = [
-      {
-        path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
-        buffer: Buffer.from('# User Guide\n\nThis is a comprehensive guide.', 'utf8'),
-      },
-    ];
-
-    const mockArchiveIterator = createMockArchiveIterator(entries);
-    const context = createMockContext(mockArchiveIterator);
-
-    await stepSaveKnowledgeBase(context);
-
-    // Should not save when assistants are disabled
-    expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
   });
 
   it('should handle Unicode content correctly', async () => {
@@ -408,8 +386,8 @@ describe('stepSaveKnowledgeBase', () => {
     it('should update ES asset references with knowledge base assets', async () => {
       const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
       updateEsAssetReferences.mockResolvedValueOnce([
-        { id: 'test-package-guide.md', type: 'knowledge_base' },
-        { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
+        { id: 'mock-id-1', type: 'knowledge_base' },
+        { id: 'mock-id-2', type: 'knowledge_base' },
       ]);
 
       const entries: ArchiveEntry[] = [
@@ -430,15 +408,15 @@ describe('stepSaveKnowledgeBase', () => {
 
       expect(updateEsAssetReferences).toHaveBeenCalledWith(savedObjectsClient, 'test-package', [], {
         assetsToAdd: [
-          { id: 'test-package-guide.md', type: 'knowledge_base' },
-          { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
+          { id: 'mock-id-1', type: 'knowledge_base' },
+          { id: 'mock-id-2', type: 'knowledge_base' },
         ],
       });
 
       // Check that context was updated with new references
       expect(context.esReferences).toEqual([
-        { id: 'test-package-guide.md', type: 'knowledge_base' },
-        { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
+        { id: 'mock-id-1', type: 'knowledge_base' },
+        { id: 'mock-id-2', type: 'knowledge_base' },
       ]);
     });
 

@@ -75,16 +75,16 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
     try {
       // Save knowledge base content - this handles both fresh installs and upgrades
       // by always deleting existing content for the package before saving new content
-      await saveKnowledgeBaseContentToIndex({
+      const documentIds = await saveKnowledgeBaseContentToIndex({
         esClient,
         pkgName: packageInfo.name,
         pkgVersion: packageInfo.version,
         knowledgeBaseContent: knowledgeBaseItems,
       });
 
-      // Add knowledge base asset references to esReferences
-      const knowledgeBaseAssetRefs = knowledgeBaseItems.map((item) => ({
-        id: `${packageInfo.name}-${item.fileName}`,
+      // Add knowledge base asset references using the ES-generated document IDs
+      const knowledgeBaseAssetRefs = documentIds.map((docId) => ({
+        id: docId,
         type: ElasticsearchAssetType.knowledgeBase,
       }));
 

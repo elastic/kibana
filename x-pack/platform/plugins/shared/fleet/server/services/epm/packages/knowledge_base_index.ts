@@ -27,13 +27,13 @@ export async function saveKnowledgeBaseContentToIndex({
   pkgName: string;
   pkgVersion: string;
   knowledgeBaseContent: KnowledgeBaseItem[];
-}) {
+}): Promise<string[]> {
   // Always delete existing documents for this package (regardless of version)
   // This ensures we only have one set of docs per package
   await deletePackageKnowledgeBase(esClient, pkgName);
 
   if (!knowledgeBaseContent || knowledgeBaseContent.length === 0) {
-    return;
+    return [];
   }
 
   // Index each knowledge base file as a separate document
@@ -41,10 +41,9 @@ export async function saveKnowledgeBaseContentToIndex({
   const installedAt = new Date().toISOString();
 
   for (const item of knowledgeBaseContent) {
-    const docId = `${pkgName}-${item.fileName}`;
-
+    // Let Elasticsearch generate the document ID automatically
     operations.push(
-      { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: docId } },
+      { index: { _index: INTEGRATION_KNOWLEDGE_INDEX } },
       {
         package_name: pkgName,
         filename: item.fileName,
@@ -56,7 +55,7 @@ export async function saveKnowledgeBaseContentToIndex({
   }
 
   if (operations.length > 0) {
-    await retryTransientEsErrors(
+    const bulkResponse = await retryTransientEsErrors(
       async () =>
         esClient.bulk({
           operations,
@@ -68,7 +67,21 @@ export async function saveKnowledgeBaseContentToIndex({
       logger.error('Bulk index operation failed', error);
       throw error;
     });
+
+    // Extract document IDs from the bulk response
+    const documentIds: string[] = [];
+    if (bulkResponse?.items) {
+      for (const item of bulkResponse.items) {
+        if (item.index && item.index._id) {
+          documentIds.push(item.index._id);
+        }
+      }
+    }
+
+    return documentIds;
   }
+
+  return [];
 }
 
 export async function getPackageKnowledgeBaseFromIndex(

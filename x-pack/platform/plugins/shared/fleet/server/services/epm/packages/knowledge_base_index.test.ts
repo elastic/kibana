@@ -57,7 +57,15 @@ describe('knowledge_base_index', () => {
     it('should save knowledge base content successfully', async () => {
       const beforeCall = new Date().toISOString();
 
-      await saveKnowledgeBaseContentToIndex({
+      // Mock the bulk response to return document IDs
+      mockEsClient.bulk.mockResolvedValue({
+        items: [
+          { index: { _id: 'generated-id-1', status: 201 } },
+          { index: { _id: 'generated-id-2', status: 201 } },
+        ],
+      } as any);
+
+      const result = await saveKnowledgeBaseContentToIndex({
         esClient: mockEsClient,
         pkgName: 'test-package',
         pkgVersion: '1.0.0',
@@ -75,7 +83,7 @@ describe('knowledge_base_index', () => {
 
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
         operations: [
-          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: 'test-package-test1.md' } },
+          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX } },
           {
             package_name: 'test-package',
             filename: 'test1.md',
@@ -83,7 +91,7 @@ describe('knowledge_base_index', () => {
             version: '1.0.0',
             installed_at: expect.any(String),
           },
-          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: 'test-package-test2.md' } },
+          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX } },
           {
             package_name: 'test-package',
             filename: 'test2.md',
@@ -94,6 +102,9 @@ describe('knowledge_base_index', () => {
         ],
         refresh: 'wait_for',
       });
+
+      // Verify the function returns the document IDs
+      expect(result).toEqual(['generated-id-1', 'generated-id-2']);
 
       // Verify the installed_at timestamp is reasonable (between before and after the call)
       const bulkCall = (mockEsClient.bulk as jest.Mock).mock.calls[0][0];
@@ -109,7 +120,7 @@ describe('knowledge_base_index', () => {
     });
 
     it('should delete existing content even when no new content provided', async () => {
-      await saveKnowledgeBaseContentToIndex({
+      const result = await saveKnowledgeBaseContentToIndex({
         esClient: mockEsClient,
         pkgName: 'test-package',
         pkgVersion: '1.0.0',
@@ -123,10 +134,11 @@ describe('knowledge_base_index', () => {
         },
       });
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
     });
 
     it('should delete existing content even when knowledge base content is undefined', async () => {
-      await saveKnowledgeBaseContentToIndex({
+      const result = await saveKnowledgeBaseContentToIndex({
         esClient: mockEsClient,
         pkgName: 'test-package',
         pkgVersion: '1.0.0',
@@ -140,6 +152,7 @@ describe('knowledge_base_index', () => {
         },
       });
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
     });
   });
 
