@@ -288,9 +288,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
         await retry.try(async () => {
           const fileInput = await find.byCssSelector('input[type="file"]');
-          const value = (await fileInput.getAttribute('value')) ?? '';
-          if (!value.includes('bulk_import.ndjson')) {
+          const value = await fileInput.getAttribute('value');
+          if (!value || !value.includes('bulk_import.ndjson')) {
             throw new Error(`File not bound yet: ${value}`);
+          } else {
+            log.debug('Value: ', value);
           }
         });
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
