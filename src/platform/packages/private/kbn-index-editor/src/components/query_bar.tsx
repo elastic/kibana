@@ -46,15 +46,16 @@ export const QueryBar = () => {
     return share?.url.locators.get('DISCOVER_APP_LOCATOR');
   }, [share?.url.locators]);
 
-  const discoverLink = esqlDiscoverQuery
-    ? discoverLocator?.getRedirectUrl({
-        timeRange: data.query.timefilter.timefilter.getTime(),
-        query: {
-          esql: esqlDiscoverQuery,
-        },
-        ...(activeColumns ? { columns: activeColumns } : {}),
-      })
-    : null;
+  const discoverLink =
+    isIndexCreated && esqlDiscoverQuery
+      ? discoverLocator?.getRedirectUrl({
+          timeRange: data.query.timefilter.timefilter.getTime(),
+          query: {
+            esql: esqlDiscoverQuery,
+          },
+          ...(activeColumns ? { columns: activeColumns } : {}),
+        })
+      : null;
 
   if (!dataView) {
     return null;
@@ -89,7 +90,7 @@ export const QueryBar = () => {
         <EuiButton
           size={'s'}
           color={'text'}
-          isDisabled={!isIndexCreated}
+          isDisabled={!discoverLink}
           href={discoverLink ?? undefined}
           target="_blank"
           iconType={'discoverApp'}
