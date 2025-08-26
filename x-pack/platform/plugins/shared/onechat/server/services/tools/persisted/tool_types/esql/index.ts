@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createEsqlToolTypeDefinition } from './esql_tools_provider';
+export { createEsqlToolType } from './esql_tool_type';

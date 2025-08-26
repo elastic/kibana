@@ -9,7 +9,7 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
-import type { ToolCreateParams, ToolTypeUpdateParams } from '../tool_provider';
+import type { ToolCreateParams, ToolTypeUpdateParams } from '../../tool_provider';
 import type { ToolStorage } from './storage';
 import { createStorage } from './storage';
 import { fromEs, createAttributes, updateDocument } from './converters';
