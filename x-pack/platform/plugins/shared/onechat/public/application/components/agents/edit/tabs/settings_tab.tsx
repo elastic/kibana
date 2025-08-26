@@ -29,6 +29,7 @@ import { Controller } from 'react-hook-form';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import type { AgentFormData } from '../agent_form';
+import { isValidAgentAvatarColor } from '../../../../utils/color';
 
 interface AgentSettingsTabProps {
   control: Control<AgentFormData>;
@@ -170,6 +171,8 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 {labels.agents.settings.optionalLabel}
               </EuiText>
             }
+            isInvalid={!!formState.errors.configuration?.instructions}
+            error={formState.errors.configuration?.instructions?.message}
           >
             <Controller
               name="configuration.instructions"
@@ -229,6 +232,8 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 {labels.agents.settings.optionalLabel}
               </EuiText>
             }
+            isInvalid={!!formState.errors.labels}
+            error={formState.errors.labels?.message}
           >
             <Controller
               name="labels"
@@ -365,10 +370,17 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             label={i18n.translate('xpack.onechat.agents.form.descriptionLabel', {
               defaultMessage: 'Display description',
             })}
+            isInvalid={!!formState.errors.description}
+            error={formState.errors.description?.message}
           >
             <Controller
               name="description"
               control={control}
+              rules={{
+                required: i18n.translate('xpack.onechat.agents.form.descriptionRequired', {
+                  defaultMessage: 'Agent description is required',
+                }),
+              }}
               render={({ field: { ref, ...rest } }) => (
                 <EuiTextArea
                   {...rest}
@@ -386,7 +398,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
           <EuiSpacer size="m" />
 
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexStart">
             <EuiFlexItem grow={1}>
               <EuiFormRow
                 label={i18n.translate('xpack.onechat.agents.form.avatarColorLabel', {
@@ -397,15 +409,29 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     {labels.agents.settings.optionalLabel}
                   </EuiText>
                 }
+                isInvalid={!!formState.errors.avatar_color}
+                error={formState.errors.avatar_color?.message}
               >
                 <Controller
                   name="avatar_color"
                   control={control}
+                  rules={{
+                    validate: (value) => {
+                      if (value && !isValidAgentAvatarColor(value)) {
+                        return i18n.translate('xpack.onechat.agents.form.avatarColorInvalidError', {
+                          defaultMessage:
+                            'Please enter a valid hex color code. This can either be a three or six character hex value.',
+                        });
+                      }
+                      return true;
+                    },
+                  }}
                   render={({ field: { onChange, value } }) => (
                     <EuiColorPicker
                       onChange={onChange}
                       color={value}
                       disabled={isFormDisabled}
+                      isInvalid={!!formState.errors.avatar_color}
                       aria-label={i18n.translate('xpack.onechat.agents.form.avatarColorAriaLabel', {
                         defaultMessage: 'Agent avatar color picker',
                       })}
@@ -424,16 +450,29 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     {labels.agents.settings.optionalLabel}
                   </EuiText>
                 }
+                isInvalid={!!formState.errors.avatar_symbol}
+                error={formState.errors.avatar_symbol?.message}
               >
                 <Controller
                   name="avatar_symbol"
                   control={control}
+                  rules={{
+                    maxLength: {
+                      value: 2,
+                      message: i18n.translate(
+                        'xpack.onechat.agents.form.avatarSymbolMaxLengthError',
+                        {
+                          defaultMessage: 'Avatar symbol must be 2 characters or less',
+                        }
+                      ),
+                    },
+                  }}
                   render={({ field: { ref, ...rest } }) => (
                     <EuiFieldText
                       {...rest}
                       inputRef={ref}
                       disabled={isFormDisabled}
-                      isInvalid={!!formState.errors.name}
+                      isInvalid={!!formState.errors.avatar_symbol}
                       aria-label={i18n.translate(
                         'xpack.onechat.agents.form.avatarSymbolAriaLabel',
                         {

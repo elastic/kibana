@@ -34,6 +34,7 @@ import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
 import { labels } from '../../../utils/i18n';
 import { AgentAvatar } from '../agent_avatar';
+import { isValidAgentAvatarColor } from '../../../utils/color';
 
 export interface AgentFormProps {
   agentId?: string;
@@ -204,7 +205,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
   const agentName = watch('name');
   const agentDescription = watch('description');
   const agentAvatarSymbol = watch('avatar_symbol');
-  const agentAvatarColor = watch('avatar_color');
+  const watchedAvatarColor = watch('avatar_color');
+  const agentAvatarColor =
+    watchedAvatarColor && isValidAgentAvatarColor(watchedAvatarColor)
+      ? watchedAvatarColor
+      : undefined;
 
   return (
     <KibanaPageTemplate panelled bottomBorder={false}>
