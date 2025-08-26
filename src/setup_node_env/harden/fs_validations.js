@@ -137,7 +137,7 @@ function getFileExtension(path) {
 }
 
 function validateFileExtension(path) {
-  if (isDevOrCI && !process.env.KBN_ENABLE_HARDENED_FS) {
+  if (isDevOrCI && devOrCIPaths.some((safePath) => path.startsWith(safePath))) {
     return;
   }
 
@@ -304,7 +304,7 @@ function getSafePath(userPath) {
  * @throws {Error} - Throws if SVG sanitization fails
  */
 function validateAndSanitizeFileData(data, path) {
-  if (isDevOrCI && !process.env.KBN_ENABLE_HARDENED_FS) {
+  if (isDevOrCI && devOrCIPaths.some((safePath) => path.startsWith(safePath))) {
     return data;
   }
   // Convert input to Buffer if needed
