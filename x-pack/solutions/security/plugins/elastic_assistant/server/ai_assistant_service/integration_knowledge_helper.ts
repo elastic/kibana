@@ -33,7 +33,7 @@ export const checkIntegrationKnowledgeIndexEntryExists = async ({
     logger.debug(`Integration knowledge index entry exists: ${exists}`);
     return exists;
   } catch (error) {
-    logger.debug(`Error checking integration knowledge index entry: ${error.message}`);
+    logger.error(`Error checking integration knowledge index entry: ${error.message}`);
     return false;
   }
 };
@@ -78,7 +78,7 @@ export const ensureIntegrationKnowledgeIndexEntry = async (
         logger.info('Integration knowledge index entry created successfully');
         return true;
       } else {
-        logger.warn('Failed to create integration knowledge index entry');
+        logger.error('Failed to create integration knowledge index entry');
         return false;
       }
     } else {

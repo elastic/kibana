@@ -210,6 +210,19 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       return;
     }
 
+    // Ensure integration knowledge index entry exists first
+    try {
+      await ensureIntegrationKnowledgeIndexEntry(
+        this,
+        this.options.logger.get('integrationKnowledge'),
+        this.options.telemetry
+      );
+    } catch (error) {
+      this.options.logger.error(
+        `Failed to ensure integration knowledge index entry: ${error.message}`
+      );
+    }
+
     try {
       this.options.logger.debug('Checking if ML nodes are available...');
       const mlNodesCount = await getMlNodeCount({
@@ -294,19 +307,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             `Inference endpoint for ELSER model '${elserId}' is already deployed`
           );
         }
-      }
-
-      // Ensure integration knowledge index entry exists first (synchronous)
-      try {
-        await ensureIntegrationKnowledgeIndexEntry(
-          this,
-          this.options.logger.get('integrationKnowledge'),
-          this.options.telemetry
-        );
-      } catch (error) {
-        this.options.logger.error(
-          `Failed to ensure integration knowledge index entry: ${error.message}`
-        );
       }
 
       if (!ignoreSecurityLabs) {
