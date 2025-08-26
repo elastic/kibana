@@ -75,8 +75,8 @@ describe('getCaseSummaryRoute', () => {
       query: { connectorId: 'test-connector' },
     };
 
-    // @ts-ignore
     await expect(
+      // @ts-ignore
       getCaseSummaryRoute.handler({ context: contextNoInference, request, response })
     ).rejects.toThrow('Failed to generate case summary: Error: Inference client is not available');
   });
