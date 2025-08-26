@@ -18,6 +18,8 @@ import { authenticatedUser } from '../../__mocks__/user';
 import { updateConversationRoute } from './update_route';
 import expect from 'expect';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import type { AuditLogger } from '@kbn/core-security-server';
 
 describe('Update conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -37,10 +39,8 @@ describe('Update conversation route', () => {
     ); // successful update
 
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
-    // Mock telemetry.reportEvent
-    context.elasticAssistant.telemetry = {
-      reportEvent: jest.fn(),
-    };
+    context.elasticAssistant.telemetry = analyticsServiceMock.createAnalyticsServiceSetup();
+    context.elasticAssistant.auditLogger = { log: jest.fn() } as unknown as AuditLogger;
     updateConversationRoute(server.router);
   });
 
@@ -246,6 +246,73 @@ describe('Update conversation route', () => {
       const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(200);
       expect(context.elasticAssistant.telemetry.reportEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('auditLogger.log calls', () => {
+    test('calls auditLogger.log on successful user sharing update', async () => {
+      const users = [
+        { id: 'user1', name: 'User One' },
+        { id: 'user2', name: 'User Two' },
+      ];
+      const request = requestMock.create({
+        method: 'put',
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+        body: {
+          ...getUpdateConversationSchemaMock(),
+          users,
+        },
+        params: { id: 'real-id' },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      expect(context.elasticAssistant.auditLogger?.log).toHaveBeenCalled();
+      expect(context.elasticAssistant.auditLogger?.log).toHaveBeenCalledWith({
+        event: {
+          action: 'security_assistant_conversation_shared',
+          category: ['database'],
+          outcome: 'success',
+          type: ['change'],
+        },
+        message:
+          'User [id=my_profile_uid, name=elastic] has shared conversation [id=04128c15-0d1b-4716-a4c5-46997ac7f3bd, title="Welcome"] to users ([id=user1, name=User One], [id=user2, name=User Two])',
+      });
+    });
+
+    test('calls auditLogger.log on error with users in request', async () => {
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockImplementation(
+        async () => {
+          throw new Error('Test error');
+        }
+      );
+      const users = [
+        { id: 'user1', name: 'User One' },
+        { id: 'user2', name: 'User Two' },
+      ];
+      const request = requestMock.create({
+        method: 'put',
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+        body: {
+          ...getUpdateConversationSchemaMock(),
+          users,
+        },
+        params: { id: 'real-id' },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      expect(context.elasticAssistant.auditLogger?.log).toHaveBeenCalled();
+      expect(context.elasticAssistant.auditLogger?.log).toHaveBeenCalledWith({
+        error: {
+          code: 'Error',
+          message: 'Test error',
+        },
+        event: {
+          action: 'security_assistant_conversation_shared',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['change'],
+        },
+        message:
+          'Failed attempt to share conversation [id=conversation-1] to users ([id=user1, name=User One], [id=user2, name=User Two])',
+      });
     });
   });
 });
