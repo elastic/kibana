@@ -216,7 +216,11 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       async clickPanelLink(deepLinkId: string) {
-        await testSubjects.click(`~panelNavItem-id-${deepLinkId}`);
+        if (await isV2()) {
+          await this.clickLink({ deepLinkId: deepLinkId as AppDeepLinkId });
+        } else {
+          await testSubjects.click(`~panelNavItem-id-${deepLinkId}`);
+        }
       },
       /**
        * @deprecated - new side nav doesn't have accordion sections
