@@ -13,7 +13,7 @@ import {
   LENS_CONTENT_TYPE,
 } from '../../../../common/constants';
 import type { LensSavedObject } from '../../../content_management';
-import { RegisterAPIRouteFn } from '../../types';
+import type { RegisterAPIRouteFn } from '../../types';
 import { lensDeleteRequestParamsSchema } from './schema';
 
 export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (

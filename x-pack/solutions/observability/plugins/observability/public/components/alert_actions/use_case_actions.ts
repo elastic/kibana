@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useCallback, useState } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { Alert } from '@kbn/alerting-types';
-import { CasesService } from '@kbn/response-ops-alerts-table/types';
+import type { CasesService } from '@kbn/response-ops-alerts-table/types';
 import type { EventNonEcsData } from '../../../common/typings';
 
 export const useCaseActions = ({

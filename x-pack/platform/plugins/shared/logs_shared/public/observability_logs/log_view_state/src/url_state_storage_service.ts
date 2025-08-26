@@ -6,19 +6,17 @@
  */
 
 import * as rt from 'io-ts';
-import { IToasts } from '@kbn/core/public';
-import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { InvokeCreator } from 'xstate';
+import type { IToasts } from '@kbn/core/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import type { InvokeCreator } from 'xstate';
 import * as Either from 'fp-ts/Either';
 import { identity, pipe } from 'fp-ts/function';
 import { map } from 'rxjs';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';
-import {
-  LogViewReference,
-  logViewReferenceRT,
-  PersistedLogViewReference,
-} from '../../../../common/log_views';
-import { LogViewContext, LogViewEvent } from './types';
+import type { LogViewReference, PersistedLogViewReference } from '../../../../common/log_views';
+import { logViewReferenceRT } from '../../../../common/log_views';
+import type { LogViewContext, LogViewEvent } from './types';
 
 export const defaultLogViewKey = 'logView';
 const defaultLegacySourceIdKey = 'sourceId';

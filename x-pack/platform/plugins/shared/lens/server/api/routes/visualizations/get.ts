@@ -7,7 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
 import {
   LENS_VIS_API_PATH,
@@ -16,7 +16,7 @@ import {
   LENS_CONTENT_TYPE,
 } from '../../../../common/constants';
 import type { LensSavedObject } from '../../../content_management';
-import { RegisterAPIRouteFn } from '../../types';
+import type { RegisterAPIRouteFn } from '../../types';
 import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
 import { getLensResponseItem } from '../utils';
 

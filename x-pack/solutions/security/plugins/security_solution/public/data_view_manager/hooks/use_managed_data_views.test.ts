@@ -46,7 +46,7 @@ describe('useManagedDataViews', () => {
     });
   });
 
-  it('should filter data views to only include those with DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID', () => {
+  it('should filter data views to only include those with Alert Data View ID', () => {
     // Create mock data views with a mix of IDs
     const mockDataViews = [
       { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: 'Security solution data view' },
@@ -67,27 +67,17 @@ describe('useManagedDataViews', () => {
     const { result } = renderHook(() => useManagedDataViews());
 
     // Expect only data views with matching ID to be included
-    expect(result.current.length).toBe(3);
+    expect(result.current.length).toBe(1);
 
     // Verify the IDs of the filtered data views
     result.current.forEach((dataView, i) => {
       if (i <= 1) {
-        expect(dataView.id).toBe(DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID);
-      } else {
         expect(dataView.id).toBe(DEFAULT_ALERT_DATA_VIEW_ID);
       }
     });
 
     // Verify DataView constructor was called with correct arguments
-    expect(DataView).toHaveBeenCalledTimes(3);
-    expect(DataView).toHaveBeenCalledWith({
-      spec: mockDataViews[0],
-      fieldFormats: mockFieldFormats,
-    });
-    expect(DataView).toHaveBeenCalledWith({
-      spec: mockDataViews[2],
-      fieldFormats: mockFieldFormats,
-    });
+    expect(DataView).toHaveBeenCalledTimes(1);
     expect(DataView).toHaveBeenCalledWith({
       spec: mockDataViews[3],
       fieldFormats: mockFieldFormats,

@@ -14,7 +14,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
@@ -24,13 +24,12 @@ import type {
   ExpressionsSetup,
   ExpressionsStart,
 } from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import {
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
   ACTION_CONVERT_TO_LENS,
   DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   ACTION_CONVERT_AGG_BASED_TO_LENS,
-  VisualizationsSetup,
-  VisualizationsStart,
 } from '@kbn/visualizations-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
@@ -45,11 +44,10 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
-  UiActionsStart,
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
-  VisualizeFieldContext,
   ADD_PANEL_TRIGGER,
   ACTION_VISUALIZE_LENS_FIELD,
 } from '@kbn/ui-actions-plugin/public';
@@ -62,15 +60,15 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SharePluginSetup, SharePluginStart, ExportShare } from '@kbn/share-plugin/public';
-import {
+import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ChartType } from '@kbn/visualization-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
@@ -131,7 +129,7 @@ import type { SaveModalContainerProps } from './app_plugin/save_modal_container'
 
 import { setupExpressions } from './expressions';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
-import { ChartInfoApi } from './chart_info_api';
+import type { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import type { LensDocument } from './persistence';

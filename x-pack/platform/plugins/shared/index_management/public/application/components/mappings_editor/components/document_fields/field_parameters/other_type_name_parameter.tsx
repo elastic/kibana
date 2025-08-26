@@ -8,7 +8,8 @@
 import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { UseField, TextField, FieldConfig, FieldHook } from '../../../shared_imports';
+import type { FieldConfig, FieldHook } from '../../../shared_imports';
+import { UseField, TextField } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
 
 /**

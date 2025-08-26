@@ -8,14 +8,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type CoreSetup, Plugin, type CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { type CoreSetup, type CoreStart } from '@kbn/core/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ManagementApp } from '@kbn/management-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
-import { AIAssistantType } from '../common/ai_assistant_type';
+import type { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -31,8 +35,9 @@ export interface SetupDependencies {
   serverless?: ServerlessPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartDependencies {}
+export interface StartDependencies {
+  licensing: LicensingPluginStart;
+}
 
 export class AIAssistantManagementPlugin
   implements
@@ -45,6 +50,8 @@ export class AIAssistantManagementPlugin
 {
   private readonly kibanaBranch: string;
   private readonly buildFlavor: BuildFlavor;
+  private registeredAiAssistantManagementSelectionApp?: ManagementApp;
+  private licensingSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
@@ -75,7 +82,7 @@ export class AIAssistantManagementPlugin
       });
     }
 
-    management.sections.section.ai.registerApp({
+    this.registeredAiAssistantManagementSelectionApp = management.sections.section.ai.registerApp({
       id: 'aiAssistantManagementSelection',
       title: i18n.translate('aiAssistantManagementSelection.managementSectionLabel', {
         defaultMessage: 'AI Assistants',
@@ -98,18 +105,40 @@ export class AIAssistantManagementPlugin
       },
     });
 
+    // Default to disabled until license check runs in start()
+    this.registeredAiAssistantManagementSelectionApp.disable();
+
     return {};
   }
 
-  public start(coreStart: CoreStart) {
+  public start(coreStart: CoreStart, { licensing }: StartDependencies) {
     const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
     );
 
     const aiAssistantType$ = new BehaviorSubject(preferredAIAssistantType);
 
+    const isAiAssistantManagementSelectionEnabled =
+      coreStart.application.capabilities.management.ai.aiAssistantManagementSelection;
+
+    // Toggle visibility based on license at runtime
+    if (licensing) {
+      this.licensingSubscription = licensing.license$.subscribe((license) => {
+        const isEnterprise = license?.hasAtLeast('enterprise');
+        if (isEnterprise && isAiAssistantManagementSelectionEnabled) {
+          this.registeredAiAssistantManagementSelectionApp?.enable();
+        } else {
+          this.registeredAiAssistantManagementSelectionApp?.disable();
+        }
+      });
+    }
+
     return {
       aiAssistantType$: aiAssistantType$.asObservable(),
     };
+  }
+
+  public stop() {
+    this.licensingSubscription?.unsubscribe();
   }
 }

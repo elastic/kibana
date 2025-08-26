@@ -15,7 +15,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
       await kibanaServer.importExport.load(
-        'x-pack/test/api_integration/fixtures/kbn_archiver/lens/example_docs.json'
+        'x-pack/platform/test/api_integration/fixtures/kbn_archives/lens/example_docs.json'
       );
     });
 
@@ -25,7 +25,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
       await kibanaServer.importExport.unload(
-        'x-pack/test/api_integration/fixtures/kbn_archiver/lens/example_docs.json'
+        'x-pack/platform/test/api_integration/fixtures/kbn_archives/lens/example_docs.json'
       );
     });
     loadTestFile(require.resolve('./main'));

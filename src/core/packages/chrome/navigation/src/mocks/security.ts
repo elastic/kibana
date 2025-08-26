@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MenuItem } from '../../types';
+import type { MenuItem } from '../../types';
 
 export const LOGO = {
   href: '/security',

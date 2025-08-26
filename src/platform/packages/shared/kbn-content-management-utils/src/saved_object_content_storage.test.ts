@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
+import type { MockedLogger, MockedLogger } from '@kbn/logging-mocks';
+
 import { SOContentStorage } from './saved_object_content_storage';
-import { ContentManagementCrudTypes } from './types';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { ContentManagementCrudTypes } from './types';
 
 import { schema } from '@kbn/config-schema';
 import type {

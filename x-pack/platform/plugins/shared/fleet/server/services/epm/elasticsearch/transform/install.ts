@@ -569,10 +569,16 @@ const installTransformsAssets = async (
               componentTemplates,
               indexTemplate: {
                 templateName: destinationIndexTemplate.installationName,
-                // @ts-expect-error data_stream property is not needed here
+                // @ts-expect-error `data_stream` property is not needed/allowed for transform index templates
                 indexTemplate: {
                   template: {
-                    settings: undefined,
+                    settings: {
+                      index: {
+                        mapping: {
+                          ignore_malformed: true,
+                        },
+                      },
+                    },
                     mappings: undefined,
                   },
                   priority: DEFAULT_TRANSFORM_TEMPLATES_PRIORITY,

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { extractReferences } from '../saved_visualization_references';
 import { visualizationsClient } from '../../content_management';
-import { BasicVisualizationClient, TypesStart } from '../../vis_types';
+import type { BasicVisualizationClient, TypesStart } from '../../vis_types';
 
 interface UpdateBasicSoAttributesDependencies {
   savedObjectsTagging?: SavedObjectsTaggingApi;

@@ -8,14 +8,15 @@
  */
 
 import { EuiTitle, useEuiTheme } from '@elastic/eui';
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 
 import { SecondaryMenuItemComponent } from './item';
 import { SecondaryMenuSectionComponent } from './section';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 import { BetaBadge } from '../beta_badge';
-import { BadgeType } from '../../../types';
+import type { BadgeType } from '../../../types';
 
 export interface SecondaryMenuProps {
   badgeType?: BadgeType;

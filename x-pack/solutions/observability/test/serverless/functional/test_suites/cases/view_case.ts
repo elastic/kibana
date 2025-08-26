@@ -18,7 +18,7 @@ import {
   createOneCaseBeforeDeleteAllAfter,
   createAndNavigateToCase,
 } from '@kbn/test-suites-xpack-platform/serverless/shared/lib/cases/helpers';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const owner = OBSERVABILITY_OWNER;
 

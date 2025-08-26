@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-
+import type { SavedObjectReference } from '@kbn/core/server';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-plugin/common/constants';

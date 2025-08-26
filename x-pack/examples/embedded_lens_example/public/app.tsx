@@ -27,7 +27,7 @@ import type {
   DateHistogramIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
 import type { StartDependencies } from './plugin';
 

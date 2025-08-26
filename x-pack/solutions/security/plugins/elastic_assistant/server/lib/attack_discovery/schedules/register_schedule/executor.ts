@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { getAttackDiscoveryMarkdownFields } from '@kbn/elastic-assistant-common';
 import { ALERT_URL } from '@kbn/rule-data-utils';
@@ -19,10 +19,10 @@ import {
 import { ANONYMIZATION_FIELDS_RESOURCE } from '../../../../ai_assistant_service/constants';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { getResourceName } from '../../../../ai_assistant_service';
-import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
+import type { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
 import { generateAttackDiscoveries } from '../../../../routes/attack_discovery/helpers/generate_discoveries';
-import { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleContext } from '../types';
+import type { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleContext } from '../types';
 import { getIndexTemplateAndPattern } from '../../../data_stream/helpers';
 import {
   generateAttackDiscoveryAlertHash,

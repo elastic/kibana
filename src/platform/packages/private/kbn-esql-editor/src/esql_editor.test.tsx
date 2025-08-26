@@ -10,7 +10,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ESQLEditor } from './esql_editor';

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React, { useCallback } from 'react';
 import { useToolsPreferences } from '../../../context/tools_preferences_provider';

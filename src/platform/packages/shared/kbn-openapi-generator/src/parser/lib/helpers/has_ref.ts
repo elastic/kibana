@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NormalizedReferenceObject } from '../../openapi_types';
+import type { NormalizedReferenceObject } from '../../openapi_types';
 
 /**
  * Check if an object has a $ref property

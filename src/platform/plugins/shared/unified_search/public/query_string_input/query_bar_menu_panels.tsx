@@ -7,20 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useRef, useEffect, RefObject } from 'react';
+import type { RefObject } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { isEqual } from 'lodash';
-import {
+import type {
   EuiContextMenuPanelDescriptor,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
-  Filter,
-  Query,
-  TimeRange,
   enableFilter,
   disableFilter,
   toggleFilterNegated,
@@ -39,11 +35,11 @@ import {
 } from '@kbn/data-plugin/common';
 import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { fromUser } from './from_user';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { FilterPanelOption } from '../types';
+import type { FilterPanelOption } from '../types';
 import { PanelTitle } from './panel_title';
 
 const MAP_ITEMS_TO_FILTER_OPTION: Record<string, FilterPanelOption> = {

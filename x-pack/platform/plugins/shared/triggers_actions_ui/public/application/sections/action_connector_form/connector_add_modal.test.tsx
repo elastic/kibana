@@ -10,7 +10,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import ConnectorAddModal from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionType, GenericValidationResult } from '../../../types';
+import type { ActionType, GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 

@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 import { boomify, isBoom } from '@hapi/boom';
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
 import {
   LENS_VIS_API_PATH,
@@ -17,7 +17,7 @@ import {
   LENS_CONTENT_TYPE,
 } from '../../../../common/constants';
 import type { LensCreateIn, LensSavedObject } from '../../../content_management';
-import { RegisterAPIRouteFn } from '../../types';
+import type { RegisterAPIRouteFn } from '../../types';
 import { ConfigBuilderStub } from '../../../../common/transforms';
 import { lensCreateRequestBodySchema, lensCreateResponseBodySchema } from './schema';
 import { getLensResponseItem } from '../utils';

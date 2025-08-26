@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient, PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/public';
-import { UiSettingsCommon } from '../common';
+import type {
+  IUiSettingsClient,
+  PublicUiSettingsParams,
+  UserProvidedValues,
+} from '@kbn/core/public';
+import type { UiSettingsCommon } from '../common';
 
 export class UiSettingsPublicToCommon implements UiSettingsCommon {
   private uiSettings: IUiSettingsClient;

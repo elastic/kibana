@@ -8,7 +8,7 @@
 import { getSegments, isRootStreamDefinition, Streams } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
-import { Direction } from '@elastic/eui';
+import type { Direction } from '@elastic/eui';
 import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers';
 
 const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;

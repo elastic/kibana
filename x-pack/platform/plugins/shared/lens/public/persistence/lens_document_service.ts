@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 import { LensClient } from './lens_client';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
-import { LensDocument } from './types';
+import type { LensDocument } from './types';
 import type { LensSearchRequestQuery } from '../../server';
 
 export interface CheckDuplicateTitleOptions {

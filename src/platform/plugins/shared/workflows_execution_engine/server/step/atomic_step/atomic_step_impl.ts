@@ -6,13 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { AtomicGraphNode } from '@kbn/workflows/types/execution/nodes/base';
-import { StepImplementation } from '../step_base';
+import type { AtomicGraphNode } from '@kbn/workflows/types/execution/nodes/base';
+import type { StepImplementation } from '../step_base';
 import { ConnectorStepImpl } from '../connector_step';
-import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
-import { ConnectorExecutor } from '../../connector_executor';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { ConnectorExecutor } from '../../connector_executor';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 
 /**
  * Implements the execution logic for an atomic workflow step.

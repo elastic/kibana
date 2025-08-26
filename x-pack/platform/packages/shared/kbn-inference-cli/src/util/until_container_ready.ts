@@ -6,7 +6,7 @@
  */
 import { backOff } from 'exponential-backoff';
 import execa from 'execa';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 export async function untilContainerReady({
   containerName,

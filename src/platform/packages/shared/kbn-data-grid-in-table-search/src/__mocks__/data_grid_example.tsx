@@ -8,7 +8,8 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
-import { EuiDataGrid, EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
+import type { EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
+import { EuiDataGrid } from '@elastic/eui';
 import { generateMockData } from './data';
 import { getRenderCellValueMock } from './render_cell_value_mock';
 import { useDataGridInTableSearch } from '../use_data_grid_in_table_search';

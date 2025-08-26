@@ -12,16 +12,18 @@ import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { hasNoParams } from '../../formatters/formatting_utils';
 import { formatLocation } from '../../../../common/utils/location_formatter';
-import {
+import type {
   BrowserFields,
-  ConfigKey,
   CommonFields,
   MonitorTypeEnum,
   Locations,
   ProjectMonitor,
+  MonitorFields,
+} from '../../../../common/runtime_types';
+import {
+  ConfigKey,
   ScheduleUnit,
   SourceType,
-  MonitorFields,
   type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import {
