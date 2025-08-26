@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
 
+import type { ActionAccordionFormProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/action_form';
 import styled from 'styled-components';
 
 import type {
@@ -85,6 +86,7 @@ interface Props {
   messageVariables: ActionVariables;
   summaryMessageVariables: ActionVariables;
   defaultRuleFrequency?: RuleActionFrequency;
+  minimumThrottleInterval?: ActionAccordionFormProps['minimumThrottleInterval'];
 }
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
@@ -122,6 +124,7 @@ export const RuleActionsField: React.FC<Props> = ({
   messageVariables,
   summaryMessageVariables,
   defaultRuleFrequency = NOTIFICATION_DEFAULT_FREQUENCY,
+  minimumThrottleInterval,
 }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
@@ -260,6 +263,7 @@ export const RuleActionsField: React.FC<Props> = ({
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
         defaultRuleFrequency,
         disableErrorMessages: !isFormValidated,
+        minimumThrottleInterval,
       }),
     [
       getActionForm,
@@ -274,6 +278,7 @@ export const RuleActionsField: React.FC<Props> = ({
       ruleTypeId,
       defaultRuleFrequency,
       isFormValidated,
+      minimumThrottleInterval,
     ]
   );
 

@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
-import {
+import type {
   IngestDocument,
   IngestProcessorContainer,
   IngestSimulateRequest,
@@ -20,31 +20,31 @@ import {
   SimulateIngestSimulateIngestDocumentResult,
   FieldCapsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
-import {
+import type {
   FlattenRecord,
-  ProcessorDefinitionWithId,
-  getProcessorType,
-  ProcessorDefinition,
-  getInheritedFieldsFromAncestors,
   NamedFieldDefinitionConfig,
   FieldDefinitionConfig,
   InheritedFieldDefinitionConfig,
-  isNamespacedEcsField,
   FieldDefinition,
+} from '@kbn/streams-schema';
+import {
+  getInheritedFieldsFromAncestors,
+  isNamespacedEcsField,
   Streams,
 } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
-import { StreamsClient } from '../../../../lib/streams/client';
-import { formatToIngestProcessors } from '../../../../lib/streams/helpers/processing';
+import type { StreamlangDSL } from '@kbn/streamlang';
+import { transpileIngestPipeline } from '@kbn/streamlang';
+import type { StreamsClient } from '../../../../lib/streams/client';
 
 export interface ProcessingSimulationParams {
   path: {
     name: string;
   };
   body: {
-    processing: ProcessorDefinitionWithId[];
+    processing: StreamlangDSL;
     documents: FlattenRecord[];
     detected_fields?: NamedFieldDefinitionConfig[];
   };
@@ -213,24 +213,26 @@ const prepareSimulationDocs = (
   }));
 };
 
-const prepareSimulationProcessors = (
-  processing: ProcessorDefinitionWithId[]
-): IngestProcessorContainer[] => {
+const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessorContainer[] => {
   //
   /**
-   * We want to simulate processors logic and collect data indipendently from the user config for simulation purposes.
+   * We want to simulate processors logic and collect data independently from the user config for simulation purposes.
    * 1. Force each processor to not ignore failures to collect all errors
    * 2. Append the error message to the `_errors` field on failure
    */
-  const processors = processing.map((processor) => {
-    const { id, ...processorConfig } = processor;
+  const transpiledIngestPipelineProcessors = transpileIngestPipeline(processing, {
+    ignoreMalformed: true,
+    traceCustomIdentifiers: true,
+  }).processors;
 
-    const type = getProcessorType(processorConfig);
+  const formattedProcessors = transpiledIngestPipelineProcessors.map((processor) => {
+    const type = Object.keys(processor)[0];
+    const processorConfig = (processor as any)[type]; // Safe to use any here due to type structure
+
     return {
       [type]: {
-        ...(processorConfig as any)[type], // Safe to use any here due to type structure
+        ...processorConfig,
         ignore_failure: false,
-        tag: id,
         on_failure: [
           {
             append: {
@@ -244,7 +246,7 @@ const prepareSimulationProcessors = (
           },
         ],
       },
-    } as ProcessorDefinition;
+    };
   });
 
   const dotExpanderProcessors: Array<Pick<IngestProcessorContainer, 'dot_expander'>> = [
@@ -270,10 +272,6 @@ const prepareSimulationProcessors = (
       },
     },
   ];
-
-  const formattedProcessors = formatToIngestProcessors(processors, {
-    ignoreMalformedManualIngestPipeline: true,
-  });
 
   return [...dotExpanderProcessors, ...formattedProcessors];
 };
@@ -426,14 +424,19 @@ const computePipelineSimulationResult = (
   pipelineSimulationResult: SuccessfulPipelineSimulateResponse,
   ingestSimulationResult: SimulateIngestResponse,
   sampleDocs: Array<{ _source: FlattenRecord }>,
-  processing: ProcessorDefinitionWithId[],
+  processing: StreamlangDSL,
   isWiredStream: boolean,
   streamFields: FieldDefinition
 ): {
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
 } => {
-  const processorsMap = initProcessorMetricsMap(processing);
+  const transpiledProcessors = transpileIngestPipeline(processing, {
+    ignoreMalformed: true,
+    traceCustomIdentifiers: true,
+  }).processors;
+
+  const processorsMap = initProcessorMetricsMap(transpiledProcessors);
 
   const forbiddenFields = Object.entries(streamFields)
     .filter(([, { type }]) => type === 'system')
@@ -491,10 +494,26 @@ const computePipelineSimulationResult = (
 };
 
 const initProcessorMetricsMap = (
-  processing: ProcessorDefinitionWithId[]
+  processors: IngestProcessorContainer[]
 ): Record<string, ProcessorMetrics> => {
-  const processorMetricsEntries = processing.map((processor) => [
-    processor.id,
+  // Gather unique IDs because the manual ingest pipeline proccessor (for example) will share the same
+  // ID across it's nested processors.
+  const ids = new Set<string>();
+
+  for (const processor of processors) {
+    const type = Object.keys(processor)[0] as keyof IngestProcessorContainer;
+    const config = processor[type] as Record<string, unknown>;
+    const tag = config.tag;
+
+    if (typeof tag === 'string') {
+      ids.add(tag);
+    }
+  }
+
+  const uniqueIds = Array.from(ids);
+
+  const processorMetricsEntries = uniqueIds.map((id) => [
+    id,
     {
       detected_fields: [],
       errors: [],
@@ -634,7 +653,7 @@ const computeSimulationDocDiff = (
         diffResult.errors.push({
           processor_id: nextDoc.processor_id,
           type: 'non_namespaced_fields_failure',
-          message: `The fields generated by the processor are not namespaced ECS fields: [${nonNamespacedFields.join()}]`,
+          message: `The fields generated by the processor do not match streams log record fields - put custom fields into attributes, body.structured or resource.attributes: [${nonNamespacedFields.join()}]`,
         });
       }
     }

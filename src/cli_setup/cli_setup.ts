@@ -13,10 +13,8 @@ import ora from 'ora';
 import { Command } from 'commander';
 import { getConfigPath } from '@kbn/utils';
 
-import {
-  ElasticsearchService,
-  EnrollResult,
-} from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
+import type { EnrollResult } from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
+import { ElasticsearchService } from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
 import { getDetailedErrorMessage } from '@kbn/interactive-setup-plugin/server/errors';
 import {
   promptToken,

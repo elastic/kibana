@@ -153,7 +153,22 @@
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "workflowsManagement",
+          "id": "def-server.WorkflowsPluginSetup.management",
+          "type": "Object",
+          "tags": [],
+          "label": "management",
+          "description": [],
+          "signature": [
+            "WorkflowsManagementApi"
+          ],
+          "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -184,7 +199,7 @@
               "section": "def-common.WorkflowExecutionEngineModel",
               "text": "WorkflowExecutionEngineModel"
             },
-            ", params: Record<string, any>) => Promise<string>"
+            ", spaceId: string, params: Record<string, any>) => Promise<string>"
           ],
           "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
           "deprecated": false,
@@ -214,6 +229,21 @@
             {
               "parentPluginId": "workflowsManagement",
               "id": "def-server.WorkflowsPluginStart.runWorkflow.$2",
+              "type": "string",
+              "tags": [],
+              "label": "spaceId",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "workflowsManagement",
+              "id": "def-server.WorkflowsPluginStart.runWorkflow.$3",
               "type": "Object",
               "tags": [],
               "label": "params",

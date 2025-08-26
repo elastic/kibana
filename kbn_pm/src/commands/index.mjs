@@ -14,6 +14,7 @@ export const COMMANDS = [
   (await import('./clean_command.mjs')).command,
   (await import('./reset_command.mjs')).command,
   (await import('./x_command.mjs')).command,
+  (await import('./build_shared_packages.mjs')).command,
 ];
 
 /**

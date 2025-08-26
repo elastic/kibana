@@ -7,7 +7,11 @@
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+<<<<<<< HEAD
 import { ValueFormatConfig } from '../../../../common/types';
+=======
+import type { ValueFormatConfig } from '../operations/definitions/column_types';
+>>>>>>> upstream/main
 import type { VisualizeEditorContext } from '../../../types';
 
 export interface TextBasedLayerColumn {

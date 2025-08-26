@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getPageApi } from '../page_api';
 import { AddButton } from './add_button';
 import { TopNav } from './top_nav';

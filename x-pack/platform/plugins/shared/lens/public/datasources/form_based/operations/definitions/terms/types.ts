@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import { ValueFormatConfig } from '../../../../../../common';
 import { FieldBasedIndexPatternColumn } from '../column_types';
+=======
+import type { FieldBasedIndexPatternColumn, ValueFormatConfig } from '../column_types';
+>>>>>>> upstream/main
 
 export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'terms';

@@ -25,6 +25,7 @@
     "@kbn/datemath",
     "@kbn/monaco",
     "@kbn/presentation-publishing",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

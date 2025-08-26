@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useMonitorMWs } from '../../../hooks/use_monitor_mws';
 import { MetricErrorIcon } from './metric_error_icon';
-import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import { isTestRunning, manualTestRunSelector } from '../../../../../state/manual_test_runs';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../../state';
 import { useErrorDetailsLink } from '../../../../common/links/error_details_link';

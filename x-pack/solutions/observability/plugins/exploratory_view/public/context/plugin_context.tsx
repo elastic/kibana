@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { createContext } from 'react';
 
 export interface PluginContextValue {

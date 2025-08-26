@@ -9,8 +9,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { metricStateSchema } from './charts/metric';
-import { LensApiAllMetricOperations } from './metric_ops';
-import { LensApiBucketOperations } from './bucket_ops';
+import type { LensApiAllMetricOperations } from './metric_ops';
+import type { LensApiBucketOperations } from './bucket_ops';
 
 export const lensApiStateSchema = schema.oneOf([metricStateSchema]);
 

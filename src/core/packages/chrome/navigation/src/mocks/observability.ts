@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MenuItem } from '../../types';
+import type { MenuItem } from '../../types';
 
 export const LOGO = {
+  href: '/observability',
+  id: 'observability',
   label: 'Observability',
-  logoType: 'logoObservability',
+  type: 'logoObservability',
 };
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [
@@ -26,6 +28,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     label: 'Dashboards',
     iconType: 'dashboardApp',
     href: '/dashboards',
+    badgeType: 'beta',
   },
   {
     id: 'overview',
@@ -34,7 +37,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     href: '/overview',
   },
   { id: 'alerts', label: 'Alerts', iconType: 'bell', href: '/alerts' },
-  { id: 'cases', label: 'Cases', iconType: 'casesApp', href: '/cases' },
+  { id: 'cases', label: 'Cases', iconType: 'casesApp', href: '/cases', badgeType: 'techPreview' },
   {
     id: 'slos',
     label: 'SLOs',
@@ -121,6 +124,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     label: 'Machine learning',
     iconType: 'machineLearningApp',
     href: '/ml/overview',
+    badgeType: 'beta',
     sections: [
       {
         id: 'ml-section-1',
@@ -197,18 +201,21 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
     label: 'Getting started',
     iconType: 'launch',
     href: '/getting-started',
+    badgeType: 'beta',
   },
   {
     id: 'developer_tools',
     label: 'Developer tools',
     iconType: 'code',
     href: '/developer-tools',
+    badgeType: 'techPreview',
   },
   {
     id: 'settings',
     label: 'Settings',
     iconType: 'gear',
     href: '/settings/project/performance',
+    badgeType: 'techPreview',
     sections: [
       {
         id: 'project',
@@ -228,6 +235,8 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
             id: 'project-fleet',
             label: 'Fleet',
             href: '/settings/project/fleet',
+            badgeType: 'beta',
+            isExternal: true,
           },
         ],
       },
@@ -280,13 +289,13 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
             id: 'access-org-members',
             label: 'Org members',
             href: '/settings/access/org-members',
-            external: true,
+            isExternal: true,
           },
           {
             id: 'access-billing',
             label: 'Billing and subscriptions',
             href: '/settings/access/billing',
-            external: true,
+            isExternal: true,
           },
           {
             id: 'access-api-keys',

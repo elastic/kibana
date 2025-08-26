@@ -5,4 +5,6 @@
  * 2.0.
  */
 
+export type * from './schema/v1/source_schemas';
+
 export { MapsStorage } from './maps_storage';

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
   countMetricOperationSchema,
@@ -96,7 +97,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
     )
   ),
   /**
-   * Whether to fit the value`
+   * Whether to fit the value
    */
   fit: schema.maybe(
     schema.boolean({ meta: { description: 'Whether to fit the value' }, defaultValue: false })
@@ -234,4 +235,4 @@ export const metricStateSchema = schema.allOf([
   }),
 ]);
 
-export type MetricState = typeof metricStateSchema.type;
+export type MetricState = TypeOf<typeof metricStateSchema>;

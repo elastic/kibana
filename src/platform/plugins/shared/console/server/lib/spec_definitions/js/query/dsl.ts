@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 
-import { SpecDefinitionsService } from '../../../../services';
+import type { SpecDefinitionsService } from '../../../../services';
 
 import {
   spanFirstTemplate,

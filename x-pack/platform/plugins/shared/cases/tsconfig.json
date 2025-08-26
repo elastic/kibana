@@ -94,7 +94,8 @@
     "@kbn/test",
     "@kbn/dev-utils",
     "@kbn/tooling-log",
-    "@kbn/page-attachment-schema"
+    "@kbn/page-attachment-schema",
+    "@kbn/licensing-types"
   ],
   "exclude": ["target/**/*"]
 }

@@ -9,9 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { DashboardMigrationsDataDashboardsClient } from './dashboard_migrations_dashboards_client';
 import type { AuthenticatedUser, IScopedClusterClient } from '@kbn/core/server';
-import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { SplunkOriginalDashboardExport } from '../../../../../common/siem_migrations/model/vendor/dashboards/splunk.gen';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { DashboardMigrationsClientDependencies } from '../types';
 
 const INDEX_NAME = '.kibana-siem-dashboard-migrations-dashboards';
 
@@ -42,7 +42,7 @@ describe('Dashboard Migrations Dashboards client', () => {
     profile_uid: 'testProfileUid',
   } as unknown as AuthenticatedUser;
 
-  const dependencies = {} as unknown as SiemMigrationsClientDependencies;
+  const dependencies = {} as unknown as DashboardMigrationsClientDependencies;
 
   beforeEach(() => {
     dashboardMigrationDataDashboardsClient = new DashboardMigrationsDataDashboardsClient(

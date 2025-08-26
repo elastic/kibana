@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import expect from '@kbn/expect';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { config, expectedValues, generateData } from './generate_data';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');

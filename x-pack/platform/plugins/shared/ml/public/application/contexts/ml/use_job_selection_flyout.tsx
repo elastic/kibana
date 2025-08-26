@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import moment from 'moment';
+import { useGeneratedHtmlId } from '@elastic/eui';
 import type { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -40,6 +41,8 @@ export function useJobSelectionFlyout() {
     };
   }, []);
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return useCallback(
     (
       config: {
@@ -64,6 +67,7 @@ export function useJobSelectionFlyout() {
           flyoutRef.current = overlays.openFlyout(
             <KibanaContextProvider services={services}>
               <JobSelectorFlyoutContent
+                flyoutTitleId={flyoutTitleId}
                 selectedIds={config.selectedIds}
                 withTimeRangeSelector={config.withTimeRangeSelector}
                 applyTimeRangeConfig={applyTimeRangeConfig}
@@ -80,13 +84,16 @@ export function useJobSelectionFlyout() {
                   flyoutRef.current!.close();
                 }}
               />
-            </KibanaContextProvider>
+            </KibanaContextProvider>,
+            {
+              'aria-labelledby': flyoutTitleId,
+            }
           );
         } catch (error) {
           reject(error);
         }
       });
     },
-    [services, overlays, applyTimeRangeConfig, setApplyTimeRangeConfig]
+    [services, overlays, applyTimeRangeConfig, setApplyTimeRangeConfig, flyoutTitleId]
   );
 }

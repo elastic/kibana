@@ -13,10 +13,6 @@ import { LogsSynthtraceProvider } from '@kbn/test-suites-xpack-platform/serverle
 import { ComboBoxService } from '@kbn/test-suites-src/functional/services/combo_box';
 import { services as deploymentAgnosticFunctionalServices } from './deployment_agnostic_services';
 import { services as svlSharedServices } from '../../shared/services';
-import { SvlChatNavigationServiceProvider } from './svl_chat_navigation';
-import { SvlObltNavigationServiceProvider } from './svl_oblt_navigation';
-import { SvlSearchNavigationServiceProvider } from './svl_search_navigation';
-import { SvlSecNavigationServiceProvider } from './svl_sec_navigation';
 import { SvlCasesServiceProvider } from '../../api_integration/services/svl_cases';
 import { services as SvlApiIntegrationSvcs } from '../../api_integration/services';
 
@@ -26,11 +22,7 @@ export const services = {
 
   // serverless FTR services
   ...svlSharedServices,
-  svlChatNavigation: SvlChatNavigationServiceProvider,
   svlCommonNavigation: SvlCommonNavigationServiceProvider,
-  svlObltNavigation: SvlObltNavigationServiceProvider,
-  svlSearchNavigation: SvlSearchNavigationServiceProvider,
-  svlSecNavigation: SvlSecNavigationServiceProvider,
   svlCommonScreenshots: SvlCommonScreenshotsProvider,
   svlCases: SvlCasesServiceProvider,
   svlMl: MachineLearningProvider,

@@ -37,14 +37,8 @@
             "label": "print",
             "description": [],
             "signature": [
-              "(query: ",
-              {
-                "pluginId": "@kbn/esql-ast",
-                "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.ESQLAstQueryExpression",
-                "text": "ESQLAstQueryExpression"
-              },
+              "(node: ",
+              "ESQLProperNode",
               ", opts?: ",
               {
                 "pluginId": "@kbn/esql-ast",
@@ -62,20 +56,12 @@
               {
                 "parentPluginId": "@kbn/esql-ast",
                 "id": "def-common.BasicPrettyPrinter.print.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "query",
-                "description": [
-                  "ES|QL query AST to print."
-                ],
+                "label": "node",
+                "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/esql-ast",
-                    "scope": "common",
-                    "docId": "kibKbnEsqlAstPluginApi",
-                    "section": "def-common.ESQLAstQueryExpression",
-                    "text": "ESQLAstQueryExpression"
-                  }
+                  "ESQLProperNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/basic_pretty_printer.ts",
                 "deprecated": false,
@@ -191,6 +177,86 @@
             ],
             "returnComment": [
               "A multi-line string representation of the query."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.BasicPrettyPrinter.query",
+            "type": "Function",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "(query: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstQueryExpression",
+                "text": "ESQLAstQueryExpression"
+              },
+              ", opts?: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.BasicPrettyPrinterOptions",
+                "text": "BasicPrettyPrinterOptions"
+              },
+              " | undefined) => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/basic_pretty_printer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.BasicPrettyPrinter.query.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [
+                  "ES|QL query AST to print."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLAstQueryExpression",
+                    "text": "ESQLAstQueryExpression"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/basic_pretty_printer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.BasicPrettyPrinter.query.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.BasicPrettyPrinterOptions",
+                    "text": "BasicPrettyPrinterOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/basic_pretty_printer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "A single-line string representation of the query."
             ]
           },
           {
@@ -2546,7 +2612,9 @@
             "type": "Function",
             "tags": [],
             "label": "replace",
-            "description": [],
+            "description": [
+              "\nReplaces a single node in the AST with a new value. Replaces the first\nnode that matches the template with the new value. Replacement happens\nin-place, so the original AST is modified.\n\nFor example, replace \"?my_param\" parameter with an inlined string literal:\n\n```typescript\nWalker.replace(ast,\n { type: 'literal', literalType: 'param', paramType: 'named',\n     value: 'my_param' },\n Builder.expression.literal.string('This is my string'));\n```\n"
+            ],
             "signature": [
               "(tree: ",
               {
@@ -2576,7 +2644,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "tree",
-                "description": [],
+                "description": [
+                  "AST node to search in."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/esql-ast",
@@ -2597,7 +2667,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "matcher",
-                "description": [],
+                "description": [
+                  "A function or template object to match against the node."
+                ],
                 "signature": [
                   "NodeMatchTemplate",
                   " | ((node: ",
@@ -2615,7 +2687,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "newValue",
-                "description": [],
+                "description": [
+                  "The new value to replace the matched node."
+                ],
                 "signature": [
                   "ESQLProperNode"
                 ],
@@ -2625,7 +2699,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "The updated node, if a match was found and replaced."
+            ]
           },
           {
             "parentPluginId": "@kbn/esql-ast",
@@ -2633,7 +2709,9 @@
             "type": "Function",
             "tags": [],
             "label": "replaceAll",
-            "description": [],
+            "description": [
+              "\nReplaces all nodes in the AST that match the given template with the new\nvalue. Works same as {@link Walker.replace}, but replaces all matching nodes.\n"
+            ],
             "signature": [
               "(tree: ",
               {
@@ -2663,7 +2741,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "tree",
-                "description": [],
+                "description": [
+                  "AST node to search in."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/esql-ast",
@@ -2684,7 +2764,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "matcher",
-                "description": [],
+                "description": [
+                  "A function or template object to match against the node."
+                ],
                 "signature": [
                   "NodeMatchTemplate",
                   " | ((node: ",
@@ -2702,7 +2784,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "newValue",
-                "description": [],
+                "description": [
+                  "The new value to replace the matched nodes."
+                ],
                 "signature": [
                   "ESQLProperNode"
                 ],
@@ -2712,7 +2796,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "The updated nodes, if any matches were found and replaced."
+            ]
           },
           {
             "parentPluginId": "@kbn/esql-ast",
@@ -7544,12 +7630,12 @@
           {
             "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.ElasticsearchCommandDefinition.license",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "license",
             "description": [],
             "signature": [
-              "\"PLATINUM\" | undefined"
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -8829,12 +8915,26 @@
           {
             "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.FunctionDefinition.license",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "license",
             "description": [],
             "signature": [
-              "\"PLATINUM\" | undefined"
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.FunctionDefinition.observabilityTier",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "observabilityTier",
+            "description": [],
+            "signature": [
+              "\"COMPLETE\" | \"LOGS_ESSENTIALS\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9320,12 +9420,12 @@
           {
             "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.Signature.license",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "license",
             "description": [],
             "signature": [
-              "\"PLATINUM\" | undefined"
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,

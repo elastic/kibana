@@ -20,17 +20,16 @@ import type {
   NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
+  SideNavLogo,
 } from '@kbn/core-chrome-navigation/types';
-import { AppDeepLinkIdToIcon } from './hack_icons_mappings';
+
+import { isActiveFromUrl } from '@kbn/shared-ux-chrome-navigation/src/utils';
+import { AppDeepLinkIdToIcon } from './known_icons_mappings';
 
 export interface NavigationItems {
-  logoItem: LogoItem;
+  logoItem: SideNavLogo;
   navItems: NavigationStructure;
-}
-
-export interface LogoItem {
-  logoType: string;
-  label: string;
+  activeItemId?: string;
 }
 
 /**
@@ -66,17 +65,39 @@ export const toNavigationItems = (
   let primaryNodes: ChromeProjectNavigationNode[] = [];
   let footerNodes: ChromeProjectNavigationNode[] = [];
 
+  let deepestActiveItemId: string | undefined;
+  let currentActiveItemIdLevel = -1;
+
+  const maybeMarkActive = (navNode: ChromeProjectNavigationNode, level: number) => {
+    if (deepestActiveItemId == null || currentActiveItemIdLevel < level) {
+      if (isActiveFromUrl(navNode.path, activeNodes, false)) {
+        deepestActiveItemId = navNode.id;
+        currentActiveItemIdLevel = level;
+      }
+    }
+  };
+
   if (navigationTree.body.length === 1) {
     const firstNode = navigationTree.body[0];
     if (!isRecentlyAccessedDefinition(firstNode)) {
-      logoNode = firstNode;
       primaryNodes = firstNode.children ?? [];
+      const homeNodeIndex = primaryNodes.findIndex((node) => node.renderAs === 'home');
+      if (homeNodeIndex !== -1) {
+        logoNode = primaryNodes[homeNodeIndex];
+        primaryNodes = primaryNodes.filter((_, index) => index !== homeNodeIndex); // Remove the logo node from primary items
+        maybeMarkActive(logoNode, 0);
+      } else {
+        warnOnce(
+          `No "home" node found in primary nodes. There should be a logo node with solution logo, name and home page href. renderAs: "home" is expected.`
+        );
+      }
     }
   } else {
     warnOnce(
-      `Navigation tree has multiple root nodes. First level should have a single node for the logo and solution name.`
+      `Navigation tree body has multiple root nodes. First level should have a single node. It is not used and shall be removed later after we fully migrate to the new nav.`
     );
   }
+
   if (navigationTree.footer?.length === 1) {
     const firstNode = navigationTree.footer[0];
     if (!isRecentlyAccessedDefinition(firstNode)) {
@@ -88,8 +109,10 @@ export const toNavigationItems = (
     );
   }
 
-  const logoItem: LogoItem = {
-    logoType: warnIfMissing(logoNode, 'icon', 'logoKibana') as string,
+  const logoItem: SideNavLogo = {
+    href: warnIfMissing(logoNode, 'href', '/missing-href-😭'),
+    iconType: warnIfMissing(logoNode, ['iconV2', 'icon'], 'logoKibana') as string,
+    id: warnIfMissing(logoNode, 'id', 'kibana'),
     label: warnIfMissing(logoNode, 'title', 'Kibana'),
   };
 
@@ -103,7 +126,7 @@ export const toNavigationItems = (
       return null;
     }
 
-    if (navNode.sideNavStatus === 'hidden') {
+    if (navNode.sideNavStatus === 'hidden' || navNode.sideNavVersion === 'v1') {
       return null;
     }
 
@@ -142,6 +165,38 @@ export const toNavigationItems = (
     }
 
     let secondarySections: SecondaryMenuSection[] | undefined;
+
+    // Helper function to filter out hidden and custom render items
+    const filterValidSecondaryChildren = (
+      children: ChromeProjectNavigationNode[]
+    ): ChromeProjectNavigationNode[] => {
+      return children
+        .filter((child) => child.sideNavStatus !== 'hidden' && child.sideNavVersion !== 'v1')
+        .filter((child) => {
+          const isCustomRender = typeof child.renderItem === 'function';
+          if (isCustomRender) {
+            warnOnce(
+              `Custom renderItem is not supported in the new navigation. Ignoring it for node "${child.id}".`
+            );
+          }
+          return !isCustomRender;
+        });
+    };
+
+    // Helper function to convert a node to a secondary menu item
+    const createSecondaryMenuItem = (child: ChromeProjectNavigationNode): SecondaryMenuItem => {
+      warnUnsupportedNavNodeOptions(child);
+      maybeMarkActive(child, 2);
+      return {
+        id: child.id,
+        label: warnIfMissing(child, 'title', 'Missing Title 😭'),
+        href: warnIfMissing(child, 'href', 'Missing Href 😭'),
+        isExternal: child.isExternalLink,
+        'data-test-subj': getTestSubj(child),
+        badgeType: child.badgeTypeV2,
+      };
+    };
+
     if (navNode.renderAs === 'panelOpener') {
       if (!navNode.children?.length) {
         warnOnce(`Panel opener node "${navNode.id}" has no children. Ignoring it.`);
@@ -160,46 +215,25 @@ export const toNavigationItems = (
         );
 
         // If all children have hrefs, we can treat them as secondary items
+        const validChildren = filterValidSecondaryChildren(navNode.children);
         secondarySections = [
-          // create a single section for all children
           {
             id: `${navNode.id}-section`,
             label: null,
-            items: navNode.children.map((child) => {
-              warnUnsupportedNavNodeOptions(child);
-              return {
-                id: child.id,
-                label: warnIfMissing(child, 'title', 'Missing Title 😭'),
-                href: warnIfMissing(child, 'href', 'Missing Href 😭'),
-                external: child.isExternalLink,
-                iconType: child.icon,
-                'data-test-subj': getTestSubj(child),
-              };
-            }),
+            items: validChildren.map(createSecondaryMenuItem),
           },
         ];
       } else {
         // Otherwise, we need to create sections for each child
         secondarySections = filterEmpty(
           navNode.children.map((child) => {
-            if (child.sideNavStatus === 'hidden') return null;
+            if (child.sideNavStatus === 'hidden' || child.sideNavVersion === 'v1') return null;
             if (!child.children?.length) return null;
 
             warnUnsupportedNavNodeOptions(child);
 
-            const secondaryItems: SecondaryMenuItem[] =
-              child.children
-                .filter((subChild) => subChild.sideNavStatus !== 'hidden')
-                .map((subChild) => {
-                  warnUnsupportedNavNodeOptions(subChild);
-                  return {
-                    id: subChild.id,
-                    label: warnIfMissing(subChild, 'title', 'Missing Title 😭'),
-                    href: warnIfMissing(subChild, 'href', 'Missing Href 😭'),
-                    external: subChild.isExternalLink,
-                    'data-test-subj': getTestSubj(subChild),
-                  };
-                }) ?? [];
+            const validChildren = filterValidSecondaryChildren(child.children);
+            const secondaryItems = validChildren.map(createSecondaryMenuItem);
 
             if (child.href) {
               warnOnce(
@@ -213,7 +247,7 @@ export const toNavigationItems = (
               items: secondaryItems,
             };
           })
-        );
+        ).filter((section) => section.items.length > 0); // Filter out empty sections;
       }
     }
 
@@ -238,14 +272,24 @@ export const toNavigationItems = (
       itemHref = warnIfMissing(navNode, 'href', 'missing-href-😭');
     }
 
+    maybeMarkActive(navNode, 1);
+
     return {
       id: navNode.id,
       label: warnIfMissing(navNode, 'title', 'Missing Title 😭'),
-      iconType: warnIfMissing(navNode, 'icon', AppDeepLinkIdToIcon[navNode.id] || 'broom'),
+      iconType: warnIfMissing(
+        {
+          iconV2: AppDeepLinkIdToIcon[navNode.id],
+          ...navNode,
+        },
+        ['iconV2', 'icon'],
+        'broom'
+      ),
       href: itemHref,
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
-    };
+      badgeType: navNode.badgeTypeV2,
+    } as MenuItem;
   };
 
   const primaryItems = filterEmpty(primaryNodes.flatMap(toMenuItem));
@@ -263,7 +307,7 @@ export const toNavigationItems = (
     );
   }
 
-  return { logoItem, navItems: { primaryItems, footerItems } };
+  return { logoItem, navItems: { primaryItems, footerItems }, activeItemId: deepestActiveItemId };
 };
 
 // =====================
@@ -272,19 +316,38 @@ export const toNavigationItems = (
 
 function warnIfMissing<T extends { id: string }, K extends keyof T>(
   obj: T | null | undefined,
-  key: K,
+  key: K | K[],
   fallback: NonNullable<T[K]>
 ): NonNullable<T[K]> {
-  const value = obj?.[key];
-  if (value === undefined || value === null) {
-    warnOnce(
-      `Navigation item "${String(obj?.id)}" is missing a "${String(
-        key
-      )}". Using fallback value: "${String(fallback)}".`
-    );
+  const keys = Array.isArray(key) ? key : [key];
+
+  // Helper function to create warning message
+  const createWarningMessage = (reason: string) =>
+    `Navigation item${obj?.id ? ` "${obj.id}"` : ''} ${reason}. Using fallback value: "${String(
+      fallback
+    )}".`;
+
+  if (!obj) {
+    warnOnce(createWarningMessage(`is missing`));
     return fallback;
   }
-  return value as NonNullable<T[K]>;
+
+  // Try each key in order until we find a value
+  for (const k of keys) {
+    const value = obj[k];
+    if (value !== undefined && value !== null) {
+      return value as NonNullable<T[K]>;
+    }
+  }
+
+  // None of the keys had values, warn and use fallback
+  const missingKeysMessage =
+    keys.length === 1
+      ? `is missing a "${String(keys[0])}"`
+      : `is missing all of "${keys.join(', ')}"`;
+
+  warnOnce(createWarningMessage(missingKeysMessage));
+  return fallback;
 }
 
 const warnedMessages = new Set<string>();

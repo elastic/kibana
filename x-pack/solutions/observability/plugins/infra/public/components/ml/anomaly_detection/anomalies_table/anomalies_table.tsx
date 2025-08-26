@@ -127,14 +127,17 @@ const AnomalyActionMenu = ({
       isAutoReloading: false,
     });
 
-    setWaffleFiltersState(
-      influencers.reduce((query, i) => {
-        if (query) {
-          query = `${query} or `;
-        }
-        return `${query} ${influencerField}: "${i}"`;
-      }, '')
-    );
+    setWaffleFiltersState({
+      query: {
+        query: influencers.reduce((query, i) => {
+          if (query) {
+            query = `${query} or `;
+          }
+          return `${query} ${influencerField}: "${i}"`;
+        }, ''),
+        language: 'kuery',
+      },
+    });
 
     if (closeFlyout) closeFlyout();
   }, [

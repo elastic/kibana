@@ -22,7 +22,7 @@ import {
 import { EuiLinkTo } from '../../react_router_helpers';
 import { TruncatedContent } from '../../truncate';
 
-import { Schema, FieldCoercionErrors } from '../types';
+import type { Schema, FieldCoercionErrors } from '../types';
 
 import {
   ERROR_TABLE_ID_HEADER,

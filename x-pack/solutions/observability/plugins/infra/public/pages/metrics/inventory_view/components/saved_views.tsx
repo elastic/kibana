@@ -42,6 +42,7 @@ export const SavedViews = () => {
     legend,
     sort,
     timelineOpen,
+    preferredSchema,
   } = useWaffleOptionsContext();
   const { currentTime, isAutoReloading } = useWaffleTimeContext();
   const { filterQuery } = useWaffleFiltersContext();
@@ -76,7 +77,12 @@ export const SavedViews = () => {
         timelineOpen,
         time: currentTime,
         autoReload: isAutoReloading,
-        filterQuery,
+        // retrocompatibility with saved views
+        filterQuery: {
+          expression: filterQuery.query,
+          kind: filterQuery.language,
+        },
+        preferredSchema,
       }}
     />
   );

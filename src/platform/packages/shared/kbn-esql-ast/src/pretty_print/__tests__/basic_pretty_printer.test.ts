@@ -8,9 +8,10 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLFunction, ESQLMap } from '../../types';
+import type { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
-import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import type { BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import { BasicPrettyPrinter } from '../basic_pretty_printer';
 
 const reprint = (src: string) => {
   const { root } = parse(src);
@@ -309,24 +310,24 @@ describe('single line query', () => {
     describe('COMPLETION', () => {
       test('from single line', () => {
         const { text } =
-          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId
+          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH {"inference_id": "my-inference-id"}
         `);
 
         expect(text).toBe(
-          'FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId'
+          'FROM search-movies | COMPLETION result = "Shakespeare" WITH {"inference_id": "my-inference-id"}'
         );
       });
 
       test('from multiline', () => {
         const { text } = reprint(
           `FROM kibana_sample_data_ecommerce
-                 | COMPLETION result = "prompt" WITH \`openai-completion\`
+                 | COMPLETION result = "prompt" WITH {"inference_id": "my-inference-id"}
                  | LIMIT 2
           `
         );
 
         expect(text).toBe(
-          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH `openai-completion` | LIMIT 2'
+          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH {"inference_id": "my-inference-id"} | LIMIT 2'
         );
       });
     });
