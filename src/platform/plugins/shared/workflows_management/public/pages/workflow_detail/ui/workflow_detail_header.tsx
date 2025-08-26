@@ -76,7 +76,7 @@ export const WorkflowDetailHeader = ({
   );
 
   return (
-    <EuiPageTemplate offset={0} minHeight={0} grow={false}>
+    <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
       <EuiPageTemplate.Header css={styles.header} restrictWidth={false} bottomBorder={false}>
         <EuiPageHeaderSection css={styles.headerSection}>
           <EuiSkeletonTitle
@@ -180,6 +180,9 @@ export const WorkflowDetailHeader = ({
 };
 
 const componentStyles = {
+  pageTemplate: css({
+    flexGrow: 0,
+  }),
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.backgroundBasePlain,
