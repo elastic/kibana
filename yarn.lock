@@ -969,12 +969,12 @@
     "@babel/template" "^7.27.2"
     "@babel/types" "^7.27.6"
 
-"@babel/parser@7.24.7", "@babel/parser@^7.1.0", "@babel/parser@^7.10.3", "@babel/parser@^7.14.7", "@babel/parser@^7.20.7", "@babel/parser@^7.21.8", "@babel/parser@^7.23.0", "@babel/parser@^7.23.9", "@babel/parser@^7.27.2", "@babel/parser@^7.27.4", "@babel/parser@^7.27.5":
+"@babel/parser@7.24.7":
   version "7.24.7"
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.24.7.tgz#9a5226f92f0c5c8ead550b750f5608e766c8ce85"
   integrity sha512-9uUYRm6OqQrCqQdG1iCBwBPZgN8ciDBro2nIOFaiRz1/BCxaI7CNvQbDHvsArAC7Tw9Hda/B3U+6ui9u4HWXPw==
 
-"@babel/parser@^7.24.7":
+"@babel/parser@^7.1.0", "@babel/parser@^7.10.3", "@babel/parser@^7.14.7", "@babel/parser@^7.20.7", "@babel/parser@^7.21.8", "@babel/parser@^7.23.0", "@babel/parser@^7.23.9", "@babel/parser@^7.24.7", "@babel/parser@^7.27.2", "@babel/parser@^7.27.4", "@babel/parser@^7.27.5":
   version "7.27.5"
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.27.5.tgz#ed22f871f110aa285a6fd934a0efed621d118826"
   integrity sha512-OsQd175SxWkGlzbny8J3K8TnnDD0N3lrIUtB92xwyRpzaenGZhxDvxN/JgU00U3CDZNj9tPuDJ5H0WS4Nt3vKg==
@@ -16067,10 +16067,15 @@ chownr@^3.0.0:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-3.0.0.tgz#9855e64ecd240a9cc4267ce8a4aa5d24a1da15e4"
   integrity sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==
 
-chroma-js@2.4.2, chroma-js@^2.1.0, chroma-js@^2.4.2:
+chroma-js@2.4.2:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-2.4.2.tgz#dffc214ed0c11fa8eefca2c36651d8e57cbfb2b0"
   integrity sha512-U9eDw6+wt7V8z5NncY2jJfZa+hUH8XEj8FQHgFJTrUFnJfXYf4Ml4adI2vXZOjqRDpFWtYVWypDfZwnJ+HIR4A==
+
+chroma-js@^2.1.0, chroma-js@^2.4.2:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-2.6.0.tgz#578743dd359698a75067a19fa5571dec54d0b70b"
+  integrity sha512-BLHvCB9s8Z1EV4ethr6xnkl/P2YRFOGqfgvuMG/MyCbZPrTA+NeiByY6XvgF0zP4/2deU2CXnWyMa3zu1LqQ3A==
 
 chrome-launcher@^1.2.0:
   version "1.2.0"
@@ -17376,9 +17381,9 @@ d3-brush@^3.0.0:
     d3-transition "3"
 
 d3-cloud@^1.2.5:
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/d3-cloud/-/d3-cloud-1.2.5.tgz#3e91564f2d27fba47fcc7d812eb5081ea24c603d"
-  integrity sha512-4s2hXZgvs0CoUIw31oBAGrHt9Kt/7P9Ik5HIVzISFiWkD0Ga2VLAuO/emO/z1tYIpE7KG2smB4PhMPfFMJpahw==
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/d3-cloud/-/d3-cloud-1.2.7.tgz#5a733c4bae43238cbb4760bb8f2d15912a8ad7a5"
+  integrity sha512-8TrgcgwRIpoZYQp7s3fGB7tATWfhckRb8KcVd1bOgqkNdkJRDGWfdSf4HkHHzZxSczwQJdSxvfPudwir5IAJ3w==
   dependencies:
     d3-dispatch "^1.0.3"
 
