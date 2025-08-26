@@ -385,22 +385,6 @@ export const DocViewerTable = ({
             pinnedFields={pinnedFields}
             onTogglePinned={onTogglePinned}
           />
-          {/* <EuiDataGrid
-            key={`fields-table-${hit.id}`}
-            {...GRID_PROPS}
-            aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
-              defaultMessage: 'Field values',
-            })}
-            className="kbnDocViewer__fieldsGrid"
-            css={styles.fieldsGrid}
-            columns={gridColumns}
-            toolbarVisibility={false}
-            rowCount={rows.length}
-            renderCellValue={renderCellValue}
-            renderCellPopover={renderCellPopover}
-            pagination={pagination}
-            leadingControlColumns={leadingControlColumns}
-          /> */}
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
