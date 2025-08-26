@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import type {
   EuiSearchBarOnChangeArgs,
   EuiSearchBarProps,
@@ -252,10 +252,6 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     });
   }, [searchQuery, displayTools]);
 
-  useEffect(() => {
-    setPageIndex(0);
-  }, [filteredTools]);
-
   const toolsByType = useMemo(() => {
     const grouped: Partial<Record<ToolType, ToolDefinition[]>> = {};
     filteredTools.forEach((tool) => {
@@ -325,6 +321,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
         }
 
         setSearchQuery(queryText);
+        setPageIndex(0);
       },
       query: searchQuery,
     };
