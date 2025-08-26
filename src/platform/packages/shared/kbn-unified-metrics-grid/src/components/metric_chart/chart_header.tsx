@@ -19,8 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { MetricField } from '../../types';
-// TODO Add flyout import when available
-// import { MetricInsightsFlyout } from '../metrics_insights_flyout';
+import { MetricInsightsFlyout } from '../metric_flyout/metrics_insights_flyout';
 
 interface ChartHeaderProps {
   title: string;
@@ -159,13 +158,12 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
           <EuiFlexItem grow={false}>{actionIcons}</EuiFlexItem>
         </EuiFlexGroup>
       )}
-
-      {/* <MetricInsightsFlyout
+      <MetricInsightsFlyout
         metric={metric}
         esqlQuery={esqlQuery}
         isOpen={isFlyoutOpen}
         onClose={() => setIsFlyoutOpen(false)}
-      /> */}
+      />
     </>
   );
 };
