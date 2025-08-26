@@ -17,6 +17,7 @@
     "@kbn/config",
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-saved-objects-api-server-internal",
   ],
   "exclude": [
     "target/**/*",
