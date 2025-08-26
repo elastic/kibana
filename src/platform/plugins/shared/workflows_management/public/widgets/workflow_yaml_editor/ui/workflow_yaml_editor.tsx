@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -36,55 +36,6 @@ const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
 
 const useWorkflowJsonSchema = () => {
   return jsonSchema;
-};
-
-const editorStyles = {
-  container: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      height: '100%',
-      position: 'relative',
-      '.template-variable-valid': {
-        backgroundColor: euiTheme.colors.backgroundLightPrimary,
-        borderRadius: '2px',
-      },
-      '.template-variable-error': {
-        backgroundColor: euiTheme.colors.backgroundLightWarning,
-        borderRadius: '2px',
-      },
-      '.step-highlight': {
-        backgroundColor: euiTheme.colors.backgroundBaseAccent,
-        borderRadius: '2px',
-      },
-      '.dimmed': {
-        opacity: 0.5,
-      },
-      '.step-execution-completed': {
-        backgroundColor: euiTheme.colors.backgroundLightSuccess,
-      },
-      '.step-execution-failed': {
-        backgroundColor: euiTheme.colors.backgroundLightDanger,
-      },
-      '.step-execution-completed-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.vis.euiColorVis0,
-          borderRadius: '50%',
-        },
-      },
-      '.step-execution-failed-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.danger,
-          borderRadius: '50%',
-        },
-      },
-    }),
 };
 
 export const WorkflowYAMLEditor = ({
@@ -139,8 +90,10 @@ export const WorkflowYAMLEditor = ({
       }
       validateVariables(editorRef.current);
       try {
-        const value = editorRef.current.getValue();
-        yamlDocumentRef.current = YAML.parseDocument(value ?? '');
+        if ('getValue' in model) {
+          const value = model.getValue();
+          yamlDocumentRef.current = YAML.parseDocument(value ?? '');
+        }
       } catch (error) {
         yamlDocumentRef.current = null;
       }
@@ -294,7 +247,7 @@ export const WorkflowYAMLEditor = ({
       theme: 'workflows-subdued',
       padding: {
         top: 24,
-        bottom: 64,
+        bottom: 16,
       },
       quickSuggestions: {
         other: true,
@@ -306,7 +259,7 @@ export const WorkflowYAMLEditor = ({
     [readOnly]
   );
 
-  const styles = useMemoCss(editorStyles);
+  const styles = useMemoCss(componentStyles);
 
   // Clean up the monaco model and editor on unmount
   useEffect(() => {
@@ -334,9 +287,9 @@ export const WorkflowYAMLEditor = ({
   }, [handleMarkersChanged]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" css={styles.container}>
+    <div css={styles.container}>
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} />
-      <EuiFlexItem
+      <div
         grow={false}
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
       >
@@ -380,8 +333,8 @@ export const WorkflowYAMLEditor = ({
             </span>
           </div>
         )}
-      </EuiFlexItem>
-      <EuiFlexItem css={{ flex: 1, minHeight: 0 }}>
+      </div>
+      <div css={styles.editorContainer}>
         <YamlEditor
           editorDidMount={handleEditorDidMount}
           onChange={handleChange}
@@ -391,8 +344,8 @@ export const WorkflowYAMLEditor = ({
           suggestionProvider={completionProvider}
           {...props}
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      </div>
+      <div css={styles.validationErrorsContainer}>
         <WorkflowYAMLValidationErrors
           isMounted={isEditorMounted}
           validationErrors={validationErrors}
@@ -403,7 +356,76 @@ export const WorkflowYAMLEditor = ({
             navigateToErrorPosition(editorRef.current, error.lineNumber, error.column);
           }}
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </div>
+    </div>
   );
+};
+
+const componentStyles = {
+  container: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+      minHeight: 0,
+      // css classes for the monaco editor
+      '.template-variable-valid': {
+        backgroundColor: euiTheme.colors.backgroundLightPrimary,
+        borderRadius: '2px',
+      },
+      '.template-variable-error': {
+        backgroundColor: euiTheme.colors.backgroundLightWarning,
+        borderRadius: '2px',
+      },
+      '.step-highlight': {
+        backgroundColor: euiTheme.colors.backgroundBaseAccent,
+        borderRadius: '2px',
+      },
+      '.dimmed': {
+        opacity: 0.5,
+      },
+      '.step-execution-pending': {
+        backgroundColor: euiTheme.colors.backgroundBaseFormsControlDisabled,
+      },
+      '.step-execution-running': {
+        backgroundColor: euiTheme.colors.backgroundLightPrimary,
+      },
+      '.step-execution-completed': {
+        backgroundColor: euiTheme.colors.backgroundLightSuccess,
+      },
+      '.step-execution-failed': {
+        backgroundColor: euiTheme.colors.backgroundLightDanger,
+      },
+      '.step-execution-completed-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.vis.euiColorVis0,
+          borderRadius: '50%',
+        },
+      },
+      '.step-execution-failed-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.danger,
+          borderRadius: '50%',
+        },
+      },
+    }),
+  editorContainer: css({
+    flex: '1 1 0',
+    minWidth: 0,
+    overflowY: 'auto',
+    minHeight: 0,
+  }),
+  validationErrorsContainer: css({
+    flexShrink: 0,
+    overflow: 'hidden',
+  }),
 };

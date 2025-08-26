@@ -8,8 +8,10 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, euiFontSize, useEuiTheme } from '@elastic/eui';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import { css } from '@emotion/react';
 import { useFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 
@@ -32,39 +34,23 @@ export const WorkflowStepExecutionListItem = ({
 
   return (
     <EuiFlexGroup
-      css={{
-        padding: euiTheme.size.m,
-        backgroundColor: selected ? backgroundColor : euiTheme.colors.backgroundBasePlain,
-        borderWidth: 1,
-        borderStyle: 'solid',
-        borderColor: color,
-        borderRadius: euiTheme.border.radius.medium,
-        gap: euiTheme.size.m,
-        flexGrow: 0,
-        cursor: selected ? 'default' : 'pointer',
-        '&:hover': selected
-          ? {}
-          : {
-              backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
-            },
-      }}
+      css={[
+        componentStyles.container,
+        !selected && componentStyles.containerSelectable,
+        {
+          borderColor: color,
+          backgroundColor: selected ? backgroundColor : euiTheme.colors.backgroundBasePlain,
+        },
+      ]}
       alignItems="center"
       justifyContent="flexStart"
       onClick={onClick}
     >
-      <EuiFlexItem css={{ flexGrow: 0, width: '16px', height: '16px' }}>
+      <EuiFlexItem css={componentStyles.statusIcon}>
         {getExecutionStatusIcon(euiTheme, stepExecution.status)}
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup
-          direction="column"
-          css={{
-            gap: euiTheme.size.xs,
-            flexGrow: 0,
-            flexShrink: 1,
-            fontSize: useEuiFontSize('s').fontSize,
-          }}
-        >
+        <EuiFlexGroup direction="column" css={componentStyles.stepInfo}>
           <EuiFlexItem>
             <p css={{ color: euiTheme.colors.textSubdued }}>{formattedStartedAt}</p>
           </EuiFlexItem>
@@ -75,4 +61,36 @@ export const WorkflowStepExecutionListItem = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+};
+
+const componentStyles = {
+  container: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.m,
+      borderWidth: 1,
+      borderStyle: 'solid',
+      borderRadius: euiTheme.border.radius.medium,
+      gap: euiTheme.size.m,
+      flexGrow: 0,
+    }),
+  containerSelectable: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      cursor: 'pointer',
+      '&:hover': {
+        backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
+      },
+    }),
+  statusIcon: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexGrow: 0,
+      width: '16px',
+      height: '16px',
+    }),
+  stepInfo: (euiThemeContext: UseEuiTheme) =>
+    css({
+      gap: euiThemeContext.euiTheme.size.xs,
+      flexGrow: 0,
+      flexShrink: 1,
+      fontSize: euiFontSize(euiThemeContext, 's').fontSize,
+    }),
 };

@@ -92,84 +92,77 @@ export function WorkflowYAMLValidationErrors({
   });
 
   return (
-    <div css={styles.container}>
-      <EuiAccordion
-        id={accordionId}
-        key={validationErrors?.length}
-        data-testid="wf-yaml-editor-validation-errors-list"
-        buttonContent={
-          <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
-            <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-            <EuiFlexItem css={styles.buttonContentText}>{buttonContent}</EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        arrowDisplay={validationErrors?.length === 0 ? 'none' : 'left'}
-        initialIsOpen={validationErrors !== null && validationErrors.length > 0}
-        isDisabled={validationErrors?.length === 0}
-      >
-        <div css={styles.accordionContent}>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {sortedValidationErrors?.map((error, index) => (
-              <EuiFlexItem
-                key={`${error.lineNumber}-${error.column}-${error.message}-${index}-${error.severity}`}
-                css={styles.validationErrorRow}
-                onClick={() => onErrorClick?.(error)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onErrorClick?.(error);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-              >
-                <EuiFlexItem grow={false} css={styles.validationErrorLineNumber}>
-                  <b>{error.lineNumber}</b>:{error.column}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type={
-                      error.severity === 'error'
-                        ? 'errorFilled'
-                        : error.severity === 'warning'
-                        ? 'warningFilled'
-                        : 'iInCircle'
-                    }
-                    color={
-                      error.severity === 'error'
-                        ? 'danger'
-                        : error.severity === 'warning'
-                        ? euiTheme.colors.vis.euiColorVis8
-                        : 'primary'
-                    }
-                    size="s"
-                    css={styles.validationErrorIcon}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <span>{error.message}</span>
-                </EuiFlexItem>
+    <EuiAccordion
+      id={accordionId}
+      key={validationErrors?.length}
+      data-testid="wf-yaml-editor-validation-errors-list"
+      buttonContent={
+        <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
+          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+          <EuiFlexItem css={styles.buttonContentText}>{buttonContent}</EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      arrowDisplay={validationErrors?.length === 0 ? 'none' : 'left'}
+      initialIsOpen={validationErrors !== null && validationErrors.length > 0}
+      isDisabled={validationErrors?.length === 0}
+      css={styles.accordion}
+    >
+      <div css={styles.accordionContent} className="eui-yScrollWithShadows">
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {sortedValidationErrors?.map((error, index) => (
+            <EuiFlexItem
+              key={`${error.lineNumber}-${error.column}-${error.message}-${index}-${error.severity}`}
+              css={styles.validationErrorRow}
+              onClick={() => onErrorClick?.(error)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onErrorClick?.(error);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              <EuiFlexItem grow={false} css={styles.validationErrorLineNumber}>
+                <b>{error.lineNumber}</b>:{error.column}
               </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </div>
-      </EuiAccordion>
-    </div>
+              <EuiFlexItem grow={false}>
+                <EuiIcon
+                  type={
+                    error.severity === 'error'
+                      ? 'errorFilled'
+                      : error.severity === 'warning'
+                      ? 'warningFilled'
+                      : 'iInCircle'
+                  }
+                  color={
+                    error.severity === 'error'
+                      ? 'danger'
+                      : error.severity === 'warning'
+                      ? euiTheme.colors.vis.euiColorVis8
+                      : 'primary'
+                  }
+                  size="s"
+                  css={styles.validationErrorIcon}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <span>{error.message}</span>
+              </EuiFlexItem>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </div>
+    </EuiAccordion>
   );
 }
 
 const componentStyles = {
-  container: ({ euiTheme }: UseEuiTheme) =>
+  accordion: ({ euiTheme }: UseEuiTheme) =>
     css({
-      width: '100%',
-      minHeight: '48px',
+      height: '100%',
       padding: `0 ${euiTheme.size.m}`,
-      zIndex: 1000,
       borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      bottom: 0,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
   buttonContent: ({ euiTheme }: UseEuiTheme) => css`
@@ -184,9 +177,9 @@ const componentStyles = {
   accordionContent: ({ euiTheme }: UseEuiTheme) =>
     css({
       maxHeight: '200px',
-      overflow: 'auto',
-      padding: `${euiTheme.size.s} 0`,
-      borderTop: `1px solid ${euiTheme.colors.lightShade}`,
+      overflowY: 'auto',
+      padding: euiTheme.size.s,
+      borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
   validationErrorRow: (euiThemeContext: UseEuiTheme) =>
     css({

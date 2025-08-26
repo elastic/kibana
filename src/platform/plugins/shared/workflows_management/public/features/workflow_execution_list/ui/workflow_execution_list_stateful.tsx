@@ -35,7 +35,11 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       return;
     }
     const activeExecutions = workflowExecutions.results.some((execution) =>
-      [ExecutionStatus.PENDING, ExecutionStatus.RUNNING].includes(execution.status)
+      [
+        ExecutionStatus.PENDING,
+        ExecutionStatus.RUNNING,
+        ExecutionStatus.WAITING_FOR_INPUT,
+      ].includes(execution.status)
     );
 
     // If there are active executions, refetch more frequently

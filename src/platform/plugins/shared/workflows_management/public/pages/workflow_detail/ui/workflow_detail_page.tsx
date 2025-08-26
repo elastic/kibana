@@ -26,7 +26,7 @@ import { WorkflowEventModal } from '../../../features/run_workflow/ui/workflow_e
 import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
 
 const WorkflowYAMLEditor = React.lazy(() =>
-  import('../../../widgets/workflow_yaml_editor/ui').then((module) => ({
+  import('../../../widgets/workflow_yaml_editor').then((module) => ({
     default: module.WorkflowYAMLEditor,
   }))
 );
@@ -307,6 +307,5 @@ const componentStyles = {
       maxWidth: '275px',
       flex: 1,
       borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
-      paddingBottom: '48px', // height of the validation errors bottom bar
     }),
 };
