@@ -28,7 +28,7 @@ export type ToolTypeUpdateValidator<ToolTypeConfig extends object = Record<strin
   config: ToolTypeConfig
 ) => MaybePromise<ToolTypeConfig>;
 
-export interface PersistedToolTypeDefinition<ToolTypeConfig extends object = any> {
+export interface PersistedToolTypeDefinition<ToolTypeConfig extends object = Record<string, any>> {
   toolType: ToolType;
   toToolDefinition: ToolDefinitionConverter<ToolTypeConfig>;
   createSchema: ObjectType;

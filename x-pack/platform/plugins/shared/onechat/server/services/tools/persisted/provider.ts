@@ -24,7 +24,7 @@ export const createPersistedToolSource = ({
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
 }): ToolSource<ToolType.esql | ToolType.index_search> => {
-  const toolDefinitions: PersistedToolTypeDefinition[] = [createEsqlToolType()];
+  const toolDefinitions: PersistedToolTypeDefinition<any>[] = [createEsqlToolType()];
 
   return {
     id: 'persisted',
@@ -104,7 +104,7 @@ export const createPersistedToolClient = ({
 
       let updatedConfig: Record<string, unknown>;
       try {
-        updatedConfig = definition.validateForCreate(createRequest.configuration);
+        updatedConfig = await definition.validateForCreate(createRequest.configuration);
       } catch (e) {
         throw createBadRequestError(
           `Invalid configuration for tool type ${createRequest.type}: ${e.message}`
@@ -138,7 +138,7 @@ export const createPersistedToolClient = ({
 
       let updatedConfig: Record<string, unknown>;
       try {
-        updatedConfig = definition.validateForUpdate(
+        updatedConfig = await definition.validateForUpdate(
           updateRequest.configuration ?? {},
           existingTool.configuration
         );
