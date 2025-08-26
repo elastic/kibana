@@ -22,5 +22,6 @@
     "@kbn/logging",
     "@kbn/zod",
     "@kbn/i18n",
+    "@kbn/elastic-assistant",
   ]
 }
