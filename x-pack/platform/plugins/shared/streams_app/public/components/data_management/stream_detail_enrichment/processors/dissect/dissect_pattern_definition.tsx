@@ -12,13 +12,13 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { useResizeCheckerUtils } from '../../../../../hooks/use_resize_checker_utils';
+import { useResizeChecker } from '@kbn/react-hooks';
 import type { ProcessorFormState } from '../../types';
 
 export const DissectPatternDefinition = () => {
   const { core } = useKibana();
   const esDocUrl = core.docLinks.links.ingest.dissectKeyModifiers;
-  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
 
   const { field, fieldState } = useController<ProcessorFormState, 'pattern'>({
     name: 'pattern',

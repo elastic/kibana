@@ -21,7 +21,7 @@ import { isSchema, recursiveRecord } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
 import type { SchemaField } from '../types';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useResizeCheckerUtils } from '../../../../hooks/use_resize_checker_utils';
+import { useResizeChecker } from '@kbn/react-hooks';
 
 const label = i18n.translate('xpack.streams.advancedFieldMappingOptions.label', {
   defaultMessage: 'Advanced field mapping parameters',
@@ -45,7 +45,7 @@ export const AdvancedFieldMappingOptions = ({
   const [hasParsingError, { on: markAsParsingError, off: resetParsingErrorFlag }] =
     useBoolean(false);
 
-  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
 
   const isInvalid = hasParsingError || !getValidFlag(field.additionalParameters);
 

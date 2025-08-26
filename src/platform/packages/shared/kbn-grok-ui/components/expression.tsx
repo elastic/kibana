@@ -11,13 +11,8 @@ import type { CodeEditorProps, monaco } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import React, { useRef, useState, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useResizeChecker } from '@kbn/react-hooks';
 import type { DraftGrokExpression, GrokCollection } from '../models';
-
-interface ResizeCheckerSetup {
-  containerRef: React.RefObject<HTMLDivElement>;
-  setupResizeChecker: (editor: monaco.editor.IStandaloneCodeEditor) => void;
-  destroyResizeChecker: () => void;
-}
 
 export const Expression = ({
   grokCollection,
@@ -25,18 +20,12 @@ export const Expression = ({
   onChange,
   height = '100px',
   dataTestSubj,
-  onEditorMount,
-  onEditorWillUnmount,
-  resizeChecker,
 }: {
   grokCollection: GrokCollection;
   draftGrokExpression: DraftGrokExpression;
   onChange?: (expression: DraftGrokExpression) => void;
   height?: CodeEditorProps['height'];
   dataTestSubj?: string;
-  onEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor, divElement: HTMLDivElement) => void;
-  onEditorWillUnmount?: () => void;
-  resizeChecker?: ResizeCheckerSetup;
 }) => {
   const [suggestionProvider] = useState(() => {
     return grokCollection.getSuggestionProvider();
@@ -45,30 +34,19 @@ export const Expression = ({
   const expression = useObservable(draftGrokExpression.getExpression$());
 
   const grokEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const divRef = useRef<HTMLDivElement | null>(null);
-  const containerRef = resizeChecker?.containerRef || divRef;
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
 
   const onGrokEditorMount: CodeEditorProps['editorDidMount'] = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       grokEditorRef.current = editor;
-      if (onEditorMount && divRef.current) {
-        onEditorMount(editor, divRef.current);
-      }
-      if (resizeChecker) {
-        resizeChecker.setupResizeChecker(editor);
-      }
+      setupResizeChecker(editor);
     },
-    [onEditorMount, resizeChecker]
+    [setupResizeChecker]
   );
 
   const onGrokEditorWillUnmount: CodeEditorProps['editorWillUnmount'] = useCallback(() => {
-    if (onEditorWillUnmount) {
-      onEditorWillUnmount();
-    }
-    if (resizeChecker) {
-      resizeChecker.destroyResizeChecker();
-    }
-  }, [onEditorWillUnmount, resizeChecker]);
+    destroyResizeChecker();
+  }, [destroyResizeChecker]);
 
   const onGrokEditorChange: CodeEditorProps['onChange'] = (value) => {
     draftGrokExpression.updateExpression(value);

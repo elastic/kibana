@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useRef } from 'react';
+import type { monaco } from '@kbn/code-editor';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
-import type { monaco } from '@kbn/monaco';
 
-/**
- * Hook that returns functions for setting up and destroying a {@link ResizeChecker}
- * for a Monaco editor. Handles ref creation internally for better reusability.
- */
-export const useResizeCheckerUtils = () => {
+export const useResizeChecker = () => {
   const resizeChecker = useRef<ResizeChecker | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -40,10 +38,8 @@ export const useResizeCheckerUtils = () => {
       if (options.flyoutMode && containerRef.current) {
         const flyoutRect = targetElement.getBoundingClientRect();
         const availableWidth = flyoutRect.width - 120;
-
         containerRef.current.style.width = `${availableWidth}px`;
         containerRef.current.style.maxWidth = `${availableWidth}px`;
-
         const containerRect = containerRef.current.getBoundingClientRect();
         editor.layout({ width: availableWidth, height: containerRect.height });
       } else {

@@ -34,7 +34,7 @@ import {
 } from '@kbn/streamlang';
 import { isPlainObject } from 'lodash';
 import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
-import { useResizeCheckerUtils } from '../../../hooks/use_resize_checker_utils';
+import { useResizeChecker } from '@kbn/react-hooks';
 
 export type RoutingConditionEditorProps = ConditionEditorProps;
 
@@ -110,7 +110,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
 
-  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
 
   const handleConditionChange = (updatedCondition: Condition) => {
     props.onConditionChange(emptyEqualsToAlways(updatedCondition));

@@ -14,7 +14,7 @@ import type { DataSourceActorRef } from '../state_management/data_source_state_m
 import { useDataSourceSelector } from '../state_management/data_source_state_machine';
 import type { CustomSamplesDataSourceWithUIAttributes } from '../types';
 import { deserializeJson, serializeXJson } from '../helpers';
-import { useResizeCheckerUtils } from '../../../../hooks/use_resize_checker_utils';
+import { useResizeChecker } from '@kbn/react-hooks';
 import { DataSourceCard } from './data_source_card';
 import { NameField } from './name_field';
 import { DATA_SOURCES_I18N } from './translations';
@@ -35,7 +35,7 @@ export const CustomSamplesDataSourceCard = ({
     snapshot.matches('disabled')
   );
 
-  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
 
   const handleChange = (params: Partial<CustomSamplesDataSourceWithUIAttributes>) => {
     dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
