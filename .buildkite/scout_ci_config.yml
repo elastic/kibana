@@ -2,6 +2,7 @@
 ui_tests:
   enabled:
     - apm
+  disabled:
     - discover_enhanced
     - maps
     - observability
@@ -10,4 +11,3 @@ ui_tests:
     - security_solution
     - streams_app
     - slo
-  disabled:
