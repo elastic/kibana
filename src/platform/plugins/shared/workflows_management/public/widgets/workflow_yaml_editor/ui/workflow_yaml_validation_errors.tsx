@@ -25,15 +25,19 @@ import type { YamlValidationError } from '../model/types';
 
 const severityOrder = ['error', 'warning', 'info'];
 
-export function WorkflowYAMLValidationErrors({
-  isMounted,
-  validationErrors,
-  onErrorClick,
-}: {
+interface WorkflowYAMLValidationErrorsProps {
   isMounted: boolean;
+  error: Error | null;
   validationErrors: YamlValidationError[] | null;
   onErrorClick?: (error: YamlValidationError) => void;
-}) {
+}
+
+export function WorkflowYAMLValidationErrors({
+  isMounted,
+  error: errorValidating,
+  validationErrors,
+  onErrorClick,
+}: WorkflowYAMLValidationErrorsProps) {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: 'wf-yaml-editor-validation-errors' });
@@ -56,6 +60,9 @@ export function WorkflowYAMLValidationErrors({
   if (!isMounted) {
     icon = <EuiLoadingSpinner size="m" />;
     buttonContent = 'Loading editor...';
+  } else if (errorValidating) {
+    icon = <EuiIcon type="error" color="danger" size="m" />;
+    buttonContent = errorValidating.message;
   } else if (!validationErrors) {
     icon = <EuiLoadingSpinner size="m" />;
     buttonContent = 'Initializing validation...';
@@ -102,9 +109,9 @@ export function WorkflowYAMLValidationErrors({
           <EuiFlexItem css={styles.buttonContentText}>{buttonContent}</EuiFlexItem>
         </EuiFlexGroup>
       }
-      arrowDisplay={validationErrors?.length === 0 ? 'none' : 'left'}
+      arrowDisplay={validationErrors !== null && validationErrors.length > 0 ? 'left' : 'none'}
       initialIsOpen={validationErrors !== null && validationErrors.length > 0}
-      isDisabled={validationErrors?.length === 0}
+      isDisabled={validationErrors == null || validationErrors.length === 0}
       css={styles.accordion}
     >
       <div css={styles.separator} />

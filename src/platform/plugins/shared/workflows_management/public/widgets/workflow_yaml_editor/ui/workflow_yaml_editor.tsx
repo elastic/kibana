@@ -92,7 +92,12 @@ export const WorkflowYAMLEditor = ({
   const stepExecutionsDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
-  const { validationErrors, validateVariables, handleMarkersChanged } = useYamlValidation({
+  const {
+    error: errorValidating,
+    validationErrors,
+    validateVariables,
+    handleMarkersChanged,
+  } = useYamlValidation({
     workflowYamlSchema: WORKFLOW_ZOD_SCHEMA_LOOSE,
     onValidationErrors,
   });
@@ -138,11 +143,11 @@ export const WorkflowYAMLEditor = ({
   };
 
   useEffect(() => {
-    // After editor is mounted, validate the initial content
-    if (isEditorMounted && editorRef.current) {
+    // After editor is mounted or workflowId changes, validate the initial content
+    if (isEditorMounted && editorRef.current && editorRef.current.getModel()?.getValue() !== '') {
       changeSideEffects();
     }
-  }, [changeSideEffects, isEditorMounted]);
+  }, [changeSideEffects, isEditorMounted, workflowId]);
 
   useEffect(() => {
     const model = editorRef.current?.getModel() as monaco.editor.ITextModel;
@@ -363,6 +368,7 @@ export const WorkflowYAMLEditor = ({
       <div css={styles.validationErrorsContainer}>
         <WorkflowYAMLValidationErrors
           isMounted={isEditorMounted}
+          error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={(error) => {
             if (!editorRef.current) {
