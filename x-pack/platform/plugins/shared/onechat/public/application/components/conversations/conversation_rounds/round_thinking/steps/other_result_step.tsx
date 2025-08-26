@@ -34,7 +34,7 @@ export const OtherResultStep: React.FC<OtherResultStepProps> = ({ result }) => {
         overflowHeight={150}
         transparentBackground
       >
-        {JSON.stringify(result, null, 2)}
+        {JSON.stringify(result.data, null, 2)}
       </EuiCodeBlock>
     </EuiAccordion>
   );
