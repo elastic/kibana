@@ -358,13 +358,6 @@ class AppContextService {
   public getLockManagerService() {
     return this.lockManagerService;
   }
-  public getO11yAndSecurityAssistantsStatus = async () => {
-    // TODO: https://github.com/elastic/ingest-dev/issues/5934 Implement a service-based approach to get assistants status, we will need to extract/export functionality from the security and o11y assistant endpoints
-    return {
-      securityAssistantStatus: true,
-      observabilityAssistantStatus: true,
-    };
-  };
 }
 
 export const appContextService = new AppContextService();

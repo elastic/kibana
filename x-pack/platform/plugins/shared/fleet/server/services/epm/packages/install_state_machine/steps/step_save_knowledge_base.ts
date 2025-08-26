@@ -8,7 +8,6 @@
 import path from 'path';
 
 import { FleetError } from '../../../../../errors';
-import { appContextService } from '../../../../app_context';
 import {
   saveKnowledgeBaseContentToIndex,
   deletePackageKnowledgeBase,
@@ -74,36 +73,30 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
   // Save knowledge base content if present
   if (knowledgeBaseItems && knowledgeBaseItems.length > 0) {
     try {
-      // First, check that one (or both) of the ai assistants are enabled via api calls
-      const { securityAssistantStatus, observabilityAssistantStatus } =
-        await appContextService.getO11yAndSecurityAssistantsStatus();
+      // Save knowledge base content - this handles both fresh installs and upgrades
+      // by always deleting existing content for the package before saving new content
+      await saveKnowledgeBaseContentToIndex({
+        esClient,
+        pkgName: packageInfo.name,
+        pkgVersion: packageInfo.version,
+        knowledgeBaseContent: knowledgeBaseItems,
+      });
 
-      if (securityAssistantStatus || observabilityAssistantStatus) {
-        // Save knowledge base content - this handles both fresh installs and upgrades
-        // by always deleting existing content for the package before saving new content
-        await saveKnowledgeBaseContentToIndex({
-          esClient,
-          pkgName: packageInfo.name,
-          pkgVersion: packageInfo.version,
-          knowledgeBaseContent: knowledgeBaseItems,
-        });
+      // Add knowledge base asset references to esReferences
+      const knowledgeBaseAssetRefs = knowledgeBaseItems.map((item) => ({
+        id: `${packageInfo.name}-${item.fileName}`,
+        type: ElasticsearchAssetType.knowledgeBase,
+      }));
 
-        // Add knowledge base asset references to esReferences
-        const knowledgeBaseAssetRefs = knowledgeBaseItems.map((item) => ({
-          id: `${packageInfo.name}-${item.fileName}`,
-          type: ElasticsearchAssetType.knowledgeBase,
-        }));
-
-        // Update ES asset references to include knowledge base assets
-        esReferences = await updateEsAssetReferences(
-          savedObjectsClient,
-          packageInfo.name,
-          esReferences,
-          {
-            assetsToAdd: knowledgeBaseAssetRefs,
-          }
-        );
-      }
+      // Update ES asset references to include knowledge base assets
+      esReferences = await updateEsAssetReferences(
+        savedObjectsClient,
+        packageInfo.name,
+        esReferences,
+        {
+          assetsToAdd: knowledgeBaseAssetRefs,
+        }
+      );
     } catch (error) {
       throw new FleetError(`Error saving knowledge base content: ${error}`);
     }
