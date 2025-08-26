@@ -54,6 +54,7 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
             />
           ),
           render: (item: TableItem) => item.key,
+          width: '30%',
         },
         {
           name: (
@@ -71,6 +72,7 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
               <IndicatorFieldValue indicator={indicator} field={item.key} />
             </SecurityCellActions>
           ),
+          width: '70%',
         },
       ] as Array<EuiBasicTableColumn<TableItem>>,
     [indicator]

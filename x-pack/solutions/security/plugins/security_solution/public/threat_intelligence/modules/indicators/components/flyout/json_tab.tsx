@@ -9,8 +9,9 @@ import type { FC } from 'react';
 import React from 'react';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorEmptyPrompt } from './empty_prompt';
-import { JsonTab } from '../../../../../flyout/document_details/shared/json_tab';
-import type { SearchHit } from '../../../../../../common/search_strategy';
+import { JsonTab } from '../../../../../flyout/shared/json_tab';
+
+const FLYOUT_JSON_TEST_ID = 'indicators-flyout';
 
 export interface IndicatorsFlyoutJsonProps {
   /**
@@ -27,6 +28,10 @@ export const IndicatorsFlyoutJson: FC<IndicatorsFlyoutJsonProps> = ({ indicator 
   return Object.keys(indicator).length === 0 ? (
     <IndicatorEmptyPrompt />
   ) : (
-    <JsonTab searchHit={indicator as unknown as SearchHit} isRulePreview={false} />
+    <JsonTab
+      value={indicator as unknown as Record<string, unknown>}
+      showFooterOffset={false}
+      data-test-subj={FLYOUT_JSON_TEST_ID}
+    />
   );
 };

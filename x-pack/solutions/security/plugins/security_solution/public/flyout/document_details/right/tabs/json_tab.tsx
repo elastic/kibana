@@ -7,7 +7,8 @@
 
 import React, { memo } from 'react';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { JsonTab as SharedJsonTab } from '../../shared/json_tab';
+import { JsonTab as SharedJsonTab } from '../../../shared/json_tab';
+import { PREFIX } from '../../../shared/test_ids';
 
 /**
  * Json view displayed in the document details expandable flyout right section
@@ -15,7 +16,13 @@ import { JsonTab as SharedJsonTab } from '../../shared/json_tab';
 export const JsonTab = memo(() => {
   const { searchHit, isRulePreview } = useDocumentDetailsContext();
 
-  return <SharedJsonTab searchHit={searchHit} isRulePreview={isRulePreview} />;
+  return (
+    <SharedJsonTab
+      value={searchHit as unknown as Record<string, unknown>}
+      showFooterOffset={isRulePreview}
+      data-test-subj={PREFIX}
+    />
+  );
 });
 
 JsonTab.displayName = 'JsonTab';
