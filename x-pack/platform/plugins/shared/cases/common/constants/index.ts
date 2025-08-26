@@ -97,7 +97,7 @@ export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
 export const INTERNAL_CASE_SUMMARY_URL = `${CASES_INTERNAL_URL}/{case_id}/summary` as const;
 export const INTERNAL_INFERENCE_CONNECTORS_URL = '/internal/inference/connectors' as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
-  `${CASES_INTERNAL_URL}/case/attachment/_bulk_get` as const;
+  `${CASES_INTERNAL_URL}/case/alerts/_find_containing_all` as const;
 
 /**
  * Action routes
