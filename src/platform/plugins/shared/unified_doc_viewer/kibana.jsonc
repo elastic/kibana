@@ -9,8 +9,8 @@
     "id": "unifiedDocViewer",
     "browser": true,
     "server": false,
-    "requiredPlugins": ["data", "fieldFormats", "share", "embeddable", "savedSearch"],
+    "requiredPlugins": ["data", "fieldFormats", "share", "embeddable"],
     "optionalPlugins": ["fieldsMetadata"],
-    "requiredBundles": ["kibanaUtils"]
+    "requiredBundles": ["kibanaUtils", "savedSearch"]
   }
 }
