@@ -65,7 +65,6 @@ export function useAgentEdit({
     mutationFn: (data: AgentEditState) => agentService.create(data),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(result.id) });
       onSaveSuccess(result);
     },
     onError: (err: Error) => {
@@ -81,8 +80,6 @@ export function useAgentEdit({
       return agentService.update(agentId, data);
     },
     onSuccess: (result) => {
-      // Invalidate specific agent and agent profiles list
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId!) });
       queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
       onSaveSuccess(result);
     },
