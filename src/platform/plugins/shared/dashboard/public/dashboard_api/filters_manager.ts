@@ -61,7 +61,7 @@ export const initializeFiltersManager = (
       ) as Filter[][];
       return allOutputFilters && allOutputFilters.length > 0 ? allOutputFilters.flat() : undefined;
     }
-  );
+  ).pipe(distinctUntilChanged(deepEqual));
 
   const filterManagerSubscription = combineLatest([childFiltersLoading$, childFilters$])
     .pipe(
@@ -90,8 +90,8 @@ export const initializeFiltersManager = (
       publishFilters();
     });
 
+  // when auto-apply is `false`, publish filters when the children are done loading them
   if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
-    // once all children are done loading their filters for the first time, publish them
     unpublishedChildFilters$.pipe(skip(1), first()).subscribe(() => {
       publishFilters();
     });

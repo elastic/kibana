@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, first, switchMap, tap, type Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, switchMap, tap, type Observable } from 'rxjs';
 
 import type { Reference } from '@kbn/content-management-utils';
 import {
@@ -71,9 +71,16 @@ export const initializeDataControlManager = async <EditorState extends object = 
     blockingError$.next(error);
   }
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+  const filtersLoading$ = new BehaviorSubject<boolean>(Boolean(willHaveInitialFilter));
+
   function setDataLoading(loading: boolean | undefined) {
     dataLoading$.next(loading);
   }
+
+  let resolveInitialDataViewReady: (dataView: DataView) => void;
+  const initialDataViewPromise = new Promise<DataView>((resolve) => {
+    resolveInitialDataViewReady = resolve;
+  });
 
   const defaultTitle$ = new BehaviorSubject<string | undefined>(state.fieldName);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
@@ -81,9 +88,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
     String(toFormat)
   );
-
-  const filtersLoading$ = new BehaviorSubject<boolean>(true);
-  const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
 
   const dataViewIdSubscription = dataControlStateManager.api.dataViewId$
     .pipe(
@@ -107,6 +111,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       if (error) {
         setBlockingError(error);
       }
+      if (dataView) resolveInitialDataViewReady(dataView);
       dataViews$.next(dataView ? [dataView] : undefined);
     });
 
@@ -164,6 +169,16 @@ export const initializeDataControlManager = async <EditorState extends object = 
     });
   };
 
+  // build initial filter
+  let initialFilter: Filter | undefined;
+  if (willHaveInitialFilter && getInitialFilter) {
+    const initialDataView = await initialDataViewPromise;
+    initialFilter = getInitialFilter(initialDataView);
+  }
+  const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(
+    initialFilter ? [initialFilter] : undefined
+  );
+
   return {
     api: {
       ...dataControlStateManager.api,
@@ -180,19 +195,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
       defaultTitle$,
       getTypeDisplayName: () => typeDisplayName,
       isEditingEnabled: () => true,
-      untilFiltersReady: async () => {
-        return new Promise<void>((resolve) => {
-          combineLatest([blockingError$, filtersLoading$])
-            .pipe(
-              first(
-                ([blockingError, filtersLoading]) => !filtersLoading || blockingError !== undefined
-              )
-            )
-            .subscribe(() => {
-              resolve();
-            });
-        });
-      },
     },
     cleanup: () => {
       dataViewIdSubscription.unsubscribe();

@@ -114,7 +114,6 @@ export function InternalDashboardTopNav({
   );
 
   const hasUnpublishedFilters = useMemo(() => {
-    console.log({ publishedChildFilters, unpublishedChildFilters });
     return !deepEqual(publishedChildFilters ?? [], unpublishedChildFilters ?? []);
   }, [publishedChildFilters, unpublishedChildFilters]);
 
