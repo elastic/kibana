@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   riskEngineRouteHelpersFactory,
   getRiskEngineConfigSO,
-  waitForRiskEngineRun,
   waitForRiskEngineTaskToBeGone,
 } from '../../utils';
 
