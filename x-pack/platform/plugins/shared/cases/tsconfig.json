@@ -100,7 +100,8 @@
     "@kbn/unified-data-table",
     "@kbn/cell-actions",
     "@kbn/discover-utils",
-    "@kbn/unified-doc-viewer-plugin"
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/core-notifications-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }
