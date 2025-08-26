@@ -37,11 +37,11 @@ export const createMetricsDataSourceProfileProvider = (
   resolve: (params) => {
     // This filter still needs to be narrowed down to `FROM metrics-*` or `TS metrics-*`
     // and possibly other conditions
-    if (
-      params.rootContext.solutionType !== SolutionType.Observability &&
-      (!isOfAggregateQueryType(params.query) ||
-        !params.query.esql.toLowerCase().includes('metrics'))
-    ) {
+
+    const isValidQuery =
+      isOfAggregateQueryType(params.query) && params.query.esql.toLowerCase().includes('metrics');
+
+    if (params.rootContext.solutionType !== SolutionType.Observability || !isValidQuery) {
       return {
         isMatch: false,
       };
