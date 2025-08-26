@@ -93,6 +93,10 @@ export const JsonCodeEditorCommon = ({
         wrappingIndent: 'indent',
       }}
       enableFindAction={enableFindAction}
+      fitToContent={{
+        minLines: 3,
+        maxLines: 30,
+      }}
     />
   );
   if (hideCopyButton) {
@@ -121,7 +125,7 @@ export const JSONCodeEditorCommonMemoized = React.memo((props: JsonCodeEditorCom
 const componentStyles = {
   codeEditor: ({ euiTheme }: UseEuiTheme) => css`
     height: 100%;
-    padding: 0 ${euiTheme.size.s};
+    padding: 0 ${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.s};
     background-color: ${euiTheme.colors.backgroundBaseSubdued};
     border-radius: ${euiTheme.border.radius.medium};
   `,
