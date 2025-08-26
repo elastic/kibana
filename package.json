@@ -119,7 +119,7 @@
     "@elastic/datemath": "5.0.3",
     "@elastic/ebt": "^1.3.1",
     "@elastic/ecs": "^8.11.5",
-    "@elastic/elasticsearch": "^8.18.2",
+    "@elastic/elasticsearch": "^8.19.0",
     "@elastic/ems-client": "8.6.3",
     "@elastic/eui": "104.0.0-amsterdam.0",
     "@elastic/eui-amsterdam": "npm:@elastic/eui@104.0.0-amsterdam.0",

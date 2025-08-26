@@ -25,12 +25,14 @@ export const packetbeatNoResults: PatternRollup = {
       managed: true,
       policy: 'packetbeat',
       phase: 'hot',
+      skip: true,
     },
     '.ds-packetbeat-8.5.3-2023.02.04-000001': {
       index: '.ds-packetbeat-8.5.3-2023.02.04-000001',
       managed: true,
       policy: 'packetbeat',
       phase: 'hot',
+      skip: true,
     },
   },
   ilmExplainPhaseCounts: {
@@ -80,12 +82,14 @@ export const packetbeatWithSomeErrors: PatternRollup = {
       managed: true,
       policy: 'packetbeat',
       phase: 'hot',
+      skip: true,
     },
     '.ds-packetbeat-8.5.3-2023.02.04-000001': {
       index: '.ds-packetbeat-8.5.3-2023.02.04-000001',
       managed: true,
       policy: 'packetbeat',
       phase: 'hot',
+      skip: true,
     },
   },
   ilmExplainPhaseCounts: {
@@ -162,6 +166,7 @@ export const mockPacketbeatPatternRollup: PatternRollup = {
         version: 1,
         modified_date_in_millis: 1675536751205,
       },
+      skip: true,
     },
     '.ds-packetbeat-8.5.3-2023.02.04-000001': {
       index: '.ds-packetbeat-8.5.3-2023.02.04-000001',
@@ -182,6 +187,7 @@ export const mockPacketbeatPatternRollup: PatternRollup = {
         version: 1,
         modified_date_in_millis: 1675536751205,
       },
+      skip: true,
     },
   },
   ilmExplainPhaseCounts: {
