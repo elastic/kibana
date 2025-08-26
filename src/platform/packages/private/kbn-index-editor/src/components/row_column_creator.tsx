@@ -25,7 +25,7 @@ export const RowColumnCreator = ({
 
   const columns = useObservable(indexUpdateService.dataTableColumns$);
 
-  const toggleAddRow = () => {
+  const addRow = () => {
     indexUpdateService.addEmptyRow();
 
     requestAnimationFrame(() => {
@@ -35,7 +35,7 @@ export const RowColumnCreator = ({
     });
   };
 
-  const toggleAddColumn = () => {
+  const addColumn = () => {
     indexUpdateService.addNewColumn();
 
     requestAnimationFrame(() => {
@@ -50,7 +50,7 @@ export const RowColumnCreator = ({
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           data-test-subj="indexEditorAddRowButton"
-          onClick={toggleAddRow}
+          onClick={addRow}
           iconType="plusInCircle"
           size="s"
           disabled={indexUpdateService.canEditIndex === false}
@@ -63,7 +63,7 @@ export const RowColumnCreator = ({
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           data-test-subj="indexEditorAddColumnButton"
-          onClick={toggleAddColumn}
+          onClick={addColumn}
           iconType="plusInCircle"
           size="s"
           disabled={indexUpdateService.canEditIndex === false}
