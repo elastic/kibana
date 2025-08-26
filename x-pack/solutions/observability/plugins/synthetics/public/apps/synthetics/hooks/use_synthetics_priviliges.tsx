@@ -28,7 +28,7 @@ import {
   SYNTHETICS_INDEX_PATTERN,
 } from '../../../../common/constants';
 import { useSyntheticsSettingsContext } from '../contexts';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 
 export const useSyntheticsPrivileges = () => {
   const { canRead: canReadSyntheticsIndex, loading: isCanReadLoading } =

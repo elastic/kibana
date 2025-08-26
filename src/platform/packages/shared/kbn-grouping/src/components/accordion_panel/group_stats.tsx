@@ -19,9 +19,9 @@ import {
   useEuiFontSize,
 } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { css } from '@emotion/react';
-import { GroupStatsItem } from '../types';
+import type { GroupStatsItem } from '../types';
 import { TAKE_ACTION } from '../translations';
 
 interface GroupStatsProps<T> {

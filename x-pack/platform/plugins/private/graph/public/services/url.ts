@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ChromeStart } from '@kbn/core/public';
-import { GraphWorkspaceSavedObject } from '../types';
-import { MetaDataState } from '../state_management';
+import type { ChromeStart } from '@kbn/core/public';
+import type { GraphWorkspaceSavedObject } from '../types';
+import type { MetaDataState } from '../state_management';
 
 export function getHomePath() {
   return '/home';

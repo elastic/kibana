@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
+import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
 import {
   ONECHAT_UI_SETTING_ID,

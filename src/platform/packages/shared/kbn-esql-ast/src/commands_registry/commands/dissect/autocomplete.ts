@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
-import { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
 import { pipeCompleteItem, colonCompleteItem, semiColonCompleteItem } from '../../complete_items';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';

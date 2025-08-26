@@ -9,14 +9,13 @@
 
 import { format as formatUrl } from 'url';
 import { stringify } from 'query-string';
-import { createBrowserHistory, History } from 'history';
+import type { History } from 'history';
+import { createBrowserHistory } from 'history';
 import { parseUrl, parseUrlHash } from '../../../common/state_management/parse';
 import { decodeState } from '../state_encoder';
 import { url as urlUtils } from '../../../common';
-import {
-  createSetStateToKbnUrl,
-  SetStateToKbnUrlHashOptions,
-} from '../../../common/state_management/set_state_to_kbn_url';
+import type { SetStateToKbnUrlHashOptions } from '../../../common/state_management/set_state_to_kbn_url';
+import { createSetStateToKbnUrl } from '../../../common/state_management/set_state_to_kbn_url';
 import { persistState } from '../state_hash';
 
 export const getCurrentUrl = (history: History) => history.createHref(history.location);

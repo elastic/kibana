@@ -16,11 +16,11 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
-import { SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
+import type { SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   createKbnUrlStateStorage,
   syncState,
-  IKbnUrlStateStorage,
   useContainerSelector,
 } from '@kbn/kibana-utils-plugin/public';
 import { setStatusOnControlConfigs } from '../../../utils/alert_controls/set_status_on_control_configs';
@@ -28,12 +28,8 @@ import { datemathStringRT } from '../../../utils/datemath';
 import { ALERT_STATUS_ALL } from '../../../../common/constants';
 import { useTimefilterService } from '../../../hooks/use_timefilter_service';
 
-import {
-  useContainer,
-  DEFAULT_STATE,
-  AlertSearchBarStateContainer,
-  AlertSearchBarContainerState,
-} from './state_container';
+import type { AlertSearchBarStateContainer, AlertSearchBarContainerState } from './state_container';
+import { useContainer, DEFAULT_STATE } from './state_container';
 
 export const alertSearchBarState = t.partial({
   rangeFrom: datemathStringRT,
@@ -178,8 +174,7 @@ function setupUrlStateSync(
     },
     stateStorage: {
       ...urlStateStorage,
-      set: <AlertSearchBarStateContainer,>(key: string, state: AlertSearchBarStateContainer) =>
-        urlStateStorage.set(key, state, { replace }),
+      set: (key, state) => urlStateStorage.set(key, state, { replace }),
     },
   });
 }

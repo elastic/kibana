@@ -15,11 +15,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
-import {
+import type {
   CreateToolPayload,
   CreateToolResponse,
   UpdateToolPayload,
@@ -34,7 +34,7 @@ import {
   transformEsqlToolToFormData,
 } from '../../../utils/transform_esql_form_data';
 import { OnechatEsqlToolForm, OnechatEsqlToolFormMode } from './form/esql_tool_form';
-import { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
+import type { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
 import { useEsqlToolForm } from '../../../hooks/tools/use_esql_tool_form';
 
 interface EsqlToolBaseProps {

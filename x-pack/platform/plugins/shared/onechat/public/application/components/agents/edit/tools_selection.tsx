@@ -6,9 +6,9 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiCheckbox,
   EuiCode,
   EuiFlexGroup,

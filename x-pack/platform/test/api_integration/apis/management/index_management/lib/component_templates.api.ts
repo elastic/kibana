@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 import { API_BASE_PATH } from '../constants';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 type Options = Partial<ClusterPutComponentTemplateRequest> | { _kbnMeta: Record<string, any> };
 

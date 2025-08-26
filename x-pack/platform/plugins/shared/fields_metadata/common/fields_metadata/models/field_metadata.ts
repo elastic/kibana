@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { pick } from 'lodash';
-import { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';
+import type { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';
 
 // Use class/interface merging to define instance properties from FieldMetadataPlain.
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

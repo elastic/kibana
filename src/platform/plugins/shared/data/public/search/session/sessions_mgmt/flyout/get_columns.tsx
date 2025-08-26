@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchSessionsMgmtTable, columns } from '../components/table';
+import type { SearchSessionsMgmtTable } from '../components/table';
+import { columns } from '../components/table';
 import { ACTION } from '../types';
 
 type GetColumnsFn = React.ComponentProps<typeof SearchSessionsMgmtTable>['getColumns'];

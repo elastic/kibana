@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { documentationService } from '../../../../../services/documentation';
 import { UseField, CheckBoxField } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
-import { Field } from '../../../types';
+import type { Field } from '../../../types';
 import { EditFieldFormRow } from '../fields/edit_field';
 
 /**

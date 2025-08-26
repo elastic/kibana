@@ -7,7 +7,7 @@
 
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const archiveEmptyIndex =
   'x-pack/solutions/search/test/functional_search/fixtures/search-empty-index';
@@ -76,7 +76,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         },
         {
           deepLinkId: 'searchPlayground',
-          breadcrumbs: ['Build', 'Playground'],
+          breadcrumbs: ['Build', 'RAG Playground'],
           pageTestSubject: 'playgroundsListPage',
         },
         {
@@ -156,7 +156,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     it('navigate to playground from side nav', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'searchPlayground' });
       await header.waitUntilLoadingHasFinished();
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Build', 'Playground']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Build', 'RAG Playground']);
 
       await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'searchPlayground' });
       expect(await browser.getCurrentUrl()).contain('/app/search_playground');
@@ -217,7 +217,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Build' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'RAG Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Web crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });

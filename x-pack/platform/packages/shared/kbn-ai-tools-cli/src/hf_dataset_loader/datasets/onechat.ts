@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { randomUUID } from 'crypto';
-import { HuggingFaceDatasetSpec } from '../types';
+import type { HuggingFaceDatasetSpec } from '../types';
 import { getFileContent } from '../huggingface_utils';
 
 const ONECHAT_REPO = 'elastic/OneChatAgent';

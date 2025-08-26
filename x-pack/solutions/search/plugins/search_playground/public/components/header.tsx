@@ -85,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
             <h2>
               <FormattedMessage
                 id="xpack.searchPlayground.unsaved.pageTitle"
-                defaultMessage="Unsaved playground"
+                defaultMessage="Unsaved RAG playground"
               />
             </h2>
           </EuiTitle>

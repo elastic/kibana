@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { AgentMode, ConversationRound, RoundInput, ToolSelection } from '@kbn/onechat-common';
-import { AgentHandlerContext } from '@kbn/onechat-server';
-import { runChatAgent } from './chat';
-import { runReasoningAgent } from './reasoning';
-import { runPlannerAgent } from './planner';
-import { runResearcherAgent } from './researcher';
+import type { ConversationRound, RoundInput, ToolSelection } from '@kbn/onechat-common';
+import type { AgentHandlerContext } from '@kbn/onechat-server';
+import { runDefaultAgentMode } from './default';
 
 export interface RunAgentParams {
-  mode: AgentMode;
   /**
    * The next message in this conversation that the agent should respond to.
    */
@@ -53,15 +49,5 @@ export const runAgent = async (
   params: RunAgentParams,
   context: AgentHandlerContext
 ): Promise<RunAgentResponse> => {
-  const { mode, ...modeParams } = params;
-  switch (mode) {
-    case AgentMode.research:
-      return runResearcherAgent(modeParams, context);
-    case AgentMode.plan:
-      return runPlannerAgent(modeParams, context);
-    case AgentMode.reason:
-      return runReasoningAgent(modeParams, context);
-    case AgentMode.normal:
-      return runChatAgent(modeParams, context);
-  }
+  return runDefaultAgentMode(params, context);
 };

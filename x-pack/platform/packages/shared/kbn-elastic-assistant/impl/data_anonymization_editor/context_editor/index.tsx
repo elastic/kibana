@@ -20,9 +20,10 @@ import { getColumns } from './get_columns';
 import { getSelectionColumns } from './get_columns/get_selection_columns';
 import { getRows } from './get_rows';
 import { Toolbar } from './toolbar';
-import { ContextEditorRow, FIELDS } from './types';
+import type { ContextEditorRow } from './types';
+import { FIELDS } from './types';
 import { useAssistantContext } from '../../assistant_context';
-import { ServerSidePagination } from '../../assistant/common/components/assistant_settings_management/pagination/use_session_pagination';
+import type { ServerSidePagination } from '../../assistant/common/components/assistant_settings_management/pagination/use_session_pagination';
 import type { UseSelectionReturn } from './selection/use_selection';
 import type {
   HandlePageReset,
