@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { OverviewStatusMetaData } from '../runtime_types';
+import type { OverviewStatusMetaData } from '../runtime_types';
 
-export type SyntheticsSuggestion = Array<OverviewStatusMetaData>;
+export type SyntheticsSuggestion = OverviewStatusMetaData;

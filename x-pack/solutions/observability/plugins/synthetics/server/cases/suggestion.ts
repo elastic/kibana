@@ -13,9 +13,9 @@ import {
 } from '@kbn/cases-plugin/common';
 import type { SuggestionType } from '@kbn/cases-plugin/server';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
-import { AttachmentItem } from '@kbn/cases-plugin/common/types/domain/suggestion/v1';
-import { OverviewStatusMetaData } from '../../common/runtime_types';
-import { SyntheticsSuggestion } from '../../common/types';
+import type { AttachmentItem } from '@kbn/cases-plugin/common/types/domain/suggestion/v1';
+import type { OverviewStatusMetaData } from '../../common/runtime_types';
+import type { SyntheticsSuggestion } from '../../common/types';
 export interface SyntheticsAggregationsResponse {
   aggregations: {
     by_monitor: {
@@ -75,149 +75,144 @@ export function getMonitorByServiceName(
   logger: Logger
 ): SuggestionType<SyntheticsSuggestion> {
   return {
-    id: 'SyntheticMonitorByServiceName',
-    attachmentId: '.page',
+    id: 'syntheticMonitorByServiceName',
+    attachmentTypeId: '.page',
     owner: 'observability',
-    tools: {
-      SyntheticMonitorByServiceName: {
-        description: 'Suggest Synthetic monitors operating on the same service.',
-        schema: {
-          type: 'object',
-          properties: {
-            serviceName: {
-              type: 'string',
-              description: 'Name of the relevant service',
-            },
-          },
-        },
-      },
-    },
-    handlers: {
-      SyntheticMonitorByServiceName: async ({
-        context,
-        request,
-      }: {
-        context: SuggestionContext;
-        request: KibanaRequest;
-      }): Promise<SuggestionHandlerResponse<SyntheticsSuggestion>> => {
-        const serviceNames = 'service.name' in context ? context['service.name'] : [];
-        if (!serviceNames.length) {
-          return { suggestions: [] };
-        }
-        const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
-        const results = await scopedClusterClient.asCurrentUser.search({
-          index: 'synthetics-*',
-          query: {
-            bool: {
-              filter: [
-                {
-                  terms: {
-                    'service.name': serviceNames,
+    handlers: {
+      syntheticMonitorByServiceName: {
+        tool: {
+          description: 'Suggest Synthetic monitors operating on the same service.',
+        },
+        handler: async ({
+          context: { 'service.name': serviceNames, spaceId },
+          request,
+        }: {
+          context: SuggestionContext;
+          request: KibanaRequest;
+        }): Promise<SuggestionHandlerResponse<SyntheticsSuggestion>> => {
+          if (!serviceNames || !serviceNames.length) {
+            return { suggestions: [] };
+          }
+          const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+          const results = await scopedClusterClient.asCurrentUser.search({
+            index: 'synthetics-*',
+            query: {
+              bool: {
+                filter: [
+                  {
+                    terms: {
+                      'service.name': serviceNames,
+                    },
                   },
-                },
-              ],
-            },
-          },
-          aggs: {
-            by_monitor: {
-              terms: {
-                field: 'observer.name',
-                // TODO: TBD
-                // it limits suggestions to the top 5 monitors
-                size: 5,
+                  {
+                    terms: {
+                      'meta.space_id': [spaceId],
+                    },
+                  },
+                ],
               },
-              aggs: {
-                latest_run: {
-                  top_hits: {
-                    sort: [
-                      {
-                        '@timestamp': {
-                          order: 'desc',
+            },
+            aggs: {
+              by_monitor: {
+                terms: {
+                  field: 'observer.name',
+                  // TODO: TBD
+                  // it limits suggestions to the top 5 monitors
+                  size: 5,
+                },
+                aggs: {
+                  latest_run: {
+                    top_hits: {
+                      sort: [
+                        {
+                          '@timestamp': {
+                            order: 'desc',
+                          },
                         },
-                      },
-                    ],
-                    size: 1,
-                    _source: {
-                      includes: [
-                        'monitor.name',
-                        'monitor.type',
-                        'monitor.status',
-                        'status',
-                        'observer.geo.name',
-                        'observer.name',
-                        'monitor.id',
-                        'config_id',
-                        'url.full',
-                        '@timestamp',
-                        'meta.space_id',
-                        'type',
                       ],
+                      size: 1,
+                      _source: {
+                        includes: [
+                          'monitor.name',
+                          'monitor.type',
+                          'monitor.status',
+                          'status',
+                          'observer.geo.name',
+                          'observer.name',
+                          'monitor.id',
+                          'config_id',
+                          'url.full',
+                          '@timestamp',
+                          'meta.space_id',
+                          'type',
+                        ],
+                      },
                     },
                   },
                 },
               },
             },
-          },
-        });
-        // MetricItem
+          });
+          // MetricItem
 
-        const uniqueMonitor = (
-          results.aggregations as SyntheticsAggregationsResponse['aggregations']
-        ).by_monitor.buckets;
-        const rawMonitorsData: Array<OverviewStatusMetaData> = uniqueMonitor.map((monitor) => {
-          const source = monitor.latest_run.hits.hits[0]._source;
-          return {
-            monitorQueryId: source.monitor.id,
-            configId: source.config_id,
-            status: source.monitor.status ?? 'unknown',
-            name: source.monitor.name,
-            isEnabled: true,
-            isStatusAlertEnabled: true,
-            type: source.monitor.type,
-            schedule: '1',
-            tags: [],
-            maintenanceWindows: [],
-            timestamp: source['@timestamp'],
-            spaces: source.meta.space_id,
-            locationLabel: source.observer.geo.name,
-            locationId: source.observer.name,
-            updated_at: '2025-08-19T07:44:35.940Z',
-            urls: source.url.full,
-            projectId: '',
-          };
-        });
-        const data = rawMonitorsData.map((monitor) => {
-          return {
-            id: 'synthetics-monitors-suggestion-' + monitor.monitorQueryId,
-            description: 'Synthetic monitors that may be related to this case',
-            payload: monitor,
-            attachment: {
-              type: AttachmentType.persistableState,
-              persistableStateAttachmentTypeId: '.page',
-              persistableStateAttachmentState: {
-                type: 'synthetics_history',
-                url: {
-                  pathAndQuery: '<SOME_PATH_AND_QUERY>',
-                  label: 'payload.name',
-                  actionLabel: i18n.translate('xpack.synthetics.addToCase.caseAttachmentLabel', {
-                    defaultMessage: 'Go to Synthetics history',
-                  }),
-                  iconType: 'metricbeatApp',
+          const uniqueMonitor = (
+            results.aggregations as SyntheticsAggregationsResponse['aggregations']
+          ).by_monitor.buckets;
+          const rawMonitorsData: Array<OverviewStatusMetaData> = uniqueMonitor.map((monitor) => {
+            const source = monitor.latest_run.hits.hits[0]._source;
+            return {
+              monitorQueryId: source.monitor.id,
+              configId: source.config_id,
+              status: source.monitor.status ?? 'unknown',
+              name: source.monitor.name,
+              isEnabled: true,
+              isStatusAlertEnabled: true,
+              type: source.monitor.type,
+              schedule: '1',
+              tags: [],
+              maintenanceWindows: [],
+              timestamp: source['@timestamp'],
+              spaces: source.meta.space_id,
+              locationLabel: source.observer.geo.name,
+              locationId: source.observer.name,
+              updated_at: '2025-08-19T07:44:35.940Z',
+              urls: source.url.full,
+              projectId: '',
+            };
+          });
+
+          const suggestions = rawMonitorsData.map((monitor) => {
+            const item: AttachmentItem<SyntheticsSuggestion> = {
+              description: `Synthetic ${monitor.name} is ${
+                monitor.status
+              } for the service: ${serviceNames.join(',')} `,
+              payload: monitor,
+              attachment: {
+                type: AttachmentType.persistableState,
+                persistableStateAttachmentTypeId: '.page',
+                persistableStateAttachmentState: {
+                  type: 'synthetics_history',
+                  url: {
+                    pathAndQuery: '<SOME_PATH_AND_QUERY>',
+                    label: 'payload.name',
+                    actionLabel: i18n.translate('xpack.synthetics.addToCase.caseAttachmentLabel', {
+                      defaultMessage: 'Go to Synthetics history',
+                    }),
+                    iconType: 'metricbeatApp',
+                  },
                 },
               },
-            },
-          } as unknown as AttachmentItem<SyntheticsSuggestion>;
-        });
+            };
+            return {
+              id: `synthetics-monitors-suggestion-${monitor.monitorQueryId}-${monitor.locationId}`,
+              componentId: 'synthetics',
+              data: [item],
+            };
+          });
 
-        const suggestions = [
-          {
-            id: 'synthetics',
-            description: `synthetic monitors linked to service`,
-            data,
-          },
-        ];
-        return { suggestions };
+          return { suggestions };
+        },
       },
     },
   };
