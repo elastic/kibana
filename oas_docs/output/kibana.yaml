@@ -27366,6 +27366,7 @@ paths:
             type: string
       responses:
         '200':
+          description: List of cloud connectors
           content:
             application/json:
               schema:
@@ -27398,6 +27399,7 @@ paths:
                     - updated_at
                 type: array
         '400':
+          description: Generic Error
           content:
             application/json:
               schema:
@@ -27420,6 +27422,9 @@ paths:
       summary: Get cloud connectors
       tags:
         - Fleet cloud connectors
+      x-metaTags:
+        - content: Kibana
+          name: product_name
     post:
       description: |-
         **Spaces method and path for this operation:**
@@ -27495,6 +27500,7 @@ paths:
                 - vars
       responses:
         '200':
+          description: Cloud connector created successfully
           content:
             application/json:
               schema:
@@ -27525,6 +27531,7 @@ paths:
                   - created_at
                   - updated_at
         '400':
+          description: Generic Error
           content:
             application/json:
               schema:
@@ -27547,6 +27554,9 @@ paths:
       summary: Create cloud connector
       tags:
         - Fleet cloud connectors
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/data_streams:
     get:
       description: |-
