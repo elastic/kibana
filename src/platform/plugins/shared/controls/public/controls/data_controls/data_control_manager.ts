@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject, combineLatest, first, switchMap, tap, type Observable } from 'rxjs';
+
 import type { Reference } from '@kbn/content-management-utils';
 import {
   DATA_VIEW_SAVED_OBJECT_TYPE,
@@ -18,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
-import { BehaviorSubject, combineLatest, switchMap, tap, type Observable } from 'rxjs';
+
 import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import { defaultControlComparators, defaultControlDefaultValues } from '../default_control_manager';
@@ -73,11 +75,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
     dataLoading$.next(loading);
   }
 
-  let resolveInitialDataViewReady: (dataView: DataView) => void;
-  const initialDataViewPromise = new Promise<DataView>((resolve) => {
-    resolveInitialDataViewReady = resolve;
-  });
-
   const defaultTitle$ = new BehaviorSubject<string | undefined>(state.fieldName);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   const field$ = new BehaviorSubject<DataViewField | undefined>(undefined);
@@ -85,9 +82,13 @@ export const initializeDataControlManager = async <EditorState extends object = 
     String(toFormat)
   );
 
+  const filtersLoading$ = new BehaviorSubject<boolean>(true);
+  const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+
   const dataViewIdSubscription = dataControlStateManager.api.dataViewId$
     .pipe(
       tap(() => {
+        filtersLoading$.next(true);
         if (blockingError$.value) {
           setBlockingError(undefined);
         }
@@ -106,42 +107,44 @@ export const initializeDataControlManager = async <EditorState extends object = 
       if (error) {
         setBlockingError(error);
       }
-      if (dataView) resolveInitialDataViewReady(dataView);
       dataViews$.next(dataView ? [dataView] : undefined);
     });
 
-  const fieldNameSubscription = combineLatest([
-    dataViews$,
-    dataControlStateManager.api.fieldName$,
-  ]).subscribe(([nextDataViews, nextFieldName]) => {
-    const dataView = nextDataViews
-      ? nextDataViews.find(({ id }) => dataControlStateManager.api.dataViewId$.value === id)
-      : undefined;
-    if (!dataView) {
-      return;
-    }
+  const fieldNameSubscription = combineLatest([dataViews$, dataControlStateManager.api.fieldName$])
+    .pipe(
+      tap(() => {
+        filtersLoading$.next(true);
+      })
+    )
+    .subscribe(([nextDataViews, nextFieldName]) => {
+      const dataView = nextDataViews
+        ? nextDataViews.find(({ id }) => dataControlStateManager.api.dataViewId$.value === id)
+        : undefined;
+      if (!dataView) {
+        return;
+      }
 
-    const field = dataView.getFieldByName(nextFieldName);
-    if (!field) {
-      setBlockingError(
-        new Error(
-          i18n.translate('controls.dataControl.fieldNotFound', {
-            defaultMessage: 'Could not locate field: {fieldName}',
-            values: { fieldName: nextFieldName },
-          })
-        )
-      );
-    } else if (blockingError$.value) {
-      setBlockingError(undefined);
-    }
+      const field = dataView.getFieldByName(nextFieldName);
+      if (!field) {
+        setBlockingError(
+          new Error(
+            i18n.translate('controls.dataControl.fieldNotFound', {
+              defaultMessage: 'Could not locate field: {fieldName}',
+              values: { fieldName: nextFieldName },
+            })
+          )
+        );
+      } else if (blockingError$.value) {
+        setBlockingError(undefined);
+      }
 
-    field$.next(field);
-    defaultTitle$.next(field ? field.displayName || field.name : nextFieldName);
-    const spec = field?.toSpec();
-    if (spec) {
-      fieldFormatter.next(dataView.getFormatterForField(spec).getConverterFor('text'));
-    }
-  });
+      field$.next(field);
+      defaultTitle$.next(field ? field.displayName || field.name : nextFieldName);
+      const spec = field?.toSpec();
+      if (spec) {
+        fieldFormatter.next(dataView.getFormatterForField(spec).getConverterFor('text'));
+      }
+    });
 
   const onEdit = async () => {
     const initialState: DefaultDataControlState & EditorState = {
@@ -161,16 +164,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
     });
   };
 
-  // build initial filter
-  let initialFilter: Filter | undefined;
-  if (willHaveInitialFilter && getInitialFilter) {
-    const initialDataView = await initialDataViewPromise;
-    initialFilter = getInitialFilter(initialDataView);
-  }
-  const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(
-    initialFilter ? [initialFilter] : undefined
-  );
-
   return {
     api: {
       ...dataControlStateManager.api,
@@ -183,9 +176,23 @@ export const initializeDataControlManager = async <EditorState extends object = 
       fieldFormatter,
       onEdit,
       appliedFilters$,
+      filtersLoading$,
       defaultTitle$,
       getTypeDisplayName: () => typeDisplayName,
       isEditingEnabled: () => true,
+      untilFiltersReady: async () => {
+        return new Promise<void>((resolve) => {
+          combineLatest([blockingError$, filtersLoading$])
+            .pipe(
+              first(
+                ([blockingError, filtersLoading]) => !filtersLoading || blockingError !== undefined
+              )
+            )
+            .subscribe(() => {
+              resolve();
+            });
+        });
+      },
     },
     cleanup: () => {
       dataViewIdSubscription.unsubscribe();
@@ -201,9 +208,12 @@ export const initializeDataControlManager = async <EditorState extends object = 
           },
         ];
       },
-      onSelectionChange: () => {},
+      onSelectionChange: () => {
+        filtersLoading$.next(true);
+      },
       setOutputFilter: (newFilter: Filter | undefined) => {
         appliedFilters$.next(newFilter ? [newFilter] : undefined);
+        filtersLoading$.next(false);
       },
     },
     anyStateChange$: dataControlStateManager.anyStateChange$,

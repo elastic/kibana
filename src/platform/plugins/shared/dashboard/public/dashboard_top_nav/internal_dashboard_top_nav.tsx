@@ -96,6 +96,7 @@ export function InternalDashboardTopNav({
     query,
     title,
     viewMode,
+    // filtersLoading,
     publishedChildFilters,
     unpublishedChildFilters,
   ] = useBatchedPublishingSubjects(
@@ -107,14 +108,15 @@ export function InternalDashboardTopNav({
     dashboardApi.query$,
     dashboardApi.title$,
     dashboardApi.viewMode$,
-    dashboardApi.publishedChildFilters$,
+    // dashboardApi.childFiltersLoading$,
+    dashboardApi.childFilters$,
     dashboardApi.unpublishedChildFilters$
   );
 
   const hasUnpublishedFilters = useMemo(() => {
+    console.log({ publishedChildFilters, unpublishedChildFilters });
     return !deepEqual(publishedChildFilters ?? [], unpublishedChildFilters ?? []);
   }, [publishedChildFilters, unpublishedChildFilters]);
-  // console.log({ hasUnpublishedFilters });
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -377,7 +379,7 @@ export function InternalDashboardTopNav({
         indexPatterns={allDataViews ?? []}
         allowSavingQueries
         appName={DASHBOARD_APP_ID}
-        // isLoading={true}
+        // isLoading={filtersLoading}
         // additionalQueryBarMenuItems={{ items: [{ renderItem: () => <>test</> }] }}
         // prependFilterBar={<>test</>}
         draft={{ query: { query: 'test', language: 'kql' } }}

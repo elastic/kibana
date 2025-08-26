@@ -11,6 +11,7 @@ import { Filter } from '@kbn/es-query';
 import { PublishingSubject } from '../../publishing_subject';
 
 export interface AppliesFilters {
+  filtersLoading$: PublishingSubject<boolean>;
   appliedFilters$: PublishingSubject<Filter[] | undefined>;
 }
 

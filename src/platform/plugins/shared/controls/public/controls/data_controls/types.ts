@@ -10,7 +10,6 @@
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import type {
-  AppliesFilters,
   HasEditCapabilities,
   PublishesBlockingError,
   PublishesDataLoading,
@@ -19,6 +18,7 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { DefaultDataControlState } from '../../../common';
+import type { AppliesAsyncFilters } from './applies_async_filters';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 
@@ -33,7 +33,7 @@ export type DataControlApi = HasEditCapabilities &
   PublishesField &
   Pick<PublishesTitle, 'defaultTitle$'> &
   PublishesDataLoading &
-  AppliesFilters & {
+  AppliesAsyncFilters & {
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
   };

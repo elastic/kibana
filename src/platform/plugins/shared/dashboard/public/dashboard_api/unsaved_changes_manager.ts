@@ -11,7 +11,9 @@ import { omit } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
+  combineLatestWith,
   debounceTime,
+  filter,
   first,
   map,
   skip,
@@ -150,9 +152,11 @@ export function initializeUnsavedChangesManager({
         settingsManager.internalApi.reset(savedState);
 
         // when auto-apply is off, wait for children to update their filters, then publish
-        filtersManager.api.childFilters$.pipe(skip(1), first()).subscribe(() => {
-          filtersManager.api.publishFilters();
-        });
+        if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
+          filtersManager.api.unpublishedChildFilters$.pipe(skip(1), first()).subscribe(() => {
+            filtersManager.api.publishFilters();
+          });
+        }
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>

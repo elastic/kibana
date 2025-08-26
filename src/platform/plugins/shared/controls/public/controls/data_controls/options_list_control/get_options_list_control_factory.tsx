@@ -243,6 +243,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         .pipe(debounceTime(0))
         .subscribe(([dataViews, fieldName, selectedOptions, existsSelected, exclude]) => {
           const dataView = dataViews?.[0];
+          if (!dataView) return;
           const field = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
 
           let newFilter: Filter | undefined;
@@ -479,6 +480,12 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         },
         allowExpensiveQueries$,
       };
+
+      if (selectionsManager.api.hasInitialSelections) {
+        console.log('untilFiltersReady', uuid);
+
+        await dataControlManager.api.untilFiltersReady();
+      }
 
       return {
         api,
