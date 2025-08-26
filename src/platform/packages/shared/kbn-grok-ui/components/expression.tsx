@@ -13,11 +13,11 @@ import React, { useRef, useState, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { DraftGrokExpression, GrokCollection } from '../models';
 
-type ResizeCheckerSetup = {
+interface ResizeCheckerSetup {
   containerRef: React.RefObject<HTMLDivElement>;
   setupResizeChecker: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   destroyResizeChecker: () => void;
-};
+}
 
 export const Expression = ({
   grokCollection,

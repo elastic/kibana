@@ -24,10 +24,10 @@ export const useResizeCheckerUtils = () => {
     if (resizeChecker.current) {
       resizeChecker.current.destroy();
     }
-    
+
     let targetElement = containerRef.current;
     if (!targetElement) return;
-    
+
     if (options.flyoutMode) {
       const flyoutElement = targetElement.closest('.euiFlyout') as HTMLDivElement;
       if (flyoutElement) {
@@ -40,10 +40,10 @@ export const useResizeCheckerUtils = () => {
       if (options.flyoutMode && containerRef.current) {
         const flyoutRect = targetElement.getBoundingClientRect();
         const availableWidth = flyoutRect.width - 120;
-        
+
         containerRef.current.style.width = `${availableWidth}px`;
         containerRef.current.style.maxWidth = `${availableWidth}px`;
-        
+
         const containerRect = containerRef.current.getBoundingClientRect();
         editor.layout({ width: availableWidth, height: containerRect.height });
       } else {

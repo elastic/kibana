@@ -73,13 +73,13 @@ export const CustomSamplesDataSourceCard = ({
           fullWidth
           style={{ minWidth: 0, maxWidth: '100%', flex: '1 1 auto', boxSizing: 'border-box' }}
         >
-          <div 
-            ref={containerRef} 
-            style={{ 
-              width: '100%', 
-              height: 200, 
-              overflow: 'hidden', 
-              minWidth: 0, 
+          <div
+            ref={containerRef}
+            style={{
+              width: '100%',
+              height: 200,
+              overflow: 'hidden',
+              minWidth: 0,
               maxWidth: '100%',
               flex: '1 1 0%',
               boxSizing: 'border-box',
