@@ -126,11 +126,7 @@ function getFileExtension(path) {
 }
 
 function validateFileExtension(path) {
-  if (
-    isDevOrCI &&
-    devOrCIPaths.some((safePath) => path?.startsWith(safePath)) &&
-    !process.env.KBN_ENABLE_HARDENED_FS
-  ) {
+  if (isDevOrCI && !process.env.KBN_ENABLE_HARDENED_FS) {
     return;
   }
 
@@ -297,11 +293,7 @@ function getSafePath(userPath) {
  * @throws {Error} - Throws if SVG sanitization fails
  */
 function validateAndSanitizeFileData(data, path) {
-  if (
-    isDevOrCI &&
-    devOrCIPaths.some((safePath) => path?.startsWith(safePath)) &&
-    !process.env.KBN_ENABLE_HARDENED_FS
-  ) {
+  if (isDevOrCI && !process.env.KBN_ENABLE_HARDENED_FS) {
     return data;
   }
   // Convert input to Buffer if needed
