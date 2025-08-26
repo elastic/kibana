@@ -8188,10 +8188,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-suites-serverless@link:x-pack/test_serverless":
-  version "0.0.0"
-  uid ""
-
 "@kbn/test-suites-src@link:src/platform/test":
   version "0.0.0"
   uid ""
