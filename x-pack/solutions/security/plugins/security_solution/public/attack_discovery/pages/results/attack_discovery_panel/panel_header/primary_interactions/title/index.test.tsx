@@ -119,16 +119,6 @@ describe('Title', () => {
     });
   });
 
-  it('renders the checkbox', () => {
-    render(
-      <TestWrapper>
-        <Title {...defaultProps} />
-      </TestWrapper>
-    );
-
-    expect(screen.getByTestId('attackDiscoveryCheckbox')).toBeInTheDocument();
-  });
-
   describe('user interactions', () => {
     it('calls setIsSelected when checkbox is clicked', async () => {
       const setIsSelected = jest.fn();
