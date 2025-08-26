@@ -36,16 +36,16 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 import type { IndexPatternManagmentContext } from '../../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
-import { type RemoveDataViewProps, removeDataView } from '../edit_index_pattern';
+import { type RemoveDataViewProps } from '../edit_index_pattern';
 import type { IndexPatternTableItem } from '../types';
 import {
   DataViewTableController,
   dataViewTableControllerStateDefaults as defaults,
 } from './data_view_table_controller';
-import { deleteModalMsg } from './delete_modal_msg';
 import { NoData } from './no_data';
 import { SpacesList } from './spaces_list';
 import { MAX_DISPLAYED_RELATIONSHIPS } from '../../constants';
+import { DeleteDataViewFlyout } from '../delete_data_view_flyout/delete_data_view_flyout';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
@@ -82,18 +82,19 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
     chrome,
     dataViews,
     share,
-    IndexPatternEditor,
     spaces,
-    overlays,
     docLinks,
     noDataPage,
-    dataViewMgmtService,
     savedObjectsManagement,
-    ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
 
   const [query, setQuery] = useState('');
-  const [selectedItems, setSelectedItems] = useState<IndexPatternTableItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<RemoveDataViewProps[]>([]);
+  const [selectedDataView, setSelectedDataView] = useState<RemoveDataViewProps>();
+  const [selectedRelationships, setSelectedRelationships] = useState<
+    Record<string, SavedObjectRelation[]>
+  >({});
+  const [flyoutOpen, setFlyoutOpen] = React.useState(false);
   const [dataViewController] = useState(
     () =>
       new DataViewTableController({
@@ -132,6 +133,17 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
     }
   };
 
+  const onFlyoutClose = () => {
+    setFlyoutOpen(false);
+    setSelectedItems([]);
+    setSelectedDataView(undefined);
+    setSelectedRelationships({});
+  };
+
+  const dataViewArray = useMemo(() => {
+    return selectedDataView ? [selectedDataView] : selectedItems;
+  }, [selectedDataView, selectedItems]);
+
   const getRelationshipsForSelections = async (selectedViews: RemoveDataViewProps[]) => {
     const allowedTypes = (await savedObjectsManagement.getAllowedTypes()).map((type) => type.name);
 
@@ -160,16 +172,6 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
   };
 
   const renderDeleteButton = () => {
-    const clickHandler = removeDataView({
-      dataViews,
-      overlays,
-      uiSettings,
-      onDelete: () => {
-        setSelectedItems([]);
-        dataViewController.loadDataViews();
-      },
-      startServices,
-    });
     if (selectedItems.length === 0) {
       return;
     }
@@ -184,14 +186,8 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
               string,
               SavedObjectRelation[]
             >) || {};
-          clickHandler(
-            selectedItems,
-            deleteModalMsg({
-              views: selectedItems,
-              hasSpaces: !!spaces,
-              relationships,
-            })
-          );
+          setSelectedRelationships(relationships);
+          setFlyoutOpen(true);
         }}
       >
         <FormattedMessage
@@ -229,14 +225,6 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
     [spaces]
   );
 
-  const removeHandler = removeDataView({
-    dataViews,
-    uiSettings,
-    overlays,
-    onDelete: () => dataViewController.loadDataViews(),
-    startServices,
-  });
-
   const alertColumn = {
     name: 'Actions',
     field: 'id',
@@ -260,14 +248,9 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
             string,
             SavedObjectRelation[]
           >;
-          return removeHandler(
-            [dataView],
-            deleteModalMsg({
-              views: [dataView],
-              hasSpaces: !!spaces,
-              relationships,
-            })
-          );
+          setSelectedDataView(dataView);
+          setSelectedRelationships(relationships);
+          setFlyoutOpen(true);
         },
         isPrimary: true,
         'data-test-subj': 'action-delete',
@@ -411,6 +394,19 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
           selection={dataViews.getCanSaveSync() ? selection : undefined}
         />
       </ContextWrapper>
+      {flyoutOpen && (
+        <DeleteDataViewFlyout
+          dataViews={dataViews}
+          dataViewArray={dataViewArray}
+          selectedRelationships={selectedRelationships}
+          hasSpaces={!!spaces}
+          onDelete={async () => {
+            dataViewController.loadDataViews();
+            onFlyoutClose();
+          }}
+          onClose={onFlyoutClose}
+        />
+      )}
     </>
   );
   if (!hasDataView)

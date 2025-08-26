@@ -49,9 +49,17 @@ interface ModalProps {
   views: RemoveDataViewProps[];
   hasSpaces: boolean;
   relationships: Record<string, SavedObjectRelation[]>;
+  reviewedItems: Set<string>;
+  setReviewedItems: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
 
-const DeleteModalMsgRender: React.FC<ModalProps> = ({ views, hasSpaces, relationships }) => {
+export const DeleteModalContent: React.FC<ModalProps> = ({
+  views,
+  hasSpaces,
+  relationships,
+  reviewedItems,
+  setReviewedItems,
+}) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
@@ -102,6 +110,7 @@ const DeleteModalMsgRender: React.FC<ModalProps> = ({ views, hasSpaces, relation
         </div>
       );
       itemIdToExpandedRowMapValues[id] = relationsTable;
+      setReviewedItems(new Set(reviewedItems).add(id));
     }
 
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
@@ -206,7 +215,7 @@ const DeleteModalMsgRender: React.FC<ModalProps> = ({ views, hasSpaces, relation
       <div>
         <FormattedMessage
           id="indexPatternManagement.dataViewTable.deleteConfirmSummary"
-          defaultMessage="You'll permanently delete {count, number} {count, plural,
+          defaultMessage="Successfully deleted {count, number} {count, plural,
           one {data view}
           other {data views}
 }."
@@ -223,8 +232,4 @@ const DeleteModalMsgRender: React.FC<ModalProps> = ({ views, hasSpaces, relation
       />
     </div>
   );
-};
-
-export const deleteModalMsg = (props: ModalProps) => {
-  return <DeleteModalMsgRender {...props} />;
 };
