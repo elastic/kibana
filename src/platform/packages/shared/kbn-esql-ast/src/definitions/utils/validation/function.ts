@@ -82,15 +82,15 @@ class FunctionValidator {
 
     const nestedErrors = this.validateNestedFunctions();
 
+    // if one or more child functions produced errors, report and stop validation
     if (nestedErrors.length) {
-      // if one or more child functions produced errors, report and stop validation
       this.report(...nestedErrors);
       return;
     }
 
+    // skip validation for functions with names defined by a parameter
+    // e.g. "... | EVAL ??param(..args)"
     if (isParamLiteral(this.fn.operator)) {
-      // skip validation for functions with names defined by a parameter
-      // e.g. "... | EVAL ??param(..args)"
       return;
     }
 
