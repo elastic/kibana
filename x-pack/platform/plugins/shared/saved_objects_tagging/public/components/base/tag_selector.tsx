@@ -58,6 +58,7 @@ const renderCreateOption = () => {
       gutterSize="xs"
       alignItems="center"
       responsive={false}
+      title=""
     >
       <EuiFlexItem grow={false}>
         <EuiIcon type="tag" />
@@ -121,7 +122,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
     // The extra whitespace is required to avoid the combobox to consider that the value
     // is selected when closing the dropdown
     return {
-      label: currentSearch.length > 0 ? `${currentSearch} ` : '',
+      label: `${currentSearch} `,
       color: '#FFFFFF',
       value: createOptionValue,
     };
