@@ -17,6 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
   const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
   const es = getService('es');
+  const retry = getService('retry');
   const spaces = getService('spaces');
   const customSpace = 'privmontestspace';
   const supertest = getService('supertest');
@@ -41,6 +42,13 @@ export default ({ getService }: FtrProviderContext) => {
           },
         },
       },
+    });
+
+  const waitForPrivMonUsersToBeSynced = async (length = 1) =>
+    retry.waitForWithTimeout('Wait for PrivMon users to be synced', 90000, async () => {
+      const res = await api.listPrivMonUsers({ query: {} });
+      log.info(`PrivMon users sync check: found ${res.body.length} users`);
+      return res.body.length >= length; // wait until we have at least one user
     });
 
   async function getPrivMonSoStatus(space: string = 'default') {
