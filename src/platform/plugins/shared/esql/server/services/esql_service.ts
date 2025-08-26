@@ -8,7 +8,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { IndicesAutocompleteResult, IndexAutocompleteItem } from '@kbn/esql-types';
+import type {
+  IndicesAutocompleteResult,
+  IndexAutocompleteItem,
+  ResolveIndexResponse,
+} from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 
@@ -65,6 +69,11 @@ export class EsqlService {
       flat_settings: true,
     })) as IndexModeResponse;
 
+    const ccsSources = (await client.indices.resolveIndex({
+      name: '*:*',
+      expand_wildcards: 'open',
+    })) as ResolveIndexResponse;
+
     const indices: IndexAutocompleteItem[] = [];
     const indexNames: string[] = [];
 
@@ -74,6 +83,12 @@ export class EsqlService {
         indices.push({ name, mode, aliases: [] });
       }
     }
+
+    ccsSources.indices?.forEach((index) => {
+      if (index.mode === mode) {
+        indices.push({ name: index.name, mode, aliases: [] });
+      }
+    });
 
     const aliases = await this.getIndexAliases(indexNames);
 
