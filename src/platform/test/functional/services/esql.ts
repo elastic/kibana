@@ -8,13 +8,14 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class ESQLService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
+  private readonly log = this.ctx.getService('log');
   private readonly browser = this.ctx.getService('browser');
 
   /** Ensures that the ES|QL code editor is loaded with a given statement */
@@ -136,11 +137,13 @@ export class ESQLService extends FtrService {
     });
   }
 
-  public async waitESQLEditorLoaded(editorSubjId = 'ESQLEditor') {
-    await this.monacoEditor.waitCodeEditorReady(editorSubjId);
+  public async waitESQLEditorLoaded(editorSubjId = 'ESQLEditor'): Promise<WebElementWrapper> {
+    this.log.debug('waitESQLEditorLoaded: ', editorSubjId);
+    return await this.monacoEditor.waitCodeEditorReady(editorSubjId);
   }
 
   public async getEsqlEditorQuery() {
+    await this.waitESQLEditorLoaded();
     return await this.monacoEditor.getCodeEditorValue();
   }
 

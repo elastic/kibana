@@ -61,7 +61,6 @@ export class OsqueryAppContextService {
     this.spacesService = dependencies.spacesService;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public stop() {}
 
   public getAgentService(): AgentService | undefined {

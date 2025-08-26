@@ -8,7 +8,7 @@
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FindSLOResponse } from '@kbn/slo-schema';
+import type { FindSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import type { SearchState } from '../hooks/use_url_search_state';
 import { SLOSortBy } from './common/sort_by_select';

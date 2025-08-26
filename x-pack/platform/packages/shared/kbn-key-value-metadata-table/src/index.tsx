@@ -11,7 +11,7 @@ import React from 'react';
 import type { EuiTableProps } from '@elastic/eui';
 import { EuiTable, EuiTableBody, EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 import { FormattedValue } from './formatted_value';
-import { KeyValuePair } from './utils/get_flattened_key_value_pairs';
+import type { KeyValuePair } from './utils/get_flattened_key_value_pairs';
 
 export function KeyValueTable({
   keyValuePairs,

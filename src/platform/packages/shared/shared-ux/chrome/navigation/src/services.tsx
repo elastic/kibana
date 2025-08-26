@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useContext, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EventTracker } from './analytics';
 
-import { NavigationKibanaDependencies, NavigationServices } from './types';
+import type { NavigationChromeDependencies, NavigationServices } from './types';
 
 const Context = React.createContext<NavigationServices | null>(null);
 
@@ -28,38 +29,46 @@ export const NavigationProvider: FC<PropsWithChildren<NavigationServices>> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const NavigationKibanaProvider: FC<PropsWithChildren<NavigationKibanaDependencies>> = ({
+export const NavigationKibanaProvider: FC<PropsWithChildren<NavigationChromeDependencies>> = ({
   children,
   ...dependencies
 }) => {
-  const { core, activeNodes$ } = dependencies;
-  const { chrome, http, analytics } = core;
-  const { basePath } = http;
-  const { navigateToUrl } = core.application;
-  const isSideNavCollapsed = useObservable(chrome.sideNav.getIsCollapsed$(), true);
-  const selectedPanelNode = useObservable(chrome.sideNav.getPanelSelectedNode$(), null);
+  const {
+    activeNodes$,
+    navigateToUrl,
+    reportEvent,
+    isCollapsed$,
+    panelSelectedNode$,
+    basePath,
+    recentlyAccessed$,
+    setPanelSelectedNode,
+    isFeedbackBtnVisible$,
+  } = dependencies;
+  const isSideNavCollapsed = useObservable(isCollapsed$, true);
+  const selectedPanelNode = useObservable(panelSelectedNode$, null);
 
   const value: NavigationServices = useMemo(
     () => ({
       basePath,
-      recentlyAccessed$: chrome.recentlyAccessed.get$(),
+      recentlyAccessed$,
       navigateToUrl,
       activeNodes$,
       isSideNavCollapsed,
-      eventTracker: new EventTracker({ reportEvent: analytics.reportEvent }),
+      eventTracker: new EventTracker({ reportEvent }),
       selectedPanelNode,
-      setSelectedPanelNode: chrome.sideNav.setPanelSelectedNode,
-      isFeedbackBtnVisible$: chrome.sideNav.getIsFeedbackBtnVisible$(),
+      setPanelSelectedNode,
+      isFeedbackBtnVisible$,
     }),
     [
       activeNodes$,
-      analytics.reportEvent,
+      reportEvent,
       basePath,
-      chrome.recentlyAccessed,
+      recentlyAccessed$,
       isSideNavCollapsed,
       navigateToUrl,
       selectedPanelNode,
-      chrome.sideNav,
+      setPanelSelectedNode,
+      isFeedbackBtnVisible$,
     ]
   );
 

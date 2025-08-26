@@ -10,7 +10,8 @@ import { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
-import { ManagementTabs, Wrapper } from './wrapper';
+import type { ManagementTabs } from './wrapper';
+import { Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
@@ -34,7 +35,7 @@ export function ClassicStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition: Streams.UnwiredStream.GetResponse;
+  definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -58,7 +59,7 @@ export function ClassicStreamDetailManagement({
                 values: { streamId: key },
               })}
               <EuiBadgeGroup gutterSize="s">
-                {Streams.UnwiredStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
+                {Streams.ClassicStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
                 <LifecycleBadge lifecycle={definition.effective_lifecycle} />
               </EuiBadgeGroup>
             </EuiFlexGroup>

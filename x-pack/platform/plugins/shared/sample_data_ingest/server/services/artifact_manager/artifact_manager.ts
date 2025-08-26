@@ -7,7 +7,7 @@
 
 import { unlink } from 'fs/promises';
 import type { Logger } from '@kbn/logging';
-import { getArtifactName } from '@kbn/product-doc-common';
+import { DocumentationProduct, getArtifactName } from '@kbn/product-doc-common';
 import { DatasetSampleType } from '../../../common';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
@@ -33,6 +33,10 @@ interface PreparedArtifact {
   mappings: any;
 }
 
+const mapDatasetSampleTypeToProduct = {
+  [DatasetSampleType.elasticsearch]: DocumentationProduct.elasticsearch,
+};
+
 export class ArtifactManager {
   private readonly artifactsFolder: string;
   private readonly artifactRepositoryUrl: string;
@@ -53,7 +57,12 @@ export class ArtifactManager {
     this.log = logger;
   }
 
-  async prepareArtifact(productName: DatasetSampleType): Promise<PreparedArtifact> {
+  async prepareArtifact(sampleType: DatasetSampleType): Promise<PreparedArtifact> {
+    const productName = mapDatasetSampleTypeToProduct[sampleType];
+
+    if (!productName) {
+      throw new Error(`Unsupported sample type for artifact preparation: ${sampleType}`);
+    }
     const productVersion = majorMinor(await this.getProductVersion(productName));
     const artifactFileName = getArtifactName({ productName, productVersion });
     const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;

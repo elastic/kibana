@@ -6,7 +6,7 @@
  */
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
@@ -34,7 +34,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Basic Functionality', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+        );
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.goToMetricExplorer();
         await pageObjects.timePicker.setAbsoluteRange(
@@ -42,7 +44,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           END_DATE.format(timepickerFormat)
         );
       });
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+        )
+      );
 
       it('should render the correct page title', async () => {
         const documentTitle = await browser.getTitle();
@@ -138,11 +144,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Saved Views', function () {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+        );
         await pageObjects.infraHome.goToMetricExplorer();
       });
 
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+        )
+      );
 
       beforeEach(async () => {
         await pageObjects.infraSavedViews.clickSavedViewsButton();

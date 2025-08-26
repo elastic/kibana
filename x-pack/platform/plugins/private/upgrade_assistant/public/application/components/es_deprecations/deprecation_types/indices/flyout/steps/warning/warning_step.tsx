@@ -20,20 +20,20 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
+import type {
   EnrichedDeprecationInfo,
   IndexWarning,
   IndexWarningType,
   ReindexAction,
-  ReindexStatus,
   ReindexStatusResponse,
 } from '../../../../../../../../../common/types';
+import { ReindexStatus } from '../../../../../../../../../common/types';
 import { useAppContext } from '../../../../../../../app_context';
+import type { WarningCheckboxProps } from './warning_step_checkbox';
 import {
   DeprecatedSettingWarningCheckbox,
   ReplaceIndexWithAliasWarningCheckbox,
   MakeIndexReadonlyWarningCheckbox,
-  WarningCheckboxProps,
 } from './warning_step_checkbox';
 import {
   FrozenCallOut,
@@ -44,7 +44,7 @@ import {
   ReindexingFailedCallOut,
 } from '../callouts';
 import { NodesLowSpaceCallOut } from '../../../../../common/nodes_low_disk_space';
-import { ReindexState } from '../../../use_reindex';
+import type { ReindexState } from '../../../use_reindex';
 
 const ML_ANOMALIES_PREFIX = '.ml-anomalies-';
 

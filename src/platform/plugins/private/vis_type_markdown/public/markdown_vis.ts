@@ -21,6 +21,7 @@ export const markdownVisType = {
   isAccessible: true,
   icon: 'visText',
   group: VisGroups.TOOLS,
+  disableEdit: true,
   titleInWizard: i18n.translate('visTypeMarkdown.markdownTitleInWizard', {
     defaultMessage: 'Markdown text',
   }),

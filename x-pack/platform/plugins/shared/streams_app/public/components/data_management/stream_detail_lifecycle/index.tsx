@@ -7,13 +7,15 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import { IngestStreamLifecycle, Streams, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
-import { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import { Streams, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
+import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { css } from '@emotion/react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { EditLifecycleModal, LifecycleEditAction } from './modal';
+import type { LifecycleEditAction } from './modal';
+import { EditLifecycleModal } from './modal';
 import { RetentionSummary } from './summary';
 import { RetentionMetadata } from './metadata';
 import { IlmSummary } from './ilm_summary';
@@ -33,7 +35,7 @@ function useLifecycleState({
 
   const lifecycleActions = useMemo(() => {
     const actions: Array<{ name: string; action: LifecycleEditAction }> = [];
-    const isUnwired = Streams.UnwiredStream.GetResponse.is(definition);
+    const isClassic = Streams.ClassicStream.GetResponse.is(definition);
 
     actions.push({
       name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
@@ -51,7 +53,7 @@ function useLifecycleState({
       });
     }
 
-    if (isUnwired || !isRoot(definition.stream.name)) {
+    if (isClassic || !isRoot(definition.stream.name)) {
       actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.resetToDefault', {
           defaultMessage: 'Reset to default',

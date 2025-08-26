@@ -17,11 +17,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/action_task_params');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/action_task_params');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/action_task_params');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/action_task_params');
     });
 
     it('7.16.0 migrates action_task_params to use references array', async () => {

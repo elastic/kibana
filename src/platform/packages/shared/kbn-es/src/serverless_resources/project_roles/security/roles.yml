@@ -1,6 +1,4 @@
-# -----
-# Copy from internal roles config in elasticsearch-controller
-# -----
+# ----- Copy from internal roles config in elasticsearch-controller
 # modeled after the t1_analyst minus osquery run saved queries privilege
 viewer:
   cluster: []
@@ -848,6 +846,7 @@ endpoint_policy_manager:
         - feature_siemV3.endpoint_list_all
         - feature_siemV3.global_artifact_management_all
         - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
         - feature_siemV3.event_filters_all
         - feature_siemV3.host_isolation_exceptions_all
         - feature_siemV3.blocklist_all # Elastic Defend Policy Management

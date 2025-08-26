@@ -26,3 +26,6 @@ export const DEFAULT_TRANSLATION_RISK_SCORE =
 
 /** Maximum size for searches, aggregations and terms queries */
 export const MAX_ES_SEARCH_SIZE = 10_000 as const;
+
+export const SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER = '[indexPattern]';
+export const SIEM_RULE_MIGRATION_INDEX_PATTERN_QUERY = `elastic_rule.query: "${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}"`;

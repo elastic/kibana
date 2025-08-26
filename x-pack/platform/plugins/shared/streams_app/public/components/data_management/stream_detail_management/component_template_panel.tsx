@@ -6,15 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiInMemoryTable,
-  EuiIcon,
-  EuiText,
-  EuiCard,
-  EuiLink,
-  useEuiTheme,
-  EuiBasicTableColumn,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable, EuiIcon, EuiText, EuiCard, EuiLink, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   UnmanagedComponentTemplateDetails,

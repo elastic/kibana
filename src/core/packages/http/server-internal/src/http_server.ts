@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Server, Request } from '@hapi/hapi';
+import type { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { createServer, getServerOptions, setTlsConfig, getRequestId } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
-import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { CoreVersionedRouter, isSafeMethod, Router } from '@kbn/core-http-router-server-internal';
+import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
+import { isSafeMethod } from '@kbn/core-http-router-server-internal';
 import type {
   IRouter,
   RouteConfigOptions,
@@ -42,10 +44,10 @@ import type {
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
 import { identity, isNil, isObject, omitBy } from 'lodash';
-import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
-import { Env } from '@kbn/config';
-import { CoreContext } from '@kbn/core-base-server-internal';
-import { HttpConfig } from './http_config';
+import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import type { Env } from '@kbn/config';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat } from './lifecycle/on_post_auth';
@@ -565,6 +567,14 @@ export class HttpServer {
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
       // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
       app.traceId = apm.currentTraceIds['trace.id'];
+      app.span = apm.startSpan('pre-route handler middlewares');
+
+      return responseToolkit.continue;
+    });
+
+    this.server!.ext('onPreHandler', (request, responseToolkit) => {
+      (request.app as KibanaRequestState).span?.end();
+      (request.app as KibanaRequestState).span = null;
 
       return responseToolkit.continue;
     });
@@ -744,6 +754,7 @@ export class HttpServer {
               reason: 'Route serves static assets',
             },
           },
+          excludeFromRateLimiter: true,
         },
         auth: false,
         cache: {

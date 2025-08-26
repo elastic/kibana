@@ -15,7 +15,7 @@ export function getIndexPatternsForStream(stream: Streams.all.Definition | undef
   if (!stream) {
     return undefined;
   }
-  if (Streams.UnwiredStream.Definition.is(stream)) {
+  if (Streams.ClassicStream.Definition.is(stream)) {
     return [stream.name];
   }
   const dataStreamOfDefinition = stream.name;

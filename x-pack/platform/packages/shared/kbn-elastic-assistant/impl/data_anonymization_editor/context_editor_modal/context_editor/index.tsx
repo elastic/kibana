@@ -9,9 +9,10 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
 import React, { useMemo, useState, useRef } from 'react';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import styled from '@emotion/styled';
-import { BatchUpdateListItem, ContextEditorRow, FIELDS } from '../../context_editor/types';
+import type { BatchUpdateListItem, ContextEditorRow } from '../../context_editor/types';
+import { FIELDS } from '../../context_editor/types';
 import { useAssistantContext } from '../../../assistant_context';
 import { getColumns } from '../../context_editor/get_columns';
 import { ANONYMIZATION_PROMPT_CONTEXT_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';

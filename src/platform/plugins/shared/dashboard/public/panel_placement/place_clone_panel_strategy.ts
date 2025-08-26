@@ -12,8 +12,8 @@ import { cloneDeep, forOwn } from 'lodash';
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/content_management';
 import type { GridData } from '../../server/content_management';
-import { PanelPlacementProps, PanelPlacementReturn } from './types';
-import { DashboardLayoutPanel } from '../dashboard_api/layout_manager';
+import type { PanelPlacementProps, PanelPlacementReturn } from './types';
+import type { DashboardLayoutPanel } from '../dashboard_api/layout_manager';
 
 interface IplacementDirection {
   grid: Omit<GridData, 'i'>;

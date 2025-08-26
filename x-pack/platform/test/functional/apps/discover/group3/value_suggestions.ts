@@ -6,7 +6,7 @@
  */
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -30,10 +30,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('value suggestions', function describeIndexTests() {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
 
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_drilldowns/drilldowns'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
@@ -91,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // navigate to context
           await dataGrid.clickRowToggle({ rowIndex: 0 });
-          const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+          const rowActions = await dataGrid.getRowActions();
           await rowActions[1].click();
           await context.waitUntilContextLoadingHasFinished();
 

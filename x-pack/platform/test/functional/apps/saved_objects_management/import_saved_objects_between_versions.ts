@@ -11,7 +11,7 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -28,7 +28,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Export import saved objects between versions', function () {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare'
       );
@@ -42,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare'
       );

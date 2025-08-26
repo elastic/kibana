@@ -210,9 +210,16 @@ describe('column', () => {
 });
 
 describe('literal', () => {
-  describe('"time interval"', () => {
-    test('a basic time Interval node', () => {
-      const node = Builder.expression.literal.qualifiedInteger(42, 'days');
+  describe('"time intervals"', () => {
+    test('a basic time duration node', () => {
+      const node = Builder.expression.literal.timespan(42, 'second');
+      const text = BasicPrettyPrinter.expression(node);
+
+      expect(text).toBe('42 second');
+    });
+
+    test('a basic date period node', () => {
+      const node = Builder.expression.literal.timespan(42, 'days');
       const text = BasicPrettyPrinter.expression(node);
 
       expect(text).toBe('42 days');

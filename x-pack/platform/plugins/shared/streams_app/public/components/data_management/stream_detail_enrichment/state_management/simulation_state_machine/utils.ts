@@ -5,40 +5,61 @@
  * 2.0.
  */
 
-import { FieldDefinition, getProcessorConfig } from '@kbn/streams-schema';
+import type { FieldDefinition } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { PreviewDocsFilterOption } from './simulation_documents_search';
-import { DetectedField, Simulation } from './types';
-import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../../../schema_editor/types';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
+import type { DetectedField, Simulation } from './types';
+import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
-export function getSourceFields(processors: ProcessorDefinitionWithUIAttributes[]): string[] {
-  return processors
-    .map((processor) => {
-      const config = getProcessorConfig(processor);
-      if ('field' in config) {
-        return config.field.trim();
-      }
-      return '';
-    })
-    .filter(Boolean);
+export function getSourceField(processor: StreamlangProcessorDefinition): string | undefined {
+  const processorSourceField = (() => {
+    switch (processor.action) {
+      case 'append':
+      case 'set':
+        return processor.to;
+      case 'rename':
+      case 'grok':
+      case 'dissect':
+      case 'date':
+        return processor.from;
+      case 'manual_ingest_pipeline':
+        return undefined;
+      default:
+        return undefined;
+    }
+  })();
+
+  const trimmedSourceField = processorSourceField?.trim();
+  return trimmedSourceField && trimmedSourceField.length > 0 ? trimmedSourceField : undefined;
 }
 
-export function getTableColumns(
-  processors: ProcessorDefinitionWithUIAttributes[],
-  fields: DetectedField[],
-  filter: PreviewDocsFilterOption
-) {
-  const uniqueProcessorsFields = uniq(getSourceFields(processors));
+export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
+  return uniq(detectedFields.map((field) => field.name));
+}
 
-  if (filter === 'outcome_filter_failed' || filter === 'outcome_filter_skipped') {
-    return uniqueProcessorsFields;
+export function getTableColumns({
+  currentProcessorSourceField,
+  detectedFields = [],
+  previewDocsFilter,
+}: {
+  currentProcessorSourceField?: string;
+  detectedFields?: DetectedField[];
+  previewDocsFilter: PreviewDocsFilterOption;
+}) {
+  if (!currentProcessorSourceField) {
+    return [];
   }
 
-  const uniqueDetectedFields = uniq(fields.map((field) => field.name));
+  if (['outcome_filter_failed', 'outcome_filter_skipped'].includes(previewDocsFilter)) {
+    return [currentProcessorSourceField];
+  }
 
-  return uniq([...uniqueProcessorsFields, ...uniqueDetectedFields]);
+  const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
+
+  return uniq([currentProcessorSourceField, ...uniqueDetectedFields]);
 }
 
 type SimulationDocReport = Simulation['documents'][number];

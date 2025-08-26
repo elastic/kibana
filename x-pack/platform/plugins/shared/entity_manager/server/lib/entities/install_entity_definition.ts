@@ -6,10 +6,10 @@
  */
 
 import semver from 'semver';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
-import { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
+import type { Logger } from '@kbn/logging';
 import { generateLatestIndexTemplateId } from './helpers/generate_component_id';
 import { createAndInstallIngestPipelines } from './create_and_install_ingest_pipeline';
 import { createAndInstallTransforms } from './create_and_install_transform';
@@ -26,7 +26,7 @@ import { createAndInstallTemplates, deleteTemplate } from '../manage_index_templ
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
-import { EntityDefinitionWithState } from './types';
+import type { EntityDefinitionWithState } from './types';
 import { stopLatestTransform, stopTransforms } from './stop_transforms';
 import { deleteLatestTransform, deleteTransforms } from './delete_transforms';
 import { deleteIndices } from './delete_index';

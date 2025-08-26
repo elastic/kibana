@@ -10,7 +10,8 @@ import { z } from '@kbn/zod';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ListIndexInfo, listIndices } from './steps/list_indices';
+import type { ListIndexBasicInfo } from './steps/list_indices';
+import { listIndices } from './steps/list_indices';
 import { getIndexMappings } from './steps/get_mappings';
 
 export interface RelevantIndex {
@@ -24,13 +25,13 @@ export interface IndexExplorerResponse {
 }
 
 export const indexExplorer = async ({
-  query,
+  nlQuery,
   indexPattern = '*',
   limit = 1,
   esClient,
   model,
 }: {
-  query: string;
+  nlQuery: string;
   indexPattern?: string;
   limit?: number;
   esClient: ElasticsearchClient;
@@ -38,12 +39,13 @@ export const indexExplorer = async ({
 }): Promise<IndexExplorerResponse> => {
   const allIndices = await listIndices({
     pattern: indexPattern,
+    showDetails: false,
     esClient,
   });
 
   const selectedIndices = await selectIndices({
     indices: allIndices,
-    query,
+    nlQuery,
     model,
     limit,
   });
@@ -73,12 +75,12 @@ export interface SelectedIndex {
 
 const selectIndices = async ({
   indices,
-  query,
+  nlQuery,
   model,
   limit = 1,
 }: {
-  indices: ListIndexInfo[];
-  query: string;
+  indices: ListIndexBasicInfo[];
+  nlQuery: string;
   model: ScopedModel;
   limit?: number;
 }): Promise<SelectedIndex[]> => {
@@ -100,7 +102,7 @@ const selectIndices = async ({
       `You are an AI assistant for the Elasticsearch company.
        based on a natural language query from the user, your task is to select up to ${limit} most relevant indices from a list of indices.
 
-       *The query is:* ${query}
+       *The natural language query is:* ${nlQuery}
 
        *List of indices:*
        ${indices.map((index) => `- ${index.index}`).join('\n')}

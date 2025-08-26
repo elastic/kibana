@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -105,7 +105,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_agent_policies_outputs', () => {
     describe('POST /api/fleet/agent_policies/outputs', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
         await fleetAndAgents.setup();
 
@@ -190,7 +190,7 @@ export default function (providerContext: FtrProviderContext) {
     let output2Id = '';
     describe('GET /api/fleet/agent_policies/{agentPolicyId}/outputs', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
         await fleetAndAgents.setup();
 

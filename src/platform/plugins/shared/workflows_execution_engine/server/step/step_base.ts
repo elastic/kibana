@@ -9,10 +9,10 @@
 
 // Import specific step types as needed from schema
 // import { evaluate } from '@marcbachmann/cel-js'
+import type { ConnectorExecutor } from '../connector_executor';
 import { WorkflowTemplatingEngine } from '../templating_engine';
-import { ConnectorExecutor } from '../connector_executor';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
   output: any;
@@ -26,6 +26,7 @@ export interface BaseStep {
   if?: string;
   foreach?: string;
   timeout?: number;
+  spaceId: string;
 }
 
 export type StepDefinition = BaseStep;
@@ -34,25 +35,28 @@ export interface StepImplementation {
   run(): Promise<void>;
 }
 
+export interface StepErrorCatcher {
+  catchError(): Promise<void>;
+}
+
 export abstract class StepBase<TStep extends BaseStep> implements StepImplementation {
   protected step: TStep;
   protected contextManager: WorkflowContextManager;
   protected templatingEngine: WorkflowTemplatingEngine;
   protected connectorExecutor: ConnectorExecutor;
-  protected workflowState: WorkflowExecutionRuntimeManager;
+  protected workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(
     step: TStep,
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor | undefined,
-    workflowState: WorkflowExecutionRuntimeManager,
-    templatingEngineType: 'mustache' | 'nunjucks' = 'nunjucks'
+    workflowExecutionRuntime: WorkflowExecutionRuntimeManager
   ) {
     this.step = step;
     this.contextManager = contextManager;
-    this.templatingEngine = new WorkflowTemplatingEngine(templatingEngineType);
+    this.templatingEngine = new WorkflowTemplatingEngine();
     this.connectorExecutor = connectorExecutor as any;
-    this.workflowState = workflowState;
+    this.workflowExecutionRuntime = workflowExecutionRuntime;
   }
 
   public getName(): string {
@@ -61,51 +65,20 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
 
   public async run(): Promise<void> {
     const stepId = (this.step as any).id || this.getName();
-    const stepName = this.getName();
 
-    // Log step start
-    this.contextManager.logStepStart(stepName);
-    await this.workflowState.startStep(stepId);
-
-    // const stepEvent = {
-    //   event: { action: 'step-execution' },
-    //   message: `Executing step: ${stepName}`,
-    // };
-
-    // Start timing
-    // this.contextManager.startTiming(stepEvent);
+    await this.workflowExecutionRuntime.startStep(stepId);
 
     try {
       const result = await this._run();
-
-      // Log success
-      // this.contextManager.stopTiming({
-      //   ...stepEvent,
-      //   event: { ...stepEvent.event, outcome: 'success' },
-      // });
-
-      this.contextManager.logStepComplete(stepName, stepName, true);
-      await this.workflowState.setStepResult(stepId, result);
+      await this.workflowExecutionRuntime.setStepResult(result);
     } catch (error) {
-      // Log failure
-      // this.contextManager.logError(`Step ${stepName} failed`, error as Error, {
-      //   event: { action: 'step-failed' },
-      // });
-
-      // this.contextManager.stopTiming({
-      //   ...stepEvent,
-      //   event: { ...stepEvent.event, outcome: 'failure' },
-      // });
-
-      this.contextManager.logStepComplete(stepName, stepName, false);
-
       const result = await this.handleFailure(error);
-      await this.workflowState.setStepResult(stepId, result);
+      await this.workflowExecutionRuntime.setStepResult(result);
     } finally {
-      // Clear step context
-      this.contextManager.clearCurrentStep();
-      await this.workflowState.finishStep(stepId);
+      await this.workflowExecutionRuntime.finishStep(stepId);
     }
+
+    this.workflowExecutionRuntime.goToNextStep();
   }
 
   // Subclasses implement this to execute the step logic

@@ -7,8 +7,9 @@
 
 import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import { indexExplorer } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { indexExplorer, IndexExplorerResponse } from '@kbn/onechat-genai-utils';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const indexExplorerSchema = z.object({
   query: z.string().describe('A natural language query to infer which indices to use.'),
@@ -22,17 +23,14 @@ const indexExplorerSchema = z.object({
     .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
 });
 
-export const indexExplorerTool = (): BuiltinToolDefinition<
-  typeof indexExplorerSchema,
-  IndexExplorerResponse
-> => {
+export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
   return {
     id: builtinToolIds.indexExplorer,
     description: `List relevant indices and corresponding mappings based on a natural language query.
 
                   The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
                   This should *only* be used if you know what you're doing (e.g. if the user explicitly specified a pattern).
-                  Otherwise, leave it empty to list all indices.
+                  Otherwise, leave it empty to search against all indices.
 
                   *Example:*
                   User: "Show me my latest alerts"
@@ -40,17 +38,31 @@ export const indexExplorerTool = (): BuiltinToolDefinition<
                   Tool result: [{ indexName: '.alerts', mappings: {...} }]
                   `,
     schema: indexExplorerSchema,
-    handler: async ({ query, indexPattern = '*', limit = 1 }, { esClient, modelProvider }) => {
+    handler: async (
+      { query: nlQuery, indexPattern = '*', limit = 1 },
+      { esClient, modelProvider }
+    ) => {
       const model = await modelProvider.getDefaultModel();
-      const result = await indexExplorer({
-        query,
+      const response = await indexExplorer({
+        nlQuery,
         indexPattern,
         limit,
         esClient: esClient.asCurrentUser,
         model,
       });
+
       return {
-        result,
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              indices: response.indices.map((result) => ({
+                index: result.indexName,
+                reason: result.reason,
+              })),
+            },
+          },
+        ],
       };
     },
     tags: [builtinTags.retrieval],

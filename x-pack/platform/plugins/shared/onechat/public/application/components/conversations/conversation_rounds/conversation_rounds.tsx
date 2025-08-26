@@ -5,28 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RoundLayout } from './round_layout';
+import React from 'react';
+import { useSendMessage } from '../../../context/send_message_context';
+import { useConversationRounds } from '../../../hooks/use_conversation';
 import { ConversationContent } from '../conversation_grid';
-import { RoundResponse } from './round_response';
-import { useConversation } from '../../../hooks/use_conversation';
 import { RoundError } from './round_error';
+import { RoundIcon } from './round_icon';
+import { RoundLayout } from './round_layout';
+import { RoundResponse } from './round_response';
 
-interface ConversationRoundsProps {
-  isResponseLoading: boolean;
-  isResponseError: boolean;
-  responseError: unknown;
-}
-
-export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
-  isResponseLoading,
-  isResponseError,
-  responseError,
-}) => {
-  const { conversation } = useConversation();
-  const rounds = conversation?.rounds ?? [];
+export const ConversationRounds: React.FC<{}> = () => {
+  const conversationRounds = useConversationRounds();
+  const { isResponseLoading, retry, error } = useSendMessage();
   return (
     <ConversationContent>
       <EuiFlexGroup
@@ -36,19 +28,19 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
           defaultMessage: 'Conversation messages',
         })}
       >
-        {rounds.map(({ input, response, steps }, index) => {
-          const isCurrentRound = index === rounds.length - 1;
+        {conversationRounds.map(({ input, response, steps }, index) => {
+          const isCurrentRound = index === conversationRounds.length - 1;
           const isLoading = isResponseLoading && isCurrentRound;
-          // TODO: enable showing RoundError once implemented
-          const isError = isResponseError && isCurrentRound && false;
+          const isError = Boolean(error) && isCurrentRound;
           return (
             <RoundLayout
               key={index}
               // TODO: eventually we will use a RoundInput component when we have more complicated inputs like file attachments
               input={<EuiText size="s">{input.message}</EuiText>}
+              outputIcon={<RoundIcon isLoading={isLoading} isError={isError} />}
               output={
                 isError ? (
-                  <RoundError error={responseError} />
+                  <RoundError error={error} onRetry={retry} />
                 ) : (
                   <RoundResponse response={response} steps={steps} isLoading={isLoading} />
                 )

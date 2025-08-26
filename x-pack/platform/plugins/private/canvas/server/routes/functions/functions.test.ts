@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import type { RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { ExpressionFunction } from '@kbn/expressions-plugin/common/expression_functions';
 import { initializeGetFunctionsRoute } from './functions';

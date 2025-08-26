@@ -17,12 +17,8 @@ import {
   getExpressionPosition,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
-import {
-  type ISuggestionItem,
-  type ICommandContext,
-  Location,
-  ICommandCallbacks,
-} from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
 import { isColumn, isAssignment } from '../../../ast/is';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { isMarkerNode } from '../../../definitions/utils/ast';
@@ -60,6 +56,7 @@ export async function autocomplete(
     location: Location.EVAL,
     context,
     hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+    activeProduct: context?.activeProduct,
   });
 
   const positionInExpression = getExpressionPosition(query, expressionRoot);

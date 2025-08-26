@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import '@kbn/core-provider-plugin/types';
-import { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
-import { GlobalSearchTestApi } from '@kbn/global-search-test-plugin/public/types';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
+import type { GlobalSearchTestApi } from '@kbn/global-search-test-plugin/public/types';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/global_search/basic'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/global_search/basic'
         );
       });
 

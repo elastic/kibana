@@ -8,7 +8,7 @@
  */
 
 import chalk from 'chalk';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { Config, createRunner } from './lib';
 import * as Tasks from './tasks';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 interface Detector {
   identifier: string;
@@ -199,12 +199,12 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         before(async () => {
-          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+          await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
           await esArchiver.loadIfNeeded(
-            'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
+            'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce'
           );
           await esArchiver.loadIfNeeded(
-            'x-pack/test/functional/es_archives/ml/categorization_small'
+            'x-pack/platform/test/fixtures/es_archives/ml/categorization_small'
           );
           await ml.testResources.createDataViewIfNeeded(fqIndexName, '@timestamp');
           await ml.testResources.createDataViewIfNeeded(ecIndexName, 'order_date');
@@ -243,9 +243,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testResources.deleteDataViewByTitle(fqIndexName);
           await ml.testResources.deleteDataViewByTitle(ecIndexName);
           await ml.testResources.deleteDataViewByTitle(categorizationIndexName);
-          await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-          await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');
-          await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization_small');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+          await esArchiver.unload(
+            'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce'
+          );
+          await esArchiver.unload(
+            'x-pack/platform/test/fixtures/es_archives/ml/categorization_small'
+          );
           await ml.testResources.resetKibanaTimeZone();
         });
 

@@ -10,17 +10,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { isRight } from 'fp-ts/Either';
+import { getOrElse, isRight } from 'fp-ts/Either';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
-import { LinkAnchor } from '../../../../../common/components/links';
+import { LinkButton } from '../../../../../common/components/links';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { PAGE_SIZE, PRIVILEGED_USER_ACTIVITY_QUERY_ID } from './constants';
 import { EsqlDashboardPanel } from '../../../privileged_user_monitoring_onboarding/components/esql_dashboard_panel/esql_dashboard_panel';
@@ -58,19 +58,19 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
     usePrivilegedUserActivityParams(selectedToggleOption, sourcererDataView);
   const stackByOptions = useStackByOptions(selectedToggleOption);
   const setSelectedChartOptionCallback = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedStackByOption(
-        stackByOptions.find((co) => co.value === event.target.value) ?? stackByOptions[0]
-      );
+    (value: string) => {
+      setSelectedStackByOption(value ?? stackByOptions[0].value);
     },
     [stackByOptions]
   );
+
   const defaultStackByOption = stackByOptions[0];
-  const [selectedStackByOption, setSelectedStackByOption] = useState(defaultStackByOption);
+  const [selectedStackByOption, setSelectedStackByOption] = useState(defaultStackByOption.value);
   const toggleOptions = useToggleOptions();
 
-  const tableQuery = generateTableQuery && generateTableQuery('@timestamp', 'DESC', 100);
-  const discoverPath = useDiscoverPath(tableQuery && isRight(tableQuery) ? tableQuery.right : '');
+  const tableQuery = generateTableQuery('@timestamp', 'DESC', 100);
+  const getOrEmptyString = getOrElse(() => '');
+  const discoverPath = useDiscoverPath(getOrEmptyString(tableQuery));
 
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj="severity-level-panel">
@@ -80,12 +80,12 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
         id={PRIVILEGED_USER_ACTIVITY_QUERY_ID}
         showInspectButton={false}
         title={TITLE}
-        titleSize="s"
+        titleSize="m"
         outerDirection="column"
         hideSubtitle
       >
-        {tableQuery && isRight(tableQuery) && (
-          <LinkAnchor
+        {isRight(tableQuery) && (
+          <LinkButton
             href={getAppUrl({
               appId: 'discover',
               path: discoverPath,
@@ -95,7 +95,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.linkDescription"
               defaultMessage="View all events"
             />
-          </LinkAnchor>
+          </LinkButton>
         )}
       </HeaderSection>
       {toggleStatus && (
@@ -107,38 +107,39 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
                 idSelected={selectedToggleOption}
                 onChange={(id) => {
                   setToggleOption(id as VisualizationToggleOptions);
-                  setSelectedStackByOption(defaultStackByOption);
+                  setSelectedStackByOption(defaultStackByOption.value);
                 }}
                 legend={PICK_VISUALIZATION_LEGEND}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {stackByOptions.length > 1 && (
-                <EuiSelect
+                <EuiSuperSelect
                   onChange={setSelectedChartOptionCallback}
                   options={stackByOptions}
                   prepend={i18n.translate('xpack.securitySolution.genericDashboard.stackBy.label', {
                     defaultMessage: 'Stack by',
                   })}
-                  value={selectedStackByOption?.value}
+                  valueOfSelected={selectedStackByOption}
+                  hasDividers={true}
+                  itemLayoutAlign="top"
                 />
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          {generateVisualizationQuery && generateTableQuery && (
-            <EsqlDashboardPanel<TableItemType>
-              title={TITLE}
-              stackByField={selectedStackByOption.value}
-              timerange={{ from, to }}
-              getLensAttributes={getLensAttributes}
-              generateVisualizationQuery={generateVisualizationQuery}
-              generateTableQuery={generateTableQuery}
-              columns={columns}
-              pageSize={PAGE_SIZE}
-              showInspectTable={true}
-            />
-          )}
+
+          <EsqlDashboardPanel<TableItemType>
+            title={TITLE}
+            stackByField={selectedStackByOption}
+            timerange={{ from, to }}
+            getLensAttributes={getLensAttributes}
+            generateVisualizationQuery={generateVisualizationQuery}
+            generateTableQuery={generateTableQuery}
+            columns={columns}
+            pageSize={PAGE_SIZE}
+            showInspectTable={true}
+          />
         </>
       )}
     </EuiPanel>

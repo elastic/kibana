@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { TimelineResponse } from '../../../../common/api/timeline';
 import {
   type TimelineType,
+  type TimelineResponse,
   TimelineTypeEnum,
   TimelineStatusEnum,
 } from '../../../../common/api/timeline';

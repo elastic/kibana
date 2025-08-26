@@ -5,8 +5,33 @@
  * 2.0.
  */
 
-export * from './data_request_descriptor_types';
-export * from './source_descriptor_types';
-export * from './layer_descriptor_types';
-export * from './map_descriptor';
-export * from './style_property_descriptor_types';
+export type * from './data_request_descriptor_types';
+export type * from './layer_descriptor_types';
+export type * from './map_descriptor';
+export type * from './style_property_descriptor_types';
+
+export type {
+  AggDescriptor,
+  CountAggDescriptor,
+  FieldedAggDescriptor,
+  PercentileAggDescriptor,
+  AbstractESAggSourceDescriptor,
+  AbstractESJoinSourceDescriptor,
+  AbstractESSourceDescriptor,
+  EMSFileSourceDescriptor,
+  EMSTMSSourceDescriptor,
+  ESGeoGridSourceDescriptor,
+  ESGeoLineSourceDescriptor,
+  ESPewPewSourceDescriptor,
+  ESSearchSourceDescriptor,
+  ESQLSourceDescriptor,
+  ESDistanceSourceDescriptor,
+  ESTermSourceDescriptor,
+  KibanaTilemapSourceDescriptor,
+  WMSSourceDescriptor,
+  XYZTMSSourceDescriptor,
+  MVTFieldDescriptor,
+  TiledSingleLayerVectorSourceDescriptor,
+  JoinSourceDescriptor,
+  SourceDescriptor,
+} from '../../server';

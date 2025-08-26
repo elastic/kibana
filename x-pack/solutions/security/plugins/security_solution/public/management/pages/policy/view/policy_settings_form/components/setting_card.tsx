@@ -148,7 +148,7 @@ export const SettingCard: FC<SettingCardProps> = memo(
             <EuiHorizontalRule margin="m" />
             <div
               css={({ euiTheme }) => ({
-                padding: `${euiTheme.size.base} ${euiTheme.size.base} 0 ${euiTheme.size.base}`,
+                padding: `0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base}`,
               })}
             >
               {children}

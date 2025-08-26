@@ -191,13 +191,10 @@ describe('parseRecords', () => {
         actorIds: 'actor1',
         badge: 1,
         docs: ['{"foo":"bar"}'],
-        hosts: [],
-        ips: [],
         isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: [null, 'target1'],
-        users: [],
       },
     ];
     const result = parseRecords(mockLogger, records);
@@ -238,31 +235,123 @@ describe('parseRecords', () => {
     expect(result.messages).toContain(ApiMessageCode.ReachedNodesLimit);
   });
 
-  it('assigns correct shapes and icons for entity nodes', () => {
+  it('assigns correct shapes and icons for entity nodes without entity data', () => {
     const records: GraphEdge[] = [
       {
         action: 'foo',
         actorIds: ['user1', 'host1', 'ip1'],
         badge: 1,
         docs: ['{"foo":"bar"}'],
-        hosts: ['host1'],
-        ips: ['ip1'],
+        actorsDocData: [null],
+        targetsDocData: [null],
         isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
-        targetIds: [],
-        users: ['user1'],
+        targetIds: ['ip1'],
       },
     ];
     const result = parseRecords(mockLogger, records);
 
     const userNode = result.nodes.find((n) => n.id === 'user1');
-    expect(userNode).toMatchObject({ shape: 'ellipse', icon: 'user' });
+    expect(userNode).toMatchObject({ shape: 'rectangle' });
+    expect(userNode).not.toHaveProperty('tag');
 
     const hostNode = result.nodes.find((n) => n.id === 'host1');
-    expect(hostNode).toMatchObject({ shape: 'hexagon', icon: 'storage' });
+    expect(hostNode).toMatchObject({ shape: 'rectangle' });
+    expect(hostNode).not.toHaveProperty('tag');
 
     const ipNode = result.nodes.find((n) => n.id === 'ip1');
-    expect(ipNode).toMatchObject({ shape: 'diamond', icon: 'globe' });
+    expect(ipNode).toMatchObject({ shape: 'rectangle' });
+    expect(ipNode).not.toHaveProperty('tag');
+  });
+
+  it('assigns correct shapes, icons and tags for entity nodes - with entity data', () => {
+    const records: GraphEdge[] = [
+      {
+        action: 'foo',
+        actorIds: ['user1', 'host1', 'ip1'],
+        actorsDocData: [
+          '{"id":"user1","type":"entity","index":"test","entity":{"name":"john","type":"Identity"}}',
+          '{"id":"ip1","type":"entity","index":"test","entity":{"name":"192.168.1.1","type":"ip"}}',
+          '{"id":"target1","type":"entity","index":"test","entity":{"name":"Target Service","type":"service"}}',
+        ],
+        badge: 1,
+        docs: ['{"foo":"bar"}'],
+        isOrigin: true,
+        isOriginAlert: false,
+        targetIds: ['target1', 'target2'],
+        isAlert: false,
+      },
+    ];
+    const result = parseRecords(mockLogger, records);
+
+    const userNode = result.nodes.find((n) => n.id === 'user1');
+    expect(userNode).toMatchObject({
+      shape: 'ellipse',
+      icon: 'user',
+      tag: 'Identity',
+    });
+
+    const hostNode = result.nodes.find((n) => n.id === 'host1');
+    expect(hostNode).toMatchObject({ shape: 'rectangle' });
+    expect(hostNode).not.toHaveProperty('tag');
+
+    const ipNode = result.nodes.find((n) => n.id === 'ip1');
+    expect(ipNode).toMatchObject({
+      shape: 'rectangle',
+      icon: 'globe',
+      tag: 'ip',
+    });
+
+    const targetNode = result.nodes.find((n) => n.id === 'target1');
+    expect(targetNode).toBeDefined();
+    expect(targetNode).toMatchObject({
+      label: 'Target Service',
+      icon: 'cloudStormy',
+      tag: 'service',
+    });
+
+    const target2Node = result.nodes.find((n) => n.id === 'target2');
+    expect(target2Node).toBeDefined();
+    // No entity data for target2, so no tag should be present
+    expect(target2Node).not.toHaveProperty('tag');
+  });
+
+  it('handles entity data with missing type property', () => {
+    const records: GraphEdge[] = [
+      {
+        action: 'foo',
+        actorIds: ['entity1', 'entity2', 'entity3'],
+        actorsDocData: [
+          '{"id":"entity1","type":"entity","index":"test","entity":{"name":"Entity One","type":"custom"}}',
+          '{"id":"entity2","type":"entity","index":"test","entity":{"name":"Entity Two"}}',
+          '{"id":"entity3","type":"entity","index":"test","entity":{}}',
+        ],
+        badge: 1,
+        docs: ['{"foo":"bar"}'],
+        isOrigin: true,
+        isOriginAlert: false,
+        targetIds: ['entity4'],
+        isAlert: false,
+      },
+    ];
+    const result = parseRecords(mockLogger, records);
+
+    const entity1Node = result.nodes.find((n) => n.id === 'entity1');
+    expect(entity1Node).toBeDefined();
+    expect(entity1Node).toHaveProperty('tag', 'custom');
+
+    const entity2Node = result.nodes.find((n) => n.id === 'entity2');
+    expect(entity2Node).toBeDefined();
+    expect(entity2Node).toHaveProperty('label', 'Entity Two');
+    expect(entity2Node).not.toHaveProperty('tag');
+
+    const entity3Node = result.nodes.find((n) => n.id === 'entity3');
+    expect(entity3Node).toBeDefined();
+    expect(entity3Node).not.toHaveProperty('tag');
+
+    const entity4Node = result.nodes.find((n) => n.id === 'entity4');
+    expect(entity4Node).toBeDefined();
+    expect(entity4Node).not.toHaveProperty('tag');
   });
 });

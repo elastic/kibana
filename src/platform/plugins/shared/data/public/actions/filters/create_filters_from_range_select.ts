@@ -9,12 +9,13 @@
 
 import { last } from 'lodash';
 import moment from 'moment';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { type AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { buildRangeFilter, DataViewFieldBase, RangeFilterParams } from '@kbn/es-query';
+import type { DataViewFieldBase, RangeFilterParams } from '@kbn/es-query';
+import { buildRangeFilter } from '@kbn/es-query';
 import { getIndexPatterns, getSearchService } from '../../services';
-import { AggConfigSerialized } from '../../../common/search/aggs';
+import type { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
 
 export interface RangeSelectDataContext {

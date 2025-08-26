@@ -6,10 +6,10 @@
  */
 
 import { type IEventLogger } from '@kbn/event-log-plugin/server';
-import { AuthenticatedUser } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core/server';
 
 import { ATTACK_DISCOVERY_EVENT_PROVIDER } from '../../../../../../common/constants';
-import { AttackDiscoveryDataClient } from '../../../../../lib/attack_discovery/persistence';
+import type { AttackDiscoveryDataClient } from '../../../../../lib/attack_discovery/persistence';
 
 const MAX_LENGTH = 1024;
 

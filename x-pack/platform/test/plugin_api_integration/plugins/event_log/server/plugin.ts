@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, Logger, PluginInitializerContext } from '@kbn/core/server';
-import { IEventLogService, IEventLogClientService } from '@kbn/event-log-plugin/server';
+import type { Plugin, CoreSetup, Logger, PluginInitializerContext } from '@kbn/core/server';
+import type { IEventLogService, IEventLogClientService } from '@kbn/event-log-plugin/server';
 import {
   logEventRoute,
   registerProviderActionsRoute,

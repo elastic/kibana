@@ -9,7 +9,7 @@ import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
-import { $Values } from 'utility-types';
+import type { $Values } from 'utility-types';
 import type { MainHistoryLocationState } from '../../common/locator/locator';
 import type { LensDocument } from '../persistence';
 
@@ -25,7 +25,7 @@ import type {
   IndexPatternRef,
   AnnotationGroups,
 } from '../types';
-import { StructuredDatasourceStates } from '../react_embeddable/types';
+import type { StructuredDatasourceStates } from '../react_embeddable/types';
 export interface VisualizationState {
   activeId: string | null;
   state: unknown;

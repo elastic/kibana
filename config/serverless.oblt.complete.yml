@@ -12,11 +12,6 @@ xpack.features.overrides:
   infrastructure.name: 'Infrastructure'
   ### By default, this feature named as `APM and User Experience`, but should be renamed to `Applications`.
   apm.name: 'Applications'
-  ### Dashboards feature should be moved from Analytics category to the Observability one.
-  dashboard_v2.category: 'observability'
-  ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
-  ### fine-tuned to grant access to Observability app.
-  discover_v2.category: 'observability'
   ### Machine Learning feature should be moved from Analytics category to the Observability one and renamed to `AI Ops`.
   ml:
     category: 'observability'
@@ -33,8 +28,8 @@ xpack.actions.preconfigured:
     actionTypeId: .inference
     exposeConfig: true
     config:
-      provider: "elastic"
-      taskType: "chat_completion"
-      inferenceId: ".rainbow-sprinkles-elastic"
+      provider: 'elastic'
+      taskType: 'chat_completion'
+      inferenceId: '.rainbow-sprinkles-elastic'
       providerConfig:
-        model_id: "rainbow-sprinkles"
+        model_id: 'rainbow-sprinkles'

@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   getNodeDocumentMode,
-  hasNodeDocumentsData,
+  getSingleDocumentData,
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -28,7 +28,7 @@ import { normalizeTimeRange } from '../../../../common/utils/normalize_time_rang
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../../preview/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useToasts } from '../../../../common/lib/kibana';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -42,9 +42,7 @@ export const GRAPH_ID = 'graph-visualization' as const;
  * Graph visualization view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const GraphVisualization: React.FC = memo(() => {
-  const {
-    services: { notifications },
-  } = useKibana();
+  const toasts = useToasts();
   const oldDataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.default,
   });
@@ -69,27 +67,24 @@ export const GraphVisualization: React.FC = memo(() => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const onOpenEventPreview = useCallback(
     (node: NodeViewModel) => {
+      const documentData = getSingleDocumentData(node);
       if (
-        hasNodeDocumentsData(node) &&
-        node.documentsData[0].index &&
         (getNodeDocumentMode(node) === 'single-event' ||
-          getNodeDocumentMode(node) === 'single-alert')
+          getNodeDocumentMode(node) === 'single-alert') &&
+        documentData
       ) {
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
-            id: node.documentsData[0].id,
-            indexName: node.documentsData[0].index,
+            id: documentData.id,
+            indexName: documentData.index,
             scopeId,
-            banner:
-              getNodeDocumentMode(node) === 'single-alert'
-                ? ALERT_PREVIEW_BANNER
-                : EVENT_PREVIEW_BANNER,
+            banner: documentData.type === 'alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
             isPreviewMode: true,
           },
         });
       } else {
-        notifications?.toasts.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorOpenNodePreview',
             {
@@ -99,7 +94,7 @@ export const GraphVisualization: React.FC = memo(() => {
         });
       }
     },
-    [notifications?.toasts, openPreviewPanel, scopeId]
+    [toasts, openPreviewPanel, scopeId]
   );
 
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
@@ -110,7 +105,20 @@ export const GraphVisualization: React.FC = memo(() => {
       const to = dateMath.parse(timeRange.to);
 
       if (!from || !to) {
-        // TODO: show error message
+        toasts.addDanger({
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorInvalidTimeRange',
+            {
+              defaultMessage: 'Invalid time range',
+            }
+          ),
+          text: i18n.translate(
+            'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorInvalidTimeRangeDescription',
+            {
+              defaultMessage: 'Please select a valid time range.',
+            }
+          ),
+        });
         return;
       }
 
@@ -131,7 +139,7 @@ export const GraphVisualization: React.FC = memo(() => {
         },
       });
     },
-    [investigateInTimeline]
+    [investigateInTimeline, toasts]
   );
 
   return (

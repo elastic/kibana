@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup(
-        'x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum_mb',
+        'x-pack/platform/test/fixtures/es_archives/monitoring/singlecluster_yellow_platinum_mb',
         {
           from: 'Aug 29, 2017 @ 17:24:14.254',
           to: 'Aug 29, 2017 @ 17:25:44.142',

@@ -22,6 +22,7 @@ export type {
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
   WorkflowExecutionListItemDto,
+  WorkflowListItemAction,
 
   // commands
   CreateWorkflowCommand,
@@ -36,10 +37,23 @@ export type {
 // exported full to use enum as values
 export {
   ExecutionStatus,
-  WorkflowStatus,
 
   // command schemas
   CreateWorkflowCommandSchema,
+  UpdateWorkflowCommandSchema,
+  SearchWorkflowCommandSchema,
 } from './v1';
 
-export type { EnterIfNode, ExitIfNode, EnterForeachNode, ExitForeachNode } from './execution';
+export type {
+  EnterIfNode,
+  ExitIfNode,
+  EnterConditionBranchNode,
+  EnterConditionBranchNodeSchema,
+  ExitConditionBranchNode,
+  ExitConditionBranchNodeSchema,
+  EnterForeachNode,
+  ExitForeachNode,
+  AtomicGraphNode,
+  WaitGraphNodeSchema,
+  WaitGraphNode,
+} from './execution';

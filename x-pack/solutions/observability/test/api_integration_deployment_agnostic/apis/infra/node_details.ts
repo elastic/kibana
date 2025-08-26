@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
-import { InfraTimerangeInput } from '@kbn/infra-plugin/common/http_api/snapshot_api';
-import { InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
-import { NodeDetailsMetricDataResponse } from '@kbn/infra-plugin/common/http_api/node_details_api';
+import type { InfraTimerangeInput } from '@kbn/infra-plugin/common/http_api/snapshot_api';
+import type { InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
+import type { NodeDetailsMetricDataResponse } from '@kbn/infra-plugin/common/http_api/node_details_api';
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
@@ -38,10 +38,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         withInternalHeaders: true,
         useCookieHeader: true,
       });
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/pods_only');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/pods_only'
+      );
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/pods_only');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/pods_only'
+      );
       await supertestWithAdminScope.destroy();
     });
 

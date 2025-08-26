@@ -6,14 +6,8 @@
  */
 
 import React, { useEffect } from 'react';
-import {
-  EuiPanel,
-  EuiSkeletonRectangle,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiSteps,
-  EuiStepStatus,
-} from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
+import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonText, EuiSpacer, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';

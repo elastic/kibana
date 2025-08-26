@@ -185,6 +185,13 @@ export const ENDPOINT_UPDATE_FAILED = i18n.translate(
   }
 );
 
+export const SOLUTION_FILTER = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.solutionFilterText',
+  {
+    defaultMessage: 'Solution filter.',
+  }
+);
+
 export const GEMINI = i18n.translate('xpack.inferenceEndpointUICommon.components.gemini.title', {
   defaultMessage: 'Google Gemini',
 });

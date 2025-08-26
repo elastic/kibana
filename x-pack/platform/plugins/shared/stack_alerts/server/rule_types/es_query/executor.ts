@@ -187,9 +187,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
         [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+        [ALERT_GROUPING]: groupingObject,
         ...ecsGroups,
         ...actionContext.sourceFields,
-        [ALERT_GROUPING]: groupingObject,
       },
     });
     if (!isGroupAgg) {

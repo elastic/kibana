@@ -9,8 +9,8 @@ import React from 'react';
 import { Observable, Subject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
-import { LensAppProps, LensAppServices } from './types';
-import { LensDocument } from '../persistence';
+import type { LensAppProps, LensAppServices } from './types';
+import type { LensDocument } from '../persistence';
 import {
   visualizationMap,
   datasourceMap,
@@ -28,14 +28,15 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
 import moment from 'moment';
-import { setState, LensAppState } from '../state_management';
+import type { LensAppState } from '../state_management';
+import { setState } from '../state_management';
 import { coreMock } from '@kbn/core/public/mocks';
-import { LensSerializedState } from '..';
+import type { LensSerializedState } from '..';
 import { createMockedField, createMockedIndexPattern } from '../datasources/form_based/mocks';
 import { faker } from '@faker-js/faker';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { VisualizeEditorContext } from '../types';
+import type { VisualizeEditorContext } from '../types';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 
 jest.mock('lodash', () => ({
@@ -234,7 +235,7 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Visualize Library',
+          text: 'Visualize library',
           href: '/testbasepath/app/visualize#/',
           onClick: expect.anything(),
         },
@@ -251,7 +252,7 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Visualize Library',
+          text: 'Visualize library',
           href: '/testbasepath/app/visualize#/',
           onClick: expect.anything(),
         },
@@ -268,7 +269,7 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Visualize Library',
+          text: 'Visualize library',
           href: '/testbasepath/app/visualize#/',
           onClick: expect.anything(),
         },
@@ -287,7 +288,7 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Visualize Library',
+          text: 'Visualize library',
           href: '/testbasepath/app/visualize#/',
           onClick: expect.anything(),
         },

@@ -6,6 +6,7 @@
  */
 
 import type { OnechatEvent } from '../base/events';
+import type { ToolResult } from '../tools/tool_result';
 import type { ConversationRound } from './conversation';
 
 export enum ChatEventType {
@@ -43,7 +44,7 @@ export const isToolCallEvent = (event: OnechatEvent<string, any>): event is Tool
 export interface ToolResultEventData {
   tool_call_id: string;
   tool_id: string;
-  result: string;
+  results: ToolResult[];
 }
 
 export type ToolResultEvent = ChatEventBase<ChatEventType.toolResult, ToolResultEventData>;
