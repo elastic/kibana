@@ -40,9 +40,9 @@ export const getSidebarVisibility = ({
   return {
     initialValue,
     isCollapsed$,
-    toggle: (isCollapsed, shouldPersist = true) => {
+    toggle: (isCollapsed) => {
       isCollapsed$.next(isCollapsed);
-      if (localStorageKey && shouldPersist) {
+      if (localStorageKey) {
         setIsCollapsed(localStorageKey, isCollapsed);
       }
     },
