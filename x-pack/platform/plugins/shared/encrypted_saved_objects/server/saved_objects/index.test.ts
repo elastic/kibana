@@ -242,7 +242,7 @@ describe('#setupSavedObjects', () => {
       );
     });
 
-    it('does not call decryptAttributes if Saved Object type is not registered', async () => {
+    it('does not call decryptAttributes and includes type error if Saved Object type is not registered', async () => {
       const mockSavedObject: SavedObject = {
         id: 'some-id',
         type: 'not-known-type',
