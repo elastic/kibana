@@ -18,6 +18,9 @@ export const ProcessorConditionEditor = () => {
   }
 
   return (
-    <ConditionEditor status="enabled" where={field.value} onConditionChange={field.onChange} />
+    <ConditionEditor
+      where={field.value}
+      onConditionChange={(params) => field.onChange(params.where)}
+    />
   );
 };

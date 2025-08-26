@@ -75,7 +75,7 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
           }}
         />
       </EuiFormRow>
-      {<ConditionEditor {...props} />}
+      <ConditionEditor {...props} />
     </EuiForm>
   );
 }
