@@ -123,7 +123,7 @@ export const toNavigationItems = (
 
   const logoItem: SideNavLogo = {
     href: warnIfMissing(logoNode, 'href', '/missing-href-😭'),
-    iconType: warnIfMissing(logoNode, ['iconV2', 'icon'], 'logoKibana') as string,
+    iconType: getIcon(logoNode),
     id: warnIfMissing(logoNode, 'id', 'kibana'),
     label: warnIfMissing(logoNode, 'title', 'Kibana'),
     'data-test-subj': logoNode ? getTestSubj(logoNode) : undefined,
@@ -290,14 +290,7 @@ export const toNavigationItems = (
     return {
       id: navNode.id,
       label: warnIfMissing(navNode, 'title', 'Missing Title 😭'),
-      iconType: warnIfMissing(
-        {
-          iconV2: AppDeepLinkIdToIcon[navNode.id],
-          ...navNode,
-        },
-        ['iconV2', 'icon'],
-        'broom'
-      ),
+      iconType: getIcon(navNode),
       href: itemHref,
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
@@ -418,3 +411,31 @@ const isRecentlyAccessedDefinition = (
 
 const filterEmpty = <T,>(arr: Array<T | null | undefined>): T[] =>
   arr.filter((item) => item !== null && item !== undefined) as T[];
+
+const getIcon = (node: ChromeProjectNavigationNode | null): string => {
+  if (node?.iconV2) {
+    return node.iconV2 as string;
+  }
+
+  if (node?.icon) {
+    return node.icon as string;
+  }
+
+  if (node && AppDeepLinkIdToIcon[node.id]) {
+    return AppDeepLinkIdToIcon[node.id];
+  }
+
+  if (node?.deepLink?.euiIconType) {
+    return node.deepLink.euiIconType;
+  }
+
+  if (node?.deepLink?.icon) {
+    return node.deepLink.icon;
+  }
+
+  warnOnce(
+    `No icon found for node "${node?.id}". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon "broom".`
+  );
+
+  return 'broom';
+};
