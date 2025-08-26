@@ -281,6 +281,34 @@ export const SYNC_ALERTS_HELP = i18n.translate('xpack.cases.components.create.sy
   defaultMessage: 'Enabling this option will sync the alert statuses with the case status.',
 });
 
+export const EXTRACT_OBSERVABLES_SWITCH_LABEL_ON = i18n.translate(
+  'xpack.cases.settings.extractObservablesSwitchLabelOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_SWITCH_LABEL_OFF = i18n.translate(
+  'xpack.cases.settings.extractObservablesSwitchLabelOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_LABEL = i18n.translate(
+  'xpack.cases.settings.extractObservablesLabel',
+  {
+    defaultMessage: 'Extract observables',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_HELP = i18n.translate(
+  'xpack.cases.components.create.extractObservablesHelpText',
+  {
+    defaultMessage: 'Enabling this option will extract observables from the alert automatically.',
+  }
+);
+
 export const ALERT = i18n.translate('xpack.cases.common.alertLabel', {
   defaultMessage: 'Alert',
 });
@@ -402,4 +430,39 @@ export const EXPERIMENTAL_LABEL = i18n.translate('xpack.cases.badge.experimental
 export const EXPERIMENTAL_DESC = i18n.translate('xpack.cases.badge.experimentalDesc', {
   defaultMessage:
     'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+});
+
+/**
+ * Observables types
+ */
+export const OBSERVABLE_TYPE_IPV4 = i18n.translate('xpack.cases.observables.ipv4', {
+  defaultMessage: 'IPv4',
+});
+
+export const OBSERVABLE_TYPE_IPV6 = i18n.translate('xpack.cases.observables.ipv6', {
+  defaultMessage: 'IPv6',
+});
+
+export const OBSERVABLE_TYPE_URL = i18n.translate('xpack.cases.observables.url', {
+  defaultMessage: 'URL',
+});
+
+export const OBSERVABLE_TYPE_HOSTNAME = i18n.translate('xpack.cases.observables.hostname', {
+  defaultMessage: 'Hostname',
+});
+
+export const OBSERVABLE_TYPE_FILE_HASH = i18n.translate('xpack.cases.observables.fileHash', {
+  defaultMessage: 'File hash',
+});
+
+export const OBSERVABLE_TYPE_FILE_PATH = i18n.translate('xpack.cases.observables.filePath', {
+  defaultMessage: 'File path',
+});
+
+export const OBSERVABLE_TYPE_EMAIL = i18n.translate('xpack.cases.observables.email', {
+  defaultMessage: 'Email',
+});
+
+export const OBSERVABLE_TYPE_DOMAIN = i18n.translate('xpack.cases.observables.domain', {
+  defaultMessage: 'Domain',
 });

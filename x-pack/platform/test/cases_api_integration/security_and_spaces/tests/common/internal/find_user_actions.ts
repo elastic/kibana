@@ -563,7 +563,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id: theCase.id,
                 version: theCase.version,
-                settings: { syncAlerts: false },
+                settings: { syncAlerts: false, extractObservables: true },
               },
             ],
           },

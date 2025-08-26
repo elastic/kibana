@@ -836,6 +836,7 @@ describe('Cases API', () => {
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: SECURITY_SOLUTION_OWNER,
       category: 'test',

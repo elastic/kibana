@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
         duration: null,
         external_service: null,
         owner: 'cases',
-        settings: { syncAlerts: false },
+        settings: { syncAlerts: false, extractObservables: false },
         severity: 0,
         status: 0,
         tags: ['new index', 'test'],
@@ -129,6 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'cases',
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
             severity: 'low',
             status: 'open',

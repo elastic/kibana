@@ -10,6 +10,10 @@ import { i18n } from '@kbn/i18n';
 export * from '../../common/translations';
 export * from '../user_profiles/translations';
 
+export const CREATE_CASE_LABEL = i18n.translate('xpack.cases.create.createCaseFlyoutAriaLabel', {
+  defaultMessage: 'Create case',
+});
+
 export const STEP_ONE_TITLE = i18n.translate('xpack.cases.create.stepOneTitle', {
   defaultMessage: 'Select template',
 });
@@ -33,6 +37,20 @@ export const ADDITIONAL_FIELDS = i18n.translate('xpack.cases.create.additionalFi
 export const SYNC_ALERTS_LABEL = i18n.translate('xpack.cases.create.syncAlertsLabel', {
   defaultMessage: 'Sync alert status with case status',
 });
+
+export const EXTRACT_OBSERVABLES_LABEL = i18n.translate(
+  'xpack.cases.create.extractObservablesLabel',
+  {
+    defaultMessage: 'Extract observables',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_OPTIONS_LABEL = i18n.translate(
+  'xpack.cases.create.extractObservablesOptionsLabel',
+  {
+    defaultMessage: 'Select observables to extract',
+  }
+);
 
 export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.create.assignYourself', {
   defaultMessage: 'Assign yourself',

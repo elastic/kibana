@@ -70,6 +70,7 @@ const basicCase = {
   version: 'WzQ3LDFd',
   settings: {
     syncAlerts: true,
+    syncObservables: true,
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
@@ -144,11 +145,11 @@ describe('RelatedCaseRt', () => {
 
 describe('SettingsRt', () => {
   it('has expected attributes in request', () => {
-    const query = CaseSettingsRt.decode({ syncAlerts: true });
+    const query = CaseSettingsRt.decode({ syncAlerts: true, syncObservables: true });
 
     expect(query).toStrictEqual({
       _tag: 'Right',
-      right: { syncAlerts: true },
+      right: { syncAlerts: true, syncObservables: true },
     });
   });
 
@@ -176,6 +177,7 @@ describe('CaseAttributesRt', () => {
     },
     settings: {
       syncAlerts: true,
+      syncObservables: true,
     },
     owner: 'cases',
     severity: CaseSeverity.LOW,

@@ -8,7 +8,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { CasePostRequest } from '../../../common/types/api';
+import type { CasePostRequest, ObservablePost } from '../../../common/types/api';
 import { fieldName as descriptionFieldName } from '../case_form_fields/description';
 import * as i18n from './translations';
 import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
@@ -32,6 +32,7 @@ import { getConfigurationByOwner } from '../../containers/configure/utils';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { getInitialCaseValue, getOwnerDefaultValue } from './utils';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
@@ -42,6 +43,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachmentsWithoutOwner;
+  observables?: ObservablePost[];
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
@@ -53,6 +55,9 @@ type FormFieldsWithFormContextProps = Pick<
   currentConfiguration: CasesConfigurationUI;
   selectedOwner: string;
   onSelectedOwner: (owner: string) => void;
+  observables: ObservablePost[];
+  selectedObservables: ObservablePost[];
+  setObservables: (observables: ObservablePost[]) => void;
 };
 
 export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps> = React.memo(
@@ -63,6 +68,9 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
     draftStorageKey,
     selectedOwner,
     onSelectedOwner,
+    observables,
+    selectedObservables,
+    setObservables,
   }) => {
     const { owner } = useCasesContext();
     const availableOwners = useAvailableCasesOwners();
@@ -102,6 +110,9 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
           withSteps={withSteps}
           draftStorageKey={draftStorageKey}
           configuration={currentConfiguration}
+          observables={observables}
+          selectedObservables={selectedObservables}
+          setObservables={setObservables}
         />
       </>
     );
@@ -118,12 +129,19 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     onSuccess,
     timelineIntegration,
     attachments,
+    observables = [],
     initialValue,
   }) => {
     const { owner } = useCasesContext();
     const availableOwners = useAvailableCasesOwners();
     const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
     const [selectedOwner, onSelectedOwner] = useState<string>(defaultOwnerValue);
+
+    const { observablesAuthorized, isExtractObservablesEnabled, isObservablesFeatureEnabled } =
+      useCasesFeatures();
+    const canExtractObservables =
+      observablesAuthorized && isObservablesFeatureEnabled && isExtractObservablesEnabled;
+    const [selectedObservables, setObservables] = useState<ObservablePost[]>(observables);
 
     const { data: configurations, isLoading: isLoadingCaseConfiguration } =
       useGetAllCaseConfigurations();
@@ -167,6 +185,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
           initialValue={initialValue}
           currentConfiguration={currentConfiguration}
           selectedOwner={selectedOwner}
+          selectedObservables={canExtractObservables ? selectedObservables : []}
         >
           <FormFieldsWithFormContext
             withSteps={withSteps}
@@ -175,6 +194,9 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
             onSelectedOwner={onSelectedOwner}
             isLoadingCaseConfiguration={isLoadingCaseConfiguration}
             currentConfiguration={currentConfiguration}
+            observables={canExtractObservables ? observables : []}
+            selectedObservables={canExtractObservables ? selectedObservables : []}
+            setObservables={setObservables}
           />
           <EuiFormRow fullWidth>
             <EuiFlexGroup
