@@ -5,49 +5,34 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useEffect } from 'react';
-import { css } from '@emotion/css';
-import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
-import { useChat } from '../../hooks/use_chat';
-import { useConversation } from '../../hooks/use_conversation';
+import { EuiResizableContainer, useEuiScrollBar } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useEffect, useRef } from 'react';
+import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
-import { ConversationInputForm } from './conversation_input_form';
+import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
+import { useConversationId } from '../../hooks/use_conversation_id';
 
-const fullHeightClassName = css`
+const fullHeightStyles = css`
   height: 100%;
 `;
-
-const conversationPanelClass = css`
-  min-height: 100%;
-  max-width: 850px;
-  margin-left: auto;
-  margin-right: auto;
+const conversationContainerStyles = css`
+  ${fullHeightStyles}
+  width: 100%;
 `;
 
-const scrollContainerClassName = (scrollBarStyles: string) => css`
-  overflow-y: auto;
-  ${scrollBarStyles}
-`;
+export const Conversation: React.FC<{}> = () => {
+  const conversationId = useConversationId();
+  const hasActiveConversation = useHasActiveConversation();
 
-interface ConversationProps {
-  agentId: string;
-  conversationId: string | undefined;
-}
-
-export const Conversation: React.FC<ConversationProps> = ({ agentId, conversationId }) => {
-  const { conversation } = useConversation({ conversationId });
-  const { sendMessage } = useChat({
-    conversationId,
-    agentId,
-  });
-
-  const theme = useEuiTheme();
-  const scrollBarStyles = euiScrollBarStyles(theme);
-
+  const scrollContainerStyles = css`
+    overflow-y: auto;
+    ${fullHeightStyles}
+    ${useEuiScrollBar()}
+  `;
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-
   const { setStickToBottom } = useStickToBottom({
     defaultState: true,
     scrollContainer: scrollContainerRef.current,
@@ -57,30 +42,37 @@ export const Conversation: React.FC<ConversationProps> = ({ agentId, conversatio
     setStickToBottom(true);
   }, [conversationId, setStickToBottom]);
 
-  const onSubmit = useCallback(
-    (message: string) => {
-      setStickToBottom(true);
-      sendMessage(message);
-    },
-    [sendMessage, setStickToBottom]
-  );
-
-  if (!conversationId && (!conversation || conversation.rounds.length === 0)) {
-    return <NewConversationPrompt onSubmit={onSubmit} />;
-  }
-
   return (
-    <>
-      <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
-        <div ref={scrollContainerRef} className={fullHeightClassName}>
-          <EuiPanel hasBorder={false} hasShadow={false} className={conversationPanelClass}>
-            <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
-          </EuiPanel>
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ConversationInputForm disabled={!agentId} loading={false} onSubmit={onSubmit} />
-      </EuiFlexItem>
-    </>
+    <EuiResizableContainer direction="vertical" css={conversationContainerStyles}>
+      {(EuiResizablePanel, EuiResizableButton) => {
+        return (
+          <>
+            {hasActiveConversation ? (
+              <EuiResizablePanel initialSize={80}>
+                <div css={scrollContainerStyles}>
+                  <div ref={scrollContainerRef}>
+                    <ConversationRounds />
+                  </div>
+                </div>
+              </EuiResizablePanel>
+            ) : (
+              <EuiResizablePanel initialSize={80}>
+                <div css={fullHeightStyles}>
+                  <NewConversationPrompt />
+                </div>
+              </EuiResizablePanel>
+            )}
+            <EuiResizableButton />
+            <EuiResizablePanel initialSize={20} minSize="20%">
+              <ConversationInputForm
+                onSubmit={() => {
+                  setStickToBottom(true);
+                }}
+              />
+            </EuiResizablePanel>
+          </>
+        );
+      }}
+    </EuiResizableContainer>
   );
 };

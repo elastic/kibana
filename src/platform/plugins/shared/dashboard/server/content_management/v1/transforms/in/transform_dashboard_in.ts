@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { DashboardAttributes } from '../../types';
-import { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { DashboardAttributes } from '../../types';
+import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
 import { transformControlGroupIn } from './transform_control_group_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
@@ -51,7 +51,10 @@ export const transformDashboardIn = async ({
 
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } =
       dashboardState;
-    const { panelsJSON, sections } = transformPanelsIn(panels);
+    const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
+
+    const { searchSourceJSON, references: searchSourceReferences } =
+      transformSearchSourceIn(kibanaSavedObjectMeta);
 
     const attributes = {
       ...rest,
@@ -66,10 +69,14 @@ export const transformDashboardIn = async ({
       }),
       ...(sections?.length && { sections }),
       ...(kibanaSavedObjectMeta && {
-        kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
+        kibanaSavedObjectMeta: { searchSourceJSON },
       }),
     };
-    return { attributes, references: tagReferences, error: null };
+    return {
+      attributes,
+      references: [...tagReferences, ...panelReferences, ...searchSourceReferences],
+      error: null,
+    };
   } catch (e) {
     return { attributes: null, references: null, error: e };
   }

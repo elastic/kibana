@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentDescriptor } from '@kbn/onechat-common';
+import type { AgentDescriptor } from '@kbn/onechat-common';
 
 /**
  * Remove extra properties from an agent descriptor supertype. Useful when serializing, e.g. to the browser-side.

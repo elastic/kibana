@@ -32,18 +32,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DashboardSettings } from '../../../common';
+import type { DashboardSettings } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
 
 interface DashboardSettingsProps {
   onClose: () => void;
+  ariaLabelledBy: string;
 }
 
 const DUPLICATE_TITLE_CALLOUT_ID = 'duplicateTitleCallout';
 
-export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => {
+export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSettingsProps) => {
   const dashboardApi = useDashboardApi();
 
   const [localSettings, setLocalSettings] = useState(dashboardApi.getSettings());
@@ -165,7 +166,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={ariaLabelledBy}>
             <FormattedMessage
               id="dashboard.embeddableApi.showSettings.flyout.title"
               defaultMessage="Dashboard settings"
@@ -185,6 +186,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
             }
           >
             <EuiFieldText
+              autoFocus
               id="dashboardTitleInput"
               className="dashboardTitleInputText"
               data-test-subj="dashboardTitleInput"

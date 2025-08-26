@@ -165,6 +165,7 @@ export const getSearchEmbeddableFactory = ({
             timeRestore: 'skip',
             usesAdHocDataView: 'skip',
             visContext: 'skip',
+            tabs: 'skip',
           };
         },
         onReset: async (lastSaved) => {

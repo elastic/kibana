@@ -35,4 +35,8 @@ export {
   type PresentationContainer,
 } from './interfaces/presentation_container';
 export { apiPublishesSettings, type PublishesSettings } from './interfaces/publishes_settings';
-export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
+export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/can_focus_panel';
+export {
+  apiSupportsPassThroughContext,
+  type PassThroughContext,
+} from './interfaces/pass_through_context';

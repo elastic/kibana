@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import type { AnalyticsClient } from '@elastic/ebt/client';
-import type { ILicense } from './types';
+import type { ILicense } from '@kbn/licensing-types';
 
 export function registerAnalyticsContextProvider(
   // Using `AnalyticsClient` from the package to be able to implement this method in the `common` dir.

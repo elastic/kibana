@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
@@ -31,6 +38,7 @@ export interface Props {
 }
 
 export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, availableEmbeddables, onClose }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const libraryTypes = useAddFromLibraryTypes();
 
   const canvasOnlyLibraryTypes = useMemo(() => {
@@ -46,10 +54,15 @@ export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, availableEmbeddables,
   );
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} data-test-subj="dashboardAddPanel">
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      data-test-subj="dashboardAddPanel"
+      aria-labelledby={modalTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{strings.getTitleText()}</h2>
+          <h2 id={modalTitleId}>{strings.getTitleText()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

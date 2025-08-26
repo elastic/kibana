@@ -10,12 +10,14 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { isColumn, isOptionNode } from '../../../ast/is';
 import { isNumericType } from '../../../definitions/types';
-import type { ICommandContext } from '../../types';
+import type { ICommandContext, ICommandCallbacks } from '../../types';
+import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
@@ -75,6 +77,8 @@ export const validate = (
       }
     });
   }
+
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   return messages;
 };

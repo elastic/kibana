@@ -138,7 +138,7 @@ export class CspPlugin
     const App = (props: CspRouterProps) => (
       <KibanaContextProvider services={{ ...core, ...plugins, storage }}>
         <RedirectAppLinks coreStart={core}>
-          <div style={{ width: '100%', height: '100%' }}>
+          <div css={{ width: '100%', height: '100%' }}>
             <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
               <CspRouter {...props} />
             </SetupContext.Provider>
@@ -152,36 +152,52 @@ export class CspPlugin
       getCloudSecurityPostureMisconfigurationFlyout: () => {
         return {
           Component: (props: FindingsMisconfigurationPanelExpandableFlyoutProps['params']) => (
-            <LazyCspFindingsMisconfigurationFlyout {...props}>
-              {props.children}
-            </LazyCspFindingsMisconfigurationFlyout>
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsMisconfigurationFlyout {...props}>
+                {props.children}
+              </LazyCspFindingsMisconfigurationFlyout>
+            </Suspense>
           ),
           Header: (props: FindingsMisconfigurationFlyoutHeaderProps) => (
-            <LazyCspFindingsMisconfigurationFlyoutHeader {...props} />
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsMisconfigurationFlyoutHeader {...props} />
+            </Suspense>
           ),
           Body: (props: FindingsMisconfigurationFlyoutContentProps) => (
-            <LazyCspFindingsMisconfigurationFlyoutBody {...props} />
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsMisconfigurationFlyoutBody {...props} />
+            </Suspense>
           ),
           Footer: (props: FindingMisconfigurationFlyoutFooterProps) => (
-            <LazyCspFindingsMisconfigurationFlyoutFooter {...props} />
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsMisconfigurationFlyoutFooter {...props} />
+            </Suspense>
           ),
         };
       },
       getCloudSecurityPostureVulnerabilityFlyout: () => {
         return {
           Component: (props: FindingsVulnerabilityPanelExpandableFlyoutProps['params']) => (
-            <LazyCspFindingsVulnerabilityFlyout {...props}>
-              {props.children}
-            </LazyCspFindingsVulnerabilityFlyout>
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsVulnerabilityFlyout {...props}>
+                {props.children}
+              </LazyCspFindingsVulnerabilityFlyout>
+            </Suspense>
           ),
           Header: (props: FindingsVulnerabilityFlyoutHeaderProps) => (
-            <LazyCspFindingsVulnerabilityFlyoutHeader {...props} />
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsVulnerabilityFlyoutHeader {...props} />
+            </Suspense>
           ),
           Body: (props: FindingsVulnerabilityFlyoutContentProps) => (
-            <LazyCspFindingsVulnerabilityFlyoutBody {...props} />
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsVulnerabilityFlyoutBody {...props} />
+            </Suspense>
           ),
           Footer: (props: FindingsVulnerabilityFlyoutFooterProps) => (
-            <LazyCspFindingsVulnerabilityFlyoutFooter {...props} />
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsVulnerabilityFlyoutFooter {...props} />
+            </Suspense>
           ),
         };
       },

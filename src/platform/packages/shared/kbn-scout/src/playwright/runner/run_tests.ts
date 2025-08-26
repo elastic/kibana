@@ -8,17 +8,20 @@
  */
 
 import { resolve } from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
-import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { pickLevelFromFlags } from '@kbn/tooling-log';
+import type { ProcRunner } from '@kbn/dev-proc-runner';
+import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getFlags } from '@kbn/dev-cli-runner';
 import { runElasticsearch, runKibanaServer } from '../../servers';
 import { loadServersConfig } from '../../config';
 import { silence } from '../../common';
-import { RunTestsOptions } from './flags';
+import type { RunTestsOptions } from './flags';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import { getPlaywrightGrepTag, execPromise } from '../utils';
-import { ScoutPlaywrightProjects } from '../types';
+import type { ScoutPlaywrightProjects } from '../types';
 
 export const getPlaywrightProject = (
   testTarget: RunTestsOptions['testTarget'],
@@ -31,13 +34,19 @@ export const getPlaywrightProject = (
   return 'local';
 };
 
-async function runPlaywrightTest(procs: ProcRunner, cmd: string, args: string[]) {
+async function runPlaywrightTest(
+  procs: ProcRunner,
+  cmd: string,
+  args: string[],
+  env: Record<string, string> = {}
+) {
   return procs.run(`playwright`, {
     cmd,
     args,
     cwd: resolve(REPO_ROOT),
     env: {
       ...process.env,
+      ...env,
     },
     wait: true,
   });
@@ -82,7 +91,8 @@ async function runLocalServersAndTests(
   log: ToolingLog,
   options: RunTestsOptions,
   cmd: string,
-  cmdArgs: string[]
+  cmdArgs: string[],
+  env: Record<string, string> = {}
 ) {
   const config = await loadServersConfig(options.mode, log);
   const abortCtrl = new AbortController();
@@ -114,7 +124,7 @@ async function runLocalServersAndTests(
     // wait for 5 seconds
     await silence(log, 5000);
 
-    await runPlaywrightTest(procs, cmd, cmdArgs);
+    await runPlaywrightTest(procs, cmd, cmdArgs, env);
   } finally {
     try {
       await procs.stop('kibana');
@@ -133,6 +143,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const pwGrepTag = getPlaywrightGrepTag(options.mode);
   const pwConfigPath = options.configPath;
   const pwProject = getPlaywrightProject(options.testTarget, options.mode);
+  const globalFlags = getFlags(process.argv.slice(2), {
+    allowUnexpected: true,
+  });
+  // Temporarily use `debug` log level for Playwright tests to better understand performance issues;
+  // We are going to change it to `info` in the future. This change doesn't affect Test Servers logging.
+  const logsLevel = pickLevelFromFlags(globalFlags, { default: 'debug' });
 
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
@@ -145,15 +161,20 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
   await withProcRunner(log, async (procs) => {
     const exitCode = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
+    const pwEnv = {
+      SCOUT_LOG_LEVEL: logsLevel,
+      SCOUT_TARGET_TYPE: options.testTarget,
+      SCOUT_TARGET_MODE: options.mode,
+    };
 
     if (exitCode !== 0) {
       process.exit(exitCode);
     }
 
     if (pwProject === 'local') {
-      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs);
+      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs, pwEnv);
     } else {
-      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs);
+      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, pwEnv);
     }
 
     reportTime(runStartTime, 'ready', {

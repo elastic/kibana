@@ -1,0 +1,120 @@
+{
+  "id": "@kbn/es-query-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/es-query-server",
+        "id": "def-server.AbsoluteTimeRange",
+        "type": "Type",
+        "tags": [],
+        "label": "AbsoluteTimeRange",
+        "description": [],
+        "signature": [
+          "{ readonly mode: \"absolute\"; readonly from: string; readonly to: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query-server",
+        "id": "def-server.RelativeTimeRange",
+        "type": "Type",
+        "tags": [],
+        "label": "RelativeTimeRange",
+        "description": [],
+        "signature": [
+          "{ readonly mode: \"relative\"; readonly from: string; readonly to: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query-server",
+        "id": "def-server.TimeRange",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeRange",
+        "description": [],
+        "signature": [
+          "{ mode?: \"absolute\" | \"relative\" | undefined; from: string; to: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/es-query-server",
+        "id": "def-server.timeRangeSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "timeRangeSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ from: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; to: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; mode: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"absolute\" | \"relative\" | undefined>; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query-server/src/time_range.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

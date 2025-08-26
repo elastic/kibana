@@ -6,7 +6,7 @@
  */
 import type { BulkFillGapsByRuleIdsParams } from './types';
 import { BulkFillGapsScheduleResult, BulkGapsFillStep } from './types';
-import { processAllGapsInTimeRange } from '../../../../lib/rule_gaps/process_all_gaps_in_time_range';
+import { processAllRuleGaps } from '../../../../lib/rule_gaps/process_all_rule_gaps';
 import type { Gap } from '../../../../lib/rule_gaps/gap';
 import type { BulkGapFillError } from './utils';
 import { logProcessedAsAuditEvent, toBulkGapFillError } from './utils';
@@ -36,16 +36,30 @@ export const batchBackfillRuleGaps = async (
   const eventLogClient = await context.getEventLogClient();
 
   try {
-    const processingResults = await processAllGapsInTimeRange({
-      ruleId: rule.id,
+    await processAllRuleGaps({
+      ruleIds: [rule.id],
       start,
       end,
       eventLogClient,
       logger,
-      processGapsBatch: (gapsBatch: Gap[]) => processGapsBatch(context, { rule, range, gapsBatch }),
-      options: { maxFetchedGaps: maxGapCountPerRule },
+      processGapsBatch: async (
+        gapsBatch: Gap[],
+        processingLimitsByRuleId: Record<string, number>
+      ) => {
+        const { processedGapsCount } = await processGapsBatch(context, {
+          rule,
+          range,
+          gapsBatch,
+          maxGapsCountToProcess: processingLimitsByRuleId[rule.id],
+        });
+        if (processedGapsCount > 0) {
+          hasBeenBackfilled = true;
+        }
+
+        return { [rule.id]: processedGapsCount };
+      },
+      options: { maxProcessedGapsPerRule: maxGapCountPerRule },
     });
-    hasBeenBackfilled = processingResults.some((result) => result);
   } catch (error) {
     logProcessedAsAuditEvent(context, rule, error);
     resultError = toBulkGapFillError(rule, BulkGapsFillStep.SCHEDULING, error);

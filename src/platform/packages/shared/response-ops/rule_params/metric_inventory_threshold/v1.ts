@@ -19,18 +19,17 @@ import {
 } from '../common/utils';
 
 const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
+const dataSchemaFormats = ['ecs', 'semconv'] as const;
 type SnapshotCustomAggregation = (typeof SNAPSHOT_CUSTOM_AGGREGATIONS)[number];
 
 const SnapshotMetricTypeKeysArray = [
   'count',
   'cpuV2',
   'cpu',
-  'diskLatency',
   'diskSpaceUsage',
   'load',
   'memory',
   'memoryFree',
-  'memoryTotal',
   'normalizedLoad1m',
   'tx',
   'rx',
@@ -87,6 +86,7 @@ export const metricInventoryThresholdRuleParamsSchema = schema.object(
     filterQuery: schema.maybe(schema.string({ validate: validateIsStringElasticsearchJSONFilter })),
     sourceId: schema.string(),
     alertOnNoData: schema.maybe(schema.boolean()),
+    schema: schema.maybe(oneOfLiterals(dataSchemaFormats)),
   },
   { unknowns: 'allow' }
 );

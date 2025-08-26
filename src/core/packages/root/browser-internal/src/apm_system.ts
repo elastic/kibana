@@ -11,11 +11,13 @@ import type { ApmBase, AgentConfigOptions, Transaction } from '@elastic/apm-rum'
 import { modifyUrl } from '@kbn/std';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { ebtSpanFilter } from './filters/ebt_span_filter';
 import { CachedResourceObserver } from './apm_resource_counter';
 
 /** "GET protocol://hostname:port/pathname" */
 const HTTP_REQUEST_TRANSACTION_NAME_REGEX =
   /^(GET|POST|PUT|HEAD|PATCH|DELETE|OPTIONS|CONNECT|TRACE)\s(.*)$/;
+const USER_INTERACTION_ATTR_NAME = 'data-test-subj';
 
 /**
  * This is the entry point used to boot the frontend when serving a application
@@ -57,12 +59,39 @@ export class ApmSystem {
       apm.addLabels(globalLabels);
     }
 
+    apm.addFilter(ebtSpanFilter);
+
     this.addHttpRequestNormalization(apm);
     this.addRouteChangeNormalization(apm);
 
     init(apmConfig);
     // hold page load transaction blocks a transaction implicitly created by init.
     this.holdPageLoadTransaction(apm);
+
+    // Registering an event handler to improve user-interaction transaction names based on data-test-subj attribute
+    // Context: https://github.com/elastic/observability-dev/issues/4528
+    window.addEventListener(
+      'click',
+      function (event) {
+        const tr = apm.getCurrentTransaction();
+        if (!tr) {
+          // In some cases agent decides not to create a transaction
+          return;
+        }
+        const { target } = event;
+        if (target instanceof Element) {
+          const element = target?.closest(
+            `a[${USER_INTERACTION_ATTR_NAME}], button[${USER_INTERACTION_ATTR_NAME}]`
+          );
+          if (element) {
+            tr.name = `Click - ${element.getAttribute(USER_INTERACTION_ATTR_NAME)}`;
+          } else if (target.getAttribute(USER_INTERACTION_ATTR_NAME)) {
+            tr.name = `Click - ${target.getAttribute(USER_INTERACTION_ATTR_NAME)}`;
+          }
+        }
+      },
+      true
+    );
   }
 
   async start(start?: StartDeps) {

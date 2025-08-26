@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import type { SearchHit } from '@kbn/es-types';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
-import type { SearchHit } from '@kbn/es-types';
+import * as t from 'io-ts';
+import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+import {
+  agentConfigurationIntakeRt,
+  serviceRt,
+} from '../../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
+import type { ApmFeatureFlags } from '../../../../common/apm_feature_flags';
+import { createInternalESClientWithResources } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
+import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
+import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
+import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
 import { createOrUpdateConfiguration } from './create_or_update_configuration';
-import { searchConfigurations } from './search_configurations';
+import { deleteConfiguration } from './delete_configuration';
 import { findExactConfiguration } from './find_exact_configuration';
-import { listConfigurations } from './list_configurations';
+import { getAgentNameByService } from './get_agent_name_by_service';
 import type { EnvironmentsResponse } from './get_environments';
 import { getEnvironments } from './get_environments';
-import { deleteConfiguration } from './delete_configuration';
-import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { getAgentNameByService } from './get_agent_name_by_service';
-import { markAppliedByAgent } from './mark_applied_by_agent';
-import {
-  serviceRt,
-  agentConfigurationIntakeRt,
-} from '../../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
-import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
-import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
-import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import { createInternalESClientWithResources } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
-import type { ApmFeatureFlags } from '../../../../common/apm_feature_flags';
+import { handleAgentConfigurationSearch } from './handle_agent_configuration_search';
+import { listConfigurations } from './list_configurations';
 
 function throwNotFoundIfAgentConfigNotAvailable(featureFlags: ApmFeatureFlags): void {
   if (!featureFlags.agentConfigurationAvailable) {
@@ -218,7 +217,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
 
 const searchParamsRt = t.intersection([
   t.type({ service: serviceRt }),
-  t.partial({ etag: t.string, mark_as_applied_by_agent: t.boolean }),
+  t.partial({ etag: t.string, mark_as_applied_by_agent: t.boolean, error: t.string }),
 ]);
 
 export type AgentConfigSearchParams = t.TypeOf<typeof searchParamsRt>;
@@ -241,48 +240,13 @@ const agentConfigurationSearchRoute = createApmServerRoute({
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const { params, logger } = resources;
-
-    const { service, etag, mark_as_applied_by_agent: markAsAppliedByAgent } = params.body;
-
     const internalESClient = await createInternalESClientWithResources(resources);
-    const configuration = await searchConfigurations({
-      service,
+
+    return handleAgentConfigurationSearch({
+      params: params.body,
       internalESClient,
+      logger,
     });
-
-    if (!configuration) {
-      logger.debug(
-        `[Central configuration] Config was not found for ${service.name}/${service.environment}`
-      );
-      return null;
-    }
-
-    // whether to update `applied_by_agent` field
-    // It will be set to true of the etags match or if `markAsAppliedByAgent=true`
-    // `markAsAppliedByAgent=true` means "force setting it to true regardless of etag". This is needed for Jaeger agent that doesn't have etags
-    const willMarkAsApplied =
-      (markAsAppliedByAgent || etag === configuration._source.etag) &&
-      !configuration._source.applied_by_agent;
-
-    logger.debug(
-      `[Central configuration] Config was found for:
-        service.name = ${service.name},
-        service.environment = ${service.environment},
-        etag (requested) = ${etag},
-        etag (existing) = ${configuration._source.etag},
-        markAsAppliedByAgent = ${markAsAppliedByAgent},
-        willMarkAsApplied = ${willMarkAsApplied}`
-    );
-
-    if (willMarkAsApplied) {
-      await markAppliedByAgent({
-        id: configuration._id!,
-        body: configuration._source,
-        internalESClient,
-      });
-    }
-
-    return configuration;
   },
 });
 

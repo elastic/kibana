@@ -6,70 +6,57 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { resources } from '@elastic/opentelemetry-node/sdk';
+import { core, node, tracing } from '@elastic/opentelemetry-node/sdk';
 import { LangfuseSpanProcessor, PhoenixSpanProcessor } from '@kbn/inference-tracing';
 import { fromExternalVariant } from '@kbn/std';
-import { TracingConfig } from '@kbn/tracing-config';
+import type { TracingConfig } from '@kbn/tracing-config';
 import { context, propagation, trace } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
-import {
-  CompositePropagator,
-  W3CBaggagePropagator,
-  W3CTraceContextPropagator,
-} from '@opentelemetry/core';
-import {
-  NodeTracerProvider,
-  ParentBasedSampler,
-  SpanProcessor,
-  TraceIdRatioBasedSampler,
-} from '@opentelemetry/sdk-trace-node';
-import type { AgentConfigOptions } from 'elastic-apm-node';
-import { castArray, once } from 'lodash';
-import { resourceFromAttributes } from '@opentelemetry/resources';
-import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from '@kbn/opentelemetry-attributes';
-import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import { castArray } from 'lodash';
 import { LateBindingSpanProcessor } from '..';
+import { installShutdownHandlers } from './on_exit_cleanup';
 
+/**
+ * Initialize the OpenTelemetry tracing provider
+ * @param resource The OpenTelemetry resource information
+ * @param tracingConfig The OpenTelemetry tracing configuration
+ */
 export function initTracing({
+  resource,
   tracingConfig,
-  apmConfig,
 }: {
-  tracingConfig?: TracingConfig;
-  apmConfig?: AgentConfigOptions;
+  resource: resources.Resource;
+  tracingConfig: TracingConfig;
 }) {
   const contextManager = new AsyncLocalStorageContextManager();
   context.setGlobalContextManager(contextManager);
   contextManager.enable();
 
-  const resource = resourceFromAttributes({
-    [ATTR_SERVICE_NAME]: apmConfig?.serviceName,
-    [ATTR_SERVICE_INSTANCE_ID]: apmConfig?.serviceNodeName,
-    [ATTR_SERVICE_NAMESPACE]: apmConfig?.environment,
-  });
-
   // this is used for late-binding of span processors
   const lateBindingProcessor = LateBindingSpanProcessor.get();
 
-  const allSpanProcessors: SpanProcessor[] = [lateBindingProcessor];
+  const allSpanProcessors: tracing.SpanProcessor[] = [lateBindingProcessor];
 
   propagation.setGlobalPropagator(
-    new CompositePropagator({
-      propagators: [new W3CTraceContextPropagator(), new W3CBaggagePropagator()],
+    new core.CompositePropagator({
+      propagators: [new core.W3CTraceContextPropagator(), new core.W3CBaggagePropagator()],
     })
   );
 
-  const traceIdSampler = new TraceIdRatioBasedSampler(tracingConfig?.sample_rate ?? 1);
+  const traceIdSampler = new tracing.TraceIdRatioBasedSampler(tracingConfig.sample_rate);
 
-  const nodeTracerProvider = new NodeTracerProvider({
+  const nodeTracerProvider = new node.NodeTracerProvider({
     // by default, base sampling on parent context,
     // or for root spans, based on the configured sample rate
-    sampler: new ParentBasedSampler({
+    sampler: new tracing.ParentBasedSampler({
       root: traceIdSampler,
     }),
     spanProcessors: allSpanProcessors,
     resource,
   });
 
-  castArray(tracingConfig?.exporters ?? []).forEach((exporter) => {
+  castArray(tracingConfig.exporters).forEach((exporter) => {
     const variant = fromExternalVariant(exporter);
     switch (variant.type) {
       case 'langfuse':
@@ -85,16 +72,14 @@ export function initTracing({
   trace.setGlobalTracerProvider(nodeTracerProvider);
 
   propagation.setGlobalPropagator(
-    new CompositePropagator({
-      propagators: [new W3CTraceContextPropagator(), new W3CBaggagePropagator()],
+    new core.CompositePropagator({
+      propagators: [new core.W3CTraceContextPropagator(), new core.W3CBaggagePropagator()],
     })
   );
 
-  const shutdown = once(async () => {
+  const shutdown = async () => {
     await Promise.all(allSpanProcessors.map((processor) => processor.shutdown()));
-  });
+  };
 
-  process.on('SIGTERM', shutdown);
-  process.on('SIGINT', shutdown);
-  process.on('beforeExit', shutdown);
+  installShutdownHandlers(shutdown);
 }

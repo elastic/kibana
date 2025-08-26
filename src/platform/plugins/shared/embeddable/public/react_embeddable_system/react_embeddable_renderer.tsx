@@ -7,15 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiIsPresentationContainer, HasSerializedChildState } from '@kbn/presentation-containers';
-import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
+import {
+  apiIsPresentationContainer,
+  type HasSerializedChildState,
+} from '@kbn/presentation-containers';
+import {
+  PresentationPanel,
+  type PresentationPanelProps,
+} from '@kbn/presentation-panel-plugin/public';
 import { initializeVisibility } from '@kbn/presentation-publishing';
 import React, { useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
-import { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
+import type { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.

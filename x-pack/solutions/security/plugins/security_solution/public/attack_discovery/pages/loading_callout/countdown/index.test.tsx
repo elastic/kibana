@@ -98,4 +98,18 @@ describe('Countdown', () => {
 
     expect(screen.getByRole('button', { name: INFORMATION })).toBeInTheDocument();
   });
+
+  it('returns null when approximateFutureTime is null', () => {
+    (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+      attackDiscoveryAlertsEnabled: true,
+    });
+
+    const { container } = render(
+      <TestProviders>
+        <Countdown approximateFutureTime={null} connectorIntervals={connectorIntervals} />
+      </TestProviders>
+    );
+
+    expect(container.innerHTML).toEqual('');
+  });
 });

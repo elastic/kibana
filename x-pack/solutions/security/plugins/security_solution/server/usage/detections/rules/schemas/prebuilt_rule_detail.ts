@@ -26,6 +26,12 @@ export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
     type: 'boolean',
     _meta: { description: 'If the detection rule has been enabled by the user' },
   },
+  is_customized: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether this is a customized prebuilt rule',
+    },
+  },
   elastic_rule: {
     type: 'boolean',
     _meta: { description: 'If the detection rule has been authored by Elastic' },
@@ -92,5 +98,11 @@ export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
   has_exceptions: {
     type: 'boolean',
     _meta: { description: 'True if this rule has exceptions' },
+  },
+  has_does_not_match_condition: {
+    type: 'boolean',
+    _meta: {
+      description: 'True if Threat match rule has does_not_match condition in threat mappings',
+    },
   },
 };

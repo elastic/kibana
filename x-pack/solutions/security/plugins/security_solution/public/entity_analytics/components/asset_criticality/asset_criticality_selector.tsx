@@ -221,14 +221,15 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({
   onSave,
 }) => {
   const basicSelectId = useGeneratedHtmlId({ prefix: 'basicSelect' });
+  const modalTitleId = useGeneratedHtmlId();
   const [value, setNewValue] = useState<CriticalityLevelWithUnassigned>(
     initialCriticalityLevel ?? 'unassigned'
   );
 
   return (
-    <EuiModal onClose={() => toggle(false)}>
+    <EuiModal onClose={() => toggle(false)} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="asset-criticality-modal-title">
+        <EuiModalHeaderTitle id={modalTitleId} data-test-subj="asset-criticality-modal-title">
           {PICK_ASSET_CRITICALITY}
         </EuiModalHeaderTitle>
       </EuiModalHeader>

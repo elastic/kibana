@@ -28,7 +28,7 @@ import { css } from '@emotion/react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  EVENT_FILTERS_OPERATORS,
+  ENDPOINT_ARTIFACT_OPERATORS,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
 } from '@kbn/securitysolution-list-utils';
@@ -61,6 +61,7 @@ import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import { getAddedFieldsCounts, computeHasDuplicateFields } from '../../../../common/utils';
 
 import {
   ABOUT_EVENT_FILTERS,
@@ -91,19 +92,6 @@ const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = OPERATING_SYSTEM
   value: os,
   inputDisplay: OS_TITLES[os],
 }));
-
-const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
-  formFields.reduce<{ [k: string]: number }>((allFields, field) => {
-    if (field in allFields) {
-      allFields[field]++;
-    } else {
-      allFields[field] = 1;
-    }
-    return allFields;
-  }, {});
-
-const computeHasDuplicateFields = (formFieldsList: Record<string, number>): boolean =>
-  Object.values(formFieldsList).some((e) => e > 1);
 
 const defaultConditionEntry = (): ExceptionListItemSchema['entries'] => [
   {
@@ -265,6 +253,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           error={NAME_ERROR}
         >
           <EuiFieldText
+            isInvalid={hasNameError && hasBeenInputNameVisited}
             aria-label={NAME_LABEL}
             id="eventFiltersFormInputName"
             defaultValue={exception?.name ?? ''}
@@ -585,7 +574,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           dataTestSubj: 'alert-exception-builder',
           idAria: 'alert-exception-builder',
           onChange: handleOnBuilderChange,
-          operatorsList: EVENT_FILTERS_OPERATORS,
+          operatorsList: ENDPOINT_ARTIFACT_OPERATORS,
           osTypes: exception.os_types,
           showValueListModal: ShowValueListModal,
         }),

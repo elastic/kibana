@@ -64,7 +64,7 @@ const baseItem = {
   skew: 0,
   color: 'red',
   depth: 2,
-  hasError: false,
+  errorCount: 0,
 } as TraceWaterfallItem;
 
 describe('TraceItemRow', () => {

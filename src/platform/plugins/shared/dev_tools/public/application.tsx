@@ -9,7 +9,8 @@
 
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -23,8 +24,8 @@ import type {
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { DocTitleService, BreadcrumbService } from './services';
 
-import { DevToolApp } from './dev_tool';
-import { DevToolsStartServices } from './types';
+import type { DevToolApp } from './dev_tool';
+import type { DevToolsStartServices } from './types';
 
 export interface AppServices {
   docTitleService: DocTitleService;

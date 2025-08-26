@@ -6,9 +6,35 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { IndexName } from '@elastic/elasticsearch/lib/api/types';
-import { useKibana } from './use_kibana';
+import type { IndexName } from '@elastic/elasticsearch/lib/api/types';
+import type { HttpSetup } from '@kbn/core/public';
+import { SearchPlaygroundQueryKeys } from '../../common';
 import { APIRoutes } from '../types';
+import { useKibana } from './use_kibana';
+
+export const IndicesQuery =
+  (http: HttpSetup, query: string = '', exact: boolean = false) =>
+  async () => {
+    try {
+      const response = await http.get<{
+        indices: string[];
+      }>(APIRoutes.GET_INDICES, {
+        query: {
+          search_query: query,
+          exact,
+          size: 100,
+        },
+      });
+
+      return response.indices;
+    } catch (err) {
+      if (err?.response?.status === 404) {
+        return [];
+      }
+
+      throw err;
+    }
+  };
 
 export const useQueryIndices = (
   {
@@ -22,28 +48,8 @@ export const useQueryIndices = (
   const { services } = useKibana();
 
   const { data, isLoading, isFetched } = useQuery({
-    queryKey: ['indices', query],
-    queryFn: async () => {
-      try {
-        const response = await services.http.get<{
-          indices: string[];
-        }>(APIRoutes.GET_INDICES, {
-          query: {
-            search_query: query,
-            exact,
-            size: 100,
-          },
-        });
-
-        return response.indices;
-      } catch (err) {
-        if (err?.response?.status === 404) {
-          return [];
-        }
-
-        throw err;
-      }
-    },
+    queryKey: [SearchPlaygroundQueryKeys.QueryIndices, query],
+    queryFn: IndicesQuery(services.http, query, exact),
     initialData: [],
   });
 

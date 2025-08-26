@@ -11,12 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
-import {
-  AppMountParameters,
-  AppUpdater,
-  DEFAULT_APP_CATEGORIES,
-  ScopedHistory,
-} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import {
   createKbnUrlStateStorage,
@@ -35,9 +30,11 @@ import type {
   CoreStart,
   Plugin,
   ApplicationStart,
-  SavedObjectsClientContract,
+  AppMountParameters,
+  AppUpdater,
+  ScopedHistory,
 } from '@kbn/core/public';
-import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   Setup as InspectorSetup,
@@ -47,7 +44,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -57,16 +54,17 @@ import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/publ
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import {
+import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
+import { css, injectGlobal } from '@emotion/css';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -74,7 +72,8 @@ import {
   dashboardVisualizationPanelTrigger,
   visualizeEditorTrigger,
 } from './triggers';
-import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
+import type { VisEditorsRegistry } from './vis_editors_registry';
+import { createVisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
 import { VisualizeLocatorDefinition } from '../common/locator';
 import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
@@ -88,7 +87,6 @@ import {
   setCapabilities,
   setHttp,
   setSearch,
-  setSavedObjects,
   setExpressions,
   setUiActions,
   setTimeFilter,
@@ -115,12 +113,9 @@ import {
   setNotifications,
 } from './services';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
-import { ListingViewRegistry } from './types';
-import {
-  LATEST_VERSION,
-  CONTENT_ID,
-  VisualizationSavedObjectAttributes,
-} from '../common/content_management';
+import type { ListingViewRegistry } from './types';
+import type { VisualizationSavedObjectAttributes } from '../common/content_management';
+import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
 import type { VisualizeSavedObjectInputState } from './embeddable/types';
 import { registerActions } from './actions/register_actions';
 
@@ -161,7 +156,6 @@ export interface VisualizationsStartDeps {
   application: ApplicationStart;
   navigation: NavigationStart;
   presentationUtil: PresentationUtilPluginStart;
-  savedObjectsClient: SavedObjectsClientContract;
   savedSearch: SavedSearchPublicPluginStart;
   spaces?: SpacesPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
@@ -177,6 +171,72 @@ export interface VisualizationsStartDeps {
   noDataPage?: NoDataPagePluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
+
+const styles = {
+  visAppWrapper: css({
+    display: 'flex',
+    flexDirection: 'column',
+    flexGrow: 1,
+  }),
+  globalScreenshotMode: css`
+    kbn-top-nav,
+    filter-bar,
+    .kbnTopNavMenu__wrapper,
+    ::-webkit-scrollbar,
+    .euiNavDrawer {
+      display: none !important;
+    }
+  `,
+  visEditorScreenshotMode: css`
+    /* hide unusable controls !important is required to override resizable panel inline display */
+    .visEditor__content .visEditor--default > :not(.visEditor__visualization__wrapper) {
+      display: none !important;
+    }
+
+    /** THIS IS FOR TSVB UNTIL REFACTOR **/
+    .tvbEditorVisualization {
+      position: static !important;
+    }
+    .visualize .tvbVisTimeSeries__legendToggle {
+      /* all non-content rows in interface */
+      display: none;
+    }
+
+    .tvbEditor--hideForReporting {
+      /* all non-content rows in interface */
+      display: none;
+    }
+    /**  END TSVB BAD BAD HACKS **/
+
+    /* remove left padding from visualizations so that map lines up with .leaflet-container and
+    *  setting the position to be fixed and to take up the entire screen, because some zoom levels/viewports
+    *  are triggering the media breakpoints that cause the .visEditor__canvas to take up more room than the viewport */
+
+    .visEditor .visEditor__canvas {
+      padding-left: 0;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    /** Visualization tweaks */
+
+    /* hide unusable controls */
+    .visualize .visLegend__toggle,
+    .visualize .kbnAggTable__controls,
+    .visualize .leaflet-container .leaflet-top.leaflet-left,
+    .visualize paginate-controls /* page numbers */ {
+      display: none;
+    }
+
+    /* Ensure the min-height of the small breakpoint isn't used */
+    .vis-editor visualization {
+      min-height: 0 !important;
+    }
+  `,
+};
 
 /**
  * Visualizations Plugin - public
@@ -266,7 +326,7 @@ export class VisualizationsPlugin
 
     core.application.register({
       id: VisualizeConstants.APP_ID,
-      title: 'Visualize Library',
+      title: 'Visualize library',
       order: 8000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -349,16 +409,15 @@ export class VisualizationsPlugin
           contentManagement: pluginsStart.contentManagement,
         };
 
-        params.element.classList.add('visAppWrapper');
+        params.element.classList.add(styles.visAppWrapper);
         if (pluginsStart.screenshotMode.isScreenshotMode()) {
-          params.element.classList.add('visEditorScreenshotModeActive');
-          // @ts-expect-error TS error, cannot find type declaration for scss
-          await import('./visualize_screenshot_mode.scss');
+          params.element.classList.add(styles.visEditorScreenshotMode);
+          injectGlobal(styles.globalScreenshotMode);
         }
         const unmount = renderApp(params, services);
         return () => {
           data.search.session.clear();
-          params.element.classList.remove('visAppWrapper');
+          params.element.classList.remove(styles.visAppWrapper);
           unlistenParentHistory();
           unmount();
           appUnMounted();
@@ -371,7 +430,7 @@ export class VisualizationsPlugin
     if (home) {
       home.featureCatalogue.register({
         id: 'visualize',
-        title: 'Visualize Library',
+        title: 'Visualize library',
         description: i18n.translate('visualizations.visualizeDescription', {
           defaultMessage:
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',
@@ -407,14 +466,20 @@ export class VisualizationsPlugin
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {
+        const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
         container.addNewPanel<VisualizeSavedObjectInputState>(
           {
             panelType: VISUALIZE_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: {
-                savedObjectId: savedObject.id,
-              },
-              references: savedObject.references,
+              rawState: {},
+              references: [
+                ...savedObject.references,
+                {
+                  name: SAVED_OBJECT_REF_NAME,
+                  type: VISUALIZE_EMBEDDABLE_TYPE,
+                  id: savedObject.id,
+                },
+              ],
             },
           },
           true
@@ -435,7 +500,7 @@ export class VisualizationsPlugin
       version: {
         latest: LATEST_VERSION,
       },
-      name: 'Visualize Library',
+      name: 'Visualize library',
     });
 
     return {
@@ -471,7 +536,6 @@ export class VisualizationsPlugin
     setApplication(core.application);
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
-    setSavedObjects(core.savedObjects);
     setDocLinks(core.docLinks);
     setSearch(data.search);
     setExpressions(expressions);

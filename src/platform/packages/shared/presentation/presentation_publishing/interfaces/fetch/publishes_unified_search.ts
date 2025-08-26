@@ -10,7 +10,7 @@
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { PublishingSubject } from '../../publishing_subject';
+import type { PublishingSubject } from '../../publishing_subject';
 import {
   areFiltersEqualForFetch,
   isQueryEqualForFetch,

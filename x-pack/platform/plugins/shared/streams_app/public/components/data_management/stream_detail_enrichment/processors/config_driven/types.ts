@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { ProcessorDefinition } from '@kbn/streams-schema';
-import { configDrivenProcessors } from '.';
-import { WithUIAttributes } from '../../types';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { configDrivenProcessors } from '.';
 
-export interface ConfigDrivenProcessorConfiguration<
-  FormStateT,
-  ProcessorDefinitionT extends ProcessorDefinition
-> {
+export interface ConfigDrivenProcessorConfiguration<FormStateT, ProcessorDefinitionT> {
   type: ConfigDrivenProcessorType;
   inputDisplay: string;
-  getDocUrl: (esDocUrl: string) => React.ReactNode;
+  getDocUrl: (docLinks: DocLinksStart) => React.ReactNode;
   defaultFormState: FormStateT;
   convertFormStateToConfig: (formState: FormStateT) => ProcessorDefinitionT;
-  convertProcessorToFormState: (processor: WithUIAttributes<ProcessorDefinitionT>) => FormStateT;
+  convertProcessorToFormState: (processor: ProcessorDefinitionT) => FormStateT;
   fieldConfigurations: FieldConfiguration[];
   fieldOptions: FieldOptions;
 }
@@ -28,6 +24,7 @@ export interface FieldOptions {
   includeIgnoreMissing: boolean;
   includeCondition: boolean;
   fieldHelpText: string;
+  fieldKey: string;
 }
 
 export interface FieldConfiguration {

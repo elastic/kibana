@@ -2001,21 +2001,6 @@
       }
     }
   },
-  "guided-onboarding-guide-state": {
-    "dynamic": false,
-    "properties": {
-      "guideId": {
-        "type": "keyword"
-      },
-      "isActive": {
-        "type": "boolean"
-      }
-    }
-  },
-  "guided-onboarding-plugin-state": {
-    "dynamic": false,
-    "properties": {}
-  },
   "index-pattern": {
     "dynamic": false,
     "properties": {
@@ -3038,8 +3023,7 @@
   },
   "privmon-api-key": {
     "dynamic": false,
-    "properties": {
-    }
+    "properties": {}
   },
   "product-doc-install-status": {
     "dynamic": false,
@@ -4261,6 +4245,52 @@
       },
       "updated_at": {
         "type": "date"
+      }
+    }
+  },
+  "workflow": {
+    "dynamic": false,
+    "properties": {
+      "createdBy": {
+        "type": "keyword"
+      },
+      "definition": {
+        "enabled": false,
+        "type": "object"
+      },
+      "deleted_at": {
+        "type": "date"
+      },
+      "description": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "lastUpdatedBy": {
+        "type": "keyword"
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "yaml": {
+        "index": false,
+        "type": "text"
       }
     }
   },

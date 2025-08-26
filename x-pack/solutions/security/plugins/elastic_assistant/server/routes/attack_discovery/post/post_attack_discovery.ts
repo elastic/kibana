@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger, IKibanaResponse } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryPostResponse,
@@ -28,7 +28,7 @@ import { performChecks } from '../../helpers';
 import { updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
 import { writeAttackDiscoveryEvent } from './helpers/write_attack_discovery_event';
 import { buildResponse } from '../../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { requestIsValid } from './helpers/request_is_valid';
 import { generateAndUpdateAttackDiscoveries } from '../helpers/generate_and_update_discoveries';
 import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
@@ -137,7 +137,7 @@ export const postAttackDiscoveryRoute = (
 
           const attackDiscoveryAlertsEnabled = await featureFlags.getBooleanValue(
             ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-            false
+            true
           );
 
           if (attackDiscoveryAlertsEnabled) {

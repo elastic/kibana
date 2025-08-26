@@ -55,12 +55,11 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 
   .kbnBody {
-    padding-top: var(--euiFixedHeadersOffset, 0);
+    padding-top: var(--euiFixedHeadersOffset, 0px);
 
-    // forward compatibility with new grid layout variables,
-    --kbn-application--content-height: calc(
-      100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))
-    );
+    // total height of all fixed headers + the sticky action menu toolbar, dynamically updated depending on the presence of the elements
+    --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0px);
+
     // forward compatibility with new grid layout variables,
     // this current height of project header app action menu, 0 or the height of the top bar when it is present
     --kbn-application--top-bar-height: 0px;
@@ -70,6 +69,22 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbn-application--sticky-headers-offset: calc(
       var(--euiFixedHeadersOffset, 0px) + var(--kbn-application--top-bar-height, 0px)
     );
+
+    // for forward compatibility with grid layout,
+    // --kbn-layout--application includes everything except chrome's fixed headers
+    // for solution navigation, it also includes the top bar height (action menu)
+    --kbn-layout--application-top: var(--euiFixedHeadersOffset, 0px);
+    --kbn-layout--application-left: 0px;
+    --kbn-layout--application-bottom: 0px;
+    --kbn-layout--application-right: 0px;
+    --kbn-layout--application-height: calc(100vh - var(--kbn-layout--application-top, 0px));
+
+    // --kbn-application--content also excludes the top bar height (action menu)
+    --kbn-application--content-top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0px));
+    --kbn-application--content-left: 0px;
+    --kbn-application--content-bottom: 0px;
+    --kbn-application--content-right: 0px;
+    --kbn-application--content-height: calc(100vh - var(--kbn-application--content-top, 0px));
   }
 
   // Conditionally override :root CSS fixed header variable. Updating \`--euiFixedHeadersOffset\`

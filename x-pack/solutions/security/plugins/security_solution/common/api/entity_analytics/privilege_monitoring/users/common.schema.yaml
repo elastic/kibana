@@ -51,7 +51,7 @@ components:
                   - csv
                   - index_sync
                   - api
-            source_indices:
+            source_ids:
               type: array
               items:
                 type: string

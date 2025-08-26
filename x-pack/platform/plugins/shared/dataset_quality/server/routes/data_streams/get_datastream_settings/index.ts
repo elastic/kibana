@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { datasetQualityPrivileges, dataStreamService } from '../../../services';
-import { DataStreamSettings } from '../../../../common/api_types';
+import type { DataStreamSettings } from '../../../../common/api_types';
 import { getDataStreamCreatedOn } from './get_datastream_created_on';
 
 export async function getDataStreamSettings({
@@ -20,7 +20,7 @@ export async function getDataStreamSettings({
   const [createdOn, [dataStreamInfo], datasetUserPrivileges] = await Promise.all([
     getDataStreamCreatedOn(esClient, dataStream),
     dataStreamService.getMatchingDataStreams(esClient, dataStream),
-    datasetQualityPrivileges.getDatasetPrivileges(esClient, dataStream),
+    datasetQualityPrivileges.getDatasetPrivileges(esClient, [dataStream]),
   ]);
 
   const integration = dataStreamInfo?._meta?.package?.name;

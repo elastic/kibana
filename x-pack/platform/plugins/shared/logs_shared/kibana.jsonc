@@ -25,9 +25,11 @@
       "uiActions",
       "usageCollection",
       "embeddable",
+      "savedSearch"
     ],
     "optionalPlugins": [
       "observabilityAIAssistant",
+      "ml",
     ],
     "requiredBundles": [
       "kibanaUtils",

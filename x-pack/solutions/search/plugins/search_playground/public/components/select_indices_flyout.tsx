@@ -22,11 +22,12 @@ import {
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getIndicesWithNoSourceFields } from '@kbn/search-queries';
-import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
 import { useIndicesFields } from '../hooks/use_indices_fields';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
@@ -64,6 +65,8 @@ interface SelectIndicesFlyout {
 
 export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) => {
   const { euiTheme } = useEuiTheme();
+  const modalTitleId = useGeneratedHtmlId();
+
   const [query, setQuery] = useState<string>('');
   const { indices, isLoading: isIndicesLoading } = useQueryIndices({ query });
   const { indices: selectedIndices, setIndices: setSelectedIndices } = useSourceIndicesFields();
@@ -129,7 +132,13 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
   };
 
   return (
-    <EuiFlyout size="s" ownFocus onClose={onClose} data-test-subj="selectIndicesFlyout">
+    <EuiFlyout
+      size="s"
+      ownFocus
+      onClose={onClose}
+      data-test-subj="selectIndicesFlyout"
+      aria-labelledby={modalTitleId}
+    >
       <EuiSelectable
         data-test-subj="indicesTable"
         searchable
@@ -155,7 +164,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
           <>
             <EuiFlyoutHeader>
               <EuiTitle size="m">
-                <h2>
+                <h2 id={modalTitleId}>
                   <FormattedMessage
                     id="xpack.searchPlayground.addDataSource.flyout.title"
                     defaultMessage="Add data"

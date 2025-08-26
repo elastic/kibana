@@ -71,7 +71,7 @@ export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView: experimentalDataView } = useDataView(sourcererScopeId);
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView?.id : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
 
   // Make a dependency key to prevent unnecessary re-renders when data object is defined inline
   // It is necessary because the data object is an array or an object and useMemo would always re-render
@@ -82,13 +82,13 @@ export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
       (Array.isArray(data) ? data : [data])
         .map(({ field, value }) => ({
           field: newDataViewPickerEnabled
-            ? experimentalDataView?.fields?.getByName(field)?.toSpec()
+            ? experimentalDataView.fields?.getByName(field)?.toSpec()
             : oldGetFieldSpec(field),
           value,
         }))
         .filter((item): item is CellActionsData => !!item.field),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Use the dependencyKey to prevent unnecessary re-renders
-    [dependencyKey, oldGetFieldSpec, newDataViewPickerEnabled, experimentalDataView?.fields]
+    [dependencyKey, oldGetFieldSpec, newDataViewPickerEnabled, experimentalDataView.fields]
   );
 
   const metadataWithDataView = useMemo(() => ({ ...metadata, dataViewId }), [dataViewId, metadata]);

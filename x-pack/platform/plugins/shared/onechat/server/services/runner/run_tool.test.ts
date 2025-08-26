@@ -7,27 +7,31 @@
 
 import { z } from '@kbn/zod';
 import type { ScopedRunnerRunToolsParams, OnechatToolEvent } from '@kbn/onechat-server';
+import type { CreateScopedRunnerDepsMock, MockedTool, ToolRegistryMock } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
   createMockedTool,
-  CreateScopedRunnerDepsMock,
-  MockedTool,
+  createToolRegistryMock,
 } from '../../test_utils';
 import { RunnerManager } from './runner';
 import { runTool } from './run_tool';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 describe('runTool', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
   let runnerManager: RunnerManager;
+  let registry: ToolRegistryMock;
   let tool: MockedTool;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
     runnerManager = new RunnerManager(runnerDeps);
 
+    registry = createToolRegistryMock();
     const {
-      toolsService: { registry },
+      toolsService: { getRegistry },
     } = runnerDeps;
+    getRegistry.mockResolvedValue(registry);
 
     tool = createMockedTool({
       schema: z.object({
@@ -38,10 +42,6 @@ describe('runTool', () => {
   });
 
   it('calls the tool registry with the expected parameters', async () => {
-    const {
-      toolsService: { registry },
-    } = runnerDeps;
-
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
       toolParams: { foo: 'bar' },
@@ -53,16 +53,10 @@ describe('runTool', () => {
     });
 
     expect(registry.get).toHaveBeenCalledTimes(1);
-    expect(registry.get).toHaveBeenCalledWith({
-      toolId: params.toolId,
-      request: runnerDeps.request,
-    });
+    expect(registry.get).toHaveBeenCalledWith(params.toolId);
   });
 
   it('throws if the tool parameters do not match the schema', async () => {
-    const {
-      toolsService: { registry },
-    } = runnerDeps;
     tool = createMockedTool({
       schema: z.object({
         bar: z.string(),
@@ -121,16 +115,18 @@ describe('runTool', () => {
       },
     };
 
-    tool.handler.mockReturnValue({ result: { test: true, over: 9000 } });
+    tool.handler.mockReturnValue({
+      results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
+    });
 
-    const result = await runTool({
+    const results = await runTool({
       toolExecutionParams: params,
       parentManager: runnerManager,
     });
 
-    expect(result).toEqual({
+    expect(results).toEqual({
       runId: expect.any(String),
-      result: { test: true, over: 9000 },
+      results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
     });
   });
 
@@ -142,8 +138,8 @@ describe('runTool', () => {
       },
     };
 
-    tool.handler.mockImplementation((toolParams, context) => {
-      return { result: 'foo' };
+    tool.handler.mockImplementation(() => {
+      return { results: [{ type: ToolResultType.other, data: { value: 42 } }] };
     });
 
     await runTool({
@@ -182,7 +178,7 @@ describe('runTool', () => {
         type: 'test-event',
         data: { foo: 'bar' },
       });
-      return { result: 42 };
+      return { results: [{ type: ToolResultType.other, data: { foo: 'bar' } }] };
     });
 
     await runTool({

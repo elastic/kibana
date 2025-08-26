@@ -11,8 +11,8 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { CasesContextFeatures } from '../../common/ui';
 import { useCasesFeatures } from './use_cases_features';
 import { TestProviders } from './mock/test_providers';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
-import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
 import { CaseMetricsFeature } from '../../common/types/api';
 
 describe('useCasesFeatures', () => {
@@ -48,6 +48,7 @@ describe('useCasesFeatures', () => {
         pushToServiceAuthorized: false,
         observablesAuthorized: false,
         isObservablesFeatureEnabled: true,
+        connectorsAuthorized: false,
       });
     }
   );
@@ -69,6 +70,7 @@ describe('useCasesFeatures', () => {
       pushToServiceAuthorized: false,
       observablesAuthorized: false,
       isObservablesFeatureEnabled: true,
+      connectorsAuthorized: false,
     });
   });
 
@@ -79,8 +81,24 @@ describe('useCasesFeatures', () => {
       type === 'platinum' || type === 'enterprise' || type === 'trial' ? true : false,
     ]);
 
+  it('allows gold features on gold license', () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'gold' },
+    });
+
+    const { result } = renderHook(() => useCasesFeatures(), {
+      wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders>,
+    });
+
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        connectorsAuthorized: true,
+      })
+    );
+  });
+
   it.each(licenseTests)(
-    'allows platinum features on a platinum license',
+    'allows platinum features on a platinum license (license = %s)',
     async (type, expectedResult) => {
       const license = licensingMock.createLicense({
         license: { type },
@@ -90,15 +108,17 @@ describe('useCasesFeatures', () => {
         wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders>,
       });
 
-      expect(result.current).toEqual({
-        isAlertsEnabled: true,
-        isSyncAlertsEnabled: true,
-        metricsFeatures: [],
-        caseAssignmentAuthorized: expectedResult,
-        pushToServiceAuthorized: expectedResult,
-        observablesAuthorized: expectedResult,
-        isObservablesFeatureEnabled: true,
-      });
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          isAlertsEnabled: true,
+          isSyncAlertsEnabled: true,
+          metricsFeatures: [],
+          caseAssignmentAuthorized: expectedResult,
+          pushToServiceAuthorized: expectedResult,
+          observablesAuthorized: expectedResult,
+          isObservablesFeatureEnabled: true,
+        })
+      );
     }
   );
 });

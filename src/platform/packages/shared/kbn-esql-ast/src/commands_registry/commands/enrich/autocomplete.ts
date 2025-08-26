@@ -11,16 +11,11 @@ import {
   pipeCompleteItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
-} from '../../utils/complete_items';
-import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete';
+} from '../../complete_items';
+import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete/helpers';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
-import {
-  type ISuggestionItem,
-  type ICommandContext,
-  Location,
-  ESQLPolicy,
-  ICommandCallbacks,
-} from '../../types';
+import type { ESQLPolicy, ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
 import {
   Position,
   buildMatchingFieldsDefinition,
@@ -40,9 +35,11 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  const pos = getPosition(query, command);
+  const innerText = query.substring(0, cursorPosition);
+  const pos = getPosition(innerText, command);
   const policies = context?.policies ?? new Map<string, ESQLPolicy>();
   const fieldsMap = context?.fields ?? new Map<string, string>();
   const allColumnNames = Array.from(fieldsMap.keys());
@@ -64,12 +61,12 @@ export async function autocomplete(
 
     const fieldSuggestions = buildFieldsDefinitions(policyMetadata.enrichFields, false);
 
-    const lastWord = findFinalWord(query);
+    const lastWord = findFinalWord(innerText);
     if (lastWord) {
       // ENRICH ... WITH a <suggest>
       const rangeToReplace = {
-        start: query.length - lastWord.length + 1,
-        end: query.length + 1,
+        start: innerText.length - lastWord.length + 1,
+        end: innerText.length + 1,
       };
       fieldSuggestions.forEach((s) => {
         s.rangeToReplace = rangeToReplace;
@@ -85,12 +82,12 @@ export async function autocomplete(
 
     case Position.POLICY: {
       const policiesSuggestions = buildPoliciesDefinitions(Array.from(policies.values()));
-      const lastWord = findFinalWord(query);
+      const lastWord = findFinalWord(innerText);
       if (lastWord !== '') {
         policiesSuggestions.forEach((policySuggestion) => {
           policySuggestion.rangeToReplace = {
-            start: query.length - lastWord.length + 1,
-            end: query.length + 1,
+            start: innerText.length - lastWord.length + 1,
+            end: innerText.length + 1,
           };
         });
       }
@@ -146,13 +143,17 @@ export async function autocomplete(
         return [];
       }
 
-      const word = findPreviousWord(query);
+      const word = findPreviousWord(innerText);
       if (policyMetadata.enrichFields.includes(unescapeColumnName(word))) {
         // complete field name
         return [pipeCompleteItem, { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
       } else {
         // not recognized as a field name, assume new user-defined column name
-        return getOperatorSuggestions({ location: Location.ENRICH });
+        return getOperatorSuggestions(
+          { location: Location.ENRICH },
+          callbacks?.hasMinimumLicenseRequired,
+          context?.activeProduct
+        );
       }
     }
 

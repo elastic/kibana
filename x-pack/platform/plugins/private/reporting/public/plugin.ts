@@ -7,7 +7,7 @@
 
 import { from, map, type Observable, ReplaySubject } from 'rxjs';
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
@@ -33,12 +33,11 @@ import {
   reportingPDFExportProvider,
   reportingPNGExportProvider,
 } from '@kbn/reporting-public/share';
-import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
-import { InjectedIntl } from '@kbn/i18n-react';
-import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
-import { StartServices } from './types';
+import type { StartServices } from './types';
 import { APP_DESC, APP_TITLE } from './translations';
 import { APP_PATH } from './constants';
 
@@ -207,15 +206,15 @@ export class ReportingPublicPlugin
       visibleIn: [],
     });
 
-    uiActionsSetup.addTriggerAction(
-      CONTEXT_MENU_TRIGGER,
-      new ReportingCsvPanelAction({
+    uiActionsSetup.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, 'generateCsvReport', async () => {
+      const { ReportingCsvPanelAction } = await import('@kbn/reporting-csv-share-panel');
+      return new ReportingCsvPanelAction({
         core,
         apiClient,
         startServices$,
         csvConfig: this.config.csv,
-      })
-    );
+      });
+    });
 
     shareSetup.registerShareIntegration<ExportShare>(
       'search',

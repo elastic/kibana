@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt, jsonRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-
-export const supportedDataSourcesRT = rt.keyof({
-  host: null,
-});
+import { SupportedEntityTypesRT } from '../http_api/shared/entity_type';
+import { DataSchemaFormatRT } from '../http_api/shared';
 
 export const getHasDataQueryParamsRT = rt.partial({
-  dataSource: supportedDataSourcesRT,
+  entityType: SupportedEntityTypesRT,
 });
 
 export const getHasDataResponseRT = rt.partial({
@@ -23,24 +21,20 @@ export const getHasDataResponseRT = rt.partial({
 export const getTimeRangeMetadataQueryParamsRT = rt.intersection([
   rt.partial({
     kuery: rt.string,
+    filters: jsonRt.pipe(rt.UnknownRecord),
   }),
   rt.type({
-    dataSource: supportedDataSourcesRT,
+    dataSource: SupportedEntityTypesRT,
     from: isoToEpochRt,
     to: isoToEpochRt,
   }),
 ]);
 
 export const getTimeRangeMetadataResponseRT = rt.type({
-  schemas: rt.array(
-    rt.keyof({
-      ecs: null,
-      semconv: null,
-    })
-  ),
+  preferredSchema: rt.union([DataSchemaFormatRT, rt.null]),
+  schemas: rt.array(DataSchemaFormatRT),
 });
 
-export type SupportedDataSources = rt.TypeOf<typeof supportedDataSourcesRT>;
 export type GetHasDataQueryParams = rt.TypeOf<typeof getHasDataQueryParamsRT>;
 export type GetHasDataResponse = rt.TypeOf<typeof getHasDataResponseRT>;
 export type GetTimeRangeMetadataQueryParams = rt.TypeOf<typeof getTimeRangeMetadataQueryParamsRT>;

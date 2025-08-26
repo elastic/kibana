@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.ts'));
@@ -13,12 +13,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaPort = functionalConfig.get('servers.kibana.port');
   const idpPath = resolve(
     __dirname,
-    '../../../test/security_api_integration/plugins/saml_provider/metadata.xml'
+    '../security_api_integration/plugins/saml_provider/metadata.xml'
   );
-  const samlIdPPlugin = resolve(
-    __dirname,
-    '../../../test/security_api_integration/plugins/saml_provider'
-  );
+  const samlIdPPlugin = resolve(__dirname, '../security_api_integration/plugins/saml_provider');
 
   return {
     ...functionalConfig.getAll(),

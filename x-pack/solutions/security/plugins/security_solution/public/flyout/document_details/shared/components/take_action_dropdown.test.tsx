@@ -39,7 +39,6 @@ jest.mock('../../../../detections/components/user_info', () => ({
 }));
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
 
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',

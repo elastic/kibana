@@ -44,8 +44,8 @@ describe('useNodeDetailsRedirect', () => {
     const toDateStrig = '2019-01-01T12:00:00Z';
 
     const getLinkProps = result.current.getAssetDetailUrl({
-      assetType: 'pod',
-      assetId: 'example-01',
+      entityType: 'pod',
+      entityId: 'example-01',
       search: {
         from: new Date(fromDateStrig).getTime(),
         to: new Date(toDateStrig).getTime(),
@@ -64,8 +64,8 @@ describe('useNodeDetailsRedirect', () => {
     const toDateStrig = '2019-01-01T12:00:00Z';
 
     const getLinkProps = result.current.getAssetDetailUrl({
-      assetType: 'host',
-      assetId: 'example-01',
+      entityType: 'host',
+      entityId: 'example-01',
       search: {
         from: new Date(fromDateStrig).getTime(),
         to: new Date(toDateStrig).getTime(),

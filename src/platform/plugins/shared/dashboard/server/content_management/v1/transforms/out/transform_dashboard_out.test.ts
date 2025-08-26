@@ -9,21 +9,21 @@
 
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROL_CHAINING,
+  DEFAULT_CONTROLS_CHAINING,
   DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_LABEL_POSITION,
+  DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-} from '@kbn/controls-plugin/common';
-import {
+} from '@kbn/controls-constants';
+import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../../dashboard_saved_object';
-import { DashboardAttributes } from '../../types';
+import type { DashboardAttributes } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 
-describe('dashboardAttributesOut', () => {
+describe('transformDashboardOut', () => {
   const controlGroupInputControlsSo = {
     explicitInput: { anyKey: 'some value' },
     type: 'type1',
@@ -36,7 +36,6 @@ describe('dashboardAttributesOut', () => {
       gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
       id: '1',
       panelIndex: '1',
-      panelRefName: 'ref1',
       title: 'title1',
       type: 'type1',
       version: '2',
@@ -58,8 +57,8 @@ describe('dashboardAttributesOut', () => {
     };
     expect(transformDashboardOut(input)).toEqual<DashboardAttributes>({
       controlGroupInput: {
-        chainingSystem: DEFAULT_CONTROL_CHAINING,
-        labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
+        chainingSystem: DEFAULT_CONTROLS_CHAINING,
+        labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
         ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
         autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
         controls: [
@@ -88,7 +87,6 @@ describe('dashboardAttributesOut', () => {
           },
           gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
           panelIndex: '1',
-          panelRefName: 'ref1',
           type: 'type1',
           version: '2',
         },
@@ -181,7 +179,6 @@ describe('dashboardAttributesOut', () => {
             i: '1',
           },
           panelIndex: '1',
-          panelRefName: 'ref1',
           type: 'type1',
           version: '2',
         },

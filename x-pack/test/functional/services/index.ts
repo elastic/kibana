@@ -12,10 +12,18 @@ import { UserMenuProvider } from '@kbn/test-suites-xpack-platform/functional/ser
 import { SampleDataServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/sample_data';
 import { GrokDebuggerProvider } from '@kbn/test-suites-xpack-platform/functional/services/grok_debugger';
 import { SearchSessionsService } from '@kbn/test-suites-xpack-platform/functional/services/search_sessions';
+import { CasesServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/cases';
+import { ActionsServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/actions';
+import { AiopsProvider } from '@kbn/test-suites-xpack-platform/functional/services/aiops';
+import { RulesServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/rules';
+import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml';
+import { CanvasElementProvider } from '@kbn/test-suites-xpack-platform/functional/services/canvas_element';
+import { TransformProvider } from '@kbn/test-suites-xpack-platform/functional/services/transform';
 import { ReportingFunctionalProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services';
-import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
-import { services as commonServices } from '../../common/services';
-
+import { RandomProvider } from '@kbn/test-suites-xpack-platform/functional/services/random';
+import { PipelineListProvider } from '@kbn/test-suites-xpack-platform/functional/services/pipeline_list';
+import { DataStreamProvider } from '@kbn/test-suites-xpack-platform/functional/services/data_stream';
+import { PipelineEditorProvider } from '@kbn/test-suites-xpack-platform/functional/services/pipeline_editor';
 import {
   MonitoringNoDataProvider,
   MonitoringClusterListProvider,
@@ -47,29 +55,9 @@ import {
   MonitoringEnterpriseSearchOverviewProvider,
   MonitoringEnterpriseSearchSummaryStatusProvider,
   // @ts-ignore not ts yet
-} from './monitoring';
-// @ts-ignore not ts yet
-import { PipelineListProvider } from './pipeline_list';
-// @ts-ignore not ts yet
-import { PipelineEditorProvider } from './pipeline_editor';
-// @ts-ignore not ts yet
-import { RandomProvider } from './random';
-// @ts-ignore not ts yet
-import { CanvasElementProvider } from './canvas_element';
-// @ts-ignore not ts yet
-// @ts-ignore not ts yet
-import { UptimeProvider } from './uptime';
-import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
-import { LogsUiProvider } from './logs_ui';
-import { MachineLearningProvider } from './ml';
-import { TransformProvider } from './transform';
-import { ObservabilityProvider } from './observability';
-import { CasesServiceProvider } from './cases';
-import { ActionsServiceProvider } from './actions';
-import { RulesServiceProvider } from './rules';
-import { AiopsProvider } from './aiops';
-import { DataStreamProvider } from './data_stream';
-import { SloUiServiceProvider } from './slo';
+} from '@kbn/test-suites-xpack-platform/functional/services/monitoring';
+import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
+import { services as commonServices } from '../../common/services';
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
 // only the built-in services will be available
@@ -116,21 +104,14 @@ export const services = {
   canvasElement: CanvasElementProvider,
   grokDebugger: GrokDebuggerProvider,
   userMenu: UserMenuProvider,
-  uptime: UptimeProvider,
-  infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
-  logsUi: LogsUiProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,
   sampleData: SampleDataServiceProvider,
   searchSessions: SearchSessionsService,
-  observability: ObservabilityProvider,
   actions: ActionsServiceProvider,
   rules: RulesServiceProvider,
   cases: CasesServiceProvider,
   aiops: AiopsProvider,
   dataStreams: DataStreamProvider,
-  slo: kibanaXPackApiIntegrationServices.slo,
-  dataViewApi: kibanaXPackApiIntegrationServices.dataViewApi,
-  sloUi: SloUiServiceProvider,
 };

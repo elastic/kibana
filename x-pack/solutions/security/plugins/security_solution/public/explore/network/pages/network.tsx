@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
@@ -46,7 +47,6 @@ import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_
 import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../common/components/page_loader';
 
@@ -78,6 +78,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const { tabName } = useParams<{ tabName: string }>();
 
     const canUseMaps = kibana.services.application.capabilities.maps_v2.show;
+    const { uiSettings } = kibana.services;
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.events) {
@@ -94,14 +95,10 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-    const { dataView, status } = useDataView();
-    const { dataViewSpec } = useDataViewSpec();
-    const experimentalSelectedPatterns = useSelectedPatterns();
+    const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+    const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
-    const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-    const indicesExist = newDataViewPickerEnabled
-      ? !!dataView?.matchedIndices?.length
-      : oldIndicesExist;
+    const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
     const selectedPatterns = newDataViewPickerEnabled
       ? experimentalSelectedPatterns
       : oldSelectedPatterns;
@@ -130,19 +127,29 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
     );
 
-    const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config: getEsQueryConfig(kibana.services.uiSettings),
-      dataViewSpec: sourcererDataView,
-      queries: [query],
-      filters: globalFilters,
-    });
+    const [filterQuery, kqlError] = useMemo(
+      () =>
+        convertToBuildEsQuery({
+          config: getEsQueryConfig(uiSettings),
+          dataViewSpec: oldSourcererDataView,
+          dataView,
+          queries: [query],
+          filters: globalFilters,
+        }),
+      [uiSettings, oldSourcererDataView, dataView, query, globalFilters]
+    );
 
-    const [tabsFilterQuery] = convertToBuildEsQuery({
-      config: getEsQueryConfig(kibana.services.uiSettings),
-      dataViewSpec: sourcererDataView,
-      queries: [query],
-      filters: tabsFilters,
-    });
+    const [tabsFilterQuery] = useMemo(
+      () =>
+        convertToBuildEsQuery({
+          config: getEsQueryConfig(uiSettings),
+          dataViewSpec: oldSourcererDataView,
+          dataView,
+          queries: [query],
+          filters: tabsFilters,
+        }),
+      [uiSettings, oldSourcererDataView, dataView, query, tabsFilters]
+    );
 
     useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
@@ -156,7 +163,10 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
             <FiltersGlobal>
-              <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
+              <SiemSearchBar
+                id={InputsModelId.global}
+                sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              />
             </FiltersGlobal>
 
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -194,7 +204,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <NetworkKpiComponent from={from} to={to} />
               </Display>
 
-              {capabilitiesFetched && !isInitializing && sourcererDataView ? (
+              {capabilitiesFetched && !isInitializing && oldSourcererDataView ? (
                 <>
                   <Display show={!globalFullScreen}>
                     <EuiSpacer />
@@ -206,7 +216,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     filterQuery={tabsFilterQuery}
                     from={from}
                     isInitializing={isInitializing}
-                    dataViewSpec={sourcererDataView}
                     indexNames={selectedPatterns}
                     setQuery={setQuery}
                     type={networkModel.NetworkType.page}

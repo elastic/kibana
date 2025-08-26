@@ -26,6 +26,7 @@ export {
   type ToolCallsOf,
   type ToolCallbacksOf,
   type ToolCall,
+  type ToolCallback,
   type ToolDefinition,
   type ToolOptions,
   type FunctionCallingMode,
@@ -130,7 +131,11 @@ export {
   getConnectorPlatform,
   getConnectorProvider,
   connectorToInference,
+  getModelDefinition,
+  getContextWindowSize,
+  contextWindowFromModelName,
   type InferenceConnector,
+  type InferenceConnectorCapabilities,
 } from './src/connectors';
 export {
   defaultInferenceEndpoints,
@@ -157,4 +162,4 @@ export {
 
 export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';
 
-export { aiAssistantAnonymizationSettings } from './src/ui_settings/settings_keys';
+export { aiAnonymizationSettings } from './src/ui_settings/settings_keys';

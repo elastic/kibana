@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { PricingServiceStart } from './src/contracts';
-export type { GetPricingResponse } from './src/api';
+export type { PricingServiceStart } from '@kbn/core-pricing-common';

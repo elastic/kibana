@@ -9,20 +9,20 @@ import React, { useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiCallOut,
   EuiConfirmModal,
   EuiIcon,
   EuiInMemoryTable,
   EuiSpacer,
-  EuiTableActionsColumnType,
   EuiText,
   useEuiBackgroundColor,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
+import type { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
 import { indexHealthToHealthColor } from '../../../shared/constants/health_colors';
@@ -43,6 +43,8 @@ export const SearchApplicationIndices: React.FC = () => {
     () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
     [share]
   );
+
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   if (!searchApplicationData) return null;
   const { indices } = searchApplicationData;
@@ -281,6 +283,8 @@ export const SearchApplicationIndices: React.FC = () => {
             'xpack.enterpriseSearch.searchApplications.searchApplication.indices.removeIndexConfirm.title',
             { defaultMessage: 'Remove this index from the search application' }
           )}
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           buttonColor="danger"
           cancelButtonText={CANCEL_BUTTON_LABEL}
           confirmButtonText={i18n.translate(

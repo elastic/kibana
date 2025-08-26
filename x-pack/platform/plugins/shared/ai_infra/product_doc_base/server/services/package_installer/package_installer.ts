@@ -17,6 +17,7 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { cloneDeep } from 'lodash';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
+import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
   downloadToDisk,
@@ -179,7 +180,7 @@ export class PackageInstaller {
         inferenceId,
       });
 
-      if (customInference && customInference?.inference_id !== this.elserInferenceId) {
+      if (customInference && !isImpliedDefaultElserInferenceId(customInference?.inference_id)) {
         if (customInference?.task_type !== 'text_embedding') {
           throw new Error(
             `Inference [${inferenceId}]'s task type ${customInference?.task_type} is not supported. Please use a model with task type 'text_embedding'.`
@@ -191,7 +192,7 @@ export class PackageInstaller {
         });
       }
 
-      if (!customInference || customInference?.inference_id === this.elserInferenceId) {
+      if (!customInference || isImpliedDefaultElserInferenceId(customInference?.inference_id)) {
         await ensureDefaultElserDeployed({
           client: this.esClient,
         });
@@ -289,6 +290,7 @@ export class PackageInstaller {
     const { inferenceId } = params;
     const allProducts = Object.values(DocumentationProduct);
     for (const productName of allProducts) {
+      await this.productDocClient.setUninstallationStarted(productName, inferenceId);
       await this.uninstallPackage({ productName, inferenceId });
     }
   }
@@ -297,5 +299,5 @@ export class PackageInstaller {
 const selectVersion = (currentVersion: string, availableVersions: string[]): string => {
   return availableVersions.includes(currentVersion)
     ? currentVersion
-    : latestVersion(availableVersions);
+    : latestVersion(availableVersions, currentVersion);
 };

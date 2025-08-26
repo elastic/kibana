@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { parse } from '../../parser';
-import { SupportedDataType, FunctionDefinitionTypes } from '../types';
+import { Parser } from '../../parser';
+import type { SupportedDataType } from '../types';
+import { FunctionDefinitionTypes } from '../types';
 import { Location } from '../../commands_registry/types';
 import { buildPartialMatcher, getExpressionType } from './expressions';
 import { setTestFunctions } from './test_functions';
@@ -15,7 +16,7 @@ import { setTestFunctions } from './test_functions';
 describe('buildPartialMatcher', () => {
   it('should build a partial matcher', () => {
     const str = 'is NoT nulL';
-    const matcher = buildPartialMatcher(str);
+    const matcher = new RegExp(buildPartialMatcher(str) + '$', 'i');
 
     for (let i = 0; i < str.length; i++) {
       expect(matcher.test(str.slice(0, i + 1))).toEqual(true);
@@ -29,13 +30,16 @@ describe('buildPartialMatcher', () => {
 
 describe('getExpressionType', () => {
   const getASTForExpression = (expression: string) => {
-    const { root } = parse(`FROM index | EVAL ${expression}`);
+    const { root, errors } = Parser.parse(`FROM index | EVAL ${expression}`);
+
+    if (errors.length > 0) {
+      throw new Error(
+        `Failed to parse expression "${expression}": ${errors.map((e) => e.message).join(', ')}`
+      );
+    }
+
     return root.commands[1].args[0];
   };
-
-  test('empty expression', () => {
-    expect(getExpressionType(getASTForExpression(''))).toBe('unknown');
-  });
 
   describe('literal expressions', () => {
     const cases: Array<{ expression: string; expectedType: SupportedDataType }> = [
@@ -65,7 +69,7 @@ describe('getExpressionType', () => {
       },
       {
         expression: '1 day',
-        expectedType: 'time_duration',
+        expectedType: 'date_period',
       },
       {
         expression: '?value',
@@ -302,10 +306,6 @@ describe('getExpressionType', () => {
       {
         expression: '[1., 2.]',
         expectedType: 'double',
-      },
-      {
-        expression: '[null, null, null]',
-        expectedType: 'null',
       },
       {
         expression: '[true, false]',

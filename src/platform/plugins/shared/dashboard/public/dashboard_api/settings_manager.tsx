@@ -6,18 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import {
-  PublishingSubject,
-  StateComparators,
-  ViewMode,
+  type PublishingSubject,
+  type StateComparators,
+  type ViewMode,
   diffComparators,
   initializeTitleManager,
   titleComparators,
 } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject, combineLatest, combineLatestWith, debounceTime, map } from 'rxjs';
-import { DashboardSettings, DashboardState } from '../../common';
+import type { DashboardSettings, DashboardState } from '../../common';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { coreServices } from '../services/kibana_services';
 

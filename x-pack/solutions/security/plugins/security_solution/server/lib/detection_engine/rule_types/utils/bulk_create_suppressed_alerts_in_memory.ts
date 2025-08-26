@@ -25,10 +25,10 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
 
 import type {
-  BaseFieldsLatest,
-  EqlBuildingBlockFieldsLatest,
-  EqlShellFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  EqlBuildingBlockAlertLatest,
+  EqlShellAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
 import { buildAlertGroupFromSequence } from '../eql/build_alert_group_from_sequence';
@@ -77,7 +77,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
   let suppressibleEvents = enrichedEvents;
-  let unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>> = [];
+  let unsuppressibleWrappedDocs: Array<WrappedAlert<DetectionAlertLatest>> = [];
 
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(
@@ -122,11 +122,11 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
     AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
   const suppressibleWrappedSequences: Array<
-    WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
-      subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+    WrappedAlert<EqlShellAlertLatest & SuppressionFieldsLatest> & {
+      subAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
     }
   > = [];
-  const unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>> = [];
+  const unsuppressibleWrappedDocs: Array<WrappedAlert<DetectionAlertLatest>> = [];
 
   sequences.forEach((sequence) => {
     const alertGroupFromSequence = buildAlertGroupFromSequence({
@@ -176,13 +176,13 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
 };
 
 export interface ExecuteBulkCreateAlertsParams<
-  T extends SuppressionFieldsLatest & BaseFieldsLatest
+  T extends SuppressionFieldsLatest & DetectionAlertLatest
 > {
   sharedParams: SecuritySharedParams;
   services: SecurityRuleServices;
   alertSuppression: AlertSuppressionCamel;
-  unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
-  suppressibleWrappedDocs: Array<WrappedFieldsLatest<T>>;
+  unsuppressibleWrappedDocs: Array<WrappedAlert<DetectionAlertLatest>>;
+  suppressibleWrappedDocs: Array<WrappedAlert<T>>;
   toReturn: SearchAfterAndBulkCreateReturnType;
   maxNumberOfAlertsMultiplier?: number;
 }
@@ -191,7 +191,7 @@ export interface ExecuteBulkCreateAlertsParams<
  * creates alerts in ES, both suppressed and unsuppressed
  */
 export const executeBulkCreateAlerts = async <
-  T extends SuppressionFieldsLatest & BaseFieldsLatest
+  T extends SuppressionFieldsLatest & DetectionAlertLatest
 >({
   sharedParams,
   unsuppressibleWrappedDocs,

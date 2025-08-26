@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { PluginInitializerContext } from '@kbn/core/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import {
-  EmbeddableSetup,
-  EmbeddableStart,
-  CONTEXT_MENU_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
-import { ExploreDataContextMenuAction, ExploreDataChartAction } from './actions';
-import { Config } from '../common';
+import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { Config } from '../common';
 
 export interface DiscoverEnhancedSetupDependencies {
   discover: DiscoverSetup;
@@ -55,13 +51,23 @@ export class DiscoverEnhancedPlugin
       const params = { start };
 
       if (this.config.actions.exploreDataInContextMenu.enabled) {
-        const exploreDataAction = new ExploreDataContextMenuAction(params);
-        uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, exploreDataAction);
+        uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, 'ACTION_EXPLORE_DATA', async () => {
+          const { ExploreDataContextMenuAction } = await import('./actions');
+          const exploreDataAction = new ExploreDataContextMenuAction(params);
+          return exploreDataAction;
+        });
       }
 
       if (this.config.actions.exploreDataInChart.enabled) {
-        const exploreDataChartAction = new ExploreDataChartAction(params);
-        uiActions.addTriggerAction(APPLY_FILTER_TRIGGER, exploreDataChartAction);
+        uiActions.addTriggerActionAsync(
+          APPLY_FILTER_TRIGGER,
+          'ACTION_EXPLORE_DATA_CHART',
+          async () => {
+            const { ExploreDataChartAction } = await import('./actions');
+            const exploreDataChartAction = new ExploreDataChartAction(params);
+            return exploreDataChartAction;
+          }
+        );
       }
     }
   }

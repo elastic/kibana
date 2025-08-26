@@ -7,26 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand } from '../../../types';
-import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
+import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import {
   columnExists,
   getLastNonWhitespaceChar,
   handleFragment,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 import { isColumn } from '../../../ast/is';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  const innerText = query.substring(0, cursorPosition);
   if (
-    /\s/.test(query[query.length - 1]) &&
-    getLastNonWhitespaceChar(query) !== ',' &&
-    !/keep\s+\S*$/i.test(query)
+    /\s/.test(innerText[innerText.length - 1]) &&
+    getLastNonWhitespaceChar(innerText) !== ',' &&
+    !/keep\s+\S*$/i.test(innerText)
   ) {
     return [pipeCompleteItem, commaCompleteItem];
   }
@@ -35,7 +38,7 @@ export async function autocomplete(
   const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
 
   return handleFragment(
-    query,
+    innerText,
     (fragment) => columnExists(fragment, context),
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // KEEP fie<suggest>

@@ -6,7 +6,6 @@
  */
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
@@ -23,7 +22,6 @@ import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomali
 import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 import { PageLoader } from '../../common/components/page_loader';
@@ -40,12 +38,7 @@ const EntityAnalyticsComponent = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataView, status } = useDataView();
-  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec();
 
-  const dataViewSpec: DataViewSpec = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
-    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
-  );
   const indicesExist = useMemo(
     () => (newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist),
     [dataView?.matchedIndices?.length, newDataViewPickerEnabled, oldIndicesExist]
@@ -70,7 +63,10 @@ const EntityAnalyticsComponent = () => {
       ) : (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={dataViewSpec} />
+            <SiemSearchBar
+              id={InputsModelId.global}
+              sourcererDataView={oldSourcererDataViewSpec} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+            />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">

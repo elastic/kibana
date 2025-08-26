@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { StructuredTool } from '@langchain/core/tools';
+import type { StructuredTool } from '@langchain/core/tools';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
-import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
-import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
+import type { MessageMetadata } from '@kbn/elastic-assistant-common';
+import { pruneContentReferences } from '@kbn/elastic-assistant-common';
+import { getPrompt } from '@kbn/security-ai-prompts';
 import { isEmpty } from 'lodash';
 import { generateChatTitle } from './nodes/generate_chat_title';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
@@ -18,16 +19,16 @@ import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
 import { getLlmClass } from '../../../../routes/utils';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
-import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
-import { AssistantToolParams } from '../../../../types';
-import { AgentExecutor } from '../../executors/types';
-import { formatPrompt } from './prompts';
-import { GraphInputs } from './types';
+import type { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
+import type { AssistantToolParams } from '../../../../types';
+import type { AgentExecutor } from '../../executors/types';
+import { DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, chatPromptFactory } from './prompts';
+import type { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
-import { agentRunnableFactory } from './agentRunnable';
+import { getConversationWithNewMessage } from '../../utils/get_conversation_with_new_message';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -42,7 +43,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   dataClients,
   esClient,
   inference,
-  inferenceChatModelEnabled = false,
+  inferenceChatModelDisabled = false,
   langChainMessages,
   llmTasks,
   llmType,
@@ -64,7 +65,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   timeout,
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
-  const isOpenAI = llmType === 'openai' && !isOssModel;
   const llmClass = getLlmClass(llmType);
 
   /**
@@ -76,7 +76,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
    * the state unintentionally. For this reason, only call createLlmInstance at runtime
    */
   const createLlmInstance = async () =>
-    inferenceChatModelEnabled
+    !inferenceChatModelDisabled
       ? inference.getChatModel({
           request,
           connectorId,
@@ -129,7 +129,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
     : undefined;
 
-  const latestMessage = langChainMessages.slice(-1); // the last message
+  const newMessages = langChainMessages.slice(-1); // this is the message that was just added
 
   // Check if KB is available (not feature flag related)
   const isEnabledKnowledgeBase =
@@ -220,56 +220,47 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     savedObjectsClient,
   });
 
-  const chatPromptTemplate = formatPrompt({
-    prompt: defaultSystemPrompt,
-    additionalPrompt: systemPrompt,
-    llmType,
-  });
-
-  const llm = await createLlmInstance();
-  const agentRunnable = await agentRunnableFactory({
-    llm,
-    llmType,
-    tools,
-    inferenceChatModelEnabled,
-    isOpenAI,
-    isStream,
-    prompt: chatPromptTemplate,
-  });
-
-  const { provider } =
-    !llmType || llmType === 'inference'
-      ? await resolveProviderAndModel({
-          connectorId,
-          actionsClient,
-        })
-      : { provider: llmType };
-
   const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>(
     DEFAULT_DATE_FORMAT_TZ
   );
 
-  const assistantGraph = getDefaultAssistantGraph({
-    agentRunnable,
-    dataClients,
+  const assistantGraph = await getDefaultAssistantGraph({
     // we need to pass it like this or streaming does not work for bedrock
     createLlmInstance,
     logger,
     actionsClient,
     savedObjectsClient,
     tools,
-    replacements,
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
-    getFormattedTime: () =>
-      getFormattedTime({
-        screenContextTimezone: screenContext?.timeZone,
-        uiSettingsDateFormatTimezone,
-      }),
-    telemetry,
-    telemetryParams,
     contentReferencesStore,
   });
+
+  const conversationMessages = await getConversationWithNewMessage({
+    logger,
+    conversationsDataClient: dataClients?.conversationsDataClient,
+    conversationId,
+    replacements,
+    newMessages,
+  });
+
+  const chatPrompt = await chatPromptFactory(DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, {
+    prompt: defaultSystemPrompt,
+    additionalPrompt: systemPrompt,
+    kbClient: dataClients?.kbDataClient,
+    contentReferencesStore,
+    logger,
+    conversationMessages,
+    formattedTime: getFormattedTime({
+      screenContextTimezone: screenContext?.timeZone,
+      uiSettingsDateFormatTimezone,
+    }),
+    actionsClient,
+    savedObjectsClient,
+    connectorId,
+    llmType,
+  });
+
   const inputs: GraphInputs = {
     responseLanguage,
     conversationId,
@@ -277,8 +268,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     llmType,
     isStream,
     isOssModel,
-    input: latestMessage[0]?.content as string,
-    provider: provider ?? '',
+    messages: chatPrompt.messages,
+    isRegeneration: newMessages.length === 0,
   };
 
   // make a fire and forget async call to generateChatTitle
@@ -293,6 +284,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       state: {
         ...inputs,
       },
+      newMessages,
       model,
       telemetryParams,
       telemetry,
@@ -306,9 +298,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       apmTracer,
       assistantGraph,
       inputs,
-      inferenceChatModelEnabled,
       isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
-
       logger,
       onLlmResponse,
       request,

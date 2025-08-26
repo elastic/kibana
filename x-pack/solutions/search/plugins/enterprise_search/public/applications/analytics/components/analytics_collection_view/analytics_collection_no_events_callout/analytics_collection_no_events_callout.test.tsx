@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../../common/types/analytics';
 
 import { AnalyticsCollectionNoEventsCallout } from './analytics_collection_no_events_callout';
 

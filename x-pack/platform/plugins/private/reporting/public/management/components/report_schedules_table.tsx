@@ -6,11 +6,10 @@
  */
 
 import { Fragment, default as React, useCallback, useState } from 'react';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
-  CriteriaWithPagination,
   EuiAvatar,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -25,7 +24,8 @@ import { orderBy } from 'lodash';
 import { stringify } from 'query-string';
 import { REPORTING_REDIRECT_APP, buildKibanaPath } from '@kbn/reporting-common';
 import type { ScheduledReportApiJSON, BaseParamsV2 } from '@kbn/reporting-common/types';
-import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
+import type { ReportingAPIClient } from '@kbn/reporting-public';
+import { useKibana } from '@kbn/reporting-public';
 import {
   guessAppIconTypeFromObjectType,
   getDisplayNameFromObjectType,
@@ -204,16 +204,16 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
         {
           name: (item) =>
             i18n.translate('xpack.reporting.schedules.table.openDashboard.title', {
-              defaultMessage: 'Open Dashboard',
-            }),
-          description: (item) =>
-            i18n.translate('xpack.reporting.schedules.table.openDashboard.description', {
-              defaultMessage: 'Open associated {objectType}',
+              defaultMessage: 'Open in {objectType}',
               values: {
                 objectType: item.payload?.objectType
                   ? getDisplayNameFromObjectType(item.payload?.objectType)
-                  : '',
+                  : 'Kibana',
               },
+            }),
+          description: (item) =>
+            i18n.translate('xpack.reporting.schedules.table.openDashboard.description', {
+              defaultMessage: 'Open the Kibana app where this report was generated.',
             }),
           'data-test-subj': (item) => `reportOpenDashboard-${item.id}`,
           type: 'icon',

@@ -7,12 +7,12 @@
 
 import React, { useMemo } from 'react';
 import { capitalize } from 'lodash';
-import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiFlexItem,
   EuiText,
   type EuiFlexGroupProps,
+  type EuiThemeComputed,
   useEuiTheme,
   EuiLink,
   EuiToolTip,

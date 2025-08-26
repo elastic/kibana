@@ -8,19 +8,22 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type * as ast from '../../../types';
+import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
+import { EDITOR_MARKER } from '../../../definitions/constants';
 import type { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
 import {
   pipeCompleteItem,
-  getNewUserDefinedColumnSuggestion,
   assignCompletionItem,
-} from '../../utils/complete_items';
+  getNewUserDefinedColumnSuggestion,
+} from '../../complete_items';
 import {
   getFieldsOrFunctionsSuggestions,
   findFinalWord,
   handleFragment,
   columnExists,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 import {
   type ISuggestionItem,
   Location,
@@ -28,17 +31,17 @@ import {
   type ICommandCallbacks,
 } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
-import { EDITOR_MARKER } from '../../../parser/constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
+import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
+  AFTER_TARGET_ID = 'after_target_id',
   AFTER_PROMPT_OR_TARGET = 'after_prompt_or_target',
   AFTER_PROMPT = 'after_prompt',
-  AFTER_WITH = 'after_with',
-  AFTER_INFERENCE_ID = 'after_inference_id',
-  AFTER_TARGET_ID = 'after_target_id',
+  WITHIN_MAP_EXPRESSION = 'within_map_expression',
+  AFTER_COMMAND = 'after_command',
 }
 
 function getPosition(
@@ -46,14 +49,16 @@ function getPosition(
   command: ESQLCommand,
   context?: ICommandContext
 ): CompletionPosition | undefined {
-  const { prompt, inferenceId, targetField } = command as ESQLAstCompletionCommand;
+  const { prompt, targetField } = command as ESQLAstCompletionCommand;
 
-  if (inferenceId.incomplete && /WITH\s*$/i.test(query)) {
-    return CompletionPosition.AFTER_WITH;
+  const paramsMap = command.args[1] as ast.ESQLMap | undefined;
+
+  if (paramsMap?.text && paramsMap.incomplete) {
+    return CompletionPosition.WITHIN_MAP_EXPRESSION;
   }
 
-  if (!inferenceId.incomplete) {
-    return CompletionPosition.AFTER_INFERENCE_ID;
+  if (paramsMap && !paramsMap.incomplete) {
+    return CompletionPosition.AFTER_COMMAND;
   }
 
   const expressionRoot = prompt?.text !== EDITOR_MARKER ? prompt : undefined;
@@ -77,7 +82,7 @@ function getPosition(
   }
 
   // We don't know if the expression is a prompt or a target field
-  if (prompt.type === 'unknown' && prompt.name === 'unknown') {
+  if (prompt.type === 'column' || (prompt.type === 'unknown' && prompt.name === 'unknown')) {
     return CompletionPosition.AFTER_PROMPT_OR_TARGET;
   }
 
@@ -100,7 +105,8 @@ const withCompletionItem: ISuggestionItem = {
   kind: 'Reference',
   label: 'WITH',
   sortText: '1',
-  text: 'WITH ',
+  asSnippet: true,
+  text: 'WITH { $0 }',
   command: TRIGGER_SUGGESTION_COMMAND,
 };
 
@@ -114,8 +120,7 @@ function inferenceEndpointToCompletionItem(
     kind: 'Reference',
     label: inferenceEndpoint.inference_id,
     sortText: '1',
-    text: `\`${inferenceEndpoint.inference_id}\` `,
-    command: TRIGGER_SUGGESTION_COMMAND,
+    text: inferenceEndpoint.inference_id,
   };
 }
 
@@ -123,14 +128,28 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
   }
+  const innerText = query.substring(0, cursorPosition);
   const { prompt } = command as ESQLAstCompletionCommand;
+  const position = getPosition(innerText, command, context);
 
-  const position = getPosition(query, command, context);
+  const endpoints = context?.inferenceEndpoints;
+
+  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
+    innerText,
+    cursorPosition,
+    callbacks,
+    context
+  );
+
+  if (functionsSpecificSuggestions?.length) {
+    return functionsSpecificSuggestions;
+  }
 
   switch (position) {
     case CompletionPosition.AFTER_COMPLETION:
@@ -144,13 +163,16 @@ export async function autocomplete(
             functions: true,
             fields: true,
             userDefinedColumns: context?.userDefinedColumns,
-          }
+          },
+          {},
+          callbacks?.hasMinimumLicenseRequired,
+          context?.activeProduct
         ),
         'label'
       );
 
       const suggestions = await handleFragment(
-        query,
+        innerText,
         (fragment) => Boolean(columnExists(fragment, context) || getFunctionDefinition(fragment)),
         (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
           return fieldsAndFunctionsSuggestions.map((suggestion) => {
@@ -165,7 +187,7 @@ export async function autocomplete(
         () => []
       );
 
-      const lastWord = findFinalWord(query);
+      const lastWord = findFinalWord(innerText);
 
       if (!lastWord) {
         suggestions.push(defaultPrompt);
@@ -197,11 +219,14 @@ export async function autocomplete(
       return [withCompletionItem];
     }
 
-    case CompletionPosition.AFTER_WITH:
-      const endpoints = context?.inferenceEndpoints;
-      return endpoints?.map(inferenceEndpointToCompletionItem) || [];
+    case CompletionPosition.WITHIN_MAP_EXPRESSION:
+      const availableParameters = {
+        inference_id: endpoints?.map(inferenceEndpointToCompletionItem) || [],
+      };
 
-    case CompletionPosition.AFTER_INFERENCE_ID:
+      return getCommandMapExpressionSuggestions(innerText, availableParameters);
+
+    case CompletionPosition.AFTER_COMMAND:
       return [pipeCompleteItem];
 
     default:

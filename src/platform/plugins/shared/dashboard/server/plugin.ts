@@ -9,8 +9,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import {
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type {
   CoreSetup,
   CoreStart,
   Logger,
@@ -18,15 +18,18 @@ import {
   PluginInitializerContext,
   UiSettingsParams,
 } from '@kbn/core/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import {
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/server';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { registerAPIRoutes } from './api';
@@ -34,13 +37,14 @@ import { capabilitiesProvider } from './capabilities_provider';
 import { DashboardStorage } from './content_management';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
-import { DashboardPluginSetup, DashboardPluginStart } from './types';
+import type { DashboardPluginSetup, DashboardPluginStart } from './types';
 import {
   TASK_ID,
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
 } from './usage/dashboard_telemetry_collection_task';
 import { registerDashboardUsageCollector } from './usage/register_collector';
+import { setKibanaServices } from './kibana_services';
 
 export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
 interface SetupDeps {
@@ -50,7 +54,8 @@ interface SetupDeps {
   contentManagement: ContentManagementServerSetup;
 }
 
-interface StartDeps {
+export interface StartDeps {
+  embeddable: EmbeddableStart;
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;
@@ -161,6 +166,8 @@ export class DashboardPlugin
 
   public start(core: CoreStart, plugins: StartDeps) {
     this.logger.debug('dashboard: Started');
+
+    setKibanaServices(plugins, this.logger);
 
     if (plugins.share) {
       plugins.share.url.locators.create(

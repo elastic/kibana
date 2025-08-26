@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import { EntityClient } from '../lib/entity_client';
-import { EntityManagerServerSetup } from '../types';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import type { EntityClient } from '../lib/entity_client';
+import type { EntityManagerServerSetup } from '../types';
 
 export interface EntityManagerRouteDependencies {
   server: EntityManagerServerSetup;

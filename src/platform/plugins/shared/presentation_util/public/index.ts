@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionFunction } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { PresentationUtilPlugin } from './plugin';
 
 export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';

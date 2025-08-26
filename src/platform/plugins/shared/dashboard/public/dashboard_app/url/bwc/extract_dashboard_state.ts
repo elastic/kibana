@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ViewMode } from '@kbn/presentation-publishing';
-import { DashboardCreationOptions } from '../../../dashboard_api/types';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { DashboardCreationOptions } from '../../../dashboard_api/types';
 import { extractControlGroupState } from './extract_control_group_state';
 import { extractSettings } from './extract_dashboard_settings';
 import { extractPanelsState } from './extract_panels_state';
@@ -32,10 +32,16 @@ export function extractDashboardState(
 
     dashboardState = {
       ...dashboardState,
-      ...extractPanelsState(stateAsObject),
       ...extractSearchState(stateAsObject),
       ...extractSettings(stateAsObject),
     };
+
+    const { panels, savedObjectReferences } = extractPanelsState(stateAsObject);
+    if (panels?.length) dashboardState.panels = panels;
+    if (savedObjectReferences?.length) {
+      dashboardState.references = [...(dashboardState.references ?? []), ...savedObjectReferences];
+    }
   }
+
   return dashboardState;
 }

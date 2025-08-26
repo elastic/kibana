@@ -11,10 +11,12 @@ import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import { columnsAfter } from './columns_after';
 import type { ICommandContext } from '../../types';
+import { validate } from './validate';
 
 const keepCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   columnsAfter,
+  validate,
 };
 
 export const keepCommand = {

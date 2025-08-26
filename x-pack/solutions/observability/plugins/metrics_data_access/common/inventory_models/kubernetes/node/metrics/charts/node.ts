@@ -102,4 +102,4 @@ export const node = {
     nodeDiskCapacity,
     nodePodCapacity,
   },
-} as const;
+};

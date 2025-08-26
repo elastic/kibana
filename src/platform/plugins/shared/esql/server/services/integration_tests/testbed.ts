@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   createTestServers,
   request,
@@ -67,6 +67,20 @@ export class EsqlServiceTestbed {
       aliases: {
         lookup_index2_alias1: {},
         lookup_index2_alias2: {},
+      },
+      mappings: {
+        properties: {
+          field2: { type: 'keyword' },
+        },
+      },
+    });
+
+    // Lookup index hidden
+    await client.indices.create({
+      index: 'lookup_index3',
+      settings: {
+        'index.mode': 'lookup',
+        'index.hidden': true,
       },
       mappings: {
         properties: {

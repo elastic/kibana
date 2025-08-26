@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * @deprecated A full query AST is represented by {@link ESQLAstQueryExpression} type.
+ */
 export type ESQLAst = ESQLAstCommand[];
 
 export type ESQLAstCommand =
   | ESQLCommand
-  | ESQLAstTimeseriesCommand
   | ESQLAstJoinCommand
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
@@ -30,7 +32,8 @@ export type ESQLSingleAstItem =
   | ESQLCommandOption
   | ESQLSource
   | ESQLColumn
-  | ESQLTimeInterval
+  | ESQLDatePeriodLiteral
+  | ESQLTimeDurationLiteral
   | ESQLList
   | ESQLLiteral
   | ESQLIdentifier
@@ -40,7 +43,20 @@ export type ESQLSingleAstItem =
   | ESQLMap
   | ESQLMapEntry;
 
-export type ESQLAstField = ESQLFunction | ESQLColumn | ESQLParam;
+/**
+ * A field is either an index field `this.is.field`, or it is a field assignment
+ * `new_field = 123`, in which case it is a binary expression with "=" operator.
+ *
+ * Also, a field can be specified as a parameter.
+ *
+ * ```
+ * EVAL this.is.a.nested.field
+ * EVAL new_field = 123
+ * EVAL ?param
+ * EVAL ?param = 123
+ * ```
+ */
+export type ESQLAstField = ESQLColumn | ESQLBinaryExpression | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
@@ -94,10 +110,6 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   args: ESQLAstItem[];
 }
 
-export interface ESQLAstTimeseriesCommand extends ESQLCommand<'ts'> {
-  sources: ESQLSource[];
-}
-
 export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
   commandType: 'lookup' | 'left' | 'right';
 }
@@ -113,7 +125,7 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
 
 export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
   prompt: ESQLAstExpression;
-  inferenceId: ESQLIdentifierOrParam;
+  inferenceId: ESQLLiteral;
   targetField?: ESQLColumn;
 }
 
@@ -282,13 +294,6 @@ export interface ESQLUnknownItem extends ESQLAstBaseItem {
   type: 'unknown';
 }
 
-export interface ESQLTimeInterval extends ESQLAstBaseItem {
-  /** @todo For consistency with other literals, this should be `literal`, not `timeInterval`. */
-  type: 'timeInterval';
-  unit: string;
-  quantity: number;
-}
-
 export interface ESQLSource extends ESQLAstBaseItem {
   type: 'source';
   sourceType: 'index' | 'policy';
@@ -411,6 +416,8 @@ export type ESQLLiteral =
   | ESQLBooleanLiteral
   | ESQLNullLiteral
   | ESQLStringLiteral
+  | ESQLTimeDurationLiteral
+  | ESQLDatePeriodLiteral
   | ESQLParamLiteral<string>;
 
 // Exporting here to prevent TypeScript error TS4058
@@ -446,7 +453,6 @@ export interface ESQLNullLiteral extends ESQLAstBaseItem {
 export interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
 
-  /** This really should be `string`, not `keyword`. */
   literalType: 'keyword';
 
   value: string;
@@ -464,6 +470,18 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
    */
   unquoted?: boolean;
 }
+
+export interface ESQLBaseTimeSpanLiteral<T extends 'time_duration' | 'date_period'>
+  extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: T;
+  value: string;
+  unit: string;
+  quantity: number;
+}
+export type ESQLDatePeriodLiteral = ESQLBaseTimeSpanLiteral<'date_period'>;
+export type ESQLTimeDurationLiteral = ESQLBaseTimeSpanLiteral<'time_duration'>;
+export type ESQLTimeSpanLiteral = ESQLDatePeriodLiteral | ESQLTimeDurationLiteral;
 
 // @internal
 export interface ESQLParamLiteral<

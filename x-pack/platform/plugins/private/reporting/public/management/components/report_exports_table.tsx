@@ -6,26 +6,26 @@
  */
 
 import { Component, Fragment, default as React } from 'react';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
+import type { EuiBasicTableColumn, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   EuiLink,
   EuiSpacer,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import { durationToNumber, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 
-import { checkLicense, Job } from '@kbn/reporting-public';
-import { ListingPropsInternal } from '..';
+import type { Job } from '@kbn/reporting-public';
+import { checkLicense } from '@kbn/reporting-public';
+import type { ListingPropsInternal } from '..';
 import { prettyPrintJobType } from '../../../common/job_utils';
 import { Poller } from '../../../common/poller';
 import { ReportDeleteButton, ReportInfoFlyout, ReportStatusIndicator } from '.';
@@ -406,9 +406,15 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
             onClick: (job) => this.setState({ selectedJob: job }),
           },
           {
-            name: i18n.translate('xpack.reporting.exports.table.openInKibanaAppLabel', {
-              defaultMessage: 'Open Dashboard',
-            }),
+            name: (job) =>
+              i18n.translate('xpack.reporting.schedules.table.openDashboard.title', {
+                defaultMessage: 'Open in {objectType}',
+                values: {
+                  objectType: job.objectType
+                    ? getDisplayNameFromObjectType(job.objectType)
+                    : 'Kibana',
+                },
+              }),
             'data-test-subj': 'reportOpenInKibanaApp',
             description: i18n.translate(
               'xpack.reporting.exports.table.openInKibanaAppDescription',

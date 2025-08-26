@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const SAVED_SEARCH_NAME = 'test saved search';
 const SAVED_SEARCH_WITH_FILTERS_NAME = 'test saved search with filters';

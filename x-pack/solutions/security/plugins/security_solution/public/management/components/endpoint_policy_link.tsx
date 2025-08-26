@@ -132,7 +132,7 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
     const tooltipContent: React.ReactNode | undefined = useMemo(() => {
       const content = tooltip === true ? children : tooltip || undefined;
       return content ? (
-        <div className="eui-textBreakAll" style={{ width: '100%' }}>
+        <div className="eui-textBreakAll" css={{ width: '100%' }}>
           {content}
           {policyNoLongerAvailableMessage && <>&nbsp;{`(${POLICY_NOT_FOUND_MESSAGE})`}</>}
         </div>
@@ -154,7 +154,7 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
             data-test-subj={testId('policyName')}
             className="eui-textTruncate"
             grow={false}
-            style={{ minWidth: '40px' }}
+            css={{ minWidth: '40px' }}
           >
             {tooltipContent ? (
               <EuiToolTip content={tooltipContent} anchorClassName="eui-textTruncate">

@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import { useGetUserInstructions } from '../../hooks/use_get_user_instructions';
@@ -58,11 +59,13 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
     onClose();
   };
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder data-test-subj="knowledgeBaseManualEntryFlyout">
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             {i18n.translate(
               'xpack.observabilityAiAssistantManagement.knowledgeBaseEditSystemPrompt.h2.editEntryLabel',
               { defaultMessage: 'User-specific System Prompt' }

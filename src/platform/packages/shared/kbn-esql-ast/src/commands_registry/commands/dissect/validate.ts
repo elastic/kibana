@@ -15,8 +15,9 @@ import type {
   ESQLCommandOption,
   ESQLAst,
 } from '../../../types';
-import type { ICommandContext } from '../../types';
+import type { ICommandContext, ICommandCallbacks } from '../../types';
 import type { FieldType } from '../../../definitions/types';
+import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 const validateColumnForGrokDissect = (command: ESQLCommand, context?: ICommandContext) => {
   const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
@@ -44,7 +45,8 @@ const validateColumnForGrokDissect = (command: ESQLCommand, context?: ICommandCo
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = validateColumnForGrokDissect(command, context);
 
@@ -78,5 +80,7 @@ export const validate = (
       })
     );
   }
+
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
   return messages;
 };

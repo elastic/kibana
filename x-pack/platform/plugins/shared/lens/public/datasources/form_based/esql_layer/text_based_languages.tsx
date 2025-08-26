@@ -7,11 +7,12 @@
 
 import React from 'react';
 
-import { CoreStart } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import { AggregateQuery, isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { AggregateQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
+import type { Reference } from '@kbn/content-management-utils';
 import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -21,7 +22,7 @@ import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
 import { toExpression } from './to_expression';
-import {
+import type {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
@@ -334,7 +335,7 @@ export function getTextBasedDatasource({
     },
     initialize(
       state?: TextBasedPersistedState,
-      savedObjectReferences?,
+      references?,
       context?,
       indexPatternRefs?,
       indexPatterns?
@@ -370,17 +371,17 @@ export function getTextBasedDatasource({
     },
 
     getPersistableState({ layers }: TextBasedPrivateState) {
-      const savedObjectReferences: SavedObjectReference[] = [];
+      const references: Reference[] = [];
       Object.entries(layers).forEach(([layerId, { index, ...persistableLayer }]) => {
         if (index) {
-          savedObjectReferences.push({
+          references.push({
             type: 'index-pattern',
             id: index,
             name: getLayerReferenceName(layerId),
           });
         }
       });
-      return { state: { layers }, savedObjectReferences };
+      return { state: { layers }, references };
     },
     insertLayer(state: TextBasedPrivateState, newLayerId: string) {
       const layer = Object.values(state?.layers)?.[0];
@@ -657,9 +658,9 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
     isEqual: (
       persistableState1: TextBasedPersistedState,
-      references1: SavedObjectReference[],
+      references1: Reference[],
       persistableState2: TextBasedPersistedState,
-      references2: SavedObjectReference[]
+      references2: Reference[]
     ) =>
       // undefined is not equal to missing
       isEqual(

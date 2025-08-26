@@ -5,27 +5,35 @@
  * 2.0.
  */
 
-import { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
+import type { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { anonymizeMessages } from './anonymize_messages';
-import {
+import type {
   AnonymizationRule,
   AssistantMessage,
   Message,
-  MessageRole,
   UserMessage,
 } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
 import { getEntityMask } from './get_entity_mask';
-
+import { RegexWorkerService } from './regex_worker_service';
+import type { AnonymizationWorkerConfig } from '../../config';
 const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),
   },
 } as any;
-
+const testConfig = {
+  enabled: false,
+} as AnonymizationWorkerConfig;
 describe('anonymizeMessages', () => {
+  let logger: MockedLogger;
+  let regexWorker: RegexWorkerService;
   beforeEach(() => {
     jest.resetAllMocks();
+    logger = loggerMock.create();
+    regexWorker = new RegexWorkerService(testConfig, logger);
   });
 
   const setupMockResponse = (entities: MlInferenceResponseResult[]) => {
@@ -67,9 +75,11 @@ describe('anonymizeMessages', () => {
       },
     ];
 
-    const serialized = messageToAnonymizationRecords(messages[0]);
+    const rec = messageToAnonymizationRecords(messages[0]);
+    const q = rec['/toolCalls/0/function/arguments/query']!;
 
     setupMockResponse([
+      { entities: [] }, // /toolCalls/0/function/name
       {
         predicted_value: '',
         entities: [
@@ -77,17 +87,18 @@ describe('anonymizeMessages', () => {
             entity: 'Bob',
             class_name: 'PER',
             class_probability: 0.9828533515650252,
-            start_pos: serialized.data!.indexOf('Bob'),
-            end_pos: serialized.data!.indexOf('Bob') + 3,
+            start_pos: q.indexOf('Bob'),
+            end_pos: q.indexOf('Bob') + 3,
           },
         ],
-      },
+      }, // /toolCalls/0/function/arguments/query
     ]);
 
     // Execute
     const result = await anonymizeMessages({
       messages,
       anonymizationRules: [nerRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -126,6 +137,7 @@ describe('anonymizeMessages', () => {
       anonymizeMessages({
         messages,
         anonymizationRules: [nerRule],
+        regexWorker,
         esClient: mockEsClient,
       })
     ).resolves.toBeDefined();
@@ -137,6 +149,7 @@ describe('anonymizeMessages', () => {
     const result = await anonymizeMessages({
       messages,
       anonymizationRules: [disabledRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -154,6 +167,7 @@ describe('anonymizeMessages', () => {
     const result = await anonymizeMessages({
       messages,
       anonymizationRules: [disabledRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -181,6 +195,7 @@ describe('anonymizeMessages', () => {
     const result = await anonymizeMessages({
       messages,
       anonymizationRules: [regexRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -225,9 +240,12 @@ describe('anonymizeMessages', () => {
       },
     ];
 
-    const serialized = messageToAnonymizationRecords(messages[0]);
+    const rec = messageToAnonymizationRecords(messages[0]);
+    const q0 = rec['/toolCalls/0/function/arguments/query']!;
+    const q1 = rec['/toolCalls/1/function/arguments/query']!;
 
     setupMockResponse([
+      { entities: [] }, // /toolCalls/0/function/name
       {
         predicted_value: '',
         entities: [
@@ -235,22 +253,29 @@ describe('anonymizeMessages', () => {
             entity: 'Bob',
             class_name: 'PER',
             class_probability: 0.99,
-            start_pos: serialized.data!.indexOf('Bob'),
-            end_pos: serialized.data!.indexOf('Bob') + 3,
+            start_pos: q0.indexOf('Bob'),
+            end_pos: q0.indexOf('Bob') + 3,
           },
+        ],
+      }, // /toolCalls/0/function/arguments/query
+      { entities: [] }, // /toolCalls/1/function/name
+      {
+        predicted_value: '',
+        entities: [
           {
             entity: 'Bob',
             class_name: 'PER',
             class_probability: 0.99,
-            start_pos: serialized.data!.lastIndexOf('Bob'),
-            end_pos: serialized.data!.lastIndexOf('Bob') + 3,
+            start_pos: q1.indexOf('Bob'),
+            end_pos: q1.indexOf('Bob') + 3,
           },
         ],
-      },
+      }, // /toolCalls/1/function/arguments/query
     ]);
 
     const result = await anonymizeMessages({
       messages,
+      regexWorker,
       anonymizationRules: [nerRule],
       esClient: mockEsClient,
     });
@@ -295,6 +320,7 @@ describe('anonymizeMessages', () => {
       system: systemPrompt,
       messages: [],
       anonymizationRules: [nerRule],
+      regexWorker,
       esClient: mockEsClient,
     });
     expect(result.system).toBe(
@@ -349,6 +375,7 @@ describe('anonymizeMessages', () => {
         },
       ],
       anonymizationRules: [nerRule], // nerRule allows only PER
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -357,5 +384,36 @@ describe('anonymizeMessages', () => {
     expect(maskedContent).toBe(
       'my name is PER_ee4587b4ba681e38996a1b716facbf375786bff7 and I live in los angeles'
     );
+  });
+
+  it('mixed text/image content preserves indices and masks correct leaf', async () => {
+    const messages: Message[] = [
+      {
+        role: MessageRole.User,
+        content: [
+          { type: 'text', text: 'hello' },
+          { type: 'image', source: { data: 'img', mimeType: 'image/png' } },
+          { type: 'text', text: 'my email is a@example.com' },
+        ],
+      },
+    ];
+
+    const result = await anonymizeMessages({
+      messages,
+      anonymizationRules: [regexRule],
+      regexWorker,
+      esClient: mockEsClient,
+    });
+
+    const anonymizedContent = result.messages[0] as UserMessage;
+    const content = anonymizedContent.content;
+
+    const emailMask = getEntityMask({ class_name: 'EMAIL', value: 'a@example.com' });
+    const expected = [
+      { type: 'text', text: 'hello' },
+      { type: 'image', source: { data: 'img', mimeType: 'image/png' } },
+      { type: 'text', text: `my email is ${emailMask}` },
+    ];
+    expect(content).toEqual(expected);
   });
 });

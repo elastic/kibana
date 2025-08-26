@@ -8,22 +8,22 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { identity } from 'lodash';
-import {
+import type {
   PersistableStateService,
   PersistableStateMigrateFn,
   MigrateFunctionsObject,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import {
+import type {
   EmbeddableFactoryRegistry,
   EnhancementsRegistry,
   EnhancementRegistryDefinition,
   EnhancementRegistryItem,
   EmbeddableRegistryDefinition,
 } from './types';
-import { EmbeddableStateWithType } from './persistable_state/types';
+import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
   getExtractFunction,
   getInjectFunction,
@@ -31,24 +31,36 @@ import {
   getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
+import type { EmbeddableTransforms } from '../common';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
+  registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
   getAllMigrations: () => MigrateFunctionsObject;
 }
 
-export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
+export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
+  getTransforms: (type: string) => EmbeddableTransforms | undefined;
+};
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private readonly enhancements: EnhancementsRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
+  private transformsRegistry: { [key: string]: EmbeddableTransforms<any, any> } = {};
 
   public setup(core: CoreSetup) {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory, this.getEnhancement);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
+      registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => {
+        if (this.transformsRegistry[type]) {
+          throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
+        }
+
+        this.transformsRegistry[type] = transforms;
+      },
       registerEnhancement: this.registerEnhancement,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory, this.getEnhancement),
       extract: getExtractFunction(this.getEmbeddableFactory, this.getEnhancement),
@@ -64,6 +76,9 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(core: CoreStart) {
     return {
+      getTransforms: (type: string) => {
+        return this.transformsRegistry[type];
+      },
       telemetry: getTelemetryFunction(this.getEmbeddableFactory, this.getEnhancement),
       extract: getExtractFunction(this.getEmbeddableFactory, this.getEnhancement),
       inject: getInjectFunction(this.getEmbeddableFactory, this.getEnhancement),

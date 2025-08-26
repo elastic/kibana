@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import {
-  Message,
-  ChatCompletionEvent,
-  MessageRole,
-  AnonymizationOutput,
-} from '@kbn/inference-common';
-import {
-  ChatCompletionEventType,
-  ChatCompletionChunkEvent,
-} from '@kbn/inference-common/src/chat_complete/events';
-import { OperatorFunction, mergeMap, filter, of, identity } from 'rxjs';
+import type { Message, ChatCompletionEvent, AnonymizationOutput } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
+import type { ChatCompletionChunkEvent } from '@kbn/inference-common/src/chat_complete/events';
+import { ChatCompletionEventType } from '@kbn/inference-common/src/chat_complete/events';
+import type { OperatorFunction } from 'rxjs';
+import { mergeMap, filter, of, identity } from 'rxjs';
 import { deanonymize } from './deanonymize';
+
+export function deanonymizeMessage<T extends ChatCompletionEvent>(
+  anonymization: AnonymizationOutput
+): OperatorFunction<T, T>;
 
 export function deanonymizeMessage(
   anonymization: AnonymizationOutput
@@ -28,7 +27,10 @@ export function deanonymizeMessage(
   return (source$) => {
     return source$.pipe(
       // Filter out original chunk events (we recreate a single deanonymized chunk later)
-      filter((event) => event.type !== ChatCompletionEventType.ChatCompletionChunk),
+      filter(
+        (event): event is Exclude<ChatCompletionEvent, ChatCompletionChunkEvent> =>
+          event.type !== ChatCompletionEventType.ChatCompletionChunk
+      ),
       // Process message events and create a new chunk plus the message
       mergeMap((event) => {
         if (event.type === ChatCompletionEventType.ChatCompletionMessage) {
@@ -40,7 +42,7 @@ export function deanonymizeMessage(
           } satisfies Message;
 
           const {
-            message: { content, toolCalls },
+            message: { content: deanonymizedContent, toolCalls: deanonymizedToolCalls },
             deanonymizations,
           } = deanonymize(message, anonymization.anonymizations);
 
@@ -55,15 +57,19 @@ export function deanonymizeMessage(
 
           // Create deanonymized output metadata
           const deanonymizedOutput = {
-            message,
+            message: {
+              content: deanonymizedContent,
+              toolCalls: deanonymizedToolCalls,
+              role: MessageRole.Assistant,
+            } as Message,
             deanonymizations,
           };
 
           // Create a new chunk with the complete deanonymized content
           const completeChunk: ChatCompletionChunkEvent = {
             type: ChatCompletionEventType.ChatCompletionChunk,
-            content,
-            tool_calls: toolCalls.map((tc, idx) => ({
+            content: deanonymizedContent,
+            tool_calls: deanonymizedToolCalls.map((tc, idx) => ({
               index: idx,
               toolCallId: tc.toolCallId,
               function: {
@@ -78,8 +84,8 @@ export function deanonymizeMessage(
           // Create deanonymized message event
           const deanonymizedMsg = {
             ...event,
-            content,
-            toolCalls,
+            content: deanonymizedContent,
+            toolCalls: deanonymizedToolCalls,
             deanonymized_input: deanonymizedInput,
             deanonymized_output: deanonymizedOutput,
           };

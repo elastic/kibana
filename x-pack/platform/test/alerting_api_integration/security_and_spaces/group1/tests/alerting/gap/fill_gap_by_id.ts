@@ -10,10 +10,13 @@ import moment from 'moment';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
+import { getFindGaps } from './utils';
 
 export default function fillGapByIdTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const logger = getService('log');
+  const findGaps = getFindGaps({ supertest, logger });
 
   describe('fill gap by id', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -65,6 +68,16 @@ export default function fillGapByIdTests({ getService }: FtrProviderContext) {
             const ruleId = ruleResponse.body.id;
             objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
 
+            const findResponseWithoutGaps = await findGaps({
+              ruleId,
+              start: gapStart,
+              end: gapEnd,
+              spaceId: apiOptions.spaceId,
+            });
+
+            expect(findResponseWithoutGaps.statusCode).to.eql(200);
+            expect(findResponseWithoutGaps.body.total).to.eql(0);
+
             // Create an unfilled gap
             await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
@@ -77,14 +90,12 @@ export default function fillGapByIdTests({ getService }: FtrProviderContext) {
               });
 
             // Find the gap to get its ID
-            const findResponse = await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_find`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                rule_id: ruleId,
-                start: gapStart,
-                end: gapEnd,
-              });
+            const findResponse = await findGaps({
+              ruleId,
+              start: gapStart,
+              end: gapEnd,
+              spaceId: apiOptions.spaceId,
+            });
 
             expect(findResponse.statusCode).to.eql(200);
             expect(findResponse.body.total).to.eql(1);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SerializedPolicy } from '../../../common/types';
+import type { SerializedPolicy } from '../../../common/types';
 import { defaultRolloverAction } from '../constants';
 
 export const isUsingDefaultRollover = (policy: SerializedPolicy): boolean => {

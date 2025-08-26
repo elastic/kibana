@@ -10,7 +10,7 @@ import { PROXY_MODE, SNIFF_MODE } from '../../../../../../../common/constants';
 import { validateSeeds } from './validate_seeds';
 import { validateProxy } from './validate_proxy';
 import { validateCloudRemoteAddress } from './validate_cloud_url';
-import { FormFields } from '../remote_cluster_form';
+import type { FormFields } from '../remote_cluster_form';
 import { validateNodeConnections } from './validate_node_connections';
 
 type ClusterError = JSX.Element | null;

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NormalizedRuntimeField } from '../../types';
+import type { NormalizedRuntimeField } from '../../types';
 import { getTypeLabelFromField } from '../../lib';
 
 import { DeleteRuntimeFieldProvider } from './delete_field_provider';
@@ -61,7 +61,7 @@ function RuntimeFieldsListItemComponent(
     return (
       <EuiFlexGroup gutterSize="s" css={styles.actions}>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={editButtonLabel}>
+          <EuiToolTip content={editButtonLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="pencil"
               onClick={editField}
@@ -74,7 +74,7 @@ function RuntimeFieldsListItemComponent(
         <EuiFlexItem grow={false}>
           <DeleteRuntimeFieldProvider>
             {(deleteField) => (
-              <EuiToolTip content={deleteButtonLabel}>
+              <EuiToolTip content={deleteButtonLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconType="trash"
                   color="danger"

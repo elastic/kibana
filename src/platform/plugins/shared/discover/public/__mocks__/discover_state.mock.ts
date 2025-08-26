@@ -44,7 +44,7 @@ export function getDiscoverStateMock({
   history?: History<HistoryLocationState>;
   customizationContext?: DiscoverCustomizationContext;
   services?: DiscoverServices;
-}) {
+} = {}) {
   if (!history) {
     history = createBrowserHistory<HistoryLocationState>();
     history.push('/');

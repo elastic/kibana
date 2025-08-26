@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { ServerSentEvent } from '@kbn/sse-utils';
+import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { apiCapabilities } from '../../common/features';
 import type { RouteDependencies } from './types';

@@ -453,15 +453,8 @@ export const cases: CasesUI = [
     comments: [],
     status: CaseStatuses['in-progress'],
     severity: CaseSeverity.MEDIUM,
-    incrementalId: 1,
   },
-  {
-    ...pushedCase,
-    updatedAt: laterTime,
-    id: '2',
-    totalComment: 0,
-    comments: [],
-  },
+  { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
   caseWithAlerts,
@@ -628,7 +621,6 @@ export const casesSnake: Cases = [
   {
     ...pushedCaseSnake,
     id: '1',
-    incremental_id: 1,
     totalComment: 0,
     comments: [],
     status: CaseStatuses['in-progress'],
@@ -995,8 +987,11 @@ export const findCaseUserActionsResponse: InternalFindCaseUserActions = {
 
 export const getCaseUserActionsStatsResponse: CaseUserActionsStats = {
   total: 20,
+  totalDeletions: 0,
   totalComments: 10,
+  totalCommentDeletions: 0,
   totalOtherActions: 10,
+  totalOtherActionDeletions: 0,
 };
 
 // components tests

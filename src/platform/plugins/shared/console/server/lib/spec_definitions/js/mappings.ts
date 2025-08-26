@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SpecDefinitionsService } from '../../../services';
+import type { SpecDefinitionsService } from '../../../services';
 
 import { BOOLEAN } from './shared';
 
@@ -116,6 +116,14 @@ export const mappings = (specService: SpecDefinitionsService) => {
               // dense_vector type
               DenseVectorIndexOptions,
             ],
+          },
+          chunking_settings: {
+            strategy: {
+              __one_of: ['sentence', 'word', 'none'],
+            },
+            max_chunk_size: 250,
+            sentence_overlap: 1,
+            overlap: 1,
           },
           analyzer: 'standard',
           search_analyzer: 'standard',

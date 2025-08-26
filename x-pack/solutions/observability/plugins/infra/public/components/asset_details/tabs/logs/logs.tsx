@@ -20,6 +20,7 @@ import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import moment from 'moment';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import useAsync from 'react-use/lib/useAsync';
+import { Global, css } from '@emotion/react';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDataViewsContext } from '../../hooks/use_data_views';
@@ -33,7 +34,7 @@ export const Logs = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const { logs } = useDataViewsContext();
 
   const { reference: logViewReference } = logs ?? {};
@@ -76,7 +77,7 @@ export const Logs = () => {
 
   const filter = useMemo(() => {
     const query = [
-      `${findInventoryFields(asset.type).id}: "${asset.id}"`,
+      `${findInventoryFields(entity.type).id}: "${entity.id}"`,
       ...(textQueryDebounced !== '' ? [textQueryDebounced] : []),
     ].join(' and ');
 
@@ -84,7 +85,7 @@ export const Logs = () => {
       language: 'kuery',
       query,
     };
-  }, [asset.type, asset.id, textQueryDebounced]);
+  }, [entity.type, entity.id, textQueryDebounced]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -98,8 +99,8 @@ export const Logs = () => {
   const logsUrl = useMemo(() => {
     return logsLocator.getRedirectUrl({
       query: getNodeQuery({
-        nodeField: findInventoryFields(asset.type).id,
-        nodeId: asset.id,
+        nodeField: findInventoryFields(entity.type).id,
+        nodeId: entity.id,
         filter: textQueryDebounced,
       }),
       timeRange: {
@@ -110,8 +111,8 @@ export const Logs = () => {
     });
   }, [
     logsLocator,
-    asset.id,
-    asset.type,
+    entity.id,
+    entity.type,
     state.startTimestamp,
     state.currentTimestamp,
     textQueryDebounced,
@@ -119,47 +120,56 @@ export const Logs = () => {
   ]);
 
   return (
-    <EuiFlexGroup direction="column" ref={ref}>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiFieldSearch
-              data-test-subj="infraAssetDetailsLogsTabFieldSearch"
-              fullWidth
-              placeholder={i18n.translate('xpack.infra.nodeDetails.logs.textFieldPlaceholder', {
-                defaultMessage: 'Search for log entries...',
-              })}
-              value={textQuery}
-              isClearable
-              onChange={onQueryChange}
+    <>
+      {/* z-index override so DocViewer flyout is being visible */}
+      <Global
+        styles={css`
+          .DiscoverFlyout {
+            z-index: 6000 !important;
+          }
+        `}
+      />
+      <EuiFlexGroup direction="column" ref={ref}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiFieldSearch
+                data-test-subj="infraAssetDetailsLogsTabFieldSearch"
+                fullWidth
+                placeholder={i18n.translate('xpack.infra.nodeDetails.logs.textFieldPlaceholder', {
+                  defaultMessage: 'Search for log entries...',
+                })}
+                value={textQuery}
+                isClearable
+                onChange={onQueryChange}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <OpenInLogsExplorerButton
+                href={logsUrl}
+                testSubject={'infraAssetDetailsLogsTabOpenInLogsButton'}
+                size="xs"
+                flush="both"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {logSources.value ? (
+            <LazySavedSearchComponent
+              dependencies={{ embeddable, searchSource, dataViews }}
+              index={logSources.value}
+              timeRange={dateRange}
+              query={filter}
+              height="68vh"
+              displayOptions={{
+                solutionNavIdOverride: 'oblt',
+                enableFilters: false,
+              }}
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <OpenInLogsExplorerButton
-              href={logsUrl}
-              testSubject={'infraAssetDetailsLogsTabOpenInLogsButton'}
-              size="xs"
-              flush="both"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {logSources.value ? (
-          <LazySavedSearchComponent
-            dependencies={{ embeddable, searchSource, dataViews }}
-            index={logSources.value}
-            timeRange={dateRange}
-            query={filter}
-            height="68vh"
-            displayOptions={{
-              solutionNavIdOverride: 'oblt',
-              enableDocumentViewer: false,
-              enableFilters: false,
-            }}
-          />
-        ) : null}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          ) : null}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };

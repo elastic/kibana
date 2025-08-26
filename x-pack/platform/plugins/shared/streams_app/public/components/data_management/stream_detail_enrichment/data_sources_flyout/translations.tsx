@@ -94,6 +94,10 @@ export const DATA_SOURCES_I18N = {
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.randomSamples.name',
       { defaultMessage: 'Random samples from stream' }
     ),
+    placeholderName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.randomSamples.placeholderName',
+      { defaultMessage: 'Random samples' }
+    ),
     subtitle: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.randomSamples.subtitle',
       { defaultMessage: 'Automatically samples random data from the stream.' }
@@ -111,6 +115,10 @@ export const DATA_SOURCES_I18N = {
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.kqlDataSource.defaultName',
       { defaultMessage: 'KQL search samples' }
     ),
+    placeholderName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.kqlDataSource.placeholderName',
+      { defaultMessage: 'KQL search samples' }
+    ),
     subtitle: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.kqlDataSource.subtitle',
       { defaultMessage: 'Sample data using KQL query syntax.' }
@@ -119,6 +127,10 @@ export const DATA_SOURCES_I18N = {
   customSamples: {
     defaultName: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.defaultName',
+      { defaultMessage: 'Custom samples' }
+    ),
+    placeholderName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.placeholderName',
       { defaultMessage: 'Custom samples' }
     ),
     subtitle: i18n.translate(

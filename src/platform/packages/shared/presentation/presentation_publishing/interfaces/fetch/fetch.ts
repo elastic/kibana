@@ -10,7 +10,6 @@
 import { useEffect, useMemo } from 'react';
 import {
   BehaviorSubject,
-  Observable,
   Subject,
   combineLatest,
   combineLatestWith,
@@ -26,22 +25,23 @@ import {
   switchMap,
   takeUntil,
   tap,
+  type Observable,
 } from 'rxjs';
 import { useStateFromPublishingSubject } from '../../publishing_subject';
-import { HasParentApi, apiHasParentApi } from '../has_parent_api';
-import { apiPublishesPauseFetch } from './publishes_pause_fetch';
+import { apiHasParentApi, type HasParentApi } from '../has_parent_api';
 import {
-  FetchContext,
-  ReloadTimeFetchContext,
+  type FetchContext,
+  type ReloadTimeFetchContext,
   isReloadTimeFetchContextEqual,
 } from './fetch_context';
+import { apiPublishesPauseFetch } from './publishes_pause_fetch';
 import { apiPublishesReload } from './publishes_reload';
-import { PublishesSearchSession, apiPublishesSearchSession } from './publishes_search_session';
+import { apiPublishesSearchSession, type PublishesSearchSession } from './publishes_search_session';
 import {
-  PublishesTimeRange,
-  PublishesUnifiedSearch,
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
+  type PublishesTimeRange,
+  type PublishesUnifiedSearch,
 } from './publishes_unified_search';
 
 function getReloadTimeFetchContext(api: unknown, reloadTimestamp?: number): ReloadTimeFetchContext {

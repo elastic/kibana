@@ -5,38 +5,31 @@
  * 2.0.
  */
 
-import type { MaybePromise } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
-import {
-  AgentType,
-  AgentMode,
-  type ConversationRound,
-  type RoundInput,
-  type ChatAgentEvent,
-  type AgentIdentifier,
-  type PlainIdAgentIdentifier,
-} from '@kbn/onechat-common';
+import { type ConversationRound, type RoundInput, type ChatAgentEvent } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ModelProvider } from '../src/model_provider';
 import type { ToolProvider } from '../src/tools';
 import type { ScopedRunner } from '../src/runner';
 
-export type AgentHandlerFn<TParams, TResponse> = (
-  params: AgentHandlerParams<TParams>,
+export type AgentHandlerFn = (
+  params: AgentHandlerParams,
   context: AgentHandlerContext
-) => Promise<AgentHandlerReturn<TResponse>>;
+) => Promise<AgentHandlerReturn>;
 
-export interface AgentHandlerParams<TParams> {
+export interface AgentHandlerParams {
   /** The params that the agent execution API was called with */
-  agentParams: TParams;
+  agentParams: AgentParams;
   /** ID of this run */
   runId: string;
+  /** optional signal to abort the execution of the agent */
+  abortSignal?: AbortSignal;
 }
 
-export interface AgentHandlerReturn<TResult> {
+export interface AgentHandlerReturn {
   /** The plain result of the agent */
-  result: TResult;
+  result: AgentResponse;
 }
 
 export interface AgentHandlerContext {
@@ -85,12 +78,7 @@ export interface AgentEventEmitter {
 
 // conversational
 
-export interface ConversationalAgentParams {
-  /**
-   * Agent mode to use for this round.
-   * Defaults to `normal`.
-   */
-  agentMode?: AgentMode;
+export interface AgentParams {
   /**
    * Previous rounds of conversation.
    * Defaults to an empty list (new conversation)
@@ -102,45 +90,9 @@ export interface ConversationalAgentParams {
   nextInput: RoundInput;
 }
 
-export interface ConversationalAgentResponse {
+export interface AgentResponse {
   /**
    * The full round of conversation, can be used for persistence for example.
    */
   round: ConversationRound;
-}
-
-/**
- * Conversational agent handler
- */
-export type ConversationalAgentHandlerFn = AgentHandlerFn<
-  ConversationalAgentParams,
-  ConversationalAgentResponse
->;
-
-export interface AgentDefinitionBase<TType extends AgentType, TParams, TResponse> {
-  type: TType;
-  id: PlainIdAgentIdentifier;
-  description: string;
-  handler: AgentHandlerFn<TParams, TResponse>;
-}
-
-export interface ConversationalAgentDefinition
-  extends AgentDefinitionBase<
-    AgentType.conversational,
-    ConversationalAgentParams,
-    ConversationalAgentResponse
-  > {
-  type: AgentType.conversational;
-  handler: ConversationalAgentHandlerFn;
-}
-
-export type AgentDefinition = ConversationalAgentDefinition;
-
-/**
- * Provider that can be registered to expose agents to onechat
- */
-export interface AgentProvider<TAgent = AgentDefinition> {
-  has(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<boolean>;
-  get(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<TAgent>;
-  list(opts: { request: KibanaRequest }): MaybePromise<TAgent[]>;
 }

@@ -24,6 +24,7 @@ jest.mock('../../../assistant/use_assistant_availability', () => ({
   useAssistantAvailability: jest.fn(() => ({
     hasAssistantPrivilege: true,
     isAssistantEnabled: true,
+    isAssistantVisible: true,
   })),
 }));
 
@@ -176,7 +177,7 @@ describe('useAttackDiscovery', () => {
     expect(mockedUseKibana.services.http.post).toHaveBeenCalledWith(
       '/internal/elastic_assistant/attack_discovery',
       {
-        body: `{"alertsIndexPattern":"alerts-index-pattern","anonymizationFields":[],"replacements":{},"size":${SIZE},"subAction":"invokeAI","apiConfig":{"connectorId":"test-id","actionTypeId":".gen-ai"}}`,
+        body: `{"alertsIndexPattern":"alerts-index-pattern","anonymizationFields":[],"replacements":{},"size":${SIZE},"subAction":"invokeAI","apiConfig":{"connectorId":"test-id","actionTypeId":".gen-ai"},"connectorName":"OpenAI connector"}`,
         version: '1',
       }
     );

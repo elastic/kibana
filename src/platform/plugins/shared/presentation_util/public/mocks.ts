@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PresentationUtilPluginStart } from './types';
+import type { PresentationUtilPluginStart } from './types';
 import { registerExpressionsLanguage } from '.';
 import { setStubKibanaServices } from './services/mocks';
 

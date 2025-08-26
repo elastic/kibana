@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { transformDashboardOut } from './out';
+export { transformDashboardOut, transformReferencesOut } from './out';
 export { transformDashboardIn } from './in';

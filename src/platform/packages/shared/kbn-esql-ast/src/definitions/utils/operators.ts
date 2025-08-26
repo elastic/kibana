@@ -6,10 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
-import { listCompleteItem } from '../../commands_registry/utils/complete_items';
-import { getFieldsOrFunctionsSuggestions } from './autocomplete';
+import { listCompleteItem } from '../../commands_registry/complete_items';
+import { getFieldsOrFunctionsSuggestions } from './autocomplete/helpers';
 import {
   type FunctionFilterPredicates,
   type FunctionParameterType,
@@ -27,7 +29,7 @@ import {
   getFunctionDefinition,
 } from './functions';
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from './shared';
-import { ESQLAstItem, ESQLFunction } from '../../types';
+import type { ESQLAstItem, ESQLFunction } from '../../types';
 import { getTestFunctions } from './test_functions';
 
 export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
@@ -53,13 +55,17 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
  * @returns
  */
 export const getOperatorSuggestions = (
-  predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType }
+  predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType },
+  hasMinimumLicenseRequired?: ((minimumLicenseRequired: LicenseType) => boolean) | undefined,
+  activeProduct?: PricingProduct | undefined
 ): ISuggestionItem[] => {
   const filteredDefinitions = filterFunctionDefinitions(
     getTestFunctions().length
       ? [...operatorsDefinitions, ...getTestFunctions()]
       : operatorsDefinitions,
-    predicates
+    predicates,
+    hasMinimumLicenseRequired,
+    activeProduct
   );
 
   // make sure the operator has at least one signature that matches
@@ -83,7 +89,7 @@ export const getOperatorsSuggestionsAfterNot = (): ISuggestionItem[] => {
     .map(getOperatorSuggestion);
 };
 
-function isArrayType(type: string): type is ArrayType {
+export function isArrayType(type: string): type is ArrayType {
   return type.endsWith('[]');
 }
 
@@ -114,6 +120,8 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType,
   getExpressionType,
   getColumnsByType,
+  hasMinimumLicenseRequired,
+  activeProduct,
 }: {
   queryText: string;
   location: Location;
@@ -121,6 +129,8 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType?: SupportedDataType;
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
   getColumnsByType: GetColumnsByTypeFn;
+  hasMinimumLicenseRequired?: ((minimumLicenseRequired: LicenseType) => boolean) | undefined;
+  activeProduct?: PricingProduct | undefined;
 }) {
   const suggestions = [];
   const isFnComplete = checkFunctionInvocationComplete(operator, getExpressionType);
@@ -176,11 +186,19 @@ export async function getSuggestionsToRightOfOperatorExpression({
 
         // TODO replace with fields callback + function suggestions
         suggestions.push(
-          ...(await getFieldsOrFunctionsSuggestions(typeToUse, location, getColumnsByType, {
-            functions: true,
-            fields: true,
-            values: Boolean(operator.subtype === 'binary-expression'),
-          }))
+          ...(await getFieldsOrFunctionsSuggestions(
+            typeToUse,
+            location,
+            getColumnsByType,
+            {
+              functions: true,
+              fields: true,
+              values: Boolean(operator.subtype === 'binary-expression'),
+            },
+            {},
+            hasMinimumLicenseRequired,
+            activeProduct
+          ))
         );
       }
     }

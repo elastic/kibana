@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FormProvider as ReactHookFormProvider, useForm, UseFormGetValues } from 'react-hook-form';
+import type { UseFormGetValues } from 'react-hook-form';
+import { FormProvider as ReactHookFormProvider, useForm } from 'react-hook-form';
 import React, { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useDebounceFn } from '@kbn/react-hooks';
@@ -12,7 +13,8 @@ import { DEFAULT_CONTEXT_DOCUMENTS } from '../../common';
 import { DEFAULT_LLM_PROMPT } from '../../common/prompt';
 import { useIndicesValidation } from '../hooks/use_indices_validation';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
-import { PlaygroundForm, PlaygroundFormFields } from '../types';
+import type { PlaygroundForm } from '../types';
+import { PlaygroundFormFields } from '../types';
 import { useLLMsModels } from '../hooks/use_llms_models';
 import { playgroundFormResolver } from '../utils/playground_form_resolver';
 
@@ -74,6 +76,7 @@ export const UnsavedFormProvider: React.FC<React.PropsWithChildren<UnsavedFormPr
       search_query: '',
     },
     resolver: playgroundFormResolver,
+    mode: 'onChange',
     reValidateMode: 'onChange',
   });
   const { isValidated: isValidatedIndices, validIndices } = useIndicesValidation(
@@ -99,7 +102,9 @@ export const UnsavedFormProvider: React.FC<React.PropsWithChildren<UnsavedFormPr
     const currentModel = form.getValues(PlaygroundFormFields.summarizationModel);
 
     if (defaultModel && (!currentModel || !models.find((model) => currentModel.id === model.id))) {
-      form.setValue(PlaygroundFormFields.summarizationModel, defaultModel);
+      form.setValue(PlaygroundFormFields.summarizationModel, defaultModel, {
+        shouldValidate: true,
+      });
     }
   }, [form, models]);
 

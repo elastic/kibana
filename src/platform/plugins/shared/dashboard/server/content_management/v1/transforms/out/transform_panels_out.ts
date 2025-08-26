@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
-import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type {
+  SavedDashboardPanel,
+  SavedDashboardSection,
+} from '../../../../dashboard_saved_object';
+import type { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 import { getReferencesForPanelId } from '../../../../../common';
+import { embeddableService, logger } from '../../../../kibana_services';
 
 export function transformPanelsOut(
   panelsJSON: string = '{}',
@@ -62,18 +66,34 @@ function transformPanelProperties(
 
   const storedSavedObjectId = id ?? embeddableConfig.savedObjectId;
   const savedObjectId = matchingReference ? matchingReference.id : storedSavedObjectId;
+  const panelType = matchingReference ? matchingReference.type : type;
+
+  const transforms = embeddableService?.getTransforms(panelType);
+
+  const panelConfig = {
+    ...embeddableConfig,
+    // <8.19 savedObjectId and title stored as siblings to embeddableConfig
+    ...(savedObjectId !== undefined && { savedObjectId }),
+    ...(title !== undefined && { title }),
+  };
+
+  let transformedPanelConfig;
+  try {
+    if (transforms?.transformOut) {
+      transformedPanelConfig = transforms.transformOut(panelConfig, references);
+    }
+  } catch (transformOutError) {
+    // do not prevent read on transformOutError
+    logger.warn(
+      `Unable to transform "${panelType}" embeddable state on read. Error: ${transformOutError.message}`
+    );
+  }
 
   return {
     gridData: rest,
-    panelConfig: {
-      ...embeddableConfig,
-      // <8.19 savedObjectId and title stored as siblings to embeddableConfig
-      ...(savedObjectId !== undefined && { savedObjectId }),
-      ...(title !== undefined && { title }),
-    },
+    panelConfig: transformedPanelConfig ? transformedPanelConfig : panelConfig,
     panelIndex,
-    panelRefName,
-    type: matchingReference ? matchingReference.type : type,
+    type: panelType,
     version,
   };
 }
