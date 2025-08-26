@@ -531,19 +531,28 @@ export function getDiscoverStateContainer({
   /**
    * Triggered when a user submits a query in the search bar
    */
-  const onUpdateQuery = (
+  const onUpdateQuery = async (
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => {
     let fields;
 
     if (isOfAggregateQueryType(payload.query)) {
+      console.log('ES|QL');
       fields = getQueryColumnsFromESQLQuery(payload.query.esql);
     } else if (isOfQueryType(payload.query) && typeof payload.query.query === 'string') {
+      console.log('KQL');
       fields = getKqlFieldNamesFromExpression(payload.query?.query);
     }
 
-    console.log({ fields });
+    const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const scopedEbtManager = scopedEbtManager$.getValue();
+    if (scopedEbtManager && fields) {
+      await scopedEbtManager.trackSubmittingQueryEvent({
+        fieldNames: fields,
+        fieldsMetadata: services.fieldsMetadata,
+      });
+    }
 
     if (isUpdate === false) {
       // remove the search session if the given query is not just updated
