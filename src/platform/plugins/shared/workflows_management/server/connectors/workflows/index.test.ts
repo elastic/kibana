@@ -63,6 +63,7 @@ describe('Workflows Connector', () => {
           subAction: 'run' as const,
           subActionParams: {
             workflowId: 'test-workflow-id',
+            spaceId: 'default',
             alerts: [{ _id: 'alert-1', _index: 'test-index' }],
             inputs: { test: 'data' },
           },
@@ -86,6 +87,7 @@ describe('Workflows Connector', () => {
 
       expect(mockWorkflowsService).toHaveBeenCalledWith(
         'test-workflow-id',
+        'default',
         { test: 'data' },
         mockRequest
       );

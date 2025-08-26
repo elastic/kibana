@@ -45,6 +45,8 @@ import type {
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 import type { Logger } from '@kbn/logging';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import { getSideNavVersion } from '@kbn/core-chrome-layout-feature-flags';
 
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
@@ -56,6 +58,7 @@ interface StartDeps {
   http: InternalHttpStart;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
   logger: Logger;
+  featureFlags: FeatureFlagsStart;
 }
 
 export class ProjectNavigationService {
@@ -91,6 +94,7 @@ export class ProjectNavigationService {
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
   private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
   private application?: InternalApplicationStart;
+  private featureFlags?: FeatureFlagsStart;
   private navLinksService?: ChromeNavLinks;
   private _http?: InternalHttpStart;
   private navigationChangeSubscription?: Subscription;
@@ -98,8 +102,16 @@ export class ProjectNavigationService {
 
   constructor(private isServerless: boolean) {}
 
-  public start({ application, navLinksService, http, chromeBreadcrumbs$, logger }: StartDeps) {
+  public start({
+    application,
+    navLinksService,
+    http,
+    chromeBreadcrumbs$,
+    logger,
+    featureFlags,
+  }: StartDeps) {
     this.application = application;
+    this.featureFlags = featureFlags;
     this.navLinksService = navLinksService;
     this._http = http;
     this.logger = logger;
@@ -228,6 +240,7 @@ export class ProjectNavigationService {
           return parseNavigationTree(id, def, {
             deepLinks: deepLinksMap,
             cloudLinks,
+            sideNavVersion: getSideNavVersion(this.featureFlags!),
           });
         })
       )

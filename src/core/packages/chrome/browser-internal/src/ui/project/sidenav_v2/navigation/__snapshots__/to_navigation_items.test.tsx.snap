@@ -3,6 +3,7 @@
 exports[`toNavigationItems should return footer items from navigation tree 1`] = `
 Array [
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav_footer.get_started nav-item-deepLinkId-undefined nav-item-id-get_started",
     "href": "/tzo/s/sec/app/security/get_started",
     "iconType": "launch",
@@ -11,17 +12,19 @@ Array [
     "sections": undefined,
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav_footer.dev_tools nav-item-deepLinkId-undefined nav-item-id-dev_tools",
     "href": "/tzo/s/sec/app/dev_tools",
-    "iconType": "editorCodeBlock",
+    "iconType": "devToolsApp",
     "id": "dev_tools",
     "label": "Developer tools",
     "sections": undefined,
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management nav-item-id-stack_management",
     "href": "/tzo/s/sec/app/management/ingest/ingest_pipelines",
-    "iconType": "gear",
+    "iconType": "broom",
     "id": "stack_management",
     "label": "Stack Management",
     "sections": Array [
@@ -29,6 +32,7 @@ Array [
         "id": "node-0",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-0.management:ingest_pipelines nav-item-deepLinkId-undefined nav-item-id-management:ingest_pipelines",
             "href": "/tzo/s/sec/app/management/ingest/ingest_pipelines",
             "id": "management:ingest_pipelines",
@@ -42,6 +46,7 @@ Array [
         "id": "node-1",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-1.management:index_management nav-item-deepLinkId-undefined nav-item-id-management:index_management",
             "href": "/tzo/s/sec/app/management/data/index_management",
             "id": "management:index_management",
@@ -49,6 +54,7 @@ Array [
             "label": "Index Management",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-1.management:index_lifecycle_management nav-item-deepLinkId-undefined nav-item-id-management:index_lifecycle_management",
             "href": "/tzo/s/sec/app/management/data/index_lifecycle_management",
             "id": "management:index_lifecycle_management",
@@ -56,6 +62,7 @@ Array [
             "label": "Index Lifecycle Policies",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-1.management:snapshot_restore nav-item-deepLinkId-undefined nav-item-id-management:snapshot_restore",
             "href": "/tzo/s/sec/app/management/data/snapshot_restore",
             "id": "management:snapshot_restore",
@@ -63,6 +70,7 @@ Array [
             "label": "Snapshot and Restore",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-1.management:rollup_jobs nav-item-deepLinkId-undefined nav-item-id-management:rollup_jobs",
             "href": "/tzo/s/sec/app/management/data/rollup_jobs",
             "id": "management:rollup_jobs",
@@ -70,6 +78,7 @@ Array [
             "label": "Rollup Jobs",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-1.management:transform nav-item-deepLinkId-undefined nav-item-id-management:transform",
             "href": "/tzo/s/sec/app/management/data/transform",
             "id": "management:transform",
@@ -77,6 +86,7 @@ Array [
             "label": "Transforms",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-1.management:remote_clusters nav-item-deepLinkId-undefined nav-item-id-management:remote_clusters",
             "href": "/tzo/s/sec/app/management/data/remote_clusters",
             "id": "management:remote_clusters",
@@ -84,6 +94,7 @@ Array [
             "label": "Remote Clusters",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-1.management:migrate_data nav-item-deepLinkId-undefined nav-item-id-management:migrate_data",
             "href": "/tzo/s/sec/app/management/data/migrate_data",
             "id": "management:migrate_data",
@@ -91,6 +102,7 @@ Array [
             "label": "Migrate",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-1.management:content_connectors nav-item-deepLinkId-undefined nav-item-id-management:content_connectors",
             "href": "/tzo/s/sec/app/management/data/content_connectors",
             "id": "management:content_connectors",
@@ -104,6 +116,7 @@ Array [
         "id": "node-2",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-2.management:triggersActions nav-item-deepLinkId-undefined nav-item-id-management:triggersActions",
             "href": "/tzo/s/sec/app/management/insightsAndAlerting/triggersActions",
             "id": "management:triggersActions",
@@ -111,6 +124,7 @@ Array [
             "label": "Rules",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-2.management:cases nav-item-deepLinkId-undefined nav-item-id-management:cases",
             "href": "/tzo/s/sec/app/management/insightsAndAlerting/cases",
             "id": "management:cases",
@@ -118,6 +132,7 @@ Array [
             "label": "Cases",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-2.management:triggersActionsConnectors nav-item-deepLinkId-undefined nav-item-id-management:triggersActionsConnectors",
             "href": "/tzo/s/sec/app/management/insightsAndAlerting/triggersActionsConnectors",
             "id": "management:triggersActionsConnectors",
@@ -125,6 +140,7 @@ Array [
             "label": "Connectors",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-2.management:reporting nav-item-deepLinkId-undefined nav-item-id-management:reporting",
             "href": "/tzo/s/sec/app/management/insightsAndAlerting/reporting",
             "id": "management:reporting",
@@ -132,6 +148,7 @@ Array [
             "label": "Reporting",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-2.management:maintenanceWindows nav-item-deepLinkId-undefined nav-item-id-management:maintenanceWindows",
             "href": "/tzo/s/sec/app/management/insightsAndAlerting/maintenanceWindows",
             "id": "management:maintenanceWindows",
@@ -139,6 +156,7 @@ Array [
             "label": "Maintenance Windows",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-2.entity_analytics-entity_store_management nav-item-deepLinkId-undefined nav-item-id-entity_analytics-entity_store_management",
             "href": "/tzo/s/sec/app/security/entity_analytics_entity_store",
             "id": "entity_analytics-entity_store_management",
@@ -152,6 +170,7 @@ Array [
         "id": "node-4",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-4.management:users nav-item-deepLinkId-undefined nav-item-id-management:users",
             "href": "/tzo/s/sec/app/management/security/users",
             "id": "management:users",
@@ -159,6 +178,7 @@ Array [
             "label": "Users",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-4.management:roles nav-item-deepLinkId-undefined nav-item-id-management:roles",
             "href": "/tzo/s/sec/app/management/security/roles",
             "id": "management:roles",
@@ -166,6 +186,7 @@ Array [
             "label": "Roles",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-4.management:api_keys nav-item-deepLinkId-undefined nav-item-id-management:api_keys",
             "href": "/tzo/s/sec/app/management/security/api_keys",
             "id": "management:api_keys",
@@ -179,6 +200,7 @@ Array [
         "id": "node-5",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-5.management:dataViews nav-item-deepLinkId-undefined nav-item-id-management:dataViews",
             "href": "/tzo/s/sec/app/management/kibana/dataViews",
             "id": "management:dataViews",
@@ -186,6 +208,7 @@ Array [
             "label": "Data Views",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-5.management:filesManagement nav-item-deepLinkId-undefined nav-item-id-management:filesManagement",
             "href": "/tzo/s/sec/app/management/kibana/filesManagement",
             "id": "management:filesManagement",
@@ -193,6 +216,7 @@ Array [
             "label": "Files",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-5.management:objects nav-item-deepLinkId-undefined nav-item-id-management:objects",
             "href": "/tzo/s/sec/app/management/kibana/objects",
             "id": "management:objects",
@@ -200,6 +224,7 @@ Array [
             "label": "Saved Objects",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-5.management:tags nav-item-deepLinkId-undefined nav-item-id-management:tags",
             "href": "/tzo/s/sec/app/management/kibana/tags",
             "id": "management:tags",
@@ -207,6 +232,7 @@ Array [
             "label": "Tags",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-5.management:aiAssistantManagementSelection nav-item-deepLinkId-undefined nav-item-id-management:aiAssistantManagementSelection",
             "href": "/tzo/s/sec/app/management/kibana/aiAssistantManagementSelection",
             "id": "management:aiAssistantManagementSelection",
@@ -214,6 +240,7 @@ Array [
             "label": "AI Assistants",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-5.management:spaces nav-item-deepLinkId-undefined nav-item-id-management:spaces",
             "href": "/tzo/s/sec/app/management/kibana/spaces",
             "id": "management:spaces",
@@ -221,6 +248,7 @@ Array [
             "label": "Spaces",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-5.maps nav-item-deepLinkId-undefined nav-item-id-maps",
             "href": "/tzo/s/sec/app/maps",
             "id": "maps",
@@ -228,6 +256,7 @@ Array [
             "label": "Maps",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-5.visualize nav-item-deepLinkId-undefined nav-item-id-visualize",
             "href": "/tzo/s/sec/app/visualize#/?_g=(filters:!(),query:(language:kuery,query:''),refreshInterval:(pause:!t,value:60000),time:(from:now%2Fd,to:now%2Fd))",
             "id": "visualize",
@@ -235,6 +264,7 @@ Array [
             "label": "Visualize library",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-5.management:settings nav-item-deepLinkId-undefined nav-item-id-management:settings",
             "href": "/tzo/s/sec/app/management/kibana/settings",
             "id": "management:settings",
@@ -248,6 +278,7 @@ Array [
         "id": "node-6",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management.node-6.management:license_management nav-item-deepLinkId-undefined nav-item-id-management:license_management",
             "href": "/tzo/s/sec/app/management/stack/license_management",
             "id": "management:license_management",
@@ -260,6 +291,7 @@ Array [
     ],
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.monitoring nav-item-deepLinkId-undefined nav-item-id-monitoring",
     "href": "/tzo/s/sec/app/monitoring",
     "iconType": "monitoringApp",
@@ -268,6 +300,7 @@ Array [
     "sections": undefined,
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.integrations nav-item-deepLinkId-undefined nav-item-id-integrations",
     "href": "/tzo/s/sec/app/integrations",
     "iconType": "plugs",
@@ -281,6 +314,7 @@ Array [
 exports[`toNavigationItems should return primary items from navigation tree 1`] = `
 Array [
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav.discover nav-item-deepLinkId-undefined nav-item-id-discover",
     "href": "/tzo/s/sec/app/discover#/?_g=(filters:!(),query:(language:kuery,query:''),refreshInterval:(pause:!t,value:60000),time:(from:now%2Fd,to:now%2Fd))",
     "iconType": "discoverApp",
@@ -289,6 +323,7 @@ Array [
     "sections": undefined,
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav.dashboards nav-item-deepLinkId-undefined nav-item-id-dashboards",
     "href": "/tzo/s/sec/app/security/dashboards",
     "iconType": "dashboardApp",
@@ -297,9 +332,10 @@ Array [
     "sections": undefined,
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.securityGroup:rules nav-item-id-securityGroup:rules",
     "href": "/tzo/s/sec/app/security/rules",
-    "iconType": "securitySignal",
+    "iconType": "broom",
     "id": "securityGroup:rules",
     "label": "Rules",
     "sections": Array [
@@ -307,6 +343,7 @@ Array [
         "id": "node-0",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.securityGroup:rules.node-0.rules nav-item-deepLinkId-undefined nav-item-id-rules",
             "href": "/tzo/s/sec/app/security/rules",
             "id": "rules",
@@ -314,6 +351,7 @@ Array [
             "label": "Detection rules (SIEM)",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.securityGroup:rules.node-0.cloud_security_posture-benchmarks nav-item-deepLinkId-undefined nav-item-id-cloud_security_posture-benchmarks",
             "href": "/tzo/s/sec/app/security/cloud_security_posture/benchmarks",
             "id": "cloud_security_posture-benchmarks",
@@ -321,6 +359,7 @@ Array [
             "label": "Benchmarks",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.securityGroup:rules.node-0.exceptions nav-item-deepLinkId-undefined nav-item-id-exceptions",
             "href": "/tzo/s/sec/app/security/exceptions",
             "id": "exceptions",
@@ -328,6 +367,7 @@ Array [
             "label": "Shared exception lists",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.securityGroup:rules.node-0.siem_migrations-rules nav-item-deepLinkId-undefined nav-item-id-siem_migrations-rules",
             "href": "/tzo/s/sec/app/security/siem_migrations/rules",
             "id": "siem_migrations-rules",
@@ -341,6 +381,7 @@ Array [
         "id": "node-1",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.securityGroup:rules.node-1.coverage-overview nav-item-deepLinkId-undefined nav-item-id-coverage-overview",
             "href": "/tzo/s/sec/app/security/rules_coverage_overview",
             "id": "coverage-overview",
@@ -353,41 +394,46 @@ Array [
     ],
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.alerts nav-item-deepLinkId-undefined nav-item-id-alerts",
     "href": "/tzo/s/sec/app/security/alerts",
-    "iconType": "bell",
+    "iconType": "broom",
     "id": "alerts",
     "label": "Alerts",
     "sections": undefined,
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.attack_discovery nav-item-deepLinkId-undefined nav-item-id-attack_discovery",
     "href": "/tzo/s/sec/app/security/attack_discovery",
-    "iconType": "lensApp",
+    "iconType": "broom",
     "id": "attack_discovery",
     "label": "Attack discovery",
     "sections": undefined,
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.cloud_security_posture-findings nav-item-deepLinkId-undefined nav-item-id-cloud_security_posture-findings",
     "href": "/tzo/s/sec/app/security/cloud_security_posture/findings",
-    "iconType": "logoSecurity",
+    "iconType": "broom",
     "id": "cloud_security_posture-findings",
     "label": "Findings",
     "sections": undefined,
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.cases nav-item-deepLinkId-undefined nav-item-id-cases",
     "href": "/tzo/s/sec/app/security/cases",
-    "iconType": "casesApp",
+    "iconType": "broom",
     "id": "cases",
     "label": "Cases",
     "sections": undefined,
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.securityGroup:explore nav-item-id-securityGroup:explore",
     "href": "/tzo/s/sec/app/security/hosts",
-    "iconType": "search",
+    "iconType": "broom",
     "id": "securityGroup:explore",
     "label": "Explore",
     "sections": Array [
@@ -395,6 +441,7 @@ Array [
         "id": "securityGroup:explore-section",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.securityGroup:explore.hosts nav-item-deepLinkId-undefined nav-item-id-hosts",
             "href": "/tzo/s/sec/app/security/hosts",
             "id": "hosts",
@@ -402,6 +449,7 @@ Array [
             "label": "Hosts",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.securityGroup:explore.network nav-item-deepLinkId-undefined nav-item-id-network",
             "href": "/tzo/s/sec/app/security/network",
             "id": "network",
@@ -409,6 +457,7 @@ Array [
             "label": "Network",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.securityGroup:explore.users nav-item-deepLinkId-undefined nav-item-id-users",
             "href": "/tzo/s/sec/app/security/users",
             "id": "users",
@@ -421,9 +470,10 @@ Array [
     ],
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.securityGroup:investigations nav-item-id-securityGroup:investigations",
     "href": "/tzo/s/sec/app/security/timelines",
-    "iconType": "casesApp",
+    "iconType": "broom",
     "id": "securityGroup:investigations",
     "label": "Investigations",
     "sections": Array [
@@ -431,6 +481,7 @@ Array [
         "id": "securityGroup:investigations-section",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.securityGroup:investigations.timelines nav-item-deepLinkId-undefined nav-item-id-timelines",
             "href": "/tzo/s/sec/app/security/timelines",
             "id": "timelines",
@@ -438,6 +489,7 @@ Array [
             "label": "Timelines",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.securityGroup:investigations.notes nav-item-deepLinkId-undefined nav-item-id-notes",
             "href": "/tzo/s/sec/app/security/administration/notes",
             "id": "notes",
@@ -445,6 +497,7 @@ Array [
             "label": "Notes",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.securityGroup:investigations.osquery nav-item-deepLinkId-undefined nav-item-id-osquery",
             "href": "/tzo/s/sec/app/osquery",
             "id": "osquery",
@@ -457,17 +510,19 @@ Array [
     ],
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.threat_intelligence nav-item-deepLinkId-undefined nav-item-id-threat_intelligence",
     "href": "/tzo/s/sec/app/security/threat_intelligence/indicators",
-    "iconType": "bug",
+    "iconType": "broom",
     "id": "threat_intelligence",
     "label": "Intelligence",
     "sections": undefined,
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets nav-item-id-securityGroup:assets",
     "href": "/tzo/s/sec/app/fleet/agents",
-    "iconType": "indexManagementApp",
+    "iconType": "broom",
     "id": "securityGroup:assets",
     "label": "Assets",
     "sections": Array [
@@ -475,6 +530,7 @@ Array [
         "id": "fleet",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets.fleet.fleet:agents nav-item-deepLinkId-undefined nav-item-id-fleet:agents",
             "href": "/tzo/s/sec/app/fleet/agents",
             "id": "fleet:agents",
@@ -482,6 +538,7 @@ Array [
             "label": "Agents",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets.fleet.fleet:policies nav-item-deepLinkId-undefined nav-item-id-fleet:policies",
             "href": "/tzo/s/sec/app/fleet/policies",
             "id": "fleet:policies",
@@ -489,6 +546,7 @@ Array [
             "label": "Policies",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets.fleet.fleet:enrollment_tokens nav-item-deepLinkId-undefined nav-item-id-fleet:enrollment_tokens",
             "href": "/tzo/s/sec/app/fleet/enrollment-tokens",
             "id": "fleet:enrollment_tokens",
@@ -496,6 +554,7 @@ Array [
             "label": "Enrollment tokens",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets.fleet.fleet:uninstall_tokens nav-item-deepLinkId-undefined nav-item-id-fleet:uninstall_tokens",
             "href": "/tzo/s/sec/app/fleet/uninstall-tokens",
             "id": "fleet:uninstall_tokens",
@@ -503,6 +562,7 @@ Array [
             "label": "Uninstall tokens",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets.fleet.fleet:data_streams nav-item-deepLinkId-undefined nav-item-id-fleet:data_streams",
             "href": "/tzo/s/sec/app/fleet/data-streams",
             "id": "fleet:data_streams",
@@ -510,6 +570,7 @@ Array [
             "label": "Data streams",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets.fleet.fleet:settings nav-item-deepLinkId-undefined nav-item-id-fleet:settings",
             "href": "/tzo/s/sec/app/fleet/settings",
             "id": "fleet:settings",
@@ -523,6 +584,7 @@ Array [
         "id": "endpoints",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets.endpoints.endpoints nav-item-deepLinkId-undefined nav-item-id-endpoints",
             "href": "/tzo/s/sec/app/security/administration/endpoints",
             "id": "endpoints",
@@ -530,6 +592,7 @@ Array [
             "label": "Endpoints",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets.endpoints.policy nav-item-deepLinkId-undefined nav-item-id-policy",
             "href": "/tzo/s/sec/app/security/administration/policy",
             "id": "policy",
@@ -537,6 +600,7 @@ Array [
             "label": "Policies",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets.endpoints.trusted_apps nav-item-deepLinkId-undefined nav-item-id-trusted_apps",
             "href": "/tzo/s/sec/app/security/administration/trusted_apps",
             "id": "trusted_apps",
@@ -544,6 +608,7 @@ Array [
             "label": "Trusted applications",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets.endpoints.event_filters nav-item-deepLinkId-undefined nav-item-id-event_filters",
             "href": "/tzo/s/sec/app/security/administration/event_filters",
             "id": "event_filters",
@@ -551,6 +616,7 @@ Array [
             "label": "Event filters",
           },
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets.endpoints.blocklist nav-item-deepLinkId-undefined nav-item-id-blocklist",
             "href": "/tzo/s/sec/app/security/administration/blocklist",
             "id": "blocklist",
@@ -564,6 +630,7 @@ Array [
         "id": "node-2",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets.node-2.node-0 nav-item-id-node-0",
             "href": "Missing Href 😭",
             "id": "node-0",
@@ -576,9 +643,10 @@ Array [
     ],
   },
   Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_nav.securityGroup:machineLearning nav-item-id-securityGroup:machineLearning",
     "href": "/tzo/s/sec/app/ml/datavisualizer",
-    "iconType": "machineLearningApp",
+    "iconType": "broom",
     "id": "securityGroup:machineLearning",
     "label": "Machine Learning",
     "sections": Array [
@@ -586,6 +654,7 @@ Array [
         "id": "node-0",
         "items": Array [
           Object {
+            "badgeType": undefined,
             "data-test-subj": "nav-item nav-item-security_solution_nav.securityGroup:machineLearning.node-0.ml:dataVisualizer nav-item-deepLinkId-undefined nav-item-id-ml:dataVisualizer",
             "href": "/tzo/s/sec/app/ml/datavisualizer",
             "id": "ml:dataVisualizer",
