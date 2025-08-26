@@ -1,5 +1,5 @@
 # Define which plugins should be run or skipped in Scout CI pipeline
-ui_tests:
+tests:
   enabled:
     - apm
     - discover_enhanced

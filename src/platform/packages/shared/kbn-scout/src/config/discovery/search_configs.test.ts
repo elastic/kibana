@@ -86,7 +86,7 @@ describe('getScoutPlaywrightConfigs', () => {
 describe('validateWithScoutCiConfig', () => {
   let mockLog: ToolingLog;
   const mockScoutCiConfig = {
-    ui_tests: {
+    tests: {
       enabled: ['pluginA', 'pluginB'],
       disabled: ['pluginC'],
     },

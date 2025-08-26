@@ -66,6 +66,7 @@ fi
 
 results=()
 failedConfigs=()
+failedConfigPaths=()  # Store plain config paths for retry
 configWithoutTests=()
 
 FINAL_EXIT_CODE=0
@@ -76,6 +77,7 @@ while read -r config_path; do
     continue
   fi
 
+  config_failed=false
   for mode in $RUN_MODE_LIST; do
     echo "--- Running tests: $config_path ($mode)"
 
@@ -89,11 +91,17 @@ while read -r config_path; do
       configWithoutTests+=("$config_path ($mode)")
     elif [[ $EXIT_CODE -ne 0 ]]; then
       failedConfigs+=("$config_path ($mode) ❌")
+      config_failed=true
       FINAL_EXIT_CODE=10  # Ensure we exit with failure if any test fails with (exit code 10 to match FTR)
     else
       results+=("$config_path ($mode) ✅")
     fi
   done
+
+  # Add config path to failedConfigPaths only once per config, regardless of how many modes failed
+  if [[ "$config_failed" == true ]]; then
+    failedConfigPaths+=("$config_path")
+  fi
 done <<< "$configs"
 
 echo "--- Scout Test Run Complete: Summary"
@@ -119,7 +127,10 @@ fi
 if [[ ${#failedConfigs[@]} -gt 0 ]]; then
   echo "❌ Failed tests:"
   printf '%s\n' "${failedConfigs[@]}"
-  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
+
+  # Store plain config paths for retry (convert array to newline-separated string)
+  failed_configs_for_retry=$(printf '%s\n' "${failedConfigPaths[@]}")
+  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failed_configs_for_retry"
 fi
 
 echo "--- Upload Scout reporter events to AppEx QA's team cluster"
