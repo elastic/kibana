@@ -13,7 +13,7 @@ import { APP_UI_ID } from '../../../../common';
 const DESCRIPTION = 'Get information about an asset from the asset inventory (hosts, users, services, etc.)';
 
 const simpleSchema = z.object({
-  entityId: z.string().describe('Asset identifier to look up (host name, user name, entity ID, or ARN)'),
+  entityId: z.string().describe('Asset identifier to look up (host name, user name, service name, entity ID, or ARN)'),
 });
 
 export const ASSET_INVENTORY_TOOL: AssistantTool = {
@@ -45,6 +45,7 @@ export const ASSET_INVENTORY_TOOL: AssistantTool = {
                   { match: { 'host.name': entityId } },
                   { match: { 'entity.id': entityId } },
                   { match: { 'user.name': entityId } },
+                  { match: { 'service.name': entityId } },
                 ],
               },
             },
@@ -109,6 +110,18 @@ User Details:
 - User ID: ${entity.user?.id || 'Not available'}
 - Roles: ${Array.isArray(entity.user?.roles) ? entity.user.roles.join(', ') : entity.user?.roles || 'Not available'}
 - User Hash: ${entity.user?.hash || 'Not available'}`;
+          } else if (entityType === 'Service' || entity.service?.name) {
+            message += `
+
+Service Details:
+- Service Name: ${entity.service?.name || 'Not available'}
+- Service Address: ${entity.service?.address || 'Not available'}
+- Service Environment: ${entity.service?.environment || 'Not available'}
+- Service ID: ${entity.service?.id || 'Not available'}
+- Service Node: ${entity.service?.node || 'Not available'}
+- Service State: ${entity.service?.state || 'Not available'}
+- Service Type: ${entity.service?.type || 'Not available'}
+- Ephemeral ID: ${entity.service?.ephemeral_id || 'Not available'}`;
           }
 
           // Add summary based on entity type
@@ -128,6 +141,12 @@ The host ${entity.entity?.name || entityId} is a ${entityType} (${entitySubType}
 The user ${entity.entity?.name || entity.user?.name || entityId} is a ${entityType} (${entitySubType}) with ${
               entity.asset?.criticality || 'unassigned'
             } business criticality${entity.user?.domain ? ` in domain "${entity.user.domain}"` : ''}, associated with account "${entity.cloud?.account?.name || 'unknown'}", last seen on ${entity['@timestamp']}.`;
+          } else if (entityType === 'Service' || entity.service?.name) {
+            message += `
+
+The service ${entity.entity?.name || entity.service?.name || entityId} is a ${entityType} (${entitySubType}) with ${
+              entity.asset?.criticality || 'unassigned'
+            } business criticality, running in ${entity.service?.environment || 'unknown environment'} state: ${entity.service?.state || 'unknown'}, associated with account "${entity.cloud?.account?.name || 'unknown'}", last seen on ${entity['@timestamp']}.`;
           } else {
             message += `
 
