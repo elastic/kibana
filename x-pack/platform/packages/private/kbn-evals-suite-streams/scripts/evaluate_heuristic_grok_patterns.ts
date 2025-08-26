@@ -23,7 +23,6 @@
 
 import { Client } from '@elastic/elasticsearch';
 import fetch from 'node-fetch';
-import uniq from 'lodash/uniq';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
@@ -36,7 +35,6 @@ import {
   getGrokPattern,
   extractGrokPatternDangerouslySlow,
 } from '@kbn/grok-heuristics';
-import { getLogGroups } from '@kbn/streams-plugin/server/routes/internal/streams/processing/get_log_groups';
 
 const ES_URL = 'http://localhost:9200';
 const ES_USER = 'elastic';
@@ -271,29 +269,6 @@ export async function evaluateGrokSuggestions() {
   }, {});
 }
 
-export async function evaluateLogGrouping() {
-  const allDocs = await fetchDocs('logs.*', 10_000);
-  const groups = getLogGroups(
-    allDocs.map((doc) => `${get(doc, MESSAGE_FIELD)}|||${get(doc, 'attributes.filepath')}`),
-    1
-  );
-  const output = groups.map((g) => {
-    return {
-      pattern: g.pattern,
-      logs: g.logs.length,
-      streams: uniq(g.logs.map((log) => log.split('|||')[1])),
-    };
-  });
-  output.forEach((g) => {
-    console.log();
-    console.log(chalk.bold(`"${g.pattern}" (${g.logs} logs):`));
-    g.streams.forEach((stream) => {
-      console.log(`- ${chalk.green(stream)}`);
-    });
-  });
-  return output;
-}
-
 async function runGrokSuggestionsEvaluation() {
   await evaluateGrokSuggestions()
     .then((result) => {
@@ -306,20 +281,6 @@ async function runGrokSuggestionsEvaluation() {
     .catch(console.error);
 }
 
-async function runLogGroupingEvaluation() {
-  console.log();
-  console.log('Starting evaluation of Log Grouping...');
-  await evaluateLogGrouping()
-    .then((result) => {
-      const file = `grouping_results.${Date.now()}.json`;
-      console.log();
-      console.log(`Evaluation complete. Writing results to ${file}`);
-      return writeFile(join(__dirname, file), JSON.stringify(result, null, 2));
-    })
-    .catch(console.error);
-}
-
 yargs(process.argv.slice(2))
   .command('*', 'Evaluate AI suggestions for Grok patterns', runGrokSuggestionsEvaluation)
-  .command('grouping', 'Evaluate log grouping patterns', runLogGroupingEvaluation)
   .parse();

@@ -10,8 +10,8 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
 import type { InferenceClient } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
-import type { StreamsClient } from '../../../../../lib/streams/client';
-import { getOtelFieldName } from '../convert_ecs_fields_to_otel';
+import type { StreamsClient } from '../../../../lib/streams/client';
+import { getOtelFieldName } from './convert_ecs_fields_to_otel';
 
 export interface ProcessingGrokSuggestionsParams {
   path: {

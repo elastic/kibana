@@ -18,15 +18,14 @@ import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
 import type { ProcessingSimulationParams } from './simulation_handler';
 import { simulateProcessing } from './simulation_handler';
-import { handleProcessingSuggestion } from './suggestions_handler';
 import {
   handleProcessingDateSuggestions,
   processingDateSuggestionsSchema,
-} from './suggestions/date_suggestions_handler';
+} from './date_suggestions_handler';
 import {
   handleProcessingGrokSuggestions,
   processingGrokSuggestionsSchema,
-} from './suggestions/grok_suggestions_handler';
+} from './grok_suggestions_handler';
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
@@ -65,47 +64,6 @@ export interface ProcessingSuggestionBody {
   connectorId: string;
   samples: FlattenRecord[];
 }
-
-const processingSuggestionSchema = z.object({
-  field: z.string(),
-  connectorId: z.string(),
-  samples: z.array(flattenRecord),
-});
-
-const suggestionsParamsSchema = z.object({
-  path: z.object({ name: z.string() }),
-  body: processingSuggestionSchema,
-});
-
-export const processingSuggestionRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/processing/_suggestions',
-  options: {
-    access: 'internal',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: suggestionsParamsSchema,
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
-    if (!isAvailableForTier) {
-      throw new SecurityError('Cannot access API on the current pricing tier');
-    }
-
-    const { inferenceClient, scopedClusterClient, streamsClient } = await getScopedClients({
-      request,
-    });
-    return handleProcessingSuggestion(
-      params.path.name,
-      params.body,
-      inferenceClient,
-      scopedClusterClient,
-      streamsClient
-    );
-  },
-});
 
 type GrokSuggestionResponse = Observable<
   ServerSentEventBase<
@@ -193,7 +151,6 @@ export const processingDateSuggestionsRoute = createServerRoute({
 
 export const internalProcessingRoutes = {
   ...simulateProcessorRoute,
-  ...processingSuggestionRoute,
   ...processingGrokSuggestionRoute,
   ...processingDateSuggestionsRoute,
 };

@@ -7,14 +7,6 @@
 
 import { groupBy, mapValues, orderBy } from 'lodash';
 
-// function getBasicPattern(value: string) {
-//   return value
-//     .replace(/\s+/g, ' ')
-//     .replace(/\d+/g, '0')
-//     .replace(/[A-Za-z][\w\-/\\]*/g, 'a')
-//     .replace(/a([ /\.]a)+/g, 'a');
-// }
-
 function evalPattern(sample: string) {
   return sample
     .replace(/[ \t\n]+/g, ' ')
