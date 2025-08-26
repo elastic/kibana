@@ -38,6 +38,7 @@ export const IM_DOES_NOT_MATCH_TOUR_TITLE = i18n.translate(
 export const IM_DOES_NOT_MATCH_TOUR_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.imDoesNotMatchTourDescription',
   {
-    defaultMessage: "Now, you can find events that don't match values in your indicator index.",
+    defaultMessage:
+      "Now you can refine your indicator match logic to ignore event values that don't match indicator values.",
   }
 );
