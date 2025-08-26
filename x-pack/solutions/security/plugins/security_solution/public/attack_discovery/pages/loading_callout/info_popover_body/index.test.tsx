@@ -12,7 +12,7 @@ import { InfoPopoverBody } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { AVERAGE_TIME } from '../countdown/translations';
 
-const averageSuccessfulDurationNanoseconds = 191000000000; // 191 seconds
+const averageSuccessfulDurationNanoseconds = 191_000_000_000; // 191 seconds
 
 describe('InfoPopoverBody', () => {
   beforeEach(() => {
