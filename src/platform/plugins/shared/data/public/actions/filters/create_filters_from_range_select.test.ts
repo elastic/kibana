@@ -14,7 +14,7 @@ import {
   type RangeSelectDataContext,
 } from './create_filters_from_range_select';
 
-import { dataViewPluginMocks } from '../../../../data_views/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
