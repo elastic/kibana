@@ -187,15 +187,16 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
     const newUsersBatch: Batch = { uploaded: [], existingUsers: batch.existingUsers };
     const existingUsersBatch: Batch = { uploaded: [], existingUsers: batch.existingUsers };
 
+    const { left: errors, right: usrs } = A.separate(batch.uploaded);
+    const { left: existingUsers, right: newUsers } = A.partition(
+      ({ username }) => batch.existingUsers[username]
+    )(usrs);
 
-    const { left: errors, right: usrs } = A.separate(batch.uploaded)
-    const { left: existingUsers, right: newUsers } = A.partition(({ username }) => batch.existingUsers[username])(usrs)
-    
-    return { 
+    return {
       errors, // probably good to preserve the errors too
       existingUsersBatch: { uploaded: existingUsers },
-      newUsersBatch: { uploaded: newUsers }
-    }
+      newUsersBatch: { uploaded: newUsers },
+    };
 
     return { newUsersBatch, existingUsersBatch };
   };
