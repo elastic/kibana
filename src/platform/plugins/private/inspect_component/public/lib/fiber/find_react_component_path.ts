@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType } from 'react';
 import type { ReactFiberNode } from './types';
 import { COMPONENT_PATH_IGNORED_TYPES, EUI_MAIN_COMPONENTS } from '../constants';
 import { getFiberType } from './get_fiber_type';
@@ -25,8 +24,119 @@ interface FindReactComponentPathResult {
 
 const isEui = (input: string) => input.startsWith('Eui');
 
-const isHtmlElement = (input: ComponentType | string) =>
-  typeof input === 'string' && /^[a-z]+$/.test(input);
+const HTML_TAGS = [
+  'a',
+  'abbr',
+  'address',
+  'area',
+  'article',
+  'aside',
+  'audio',
+  'b',
+  'base',
+  'bdi',
+  'bdo',
+  'blockquote',
+  'body',
+  'br',
+  'button',
+  'canvas',
+  'caption',
+  'cite',
+  'code',
+  'col',
+  'colgroup',
+  'data',
+  'datalist',
+  'dd',
+  'del',
+  'details',
+  'dfn',
+  'dialog',
+  'div',
+  'dl',
+  'dt',
+  'em',
+  'embed',
+  'fieldset',
+  'figcaption',
+  'figure',
+  'footer',
+  'form',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'head',
+  'header',
+  'hr',
+  'html',
+  'i',
+  'iframe',
+  'img',
+  'input',
+  'ins',
+  'kbd',
+  'label',
+  'legend',
+  'li',
+  'link',
+  'main',
+  'map',
+  'mark',
+  'meta',
+  'meter',
+  'nav',
+  'noscript',
+  'object',
+  'ol',
+  'optgroup',
+  'option',
+  'output',
+  'p',
+  'param',
+  'picture',
+  'pre',
+  'progress',
+  'q',
+  'rp',
+  'rt',
+  'ruby',
+  's',
+  'samp',
+  'script',
+  'section',
+  'select',
+  'small',
+  'source',
+  'span',
+  'strong',
+  'style',
+  'sub',
+  'summary',
+  'sup',
+  'table',
+  'tbody',
+  'td',
+  'template',
+  'textarea',
+  'tfoot',
+  'th',
+  'thead',
+  'time',
+  'title',
+  'tr',
+  'track',
+  'u',
+  'ul',
+  'var',
+  'video',
+  'wbr',
+];
+
+const isHtmlTag = (tag: string) => HTML_TAGS.includes(tag.toLowerCase());
 
 const isIgnored = (input: string) => COMPONENT_PATH_IGNORED_TYPES.some((t) => input.includes(t));
 
@@ -54,7 +164,7 @@ export const findReactComponentPath = (
           if (!isIgnored(type)) {
             path.push(type);
           }
-          if (!isHtmlElement(type) && !isEui(type) && !isIgnored(type)) {
+          if (!isHtmlTag(type) && !isEui(type) && !isIgnored(type)) {
             firstUserDefinedComponent = type;
           }
         }
@@ -80,11 +190,12 @@ export const findReactComponentPath = (
 
   const filteredPath = reversedPath.filter((component, index) => {
     const isEuiMainComponent = EUI_MAIN_COMPONENTS.includes(component);
-    if (isEuiMainComponent) {
+    // Spacers only make sense if they are the main component
+    if (isEuiMainComponent && component !== 'EuiSpacer') {
       return true;
-    } else if (isHtmlElement(component) || isEui(component)) {
+    } else if (isHtmlTag(component) || isEui(component)) {
       // Keep if it's the first or last component in the path
-      // TODO: Handle cases where the last component was an EUI component that can't have children - don't return HTML elements after that
+      // TODO: Handle cases where the last component was an EUI component that can't have children or their children are an internal implementation (e.g EuiButton -> Button) - don't return HTML elements after that.
       return index === 0 || index === reversedPath.length - 1;
     }
   });

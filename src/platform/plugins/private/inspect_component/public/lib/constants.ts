@@ -24,7 +24,6 @@ export const COMPONENT_PATH_IGNORED_TYPES = [
 
 export const EUI_MAIN_COMPONENTS = [
   'EuiSpacer',
-  'EuiTextColor',
   'EuiTextAlign',
   'EuiTitle',
   'EuiText',
@@ -166,6 +165,7 @@ export const EUI_MAIN_COMPONENTS = [
   'EuiAccordion',
   'EuiFlexGroup',
   'EuiFlexItem',
+  'EuiTitle',
 ];
 
 export const EUI_COMPONENTS_DOCS_MAP = new Map<string, string>([
