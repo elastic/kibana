@@ -247,18 +247,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await retry.try(async () => {
           const fileInput = await find.byCssSelector('input[type="file"]');
 
-          await browser.execute(`
-      document.querySelector('input[type="file"]').value = ''
-    `);
-
           await fileInput.type(tempFilePath);
-
-          const value = await fileInput.getAttribute('value');
-          if (!value || !value.includes('bulk_import.ndjson')) {
-            throw new Error(`File not bound yet: ${value}`);
-          } else {
-            log.debug('File input bound correctly:', value);
-          }
         });
 
         return tempFilePath;
@@ -293,13 +282,20 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         expect(initialCount).to.eql(0);
 
         await openBulkImportFlyout();
-
         const entries = await prepareBulkImportData();
 
-        await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
+        await retry.try(async () => {
+          await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
+          const fileInput = await find.byCssSelector('input[type="file"]');
+          const value = await fileInput.getAttribute('value');
+          if (!value || !value.includes('bulk_import.ndjson')) {
+            throw new Error(`File not bound yet: ${value}`);
+          } else {
+            log.debug('File input bound correctly:', value);
+          }
+        });
 
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
-
         const toastText = await retry.try(async () => {
           const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
           return await toast.getVisibleText();
