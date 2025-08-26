@@ -78,7 +78,22 @@ const meta = {
 export default meta;
 type Story = StoryObj<Args>;
 
-export const Basic: Story = {
+export const Default: Story = {
+  args: {
+    id: 'custom-table-story',
+    hit: APMSpanFixture,
+    containerWidth: 800,
+    rows,
+    isEsqlMode: false,
+    filter: () => {},
+    onAddColumn: () => {},
+    onRemoveColumn: () => {},
+    columns: [GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE],
+    onFindSearchTermMatch: (_row, _term) => null,
+  },
+};
+
+export const CustomRenderers: Story = {
   args: {
     id: 'custom-table-story',
     hit: APMSpanFixture,
