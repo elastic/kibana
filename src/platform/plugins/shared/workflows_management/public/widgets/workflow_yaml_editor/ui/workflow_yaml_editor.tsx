@@ -290,7 +290,6 @@ export const WorkflowYAMLEditor = ({
     <div css={styles.container}>
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} />
       <div
-        grow={false}
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
       >
         {hasChanges ? (
