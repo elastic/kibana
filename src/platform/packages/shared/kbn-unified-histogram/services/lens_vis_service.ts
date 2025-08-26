@@ -240,7 +240,7 @@ export class LensVisService {
 
     if (queryParams.isPlainRecord) {
       if (isOfAggregateQueryType(queryParams.query)) {
-        if (getCategorizeField(queryParams.query.esql).length > 0) {
+        if (getCategorizeField(queryParams.query.esql).length) {
           // query uses categorize, override the chart to be a simple doc count histogram
           const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
             queryParams: {
