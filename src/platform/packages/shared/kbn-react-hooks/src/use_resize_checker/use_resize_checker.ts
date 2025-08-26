@@ -15,38 +15,38 @@ export const useResizeChecker = () => {
   const resizeChecker = useRef<ResizeChecker | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const setupResizeChecker = useCallback((
-    editor: monaco.editor.IStandaloneCodeEditor,
-    options: { flyoutMode?: boolean } = {}
-  ) => {
-    if (resizeChecker.current) {
-      resizeChecker.current.destroy();
-    }
-
-    let targetElement = containerRef.current;
-    if (!targetElement) return;
-
-    if (options.flyoutMode) {
-      const flyoutElement = targetElement.closest('.euiFlyout') as HTMLDivElement;
-      if (flyoutElement) {
-        targetElement = flyoutElement;
+  const setupResizeChecker = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor, options: { flyoutMode?: boolean } = {}) => {
+      if (resizeChecker.current) {
+        resizeChecker.current.destroy();
       }
-    }
 
-    resizeChecker.current = new ResizeChecker(targetElement);
-    resizeChecker.current.on('resize', () => {
-      if (options.flyoutMode && containerRef.current) {
-        const flyoutRect = targetElement.getBoundingClientRect();
-        const availableWidth = flyoutRect.width - 120;
-        containerRef.current.style.width = `${availableWidth}px`;
-        containerRef.current.style.maxWidth = `${availableWidth}px`;
-        const containerRect = containerRef.current.getBoundingClientRect();
-        editor.layout({ width: availableWidth, height: containerRect.height });
-      } else {
-        editor.layout();
+      let targetElement = containerRef.current;
+      if (!targetElement) return;
+
+      if (options.flyoutMode) {
+        const flyoutElement = targetElement.closest('.euiFlyout') as HTMLDivElement;
+        if (flyoutElement) {
+          targetElement = flyoutElement;
+        }
       }
-    });
-  }, []);
+
+      resizeChecker.current = new ResizeChecker(targetElement);
+      resizeChecker.current.on('resize', () => {
+        if (options.flyoutMode && containerRef.current) {
+          const flyoutRect = targetElement.getBoundingClientRect();
+          const availableWidth = flyoutRect.width - 120;
+          containerRef.current.style.width = `${availableWidth}px`;
+          containerRef.current.style.maxWidth = `${availableWidth}px`;
+          const containerRect = containerRef.current.getBoundingClientRect();
+          editor.layout({ width: availableWidth, height: containerRect.height });
+        } else {
+          editor.layout();
+        }
+      });
+    },
+    []
+  );
 
   const destroyResizeChecker = useCallback(() => {
     if (resizeChecker.current) {

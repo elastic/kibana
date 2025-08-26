@@ -19,9 +19,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldDefinitionConfigAdvancedParameters } from '@kbn/streams-schema';
 import { isSchema, recursiveRecord } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
+import { useResizeChecker } from '@kbn/react-hooks';
 import type { SchemaField } from '../types';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useResizeChecker } from '@kbn/react-hooks';
 
 const label = i18n.translate('xpack.streams.advancedFieldMappingOptions.label', {
   defaultMessage: 'Advanced field mapping parameters',

@@ -33,8 +33,8 @@ import {
   isNeverCondition,
 } from '@kbn/streamlang';
 import { isPlainObject } from 'lodash';
-import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 import { useResizeChecker } from '@kbn/react-hooks';
+import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 
 export type RoutingConditionEditorProps = ConditionEditorProps;
 

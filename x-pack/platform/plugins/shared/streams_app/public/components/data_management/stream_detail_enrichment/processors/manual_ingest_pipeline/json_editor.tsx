@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import type { ElasticsearchProcessorType } from '@kbn/streams-schema';
 import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../../hooks/use_kibana';
 import { useResizeChecker } from '@kbn/react-hooks';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import type { ProcessorFormState } from '../../types';
 import { deserializeJson, serializeXJson } from '../../helpers';
 

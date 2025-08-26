@@ -11,8 +11,8 @@ import { EuiFormRow, EuiLink } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../../hooks/use_kibana';
 import { useResizeChecker } from '@kbn/react-hooks';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import type { ProcessorFormState } from '../../types';
 
 export const DissectPatternDefinition = () => {
