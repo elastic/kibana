@@ -43,3 +43,20 @@ export interface ReactFiberNode {
   /** Parent Fiber node. */
   return?: ReactFiberNode | null;
 }
+
+export interface ReactFiberNodeWithDomElement extends ReactFiberNode {
+  /** Metadata about the source file where this Fiber was created. */
+  _debugSource: DebugSource;
+  /** DOM element with the fiber node. */
+  domElement: HTMLElement;
+}
+
+/**
+ * The name of the top-level React component where the path starts and the associated DOM element.
+ */
+export interface SourceComponent {
+  /** The component name. */
+  type: string;
+  /** The DOM element associated with the source component. */
+  domElement: HTMLElement | null;
+}

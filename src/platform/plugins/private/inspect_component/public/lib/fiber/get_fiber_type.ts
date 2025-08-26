@@ -11,18 +11,18 @@ import type { ReactFiberNode } from './types';
 
 /**
  * Get the display name of the fiber node.
- * @param {ReactFiberNode} fiber The React Fiber node.
+ * @param {ReactFiberNode} fiberNode The React Fiber node.
  * @return {string | null} The display name of the fiber node, or null if it cannot be determined.
  */
-export const getFiberType = (fiber: ReactFiberNode): string | null => {
-  if (typeof fiber.type === 'string') {
-    return fiber.type;
-  } else if (typeof fiber.type?.name === 'string') {
-    return fiber.type?.name;
-  } else if (typeof fiber.type?.displayName === 'string') {
-    return fiber.type?.displayName;
-  } else if (typeof fiber.elementType === 'string') {
-    return fiber.elementType;
+export const getFiberType = (fiberNode: ReactFiberNode): string | null => {
+  if (typeof fiberNode.type === 'string') {
+    return fiberNode.type;
+  } else if (typeof fiberNode.type?.name === 'string') {
+    return fiberNode.type?.name;
+  } else if (typeof fiberNode.type?.displayName === 'string') {
+    return fiberNode.type?.displayName;
+  } else if (typeof fiberNode.elementType === 'string') {
+    return fiberNode.elementType;
   }
 
   return null;

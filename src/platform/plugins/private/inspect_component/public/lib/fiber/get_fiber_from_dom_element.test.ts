@@ -58,20 +58,4 @@ describe('getFiberFromDomElement', () => {
 
     expect(result).toBe(mockFiberNode);
   });
-
-  it('should work with SVG elements', () => {
-    const mockFiberNode = { tag: 5, type: 'circle' } as unknown as ReactFiberNode;
-    const mockElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-
-    const fiberKey = '__reactFiber$abcdef';
-
-    Object.defineProperty(mockElement, fiberKey, {
-      value: mockFiberNode,
-      enumerable: true,
-    });
-
-    const result = getFiberFromDomElement(mockElement);
-
-    expect(result).toBe(mockFiberNode);
-  });
 });

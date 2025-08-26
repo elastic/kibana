@@ -25,8 +25,8 @@ describe('getEuiComponentDocsData', () => {
     jest.clearAllMocks();
   });
 
-  it('should return null when componentPath is undefined', () => {
-    expect(getEuiComponentDocsData(undefined)).toBeNull();
+  it('should return null when componentPath is null', () => {
+    expect(getEuiComponentDocsData(null)).toBeNull();
   });
 
   it('should return null when componentPath is empty string', () => {

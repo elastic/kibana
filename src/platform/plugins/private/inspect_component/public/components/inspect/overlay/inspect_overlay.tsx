@@ -13,10 +13,12 @@ import { css } from '@emotion/css';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { ReactFiberNodeWithDomElement, SourceComponent } from '../../../lib/fiber/types';
+import { findFirstFiberWithDebugSource } from '../../../lib/fiber/find_first_fiber_with_debug_source';
 import { handleEventPropagation } from '../../../lib/dom/handle_event_propagation';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
-import { findReactComponentPath } from '../../../lib/fiber/find_react_component_path';
+import { findReactComponentPathAndSourceComponent } from '../../../lib/fiber/find_react_component_path_and_source_component';
 import { InspectFlyout, flyoutOptions } from '../flyout/inspect_flyout';
 import { INSPECT_OVERLAY_ID } from '../../../lib/constants';
 import { InspectHighlight } from './inspect_highlight';
@@ -37,8 +39,10 @@ interface Props {
 export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties>({});
-  const [componentPath, setComponentPath] = useState<string | undefined>();
-  const [sourceComponent, setSourceComponent] = useState<string | undefined>();
+  const [componentPath, setComponentPath] = useState<string | null>(null);
+  const [sourceComponent, setSourceComponent] = useState<SourceComponent | null>(null);
+  const [targetFiberNodeWithDomElement, setTargetFiberNodeWithDomElement] =
+    useState<ReactFiberNodeWithDomElement | null>(null);
 
   /**
    * pointer-events: none is required for {@link stopEventsOnInspectedElement} to work properly.
@@ -63,13 +67,19 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       }
 
       const { top, left, width, height } = target.getBoundingClientRect();
+      const fiberNode = findFirstFiberWithDebugSource(target);
 
-      const pathInfo = findReactComponentPath(target as HTMLElement);
+      if (!fiberNode) {
+        return;
+      }
 
-      setSourceComponent(pathInfo?.sourceComponent);
+      setTargetFiberNodeWithDomElement(fiberNode);
+
+      const pathInfo = findReactComponentPathAndSourceComponent(fiberNode);
 
       if (pathInfo?.path && pathInfo.path !== componentPath) {
         setComponentPath(pathInfo.path);
+        setSourceComponent(pathInfo.sourceComponent);
       }
 
       setHighlightPosition({
@@ -93,6 +103,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       const componentData = await getInspectedElementData({
         target,
         httpService: core.http,
+        targetFiberNodeWithDomElement,
         componentPath,
         sourceComponent,
       });
@@ -117,7 +128,14 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       setFlyoutOverlayRef(flyout);
       setIsInspecting(false);
     },
-    [core, componentPath, sourceComponent, setIsInspecting, setFlyoutOverlayRef]
+    [
+      core,
+      componentPath,
+      sourceComponent,
+      targetFiberNodeWithDomElement,
+      setIsInspecting,
+      setFlyoutOverlayRef,
+    ]
   );
 
   useEffect(() => {

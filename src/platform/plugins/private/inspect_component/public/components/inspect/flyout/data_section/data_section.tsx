@@ -17,16 +17,15 @@ import { CodeownersList } from './codeowners_list';
 
 interface Props {
   componentData: ComponentData;
-  target: HTMLElement | SVGElement;
 }
 
-export const DataSection = ({ componentData, target }: Props) => {
+export const DataSection = ({ componentData }: Props) => {
   const { codeowners, euiData, iconType, sourceComponent } = componentData;
 
   return (
     <>
-      <PreviewImage targetDomElement={target} />
-      <ComponentTitle sourceComponent={sourceComponent} />
+      <PreviewImage domElement={sourceComponent.domElement} />
+      <ComponentTitle sourceComponentType={sourceComponent.type} />
       <CodeownersList codeowners={codeowners} />
       <IconType iconType={iconType} />
       <EuiDocsLink euiData={euiData} />

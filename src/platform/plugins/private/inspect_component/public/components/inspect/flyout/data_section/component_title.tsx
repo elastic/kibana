@@ -13,10 +13,10 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
-  sourceComponent?: string;
+  sourceComponentType: string | null;
 }
 
-export const ComponentTitle = ({ sourceComponent }: Props) => {
+export const ComponentTitle = ({ sourceComponentType }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const titleCss = css`
@@ -28,9 +28,9 @@ export const ComponentTitle = ({ sourceComponent }: Props) => {
     <>
       <EuiTitle size="s">
         <h3>
-          {sourceComponent ? (
+          {sourceComponentType ? (
             <EuiCode transparentBackground css={titleCss}>
-              {sourceComponent}
+              {sourceComponentType}
             </EuiCode>
           ) : (
             <FormattedMessage

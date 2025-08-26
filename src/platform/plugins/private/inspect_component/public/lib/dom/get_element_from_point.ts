@@ -13,9 +13,9 @@ import { INSPECT_OVERLAY_ID } from '../constants';
  * Get the topmost DOM element at the given pointer event's coordinates, ignoring inspect overlay and non-inspectable
  * elements.
  * @param {MouseEvent} event The mouse event containing the coordinates.
- * @return {HTMLElement | SVGElement| undefined} The topmost inspectable DOM element at the event's coordinates, or undefined if none found.
+ * @return {HTMLElement | null} The topmost inspectable DOM element at the event's coordinates, or undefined if none found.
  */
-export const getElementFromPoint = (event: MouseEvent): HTMLElement | SVGElement | undefined => {
+export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
   const elements = document.elementsFromPoint(event.clientX, event.clientY);
 
   for (const el of elements) {
@@ -27,8 +27,8 @@ export const getElementFromPoint = (event: MouseEvent): HTMLElement | SVGElement
 
     if (isNotInspectable || isOverlay || isPath) continue;
 
-    return el;
+    return isSvg ? el.parentElement : el;
   }
 
-  return undefined;
+  return null;
 };

@@ -14,10 +14,8 @@ import { DataSection } from './data_section';
 import { mockComponentData } from '../../../../__mocks__/mocks';
 
 describe('DataSection', () => {
-  const mockTargetDomElement = document.createElement('div');
-
   it('should render correctly', () => {
-    renderWithI18n(<DataSection componentData={mockComponentData} target={mockTargetDomElement} />);
+    renderWithI18n(<DataSection componentData={mockComponentData} />);
 
     const title = screen.getByText('MyComponent');
     expect(title).toBeInTheDocument();

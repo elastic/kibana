@@ -21,8 +21,8 @@ describe('IconType', () => {
     expect(screen.getByText('logoElastic')).toBeInTheDocument();
   });
 
-  it('should render "N/A" when iconType is not provided', () => {
-    renderWithI18n(<IconType iconType={undefined} />);
+  it('should render "N/A" when iconType is null', () => {
+    renderWithI18n(<IconType iconType={null} />);
 
     expect(screen.getByText('N/A')).toBeInTheDocument();
   });

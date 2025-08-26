@@ -18,7 +18,11 @@ interface Props {
 }
 
 export const ActionsSection = ({ componentData }: Props) => {
-  const { columnNumber, fileName, lineNumber, relativePath, baseFileName } = componentData;
+  const {
+    _debugSource: { columnNumber, fileName, lineNumber },
+    relativePath,
+    baseFileName,
+  } = componentData;
 
   return (
     <>

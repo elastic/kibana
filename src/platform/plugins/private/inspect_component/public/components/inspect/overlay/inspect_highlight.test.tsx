@@ -35,6 +35,7 @@ describe('InspectHighlight', () => {
           height: 50,
           transform: 'translate(20px,10px)',
         }}
+        path={null}
       />
     );
 

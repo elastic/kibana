@@ -24,7 +24,7 @@ import { InspectHighlight } from '../overlay/inspect_highlight';
 
 interface Props {
   componentData: ComponentData;
-  target: HTMLElement | SVGElement;
+  target: HTMLElement;
 }
 
 export const flyoutOptions: OverlayFlyoutOpenOptions = {
@@ -74,13 +74,16 @@ export const InspectFlyout = ({ componentData, target }: Props) => {
       <EuiWindowEvent event="resize" handler={updateHighlightPosition} />
       <InspectFlyoutHeader />
       <EuiFlyoutBody>
-        <DataSection componentData={componentData} target={target} />
+        <DataSection componentData={componentData} />
         <EuiSpacer size="xxl" />
         <ActionsSection componentData={componentData} />
       </EuiFlyoutBody>
       {highlightPosition && (
         <EuiPortal>
-          <InspectHighlight currentPosition={highlightPosition} />
+          <InspectHighlight
+            currentPosition={highlightPosition}
+            path={componentData.componentPath}
+          />
         </EuiPortal>
       )}
     </>

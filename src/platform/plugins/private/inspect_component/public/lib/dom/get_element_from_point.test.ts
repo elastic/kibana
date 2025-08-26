@@ -59,17 +59,19 @@ describe('getElementFromPoint', () => {
     expect(result).toBe(mockValidElement);
   });
 
-  it('should return SVG elements that are not paths', () => {
-    const mockSvgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  it('should return parents of SVG elements that are not paths', () => {
+    const mockSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const mockParentElement = document.createElement('div');
+    mockParentElement.appendChild(mockSvg);
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([mockSvgCircle]);
+    document.elementsFromPoint = jest.fn().mockReturnValue([mockSvg]);
 
     const result = getElementFromPoint(mockEvent);
 
-    expect(result).toBe(mockSvgCircle);
+    expect(result).toBe(mockParentElement);
   });
 
-  it('should return undefined when no valid elements are found', () => {
+  it('should return null when no valid elements are found', () => {
     const mockOverlayElement = document.createElement('div');
     mockOverlayElement.id = INSPECT_OVERLAY_ID;
     const mockSvgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -78,14 +80,14 @@ describe('getElementFromPoint', () => {
 
     const result = getElementFromPoint(mockEvent);
 
-    expect(result).toBeUndefined();
+    expect(result).toBeNull();
   });
 
-  it('should return undefined when elements array is empty', () => {
+  it('should return null when elements array is empty', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([]);
 
     const result = getElementFromPoint(mockEvent);
 
-    expect(result).toBeUndefined();
+    expect(result).toBeNull();
   });
 });

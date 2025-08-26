@@ -23,10 +23,10 @@ export interface EuiData {
 /**
  * Get EUI component documentation link and component name from a given component path.
  * If multiple EUI components are found in the path, the first one with a known documentation link is returned.
- * @param {string | undefined} componentPath The component path string.
+ * @param {string | null} componentPath The component path string.
  * @return {EuiData | null} An object containing the component name and documentation link, or null if no EUI component is found.
  */
-export const getEuiComponentDocsData = (componentPath?: string): EuiData | null => {
+export const getEuiComponentDocsData = (componentPath: string | null): EuiData | null => {
   if (!componentPath) return null;
 
   const toUrl = (name: string): string | null => {

@@ -13,11 +13,6 @@ import { EuiImage, EuiSkeletonRectangle, EuiCard, EuiSpacer } from '@elastic/eui
 import domtoimage from 'dom-to-image-more';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { findDomElementForUserComponent } from '../../../../lib/fiber/find_dom_element_for_user_component';
-
-interface Props {
-  targetDomElement?: HTMLElement | SVGElement;
-}
 
 const PREVIEW_ALT_TEXT = i18n.translate(
   'kbnInspectComponent.inspectFlyout.dataSection.previewImageAltText',
@@ -33,10 +28,14 @@ const PREVIEW_BADGE_LABEL = i18n.translate(
   }
 );
 
+interface Props {
+  domElement: HTMLElement | null;
+}
+
 /**
  * The PreviewImage component is responsible for rendering a preview of a user-creted component associated with target DOM element.
  */
-export const PreviewImage = ({ targetDomElement }: Props) => {
+export const PreviewImage = ({ domElement }: Props) => {
   const [screenshot, setScreenshot] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -61,30 +60,8 @@ export const PreviewImage = ({ targetDomElement }: Props) => {
   useEffect(() => {
     const generateScreenshot = async (element: HTMLElement) => {
       try {
-        if (element instanceof SVGElement) {
-          const svgData = new XMLSerializer().serializeToString(element);
-          const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-          const url = URL.createObjectURL(svgBlob);
-
-          const img = new Image();
-          await new Promise<void>((resolve, reject) => {
-            img.onload = () => resolve();
-            img.onerror = reject;
-            img.src = url;
-          });
-
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width || CARD_WIDTH;
-          canvas.height = img.height || CARD_HEIGHT;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0);
-
-          setScreenshot(canvas.toDataURL('image/png'));
-          URL.revokeObjectURL(url);
-        } else {
-          const canvas = await domtoimage.toCanvas(element);
-          setScreenshot(canvas.toDataURL('image/png'));
-        }
+        const canvas = await domtoimage.toCanvas(element);
+        setScreenshot(canvas.toDataURL('image/png'));
       } catch (err) {
         return;
       } finally {
@@ -92,17 +69,12 @@ export const PreviewImage = ({ targetDomElement }: Props) => {
       }
     };
 
-    if (targetDomElement) {
-      const domElement = findDomElementForUserComponent(targetDomElement);
-      if (!domElement) {
-        setIsLoading(false);
-        return;
-      }
+    if (domElement) {
       generateScreenshot(domElement);
     }
-  }, [targetDomElement]);
+  }, [domElement]);
 
-  if (!targetDomElement) {
+  if (!domElement) {
     return null;
   }
   return (

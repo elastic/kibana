@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { findDebugSource } from './find_debug_source';
+import { findFirstFiberWithDebugSource } from './find_first_fiber_with_debug_source';
 import { getFiberFromDomElement } from './get_fiber_from_dom_element';
 import type { DebugSource, ReactFiberNode } from './types';
 
 jest.mock('./get_fiber_from_dom_element');
 
-describe('findDebugSource', () => {
+describe('findFirstFiberWithDebugSource', () => {
   let mockElement: HTMLElement;
   let mockFiber: ReactFiberNode;
   let mockDebugSource: DebugSource;
@@ -29,22 +29,25 @@ describe('findDebugSource', () => {
     (getFiberFromDomElement as jest.Mock).mockReset();
   });
 
-  it('should return undefined when no fiber is found', () => {
+  it('should return null when no fiber is found', () => {
     (getFiberFromDomElement as jest.Mock).mockReturnValue(undefined);
 
-    const result = findDebugSource(mockElement);
+    const result = findFirstFiberWithDebugSource(mockElement);
 
-    expect(result).toBeUndefined();
+    expect(result).toBeNull();
     expect(getFiberFromDomElement).toHaveBeenCalledWith(mockElement);
   });
 
-  it('should return debug source from the direct fiber', () => {
+  it('should return fiber with debug source and dom element from the direct fiber', () => {
     mockFiber._debugSource = mockDebugSource;
     (getFiberFromDomElement as jest.Mock).mockReturnValue(mockFiber);
 
-    const result = findDebugSource(mockElement);
+    const result = findFirstFiberWithDebugSource(mockElement);
 
-    expect(result).toBe(mockDebugSource);
+    expect(result).toEqual({
+      ...mockFiber,
+      domElement: mockElement,
+    });
   });
 
   it('should traverse up the fiber owner chain to find debug source', () => {
@@ -56,9 +59,12 @@ describe('findDebugSource', () => {
     mockFiber._debugOwner = ownerFiber;
     (getFiberFromDomElement as jest.Mock).mockReturnValue(mockFiber);
 
-    const result = findDebugSource(mockElement);
+    const result = findFirstFiberWithDebugSource(mockElement);
 
-    expect(result).toBe(mockDebugSource);
+    expect(result).toEqual({
+      ...ownerFiber,
+      domElement: mockElement,
+    });
   });
 
   it('should traverse up the DOM tree if no fiber or debug source is found', () => {
@@ -85,15 +91,18 @@ describe('findDebugSource', () => {
       .mockReturnValueOnce(undefined)
       .mockReturnValueOnce(grandParentFiber);
 
-    const result = findDebugSource(mockElement);
+    const result = findFirstFiberWithDebugSource(mockElement);
 
-    expect(result).toBe(mockDebugSource);
+    expect(result).toEqual({
+      ...grandParentFiber,
+      domElement: grandParentElement,
+    });
     expect(getFiberFromDomElement).toHaveBeenNthCalledWith(1, mockElement);
     expect(getFiberFromDomElement).toHaveBeenNthCalledWith(2, parentElement);
     expect(getFiberFromDomElement).toHaveBeenNthCalledWith(3, grandParentElement);
   });
 
-  it('should return undefined when traversing the DOM tree finds no debug source', () => {
+  it('should return null when traversing the DOM tree finds no debug source', () => {
     const parentElement = document.createElement('div');
     Object.defineProperty(mockElement, 'parentElement', {
       value: parentElement,
@@ -108,8 +117,8 @@ describe('findDebugSource', () => {
       .mockReturnValueOnce(undefined)
       .mockReturnValueOnce(undefined);
 
-    const result = findDebugSource(mockElement);
+    const result = findFirstFiberWithDebugSource(mockElement);
 
-    expect(result).toBeUndefined();
+    expect(result).toBeNull();
   });
 });

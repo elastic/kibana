@@ -14,7 +14,7 @@ import { css } from '@emotion/css';
 
 interface Props {
   currentPosition: CSSProperties;
-  path?: string;
+  path: string | null;
 }
 
 /**

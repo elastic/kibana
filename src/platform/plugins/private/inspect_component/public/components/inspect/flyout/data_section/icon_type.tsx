@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
-  iconType?: string;
+  iconType: string | null;
 }
 
 export const IconType = ({ iconType }: Props) => {

@@ -11,21 +11,12 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { PreviewImage } from './preview_image';
-import { findDomElementForUserComponent } from '../../../../lib/fiber/find_dom_element_for_user_component';
-
-jest.mock('../../../../lib/fiber/find_dom_element_for_user_component');
 
 describe('PreviewImage', () => {
-  beforeEach(() => {
-    (findDomElementForUserComponent as jest.Mock).mockImplementation(() =>
-      document.createElement('div')
-    );
-  });
-
-  const mockTargetDomElement = document.createElement('div');
+  const mockDomElement = document.createElement('div');
 
   it('should render correctly', () => {
-    renderWithI18n(<PreviewImage targetDomElement={mockTargetDomElement} />);
+    renderWithI18n(<PreviewImage domElement={mockDomElement} />);
 
     const previewImage = screen.getByTestId('inspectFlyoutPreviewImage');
 

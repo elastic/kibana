@@ -10,9 +10,11 @@
 import type { ComponentData } from '../lib/get_inspected_element_data';
 
 export const mockComponentData: ComponentData = {
-  columnNumber: 10,
-  fileName: '/path/to/component.tsx',
-  lineNumber: 25,
+  _debugSource: {
+    columnNumber: 10,
+    fileName: '/path/to/component.tsx',
+    lineNumber: 25,
+  },
   relativePath: 'src/components/my_component',
   baseFileName: 'component.tsx',
   codeowners: ['@elastic/capybara-team'],
@@ -21,5 +23,12 @@ export const mockComponentData: ComponentData = {
     docsLink: 'https://eui.elastic.co/docs/components/button',
   },
   iconType: 'button',
-  sourceComponent: 'MyComponent',
+  sourceComponent: {
+    type: 'MyComponent',
+    domElement: document.createElement('div'),
+  },
+  elementType: null,
+  type: 'MyComponent',
+  componentPath: 'MyComponent > EuiButton > div',
+  domElement: document.createElement('div'),
 };

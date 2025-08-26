@@ -13,16 +13,16 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ComponentTitle } from './component_title';
 
 describe('ComponentTitle', () => {
-  it('should render correctly when sourceComponent is undefined', () => {
-    renderWithI18n(<ComponentTitle />);
+  it('should render correctly when sourceComponentType is null', () => {
+    renderWithI18n(<ComponentTitle sourceComponentType={null} />);
 
     const title = screen.getByText('Data');
 
     expect(title).toBeInTheDocument();
   });
 
-  it('should render correctly when sourceComponent is defined', () => {
-    renderWithI18n(<ComponentTitle sourceComponent="SomeComponent" />);
+  it('should render correctly when sourceComponentType is defined', () => {
+    renderWithI18n(<ComponentTitle sourceComponentType="SomeComponent" />);
 
     const title = screen.getByText('SomeComponent');
 
