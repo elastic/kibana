@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ALL_VALUE, FiltersSchema } from '@kbn/slo-schema';
+import type { FiltersSchema } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { FilterStateStore } from '@kbn/es-query';
 
 export const getGroupByCardinalityFilters = ({

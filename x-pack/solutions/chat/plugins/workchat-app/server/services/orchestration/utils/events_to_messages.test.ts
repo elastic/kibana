@@ -6,11 +6,11 @@
  */
 
 import { HumanMessage, AIMessage, ToolMessage } from '@langchain/core/messages';
+import type { ConversationEventType } from '../../../../common/conversation_events';
 import {
   createUserMessage,
   createAssistantMessage,
   createToolResult,
-  ConversationEventType,
 } from '../../../../common/conversation_events';
 import { conversationEventsToMessages } from './events_to_messages';
 

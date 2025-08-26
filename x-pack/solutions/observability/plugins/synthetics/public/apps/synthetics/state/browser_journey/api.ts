@@ -6,15 +6,17 @@
  */
 
 import { apiService } from '../../../../utils/api_service';
-import {
+import type {
   FailedStepsApiResponse,
-  FailedStepsApiResponseType,
   ScreenshotBlockDoc,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
-  SyntheticsJourneyApiResponseType,
   Ping,
+} from '../../../../../common/runtime_types';
+import {
+  FailedStepsApiResponseType,
+  SyntheticsJourneyApiResponseType,
   PingType,
 } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';

@@ -12,13 +12,15 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import moment from 'moment';
-import { SearchSessionStatus, SearchSessionStatusResponse } from '../../../../../../common';
+import type { SearchSessionStatusResponse } from '../../../../../../common';
+import { SearchSessionStatus } from '../../../../../../common';
 import { createSearchUsageCollectorMock } from '../../../../collectors/mocks';
 import { SearchSessionsMgmtTable } from './table';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { SessionsClient } from '../../../sessions_client';
 import { getSearchSessionSavedObjectMocks } from '../../__mocks__';
-import { ACTION, SearchSessionSavedObject } from '../../types';
+import type { SearchSessionSavedObject } from '../../types';
+import { ACTION } from '../../types';
 import { getPersistedSearchSessionSavedObjectAttributesMock } from '../../../mocks';
 import { columns } from '.';
 
@@ -60,6 +62,7 @@ const Component = ({
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
+    featureFlags: mockCoreStart.featureFlags,
   });
   api.fetchTableData = async () => {
     return {

@@ -283,6 +283,10 @@ export class LegacyAlertsClient<
   }
 
   public async persistAlerts() {
+    return;
+  }
+
+  public async updatePersistedAlertsWithMaintenanceWindowIds() {
     return null;
   }
 

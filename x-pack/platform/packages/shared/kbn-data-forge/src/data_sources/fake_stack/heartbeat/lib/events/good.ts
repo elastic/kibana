@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventFunction } from '../../../../../types';
+import type { EventFunction } from '../../../../../types';
 import { MONGODB, MONGO_DB_GATEWAY } from '../../../common/constants';
 import { createEvent } from './create_event';
 

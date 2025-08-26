@@ -9,18 +9,20 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
-import { GLOBAL_EMPTY_STATE_SKIP_KEY, WorkflowId } from '@kbn/search-shared-ui';
+import type { WorkflowId } from '@kbn/search-shared-ui';
+import { GLOBAL_EMPTY_STATE_SKIP_KEY } from '@kbn/search-shared-ui';
 import type { IndicesStatusResponse } from '../../../common';
 
 import { AnalyticsEvents } from '../../analytics/constants';
-import { AvailableLanguages } from '../../code_examples';
+import type { AvailableLanguages } from '../../code_examples';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { generateRandomIndexName } from '../../utils/indices';
 import { getDefaultCodingLanguage } from '../../utils/language';
 
 import { CreateIndexUIView } from './create_index';
 import { CreateIndexCodeView } from '../shared/create_index_code_view';
-import { CreateIndexFormState, CreateIndexViewMode } from '../../types';
+import type { CreateIndexFormState } from '../../types';
+import { CreateIndexViewMode } from '../../types';
 
 import { CreateIndexPanel } from '../shared/create_index_panel/create_index_panel';
 import { useKibana } from '../../hooks/use_kibana';

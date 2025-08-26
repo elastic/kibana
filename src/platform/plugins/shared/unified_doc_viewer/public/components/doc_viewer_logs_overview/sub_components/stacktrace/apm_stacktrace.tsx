@@ -8,7 +8,7 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';

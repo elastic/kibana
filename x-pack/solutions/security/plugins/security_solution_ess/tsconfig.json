@@ -27,5 +27,6 @@
     "@kbn/management-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/cloud-plugin",
+    "@kbn/licensing-types",
   ]
 }

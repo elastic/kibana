@@ -7,10 +7,10 @@
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ActionsClientLlm } from '@kbn/langchain/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { getLlmType } from '../../../../../routes/utils';
 

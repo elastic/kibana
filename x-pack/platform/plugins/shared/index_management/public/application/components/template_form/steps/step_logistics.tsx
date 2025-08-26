@@ -19,6 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { Forms } from '../../../../shared_imports';
 import {
   useForm,
   useFormData,
@@ -26,13 +27,12 @@ import {
   getUseField,
   getFormRow,
   Field,
-  Forms,
   JsonEditorField,
   NumericField,
   RadioGroupField,
 } from '../../../../shared_imports';
 import { UnitField, timeUnits } from '../../shared';
-import { DataRetention } from '../../../../../common';
+import type { DataRetention } from '../../../../../common';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
 import {

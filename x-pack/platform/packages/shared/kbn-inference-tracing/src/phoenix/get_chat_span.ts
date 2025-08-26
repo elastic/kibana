@@ -33,15 +33,11 @@ import {
   PROMPT_TEMPLATE_TEMPLATE,
   LLM_TOOLS,
 } from '@arizeai/openinference-semantic-conventions';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { omit, partition } from 'lodash';
-import { ToolDefinition } from '@kbn/inference-common';
-import {
-  ChoiceEvent,
-  ElasticGenAIAttributes,
-  GenAISemanticConventions,
-  MessageEvent,
-} from '../types';
+import type { ToolDefinition } from '@kbn/inference-common';
+import type { ChoiceEvent, MessageEvent } from '../types';
+import { ElasticGenAIAttributes, GenAISemanticConventions } from '../types';
 import { flattenAttributes } from '../util/flatten_attributes';
 import { unflattenAttributes } from '../util/unflatten_attributes';
 

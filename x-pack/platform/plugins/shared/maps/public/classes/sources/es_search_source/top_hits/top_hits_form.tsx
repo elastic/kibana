@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { getIndexPatternService } from '../../../../kibana_services';
 import { ValidatedRange } from '../../../../components/validated_range';
 import { DEFAULT_MAX_INNER_RESULT_WINDOW } from '../../../../../common/constants';
 import { loadIndexSettings } from '../util/load_index_settings';
-import { OnSourceChangeArgs } from '../../source';
+import type { OnSourceChangeArgs } from '../../source';
 import { GroupByButtonGroup } from '../../es_geo_line_source/geo_line_form/group_by_button_group';
 
 interface Props {

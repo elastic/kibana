@@ -5,30 +5,34 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import {
+import type {
   CheckAndLoadIntegrationResponse,
-  checkAndLoadIntegrationResponseRt,
   DataStreamRolloverResponse,
-  dataStreamRolloverResponseRt,
   DegradedFieldAnalysis,
-  degradedFieldAnalysisRt,
   DegradedFieldValues,
-  degradedFieldValuesRt,
   FailedDocsDetails,
   FailedDocsErrorsResponse,
+  IntegrationDashboardsResponse,
+  UpdateFieldLimitResponse,
+  UpdateFailureStoreResponse,
+} from '../../../common/api_types';
+import {
+  checkAndLoadIntegrationResponseRt,
+  dataStreamRolloverResponseRt,
+  degradedFieldAnalysisRt,
+  degradedFieldValuesRt,
   failedDocsErrorsRt,
   getDataStreamDegradedFieldsResponseRt,
   getDataStreamsDetailsResponseRt,
   getDataStreamsSettingsResponseRt,
-  IntegrationDashboardsResponse,
   integrationDashboardsRT,
   qualityIssueBaseRT,
-  UpdateFieldLimitResponse,
   updateFieldLimitResponseRt,
+  updateFailureStoreResponseRt,
 } from '../../../common/api_types';
-import {
+import type {
   DataStreamDetails,
   DataStreamSettings,
   DegradedFieldResponse,
@@ -42,9 +46,9 @@ import {
   GetDataStreamSettingsResponse,
   GetIntegrationDashboardsParams,
 } from '../../../common/data_streams_stats';
-import { IDataStreamDetailsClient } from './types';
+import type { IDataStreamDetailsClient } from './types';
 import { Integration } from '../../../common/data_streams_stats/integration';
-import {
+import type {
   AnalyzeDegradedFieldsParams,
   CheckAndLoadIntegrationParams,
   UpdateFieldLimitParams,
@@ -305,6 +309,36 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
       dataStreamRolloverResponseRt,
       (message: string) =>
         new DatasetQualityError(`Failed to decode rollover response: ${message}"`)
+    )(response);
+  }
+
+  public async updateFailureStore({
+    dataStream,
+    failureStoreEnabled,
+    customRetentionPeriod,
+  }: {
+    dataStream: string;
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  }): Promise<UpdateFailureStoreResponse> {
+    const response = await this.http
+      .put<UpdateFailureStoreResponse>(
+        `/internal/dataset_quality/data_streams/${dataStream}/update_failure_store`,
+        {
+          body: JSON.stringify({
+            failureStoreEnabled,
+            customRetentionPeriod,
+          }),
+        }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to update failure store": ${error}`, error);
+      });
+
+    return decodeOrThrow(
+      updateFailureStoreResponseRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode update failure store response: ${message}"`)
     )(response);
   }
 }

@@ -11,7 +11,7 @@
         "label": "AlertActions",
         "description": [],
         "signature": [
-          "(args: CellContext & ",
+          "({ observabilityRuleTypeRegistry, alert, tableId, refresh, openAlertInFlyout, parentAlert, services, ...rest }: {} | (CellContext & ",
           "EuiDataGridCellValueElementProps",
           " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
           "EuiDataGridRefProps",
@@ -297,7 +297,69 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">; }) => React.ReactNode) | React.ComponentClass<any, any> | undefined; renderActionsCell?: any | React.ComponentClass<CellContext & ",
+          ">; }) => React.ReactNode) | React.ComponentClass<any, any> | undefined; renderActionsCell?: ((args: CellContext & ",
+          "EuiDataGridCellValueElementProps",
+          " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+          "EuiDataGridRefProps",
+          " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.Alert",
+            "text": "Alert"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.UnknownAlertFields",
+            "text": "UnknownAlertFields"
+          },
+          ">[]; oldAlertsData: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.LegacyField",
+            "text": "LegacyField"
+          },
+          "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.BrowserFields",
+            "text": "BrowserFields"
+          },
+          "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+          "MutedAlerts",
+          " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+          "Case",
+          "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.MaintenanceWindow",
+            "text": "MaintenanceWindow"
+          },
+          "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+          "BulkActionsState",
+          ", React.Dispatch<",
+          "BulkActionsReducerAction",
+          ">]; } & any & ",
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.ObservabilityAlertsTableContext",
+            "text": "ObservabilityAlertsTableContext"
+          },
+          " & ",
+          "AlertWithLegacyFormats",
+          " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; }) => React.ReactNode) | React.ComponentClass<CellContext & ",
           "EuiDataGridCellValueElementProps",
           " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
           "EuiDataGridRefProps",
@@ -401,7 +463,7 @@
           },
           " & ",
           "AlertWithLegacyFormats",
-          " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; }) => React.ReactNode"
+          " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; })) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/public/components/alert_actions/alert_actions_lazy.tsx",
         "deprecated": false,
@@ -413,12 +475,464 @@
             "id": "def-public.AlertActions.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "args",
+            "label": "__0",
             "description": [],
             "signature": [
-              "Props & AP"
+              "{} | (CellContext & ",
+              "EuiDataGridCellValueElementProps",
+              " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">[]; oldAlertsData: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.LegacyField",
+                "text": "LegacyField"
+              },
+              "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              },
+              "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+              "MutedAlerts",
+              " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+              "Case",
+              "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindow",
+                "text": "MaintenanceWindow"
+              },
+              "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+              "BulkActionsState",
+              ", React.Dispatch<",
+              "BulkActionsReducerAction",
+              ">]; } & { services: { data: ",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              },
+              "; http: ",
+              "HttpSetup",
+              "; notifications: ",
+              "NotificationsStart",
+              "; fieldFormats: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "public",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-public.FieldFormatsStart",
+                "text": "FieldFormatsStart"
+              },
+              "; application: ",
+              "ApplicationStart",
+              "; licensing: ",
+              {
+                "pluginId": "licensing",
+                "scope": "public",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-public.LicensingPluginStart",
+                "text": "LicensingPluginStart"
+              },
+              "; settings: ",
+              "SettingsStart",
+              "; cases?: ",
+              "CasesService",
+              " | undefined; }; renderCellValue?: ((args: CellContext & ",
+              "EuiDataGridCellValueElementProps",
+              " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">[]; oldAlertsData: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.LegacyField",
+                "text": "LegacyField"
+              },
+              "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              },
+              "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+              "MutedAlerts",
+              " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+              "Case",
+              "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindow",
+                "text": "MaintenanceWindow"
+              },
+              "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+              "BulkActionsState",
+              ", React.Dispatch<",
+              "BulkActionsReducerAction",
+              ">]; } & any & ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              " & ",
+              "AlertWithLegacyFormats",
+              ") => React.ReactNode) | React.ComponentClass<CellContext & ",
+              "EuiDataGridCellValueElementProps",
+              " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">[]; oldAlertsData: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.LegacyField",
+                "text": "LegacyField"
+              },
+              "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              },
+              "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+              "MutedAlerts",
+              " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+              "Case",
+              "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindow",
+                "text": "MaintenanceWindow"
+              },
+              "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+              "BulkActionsState",
+              ", React.Dispatch<",
+              "BulkActionsReducerAction",
+              ">]; } & any & ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              " & ",
+              "AlertWithLegacyFormats",
+              ", any> | undefined; renderCellPopover?: ((args: ",
+              "EuiDataGridCellPopoverElementProps",
+              " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">[]; oldAlertsData: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.LegacyField",
+                "text": "LegacyField"
+              },
+              "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              },
+              "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+              "MutedAlerts",
+              " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+              "Case",
+              "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindow",
+                "text": "MaintenanceWindow"
+              },
+              "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+              "BulkActionsState",
+              ", React.Dispatch<",
+              "BulkActionsReducerAction",
+              ">]; } & any & ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              " & { alert: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">; }) => React.ReactNode) | React.ComponentClass<any, any> | undefined; renderActionsCell?: ((args: CellContext & ",
+              "EuiDataGridCellValueElementProps",
+              " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">[]; oldAlertsData: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.LegacyField",
+                "text": "LegacyField"
+              },
+              "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              },
+              "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+              "MutedAlerts",
+              " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+              "Case",
+              "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindow",
+                "text": "MaintenanceWindow"
+              },
+              "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+              "BulkActionsState",
+              ", React.Dispatch<",
+              "BulkActionsReducerAction",
+              ">]; } & any & ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              " & ",
+              "AlertWithLegacyFormats",
+              " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; }) => React.ReactNode) | React.ComponentClass<CellContext & ",
+              "EuiDataGridCellValueElementProps",
+              " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">[]; oldAlertsData: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.LegacyField",
+                "text": "LegacyField"
+              },
+              "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              },
+              "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+              "MutedAlerts",
+              " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+              "Case",
+              "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindow",
+                "text": "MaintenanceWindow"
+              },
+              "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+              "BulkActionsState",
+              ", React.Dispatch<",
+              "BulkActionsReducerAction",
+              ">]; } & any & ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              " & ",
+              "AlertWithLegacyFormats",
+              " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; }, any> | undefined; renderFlyoutHeader?: ",
+              "FlyoutSectionRenderer",
+              "<",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              "> | undefined; renderFlyoutBody?: ",
+              "FlyoutSectionRenderer",
+              "<",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              "> | undefined; renderFlyoutFooter?: ",
+              "FlyoutSectionRenderer",
+              "<",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              "> | undefined; flyoutOwnsFocus?: boolean | undefined; flyoutPagination?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; columns: ",
+              "EuiDataGridColumn",
+              "[]; openLinksInNewTab: boolean; } & ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              " & ",
+              "AlertWithLegacyFormats",
+              " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; })"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-table/types.ts",
+            "path": "x-pack/solutions/observability/plugins/observability/public/components/alert_actions/alert_actions.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -17237,7 +17751,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -18020,6 +18534,8 @@
                   "; sql: ",
                   "default",
                   "; ssl: ",
+                  "default",
+                  "; streams: ",
                   "default",
                   "; synonyms: ",
                   "default",
@@ -18314,7 +18830,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -19097,6 +19613,8 @@
                   "; sql: ",
                   "default",
                   "; ssl: ",
+                  "default",
+                  "; streams: ",
                   "default",
                   "; synonyms: ",
                   "default",
@@ -24883,6 +25401,21 @@
         "description": [],
         "signature": [
           "\"RULES_LOCATOR\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.sloDetailsHistoryLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "sloDetailsHistoryLocatorID",
+        "description": [],
+        "signature": [
+          "\"SLO_DETAILS_HISTORY_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
         "deprecated": false,

@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import type {
   GetAgentStatusResponse,
   GetOnePackagePolicyResponse,

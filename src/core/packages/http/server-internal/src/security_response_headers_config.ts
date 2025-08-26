@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PermissionsPolicyConfigType } from './permissions_policy';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PermissionsPolicyConfigType } from './permissions_policy';
 
 export const securityResponseHeadersSchema = schema.object({
   strictTransportSecurity: schema.oneOf([schema.string(), schema.literal(null)], {

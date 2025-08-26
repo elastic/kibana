@@ -6,7 +6,7 @@
  */
 import expect from 'expect';
 import { omit, sortBy } from 'lodash';
-import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { INSTALLED_VERSION } from '../services/private_location_test_service';
 
 interface PolicyProps {

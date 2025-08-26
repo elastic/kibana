@@ -9,7 +9,7 @@
 
 import { Builder } from '../builder';
 import {
-  ESQLColumn,
+  ESQLColumn
   ESQLDecimalLiteral,
   ESQLIntegerLiteral,
   ESQLParamLiteral,

@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ADD_PANEL_TRIGGER, UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';

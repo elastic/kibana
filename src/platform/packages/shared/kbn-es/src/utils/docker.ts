@@ -13,9 +13,10 @@ import fs, { existsSync } from 'fs';
 import Fsp from 'fs/promises';
 import pRetry from 'p-retry';
 import { resolve, basename, join } from 'path';
-import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
+import type { ClientOptions } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
 import { CA_CERT_PATH, ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 import {
@@ -32,7 +33,7 @@ import {
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
-import { EsClusterExecOptions } from '../cluster_exec_options';
+import type { EsClusterExecOptions } from '../cluster_exec_options';
 import {
   SERVERLESS_RESOURCES_PATHS,
   SERVERLESS_SECRETS_PATH,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { of } from 'rxjs';
-import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { tagsCacheMock } from '../services/tags/tags_cache.mock';
 import { createTag } from '../../common/test_utils';
 import { buildParseSearchQuery } from './parse_search_query';

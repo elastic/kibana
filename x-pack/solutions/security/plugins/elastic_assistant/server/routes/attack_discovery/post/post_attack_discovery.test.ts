@@ -7,14 +7,14 @@
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 import { performChecks } from '../../helpers';
 import { updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
 import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
 import { requestIsValid } from './helpers/request_is_valid';
-import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 import { transformESSearchToAttackDiscovery } from '../../../lib/attack_discovery/persistence/transforms/transforms';
 import { getAttackDiscoverySearchEsMock } from '../../../__mocks__/attack_discovery_schema.mock';
 import { serverMock } from '../../../__mocks__/server';

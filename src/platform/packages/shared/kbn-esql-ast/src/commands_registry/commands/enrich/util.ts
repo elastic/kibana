@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLCommand } from '../../../types';
-import { ESQLPolicy, ISuggestionItem } from '../../types';
+import type { ESQLCommand } from '../../../types';
+import type { ESQLPolicy, ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getSafeInsertText } from '../../../definitions/utils/autocomplete/helpers';
 
