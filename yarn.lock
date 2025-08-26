@@ -16242,7 +16242,7 @@ is-symbol@^1.0.2, is-symbol@^1.0.3:
   dependencies:
     has-symbols "^1.0.1"
 
-is-typedarray@^1.0.0, is-typed-array@^1.1.13, is-typed-array@^1.1.14:
+is-typed-array@^1.1.13, is-typed-array@^1.1.14, is-typedarray@^1.0.0:
   version "1.1.15"
   resolved "https://registry.yarnpkg.com/is-typed-array/-/is-typed-array-1.1.15.tgz#4bfb4a45b61cee83a5a46fba778e4e8d59c0ce0b"
   integrity sha512-p3EcsicXjit7SaskXHs1hA91QxgTw46Fv6EFKKGS5DRFLD8yKnohjF3hxoju94b/OcMZoQukzpPpBE9uLVKzgQ==
