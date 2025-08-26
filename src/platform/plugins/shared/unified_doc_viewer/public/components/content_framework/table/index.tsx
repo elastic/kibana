@@ -198,7 +198,12 @@ export function ContentFrameworkTable({
 
       if (!fieldConfig) return null;
       if (columnId === 'name') {
-        return fieldConfig.name;
+        return (
+          <>
+            <EuiSpacer size="s" />
+            {fieldConfig.name}
+          </>
+        );
       }
       return fieldConfig.valueCellContent;
     },
