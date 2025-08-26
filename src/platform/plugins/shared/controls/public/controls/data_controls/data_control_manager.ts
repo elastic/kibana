@@ -62,6 +62,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       ...defaultControlDefaultValues,
       dataViewId: '',
       fieldName: '',
+      useGlobalFilters: true,
     },
     defaultDataControlComparators
   );
