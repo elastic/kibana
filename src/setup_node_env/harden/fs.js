@@ -12,7 +12,6 @@ const { fsEventBus, FS_CONFIG_EVENT } = require('@kbn/security-hardening/fs-even
 
 const { getSafePath, validateAndSanitizeFileData, isDevOrCI } = require('./fs_validations');
 
-// eslint-disable-next-line no-unused-vars
 let hardeningConfig = null;
 
 // IMPORTANT: this is used for POC, however we can consider using preboot plugin to pass the config down
@@ -113,7 +112,7 @@ const patchAsyncDualMethod = (target, thisArg, argumentsList) => {
   return target.apply(thisArg, [srcSafePath, destSafePath, ...args]);
 };
 
-const pathUnsecureMethod = (target, thisArg, argumentsList) => {
+const patchUnsecureMethod = (target, thisArg, argumentsList) => {
   if (!shouldEnableHardenedFs() || isDevOrCI) {
     return target.apply(thisArg, argumentsList);
   }
@@ -122,26 +121,71 @@ const pathUnsecureMethod = (target, thisArg, argumentsList) => {
 };
 
 const createFsProxy = (fs) => {
-  fs.writeFileSync = new Proxy(fs.writeFileSync, { apply: patchSingleMethod });
-  fs.writeFile = new Proxy(fs.writeFile, { apply: patchAsyncSingleMethod });
-  fs.copyFileSync = new Proxy(fs.copyFileSync, { apply: patchDualMethod });
-  fs.copyFile = new Proxy(fs.copyFile, { apply: patchAsyncDualMethod });
+  const originalWriteFileSync = fs.writeFileSync;
+  fs.writeFileSync = function (...args) {
+    return patchSingleMethod(originalWriteFileSync, this, args);
+  };
 
-  fs.appendFileSync = new Proxy(fs.appendFileSync, { apply: patchSingleMethod });
-  fs.appendFile = new Proxy(fs.appendFile, { apply: patchAsyncSingleMethod });
-  fs.createWriteStream = new Proxy(fs.createWriteStream, { apply: patchWriteStream });
+  const originalWriteFile = fs.writeFile;
+  fs.writeFile = function (...args) {
+    return patchAsyncSingleMethod(originalWriteFile, this, args);
+  };
 
-  // Methods that we want to block completely in runtime
-  fs.openSync = new Proxy(fs.openSync, { apply: pathUnsecureMethod });
-  fs.symlink = new Proxy(fs.symlink, { apply: pathUnsecureMethod });
-  fs.symlinkSync = new Proxy(fs.symlinkSync, { apply: pathUnsecureMethod });
+  const originalCopyFileSync = fs.copyFileSync;
+  fs.copyFileSync = function (...args) {
+    return patchDualMethod(originalCopyFileSync, this, args);
+  };
+
+  const originalCopyFile = fs.copyFile;
+  fs.copyFile = function (...args) {
+    return patchAsyncDualMethod(originalCopyFile, this, args);
+  };
+
+  const originalAppendFileSync = fs.appendFileSync;
+  fs.appendFileSync = function (...args) {
+    return patchSingleMethod(originalAppendFileSync, this, args);
+  };
+
+  const originalAppendFile = fs.appendFile;
+  fs.appendFile = function (...args) {
+    return patchAsyncSingleMethod(originalAppendFile, this, args);
+  };
+
+  const originalCreateWriteStream = fs.createWriteStream;
+  fs.createWriteStream = function (...args) {
+    return patchWriteStream(originalCreateWriteStream, this, args);
+  };
+
+  // Methods that we want to block completely
+
+  const originalOpenSync = fs.openSync;
+  fs.openSync = function (...args) {
+    return patchUnsecureMethod(originalOpenSync, this, args);
+  };
+
+  const originalSymlink = fs.symlink;
+  fs.symlink = function (...args) {
+    return patchUnsecureMethod(originalSymlink, this, args);
+  };
+
+  const originalSymlinkSync = fs.symlinkSync;
+  fs.symlinkSync = function (...args) {
+    return patchUnsecureMethod(originalSymlinkSync, this, args);
+  };
 
   return fs;
 };
 
 const createFsPromisesProxy = (fs) => {
-  fs.writeFile = new Proxy(fs.writeFile, { apply: patchSingleMethod });
-  fs.appendFile = new Proxy(fs.appendFile, { apply: patchSingleMethod });
+  const originalWriteFile = fs.writeFile;
+  fs.writeFile = function (...args) {
+    return patchSingleMethod(originalWriteFile, this, args);
+  };
+
+  const originalAppendFile = fs.appendFile;
+  fs.appendFile = function (...args) {
+    return patchSingleMethod(originalAppendFile, this, args);
+  };
 
   return fs;
 };
