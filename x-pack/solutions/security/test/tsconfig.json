@@ -17,12 +17,13 @@
     "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
   ],
   "exclude": [
+    "security_solution_cypress/cypress/**/*",
     "target/**/*",
     "*/plugins/**/*",
-    "plugins/**/*",
-    "security_solution_cypress/cypress/**/*",
     "*/packages/**/*",
     "*/*/packages/**/*",
+    "security_solution_api_integration/**/*",
+    "security_solution_endpoint/**/*"
   ],
   "kbn_references": [
     "@kbn/test",
