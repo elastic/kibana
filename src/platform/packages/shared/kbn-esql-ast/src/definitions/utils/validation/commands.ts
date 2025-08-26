@@ -37,7 +37,7 @@ export const validateCommandArguments = (
           })
         );
       } else if (isOptionNode(arg)) {
-        messages.push(...validateOption(arg, command, context, callbacks));
+        messages.push(...validateOption(arg, command, ast, context, callbacks));
       } else if (isColumn(arg) || isIdentifier(arg)) {
         if (command.name === 'stats' || command.name === 'inlinestats') {
           messages.push(errors.unknownAggFunction(arg));
