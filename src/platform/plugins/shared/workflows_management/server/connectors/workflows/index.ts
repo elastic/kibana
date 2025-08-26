@@ -181,6 +181,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             workflowId,
             alerts: workflowAlerts,
             inputs: { event: alertContext },
+            spaceId,
           },
         };
       } catch (error) {
