@@ -32,6 +32,7 @@ const MAX_FILE_SIZE = 1024 * 1024 * 1024;
 let magicBytes = require('magic-bytes.js');
 
 const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
+
 const baseSafePaths = [join(REPO_ROOT, 'data'), join(REPO_ROOT, '.es')];
 
 const allowedExtensions = ['.txt', '.md', '.log', '.json', '.yml', '.yaml', '.csv', '.svg', '.png'];
@@ -129,6 +130,7 @@ function validateFileExtension(path) {
   if (isDevOrCI && !process.env.KBN_ENABLE_HARDENED_FS) {
     return;
   }
+
   const hasAllowedExtension = allowedExtensions.some((ext) => path.toLowerCase().endsWith(ext));
 
   if (!hasAllowedExtension) {
