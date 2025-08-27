@@ -42,6 +42,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User can customize a prebuilt rule via public API**](#scenario-user-can-customize-a-prebuilt-rule-via-public-api)
   - [Detecting rule customizations](#detecting-rule-customizations)
     - [**Scenario: prebuilt rule's `is_customized` is set to true after it is customized**](#scenario-prebuilt-rules-is_customized-is-set-to-true-after-it-is-customized)
+    - [**Scenario: prebuilt rule's `is_customized` stays unchanged after it is saved unchanged**](#scenario-prebuilt-rules-is_customized-stays-unchanged-after-it-is-saved-unchanged)
     - [**Scenario: prebuilt rule's `is_customized` value is not affected by specific fields**](#scenario-prebuilt-rules-is_customized-value-is-not-affected-by-specific-fields)
     - [**Scenario: User cannot change non-customizable rule fields on prebuilt rules**](#scenario-user-cannot-change-non-customizable-rule-fields-on-prebuilt-rules)
     - [**Scenario: User can revert a customized prebuilt rule to its original state**](#scenario-user-can-revert-a-customized-prebuilt-rule-to-its-original-state)
@@ -262,13 +263,25 @@ Then the rule's `is_customized` value should be `true`
 And ruleSource should be "external"
 ```
 
+#### **Scenario: prebuilt rule's `is_customized` stays unchanged after it is saved unchanged**
+
+**Automation**: one integration test.
+
+```Gherkin
+Given a prebuilt rule installed
+And the prebuilt rule doesn't have a matching base version
+When user opens the corresponding rule editing page
+And saves the form unchanged
+Then the rule's `is_customized` value should stay unchanged (non-customized rule stays non-customized)
+```
+
 **Examples:**
 
 `<field_name>` = all customizable rule fields
 
 #### **Scenario: prebuilt rule's `is_customized` value is not affected by specific fields**
 
-**Automation**: 5 integration tests.
+**Automation**: one integration test per field.
 
 ```Gherkin
 Given a prebuilt rule installed
@@ -288,7 +301,7 @@ Then the rule's `is_customized` value should remain `false`
 
 #### **Scenario: User cannot change non-customizable rule fields on prebuilt rules**
 
-**Automation**: 4 integration tests.
+**Automation**: one integration test per field.
 
 ```Gherkin
 Given a prebuilt rule installed
@@ -319,7 +332,7 @@ NOTE: These are not edge cases but rather normal cases. In many package upgrade 
 
 #### **Scenario: prebuilt rule's `is_customized` is set to true after it is customized when base version is missing**
 
-**Automation**: 1 Cypress test.
+**Automation**: one integration test per field.
 
 ```Gherkin
 Given a prebuilt rule installed
@@ -335,7 +348,7 @@ And ruleSource should be "external"
 
 #### **Scenario: prebuilt rule's `is_customized` stays unchanged after it is saved unchanged when base version is missing**
 
-**Automation**: 1 Cypress test.
+**Automation**: one integration test.
 
 ```Gherkin
 Given a prebuilt rule installed
@@ -351,7 +364,7 @@ Then the rule's `is_customized` value should stay unchanged (non-customized rule
 
 #### **Scenario: prebuilt rule's `is_customized` value is not affected by specific fields when base version is missing**
 
-**Automation**: 5 integration tests.
+**Automation**: one integration test per field.
 
 ```Gherkin
 Given a prebuilt rule installed
