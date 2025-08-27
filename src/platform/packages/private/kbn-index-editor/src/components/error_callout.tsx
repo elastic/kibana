@@ -46,6 +46,12 @@ const errorTitles: Record<IndexEditorErrors, string> = {
       defaultMessage: 'An error occurred while uploading the files.',
     }
   ),
+  [IndexEditorErrors.FILE_ANALYSIS_ERROR]: i18n.translate(
+    'indexEditor.flyout.error.fileAnalysisError',
+    {
+      defaultMessage: 'An error occurred while analyzing the files.',
+    }
+  ),
 };
 
 export const ErrorCallout = () => {

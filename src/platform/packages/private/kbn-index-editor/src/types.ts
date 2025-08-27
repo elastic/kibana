@@ -78,4 +78,5 @@ export enum IndexEditorErrors {
   FILE_REJECTION_ERROR = 'fileRejectionError',
   FILE_TOO_BIG_ERROR = 'fileTooBigError',
   FILE_UPLOAD_ERROR = 'fileUploadError',
+  FILE_ANALYSIS_ERROR = 'fileAnalysisError',
 }

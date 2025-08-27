@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PropsWithChildren } from 'react';
-import React, { type FC, useCallback } from 'react';
+import React, { type FC, useCallback, useEffect } from 'react';
 import type { FileRejection } from 'react-dropzone';
 import { useDropzone } from 'react-dropzone';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -68,26 +68,56 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     (uploadStatus.overallImportStatus === STATUS.COMPLETED && isSaving);
   const overallImportProgress = uploadStatus.overallImportProgress;
 
-  const filesTooBig = filesStatus.filter((f) => f.fileTooLarge);
-  if (filesTooBig.length > 0) {
-    const errorDetail = i18n.translate('indexEditor.filePicker.sizeError', {
-      defaultMessage:
-        'The following files exceed the maximum allowed size of {maxSize}: \n {files}',
-      values: {
-        maxSize: filesTooBig[0].fileSizeInfo.maxFileSizeFormatted,
-        files: filesTooBig
-          .map((file) => `- ${file.fileName} (${file.fileSizeInfo.fileSizeFormatted})`)
-          .join('\n'),
-      },
-    });
+  useEffect(
+    function checkForErrors() {
+      // File size errors
+      const filesTooBig = filesStatus.filter((f) => f.fileTooLarge);
+      if (filesTooBig.length > 0) {
+        const errorDetail = i18n.translate('indexEditor.filePicker.sizeError', {
+          defaultMessage:
+            'The following files exceed the maximum allowed size of {maxSize}: \n {files}',
+          values: {
+            maxSize: filesTooBig[0].fileSizeInfo.maxFileSizeFormatted,
+            files: filesTooBig
+              .map((file) => `- ${file.fileName} (${file.fileSizeInfo.fileSizeFormatted})`)
+              .join('\n'),
+          },
+        });
+        indexUpdateService.setError(IndexEditorErrors.FILE_TOO_BIG_ERROR, errorDetail);
+      }
 
-    indexUpdateService.setError(IndexEditorErrors.FILE_TOO_BIG_ERROR, errorDetail);
-  }
+      // Analysis errors
+      const analysisErrors = filesStatus.filter((f) => f.analysisStatus === STATUS.FAILED);
+      if (analysisErrors.length > 0) {
+        const errorDetail = analysisErrors
+          .map((file) => `- ${file.fileName}: ${file.analysisError.body.message}`)
+          .join('\n');
 
-  if (uploadStatus.overallImportStatus === STATUS.FAILED) {
-    const errorDetail = uploadStatus.errors.map((error) => `- ${error.title}`).join('\n');
-    indexUpdateService.setError(IndexEditorErrors.FILE_UPLOAD_ERROR, errorDetail);
-  }
+        indexUpdateService.setError(IndexEditorErrors.FILE_ANALYSIS_ERROR, errorDetail);
+        analysisErrors.forEach((file) => {
+          const fileIndex = fileUploadManager
+            .getFiles()
+            .findIndex((f) => f.getFileName() === file.fileName);
+          if (fileIndex > -1) {
+            fileUploadManager.removeFile(fileIndex);
+          }
+        });
+      }
+
+      // Generic errors
+      if (uploadStatus.overallImportStatus === STATUS.FAILED) {
+        const errorDetail = uploadStatus.errors.map((error) => `- ${error.title}`).join('\n');
+        indexUpdateService.setError(IndexEditorErrors.FILE_UPLOAD_ERROR, errorDetail);
+      }
+    },
+    [
+      fileUploadManager,
+      filesStatus,
+      indexUpdateService,
+      uploadStatus.errors,
+      uploadStatus.overallImportStatus,
+    ]
+  );
 
   const onFilesSelected = useCallback(
     async (files: File[]) => {
@@ -198,10 +228,11 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     </div>
   );
 
+  const successfulPreviews = filesStatus.filter((f) => f.analysisStatus === STATUS.COMPLETED);
   const showFilePreview =
     isSaving ||
     (!isDragActive &&
-      filesStatus.length > 0 &&
+      successfulPreviews.length > 0 &&
       uploadStatus.overallImportStatus !== STATUS.COMPLETED);
 
   let content: React.ReactNode = children;
