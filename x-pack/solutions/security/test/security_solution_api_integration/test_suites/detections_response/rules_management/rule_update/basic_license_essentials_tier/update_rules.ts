@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 
+import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRuleOutput,
@@ -18,9 +19,9 @@ import {
   getSimpleMlRuleUpdate,
   getSimpleRule,
   updateUsername,
-  createHistoricalPrebuiltRuleAssetSavedObjects,
   installPrebuiltRules,
-  createRuleAssetSavedObject,
+  installFleetPackageByUpload,
+  createPrebuiltRulesPackage,
 } from '../../../utils';
 import {
   createAlertsIndex,
@@ -28,6 +29,11 @@ import {
   createRule,
   deleteAllAlerts,
 } from '../../../../../config/services/detections_response';
+import {
+  PREBUILT_RULE_ASSET_A,
+  PREBUILT_RULE_ASSET_B,
+  PREBUILT_RULE_ID_A,
+} from '../../prebuilt_rules/common/configs/edge_cases/ess_air_gapped_with_bundled_packages.config';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -35,6 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
+  const retryService = getService('retry');
 
   describe('@ess @serverless @serverlessQA update_rules', () => {
     describe('update rules', () => {
@@ -314,15 +321,33 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
-        // Install base prebuilt detection rule
-        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', license: 'elastic' }),
-        ]);
+        await retryService.tryWithRetries(
+          'installSecurityDetectionEnginePackage',
+          async () => {
+            const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
+              packageName: PREBUILT_RULES_PACKAGE_NAME,
+              // Use a high version to avoid conflicts with real packages
+              // including mock bundled packages path configured via "xpack.fleet.developer.bundledPackageLocation"
+              packageSemver: '99.0.0',
+              prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
+            });
+
+            await installFleetPackageByUpload({
+              getService,
+              packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
+            });
+          },
+          {
+            retryCount: 5,
+            retryDelay: 5000,
+            timeout: 15000, // total timeout applied to all attempts altogether
+          }
+        );
         await installPrebuiltRules(es, supertest);
 
         const { body: existingRule } = await securitySolutionApi
           .readRule({
-            query: { rule_id: 'rule-1' },
+            query: { rule_id: PREBUILT_RULE_ID_A },
           })
           .expect(200);
 
@@ -330,7 +355,7 @@ export default ({ getService }: FtrProviderContext) => {
           .updateRule({
             body: getCustomQueryRuleParams({
               ...existingRule,
-              rule_id: 'rule-1',
+              rule_id: PREBUILT_RULE_ID_A,
               id: undefined,
               license: 'new license',
             }),
