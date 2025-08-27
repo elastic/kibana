@@ -5,29 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiCheckbox,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useMemo, useCallback, useState } from 'react';
+import { EuiLoadingSpinner, EuiSpacer, EuiSearchBar } from '@elastic/eui';
 import type { ToolSelection, ToolDefinition, ToolType } from '@kbn/onechat-common';
-import {
-  toggleTypeSelection,
-  toggleToolSelection,
-  isToolSelected,
-  isAllToolsSelectedForType,
-} from '../../../utils/tool_selection_utils';
-import { truncateAtNewline } from '../../../utils/truncate_at_newline';
+import { filterToolsBySelection, activeToolsCountWarningThreshold } from '@kbn/onechat-common';
+import { toggleTypeSelection, toggleToolSelection } from '../../../utils/tool_selection_utils';
+import { ActiveToolsStatus } from './active_tools_status';
+import { ToolsSearchControls } from './tools_search_controls';
+import { ToolsFlatView } from './tools_flat_view';
+import { ToolsGroupedView } from './tools_grouped_view';
 
 interface ToolsSelectionProps {
   tools: ToolDefinition[];
@@ -35,6 +21,10 @@ interface ToolsSelectionProps {
   selectedTools: ToolSelection[];
   onToolsChange: (tools: ToolSelection[]) => void;
   disabled?: boolean;
+  showActiveOnly?: boolean;
+  onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
+  showGroupedView?: boolean;
+  onShowGroupedViewChange?: (showGroupedView: boolean) => void;
 }
 
 export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
@@ -43,11 +33,44 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   selectedTools,
   onToolsChange,
   disabled = false,
+  showActiveOnly = false,
+  onShowActiveOnlyChange,
+  showGroupedView = true,
+  onShowGroupedViewChange,
 }) => {
-  // Group tools by type
+  const [searchQuery, setSearchQuery] = useState('');
+  const [pageIndex, setPageIndex] = useState(0);
+
+  const displayTools = useMemo(() => {
+    let result = tools;
+
+    if (showActiveOnly) {
+      result = tools.filter((tool) => {
+        return selectedTools.some((selection) => {
+          if (selection.type && selection.type !== tool.type) {
+            return false;
+          }
+          return selection.tool_ids.includes(tool.id) || selection.tool_ids.includes('*');
+        });
+      });
+    }
+
+    return result;
+  }, [tools, showActiveOnly, selectedTools]);
+
+  const filteredTools = useMemo(() => {
+    if (!searchQuery) {
+      return displayTools;
+    }
+
+    return EuiSearchBar.Query.execute(EuiSearchBar.Query.parse(searchQuery), displayTools, {
+      defaultFields: ['id', 'description', 'type'],
+    });
+  }, [searchQuery, displayTools]);
+
   const toolsByType = useMemo(() => {
     const grouped: Partial<Record<ToolType, ToolDefinition[]>> = {};
-    tools.forEach((tool) => {
+    filteredTools.forEach((tool) => {
       const toolType = tool.type;
       if (!grouped[toolType]) {
         grouped[toolType] = [];
@@ -55,7 +78,11 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
       grouped[toolType]!.push(tool);
     });
     return grouped;
-  }, [tools]);
+  }, [filteredTools]);
+
+  const activeToolsCount = useMemo(() => {
+    return filterToolsBySelection(tools, selectedTools).length;
+  }, [tools, selectedTools]);
 
   const handleToggleTypeTools = useCallback(
     (type: ToolType) => {
@@ -75,96 +102,59 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     [selectedTools, onToolsChange, toolsByType]
   );
 
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+    setPageIndex(0);
+  }, []);
+
+  const handlePageChange = useCallback((newPageIndex: number) => {
+    setPageIndex(newPageIndex);
+  }, []);
+
   if (toolsLoading) {
     return <EuiLoadingSpinner size="l" />;
   }
 
   return (
     <div>
-      {Object.entries(toolsByType).map(([type, typeTools]) => {
-        const toolType = type as ToolType;
-        const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
-          {
-            field: 'id',
-            name: i18n.translate('xpack.onechat.tools.toolIdLabel', { defaultMessage: 'Tool' }),
-            valign: 'top',
-            render: (id: string, tool: ToolDefinition) => (
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiCheckbox
-                    id={`tool-${tool.id}`}
-                    checked={isToolSelected(tool, selectedTools)}
-                    onChange={() => handleToggleTool(tool.id, toolType)}
-                    disabled={disabled}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    <strong>{id}</strong>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-          },
-          {
-            field: 'description',
-            name: i18n.translate('xpack.onechat.tools.toolDescriptionLabel', {
-              defaultMessage: 'Description',
-            }),
-            width: '60%',
-            valign: 'top',
-            render: (description: string) => (
-              <EuiText size="s">{truncateAtNewline(description)}</EuiText>
-            ),
-          },
-        ];
+      <ActiveToolsStatus
+        activeToolsCount={activeToolsCount}
+        warningThreshold={activeToolsCountWarningThreshold}
+      />
 
-        return (
-          <div key={type}>
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h4>
-                    <EuiCode>{type}</EuiCode>{' '}
-                    {i18n.translate('xpack.onechat.tools.typeToolsLabel', {
-                      defaultMessage: 'tools',
-                    })}
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  id={`type-${type}`}
-                  label={
-                    <EuiText size="s" color="subdued">
-                      {i18n.translate('xpack.onechat.tools.selectAllTypeTools', {
-                        defaultMessage: 'Select all {typeName} tools',
-                        values: { typeName: type },
-                      })}
-                    </EuiText>
-                  }
-                  checked={isAllToolsSelectedForType(type, typeTools, selectedTools)}
-                  onChange={() => handleToggleTypeTools(toolType)}
-                  disabled={disabled}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+      <EuiSpacer size="l" />
 
-            <EuiSpacer size="s" />
+      <ToolsSearchControls
+        displayTools={displayTools}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        showGroupedView={showGroupedView}
+        onShowGroupedViewChange={onShowGroupedViewChange}
+        showActiveOnly={showActiveOnly}
+        onShowActiveOnlyChange={onShowActiveOnlyChange}
+        disabled={disabled}
+      />
 
-            <EuiBasicTable
-              columns={columns}
-              items={typeTools}
-              itemId="id"
-              noItemsMessage={i18n.translate('xpack.onechat.tools.noToolsAvailable', {
-                defaultMessage: 'No tools available',
-              })}
-            />
+      <EuiSpacer size="m" />
 
-            <EuiSpacer size="m" />
-          </div>
-        );
-      })}
+      {!showGroupedView ? (
+        <ToolsFlatView
+          tools={filteredTools}
+          selectedTools={selectedTools}
+          onToggleTool={handleToggleTool}
+          disabled={disabled}
+          pageIndex={pageIndex}
+          onPageChange={handlePageChange}
+        />
+      ) : (
+        <ToolsGroupedView
+          toolsByType={toolsByType}
+          selectedTools={selectedTools}
+          onToggleTool={handleToggleTool}
+          onToggleTypeTools={handleToggleTypeTools}
+          disabled={disabled}
+        />
+      )}
     </div>
   );
 };
