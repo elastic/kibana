@@ -119,8 +119,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/230988
-    describe.skip('User instruction management', () => {
+    describe('User instruction management', () => {
       async function openUserInstructionFlyout() {
         await testSubjects.click(ui.pages.kbManagementTab.editUserInstructionButton);
         await testSubjects.exists(ui.pages.kbManagementTab.saveEntryButton);
