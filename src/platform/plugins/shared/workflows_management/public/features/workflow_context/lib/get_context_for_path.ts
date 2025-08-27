@@ -91,8 +91,9 @@ export function getContextSchemaForPath(
       steps: outputsSchema,
     });
   }
+  // TODO: search graph for foreach steps, which contain this step in their steps array
+  // const somePredecessorIsForEach =
   if (nearestStep.foreach) {
-    // TODO: add foreach item type
     let itemSchema: z.ZodType = z.any();
     if (nearestStep.foreach.startsWith('steps.') || nearestStep.foreach.startsWith('consts.')) {
       const schema = getSchemaAtPath(contextSchema, nearestStep.foreach);

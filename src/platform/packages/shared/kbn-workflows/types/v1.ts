@@ -70,6 +70,7 @@ export interface EsWorkflowStepExecution {
   executionIndex: number;
   error?: string | null;
   output?: Record<string, any> | null;
+  input?: Record<string, any> | null;
   state?: Record<string, any>;
 }
 
@@ -156,6 +157,16 @@ export const SearchWorkflowCommandSchema = z.object({
   query: z.string().optional(),
   _full: z.boolean().default(false),
 });
+
+export const RunWorkflowCommandSchema = z.object({
+  inputs: z.record(z.any()),
+});
+export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
+
+export const RunWorkflowResponseSchema = z.object({
+  workflowExecutionId: z.string(),
+});
+export type RunWorkflowResponseDto = z.infer<typeof RunWorkflowResponseSchema>;
 
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 

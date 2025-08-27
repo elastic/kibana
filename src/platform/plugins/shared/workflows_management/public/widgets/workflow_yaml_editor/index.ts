@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-interface WorkflowDetailProps {
-  id: string;
-}
-
-export function WorkflowDetail(props: WorkflowDetailProps) {
-  return 'WorkflowDetail';
-}
+export { WorkflowYAMLEditor } from './ui/workflow_yaml_editor';
