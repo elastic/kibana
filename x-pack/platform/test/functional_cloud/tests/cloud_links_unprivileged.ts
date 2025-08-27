@@ -10,6 +10,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'userProfiles', 'settings']);
 
   describe('Cloud Links integration: Unprivileged User', function () {
@@ -34,6 +35,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.clickAndValidate('toggleNavButton', 'collapsibleNavCustomNavLink');
       const cloudLink = await find.byLinkText('Manage this deployment');
       expect(cloudLink).to.not.be(null);
+    });
+
+    after(async () => {
+      // Clean up role mapping
+      await getService('esSupertest')
+        .delete('/_security/role_mapping/cloud-saml-kibana')
+        .expect(200);
+      await browser.refresh();
     });
 
     describe('Fills up the user menu items', () => {

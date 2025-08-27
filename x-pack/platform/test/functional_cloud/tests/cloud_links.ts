@@ -33,6 +33,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
+    after(async () => {
+      // Clean up role mapping
+      await getService('esSupertest')
+        .delete('/_security/role_mapping/cloud-saml-kibana')
+        .expect(200);
+      await browser.refresh();
+    });
+
     describe('Guided onboarding', () => {
       it('Can open "Connection details" overlay with ES URL and Cloud ID', async () => {
         await PageObjects.common.clickAndValidate('helpMenuButton', 'connectionDetailsHelpLink');
