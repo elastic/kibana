@@ -21,4 +21,14 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    description: Indicates if the scheduling was successful
+                    description: Indicates the scheduling was successful
+        "409":
+          description: Conflict - Monitoring engine is already running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message indicating the engine is already running

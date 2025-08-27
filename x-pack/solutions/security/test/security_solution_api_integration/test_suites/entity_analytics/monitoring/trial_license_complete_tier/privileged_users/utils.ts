@@ -70,15 +70,16 @@ export const PrivMonUtils = (
       .expect(expectStatusCode);
   };
 
-  // TODO: delete, a hack while I figure out how to get the PAI in the .gen.ts file
-  const scheduleMonitoringEngineNow = async () => {
+  const scheduleMonitoringEngineNowIgnoreConflict = async () => {
     log.info(`Scheduling Privilege Monitoring engine in namespace ${namespace || 'default'}`);
     return supertest
       .post(routeWithNamespace('/api/entity_analytics/monitoring/engine/schedule_now', namespace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .expect(200);
+      .expect((res) => {
+        return res.status === 200 || res.status === 409;
+      });
   };
 
   const retry = async <T>(fn: () => Promise<T>, retries: number = 5, delay: number = 1000) => {
@@ -153,6 +154,6 @@ export const PrivMonUtils = (
     findUser,
     createSourceIndex,
     assertIsPrivileged,
-    scheduleMonitoringEngineNow,
+    scheduleMonitoringEngineNowIgnoreConflict,
   };
 };

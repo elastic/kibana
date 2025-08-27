@@ -63,6 +63,10 @@ interface StartParams {
   taskManager: TaskManagerStartContract;
 }
 
+export const isTaskAlreadyRunningError = (error: Error): boolean => {
+  return error.name === 'TaskAlreadyRunningError';
+};
+
 const getTaskName = (): string => TYPE;
 
 const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION}`;
@@ -268,7 +272,14 @@ export const scheduleNow = async ({
   try {
     return taskManager.runSoon(taskId);
   } catch (e) {
+    if (e.message.contains('as it is currently running')) {
+      logger.warn(`[task ${taskId}]: task is already running`);
+      const newError = new Error(`Monitoring engine is already running`);
+      newError.name = 'TaskAlreadyRunningError';
+      throw newError;
+    }
     logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
+
     throw e;
   }
 };

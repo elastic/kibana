@@ -18,6 +18,7 @@ import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import { isTaskAlreadyRunningError } from '../../privilege_monitoring/tasks/privilege_monitoring_task';
 
 export const riskEngineScheduleNowRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -65,6 +66,16 @@ export const riskEngineScheduleNowRoute = (
           const body: RiskEngineScheduleNowResponse = { success: true };
           return response.ok({ body });
         } catch (e) {
+          if (isTaskAlreadyRunningError(e)) {
+            return siemResponse.error({
+              statusCode: 409,
+              body: {
+                message: 'Monitoring engine is already running',
+                full_error: JSON.stringify(e),
+              },
+            });
+          }
+
           const error = transformError(e);
 
           return siemResponse.error({

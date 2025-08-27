@@ -402,7 +402,7 @@ export default ({ getService }: FtrProviderContext) => {
         const sources = await api.listEntitySources({ query: {} });
         const names = sources.body.map((s: any) => s.name);
         expect(names).toContain('StarWars');
-        await privMonUtils.scheduleMonitoringEngineNow();
+        await privMonUtils.scheduleMonitoringEngineNowIgnoreConflict();
         await privMonUtils.waitForSyncTaskRun();
         await waitForPrivMonUsersToBeSynced(uniqueUsernames.length);
         // Check if the users are indexed
