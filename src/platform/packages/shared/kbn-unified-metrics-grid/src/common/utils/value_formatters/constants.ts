@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const FIELD_VALUE_SEPARATOR = 0x1d;
+export const FIELD_VALUE_SEPARATOR = String.fromCharCode(0x1d);

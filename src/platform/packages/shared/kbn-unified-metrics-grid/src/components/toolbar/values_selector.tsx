@@ -142,7 +142,7 @@ export const ValuesSelector = ({
 
   return (
     <ToolbarSelector
-      data-test-subj="metricsExperienceBreakdownSelector"
+      data-test-subj="metricsExperienceValuesSelector"
       data-selected-value={selectedDimensions}
       searchable
       buttonLabel={buttonLabel}

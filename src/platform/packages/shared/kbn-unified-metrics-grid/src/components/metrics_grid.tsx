@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { EuiFlexGridProps, IconType } from '@elastic/eui';
 import {
   EuiFlexGrid,
@@ -25,7 +25,7 @@ import { IconChartBarStacked } from '@kbn/chart-icons';
 import { i18n } from '@kbn/i18n';
 import { MetricChart } from './metric_chart';
 
-type MetricsGridProps = {
+export type MetricsGridProps = {
   timeRange: { from?: string; to?: string };
   loading: boolean;
   filters?: Array<{ field: string; value: string }>;
@@ -54,9 +54,17 @@ export const MetricsGrid = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
+  const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
+
   if (loading) {
     return (
-      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '400px' }}>
+      <EuiFlexGroup
+        justifyContent="center"
+        alignItems="center"
+        css={css`
+          min-height: 400px;
+        `}
+      >
         <EuiFlexItem grow={false}>
           <EuiLoadingChart size="m" />
         </EuiFlexItem>
@@ -109,6 +117,7 @@ export const MetricsGrid = ({
         padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
         ${euiScrollBarStyles(euiThemeContext)}
       `}
+      data-test-subj="unifiedMetricsExperienceGrid"
     >
       {pivotOn === 'metric'
         ? fields.map((field, index) => (
@@ -119,7 +128,7 @@ export const MetricsGrid = ({
                 dimensions={dimensions}
                 filters={filters}
                 colorIndex={index}
-                size={columns === 2 || columns === 4 ? 's' : 'm'}
+                size={chartSize}
               />
             </EuiFlexItem>
           ))
@@ -132,7 +141,7 @@ export const MetricsGrid = ({
                 dimensions={[dimension]}
                 filters={filters}
                 colorIndex={index}
-                size={columns === 2 || columns === 4 ? 's' : 'm'}
+                size={chartSize}
               />
             </EuiFlexItem>
           ))}

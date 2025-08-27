@@ -92,7 +92,7 @@ export const MetricsExperienceGrid = ({
       }),
 
       onClick: () => {},
-      'data-test-subj': 'metricsExperienceEditVisualization',
+      'data-test-subj': 'metricsExperienceToolbarSearch',
     },
     {
       iconType: 'fullScreen',
@@ -101,7 +101,7 @@ export const MetricsExperienceGrid = ({
       }),
 
       onClick: () => {},
-      'data-test-subj': 'metricsExperienceEditVisualization',
+      'data-test-subj': 'metricsExperienceToolbarFullScreen',
     },
   ];
 
