@@ -1115,7 +1115,10 @@ describe('unary operator precedence and grouping', () => {
 
   test('unary minus should parenthesize addition', () => {
     assertReprint(
-      `ROW -(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa + bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb)`
+      `ROW
+  -2 *
+    (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa +
+      bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb)`
     );
   });
 });

@@ -157,6 +157,8 @@ export class WrappingPrettyPrinter {
     const [left, right] = ctx.arguments();
     const groupLeft = binaryExpressionGroup(left);
     const groupRight = binaryExpressionGroup(right);
+    const doGroupLeft = groupLeft && groupLeft < group;
+    const doGroupRight = groupRight && groupRight < group;
     const continueVerticalFlattening = group && inp.flattenBinExpOfType === group;
     const suffix = inp.suffix ?? '';
     const oneArgumentPerLine =
@@ -198,11 +200,11 @@ export class WrappingPrettyPrinter {
     let leftFormatted = BasicPrettyPrinter.expression(left, this.opts);
     let rightFormatted = BasicPrettyPrinter.expression(right, this.opts);
 
-    if (groupLeft && groupLeft < group) {
+    if (doGroupLeft) {
       leftFormatted = `(${leftFormatted})`;
     }
 
-    if (groupRight && groupRight < group) {
+    if (doGroupRight) {
       rightFormatted = `(${rightFormatted})`;
     }
 
@@ -234,6 +236,14 @@ export class WrappingPrettyPrinter {
       };
       const leftOut = ctx.visitArgument(0, leftInput);
       const rightOut = ctx.visitArgument(1, rightInput);
+
+      if (doGroupLeft) {
+        leftOut.txt = `(${leftOut.txt})`;
+      }
+
+      if (doGroupRight) {
+        rightOut.txt = `(${rightOut.txt})`;
+      }
 
       txt = `${leftOut.txt}${operatorLeadingWhitespace}${operator}\n`;
 
