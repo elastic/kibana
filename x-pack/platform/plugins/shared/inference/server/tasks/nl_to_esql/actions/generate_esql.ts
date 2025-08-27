@@ -19,7 +19,7 @@ import {
   ChatCompleteOptions,
   ChatCompleteAPI,
   OutputEventType,
-  ToolChoiceType
+  ToolChoiceType,
 } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
