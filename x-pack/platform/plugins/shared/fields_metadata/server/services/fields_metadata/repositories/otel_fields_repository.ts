@@ -87,7 +87,9 @@ export class OtelFieldsRepository {
       const field = this.getByName(fieldName);
 
       if (field) {
-        fieldsMetadata[fieldName] = field;
+        // Use the stripped field name as the key for consistency
+        const strippedFieldName = stripOtelPrefixes(fieldName as string);
+        fieldsMetadata[strippedFieldName as OtelFieldName] = field;
       }
 
       return fieldsMetadata;
