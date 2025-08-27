@@ -2203,26 +2203,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.3.0.tgz#3d65189b84f55440145eeb01dff9a77fb8036830"
   integrity sha512-rimxG9D/jCT/UvrZvet69kTHYMIpBqPwl+iR+aA9Ay5QaP7LFEPnEj6TMb1wk64vfzrTeV95eOLMAElJmXo4wA==
 
-"@elastic/eui-theme-borealis@3.3.2":
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.3.2.tgz#b3b6a9bf0df3cbfc4c4e07f24c5a2f8eec2abd94"
-  integrity sha512-0NbT2MtoaM2ltzyc1ms/lIc163p/XgG/6ePMsEWuHTWkScZe5V1sN7cnjzKncwpIIDJ0CfdOkeJQKcL/gj7bBA==
-
-"@elastic/eui-theme-common@4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-4.0.0.tgz#d3f10cc42f754923ae23cee9a1b62d4345157843"
-  integrity sha512-0X9KFVpQnyk4KsWD5W8fzzZbCud25XJ6z2J03qka0mwh4qGy/XWIiGflBC1BH1BZYu71olnaMKaSJQliY3LZlQ==
-  dependencies:
-    "@types/lodash" "^4.14.202"
-    chroma-js "^2.4.2"
-    lodash "^4.17.21"
-
-"@elastic/eui@106.4.0":
+"@elastic/eui-amsterdam@file:./eui_106.4.0_super_date_picker_time_window_01.tgz", "@elastic/eui@file:./eui_106.4.0_super_date_picker_time_window_01.tgz":
   version "106.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.4.0.tgz#a974ebfa7ea5636235edd64022e9f2122ac44d40"
-  integrity sha512-LCNImIS3+ZN1SrsppqICkm/1DH5uTe1YptyVPctsogViPVm6CxEeo+SyFz1PDKE5wKbmSvCHcVGVUf2xjH7RgA==
+  resolved "file:./eui_106.4.0_super_date_picker_time_window_01.tgz#42068f3d12c0b1fecbf00298043a9806384583fb"
   dependencies:
-    "@elastic/eui-theme-common" "4.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2257,6 +2241,18 @@
     url-parse "^1.5.10"
     uuid "^8.3.0"
     vfile "^4.2.1"
+
+"@elastic/eui-theme-borealis@file:./eui_theme_borealis_3.3.2_super_date_picker_time_window_01.tgz":
+  version "3.3.2"
+  resolved "file:./eui_theme_borealis_3.3.2_super_date_picker_time_window_01.tgz#e4fe317283043e1e721fc9e29ec00cfbd32ccb16"
+
+"@elastic/eui-theme-common@file:./eui_theme_common_4.0.0_super_date_picker_time_window_01.tgz":
+  version "4.0.0"
+  resolved "file:./eui_theme_common_4.0.0_super_date_picker_time_window_01.tgz#b979d193738fdee265b215b930feb8c70e7ca859"
+  dependencies:
+    "@types/lodash" "^4.14.202"
+    chroma-js "^2.4.2"
+    lodash "^4.17.21"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
