@@ -18,8 +18,7 @@ import {
   OutputEventType,
   ToolChoiceType,
   FunctionCallingMode,
-  ChatCompleteMetadata,
-  ChatCompleteOptions
+  ChatCompleteMetadata
 } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import { InferenceClient } from '../../..';
