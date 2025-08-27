@@ -31,7 +31,10 @@ export class EnterForeachNodeImpl implements StepImplementation {
 
       if (evaluatedItems.length === 0) {
         this.workflowLogger.logDebug(
-          `Foreach step "${this.step.id}" has no items to iterate over. Skipping execution.`
+          `Foreach step "${this.step.id}" has no items to iterate over. Skipping execution.`,
+          {
+            workflow: { step_id: this.step.id },
+          }
         );
         await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
           items: [],
@@ -43,7 +46,10 @@ export class EnterForeachNodeImpl implements StepImplementation {
       }
 
       this.workflowLogger.logDebug(
-        `Foreach step "${this.step.id}" will iterate over ${evaluatedItems.length} items.`
+        `Foreach step "${this.step.id}" will iterate over ${evaluatedItems.length} items.`,
+        {
+          workflow: { step_id: this.step.id },
+        }
       );
 
       // Initialize foreach state
