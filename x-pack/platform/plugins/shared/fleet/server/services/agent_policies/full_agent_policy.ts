@@ -161,7 +161,7 @@ export async function getFullAgentPolicy(
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(agentInputs);
+    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput);
   }
 
   const inputs = agentInputs
@@ -876,23 +876,113 @@ export function getBinarySourceSettings(
 }
 
 // Generate OTel Collector policy
-export function generateOtelcolConfig(inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[]) {
-  const otelConfig = inputs.flatMap((input) => {
-    if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
+export function generateOtelcolConfig(inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[], dataOutput: Output) {
+  const otelConfigs : OTelCollectorConfig[] = inputs.
+    filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE).
+    flatMap((input) => {
       const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).flatMap((inputStream) => {
         return {
           ...(inputStream?.receivers ? { receivers: inputStream.receivers } : {}),
           ...(inputStream?.service ? { service: inputStream.service } : {}),
-          ...(inputStream?.extensions ? { service: inputStream.extensions } : {}),
-          ...(inputStream?.processors ? { service: inputStream.processors } : {}),
-          ...(inputStream?.connectors ? { service: inputStream.connectors } : {}),
-          ...(inputStream?.exporters ? { service: inputStream.exporters } : {}),
+          ...(inputStream?.extensions ? { extensions: inputStream.extensions } : {}),
+          ...(inputStream?.processors ? { processors: inputStream.processors } : {}),
+          ...(inputStream?.connectors ? { connectors: inputStream.connectors } : {}),
+          ...(inputStream?.exporters ? { exporters: inputStream.exporters } : {}),
         };
       });
 
       return otelInputs;
-    }
-  });
+    });
 
-  return otelConfig.length > 0 ? otelConfig[0] : {};
+  return otelConfigs.length > 0? mergeOtelcolConfigs(otelConfigs) : {};
+}
+
+export function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]) {
+  return otelConfigs.reduce((merged, next) => {
+    if (!next) {
+      return merged
+    }
+    return {
+      extensions: {
+        ...merged.extensions,
+        ...next.extensions,
+      },
+      receivers: {
+        ...merged.receivers,
+        ...next.receivers,
+      },
+      processors: {
+        ...merged.processors,
+        ...next.processors,
+      },
+      connectors: {
+        ...merged.connectors,
+        ...next.connectors,
+      },
+      exporters: {
+        ...merged.exporters,
+        ...next.exporters,
+      },
+      service: {
+        ...merged.service,
+        ...(next.service?.extensions? { extensions: (merged.service?.extensions? merged.service.extensions : []).concat(next.service.extensions) } : {}),
+        pipelines: {
+          ...merged.service?.pipelines,
+          ...next.service?.pipelines,
+        }
+      }
+    }
+
+    /*
+    if (next.extensions) {
+      merged.extensions = {
+        ...merged.extensions,
+        ...next.extensions,
+      }
+    }
+    if (next.receivers) {
+      merged.receivers = {
+        ...merged.receivers,
+        ...next.receivers,
+      }
+    }
+    if (next.processors) {
+      merged.processors = {
+        ...merged.processors,
+        ...next.processors,
+      }
+    }
+    if (next.connectors) {
+      merged.connectors = {
+        ...merged.connectors,
+        ...next.connectors,
+      }
+    }
+    if (next.exporters) {
+      merged.exporters = {
+        ...merged.exporters,
+        ...next.exporters,
+      }
+    }
+
+    if (next.service?.extensions) {
+      merged.service = {
+        ...merged.service,
+        extensions: (merged.service?.extensions? merged.service.extensions : []).concat(next.service.extensions)
+      }
+    }
+
+    if (next.service?.pipelines) {
+      merged.service = {
+        ...merged.service,
+        pipelines: {
+          ...merged.service?.pipelines,
+          ...next.service?.pipelines,
+        },
+      }
+    }
+
+    return merged;
+    */
+  });
 }
