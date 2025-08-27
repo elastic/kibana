@@ -2453,6 +2453,18 @@ module.exports = {
         ],
       },
     },
+    {
+      // Deployment-agnostic test files must use proper context and services
+      files: [
+        'x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
+        'x-pack/platform/test/api_integration_deployment_agnostic/services/**/*.{js,ts}',
+        'x-pack/solutions/**/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
+        'x-pack/solutions/**/test/api_integration_deployment_agnostic/services/**/*.{js,ts}',
+      ],
+      rules: {
+        '@kbn/eslint/deployment_agnostic_test_context': 'error',
+      },
+    },
   ],
 };
 
