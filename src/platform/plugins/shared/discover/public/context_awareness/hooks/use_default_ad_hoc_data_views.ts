@@ -37,7 +37,7 @@ export const useDefaultAdHocDataViews = ({
 
       const profileDataViewSpecs = rootProfileState.getDefaultAdHocDataViews();
       const profileDataViews = await Promise.all(
-        profileDataViewSpecs.map((spec) => dataViews.create(spec, true))
+        profileDataViewSpecs.map((spec) => dataViews.create({ ...spec, managed: true }, true))
       );
 
       internalState.dispatch(

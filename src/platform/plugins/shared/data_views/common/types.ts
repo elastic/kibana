@@ -385,7 +385,6 @@ export type TypeMeta = {
 export enum DataViewType {
   DEFAULT = 'default',
   ROLLUP = 'rollup',
-  MANAGED = 'managed',
 }
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;

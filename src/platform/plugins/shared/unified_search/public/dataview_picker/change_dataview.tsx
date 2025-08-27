@@ -26,8 +26,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { type DataViewPickerProps } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
@@ -144,9 +143,10 @@ export function ChangeDataView({
       return;
     }
     const dataView = await dataViews.get(currentDataViewId);
-    const editData = new DataView({
-      spec: { title: dataView.getIndexPattern() },
-      fieldFormats: {} as FieldFormatsStartCommon,
+    const editData = await dataViews.create({
+      ...dataView.toSpec(),
+      id: undefined,
+      managed: false,
     });
 
     dataViewEditor.openEditor({
@@ -155,7 +155,7 @@ export function ChangeDataView({
         onDataViewCreated(newDataView);
       },
       allowAdHocDataView: true,
-      isDuplicatingManaged: true,
+      isDuplicating: true,
     });
   }, [currentDataViewId, dataViews, dataViewEditor, onDataViewCreated]);
 

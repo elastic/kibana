@@ -63,7 +63,7 @@ export const sharedDataViewManagerSlice = createSlice({
           // NOTE: user is allowed to duplicate a managed data view and
           // we want both to show up in the list
           state.adhocDataViews.find(
-            (dv) => dv.title === dataViewSpec.title && dv.name === dataViewSpec.managed
+            (dv) => dv.title === dataViewSpec.title && dv.managed === dataViewSpec.managed
           )
         ) {
           return;

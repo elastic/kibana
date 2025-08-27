@@ -72,13 +72,13 @@ export interface DataViewEditorProps {
    */
   showManagementLink?: boolean;
   /**
-   * if editing a managed data view and onDuplicate is defined, a duplicate button is shown
+   * If editing a data view and onDuplicate is defined, a duplicate button is shown
    */
   onDuplicate?: () => void;
   /**
-   * if editing a managed data view and onDuplicate is defined, a duplicate button is shown
+   * Optional boolean to indicate if the data view is being duplicated
    */
-  isDuplicatingManaged?: boolean;
+  isDuplicating?: boolean;
   /**
    * Optional callback to get help text based on the active data view
    */
