@@ -56,6 +56,7 @@ jobs:
           COPILOT_EMAILS="github-actions[bot]@users.noreply.github.com\ncopilot-bot@users.noreply.github.com\ncopilot@github.com"
           FOUND=0
           for COMMIT in $(cat commits.txt); do
+            echo "Checking commit: $COMMIT"
             AUTHOR_EMAIL=$(git show -s --format='%ae' $COMMIT)
             for EMAIL in $COPILOT_EMAILS; do
               if [ "$AUTHOR_EMAIL" = "$EMAIL" ]; then
