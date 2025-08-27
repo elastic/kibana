@@ -120,7 +120,7 @@ Alerting::
 Canvas::
 * Fixes a rendering issue that affected progress elements in Canvas ({kibana-pull}232432[#232432]).
 Dashboards and Visualizations::
-* Ensures passing of the `allowLeadingWildcards` advanced setting in Lens ({kibana-pull}232609[#232609]).
+* Ensures passing of the `allowLeadingWildcards` advanced setting for ES|QL charts in Lens ({kibana-pull}232609[#232609]).
 * Removes the list of `availableOptions` from the ES|QL `VALUES_FROM_QUERY` saved object ({kibana-pull}231690[#231690]).
 * Fixes older color mapping configuration in Lens ({kibana-pull}231563[#231563]).
 * Fixes lost references when returning to unsaved dashboards with reference panels ({kibana-pull}231517[#231517]).
