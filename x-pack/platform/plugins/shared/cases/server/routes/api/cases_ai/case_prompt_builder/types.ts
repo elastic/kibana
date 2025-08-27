@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { getConnectorList, getDefaultConnector } from './src/connectors';
+export enum PersistableAttachmentType {
+  page = '.page',
+}
+
+export enum PageAttachmentType {
+  slo_history = 'slo_history',
+  synthetics_monitor = 'synthetics_monitor',
+}

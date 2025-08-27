@@ -24,7 +24,7 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { WorkflowStepExecutionListItem } from './workflow_step_execution_list_item';
 
-interface WorkflowStepExecutionListProps {
+export interface WorkflowStepExecutionListProps {
   execution: WorkflowExecutionDto | null;
   isLoading: boolean;
   error: Error | null;

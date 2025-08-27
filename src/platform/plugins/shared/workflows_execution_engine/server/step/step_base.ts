@@ -91,6 +91,18 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
   // Subclasses implement this to execute the step logic
   protected abstract _run(input?: any): Promise<RunStepResult>;
 
+  // Helper to handle common logic like condition evaluation, retries, etc.
+  protected async evaluateCondition(condition: string | undefined): Promise<boolean> {
+    if (!condition) return true;
+    // Use templating engine to evaluate condition with context
+    // For now, placeholder: assume it's true if condition exists
+    // Integrate with TemplatingEngine in actual implementation
+    // const context = this.contextManager.getContext();
+    // const parsedCondition = this.templatingEngine.render(condition, context);
+    // return evaluate(parsedCondition, context);
+    return true;
+  }
+
   // Helper for handling on-failure, retries, etc.
   protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
     // Implement retry logic based on step['on-failure']

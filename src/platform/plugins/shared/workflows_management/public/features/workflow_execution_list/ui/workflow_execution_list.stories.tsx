@@ -8,14 +8,17 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
+import type { Meta } from '@storybook/react';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import { WorkflowExecutionList } from './workflow_execution_list';
 
-export default {
+const meta: Meta<typeof WorkflowExecutionList> = {
   component: WorkflowExecutionList,
   title: 'Workflows Management/Workflow Execution List',
   decorators: [kibanaReactDecorator],
 };
+
+export default meta;
 
 export const Default = {
   args: {

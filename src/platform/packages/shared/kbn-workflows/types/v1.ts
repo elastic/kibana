@@ -28,8 +28,9 @@ export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
   workflowId: string;
+  isTestRun: boolean;
   status: ExecutionStatus;
-  context: Record<string, string>;
+  context: Record<string, any>;
   workflowDefinition: WorkflowYaml;
   currentNodeId?: string; // The node currently being executed
   stack: string[];
@@ -210,10 +211,10 @@ export interface WorkflowListDto {
   };
   results: WorkflowListItemDto[];
 }
-export type WorkflowExecutionEngineModel = Pick<
-  EsWorkflow,
-  'id' | 'name' | 'enabled' | 'definition'
->;
+export interface WorkflowExecutionEngineModel
+  extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition'> {
+  isTestRun?: boolean;
+}
 
 export interface WorkflowListItemAction {
   isPrimary?: boolean;

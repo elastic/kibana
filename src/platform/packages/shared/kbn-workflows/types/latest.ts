@@ -14,6 +14,24 @@ export type {
   EsWorkflow,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  WorkflowExecutionLogModel,
+  WorkflowExecutionHistoryModel,
+
+  // dtos
+  WorkflowDetailDto,
+  WorkflowListDto,
+  WorkflowListItemDto,
+  WorkflowExecutionDto,
+  WorkflowExecutionListDto,
+  WorkflowExecutionListItemDto,
+  WorkflowListItemAction,
+
+  // commands
+  CreateWorkflowCommand,
+  UpdatedWorkflowResponseDto,
+  RunWorkflowCommand,
+  RunWorkflowResponseDto,
+
   // execution engine
   Provider,
   ProviderInput,
