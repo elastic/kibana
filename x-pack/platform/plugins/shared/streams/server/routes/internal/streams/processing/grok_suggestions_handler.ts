@@ -77,7 +77,8 @@ export const handleProcessingGrokSuggestions = async ({
         ? field.ecs_field.replace('@timestamp', 'custom.timestamp')
         : field.ecs_field;
       return {
-        name: isWiredStream ? getOtelFieldName(name) : name,
+        // if the stream is wired, or if it matches the logs-*otel-* pattern, use the OTEL field names
+        name: (isWiredStream || params.path.name.match(/^logs-.*\.otel-/)) ? getOtelFieldName(name) : name,
         columns: field.columns,
         grok_components: field.grok_components,
       };
