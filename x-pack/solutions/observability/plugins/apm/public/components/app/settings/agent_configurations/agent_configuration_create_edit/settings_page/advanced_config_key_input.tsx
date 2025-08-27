@@ -59,14 +59,14 @@ export function AdvancedConfigKeyInput({
           defaultMessage: 'This key is already predefined in the standard configuration above',
         });
       }
-      if (touched && checkIfAdvancedConfigKeyExists(key)) {
+      if (key !== configKey && checkIfAdvancedConfigKeyExists(key)) {
         return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
           defaultMessage: 'This key is already used in another advanced configuration',
         });
       }
       return null;
     },
-    [checkIfAdvancedConfigKeyExists, checkIfPredefinedConfigKeyExists, touched]
+    [checkIfAdvancedConfigKeyExists, checkIfPredefinedConfigKeyExists, configKey]
   );
 
   useEffect(() => {
