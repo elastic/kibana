@@ -100,6 +100,8 @@ export interface ContentFrameworkTableProps
   title: string;
 }
 
+const DEFAULT_INITIAL_PAGE_SIZE = 25;
+
 export type FieldConfigValue = string | number | undefined;
 
 export interface FieldConfiguration {
@@ -245,7 +247,7 @@ export function ContentFrameworkTable({
         onAddColumn={onAddColumn}
         onRemoveColumn={onRemoveColumn}
         columns={columns}
-        initialPageSize={0}
+        initialPageSize={DEFAULT_INITIAL_PAGE_SIZE}
         customRenderCellValue={cellValueRenderer}
         customRenderCellPopover={cellPopoverRenderer}
         gridStyle={{ stripes: false, rowHover: 'none' }}
