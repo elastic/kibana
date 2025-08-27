@@ -17,7 +17,8 @@ import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import type { MlRoute, PageProps } from '../router';
-import { createPath, PageLoader } from '../router';
+import { PageLoader } from '../page_loader';
+import { createPath } from '../create_path';
 import { useRouteResolver } from '../use_resolver';
 import { initSavedObjects } from '../resolvers';
 

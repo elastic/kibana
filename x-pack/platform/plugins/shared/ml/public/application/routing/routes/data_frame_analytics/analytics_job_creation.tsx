@@ -17,7 +17,8 @@ import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import { DataSourceContextProvider } from '../../../contexts/ml';
 import type { MlRoute, PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import {

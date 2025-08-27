@@ -13,7 +13,7 @@ import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { type NavigateToApp, getStackManagementBreadcrumb } from '../breadcrumbs';
 import type { MlRoute, PageProps } from '../router';
-import { PageLoader } from '../router'; // createPath,
+import { PageLoader } from '../page_loader'; // createPath,
 import { useRouteResolver } from '../use_resolver';
 import { initSavedObjects } from '../resolvers';
 import { useEnabledFeatures } from '../../contexts/ml';

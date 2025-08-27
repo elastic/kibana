@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { MlRoute } from '../../router';
-import { PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
 import { useRouteResolver } from '../../use_resolver';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import {

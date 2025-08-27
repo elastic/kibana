@@ -18,7 +18,8 @@ import { basicResolvers } from '../../resolvers';
 import type { NavigateToPath } from '../../../contexts/kibana';
 
 import type { MlRoute, PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
 import { getDateFormatTz } from '../../../explorer/explorer_utils';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';

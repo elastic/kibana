@@ -16,7 +16,8 @@ import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_ch
 
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import type { MlRoute, PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
 import {
   type NavigateToApp,

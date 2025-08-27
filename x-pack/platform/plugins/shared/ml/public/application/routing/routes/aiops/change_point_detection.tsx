@@ -15,7 +15,8 @@ import { DataSourceContextProvider } from '../../../contexts/ml';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../..';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
 
 const Page = dynamic(async () => ({

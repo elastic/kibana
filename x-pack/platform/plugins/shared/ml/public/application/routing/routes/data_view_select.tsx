@@ -15,7 +15,7 @@ import type { MlRoute } from '../router';
 import type { NavigateToPath } from '../../contexts/kibana';
 import { NavigateToPageButton } from '../components/navigate_to_page_button';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { createPath } from '../router';
+import { createPath } from '../create_path';
 import { MODE, PageWrapper } from './new_job/index_or_search_page_wrapper';
 
 const getDataVisBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [

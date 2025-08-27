@@ -15,7 +15,8 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
 
 import type { MlRoute } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { type NavigateToApp, getADSettingsBreadcrumbs } from '../../breadcrumbs';
