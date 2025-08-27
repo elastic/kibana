@@ -16,9 +16,16 @@ export const useFindCasesContainingAllSelectedAlerts = (
   selectedAlertIds: string[],
   caseIds: string[]
 ) => {
-  return useQuery<unknown, unknown, { casesWithAllAttachments?: string[] }>({
-    queryKey: normalizeQueryKey(selectedAlertIds, caseIds),
-    queryFn: () => findCasesByAttachmentId(selectedAlertIds, caseIds),
-    enabled: selectedAlertIds.length > 0 && caseIds.length > 0,
-  });
+  return useQuery<
+    { casesWithAllAttachments: string[] },
+    Error,
+    { casesWithAllAttachments?: string[] },
+    readonly string[]
+  >(
+    normalizeQueryKey(selectedAlertIds, caseIds),
+    () => findCasesByAttachmentId(selectedAlertIds, caseIds),
+    {
+      enabled: selectedAlertIds.length > 0 && caseIds.length > 0,
+    }
+  );
 };

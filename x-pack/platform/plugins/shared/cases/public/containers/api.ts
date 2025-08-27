@@ -223,7 +223,9 @@ export const getInferenceConnectors = async (
 };
 
 export const findCasesByAttachmentId = async (alertIds: string[], caseIds: string[]) => {
-  return KibanaServices.get().http.fetch<{}>(`${INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL}`, {
+  return KibanaServices.get().http.fetch<{
+    casesWithAllAttachments: string[];
+  }>(`${INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL}`, {
     method: 'POST',
     body: JSON.stringify({
       alertIds,
