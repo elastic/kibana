@@ -34,9 +34,14 @@ export interface AppliedStatsFunction {
 // helper for removing backticks from field names
 const removeBackticks = (str: string) => str.replace(/`/g, '');
 
-export const getESQLStatsQueryMeta = (queryString: string) => {
-  const groupByFields: Array<{ field: string; type: string }> = [];
-  const appliedFunctions: AppliedStatsFunction[] = [];
+export interface ESQLStatsQueryMeta {
+  groupByFields: Array<{ field: string; type: string }>;
+  appliedFunctions: AppliedStatsFunction[];
+}
+
+export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
+  const groupByFields: ESQLStatsQueryMeta['groupByFields'] = [];
+  const appliedFunctions: ESQLStatsQueryMeta['appliedFunctions'] = [];
 
   const esqlQuery = EsqlQuery.fromSrc(queryString);
 
