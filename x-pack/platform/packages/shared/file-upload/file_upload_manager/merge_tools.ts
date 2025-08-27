@@ -80,12 +80,6 @@ export function createMergedMappings(
 
   const fieldsPerFile = tempMappings.map((m) => getFieldsFromMappings(m as MappingTypeMapping));
 
-  if (existingIndexMappings !== null) {
-    // add the existing index mappings to the beginning of the fields array
-    // so the merged mappings contain the existing index mappings
-    fieldsPerFile.splice(0, 0, getFieldsFromMappings(existingIndexMappings as MappingTypeMapping));
-  }
-
   const mappingClashes: MappingClash[] = [];
 
   const mergedMappingsMap = fieldsPerFile.reduce((acc, fields, i) => {
@@ -108,7 +102,7 @@ export function createMergedMappings(
               fieldName: field.name,
               existingType: existingField.type,
               clashingType: {
-                fileName: files[i].getFileName(),
+                fileName: files[i]?.getFileName(),
                 newType: field.value.type as string,
                 fileIndex: i,
               },
