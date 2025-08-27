@@ -20,7 +20,7 @@ import { getScopeFieldDefaults } from './utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { MANAGEMENT_SECTION_IDS } from '../../management';
-import { useCreateAndNavigateToManagementMlLink } from '../../contexts/kibana';
+import { useCreateAndNavigateToManagementMlLink } from '../../contexts/kibana/use_create_url';
 
 function NoFilterListsCallOut() {
   const redirectToFilterManagementPage = useCreateAndNavigateToManagementMlLink(
