@@ -58,7 +58,7 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
           type: 'field_value_selection',
           field: 'type',
           name: labels.tools.typeFilter,
-          multiSelect: true,
+          multiSelect: 'or',
           options: Object.entries(toolTypeDisplays).map(([type, display]) => ({
             value: type as ToolType,
             name: display.label,
