@@ -103,7 +103,19 @@ export class IndicesMetadataService {
       this.receiver.getIndices(),
       this.receiver.getDataStreams(),
       this.receiver.getIndexTemplatesStats(),
-    ]);
+    ]).catch((error) => {
+      this.logger.error('Error fetching indices metadata', { error });
+      return [undefined, undefined, undefined];
+    });
+
+    if (
+      indicesSettings === undefined ||
+      dataStreams === undefined ||
+      indexTemplates === undefined
+    ) {
+      this.logger.debug('Skipping indices metadata publish due to fetch errors');
+      return;
+    }
 
     const indices = indicesSettings.map((index) => index.index_name);
 
