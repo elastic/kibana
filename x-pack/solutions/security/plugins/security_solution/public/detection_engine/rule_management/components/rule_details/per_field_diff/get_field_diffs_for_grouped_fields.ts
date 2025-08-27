@@ -29,7 +29,7 @@ export const sortAndStringifyJson = (fieldValue: unknown): string => {
   if (typeof fieldValue === 'string') {
     return fieldValue;
   }
-  return stringify(fieldValue, { space: 2 });
+  return `${stringify(fieldValue, { space: 2 })}`;
 };
 
 export const getFieldDiffsForDataSource = (

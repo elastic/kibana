@@ -61,7 +61,7 @@ const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
 ];
 
 const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
-  stringify(jsObject, { space: 2 });
+  `${stringify(jsObject, { space: 2 })}`;
 
 /**
  * Normalizes the rule object, making it suitable for comparison with another normalized rule.

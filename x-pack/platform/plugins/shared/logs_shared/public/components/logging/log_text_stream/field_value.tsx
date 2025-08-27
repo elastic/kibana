@@ -58,7 +58,7 @@ const formatValue = (value: JsonValue): string => {
     return value;
   }
 
-  return stringify(value);
+  return `${stringify(value)}`;
 };
 
 const CommaSeparatedLi = euiStyled.li`

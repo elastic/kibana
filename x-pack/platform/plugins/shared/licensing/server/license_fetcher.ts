@@ -128,11 +128,11 @@ function sign({
 }) {
   return createHash('sha256')
     .update(
-      stringify({
+      `${stringify({
         license,
         features,
         error,
-      })
+      })}`
     )
     .digest('hex');
 }

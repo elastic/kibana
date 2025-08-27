@@ -49,7 +49,7 @@ export const stringifyToSortedJson = (fieldValue: unknown): string => {
     return fieldValue;
   }
 
-  return stringify(fieldValue, { space: 2 });
+  return `${stringify(fieldValue, { space: 2 })}`;
 };
 
 interface OptionDetails {

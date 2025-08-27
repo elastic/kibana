@@ -20,7 +20,9 @@ import type { SearchSessionSavedObjectAttributes } from '../../../common';
  */
 export function createRequestHash(keys: Record<any, any>) {
   const { preference, ...params } = keys;
-  return createHash(`sha256`).update(stringify(params)).digest('hex');
+  return createHash(`sha256`)
+    .update(`${stringify(params)}`)
+    .digest('hex');
 }
 
 export function isSearchSessionExpired(

@@ -22,7 +22,7 @@ export const jsonFromBase64StringRT = new rt.Type<JsonValue, string, string>(
       return rt.failure(error, context);
     }
   },
-  (a) => Buffer.from(stringify(a)).toString('base64')
+  (a) => Buffer.from(`${stringify(a)}`).toString('base64')
 );
 
 export const createAsyncRequestRTs = <StateCodec extends rt.Mixed, ParamsCodec extends rt.Mixed>(

@@ -210,7 +210,7 @@ export class CasesConnectorExecutor {
 
     for (const alert of alertsWithAllGroupingFields) {
       const alertWithOnlyTheGroupingFields = pick(alert, uniqueGroupingByFields);
-      const groupingKey = stringify(alertWithOnlyTheGroupingFields);
+      const groupingKey = `${stringify(alertWithOnlyTheGroupingFields)}`;
 
       if (this.logger.isLevelEnabled('debug')) {
         this.logger.debug(
@@ -229,7 +229,7 @@ export class CasesConnectorExecutor {
     if (noGroupedAlerts.length > 0) {
       const noGroupedGrouping = this.generateNoGroupAlertGrouping(params.groupingBy);
 
-      groupingMap.set(stringify(noGroupedGrouping), {
+      groupingMap.set(`${stringify(noGroupedGrouping)}`, {
         alerts: noGroupedAlerts,
         grouping: noGroupedGrouping,
       });

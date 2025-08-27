@@ -11,5 +11,5 @@ import { Sha256 } from '@kbn/crypto-browser';
 import stringify from 'json-stable-stringify';
 
 export async function createRequestHash(keys: Record<string, any>) {
-  return new Sha256().update(stringify(keys), 'utf8').digest('hex');
+  return new Sha256().update(`${stringify(keys)}`, 'utf8').digest('hex');
 }

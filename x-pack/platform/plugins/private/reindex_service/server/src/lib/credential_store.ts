@@ -22,7 +22,7 @@ const getHash = (reindexOp: ReindexSavedObject) => {
   // This needs further investigation, see: https://github.com/elastic/kibana/issues/123752
   const { reindexOptions, ...attributes } = reindexOp.attributes;
   return createHash('sha256')
-    .update(stringify({ id: reindexOp.id, ...attributes }))
+    .update(`${stringify({ id: reindexOp.id, ...attributes })}`)
     .digest('base64');
 };
 

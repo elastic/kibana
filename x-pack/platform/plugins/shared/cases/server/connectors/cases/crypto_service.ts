@@ -21,6 +21,6 @@ export class CryptoService {
       return null;
     }
 
-    return stringify(obj);
+    return stringify(obj) ?? null;
   }
 }

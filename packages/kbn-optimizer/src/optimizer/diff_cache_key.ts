@@ -22,5 +22,5 @@ export function diffCacheKey(expected?: unknown, actual?: unknown) {
     return;
   }
 
-  return diffStrings(expectedJson, actualJson);
+  return diffStrings(`${expectedJson}`, `${actualJson}`);
 }
