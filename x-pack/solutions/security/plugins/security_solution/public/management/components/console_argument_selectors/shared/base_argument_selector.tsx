@@ -88,7 +88,7 @@ const BaseArgumentSelectorComponent = <
       const hasDescription = 'description' in option && option.description;
       const testId = testIdPrefix ? `${testIdPrefix}-` : '';
       const descriptionText = hasDescription ? String(option.description) : '';
-      
+
       return (
         <div data-test-subj={`${testId}script`}>
           <EuiText size="s" css={SHARED_TRUNCATION_STYLE}>

@@ -1115,8 +1115,12 @@ describe('When using Actions service utilities', () => {
     it('should preserve meta field in action details record', () => {
       const machineActionId = 'ms-defender-action-456';
       actionRequest.meta = { machineActionId };
-      
-      const actionDetails = createActionDetailsRecord(actionRequest, actionResponses, agentHostInfo);
+
+      const actionDetails = createActionDetailsRecord(
+        actionRequest,
+        actionResponses,
+        agentHostInfo
+      );
       expect(actionDetails.meta).toEqual({ machineActionId });
     });
 
