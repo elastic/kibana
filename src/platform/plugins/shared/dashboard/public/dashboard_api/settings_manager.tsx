@@ -85,7 +85,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     setTags(settings.tags);
     setTimeRestore(settings.timeRestore);
     setUseMargins(settings.useMargins);
-    setAutoApplyFilters(settings.autoApplyFilters ?? DEFAULT_DASHBOARD_STATE.au);
+    setAutoApplyFilters(settings.autoApplyFilters);
     titleManager.api.setHideTitle(settings.hidePanelTitles);
     titleManager.api.setDescription(settings.description);
     titleManager.api.setTitle(settings.title);

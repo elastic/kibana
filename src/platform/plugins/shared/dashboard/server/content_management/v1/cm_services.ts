@@ -207,12 +207,10 @@ export const optionsSchema = schema.object({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.useMargins,
     meta: { description: 'Show margins between panels in the dashboard layout.' },
   }),
-  autoApplyFilters: schema.maybe(
-    schema.boolean({
-      defaultValue: DEFAULT_DASHBOARD_OPTIONS.autoApplyFilters,
-      meta: { description: 'Auto apply control filters.' },
-    })
-  ),
+  autoApplyFilters: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_OPTIONS.autoApplyFilters,
+    meta: { description: 'Auto apply control filters.' },
+  }),
   syncColors: schema.boolean({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncColors,
     meta: { description: 'Synchronize colors between related panels in the dashboard.' },

@@ -101,8 +101,10 @@ export function initializeLayoutManager(
     }
   );
 
-  const childrenLoading$: Observable<boolean> = combineLatest([children$, layout$]).pipe(
+  /** Observable that publishes `true` when all children APIs are available */
+  const childrenLoading$ = combineLatest([children$, layout$]).pipe(
     map(([children, layout]) => {
+      // filter out panels that are in collapsed sections, since the APIs will never be available
       const expectedChildCount = Object.values(layout.panels).filter((panel) => {
         return panel.gridData.sectionId ? !isSectionCollapsed(panel.gridData.sectionId) : true;
       }).length;
@@ -113,7 +115,6 @@ export function initializeLayoutManager(
   );
 
   let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
-
   let lastSavedLayout = initialLayout;
   let lastSavedChildState = initialChildState;
   const resetLayout = () => {

@@ -96,7 +96,6 @@ export function InternalDashboardTopNav({
     query,
     title,
     viewMode,
-    // filtersLoading,
     publishedChildFilters,
     unpublishedChildFilters,
   ] = useBatchedPublishingSubjects(
@@ -108,8 +107,7 @@ export function InternalDashboardTopNav({
     dashboardApi.query$,
     dashboardApi.title$,
     dashboardApi.viewMode$,
-    // dashboardApi.childFiltersLoading$,
-    dashboardApi.childFilters$,
+    dashboardApi.publishedChildFilters$,
     dashboardApi.unpublishedChildFilters$
   );
 

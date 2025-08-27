@@ -22,11 +22,7 @@ import {
 
 import type { Filter } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import {
-  apiAppliesFilters,
-  type AppliesFilters,
-  type PublishingSubject,
-} from '@kbn/presentation-publishing';
+import { apiAppliesFilters, type AppliesFilters } from '@kbn/presentation-publishing';
 
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeSettingsManager } from './settings_manager';
@@ -72,6 +68,7 @@ export const initializeFiltersManager = (
     }
   ).pipe(distinctUntilChanged(deepEqual));
 
+  /** don't push filters to `unpublishedFilters$` until all children have their filters ready */
   const filterManagerSubscription = combineLatest([childFiltersLoading$, childFilters$])
     .pipe(
       skip(1),
@@ -90,7 +87,7 @@ export const initializeFiltersManager = (
     }
   };
 
-  // when auto publish is `true`, push filters from `unpublishedFilters` directly to published
+  /** when auto publish is `true`, push filters from `unpublishedFilters$` directly to published */
   const autoPublishFiltersSubscription = unpublishedChildFilters$
     .pipe(
       combineLatestWith(settingsManager.api.settings.autoApplyFilters$),
@@ -100,7 +97,7 @@ export const initializeFiltersManager = (
       publishFilters();
     });
 
-  // when auto-apply is `false`, publish filters when the children are done loading them
+  /** when auto-apply is `false`, publish filters when the children are done loading them */
   if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
     unpublishedChildFilters$.pipe(skip(1), first()).subscribe(() => {
       publishFilters();
@@ -124,10 +121,9 @@ export const initializeFiltersManager = (
   return {
     api: {
       filters$,
-      childFilters$: publishedChildFilters$,
+      publishedChildFilters$,
       unpublishedChildFilters$,
       publishFilters,
-      childFiltersLoading$: childFiltersLoading$ as PublishingSubject<boolean>,
     },
     cleanup: () => {
       autoPublishFiltersSubscription.unsubscribe();

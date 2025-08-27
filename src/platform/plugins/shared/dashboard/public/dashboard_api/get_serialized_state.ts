@@ -56,12 +56,13 @@ export const getSerializedState = ({
     description,
 
     // Dashboard options
-    autoApplyFilters,
     useMargins,
     syncColors,
     syncCursor,
     syncTooltips,
     hidePanelTitles,
+    autoApplyFilters,
+
     controlGroupInput,
   } = dashboardState;
 

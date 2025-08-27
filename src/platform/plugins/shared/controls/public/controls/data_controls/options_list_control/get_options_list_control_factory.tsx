@@ -480,12 +480,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         allowExpensiveQueries$,
       };
 
-      // if (selectionsManager.api.hasInitialSelections) {
-      //   console.log('untilFiltersReady', uuid);
-
-      //   await dataControlManager.api.untilFiltersReady();
-      // }
-
       return {
         api,
         Component: () => {

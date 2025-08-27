@@ -60,7 +60,6 @@ const defaultFiltersUpdated = (
     if (onFiltersUpdated) {
       onFiltersUpdated(filters);
     } else {
-      // console.log('SET FITERS');
       queryService.filterManager.setFilters(filters);
     }
   };
@@ -210,7 +209,7 @@ export function createSearchBar({
       query,
       core,
     });
-    // console.log('draft', props.draft);
+
     return (
       <KibanaContextProvider
         services={{
