@@ -8,7 +8,7 @@
  */
 
 import type { ESQLAst, ESQLCommand, ESQLMessage, ErrorTypes } from '@kbn/esql-ast';
-import { EsqlQuery, walk, esqlCommandRegistry } from '@kbn/esql-ast';
+import { EsqlQuery, walk, esqlCommandRegistry, Builder } from '@kbn/esql-ast';
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type {
   ESQLFieldWithMetadata,
@@ -19,13 +19,13 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
 import {
-  retrieveFields,
-  retrieveFieldsFromStringSources,
   retrievePolicies,
-  retrievePoliciesFields,
+  // retrievePoliciesFields,
   retrieveSources,
 } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
+import { getQueryForFields } from '../autocomplete/helper';
+import { getFieldsByTypeHelper } from '../shared/resources_helpers';
 
 /**
  * ES|QL validation public API
@@ -110,57 +110,60 @@ async function validateAst(
   const parsingResult = EsqlQuery.fromSrc(queryString);
   const rootCommands = parsingResult.ast.commands;
 
-  const [sources, availableFields, availablePolicies, joinIndices] = await Promise.all([
+  const [sources, availablePolicies, joinIndices] = await Promise.all([
     // retrieve the list of available sources
     retrieveSources(rootCommands, callbacks),
-    // retrieve available fields (if a source command has been defined)
-    retrieveFields(queryString, rootCommands, callbacks),
     // retrieve available policies (if an enrich command has been defined)
     retrievePolicies(rootCommands, callbacks),
     // retrieve indices for join command
     callbacks?.getJoinIndices?.(),
   ]);
 
-  if (availablePolicies.size) {
-    const fieldsFromPoliciesMap = await retrievePoliciesFields(
-      rootCommands,
-      availablePolicies,
-      callbacks
-    );
-    fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
-  }
+  // if (availablePolicies.size) {
+  //   const fieldsFromPoliciesMap = await retrievePoliciesFields(
+  //     rootCommands,
+  //     availablePolicies,
+  //     callbacks
+  //   );
+  //   fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
+  // }
 
-  if (rootCommands.some(({ name }) => ['grok', 'dissect'].includes(name))) {
-    const fieldsFromGrokOrDissect = await retrieveFieldsFromStringSources(
-      queryString,
-      rootCommands,
-      callbacks
-    );
-    fieldsFromGrokOrDissect.forEach((value, key) => {
-      // if the field is already present, do not overwrite it
-      // Note: this can also overlap with some userDefinedColumns
-      if (!availableFields.has(key)) {
-        availableFields.set(key, value);
-      }
-    });
-  }
+  const sourceFields = await getFieldsByTypeHelper(
+    queryString.split('|')[0],
+    callbacks
+  ).getFieldsMap();
 
-  const userDefinedColumns = collectUserDefinedColumns(rootCommands, availableFields, queryString);
-  messages.push(...validateUnsupportedTypeFields(availableFields, rootCommands));
-
-  const references: ReferenceMaps = {
-    sources,
-    fields: availableFields,
-    policies: availablePolicies,
-    userDefinedColumns,
-    query: queryString,
-    joinIndices: joinIndices?.indices || [],
-  };
+  messages.push(...validateUnsupportedTypeFields(sourceFields, rootCommands));
 
   const license = await callbacks?.getLicense?.();
   const hasMinimumLicenseRequired = license?.hasAtLeast;
-  for (const [_, command] of rootCommands.entries()) {
-    const commandMessages = validateCommand(command, references, rootCommands, {
+  for (let i = 0; i < rootCommands.length; i++) {
+    const partialQuery = queryString.slice(0, rootCommands[i].location.max + 1);
+
+    const previousCommands = rootCommands.slice(0, i + 1);
+    const queryForFields = getQueryForFields(
+      partialQuery,
+      Builder.expression.query(previousCommands)
+    );
+
+    const { getFieldsMap } = getFieldsByTypeHelper(queryForFields, callbacks);
+    const availableFields = await getFieldsMap();
+    const userDefinedColumns = collectUserDefinedColumns(
+      previousCommands,
+      availableFields,
+      queryString
+    );
+
+    const references: ReferenceMaps = {
+      sources,
+      fields: availableFields,
+      policies: availablePolicies,
+      userDefinedColumns,
+      query: queryString,
+      joinIndices: joinIndices?.indices || [],
+    };
+
+    const commandMessages = validateCommand(rootCommands[i], references, rootCommands, {
       ...callbacks,
       hasMinimumLicenseRequired,
     });
@@ -170,6 +173,8 @@ async function validateAst(
   const parserErrors = parsingResult.errors;
 
   /**
+   * @TODO - move deeper
+   *
    * Some changes to the grammar deleted the literal names for some tokens.
    * This is a workaround to restore the literals that were lost.
    *

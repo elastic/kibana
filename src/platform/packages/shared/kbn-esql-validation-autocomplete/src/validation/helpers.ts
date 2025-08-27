@@ -7,61 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  type ESQLAst,
-  type ESQLAstQueryExpression,
-  type ESQLColumn,
-  type ESQLSource,
-  type ESQLCommand,
-  type FunctionDefinition,
-  Walker,
-} from '@kbn/esql-ast';
-import { mutate, synth } from '@kbn/esql-ast';
+import { type ESQLAst, type ESQLCommand, type FunctionDefinition, Walker } from '@kbn/esql-ast';
 import type { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
-
-export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
-  const firstCommand = ast[0];
-  if (!firstCommand) return '';
-
-  const sources: ESQLSource[] = [];
-  const metadataFields: ESQLColumn[] = [];
-
-  if (firstCommand.name === 'ts') {
-    const timeseries = firstCommand as ESQLCommand<'ts'>;
-    const tsSources = timeseries.args as ESQLSource[];
-
-    sources.push(...tsSources);
-  } else if (firstCommand.name === 'from') {
-    const fromSources = mutate.commands.from.sources.list(firstCommand as any);
-    const fromMetadataColumns = [...mutate.commands.from.metadata.list(firstCommand as any)].map(
-      ([column]) => column
-    );
-
-    sources.push(...fromSources);
-    if (fromMetadataColumns.length) metadataFields.push(...fromMetadataColumns);
-  }
-
-  const joinSummary = mutate.commands.join.summarize({
-    type: 'query',
-    commands: ast,
-  } as ESQLAstQueryExpression);
-  const joinIndices = joinSummary.map(({ target: { index } }) => index);
-
-  if (joinIndices.length > 0) {
-    sources.push(...joinIndices);
-  }
-
-  if (sources.length === 0) {
-    return queryString.substring(0, firstCommand.location.max + 1);
-  }
-
-  const from =
-    metadataFields.length > 0
-      ? synth.cmd`FROM ${sources} METADATA ${metadataFields}`
-      : synth.cmd`FROM ${sources}`;
-
-  return from.toString();
-}
 
 export function buildQueryForFieldsInPolicies(policies: ESQLPolicy[]) {
   return `from ${policies

@@ -135,6 +135,10 @@ export async function getCurrentQueryAvailableFields(
   const lastCommand = commands[commands.length - 1];
   const commandDefinition = esqlCommandRegistry.getCommandByName(lastCommand.name);
 
+  // @TODO — all logic in collectUserDefinedColumns
+  // should be will be moved to columnsAfter methods;
+  // though it may still be useful to delineate between
+  // user-defined columns and other fields... need to consider this
   // If the command has a columnsAfter function, use it to get the fields
   if (commandDefinition?.methods.columnsAfter) {
     const userDefinedColumns = collectUserDefinedColumns([lastCommand], cacheCopy, query);

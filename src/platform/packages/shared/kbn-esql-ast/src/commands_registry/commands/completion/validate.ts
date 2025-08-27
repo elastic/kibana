@@ -57,6 +57,7 @@ export const validate = (
   const targetName = targetField?.name || 'completion';
 
   // Sets the target field so the column is recognized after the command is applied
+  // @TODO can we remove now?
   context?.userDefinedColumns.set(targetName, [
     {
       name: targetName,

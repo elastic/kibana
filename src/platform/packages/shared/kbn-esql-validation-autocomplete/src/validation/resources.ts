@@ -16,38 +16,7 @@ import {
   getSourcesHelper,
 } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
-import {
-  buildQueryForFieldsForStringSources,
-  buildQueryForFieldsFromSource,
-  buildQueryForFieldsInPolicies,
-  getEnrichCommands,
-} from './helpers';
-
-export async function retrieveFields(
-  queryString: string,
-  commands: ESQLCommand[],
-  callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLFieldWithMetadata>> {
-  if (!callbacks || commands.length < 1) {
-    return new Map();
-  }
-  // Do not fetch fields, if query has only one source command and that command
-  // does not require fields.
-  if (commands.length === 1) {
-    switch (commands[0].name) {
-      case 'from':
-      case 'show':
-      case 'row': {
-        return new Map();
-      }
-    }
-  }
-  if (commands[0].name === 'row') {
-    return new Map();
-  }
-  const customQuery = buildQueryForFieldsFromSource(queryString, commands);
-  return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
-}
+import { buildQueryForFieldsInPolicies, getEnrichCommands } from './helpers';
 
 export async function retrievePolicies(
   commands: ESQLCommand[],
@@ -98,17 +67,5 @@ export async function retrievePoliciesFields(
   const customQuery = buildQueryForFieldsInPolicies(
     policyNames.map((name) => policies.get(name)) as ESQLPolicy[]
   );
-  return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
-}
-
-export async function retrieveFieldsFromStringSources(
-  queryString: string,
-  commands: ESQLCommand[],
-  callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLFieldWithMetadata>> {
-  if (!callbacks) {
-    return new Map();
-  }
-  const customQuery = buildQueryForFieldsForStringSources(queryString, commands);
   return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
 }
