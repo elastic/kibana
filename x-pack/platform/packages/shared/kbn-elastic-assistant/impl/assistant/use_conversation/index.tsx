@@ -200,7 +200,7 @@ export const useConversation = (): UseConversation => {
           throw new Error('No conversation available to duplicate');
         }
         let conversation = selectedConversation;
-        if (selectedConversation.messages.length === 0) {
+        if ((selectedConversation.messages ?? []).length === 0) {
           // Fetch conversation details if the messages array is empty
           // This is necessary because conversation lists don't include message content
           const conversationWithMessages = await getConversation(selectedConversation.id, true);
