@@ -201,7 +201,6 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
   };
   indexTemplate: {
@@ -210,7 +209,6 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
   };
   aliases: {
@@ -219,7 +217,6 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
   };
   indexPatterns: {
@@ -228,7 +225,6 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
   };
   pipelines: {
