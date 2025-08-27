@@ -270,6 +270,25 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
    * The order affects what context will be available in the step if/foreach/etc operation.
    */
 
+  if ((currentStep as BaseStep)?.['on-failure']?.retry) {
+    // Wrap the current step in a retry step
+    // and remove the retry from the current step's on-failure to avoid infinite nesting
+    // The retry logic will be handled by the outer retry step
+    // We keep other on-failure properties (like fallback-step, continue) on the inner step
+    // so they can be handled if the retry attempts are exhausted
+    return {
+      name: `retry_${getNodeId(currentStep)}`,
+      type: 'retry',
+      steps: [
+        handleStepLevelOperations({
+          ...currentStep,
+          'on-failure': omit(currentStep['on-failure'], ['retry']) as any,
+        }),
+      ],
+      retry: (currentStep as BaseStep)['on-failure']?.retry,
+    } as RetryStep;
+  }
+
   // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
   // when the step is already a foreach step
   if (currentStep.if) {
@@ -290,25 +309,6 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
       foreach: currentStep.foreach,
       steps: [handleStepLevelOperations(modifiedStep)],
     } as ForEachStep;
-  }
-
-  if ((currentStep as BaseStep)?.['on-failure']?.retry) {
-    // Wrap the current step in a retry step
-    // and remove the retry from the current step's on-failure to avoid infinite nesting
-    // The retry logic will be handled by the outer retry step
-    // We keep other on-failure properties (like fallback-step, continue) on the inner step
-    // so they can be handled if the retry attempts are exhausted
-    return {
-      name: `retry_${getNodeId(currentStep)}`,
-      type: 'retry',
-      steps: [
-        handleStepLevelOperations({
-          ...currentStep,
-          'on-failure': omit(currentStep['on-failure'], ['retry']) as any,
-        }),
-      ],
-      retry: (currentStep as BaseStep)['on-failure']?.retry,
-    } as RetryStep;
   }
 
   return currentStep;
