@@ -7,16 +7,13 @@
 
 import rawExpect from 'expect';
 import expect from '@kbn/expect';
-import {
+import type {
   IngestStreamEffectiveLifecycle,
   IngestStreamLifecycle,
   IngestStreamLifecycleDisabled,
-  Streams,
-  isDisabledLifecycle,
-  isDslLifecycle,
-  isIlmLifecycle,
 } from '@kbn/streams-schema';
-import { IndicesManagedBy } from '@elastic/elasticsearch/lib/api/types';
+import { Streams, isDisabledLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import type { IndicesManagedBy } from '@elastic/elasticsearch/lib/api/types';
 import {
   disableStreams,
   enableStreams,
@@ -24,11 +21,9 @@ import {
   getStream,
   getIlmStats,
 } from './helpers/requests';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
@@ -222,7 +217,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...wiredPutBody.stream.ingest,
               wired: {
                 fields: {},
-                routing: [{ destination: 'logs.overrides.lifecycle', where: { never: {} } }],
+                routing: [
+                  {
+                    destination: 'logs.overrides.lifecycle',
+                    where: { never: {} },
+                    status: 'disabled',
+                  },
+                ],
               },
               lifecycle: { dsl: { data_retention: '1d' } },
             },
@@ -275,7 +276,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...wiredPutBody.stream.ingest,
               wired: {
                 fields: {},
-                routing: [{ destination: 'logs.10d.20d.inherits', where: { never: {} } }],
+                routing: [
+                  {
+                    destination: 'logs.10d.20d.inherits',
+                    where: { never: {} },
+                    status: 'disabled',
+                  },
+                ],
               },
             },
           },
@@ -349,7 +356,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ...wiredPutBody.stream.ingest,
                 wired: {
                   fields: {},
-                  routing: [{ destination: 'logs.ilm.stream', where: { never: {} } }],
+                  routing: [
+                    { destination: 'logs.ilm.stream', where: { never: {} }, status: 'disabled' },
+                  ],
                 },
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },

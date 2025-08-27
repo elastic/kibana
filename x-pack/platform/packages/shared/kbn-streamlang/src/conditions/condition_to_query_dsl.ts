@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import type { FilterCondition, Condition } from '../../types/conditions';
 import {
-  FilterCondition,
-  Condition,
   isFilterCondition,
   isAndCondition,
   isOrCondition,

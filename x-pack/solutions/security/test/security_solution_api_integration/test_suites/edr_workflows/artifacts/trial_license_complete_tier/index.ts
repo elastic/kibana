@@ -6,7 +6,7 @@
  */
 import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
@@ -53,6 +53,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
 
     // Remember to make sure the suite is enabled in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml when adding new tests without @skipInServerlessMKI
     loadTestFile(require.resolve('./trusted_apps'));
+    loadTestFile(require.resolve('./trusted_devices'));
     loadTestFile(require.resolve('./event_filters'));
     loadTestFile(require.resolve('./host_isolation_exceptions'));
     loadTestFile(require.resolve('./blocklists'));

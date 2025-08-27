@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityEvent } from './types';
+import type { SecurityEvent } from './types';
 
 export function generateEvent(extra: Record<string, unknown> = {}): SecurityEvent {
   return {

@@ -6,13 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { Streams } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { Streams } from '@kbn/streams-schema';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { loadDashboards } from './helpers/dashboards';
 
 const TEST_STREAM_NAME = 'logs-test-default';
@@ -166,6 +164,7 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
             field: 'resource.attributes.host.name',
             eq: 'myHost',
           },
+          status: 'enabled',
         },
       ],
       fields: {

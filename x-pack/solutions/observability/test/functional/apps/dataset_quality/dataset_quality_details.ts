@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
 import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
-import { DatasetQualityFtrProviderContext } from './config';
+import type { DatasetQualityFtrProviderContext } from './config';
 import {
   createDegradedFieldsRecord,
   createFailedLogRecord,
@@ -438,7 +438,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
     });
 
-    describe('navigation', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/231824
+    describe.skip('navigation', () => {
       it('should go to discover page when the open in discover button is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: regularDataStreamName,

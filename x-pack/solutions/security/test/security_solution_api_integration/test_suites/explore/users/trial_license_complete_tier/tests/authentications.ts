@@ -6,17 +6,17 @@
  */
 
 import expect from '@kbn/expect';
+import type { UserAuthenticationsStrategyResponse } from '@kbn/security-solution-plugin/common/search_strategy';
 import {
   AuthStackByField,
   Direction,
-  UserAuthenticationsStrategyResponse,
   UsersQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import type { UserAuthenticationsRequestOptions } from '@kbn/security-solution-plugin/common/api/search_strategy';
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 
-import { SearchService } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import type { SearchService } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';

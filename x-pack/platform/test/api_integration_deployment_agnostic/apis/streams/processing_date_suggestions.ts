@@ -6,14 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
-import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
+import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
+import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { disableStreams, enableStreams, forkStream } from './helpers/requests';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 async function simulateDateSuggestions(
   client: StreamsSupertestRepositoryClient,
@@ -61,6 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           field: 'host.name',
           eq: 'test-host',
         },
+        status: 'enabled',
       });
     });
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import expect from '@kbn/expect';
-import { StreamsSupertestRepositoryClient } from './repository_client';
+import type { StreamsSupertestRepositoryClient } from './repository_client';
 
 type StreamPutItem = Omit<Streams.WiredStream.UpsertRequest, 'dashboards' | 'queries'> & {
   name: string;
@@ -88,6 +88,7 @@ const streams: StreamPutItem[] = [
                   },
                 ],
               },
+              status: 'enabled',
             },
             {
               destination: 'logs.test2',
@@ -99,6 +100,7 @@ const streams: StreamPutItem[] = [
                   },
                 ],
               },
+              status: 'enabled',
             },
           ],
         },

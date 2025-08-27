@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Signature } from '../types';
+import type { Signature } from '../types';
 import { aggregateLicensesFromSignatures } from './aggregate_licenses_from_signatures';
 
 describe('aggregateLicensesFromSignatures', () => {

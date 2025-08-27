@@ -7,8 +7,8 @@
 
 import expect from 'expect';
 
-import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams, combineToNdJson } from '../../../utils';
 import { deleteAllRules } from '../../../../../config/services/detections_response';
 

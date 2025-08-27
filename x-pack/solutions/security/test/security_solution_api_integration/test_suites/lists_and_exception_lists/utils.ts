@@ -29,8 +29,8 @@ import {
   setIndexTemplate,
   createBootstrapIndex,
 } from '@kbn/securitysolution-es-utils';
-import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import { countDownTest, withSpaceUrl } from '../../config/services/detections_response';

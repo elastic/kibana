@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchFilterConfig } from '@elastic/eui';
+import type { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { TableText } from '../..';
-import { UISession } from '../../../types';
+import type { UISession } from '../../../types';
 import { getStatusText } from '../../status';
 import { SearchSessionStatus } from '../../../../../../../common/search/session/status';
 

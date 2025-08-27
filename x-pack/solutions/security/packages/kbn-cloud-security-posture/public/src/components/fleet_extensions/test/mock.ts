@@ -8,9 +8,9 @@
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
+import type { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
 import { AWS_PROVIDER, GCP_PROVIDER, AZURE_PROVIDER } from '../constants';
-import { CloudProviders, CloudSetupConfig } from '../types';
+import type { CloudProviders, CloudSetupConfig } from '../types';
 
 const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
 const CLOUDBEAT_GCP = 'cloudbeat/cis_gcp';

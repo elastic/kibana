@@ -6,7 +6,7 @@
  */
 
 import { Streams, getParentId, isRoot } from '@kbn/streams-schema';
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { transpileIngestPipeline } from '@kbn/streamlang';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { getLogsDefaultPipelineProcessors } from './logs_default_pipeline';

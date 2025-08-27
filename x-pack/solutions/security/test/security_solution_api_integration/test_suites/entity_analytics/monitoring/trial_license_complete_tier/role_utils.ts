@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import { usersAndRolesFactory } from '../../utils/users_and_roles';
 

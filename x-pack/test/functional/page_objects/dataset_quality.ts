@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   DATA_QUALITY_URL_STATE_KEY,
   datasetQualityDetailsUrlSchemaV1,
@@ -17,10 +17,10 @@ import {
   DEFAULT_QUALITY_ISSUE_SORT_FIELD,
 } from '@kbn/dataset-quality-plugin/common/constants';
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
   v: 1,

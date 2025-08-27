@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  ALWAYS_CONDITION,
-  AlwaysCondition,
-  Condition,
-  ShorthandBinaryFilterCondition,
-  isAlwaysCondition,
-} from '@kbn/streamlang';
+import type { AlwaysCondition, Condition, ShorthandBinaryFilterCondition } from '@kbn/streamlang';
+import { ALWAYS_CONDITION, isAlwaysCondition } from '@kbn/streamlang';
 
 import { cloneDeep, isEqual } from 'lodash';
 

@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { defaultOriginalDashboardExports } from '../../../utils/dashboard_mocks';
 import { dashboardMigrationRouteFactory } from '../../../utils/dashboards';
 import { deleteAllDashboardMigrations } from '../../../utils/es_queries_dashboards';

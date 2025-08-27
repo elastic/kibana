@@ -7,13 +7,14 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { updatePolicyWithInputs } from '../utils';
-import { CspRadioGroupProps, RadioGroup } from '../../csp_boxed_radio_group';
-import { AwsAccountType, UpdatePolicy } from '../types';
+import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
+import { RadioGroup } from '../../csp_boxed_radio_group';
+import type { AwsAccountType, UpdatePolicy } from '../types';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 

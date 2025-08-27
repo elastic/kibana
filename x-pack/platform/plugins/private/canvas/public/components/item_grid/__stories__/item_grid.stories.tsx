@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiIcon, IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { readableColor } from '../../../lib/readable_color';
 import { ColorDot } from '../../color_dot';

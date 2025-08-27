@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { dashboardMigrationRouteFactory } from '../../../../utils/dashboards';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { defaultOriginalDashboardExports } from '../../../../utils/dashboard_mocks';
 import {
   deleteAllDashboardMigrations,

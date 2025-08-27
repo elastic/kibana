@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { generateLongId, log, timerange } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'svlCommonPage']);

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   XYByValueAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
   XYState,
 } from '../../types';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
-import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getUnlinkLayerAction } from './unlink_action';
 
 describe('annotation group unlink actions', () => {

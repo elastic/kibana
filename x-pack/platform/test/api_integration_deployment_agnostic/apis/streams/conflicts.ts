@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { RoutingStatus } from '@kbn/streams-schema';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import {
   indexDocument,
   putStream,
@@ -14,17 +15,18 @@ import {
   enableStreams,
   forkStream,
 } from './helpers/requests';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
+  const status = 'enabled' as RoutingStatus;
 
-  describe('conflicts', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/231906
+  // Failing: See https://github.com/elastic/kibana/issues/231905
+  describe.skip('conflicts', function () {
     describe('concurrency handling', function () {
       before(async () => {
         apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -44,6 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             field: 'resource.attributes.host.name',
             eq: 'routeme',
           },
+          status,
         };
         const stream2 = {
           stream: {
@@ -53,6 +56,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             field: 'resource.attributes.host.name',
             eq: 'routeme2',
           },
+          status,
         };
         const responses = await Promise.allSettled([
           forkStream(apiClient, 'logs', stream1),
@@ -114,6 +118,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             field: 'resource.attributes.host.name',
             eq: 'routeme',
           },
+          status,
         };
         await forkStream(apiClient, 'logs', stream, 400);
       });
@@ -125,6 +130,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             field: 'resource.attributes.host.name',
             eq: 'routeme',
           },
+          status,
         };
         await forkStream(apiClient, 'logs', stream, 409);
       });

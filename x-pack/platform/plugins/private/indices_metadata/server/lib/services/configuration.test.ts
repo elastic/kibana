@@ -9,10 +9,10 @@ import { firstValueFrom } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ArtifactService } from './artifact';
 import { ConfigurationService, REFRESH_CONFIG_INTERVAL_MS } from './configuration';
-import { IndicesMetadataConfiguration } from './indices_metadata.types';
+import type { IndicesMetadataConfiguration } from './indices_metadata.types';
 import { ArtifactNotFoundError, ManifestNotFoundError } from './artifact.errors';
-import { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
-import { CdnConfig } from './artifact.types';
+import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { CdnConfig } from './artifact.types';
 
 jest.mock('./artifact');
 

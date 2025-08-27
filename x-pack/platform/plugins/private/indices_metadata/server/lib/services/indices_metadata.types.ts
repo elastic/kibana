@@ -5,7 +5,8 @@
  * 2.0.
  */
 import type { DateTime } from '@elastic/elasticsearch/lib/api/types';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export const IndicesMetadataConfigurationSchema = schema.object({
   indices_threshold: schema.number(),

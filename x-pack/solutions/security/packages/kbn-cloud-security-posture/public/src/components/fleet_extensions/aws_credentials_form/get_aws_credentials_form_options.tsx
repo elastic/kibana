@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { AwsCredentialsType } from '../types';
+import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type { AwsCredentialsType } from '../types';
 import { AWS_CREDENTIALS_TYPE } from '../constants';
 import { getAwsCredentialsType } from '../utils';
 

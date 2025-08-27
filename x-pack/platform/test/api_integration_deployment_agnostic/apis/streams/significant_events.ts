@@ -6,18 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  IngestStreamLifecycle,
-  Streams,
-  isDslLifecycle,
-  isIlmLifecycle,
-} from '@kbn/streams-schema';
+import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
   deleteStream,
   disableStreams,
@@ -25,7 +19,7 @@ import {
   getStream,
   putStream,
 } from './helpers/requests';
-import { RoleCredentials } from '../../services';
+import type { RoleCredentials } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -109,6 +103,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     where: {
                       always: {},
                     },
+                    status: 'enabled',
                   },
                 ],
               },
@@ -139,6 +134,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       field: 'attributes.field',
                       lt: 15,
                     },
+                    status: 'enabled',
                   },
                   {
                     destination: 'logs.queries-test.child.second',
@@ -146,6 +142,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       field: 'attributes.field',
                       gt: 15,
                     },
+                    status: 'enabled',
                   },
                 ],
               },

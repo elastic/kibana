@@ -8,14 +8,15 @@
  */
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { Histogram, HistogramProps } from './histogram';
+import type { HistogramProps } from './histogram';
+import { Histogram } from './histogram';
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import { getLensVisMock } from '../../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { UnifiedHistogramInput$ } from '../../types';
+import type { UnifiedHistogramInput$ } from '../../types';
 import { act } from 'react-dom/test-utils';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import { getLensProps, useLensProps } from './hooks/use_lens_props';

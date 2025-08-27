@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RuleParamsWithDefaultValue } from '@kbn/response-ops-rule-params';
-import { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
+import type { RuleParamsWithDefaultValue } from '@kbn/response-ops-rule-params';
+import type { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
 
 const baseBody = {
   name: 'Test investigation fields',

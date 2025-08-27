@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 
 // This can be used to apply any post-processing directly to the ingest pipeline processors.
 export const applyPostProcessing = (processors: IngestProcessorContainer[]) => {

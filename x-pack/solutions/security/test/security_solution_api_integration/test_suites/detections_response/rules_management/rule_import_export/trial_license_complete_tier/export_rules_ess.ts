@@ -7,8 +7,8 @@
 
 import expect from 'expect';
 
-import { Rule } from '@kbn/alerting-plugin/common';
-import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -28,7 +28,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
 } from '../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 import { createConnector } from '../../../utils/connectors';
 

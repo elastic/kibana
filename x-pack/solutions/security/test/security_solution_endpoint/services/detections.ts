@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Response } from 'superagent';
+import type { Response } from 'superagent';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -13,13 +13,11 @@ import {
   DETECTION_ENGINE_RULES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import type { estypes } from '@elastic/elasticsearch';
-import { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
-import {
-  IndexedEndpointRuleAlerts,
-  indexEndpointRuleAlerts,
-} from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import type { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
+import type { IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import { indexEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
-import { FtrProviderContext } from '../configs/ftr_provider_context';
+import type { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export function DetectionsTestServiceProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

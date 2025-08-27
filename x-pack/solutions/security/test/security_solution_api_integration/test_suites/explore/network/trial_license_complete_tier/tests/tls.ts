@@ -6,18 +6,18 @@
  */
 
 import expect from '@kbn/expect';
+import type { NetworkTlsStrategyResponse } from '@kbn/security-solution-plugin/common/search_strategy';
 import {
   NetworkQueries,
   Direction,
   NetworkTlsFields,
   FlowTarget,
-  NetworkTlsStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 
-import { SearchService } from '@kbn/ftr-common-functional-services';
+import type { SearchService } from '@kbn/ftr-common-functional-services';
 
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';

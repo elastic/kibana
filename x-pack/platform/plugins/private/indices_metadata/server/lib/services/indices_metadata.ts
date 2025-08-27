@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import type {
   ConcreteTaskInstance,
   TaskInstance,
@@ -36,7 +36,7 @@ import {
 } from '../ebt/events';
 import { MetadataReceiver } from './receiver';
 import { MetadataSender } from './sender';
-import { ConfigurationService } from './configuration';
+import type { ConfigurationService } from './configuration';
 
 const TASK_TYPE = 'IndicesMetadata:IndicesMetadataTask';
 const TASK_ID = 'indices-metadata:indices-metadata-task:1.0.0';
@@ -103,7 +103,19 @@ export class IndicesMetadataService {
       this.receiver.getIndices(),
       this.receiver.getDataStreams(),
       this.receiver.getIndexTemplatesStats(),
-    ]);
+    ]).catch((error) => {
+      this.logger.error('Error fetching indices metadata', { error });
+      return [undefined, undefined, undefined];
+    });
+
+    if (
+      indicesSettings === undefined ||
+      dataStreams === undefined ||
+      indexTemplates === undefined
+    ) {
+      this.logger.debug('Skipping indices metadata publish due to fetch errors');
+      return;
+    }
 
     const indices = indicesSettings.map((index) => index.index_name);
 

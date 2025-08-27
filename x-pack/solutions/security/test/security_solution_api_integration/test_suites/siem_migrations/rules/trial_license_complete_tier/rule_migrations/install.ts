@@ -7,12 +7,12 @@
 
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
-import {
+import type {
   ElasticRule,
   RuleMigrationRuleData,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { RuleTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
-import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { deleteAllRules } from '../../../../../config/services/detections_response';
 import {
   createMigrationRules,
@@ -22,7 +22,7 @@ import {
   ruleMigrationRouteHelpersFactory,
   statsOverrideCallbackFactory,
 } from '../../../utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { Ecs, EcsHost } from '@elastic/ecs';
+import type { Ecs, EcsHost } from '@elastic/ecs';
 import type {
   IndexRequest,
   MappingTypeMapping,
   SearchHit,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
-import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import type { GetEntityStoreStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { EntityStoreUtils } from '../../utils';
@@ -47,7 +47,8 @@ export default function (providerContext: FtrProviderContext) {
   const es = providerContext.getService('es');
   const dataView = dataViewRouteHelpersFactory(supertest);
 
-  describe('@ess Host transform logic', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/232405
+  describe.skip('@ess Host transform logic', () => {
     describe('Entity Store is not installed by default', () => {
       it("Should return 200 and status 'not_installed'", async () => {
         const { body } = await supertest.get('/api/entity_store/status').expect(200);

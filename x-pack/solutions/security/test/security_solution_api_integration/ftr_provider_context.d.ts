@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { GenericFtrProviderContext } from '@kbn/test';
+import type { GenericFtrProviderContext } from '@kbn/test';
 
-import { services } from './config/serverless/services';
+import type { services } from './config/serverless/services';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

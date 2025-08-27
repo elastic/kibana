@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { reducer, initialValue, Actions, Store } from './request';
-import { RequestResult } from '../hooks/use_send_current_request/send_request';
-import { BaseResponseType } from '../../types/common';
+import type { Actions, Store } from './request';
+import { reducer, initialValue } from './request';
+import type { RequestResult } from '../hooks/use_send_current_request/send_request';
+import type { BaseResponseType } from '../../types/common';
 
 describe('request store', () => {
   it('should return initial state when no action matches', () => {

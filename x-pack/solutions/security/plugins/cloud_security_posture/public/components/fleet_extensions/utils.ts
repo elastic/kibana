@@ -18,7 +18,7 @@ import {
   KSPM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-common/constants';
 import { i18n } from '@kbn/i18n';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import {
   CLOUDBEAT_AWS,
@@ -36,7 +36,7 @@ import type {
   CloudSecurityPolicyTemplate,
   AwsCredentialsType,
 } from '../../../common/types_old';
-import { CloudPostureIntegrations } from '../../common/constants';
+import type { CloudPostureIntegrations } from '../../common/constants';
 import eksLogo from '../../assets/icons/cis_eks_logo.svg';
 
 const cloudPostureIntegrations: CloudPostureIntegrations = {

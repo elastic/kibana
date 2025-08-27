@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('@ess @serverless SecuritySolution Automatic Dashboard Migrations', () => {
@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./dashboards/create'));
+    loadTestFile(require.resolve('./resources/missing'));
   });
 }

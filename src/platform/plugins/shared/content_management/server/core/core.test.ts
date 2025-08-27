@@ -36,9 +36,9 @@ import type {
   SearchItemSuccess,
   SearchItemError,
 } from './event_types';
-import { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
+import type { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import { createMockedMSearchStorage } from './mocks/in_memory_storage';
 
 const spyMsearch = jest.fn();

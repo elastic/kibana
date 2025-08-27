@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { KeyboardEvent } from 'react';
+import type { KeyboardEvent } from 'react';
+import React from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '../../types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '../../types';
 import { NestedSecondaryMenu } from './nested_secondary_menu';
 import { SecondaryMenu } from './secondary_menu';
 import { SideNav } from './side_nav';
@@ -157,7 +160,9 @@ export const Navigation = ({
               container={document.documentElement}
               hasContent
               isSidePanelOpen={false}
-              label="More" // TODO: translate
+              label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuLabel', {
+                defaultMessage: 'More',
+              })}
               persistent
               trigger={
                 <SideNav.PrimaryMenuItem
@@ -169,10 +174,14 @@ export const Navigation = ({
                   hasContent
                   href=""
                   id="more-menu"
-                  label="More" // TODO: translate
+                  label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuItemLabel', {
+                    defaultMessage: 'More',
+                  })}
                 >
-                  {/* TODO: translate */}
-                  More
+                  <FormattedMessage
+                    id="core.ui.chrome.sideNavigation.moreMenuItemText"
+                    defaultMessage="More"
+                  />
                 </SideNav.PrimaryMenuItem>
               }
             >

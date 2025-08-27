@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { Streams } from '@kbn/streams-schema';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { RoutingStatus, Streams } from '@kbn/streams-schema';
 import {
   disableStreams,
   enableStreams,
@@ -16,11 +16,9 @@ import {
   indexDocument,
   putStream,
 } from './helpers/requests';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -39,6 +37,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           field: 'resource.attributes.host.name',
           eq: 'routeme',
         },
+        status: 'enabled' as RoutingStatus,
       };
       // We use a forked stream as processing changes cannot be made to the root stream
       await forkStream(apiClient, 'logs', body);

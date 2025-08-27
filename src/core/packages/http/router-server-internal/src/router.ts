@@ -9,12 +9,11 @@
 
 import { EventEmitter } from 'node:events';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
-import apm, { Span } from 'elastic-apm-node';
+import type { Span } from 'elastic-apm-node';
+import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
-import {
-  isUnauthorizedError as isElasticsearchUnauthorizedError,
-  UnauthorizedError as EsNotAuthorizedError,
-} from '@kbn/es-errors';
+import type { UnauthorizedError as EsNotAuthorizedError } from '@kbn/es-errors';
+import { isUnauthorizedError as isElasticsearchUnauthorizedError } from '@kbn/es-errors';
 import type {
   KibanaRequest,
   ErrorHttpResponseOptions,
@@ -30,16 +29,18 @@ import type {
   IKibanaResponse,
 } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
-import { Env } from '@kbn/config';
+import type { Env } from '@kbn/config';
 import { context, defaultTextMapGetter, propagation } from '@opentelemetry/api';
 import { CoreVersionedRouter } from './versioned_router';
-import { CoreKibanaRequest, getProtocolFromRequest } from './request';
+import type { CoreKibanaRequest } from './request';
+import { getProtocolFromRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { formatErrorMeta } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
-import { InternalRouteConfig, buildRoute } from './route';
+import type { InternalRouteConfig } from './route';
+import { buildRoute } from './route';
 
 export type ContextEnhancer<
   P,

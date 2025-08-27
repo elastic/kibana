@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DocLinksStart } from '@kbn/core/public';
-import { configDrivenProcessors } from '.';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { configDrivenProcessors } from '.';
 
 export interface ConfigDrivenProcessorConfiguration<FormStateT, ProcessorDefinitionT> {
   type: ConfigDrivenProcessorType;

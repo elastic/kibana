@@ -10,7 +10,7 @@ import { DETECTION_ENGINE_PRIVILEGES_URL } from '@kbn/security-solution-plugin/c
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../../../../config/services/common';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

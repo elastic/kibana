@@ -14,16 +14,14 @@ import { EventEmitter, type Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { ObservabilityAIAssistantClient } from '.';
 import { MessageRole, type Message, CONTEXT_FUNCTION_NAME } from '../../../common';
-import {
+import type {
   ChatCompletionChunkEvent,
   MessageAddEvent,
-  StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
-import {
-  ChatCompletionEventType as InferenceChatCompletionEventType,
-  ChatCompleteResponse,
-} from '@kbn/inference-common';
-import { InferenceClient } from '@kbn/inference-common';
+import { StreamingChatResponseEventType } from '../../../common/conversation_complete';
+import type { ChatCompleteResponse } from '@kbn/inference-common';
+import { ChatCompletionEventType as InferenceChatCompletionEventType } from '@kbn/inference-common';
+import type { InferenceClient } from '@kbn/inference-common';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
@@ -288,7 +286,7 @@ describe('Observability AI Assistant client', () => {
             system:
               'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. DO NOT include any labels or prefixes like "Title:", "**Title:**", or similar. Only the actual title text should be returned. If the conversation content itself suggests a relevant prefix (e.g., "Incident: ..."), that is acceptable, but do not add generic labels. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
             functionCalling: 'auto',
-            maxRetries: 0,
+            maxRetries: 1,
             temperature: 0.25,
             toolChoice: expect.objectContaining({
               function: 'title_conversation',
@@ -327,7 +325,7 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'auto',
-            maxRetries: 0,
+            maxRetries: 1,
             temperature: 0.25,
             toolChoice: undefined,
             tools: undefined,
@@ -855,7 +853,7 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'auto',
-            maxRetries: 0,
+            maxRetries: 1,
             temperature: 0.25,
             toolChoice: 'auto',
             tools: expect.any(Object),
@@ -1016,7 +1014,7 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'auto',
-            maxRetries: 0,
+            maxRetries: 1,
             temperature: 0.25,
             toolChoice: 'auto',
             tools: expect.any(Object),

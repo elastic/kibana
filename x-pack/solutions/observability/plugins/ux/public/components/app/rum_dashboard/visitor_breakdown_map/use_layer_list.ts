@@ -6,25 +6,28 @@
  */
 
 import { getStaticDataViewId } from '@kbn/apm-data-view';
+import type {
+  EMSFileSourceDescriptor,
+  ESTermSourceDescriptor,
+  LayerDescriptor as BaseLayerDescriptor,
+  VectorLayerDescriptor as BaseVectorLayerDescriptor,
+  VectorStyleDescriptor,
+  LAYER_STYLE_TYPE,
+} from '@kbn/maps-plugin/common';
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
-  EMSFileSourceDescriptor,
-  ESTermSourceDescriptor,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
   LABEL_POSITIONS,
-  LayerDescriptor as BaseLayerDescriptor,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
-  VectorLayerDescriptor as BaseVectorLayerDescriptor,
-  VectorStyleDescriptor,
 } from '@kbn/maps-plugin/common';
 
 import { useMemo } from 'react';
-import { Writable } from '@kbn/utility-types';
+import type { Writable } from '@kbn/utility-types';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -98,7 +101,7 @@ export function useLayerList() {
 
   const getLayerStyle = (fieldName: string): VectorStyleDescriptor => {
     return {
-      type: 'VECTOR',
+      type: 'VECTOR' as LAYER_STYLE_TYPE.VECTOR,
       properties: {
         icon: { type: STYLE_TYPE.STATIC, options: { value: 'marker' } },
         fillColor: {

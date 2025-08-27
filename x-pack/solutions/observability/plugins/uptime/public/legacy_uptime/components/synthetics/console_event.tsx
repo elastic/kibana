@@ -6,8 +6,9 @@
  */
 
 import { EuiFlexItem, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
-import React, { FC } from 'react';
-import { JourneyStep } from '../../../../common/runtime_types/ping';
+import type { FC } from 'react';
+import React from 'react';
+import type { JourneyStep } from '../../../../common/runtime_types/ping';
 
 interface Props {
   event: JourneyStep;

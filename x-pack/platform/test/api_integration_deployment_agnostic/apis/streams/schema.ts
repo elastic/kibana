@@ -6,12 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import type { RoutingStatus } from '@kbn/streams-schema';
 import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -107,6 +106,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             field: 'attributes.log.logger',
             eq: 'nginx',
           },
+          status: 'enabled' as RoutingStatus,
         };
 
         await forkStream(apiClient, 'logs', forkBody);

@@ -7,7 +7,7 @@
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
@@ -15,20 +15,20 @@ import { useSignificantEventsApi } from '../../hooks/use_significant_events_api'
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
-import { Timeline, TimelineEvent } from '../timeline';
-import { formatChangePoint } from './change_point';
+import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
+import type { SaveData } from './add_significant_event_flyout/types';
 import { ChangePointSummary } from './change_point_summary';
-import { SignificantEventsViewEmptyState } from './empty_state';
-import { SignificantEventFlyout } from './significant_event_flyout';
+import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
+import type { TimelineEvent } from './timeline';
+import { Timeline } from './timeline';
+import { formatChangePoint } from './utils/change_point';
 
-export function StreamDetailSignificantEventsView({
-  definition,
-  refreshDefinition,
-}: {
+interface Props {
   definition: Streams.all.GetResponse;
-  refreshDefinition: () => void;
-}) {
+}
+
+export function StreamDetailSignificantEventsView({ definition }: Props) {
   const {
     core: { notifications },
   } = useKibana();
@@ -48,7 +48,9 @@ export function StreamDetailSignificantEventsView({
     end,
   });
 
-  const { addQuery, removeQuery } = useSignificantEventsApi({ name: definition.stream.name }) || {};
+  const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
+    name: definition.stream.name,
+  });
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
 
@@ -81,67 +83,63 @@ export function StreamDetailSignificantEventsView({
   }
 
   const editFlyout = isEditFlyoutOpen ? (
-    <SignificantEventFlyout
-      onCreate={async (next) => {
-        await addQuery?.(next).then(
-          () => {
-            notifications.toasts.addSuccess({
-              title: i18n.translate(
-                'xpack.streams.significantEvents.significantEventCreateSuccessToastTitle',
-                {
-                  defaultMessage: `Added significant event`,
-                }
-              ),
-            });
-            setIsEditFlyoutOpen(false);
-            significantEventsFetchState.refresh();
-          },
-          (error) => {
-            notifications.showErrorDialog({
-              title: i18n.translate(
-                'xpack.streams.significantEvents.significantEventCreateErrorToastTitle',
-                {
-                  defaultMessage: `Could not add significant event`,
-                }
-              ),
-              error,
-            });
-          }
-        );
-      }}
-      onUpdate={async (next) => {
-        await addQuery?.(next).then(
-          () => {
-            notifications.toasts.addSuccess({
-              title: i18n.translate(
-                'xpack.streams.significantEvents.significantEventUpdateSuccessToastTitle',
-                {
-                  defaultMessage: `Updated significant event`,
-                }
-              ),
-            });
-            setIsEditFlyoutOpen(false);
-            significantEventsFetchState.refresh();
-          },
-          (error) => {
-            notifications.showErrorDialog({
-              title: i18n.translate(
-                'xpack.streams.significantEvents.significantEventUpdateErrorToastTitle',
-                {
-                  defaultMessage: `Could not update significant event`,
-                }
-              ),
-              error,
-            });
-          }
-        );
+    <AddSignificantEventFlyout
+      definition={definition.stream}
+      query={queryToEdit}
+      onSave={async (data: SaveData) => {
+        switch (data.type) {
+          case 'single':
+            await upsertQuery(data.query).then(
+              () => {
+                notifications.toasts.addSuccess({
+                  title: i18n.translate(
+                    'xpack.streams.significantEvents.savedSingle.successfullyToastTitle',
+                    { defaultMessage: `Saved significant event query successfully` }
+                  ),
+                });
+                setIsEditFlyoutOpen(false);
+                significantEventsFetchState.refresh();
+              },
+              (error) => {
+                notifications.showErrorDialog({
+                  title: i18n.translate(
+                    'xpack.streams.significantEvents.savedSingle.errorToastTitle',
+                    { defaultMessage: `Could not save significant event query` }
+                  ),
+                  error,
+                });
+              }
+            );
+            break;
+          case 'multiple':
+            await bulk(data.queries.map((query) => ({ index: query }))).then(
+              () => {
+                notifications.toasts.addSuccess({
+                  title: i18n.translate(
+                    'xpack.streams.significantEvents.savedMultiple.successfullyToastTitle',
+                    { defaultMessage: `Saved significant events queries successfully` }
+                  ),
+                });
+                setIsEditFlyoutOpen(false);
+                significantEventsFetchState.refresh();
+              },
+              (error) => {
+                notifications.showErrorDialog({
+                  title: i18n.translate(
+                    'xpack.streams.significantEvents.savedMultiple.errorToastTitle',
+                    { defaultMessage: 'Could not save significant events queries' }
+                  ),
+                  error,
+                });
+              }
+            );
+            break;
+        }
       }}
       onClose={() => {
         setIsEditFlyoutOpen(false);
         setQueryToEdit(undefined);
       }}
-      query={queryToEdit}
-      name={definition.stream.name}
     />
   ) : null;
 
@@ -174,10 +172,10 @@ export function StreamDetailSignificantEventsView({
                   setIsEditFlyoutOpen(true);
                   setQueryToEdit(undefined);
                 }}
-                iconType="plusInCircle"
+                iconType="plus"
               >
                 {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
-                  defaultMessage: 'Add significant event query',
+                  defaultMessage: 'Significant events',
                 })}
               </EuiButton>
             </EuiFlexItem>

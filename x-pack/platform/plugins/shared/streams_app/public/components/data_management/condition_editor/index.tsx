@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiFieldText,
@@ -15,32 +16,33 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiSelect,
-  EuiSelectOption,
   EuiSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
+import type { Condition, FilterCondition, OperatorKeys } from '@kbn/streamlang';
 import {
-  ALWAYS_CONDITION,
-  Condition,
-  FilterCondition,
-  NEVER_CONDITION,
-  OperatorKeys,
   getDefaultFormValueForOperator,
   getFilterOperator,
   getFilterValue,
   isCondition,
   isFilterConditionObject,
-  isNeverCondition,
 } from '@kbn/streamlang';
 import { isPlainObject } from 'lodash';
+import type { RoutingDefinition, RoutingStatus } from '@kbn/streams-schema';
+import { isRoutingEnabled } from '@kbn/streams-schema';
+import { useResizeChecker } from '@kbn/react-hooks';
 import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 
-export type RoutingConditionEditorProps = ConditionEditorProps;
+type RoutingConditionChangeParams = Omit<RoutingDefinition, 'destination'>;
+
+export type RoutingConditionEditorProps = ConditionEditorProps & {
+  onStatusChange: (params: RoutingConditionChangeParams['status']) => void;
+};
 
 export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
-  const isEnabled = !isNeverCondition(props.condition);
+  const isEnabled = isRoutingEnabled(props.status);
 
   return (
     <EuiForm fullWidth>
@@ -65,14 +67,18 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
           })}
           compressed
           checked={isEnabled}
-          onChange={(event) => {
-            props.onConditionChange(event.target.checked ? ALWAYS_CONDITION : NEVER_CONDITION);
-          }}
+          onChange={(event) => props.onStatusChange(event.target.checked ? 'enabled' : 'disabled')}
         />
       </EuiFormRow>
-      {isEnabled && <ConditionEditor {...props} />}
+      <ConditionEditor {...props} />
     </EuiForm>
   );
+}
+
+export type ProcessorConditionEditorProps = Omit<ConditionEditorProps, 'status'>;
+
+export function ProcessorConditionEditorWrapper(props: ProcessorConditionEditorProps) {
+  return <ConditionEditor status="enabled" {...props} />;
 }
 
 const operatorMap = {
@@ -97,12 +103,15 @@ const operatorOptions: EuiSelectOption[] = Object.entries(operatorMap).map(([val
   text,
 }));
 
-export interface ConditionEditorProps {
+interface ConditionEditorProps {
   condition: Condition;
+  status: RoutingStatus;
   onConditionChange: (condition: Condition) => void;
 }
 
 export function ConditionEditor(props: ConditionEditorProps) {
+  const { status, onConditionChange } = props;
+
   const isInvalidCondition = !isCondition(props.condition);
 
   const condition = alwaysToEmptyEquals(props.condition);
@@ -111,8 +120,10 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
 
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
+
   const handleConditionChange = (updatedCondition: Condition) => {
-    props.onConditionChange(emptyEqualsToAlways(updatedCondition));
+    onConditionChange(emptyEqualsToAlways(updatedCondition));
   };
 
   return (
@@ -129,6 +140,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
           compressed
           checked={usingSyntaxEditor}
           onChange={toggleSyntaxEditor}
+          disabled={status === 'disabled'}
         />
       }
       isInvalid={isInvalidCondition}
@@ -141,21 +153,32 @@ export function ConditionEditor(props: ConditionEditorProps) {
       }
     >
       {usingSyntaxEditor ? (
-        <CodeEditor
-          dataTestSubj="streamsAppConditionEditorCodeEditor"
-          height={200}
-          languageId="json"
-          value={JSON.stringify(condition, null, 2)}
-          onChange={(value) => {
-            try {
-              handleConditionChange(JSON.parse(value));
-            } catch (error: unknown) {
-              // do nothing
-            }
-          }}
-        />
+        <div ref={containerRef} style={{ width: '100%', height: 200, overflow: 'hidden' }}>
+          <CodeEditor
+            dataTestSubj="streamsAppConditionEditorCodeEditor"
+            height={200}
+            languageId="json"
+            value={JSON.stringify(condition, null, 2)}
+            onChange={(value) => {
+              try {
+                handleConditionChange(JSON.parse(value));
+              } catch (error: unknown) {
+                // do nothing
+              }
+            }}
+            editorDidMount={setupResizeChecker}
+            editorWillUnmount={destroyResizeChecker}
+            options={{
+              readOnly: status === 'disabled',
+            }}
+          />
+        </div>
       ) : isFilterCondition ? (
-        <FilterForm condition={condition} onConditionChange={handleConditionChange} />
+        <FilterForm
+          disabled={status === 'disabled'}
+          condition={condition}
+          onConditionChange={handleConditionChange}
+        />
       ) : (
         <EuiCodeBlock language="json" paddingSize="m" isCopyable>
           {JSON.stringify(condition, null, 2)}
@@ -167,26 +190,29 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
 function FilterForm(props: {
   condition: FilterCondition;
+  disabled: boolean;
   onConditionChange: (condition: FilterCondition) => void;
 }) {
+  const { condition, disabled, onConditionChange } = props;
+
   const operator = useMemo(() => {
-    return getFilterOperator(props.condition);
-  }, [props.condition]);
+    return getFilterOperator(condition);
+  }, [condition]);
 
   const value = useMemo(() => {
-    return getFilterValue(props.condition);
-  }, [props.condition]);
+    return getFilterValue(condition);
+  }, [condition]);
 
   const handleConditionChange = (updatedCondition: Partial<FilterCondition>) => {
-    props.onConditionChange({
-      ...props.condition,
+    onConditionChange({
+      ...condition,
       ...updatedCondition,
     } as FilterCondition);
   };
 
   const handleValueChange = (nextValue: string | boolean) => {
-    props.onConditionChange({
-      field: props.condition.field,
+    onConditionChange({
+      field: condition.field,
       [operator as OperatorKeys]: nextValue,
     } as FilterCondition);
   };
@@ -194,14 +220,14 @@ function FilterForm(props: {
   const handleOperatorChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newOperator = event.target.value;
 
-    const existingValue = getFilterValue(props.condition);
+    const existingValue = getFilterValue(condition);
 
     const defaultValue = getDefaultFormValueForOperator(newOperator as OperatorKeys);
 
     const typeChanged = typeof existingValue !== typeof defaultValue;
 
-    props.onConditionChange({
-      field: props.condition.field,
+    onConditionChange({
+      field: condition.field,
       [newOperator]: existingValue !== undefined && !typeChanged ? existingValue : defaultValue,
     } as FilterCondition);
   };
@@ -215,10 +241,11 @@ function FilterForm(props: {
         placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
           defaultMessage: 'Field',
         })}
-        value={props.condition.field}
+        value={condition.field}
         onChange={(e) => {
           handleConditionChange({ field: e.target.value });
         }}
+        disabled={disabled}
       />
       <EuiSelect
         aria-label={i18n.translate('xpack.streams.filter.operator', {
@@ -229,6 +256,7 @@ function FilterForm(props: {
         value={operator}
         compressed
         onChange={handleOperatorChange}
+        disabled={disabled}
       />
       {typeof value === 'string' ? (
         <EuiFieldText
@@ -242,6 +270,7 @@ function FilterForm(props: {
           onChange={(e) => {
             handleValueChange(e.target.value);
           }}
+          disabled={disabled}
         />
       ) : typeof value === 'boolean' ? (
         <EuiSelect
@@ -269,6 +298,7 @@ function FilterForm(props: {
             const nextValue = e.target.value === 'true' ? true : false;
             handleValueChange(nextValue);
           }}
+          disabled={disabled}
         />
       ) : null}
     </EuiFlexGroup>

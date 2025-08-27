@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { map, omit, pickBy } from 'lodash';
-import { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
+import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
 
 const serverGeneratedProperties = [
   'id',

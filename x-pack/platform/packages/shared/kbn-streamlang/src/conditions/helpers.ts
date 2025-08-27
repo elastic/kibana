@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import {
+import type {
   ShorthandBinaryFilterCondition,
   RangeCondition,
   StringOrNumberOrBoolean,
   OperatorKeys,
-  BINARY_OPERATORS,
   ShorthandUnaryFilterCondition,
-  UNARY_OPERATORS,
   FilterCondition,
   Condition,
+} from '../../types/conditions';
+import {
+  BINARY_OPERATORS,
+  UNARY_OPERATORS,
   isAndCondition,
   isFilterCondition,
   isOrCondition,

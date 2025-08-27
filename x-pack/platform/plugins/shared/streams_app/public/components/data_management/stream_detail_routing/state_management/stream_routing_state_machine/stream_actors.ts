@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { RoutingDefinition, Streams } from '@kbn/streams-schema';
-import { ErrorActorEvent, fromPromise } from 'xstate5';
-import { errors as esErrors } from '@elastic/elasticsearch';
-import { APIReturnType } from '@kbn/streams-plugin/public/api';
-import { IToasts } from '@kbn/core/public';
+import type { RoutingDefinition, RoutingStatus, Streams } from '@kbn/streams-schema';
+import type { ErrorActorEvent } from 'xstate5';
+import { fromPromise } from 'xstate5';
+import type { errors as esErrors } from '@elastic/elasticsearch';
+import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { Condition } from '@kbn/streamlang';
+import type { Condition } from '@kbn/streamlang';
 import { getFormattedError } from '../../../../../util/errors';
-import { StreamRoutingServiceDependencies } from './types';
+import type { StreamRoutingServiceDependencies } from './types';
 
 /**
  * Upsert stream actor factory
@@ -57,6 +58,7 @@ export type ForkStreamResponse = APIReturnType<'POST /api/streams/{name}/_fork 2
 export interface ForkStreamInput {
   definition: Streams.WiredStream.GetResponse;
   where: Condition;
+  status: RoutingStatus;
   destination: string;
 }
 export function createForkStreamActor({
@@ -76,6 +78,7 @@ export function createForkStreamActor({
           },
           body: {
             where: input.where,
+            status: input.status,
             stream: {
               name: input.destination,
             },

@@ -8,7 +8,7 @@ import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { SchemaEditorProps, SchemaField } from './types';
+import type { SchemaEditorProps, SchemaField } from './types';
 
 export const UnpromoteFieldModal = ({
   field,

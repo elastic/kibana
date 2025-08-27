@@ -6,13 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { FieldDefinition, Streams } from '@kbn/streams-schema';
+import type { FieldDefinition, RoutingStatus } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
-import { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
+import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
 import { get, omit } from 'lodash';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import {
-  StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
   createStreamsRepositoryViewerClient,
 } from './helpers/repository_client';
@@ -34,6 +35,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
   const isServerless = !!config.get('serverless');
   const esClient = getService('es');
+  const status = 'enabled' as RoutingStatus;
 
   interface Resources {
     indices: string[];
@@ -221,6 +223,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             field: 'attributes.log.logger',
             eq: 'nginx',
           },
+          status,
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -235,6 +238,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             field: 'log.logger',
             eq: 'nginx',
           },
+          status,
         };
         const response = await forkStream(apiClient, 'logs', body, 409);
         expect(response).to.have.property('message', 'Child stream logs.nginx already exists');
@@ -267,6 +271,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             name: 'logs.nginx.access',
           },
           where: { field: 'severity_text', eq: 'info' },
+          status,
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -299,6 +304,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             name: 'logs.nginx.error',
           },
           where: { field: 'attributes.log', eq: 'error' },
+          status,
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -331,6 +337,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             name: 'logs.number-test',
           },
           where: { field: 'attributes.code', gte: '500' },
+          status,
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -366,6 +373,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               { field: 'body.text', contains: 400 },
             ],
           },
+          status,
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -401,6 +409,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             ],
           },
+          status,
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -535,6 +544,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ).to.eql([
           {
             destination: 'logs.nginx.error',
+            status: 'enabled',
             where: {
               field: 'attributes.log',
               eq: 'error',

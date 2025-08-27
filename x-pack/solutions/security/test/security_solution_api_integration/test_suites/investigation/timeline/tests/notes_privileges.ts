@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
+import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { createNote, deleteNote, getNote } from '../../utils/notes';
 import * as users from '../../../../config/privileges/users';
 import { roles } from '../../../../config/privileges/roles';

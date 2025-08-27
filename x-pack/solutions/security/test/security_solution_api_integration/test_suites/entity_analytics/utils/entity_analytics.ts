@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import SuperTest from 'supertest';
+import type SuperTest from 'supertest';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -14,7 +14,7 @@ import {
   ENTITY_ANALYTICS_INTERNAL_RUN_MIGRATIONS_ROUTE,
   API_VERSIONS,
 } from '@kbn/security-solution-plugin/common/constants';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { routeWithNamespace } from '../../../config/services/detections_response';
 
 export const entityAnalyticsRouteHelpersFactory = (

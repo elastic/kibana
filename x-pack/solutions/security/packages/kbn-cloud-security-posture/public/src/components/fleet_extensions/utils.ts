@@ -13,7 +13,7 @@ import type {
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import {
@@ -32,14 +32,14 @@ import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE,
 } from './constants';
-import {
+import type {
   AwsCredentialsType,
   CloudProviders,
   GcpCredentialsType,
   GcpFields,
   GcpInputFields,
-  type GetAwsCredentialTypeConfigParams,
-  type GetCloudConnectorRemoteRoleTemplateParams,
+  GetAwsCredentialTypeConfigParams,
+  GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
 
 const buildPolicyInput = (

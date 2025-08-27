@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { FieldDefinition, Streams } from '@kbn/streams-schema';
-import { ErrorActorEvent, fromPromise } from 'xstate5';
-import { errors as esErrors } from '@elastic/elasticsearch';
-import { APIReturnType } from '@kbn/streams-plugin/public/api';
-import { IToasts } from '@kbn/core/public';
+import type { FieldDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
+import type { ErrorActorEvent } from 'xstate5';
+import { fromPromise } from 'xstate5';
+import type { errors as esErrors } from '@elastic/elasticsearch';
+import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import { getFormattedError } from '../../../../../util/errors';
-import { StreamEnrichmentServiceDependencies } from './types';
+import type { StreamEnrichmentServiceDependencies } from './types';
 import { processorConverter } from '../../utils';
 
 export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest 2023-10-31'>;

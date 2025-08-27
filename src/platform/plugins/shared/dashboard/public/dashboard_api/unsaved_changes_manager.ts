@@ -8,36 +8,25 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { HasLastSavedChildState, childrenUnsavedChanges$ } from '@kbn/presentation-containers';
-import {
+import type { HasLastSavedChildState } from '@kbn/presentation-containers';
+import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
+import type {
   PublishesSavedObjectId,
   PublishingSubject,
   ViewMode,
-  apiHasSerializableState,
 } from '@kbn/presentation-publishing';
+import { apiHasSerializableState } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
-import {
-  BehaviorSubject,
-  Observable,
-  combineLatest,
-  debounceTime,
-  map,
-  skipWhile,
-  switchMap,
-  tap,
-} from 'rxjs';
-import {
-  DashboardBackupState,
-  getDashboardBackupService,
-} from '../services/dashboard_backup_service';
-import { initializeLayoutManager } from './layout_manager';
-import { initializeSettingsManager } from './settings_manager';
-import { DashboardState } from '../../common';
-import { initializeUnifiedSearchManager } from './unified_search_manager';
-import {
-  CONTROL_GROUP_EMBEDDABLE_ID,
-  initializeControlGroupManager,
-} from './control_group_manager';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, skipWhile, switchMap, tap } from 'rxjs';
+import type { DashboardBackupState } from '../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
+import type { initializeLayoutManager } from './layout_manager';
+import type { initializeSettingsManager } from './settings_manager';
+import type { DashboardState } from '../../common';
+import type { initializeUnifiedSearchManager } from './unified_search_manager';
+import type { initializeControlGroupManager } from './control_group_manager';
+import { CONTROL_GROUP_EMBEDDABLE_ID } from './control_group_manager';
 
 const DEBOUNCE_TIME = 100;
 

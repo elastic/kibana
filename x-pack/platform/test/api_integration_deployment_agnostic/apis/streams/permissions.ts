@@ -6,9 +6,9 @@
  */
 
 import expect from 'expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import {
-  StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
   createStreamsRepositoryEditorClient,
 } from './helpers/repository_client';
@@ -32,6 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'logs.forked',
         },
         where: { always: {} },
+        status: 'enabled',
       });
     });
 
@@ -43,7 +44,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const response = await forkStream(
         editorApiClient,
         'logs',
-        { stream: { name: 'logs.forked2' }, where: { always: {} } },
+        { stream: { name: 'logs.forked2' }, where: { always: {} }, status: 'enabled' },
         403
       );
 

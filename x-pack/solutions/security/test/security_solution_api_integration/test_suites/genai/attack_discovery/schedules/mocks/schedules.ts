@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AttackDiscoveryScheduleCreateProps } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryScheduleCreateProps } from '@kbn/elastic-assistant-common';
 
 export const getSimpleAttackDiscoverySchedule = (
   overrides?: Partial<AttackDiscoveryScheduleCreateProps>

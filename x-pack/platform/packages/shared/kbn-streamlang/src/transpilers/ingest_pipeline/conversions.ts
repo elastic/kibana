@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ElasticsearchProcessorType,
-  elasticsearchProcessorTypes,
-} from '../../../types/processors/manual_ingest_pipeline_processors';
-import {
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchProcessorType } from '../../../types/processors/manual_ingest_pipeline_processors';
+import { elasticsearchProcessorTypes } from '../../../types/processors/manual_ingest_pipeline_processors';
+import type {
   IngestPipelineGrokProcessor,
   IngestPipelineDissectProcessor,
   IngestPipelineDateProcessor,
@@ -19,7 +17,7 @@ import {
   IngestPipelineManualIngestPipelineProcessor,
   IngestPipelineAppendProcessor,
 } from '../../../types/processors/ingest_pipeline_processors';
-import { StreamlangProcessorDefinition } from '../../../types/processors';
+import type { StreamlangProcessorDefinition } from '../../../types/processors';
 import { conditionToPainless } from '../../conditions/condition_to_painless';
 import type { IngestPipelineTranspilationOptions } from '.';
 

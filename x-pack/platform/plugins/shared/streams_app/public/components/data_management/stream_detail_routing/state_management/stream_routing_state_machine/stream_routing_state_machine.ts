@@ -4,18 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  MachineImplementationsFrom,
-  assign,
-  and,
-  enqueueActions,
-  setup,
-  ActorRefFrom,
-} from 'xstate5';
+import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate5';
+import { assign, and, enqueueActions, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { Streams, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION } from '@kbn/streamlang';
-import {
+import type {
   StreamRoutingContext,
   StreamRoutingEvent,
   StreamRoutingInput,
@@ -29,7 +24,7 @@ import {
   createDeleteStreamActor,
 } from './stream_actors';
 import { routingConverter } from '../../utils';
-import { RoutingDefinitionWithUIAttributes } from '../../types';
+import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import { selectCurrentRule } from './selectors';
 import {
   createRoutingSamplesMachineImplementations,
@@ -58,6 +53,7 @@ export const streamRoutingMachine = setup({
       const newRule = routingConverter.toUIDefinition({
         destination: `${context.definition.stream.name}.child`,
         where: ALWAYS_CONDITION,
+        status: 'enabled',
         isNew: true,
       });
 
@@ -211,6 +207,7 @@ export const streamRoutingMachine = setup({
                     definition: context.definition,
                     where: currentRoutingRule.where,
                     destination: currentRoutingRule.destination,
+                    status: currentRoutingRule.status,
                   };
                 },
                 onDone: {

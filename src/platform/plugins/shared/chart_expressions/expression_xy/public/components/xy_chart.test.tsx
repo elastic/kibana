@@ -11,13 +11,19 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
+import type {
+  GeometryValue,
+  XYChartSeriesIdentifier,
+  PointStyle,
+  AreaSeriesStyle,
+  LineSeriesStyle,
+} from '@elastic/charts';
 import {
   AreaSeries,
   Axis,
   BarSeries,
   ColorVariant,
   Fit,
-  GeometryValue,
   GroupBy,
   HorizontalAlignment,
   LayoutDirection,
@@ -29,20 +35,16 @@ import {
   Settings,
   SmallMultiples,
   VerticalAlignment,
-  XYChartSeriesIdentifier,
   Tooltip,
   LegendValue,
-  PointStyle,
-  AreaSeriesStyle,
-  LineSeriesStyle,
 } from '@elastic/charts';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import { DataLayerConfig } from '../../common';
+import type { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { XyEndzones } from './x_domain';
 import {
@@ -60,8 +62,9 @@ import {
   createSampleDatatableWithRows,
   sampleLayer,
 } from '../../common/test_utils';
-import { XYChart, XYChartRenderProps } from './xy_chart';
-import {
+import type { XYChartRenderProps } from './xy_chart';
+import { XYChart } from './xy_chart';
+import type {
   ExtendedDataLayerConfig,
   XYProps,
   AnnotationLayerConfigResult,
@@ -902,13 +905,13 @@ describe('XYChart component', () => {
       expect(linePointStyle.visible).toBe('always');
     });
 
-    test(`should be 'auto' when pointVisibility is undefined and showPoints is 'false'`, () => {
+    test(`should be 'never' when pointVisibility is undefined and showPoints is 'false'`, () => {
       const { areaPointStyle, linePointStyle } = getAreaLinePointStyles({
         showPoints: false,
       });
 
-      expect(areaPointStyle.visible).toBe('auto');
-      expect(linePointStyle.visible).toBe('auto');
+      expect(areaPointStyle.visible).toBe('never');
+      expect(linePointStyle.visible).toBe('never');
     });
   });
 

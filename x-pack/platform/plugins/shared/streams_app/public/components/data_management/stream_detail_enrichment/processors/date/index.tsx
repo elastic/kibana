@@ -11,7 +11,7 @@ import { isEmpty, uniq } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import useMount from 'react-use/lib/useMount';
-import { StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public/api';
+import type { StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public/api';
 import { STREAMS_TIERED_ML_FEATURE } from '@kbn/streams-plugin/common';
 import { getFormattedError } from '../../../../../util/errors';
 import { useKibana } from '../../../../../hooks/use_kibana';
@@ -27,7 +27,7 @@ import {
   useStreamEnrichmentSelector,
   useSimulatorSelector,
 } from '../../state_management/stream_enrichment_state_machine';
-import { DateFormState } from '../../types';
+import type { DateFormState } from '../../types';
 
 type DateSuggestionsRequestSamples =
   StreamsAPIClientRequestParamsOf<'POST /internal/streams/{name}/processing/_suggestions/date'>['params']['body']['dates'];

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isColumn } from '../../../ast/is';
 import type { ESQLAst, ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
-import { ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandContext, ICommandCallbacks } from '../../types';
 
 export const validate = (
   command: ESQLCommand,

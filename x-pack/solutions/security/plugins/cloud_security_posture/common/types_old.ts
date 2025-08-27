@@ -10,10 +10,10 @@ import type {
   CspFinding,
   MisconfigurationEvaluationStatus,
 } from '@kbn/cloud-security-posture-common';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
-import { getComplianceDashboardSchema } from './schemas/stats';
+import type { getComplianceDashboardSchema } from './schemas/stats';
 type CloudConnectorType = 'cloud_connectors';
 export type AwsCredentialsType =
   | CloudConnectorType

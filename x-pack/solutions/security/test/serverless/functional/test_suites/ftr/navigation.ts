@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');

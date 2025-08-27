@@ -7,8 +7,8 @@
 
 import type SuperTest from 'supertest';
 import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import { RuleParamsWithDefaultValue } from '@kbn/response-ops-rule-params';
-import { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
+import type { RuleParamsWithDefaultValue } from '@kbn/response-ops-rule-params';
+import type { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
 import { createRuleThroughAlertingEndpoint } from '../../../utils';
 
 /**

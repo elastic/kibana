@@ -8,7 +8,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { WorkflowSchema, WorkflowYaml } from '../spec/schema';
+import type { WorkflowYaml } from '../spec/schema';
+import { WorkflowSchema } from '../spec/schema';
 
 export enum ExecutionStatus {
   // In progress
@@ -24,10 +25,15 @@ export enum ExecutionStatus {
 }
 
 export interface EsWorkflowExecution {
+  spaceId: string;
   id: string;
   workflowId: string;
+  isTestRun: boolean;
   status: ExecutionStatus;
+  context: Record<string, any>;
   workflowDefinition: WorkflowYaml;
+  currentNodeId?: string; // The node currently being executed
+  stack: string[];
   createdAt: string;
   error: string | null;
   createdBy: string;
@@ -52,6 +58,7 @@ export interface Provider {
 }
 
 export interface EsWorkflowStepExecution {
+  spaceId: string;
   id: string;
   stepId: string;
   workflowRunId: string;
@@ -61,15 +68,11 @@ export interface EsWorkflowStepExecution {
   completedAt?: string;
   executionTimeMs?: number;
   topologicalIndex: number;
-  error?: string;
-  output?: Record<string, any>;
-}
-
-export enum WorkflowStatus {
-  DRAFT = 'draft',
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  DELETED = 'deleted',
+  executionIndex: number;
+  error?: string | null;
+  output?: Record<string, any> | null;
+  input?: Record<string, any> | null;
+  state?: Record<string, any>;
 }
 
 export interface WorkflowExecutionHistoryModel {
@@ -83,12 +86,14 @@ export interface WorkflowExecutionHistoryModel {
 }
 
 export interface WorkflowExecutionLogModel {
+  spaceId: string;
   timestamp: string;
   message: string;
   level: string;
 }
 
 export interface WorkflowExecutionDto {
+  spaceId: string;
   id: string;
   status: ExecutionStatus;
   startedAt: string;
@@ -105,7 +110,7 @@ export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecu
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
   _pagination: {
-    offset: number;
+    page: number;
     limit: number;
     total: number;
     next?: string;
@@ -119,13 +124,14 @@ export const EsWorkflowSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
-  status: z.nativeEnum(WorkflowStatus),
+  enabled: z.boolean(),
   tags: z.array(z.string()),
   createdAt: z.date(),
   createdBy: z.string(),
   lastUpdatedAt: z.date(),
   lastUpdatedBy: z.string(),
   definition: WorkflowSchema,
+  deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
 });
 
@@ -134,6 +140,34 @@ export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
 });
+
+export const UpdateWorkflowCommandSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  enabled: z.boolean(),
+  tags: z.array(z.string()),
+  yaml: z.string(),
+});
+
+export const SearchWorkflowCommandSchema = z.object({
+  triggerType: z.string().optional(),
+  limit: z.number().default(100),
+  page: z.number().default(0),
+  createdBy: z.array(z.string()).optional(),
+  enabled: z.array(z.boolean()).optional(),
+  query: z.string().optional(),
+  _full: z.boolean().default(false),
+});
+
+export const RunWorkflowCommandSchema = z.object({
+  inputs: z.record(z.any()),
+});
+export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
+
+export const RunWorkflowResponseSchema = z.object({
+  workflowExecutionId: z.string(),
+});
+export type RunWorkflowResponseDto = z.infer<typeof RunWorkflowResponseSchema>;
 
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
@@ -147,7 +181,7 @@ export interface WorkflowDetailDto {
   id: string;
   name: string;
   description?: string;
-  status: WorkflowStatus;
+  enabled: boolean;
   createdAt: Date;
   createdBy: string;
   lastUpdatedAt: Date;
@@ -160,7 +194,7 @@ export interface WorkflowListItemDto {
   id: string;
   name: string;
   description: string;
-  status: WorkflowStatus;
+  enabled: boolean;
   definition: WorkflowYaml;
   createdAt: Date;
   history: WorkflowExecutionHistoryModel[];
@@ -169,7 +203,7 @@ export interface WorkflowListItemDto {
 
 export interface WorkflowListDto {
   _pagination: {
-    offset: number;
+    page: number;
     limit: number;
     total: number;
     next?: string;
@@ -178,9 +212,8 @@ export interface WorkflowListDto {
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
-  extends Pick<EsWorkflow, 'id' | 'name' | 'status' | 'definition'> {
-  /** Serialized graphlib.Graph */
-  executionGraph?: any;
+  extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition'> {
+  isTestRun?: boolean;
 }
 
 export interface WorkflowListItemAction {
@@ -191,4 +224,27 @@ export interface WorkflowListItemAction {
   icon: string;
   description: string;
   onClick: (item: WorkflowListItemDto) => void;
+}
+
+export interface WorkflowExecutionsHistoryStats {
+  date: string;
+  timestamp: string;
+  completed: number;
+  failed: number;
+  cancelled: number;
+}
+
+export interface WorkflowStatsDto {
+  workflows: {
+    enabled: number;
+    disabled: number;
+  };
+  executions: WorkflowExecutionsHistoryStats[];
+}
+
+export interface WorkflowAggsDto {
+  [key: string]: {
+    key: string;
+    label: string;
+  }[];
 }

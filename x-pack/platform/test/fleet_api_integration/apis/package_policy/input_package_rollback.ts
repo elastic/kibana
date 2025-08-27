@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { getInstallationInfo } from './helper';
 const PACKAGE_NAME = 'input_package_upgrade';
