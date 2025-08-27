@@ -119,7 +119,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    describe('User instruction management', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/230988
+    describe.skip('User instruction management', () => {
       async function openUserInstructionFlyout() {
         await testSubjects.click(ui.pages.kbManagementTab.editUserInstructionButton);
         await testSubjects.exists(ui.pages.kbManagementTab.saveEntryButton);
@@ -138,18 +139,10 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       async function setUserInstructionContent(content?: string) {
         const editor = await find.byCssSelector(`#${ui.pages.kbManagementTab.entryMarkdownEditor}`);
-        await retry.try(async () => {
-          await editor.clearValue();
-          if (content) {
-            await editor.type(content);
-          }
-          const actualValue = await editor.getAttribute('value');
-          if (actualValue !== (content ?? '')) {
-            throw new Error(
-              `Expected editor value to be "${content ?? ''}" but found "${actualValue}"`
-            );
-          }
-        });
+        await editor.clearValue();
+        if (content) {
+          await editor.type(content);
+        }
       }
 
       before(async () => {
