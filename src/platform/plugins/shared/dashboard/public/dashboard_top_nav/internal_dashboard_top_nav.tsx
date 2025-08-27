@@ -376,9 +376,6 @@ export function InternalDashboardTopNav({
         indexPatterns={allDataViews ?? []}
         allowSavingQueries
         appName={DASHBOARD_APP_ID}
-        // isLoading={filtersLoading}
-        // additionalQueryBarMenuItems={{ items: [{ renderItem: () => <>test</> }] }}
-        // prependFilterBar={<>test</>}
         draft={{ query: { query: 'test', language: 'kql' } }}
         visible={viewMode !== 'print'}
         setMenuMountPoint={
@@ -400,7 +397,7 @@ export function InternalDashboardTopNav({
           dashboardApi.publishFilters();
         }}
         onSavedQueryIdChange={setSavedQueryId}
-        dirtyState={hasUnpublishedFilters ? { hasUnpublishedFilters } : undefined}
+        hasDirtyState={hasUnpublishedFilters}
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />

@@ -155,7 +155,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   esqlEditorInitialState?: QueryBarTopRowProps['esqlEditorInitialState'];
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
 
-  dirtyState?: object;
+  hasDirtyState?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -315,7 +315,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       (this.state.query && this.props.query && !isEqual(this.state.query, this.props.query)) ||
       this.state.dateRangeFrom !== this.props.dateRangeFrom ||
       this.state.dateRangeTo !== this.props.dateRangeTo ||
-      Object.keys(this.props.dirtyState ?? {}).length
+      Boolean(this.props.hasDirtyState)
     );
   };
 

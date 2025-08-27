@@ -262,7 +262,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
           </EuiFormRow>
 
           <EuiFormRow
-            label={i18n.translate('dashboard.embeddableApi.showSettings.flyout.formRow.controls', {
+            label={i18n.translate('dashboard.embeddableApi.flyout.formRow.controls', {
               defaultMessage: 'Control panels',
             })}
           >
@@ -270,7 +270,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               <EuiFormRow>
                 <EuiSwitch
                   label={i18n.translate(
-                    'dashboard.embeddableApi.showSettings.flyout.form.autoApplyFiltersSwitchLabel',
+                    'dashboard.embeddableApi.lyout.form.autoApplyFiltersSwitchLabel',
                     {
                       defaultMessage: 'Auto apply filters',
                     }
