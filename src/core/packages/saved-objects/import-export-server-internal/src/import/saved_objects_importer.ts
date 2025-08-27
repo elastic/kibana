@@ -93,6 +93,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     namespace,
     retries,
     managed,
+    request,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
     this.#log.debug('Resolving import errors');
     return resolveSavedObjectsImportErrors({
@@ -106,6 +107,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
       managed,
+      request,
     });
   }
 }
