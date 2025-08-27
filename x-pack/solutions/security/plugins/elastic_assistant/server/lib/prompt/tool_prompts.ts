@@ -175,4 +175,23 @@ Use query types like: recent_activity, login_attempts, network_connections, proc
 ALWAYS use this tool instead of the general GenerateESQLTool when the user wants to investigate a specific asset or entity.`,
     },
   },
+  {
+    promptId: 'AssetComplianceTool',
+    promptGroupId,
+    prompt: {
+      default: `Call this tool to get compliance and misconfiguration information for a specific asset. This includes CIS benchmark results, security posture findings, and remediation guidance.
+
+Use this tool when the user wants to:
+- Check compliance status of an asset, host, user, or service
+- Get security misconfiguration findings for an entity
+- Review CIS benchmark results
+- See failed security configurations that need attention
+- Get remediation guidance for compliance issues
+- Understand security posture and compliance score
+
+The tool provides detailed compliance findings including passed/failed checks, compliance scores, benchmark coverage, and actionable remediation steps.
+
+Provide the asset identifier (hostname, entity ID, username, or service name) to get comprehensive compliance and security posture information.`,
+    },
+  },
 ];

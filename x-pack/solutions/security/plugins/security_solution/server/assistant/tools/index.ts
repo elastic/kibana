@@ -15,12 +15,14 @@ import { KNOWLEDGE_BASE_RETRIEVAL_TOOL } from './knowledge_base/knowledge_base_r
 import { KNOWLEDGE_BASE_WRITE_TOOL } from './knowledge_base/knowledge_base_write_tool';
 import { SECURITY_LABS_KNOWLEDGE_BASE_TOOL } from './security_labs/security_labs_tool';
 import { ASSET_INVENTORY_TOOL } from './asset_inventory_simple/asset_inventory_simple';
+import { ASSET_COMPLIANCE_TOOL } from './asset_compliance_tool/asset_compliance_tool';
 
 // any new tool should also be added to telemetry schema in
 // x-pack/solutions/security/plugins/elastic_assistant/server/lib/telemetry/event_based_telemetry.ts
 export const assistantTools = [
   ALERT_COUNTS_TOOL,
   ASSET_INVENTORY_TOOL,
+  ASSET_COMPLIANCE_TOOL,
   KNOWLEDGE_BASE_RETRIEVAL_TOOL,
   KNOWLEDGE_BASE_WRITE_TOOL,
   GENERATE_ESQL_TOOL,
