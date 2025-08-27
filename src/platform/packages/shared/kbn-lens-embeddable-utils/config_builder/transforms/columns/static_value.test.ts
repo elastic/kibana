@@ -43,7 +43,7 @@ describe('Static Value Transforms', () => {
 
       const result = fromStaticValueAPItoLensState(input);
       expect(result.params.value).toBe(String(LENS_STATIC_VALUE_DEFAULT));
-      expect(result.label).toBe('Static Value');
+      expect(result.label).toBe(`Static value: ${LENS_STATIC_VALUE_DEFAULT}`);
     });
 
     it('should handle format configuration', () => {
@@ -151,7 +151,7 @@ describe('Static Value Transforms', () => {
       };
 
       const result = fromStaticValueAPItoLensState(input);
-      expect(result.label).toBe('Static Value');
+      expect(result.label).toBe('Static value: 100');
     });
 
     it('should generate default label for NaN value', () => {

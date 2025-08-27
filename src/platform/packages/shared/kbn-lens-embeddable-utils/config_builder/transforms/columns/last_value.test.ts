@@ -26,11 +26,13 @@ describe('Last Value Transforms', () => {
         sourceField: 'status',
         label: 'Last value of status',
         isBucketed: false,
-        dataType: 'string',
+        dataType: 'number',
         params: {
           sortField: '@timestamp',
           showArrayValues: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
         },
+        customLabel: false,
+        filter: undefined,
       };
 
       expect(fromLastValueAPItoLensState(input)).toEqual(expected);
@@ -125,7 +127,6 @@ describe('Last Value Transforms', () => {
       const result = fromLastValueLensStateToAPI(input);
       expect(result.format).toEqual({
         type: 'number',
-        decimals: 2,
       });
     });
 

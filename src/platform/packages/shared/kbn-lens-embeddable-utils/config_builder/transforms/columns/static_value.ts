@@ -48,9 +48,9 @@ export const fromStaticValueLensStateToAPI = (
 ): LensApiStaticValueOperation => {
   return {
     operation: 'static_value',
-    // @TODO: strip this out once fixed the schema output types
-    value:
-      options.params?.value != null ? Number(options.params?.value) : LENS_STATIC_VALUE_DEFAULT,
+    ...(options.params?.value != null && options.params.value !== String(LENS_STATIC_VALUE_DEFAULT)
+      ? { value: Number(options.params?.value) }
+      : {}),
     ...getLensAPIMetricSharedProps(options, ofName(options.params.value)),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };

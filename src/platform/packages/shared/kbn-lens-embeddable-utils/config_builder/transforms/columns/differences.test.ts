@@ -42,6 +42,8 @@ describe('Differences Transforms', () => {
         isBucketed: false,
         dataType: 'number',
         filter: undefined,
+        reducedTimeRange: undefined,
+        params: {},
       };
 
       expect(fromDifferencesAPItoLensState(input, testRef)).toEqual(expected);

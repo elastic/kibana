@@ -91,7 +91,7 @@ describe('Bucket Operation Schemas', () => {
         },
         {
           type: 'custom' as const,
-          operation: 'field-op-only' as const,
+          operation: 'average' as const,
           field: 'myfield',
           direction: 'asc' as const,
         },
