@@ -33,6 +33,7 @@ import {
   isNeverCondition,
 } from '@kbn/streamlang';
 import { isPlainObject } from 'lodash';
+import { useResizeChecker } from '@kbn/react-hooks';
 import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 
 export type RoutingConditionEditorProps = ConditionEditorProps;
@@ -109,6 +110,8 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
 
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
+
   const handleConditionChange = (updatedCondition: Condition) => {
     props.onConditionChange(emptyEqualsToAlways(updatedCondition));
   };
@@ -139,19 +142,23 @@ export function ConditionEditor(props: ConditionEditorProps) {
       }
     >
       {usingSyntaxEditor ? (
-        <CodeEditor
-          dataTestSubj="streamsAppConditionEditorCodeEditor"
-          height={200}
-          languageId="json"
-          value={JSON.stringify(condition, null, 2)}
-          onChange={(value) => {
-            try {
-              handleConditionChange(JSON.parse(value));
-            } catch (error: unknown) {
-              // do nothing
-            }
-          }}
-        />
+        <div ref={containerRef} style={{ width: '100%', height: 200, overflow: 'hidden' }}>
+          <CodeEditor
+            dataTestSubj="streamsAppConditionEditorCodeEditor"
+            height={200}
+            languageId="json"
+            value={JSON.stringify(condition, null, 2)}
+            onChange={(value) => {
+              try {
+                handleConditionChange(JSON.parse(value));
+              } catch (error: unknown) {
+                // do nothing
+              }
+            }}
+            editorDidMount={setupResizeChecker}
+            editorWillUnmount={destroyResizeChecker}
+          />
+        </div>
       ) : isFilterCondition ? (
         <FilterForm condition={condition} onConditionChange={handleConditionChange} />
       ) : (

@@ -50,7 +50,6 @@ import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
 import type {
   CommonResponseActionMethodOptions,
-  CustomScriptsResponse,
   GetFileDownloadMethodResponse,
   OmitUnsupportedAttributes,
   ProcessPendingActionsMethodOptions,
@@ -64,6 +63,7 @@ import { stringify } from '../../../../utils/stringify';
 import { ResponseActionAgentResponseEsDocNotFound, ResponseActionsClientError } from '../errors';
 import type {
   ActionDetails,
+  ResponseActionScriptsApiResponse,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   GetProcessesActionOutputContent,
@@ -90,6 +90,7 @@ import type {
   SentinelOneProcessesResponseMeta,
   SentinelRunScriptRequestMeta,
   UploadedFileInfo,
+  SentinelOneScript,
 } from '../../../../../../common/endpoint/types';
 import type {
   GetProcessesRequestBody,
@@ -1137,7 +1138,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   async getCustomScripts({
     osType,
-  }: Omit<CustomScriptsRequestQueryParams, 'agentType'> = {}): Promise<CustomScriptsResponse> {
+  }: Omit<CustomScriptsRequestQueryParams, 'agentType'> = {}): Promise<
+    ResponseActionScriptsApiResponse<SentinelOneScript>
+  > {
     if (
       !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled
     ) {
@@ -1165,17 +1168,35 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
 
     return {
-      data: (scriptSearchResults?.data ?? []).map((scriptInfo) => {
-        return {
-          id: scriptInfo.id,
-          name: scriptInfo.scriptName,
-          description: `${scriptInfo.scriptDescription ?? ''} ${
-            scriptInfo.inputInstructions
-              ? `Input instructions: ${scriptInfo.inputInstructions}`
-              : ''
-          }`.trim(),
-        };
-      }),
+      data: (scriptSearchResults?.data ?? []).map(
+        ({
+          id,
+          scriptName,
+          scriptDescription,
+          inputInstructions,
+          inputExample,
+          inputRequired,
+          osTypes,
+          shortFileName,
+        }) => {
+          return {
+            id,
+            name: scriptName,
+            description: `${scriptDescription ?? ''} ${
+              inputInstructions ? `Input instructions: ${inputInstructions}` : ''
+            }`.trim(),
+            meta: {
+              id,
+              scriptDescription,
+              osTypes,
+              inputInstructions,
+              inputExample,
+              inputRequired,
+              shortFileName,
+            },
+          };
+        }
+      ),
     };
   }
 
