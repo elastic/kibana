@@ -650,38 +650,6 @@ export function HistoryAndStarredQueriesTabs({
         </EuiTabs>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-            {selectedTabId === 'history-queries-tab' && (
-              <EuiFlexItem grow={false}>
-                <EuiFieldSearch
-                  placeholder={i18n.translate('esqlEditor.history.searchPlaceholder', {
-                    defaultMessage: 'Search query history',
-                  })}
-                  compressed
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  data-test-subj="ESQLEditor-history-search"
-                  css={css`
-                    width: 400px;
-                  `}
-                />
-              </EuiFlexItem>
-            )}
-            {selectedTabId === 'starred-queries-tab' && (
-              <EuiFlexItem grow={false}>
-                <EuiFieldSearch
-                  placeholder={i18n.translate('esqlEditor.starred.searchPlaceholder', {
-                    defaultMessage: 'Search starred queries',
-                  })}
-                  compressed
-                  value={starredSearchQuery}
-                  onChange={(e) => setStarredSearchQuery(e.target.value)}
-                  data-test-subj="ESQLEditor-starred-search"
-                  css={css`
-                    width: 400px;
-                  `}
-                />
-              </EuiFlexItem>
-            )}
             <EuiText
               size="xs"
               color="subdued"
@@ -717,6 +685,38 @@ export function HistoryAndStarredQueriesTabs({
                     })()}
               </p>
             </EuiText>
+            {selectedTabId === 'history-queries-tab' && (
+              <EuiFlexItem grow={false}>
+                <EuiFieldSearch
+                  placeholder={i18n.translate('esqlEditor.history.searchPlaceholder', {
+                    defaultMessage: 'Search query history',
+                  })}
+                  compressed
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  data-test-subj="ESQLEditor-history-search"
+                  css={css`
+                    width: 400px;
+                  `}
+                />
+              </EuiFlexItem>
+            )}
+            {selectedTabId === 'starred-queries-tab' && (
+              <EuiFlexItem grow={false}>
+                <EuiFieldSearch
+                  placeholder={i18n.translate('esqlEditor.starred.searchPlaceholder', {
+                    defaultMessage: 'Search starred queries',
+                  })}
+                  compressed
+                  value={starredSearchQuery}
+                  onChange={(e) => setStarredSearchQuery(e.target.value)}
+                  data-test-subj="ESQLEditor-starred-search"
+                  css={css`
+                    width: 400px;
+                  `}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
