@@ -44,9 +44,7 @@ export function GroupStreamDetailManagement({
 
   const tabs = {
     overview: {
-      content: (
-        <GroupStreamDetailView definition={definition} refreshDefinition={refreshDefinition} />
-      ),
+      content: <GroupStreamDetailView stream={definition} refreshDefinition={refreshDefinition} />,
       label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
         defaultMessage: 'Overview',
       }),
