@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-// @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import type { Streams } from '@kbn/streams-schema';
 import type { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
@@ -28,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { ContentPackObjectsList } from './objects_list';
-import { previewContent } from './requests';
+import { parseContent } from './requests';
 import { ContentPackMetadata } from './manifest';
 import { hasSelectedObjects } from './helpers';
 
@@ -76,7 +75,7 @@ export function ExportContentPackFlyout({
         }
       );
 
-      const contentPack = await previewContent({
+      const contentPack = await parseContent({
         http,
         definition,
         file: new File([contentPackRaw], `${definition.stream.name}-1.0.0.zip`, {

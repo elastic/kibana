@@ -5,12 +5,22 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
-import type { FieldDefinition } from '@kbn/streams-schema';
-import { filterQueries, filterRouting, includedObjectsFor } from './helpers';
-import { ContentPackConflictError } from '../error';
-import { baseFields } from '../../streams/component_templates/logs_layer';
+import { uniq } from 'lodash';
+import {
+  ContentPackIncludedObjects,
+  ContentPackStream,
+  PropertyConflict,
+  StreamConflict,
+} from '@kbn/content-packs-schema';
+import { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
+import {
+  ConflictResolverFactories,
+  IdResolverFactory,
+  filterQueries,
+  filterRouting,
+  includedObjectsFor,
+} from './helpers';
+import { mergeField, mergeQuery, mergeRoutingDefinition } from './merge';
 
 export type StreamTree = ContentPackStream & {
   children: StreamTree[];
@@ -57,84 +67,239 @@ export function asTree({
   };
 }
 
-/**
- * merges the root streams provided.
- * this is not called recursively on the children as we currently
- * fail when trying to merge a child that already exists.
- */
 export function mergeTrees({
+  base,
   existing,
   incoming,
+  resolverFactories,
 }: {
+  base: StreamTree | undefined;
   existing: StreamTree;
   incoming: StreamTree;
-}): StreamTree {
-  assertNoConflicts(existing, incoming);
-
-  const mergedRouting = [
-    ...existing.request.stream.ingest.wired.routing,
-    ...incoming.request.stream.ingest.wired.routing,
-  ];
-  const mergedFields = {
-    ...existing.request.stream.ingest.wired.fields,
-    ...Object.keys(incoming.request.stream.ingest.wired.fields)
-      .filter((field) => !baseFields[field])
-      .reduce((fields, field) => {
-        fields[field] = incoming.request.stream.ingest.wired.fields[field];
-        return fields;
-      }, {} as FieldDefinition),
-  };
-  const mergedQueries = [...existing.request.queries, ...incoming.request.queries];
-  const mergedChildren = [...existing.children, ...incoming.children];
-
-  return {
-    type: 'stream' as const,
+  resolverFactories: ConflictResolverFactories;
+}): {
+  existing: StreamTree;
+  incoming: StreamTree;
+  merged: StreamTree;
+  conflicts: StreamConflict[];
+} {
+  const merged: StreamTree = {
     name: existing.name,
+    type: 'stream',
+    children: [],
     request: {
-      ...existing.request,
-      queries: mergedQueries,
       stream: {
-        ...existing.request.stream,
+        description: existing.request.stream.description,
         ingest: {
-          ...existing.request.stream.ingest,
+          processing: existing.request.stream.ingest.processing,
+          lifecycle: existing.request.stream.ingest.lifecycle,
           wired: {
-            ...existing.request.stream.ingest.wired,
-            routing: mergedRouting,
-            fields: mergedFields,
+            routing: [],
+            fields: {},
           },
         },
       },
+      queries: [],
+      dashboards: [],
     },
-    children: mergedChildren,
+  };
+
+  const { merged: mergedFields, conflicts: fieldConflicts } = mergeFields({
+    base: base?.request.stream.ingest.wired.fields,
+    existing: existing.request.stream.ingest.wired.fields,
+    incoming: incoming.request.stream.ingest.wired.fields,
+    resolverFactory: resolverFactories.field(existing.name),
+  });
+  merged.request.stream.ingest.wired.fields = mergedFields;
+
+  const { merged: mergedQueries, conflicts: queryConflicts } = mergeQueries({
+    base: base?.request.queries,
+    existing: existing.request.queries,
+    incoming: incoming.request.queries,
+    resolverFactory: resolverFactories.query(existing.name),
+  });
+  merged.request.queries = mergedQueries;
+
+  const { merged: mergedRouting, conflicts: routingConflicts } = mergeRouting({
+    base: base?.request.stream.ingest.wired.routing,
+    existing: existing.request.stream.ingest.wired.routing,
+    incoming: incoming.request.stream.ingest.wired.routing,
+    resolverFactory: resolverFactories.routing(existing.name),
+  });
+  merged.request.stream.ingest.wired.routing = mergedRouting;
+
+  const { children: mergedChildren, conflicts: childConflicts } = mergeChildren({
+    base: base,
+    existing: existing,
+    incoming: incoming,
+    resolverFactories,
+    routing: mergedRouting,
+  });
+  merged.children = mergedChildren;
+
+  return {
+    existing,
+    incoming,
+    merged,
+    conflicts: [
+      { name: merged.name, conflicts: [...fieldConflicts, ...queryConflicts, ...routingConflicts] },
+      ...childConflicts,
+    ].filter(({ conflicts }) => conflicts.length > 0),
   };
 }
 
-function assertNoConflicts(existing: ContentPackStream, incoming: ContentPackStream) {
-  // routing
-  for (const { destination } of incoming.request.stream.ingest.wired.routing) {
-    if (
-      existing.request.stream.ingest.wired.routing.some((rule) => rule.destination === destination)
-    ) {
-      throw new ContentPackConflictError(`[${destination}] already exists`);
-    }
-  }
+function mergeQueries({
+  base = [],
+  existing,
+  incoming,
+  resolverFactory,
+}: {
+  base?: StreamQuery[];
+  existing: StreamQuery[];
+  incoming: StreamQuery[];
+  resolverFactory: IdResolverFactory<StreamQuery>;
+}): { merged: StreamQuery[]; conflicts: PropertyConflict[] } {
+  const conflicts: PropertyConflict[] = [];
+  const merged = uniq([
+    ...(base.map((query) => query.id) ?? []),
+    ...existing.map((query) => query.id),
+    ...incoming.map((query) => query.id),
+  ]).reduce((queries, id) => {
+    const baseQuery = base.find((q) => q.id === id);
+    const existingQuery = existing.find((q) => q.id === id);
+    const incomingQuery = incoming.find((q) => q.id === id);
 
-  // fields
-  for (const [field, fieldConfig] of Object.entries(incoming.request.stream.ingest.wired.fields)) {
-    const existingField = existing.request.stream.ingest.wired.fields[field];
-    if (existingField && !isEqual(existingField, fieldConfig)) {
-      throw new ContentPackConflictError(
-        `Cannot change mapping of [${field}] for [${existing.name}]`
-      );
+    const { value, conflict } = mergeQuery({
+      base: baseQuery,
+      existing: existingQuery,
+      incoming: incomingQuery,
+      resolver: resolverFactory((baseQuery?.id ?? existingQuery?.id ?? incomingQuery?.id)!),
+    });
+    if (value) {
+      queries.push(value);
     }
-  }
+    if (conflict) {
+      conflicts.push(conflict);
+    }
 
-  // queries
-  for (const { id, title } of incoming.request.queries) {
-    if (existing.request.queries.some((query) => query.id === id)) {
-      throw new ContentPackConflictError(
-        `Query [${id} | ${title}] already exists on [${existing.name}]`
-      );
+    return queries;
+  }, [] as StreamQuery[]);
+
+  return { merged, conflicts };
+}
+
+function mergeFields({
+  base = {},
+  existing,
+  incoming,
+  resolverFactory,
+}: {
+  base?: FieldDefinition;
+  existing: FieldDefinition;
+  incoming: FieldDefinition;
+  resolverFactory: IdResolverFactory<FieldDefinition>;
+}): { merged: FieldDefinition; conflicts: PropertyConflict[] } {
+  const conflicts: PropertyConflict[] = [];
+  const merged = uniq([
+    ...Object.keys(base),
+    ...Object.keys(existing),
+    ...Object.keys(incoming),
+  ]).reduce((fields, key) => {
+    const { value, conflict } = mergeField({
+      base: { [key]: base[key] },
+      existing: { [key]: existing[key] },
+      incoming: { [key]: incoming[key] },
+      resolver: resolverFactory(key),
+    });
+    if (value) {
+      fields[key] = value[key];
     }
-  }
+    if (conflict) {
+      conflicts.push(conflict);
+    }
+
+    return fields;
+  }, {} as FieldDefinition);
+
+  return { merged, conflicts };
+}
+
+function mergeRouting({
+  base = [],
+  existing,
+  incoming,
+  resolverFactory,
+}: {
+  base?: RoutingDefinition[];
+  existing: RoutingDefinition[];
+  incoming: RoutingDefinition[];
+  resolverFactory: IdResolverFactory<RoutingDefinition>;
+}): { merged: RoutingDefinition[]; conflicts: PropertyConflict[] } {
+  const conflicts: PropertyConflict[] = [];
+  const merged = uniq([
+    ...existing.map((routing) => routing.destination),
+    ...(base.map((routing) => routing.destination) ?? []),
+    ...incoming.map((routing) => routing.destination),
+  ]).reduce((routing, child) => {
+    const baseRouting = base.find(({ destination }) => destination === child);
+    const existingRouting = existing.find(({ destination }) => destination === child);
+    const incomingRouting = incoming.find(({ destination }) => destination === child);
+
+    const { value, conflict } = mergeRoutingDefinition({
+      base: baseRouting,
+      existing: existingRouting,
+      incoming: incomingRouting,
+      resolver: resolverFactory(child),
+    });
+    if (value) {
+      routing.push(value);
+    }
+    if (conflict) {
+      conflicts.push(conflict);
+    }
+
+    return routing;
+  }, [] as RoutingDefinition[]);
+
+  return { merged, conflicts };
+}
+
+function mergeChildren({
+  base,
+  existing,
+  incoming,
+  routing,
+  resolverFactories,
+}: {
+  base?: StreamTree;
+  existing: StreamTree;
+  incoming: StreamTree;
+  routing: RoutingDefinition[];
+  resolverFactories: ConflictResolverFactories;
+}) {
+  const { children: mergedChildren, conflicts: childConflicts } = routing.reduce(
+    ({ children, conflicts }, { destination }) => {
+      const baseChild = base?.children.find((child) => child.name === destination);
+      const existingChild = existing.children.find((child) => child.name === destination);
+      const incomingChild = incoming.children.find((child) => child.name === destination);
+
+      if (existingChild && incomingChild) {
+        const { merged: mergedChild, conflicts: childConflicts } = mergeTrees({
+          base: baseChild,
+          existing: existingChild,
+          incoming: incomingChild,
+          resolverFactories,
+        });
+        children.push(mergedChild);
+        conflicts.push(...childConflicts);
+      } else {
+        children.push((existingChild ?? incomingChild)!);
+      }
+
+      return { children, conflicts };
+    },
+    { children: [], conflicts: [] } as { children: StreamTree[]; conflicts: StreamConflict[] }
+  );
+
+  return { children: mergedChildren, conflicts: childConflicts };
 }

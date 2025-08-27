@@ -5,11 +5,72 @@
  * 2.0.
  */
 
-import type { ContentPack, ContentPackIncludedObjects } from '@kbn/content-packs-schema';
-import type { HttpSetup } from '@kbn/core/public';
-import type { Streams } from '@kbn/streams-schema';
+import {
+  ConflictResolution,
+  ContentPack,
+  ContentPackIncludedObjects,
+  StreamChanges,
+  StreamConflicts,
+} from '@kbn/content-packs-schema';
+import { HttpSetup } from '@kbn/core/public';
+import { Streams } from '@kbn/streams-schema';
 
 export async function importContent({
+  file,
+  http,
+  definition,
+  include,
+  resolutions,
+}: {
+  file: File;
+  http: HttpSetup;
+  definition: Streams.ingest.all.GetResponse;
+  include: ContentPackIncludedObjects;
+  resolutions: ConflictResolution[];
+}) {
+  const body = new FormData();
+  body.append('content', file);
+  body.append('include', JSON.stringify(include));
+  body.append('resolutions', JSON.stringify(resolutions));
+
+  const response = await http.post(`/api/streams/${definition.stream.name}/content/import`, {
+    body,
+    headers: {
+      // Important to be undefined, it forces proper headers to be set for FormData
+      'Content-Type': undefined,
+    },
+  });
+
+  return response;
+}
+
+export async function parseContent({
+  http,
+  file,
+  definition,
+}: {
+  http: HttpSetup;
+  file: File;
+  definition: Streams.ingest.all.GetResponse;
+}) {
+  const body = new FormData();
+  body.append('content', file);
+
+  const contentPack = await http.post<ContentPack>(
+    `/internal/streams/${definition.stream.name}/content/parse`,
+    {
+      body,
+      headers: {
+        // Important to be undefined, it forces proper headers to be set for FormData
+        'Content-Type': undefined,
+      },
+    }
+  );
+
+  return contentPack;
+}
+
+export async function previewContent({
   file,
   http,
   definition,
@@ -24,30 +85,7 @@ export async function importContent({
   body.append('content', file);
   body.append('include', JSON.stringify(include));
 
-  const response = await http.post(`/api/streams/${definition.stream.name}/content/import`, {
-    body,
-    headers: {
-      // Important to be undefined, it forces proper headers to be set for FormData
-      'Content-Type': undefined,
-    },
-  });
-
-  return response;
-}
-
-export async function previewContent({
-  http,
-  file,
-  definition,
-}: {
-  http: HttpSetup;
-  file: File;
-  definition: Streams.ingest.all.GetResponse;
-}) {
-  const body = new FormData();
-  body.append('content', file);
-
-  const contentPack = await http.post<ContentPack>(
+  const response = await http.post<{ changes: StreamChanges[]; conflicts: StreamConflicts[] }>(
     `/internal/streams/${definition.stream.name}/content/preview`,
     {
       body,
@@ -58,5 +96,5 @@ export async function previewContent({
     }
   );
 
-  return contentPack;
+  return response;
 }
