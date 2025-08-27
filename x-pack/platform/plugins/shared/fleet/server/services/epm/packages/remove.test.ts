@@ -13,6 +13,7 @@ import { auditLoggingService } from '../../audit_logging';
 
 import { deleteESAsset, removeInstallation, cleanupAssets } from './remove';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
+import { getInstallation } from './get';
 
 jest.mock('../..', () => {
   return {
@@ -45,13 +46,13 @@ jest.mock('../../package_policies/populate_package_policy_assigned_agents_count'
 jest.mock('./knowledge_base_index', () => ({
   deletePackageKnowledgeBase: jest.fn(),
 }));
-jest.mock('.', () => ({
-  ...jest.requireActual('.'),
+jest.mock('./get', () => ({
   getPackageInfo: jest.fn().mockResolvedValue({
     name: 'test-package',
     version: '1.0.0',
     conditions: { kibana: { version: '^8.0.0' } },
   }),
+  getInstallation: jest.fn(),
 }));
 jest.mock('../kibana/index_pattern/install', () => ({
   removeUnusedIndexPatterns: jest.fn(),
@@ -68,6 +69,7 @@ const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof pack
 const mockDeletePackageKnowledgeBase = deletePackageKnowledgeBase as jest.MockedFunction<
   typeof deletePackageKnowledgeBase
 >;
+const mockGetInstallation = getInstallation as jest.MockedFunction<typeof getInstallation>;
 
 describe('removeInstallation', () => {
   let soClientMock: any;
@@ -80,6 +82,14 @@ describe('removeInstallation', () => {
       find: jest.fn().mockResolvedValue({ saved_objects: [] }),
       bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
     } as any;
+
+    mockGetInstallation.mockResolvedValue({
+      name: 'test-package',
+      version: '1.0.0',
+      installed_kibana: [],
+      installed_es: [],
+      package_assets: [],
+    } as any);
   });
   it('should remove package policies when force', async () => {
     await removeInstallation({
@@ -148,11 +158,7 @@ describe('removeInstallation', () => {
       force: true,
     });
 
-    expect(mockDeletePackageKnowledgeBase).toHaveBeenCalledWith(
-      esClientMock,
-      'test-package',
-      '1.0.0'
-    );
+    expect(mockDeletePackageKnowledgeBase).toHaveBeenCalledWith(esClientMock, 'test-package');
   });
 });
 
