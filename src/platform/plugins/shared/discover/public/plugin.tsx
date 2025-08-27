@@ -213,8 +213,10 @@ export class DiscoverPlugin
           element: params.element,
           onAppLeave: params.onAppLeave,
           services,
-          customizationContext: defaultCustomizationContext,
-          enableEsqlByDefault: this.enableEsqlByDefault,
+          customizationContext: {
+            ...defaultCustomizationContext,
+            enableEsqlByDefault: this.enableEsqlByDefault,
+          },
         });
 
         return () => {
@@ -273,11 +275,7 @@ export class DiscoverPlugin
     return {
       locator: this.locator,
       DiscoverContainer: (props: DiscoverContainerProps) => (
-        <DiscoverContainerInternal
-          getDiscoverServices={getDiscoverServicesInternal}
-          enableEsqlByDefault={this.enableEsqlByDefault}
-          {...props}
-        />
+        <DiscoverContainerInternal getDiscoverServices={getDiscoverServicesInternal} {...props} />
       ),
     };
   }

@@ -25,7 +25,6 @@ export interface DiscoverRouterProps {
   services: DiscoverServices;
   customizationContext: DiscoverCustomizationContext;
   onAppLeave: AppMountParameters['onAppLeave'];
-  enableEsqlByDefault?: boolean;
 }
 
 export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps) => {
@@ -43,7 +42,7 @@ export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps)
 // this exists as a separate component to allow the tests to gather the routes
 export const DiscoverRoutes = ({
   ...routeProps
-}: Pick<DiscoverRouterProps, 'customizationContext' | 'onAppLeave' | 'enableEsqlByDefault'>) => {
+}: Pick<DiscoverRouterProps, 'customizationContext' | 'onAppLeave'>) => {
   return (
     <Routes>
       <Route path="/context/:dataViewId/:id">

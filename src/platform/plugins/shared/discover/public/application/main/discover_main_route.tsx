@@ -43,7 +43,6 @@ export interface MainRouteProps {
   customizationCallbacks?: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
   onAppLeave?: AppMountParameters['onAppLeave'];
-  enableEsqlByDefault?: boolean;
 }
 
 type InitializeMainRoute = (
@@ -57,7 +56,6 @@ export const DiscoverMainRoute = ({
   customizationCallbacks = defaultCustomizationCallbacks,
   stateStorageContainer,
   onAppLeave,
-  enableEsqlByDefault,
 }: MainRouteProps) => {
   const services = useDiscoverServices();
   const tabsEnabled = services.core.featureFlags.getBooleanValue(
@@ -183,7 +181,6 @@ export const DiscoverMainRoute = ({
     urlStateStorage,
     internalState,
     runtimeStateManager,
-    enableEsqlByDefault,
   };
 
   return (

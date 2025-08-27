@@ -20,7 +20,6 @@ export interface RenderAppProps {
   onAppLeave: AppMountParameters['onAppLeave'];
   services: DiscoverServices;
   customizationContext: DiscoverCustomizationContext;
-  enableEsqlByDefault?: boolean;
 }
 
 export const renderApp = ({
@@ -28,7 +27,6 @@ export const renderApp = ({
   onAppLeave,
   services,
   customizationContext,
-  enableEsqlByDefault,
 }: RenderAppProps) => {
   const { capabilities, chrome, data, core } = services;
 
@@ -49,7 +47,6 @@ export const renderApp = ({
       onAppLeave={onAppLeave}
       services={services}
       customizationContext={customizationContext}
-      enableEsqlByDefault={enableEsqlByDefault}
     />,
     core
   )(element);

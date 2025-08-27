@@ -26,4 +26,8 @@ export interface DiscoverCustomizationContext {
    * Display mode in which discover is running
    */
   displayMode: DiscoverDisplayMode;
+  /*
+   * Enable ES|QL by default for new searches
+   */
+  enableEsqlByDefault?: boolean;
 }

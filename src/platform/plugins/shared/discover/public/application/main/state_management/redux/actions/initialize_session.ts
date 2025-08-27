@@ -47,7 +47,6 @@ export interface InitializeSessionParams {
   dataViewSpec: DataViewSpec | undefined;
   defaultUrlState: DiscoverAppState | undefined;
   shouldClearAllTabs: boolean | undefined;
-  enableEsqlByDefault: boolean | undefined;
 }
 
 export const initializeSession: InternalStateThunkActionCreator<
@@ -63,7 +62,6 @@ export const initializeSession: InternalStateThunkActionCreator<
       dataViewSpec,
       defaultUrlState,
       shouldClearAllTabs,
-      enableEsqlByDefault,
     },
   }) =>
   async (
@@ -240,7 +238,7 @@ export const initializeSession: InternalStateThunkActionCreator<
       savedSearch: persistedDiscoverSession,
       overrideDataView: dataView,
       services,
-      enableEsqlByDefault,
+      enableEsqlByDefault: customizationContext?.enableEsqlByDefault ?? false,
     });
     const discoverSession = updateSavedSearch({
       savedSearch: persistedDiscoverSession
