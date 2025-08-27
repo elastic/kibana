@@ -31,6 +31,7 @@ import type {
 } from './types';
 
 export const NON_ECS_FIELD = '<non-ecs>';
+export const FREE_TEXT = 'FREE_TEXT';
 
 type FilterOperation = '+' | '-' | '_exists_';
 
@@ -204,12 +205,17 @@ export class ScopedDiscoverEBTManager {
       });
       console.log({ fieldNames });
 
-      // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
-      const categorizedFields = fieldNames.map((fieldName) =>
-        fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
-      );
+      // exclude full text search from ECS check
+      if (fieldNames.includes(FREE_TEXT)) {
+        eventData[FIELD_USAGE_IN_QUERY_FIELD_NAMES] = [FREE_TEXT];
+      } else {
+        // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
+        const categorizedFields = fieldNames.map((fieldName) =>
+          fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
+        );
 
-      eventData[FIELD_USAGE_IN_QUERY_FIELD_NAMES] = categorizedFields;
+        eventData[FIELD_USAGE_IN_QUERY_FIELD_NAMES] = categorizedFields;
+      }
     }
 
     console.log({ FIELD_USAGE_EVENT_TYPE, eventData });
@@ -227,11 +233,11 @@ export class ScopedDiscoverEBTManager {
       return;
     }
 
-    const fieldNames = [...new Set(getKqlFieldNamesFromExpression(query.query))];
+    const extractedFieldNames = [...new Set(getKqlFieldNamesFromExpression(query.query))];
 
-    if (fieldNames.length === 0) {
-      return;
-    }
+    // we discarded an empty query earlier, so if we're getting an empty array here it's a full text search
+    const fieldNames = extractedFieldNames.length === 0 ? [FREE_TEXT] : extractedFieldNames;
+
     await this.trackFieldUsageInQueryEvent({
       eventName: FieldUsageInQueryEventName.kqlQueryUpdate,
       fieldNames,

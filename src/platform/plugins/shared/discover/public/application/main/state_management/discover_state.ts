@@ -18,11 +18,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import {
-  isOfAggregateQueryType,
-  isOfQueryType,
-  getKqlFieldNamesFromExpression,
-} from '@kbn/es-query';
+import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { isFunction } from 'lodash';
 import type { DiscoverServices } from '../../..';
 import { restoreStateFromSavedSearch } from './utils/restore_from_saved_search';
@@ -532,10 +528,6 @@ export function getDiscoverStateContainer({
   };
 
   const trackQueryFieldUsage = (query: Query | AggregateQuery | undefined) => {
-    if (!query) {
-      return;
-    }
-
     const { fieldsMetadata } = services;
 
     if (isOfAggregateQueryType(query)) {
