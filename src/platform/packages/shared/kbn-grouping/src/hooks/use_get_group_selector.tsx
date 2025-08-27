@@ -37,6 +37,11 @@ export interface UseGetGroupSelectorArgs {
     count?: number | undefined
   ) => void;
   title?: string;
+  onOpenTracker?: (
+    type: UiCounterMetricType,
+    event: string | string[],
+    count?: number | undefined
+  ) => void;
 }
 
 interface UseGetGroupSelectorStateless
@@ -94,6 +99,7 @@ export const useGetGroupSelector = ({
   onOptionsChange,
   tracker,
   title,
+  onOpenTracker,
 }: UseGetGroupSelectorArgs) => {
   const { activeGroups: selectedGroups, options } =
     groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
@@ -214,8 +220,18 @@ export const useGetGroupSelector = ({
           maxGroupingLevels,
           options,
           title,
+          onOpenTracker,
         }}
       />
     );
-  }, [groupingId, fields, maxGroupingLevels, onChange, selectedGroups, options, title]);
+  }, [
+    groupingId,
+    selectedGroups,
+    onChange,
+    fields,
+    maxGroupingLevels,
+    options,
+    title,
+    onOpenTracker,
+  ]);
 };
