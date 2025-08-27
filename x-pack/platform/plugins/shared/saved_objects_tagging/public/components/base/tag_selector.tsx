@@ -121,7 +121,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
     // The extra whitespace is required to avoid the combobox to consider that the value
     // is selected when closing the dropdown
     return {
-      label: `${currentSearch} `,
+      label: currentSearch.length > 0 ? `${currentSearch} ` : '',
       color: '#FFFFFF',
       value: createOptionValue,
     };
