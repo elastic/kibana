@@ -2211,10 +2211,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.3.0.tgz#3d65189b84f55440145eeb01dff9a77fb8036830"
   integrity sha512-rimxG9D/jCT/UvrZvet69kTHYMIpBqPwl+iR+aA9Ay5QaP7LFEPnEj6TMb1wk64vfzrTeV95eOLMAElJmXo4wA==
 
-"@elastic/eui-amsterdam@npm:@elastic/eui@106.3.0-amsterdam.0":
-  version "106.3.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.3.0-amsterdam.0.tgz#3ac3b4986166d51caae3dd5666d8160fa98ef682"
-  integrity sha512-d2/zj68QLeWiXQ+5qPDdip35s/rJmCeVRcaBedm1KH3Tkom+rh0awGfijqwgt61OIC3q63ndXaRS2XmZkEerNg==
+"@elastic/eui-amsterdam@npm:@elastic/eui@106.4.0-amsterdam.0":
+  version "106.4.0-amsterdam.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.4.0-amsterdam.0.tgz#cce2a7b51b612f976cb7530416d3d4d7d6773096"
+  integrity sha512-pHTfS3hQhJDnM9QWdwkH8BGijChfFv3D+hjXKln26DXzlFCExE5Y7vVF5Hzb30Nql08KVNBX+/BJUXX/5VUMQQ==
   dependencies:
     "@elastic/eui-theme-common" "4.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
@@ -2252,10 +2252,10 @@
     uuid "^8.3.0"
     vfile "^4.2.1"
 
-"@elastic/eui-theme-borealis@3.3.1":
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.3.1.tgz#cbc1bcdf68277235e0ab1e1a19ec3a5511258dd6"
-  integrity sha512-atrYq78/s28qaP+eryCNMcW0FDHKWNdE4ltxmEEmvrUtqpA0NE55xeV6sTW7zld66aNpbooYqpgLSJqs9WafRg==
+"@elastic/eui-theme-borealis@3.3.2":
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.3.2.tgz#b3b6a9bf0df3cbfc4c4e07f24c5a2f8eec2abd94"
+  integrity sha512-0NbT2MtoaM2ltzyc1ms/lIc163p/XgG/6ePMsEWuHTWkScZe5V1sN7cnjzKncwpIIDJ0CfdOkeJQKcL/gj7bBA==
 
 "@elastic/eui-theme-common@4.0.0":
   version "4.0.0"
@@ -2266,10 +2266,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@106.3.0":
-  version "106.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.3.0.tgz#3dbe8135b8b1cc36def41b39b14fb2a243b7dde0"
-  integrity sha512-TkeGP7Eq0v/LKIZMbw0HcpDd4Bn+xgkaEZLck+nmYFd5cKxVr4l6wCXFVfNSc/xPrqsvSNHVclC+n0P9EWWdHQ==
+"@elastic/eui@106.4.0":
+  version "106.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.4.0.tgz#a974ebfa7ea5636235edd64022e9f2122ac44d40"
+  integrity sha512-LCNImIS3+ZN1SrsppqICkm/1DH5uTe1YptyVPctsogViPVm6CxEeo+SyFz1PDKE5wKbmSvCHcVGVUf2xjH7RgA==
   dependencies:
     "@elastic/eui-theme-common" "4.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
@@ -4249,6 +4249,10 @@
   uid ""
 
 "@kbn/capture-oas-snapshot-cli@link:packages/kbn-capture-oas-snapshot-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cases-ai@link:x-pack/platform/packages/shared/cases-ai":
   version "0.0.0"
   uid ""
 
