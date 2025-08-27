@@ -87,7 +87,6 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
           ({
             ...req.body.data,
             description: req.body.data.description ?? undefined,
-            visualizationType: req.body.data.visualizationType ?? null,
           } satisfies LensCreateIn['data']);
 
       try {

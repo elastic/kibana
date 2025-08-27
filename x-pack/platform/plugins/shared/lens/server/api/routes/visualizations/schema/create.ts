@@ -10,20 +10,14 @@ import { schema } from '@kbn/config-schema';
 import {
   lensResponseItemSchema,
   lensAPIConfigSchema,
-  lensAPIAttributesSchema,
   lensCMCreateOptionsSchema,
 } from '../../../../content_management';
 import { lensItemSchemaV0 } from '../../../../content_management/v0';
 import { pickFromObjectSchema } from '../../../../utils';
 
-const apiConfigData = schema.object(
-  {
-    ...lensAPIAttributesSchema.getPropSchemas(),
-    // omit id on create options
-    ...pickFromObjectSchema(lensAPIConfigSchema.getPropSchemas(), ['references']),
-  },
-  { unknowns: 'forbid' }
-);
+const apiConfigData = lensAPIConfigSchema.extends({
+  id: undefined,
+});
 
 const v0ConfigData = lensItemSchemaV0.extends({
   id: undefined,
