@@ -29,6 +29,7 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
+  const [badgeOffsetX, setBadgeOffsetX] = useState(0);
   const [badgeOffsetY, setBadgeOffsetY] = useState(0);
   const isFixed = currentPosition.position === 'fixed';
 
@@ -53,10 +54,27 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
 
     const badgeRect = badgeRef.current.getBoundingClientRect();
     const containerRect = containerRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
     const highlightHeight =
       typeof rest.height === 'number' ? rest.height : parseInt((rest.height as string) || '0', 10);
+
+    /**
+     * Horizontal adjustment.
+     * If the badge would overflow the viewport on the right, we shift it to the left so it's fully visible.
+     */
+    if (isFixed) {
+      // For fixed positioning, check if badge extends beyond viewport
+      const badgeRight = containerRect.left + badgeRect.width;
+      setBadgeOffsetX(
+        badgeRight > viewportWidth ? viewportWidth - containerRect.left - badgeRect.width : 0
+      );
+    } else {
+      // Original logic for absolute positioning
+      const availableRight = viewportWidth - containerRect.left;
+      setBadgeOffsetX(badgeRect.width > availableRight ? availableRight - badgeRect.width : 0);
+    }
 
     /**
      * Vertical adjustment.
@@ -90,6 +108,7 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
   const badgeCss = css({
     position: 'absolute',
     top: badgeOffsetY,
+    left: badgeOffsetX,
     whiteSpace: 'nowrap',
   });
 
