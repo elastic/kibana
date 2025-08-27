@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiSwitch, EuiText } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
@@ -144,13 +145,13 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       },
     };
   },
-  getAdvancedOptions: function CountAdvancedOptions({
+  getAdvancedOptions: ({
     layer,
     columnId,
     currentColumn,
     paramEditorUpdater,
-  }: ParamEditorProps<CountIndexPatternColumn>) {
-    const { euiTheme } = useEuiTheme();
+    euiTheme,
+  }: ParamEditorProps<CountIndexPatternColumn> & { euiTheme: EuiThemeComputed }) => {
     return [
       {
         dataTestSubj: 'hide-zero-values',

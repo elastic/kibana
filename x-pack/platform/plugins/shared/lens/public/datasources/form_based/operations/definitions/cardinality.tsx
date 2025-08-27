@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiSwitch, EuiText } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
@@ -139,13 +140,13 @@ export const cardinalityOperation: OperationDefinition<
       },
     };
   },
-  getAdvancedOptions: function UniqueValueAdvancedOptions({
+  getAdvancedOptions: ({
     layer,
     columnId,
     currentColumn,
     paramEditorUpdater,
-  }: ParamEditorProps<CardinalityIndexPatternColumn>) {
-    const { euiTheme } = useEuiTheme();
+    euiTheme,
+  }: ParamEditorProps<CardinalityIndexPatternColumn> & { euiTheme: EuiThemeComputed }) => {
     return [
       {
         dataTestSubj: 'hide-zero-values',

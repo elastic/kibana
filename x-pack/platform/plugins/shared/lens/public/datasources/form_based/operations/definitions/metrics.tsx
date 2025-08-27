@@ -180,13 +180,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
-    getAdvancedOptions: function UniqueValueAdvancedOptions({
-      layer,
-      columnId,
-      currentColumn,
-      paramEditorUpdater,
-    }: ParamEditorProps<T>) {
-      const { euiTheme } = useEuiTheme();
+    getAdvancedOptions: ({ layer, columnId, currentColumn, paramEditorUpdater, euiTheme }) => {
       if (!hideZeroOption) return [];
       return [
         {
