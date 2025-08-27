@@ -12,8 +12,23 @@ import {
   hasPartialCodeSignatureEntry,
   getOperatorOptions,
 } from '.';
-import { ALL_OPERATORS, ALL_OPERATORS_SANS_MATCHES, DETECTION_ENGINE_EXCEPTION_OPERATORS, EXCEPTION_OPERATORS_SANS_LISTS, doesNotExistOperator, doesNotMatchOperator, existsOperator, isInListOperator, isNotInListOperator, isNotOneOfOperator, isNotOperator, isOneOfOperator, isOperator, matchesOperator } from '../autocomplete_operators';
-import { FormattedBuilderEntry } from '../types';
+import {
+  ALL_OPERATORS,
+  ALL_OPERATORS_SANS_MATCHES,
+  DETECTION_ENGINE_EXCEPTION_OPERATORS,
+  EXCEPTION_OPERATORS_SANS_LISTS,
+  doesNotExistOperator,
+  doesNotMatchOperator,
+  existsOperator,
+  isInListOperator,
+  isNotInListOperator,
+  isNotOneOfOperator,
+  isNotOperator,
+  isOneOfOperator,
+  isOperator,
+  matchesOperator,
+} from '../autocomplete_operators';
+import type { FormattedBuilderEntry } from '../types';
 
 describe('Helpers', () => {
   describe('getMappingConflictsInfo', () => {
@@ -377,25 +392,28 @@ describe('Helpers', () => {
   });
 
   describe('getOperatorOptions', () => {
-    const getItem = (overrides?: { nested?: FormattedBuilderEntry['nested'], field?: FormattedBuilderEntry['field'] }): FormattedBuilderEntry => {
+    const getItem = (overrides?: {
+      nested?: FormattedBuilderEntry['nested'];
+      field?: FormattedBuilderEntry['field'];
+    }): FormattedBuilderEntry => {
       const item = {
         nested: null,
         field: null,
         ...overrides,
-      } as FormattedBuilderEntry
-      return item
-    }
+      } as FormattedBuilderEntry;
+      return item;
+    };
 
     const fieldNotSupportMatches = {
-      name: "_index",
-      type: "string",
-      esTypes: ["_index"],
-    }
+      name: '_index',
+      type: 'string',
+      esTypes: ['_index'],
+    };
     const fieldSupportMatches = {
-      name: "host.name",
-      type: "string",
-      esTypes: ["keyword"],
-    }
+      name: 'host.name',
+      type: 'string',
+      esTypes: ['keyword'],
+    };
 
     it('returns [isOperator] if item.nested is "parent"', () => {
       const result = getOperatorOptions(getItem({ nested: 'parent' }), 'endpoint', false);
@@ -414,47 +432,63 @@ describe('Helpers', () => {
 
     it('returns match operators if listType is "endpoint", not boolean, and field supports matches', () => {
       const result = getOperatorOptions(getItem({ field: fieldSupportMatches }), 'endpoint', false);
-      expect(result).toEqual([
-        isOperator,
-        isOneOfOperator,
-        matchesOperator,
-        doesNotMatchOperator,
-      ]);
+      expect(result).toEqual([isOperator, isOneOfOperator, matchesOperator, doesNotMatchOperator]);
     });
 
     it('returns basic operators if listType is "endpoint", not boolean, and field does not support matches', () => {
-      const result = getOperatorOptions(getItem({ field: fieldNotSupportMatches }), 'endpoint', false);
+      const result = getOperatorOptions(
+        getItem({ field: fieldNotSupportMatches }),
+        'endpoint',
+        false
+      );
       expect(result).toEqual([isOperator, isOneOfOperator]);
     });
 
     it('returns detection + boolean operators if nested and listType is "detection" and isBoolean is true', () => {
-      const result = getOperatorOptions(getItem({ nested: 'child', field: fieldNotSupportMatches }), 'detection', true);
-      console.log(result)
+      const result = getOperatorOptions(
+        getItem({ nested: 'child', field: fieldNotSupportMatches }),
+        'detection',
+        true
+      );
+      console.log(result);
       expect(result).toEqual([isOperator, existsOperator]);
     });
 
     it('returns detection operators if nested and listType is "detection" and not boolean', () => {
-      const result = getOperatorOptions(getItem({ nested: 'child', field: fieldNotSupportMatches }), 'detection', false);
+      const result = getOperatorOptions(
+        getItem({ nested: 'child', field: fieldNotSupportMatches }),
+        'detection',
+        false
+      );
       expect(result).toEqual([isOperator, isOneOfOperator, existsOperator]);
     });
 
     it('returns full boolean operator set if isBoolean is true (fallback path)', () => {
-      const result = getOperatorOptions(getItem({ field: fieldNotSupportMatches }), 'endpoint_trusted_apps', true);
-      expect(result).toEqual([
-        isOperator,
-        isNotOperator,
-        existsOperator,
-        doesNotExistOperator,
-      ]);
+      const result = getOperatorOptions(
+        getItem({ field: fieldNotSupportMatches }),
+        'endpoint_trusted_apps',
+        true
+      );
+      expect(result).toEqual([isOperator, isNotOperator, existsOperator, doesNotExistOperator]);
     });
 
     it('returns EXCEPTION_OPERATORS_SANS_LISTS if value lists disabled, it should include value list operators and field supports matches', () => {
-      const result = getOperatorOptions(getItem({ field: fieldSupportMatches }), 'endpoint_trusted_devices', false, false);
+      const result = getOperatorOptions(
+        getItem({ field: fieldSupportMatches }),
+        'endpoint_trusted_devices',
+        false,
+        false
+      );
       expect(result).toEqual(EXCEPTION_OPERATORS_SANS_LISTS);
     });
 
     it('returns basic operators if value lists disabled and field does not support matches', () => {
-      const result = getOperatorOptions(getItem({ field: fieldNotSupportMatches }), 'endpoint_trusted_devices', false, false);
+      const result = getOperatorOptions(
+        getItem({ field: fieldNotSupportMatches }),
+        'endpoint_trusted_devices',
+        false,
+        false
+      );
       expect(result).toEqual([
         isOperator,
         isNotOperator,
@@ -466,12 +500,22 @@ describe('Helpers', () => {
     });
 
     it('returns DETECTION_ENGINE_EXCEPTION_OPERATORS if detection list, it should include value list operators, and supports matches', () => {
-      const result = getOperatorOptions(getItem({ field: fieldSupportMatches }), 'detection', false, true);
+      const result = getOperatorOptions(
+        getItem({ field: fieldSupportMatches }),
+        'detection',
+        false,
+        true
+      );
       expect(result).toEqual(DETECTION_ENGINE_EXCEPTION_OPERATORS);
     });
 
     it('returns fallback operators without matches if detection list, it should include value list operators and does not support matches', () => {
-      const result = getOperatorOptions(getItem({ field: fieldNotSupportMatches }), 'detection', false, true);
+      const result = getOperatorOptions(
+        getItem({ field: fieldNotSupportMatches }),
+        'detection',
+        false,
+        true
+      );
       expect(result).toEqual([
         isOperator,
         isNotOperator,
@@ -485,12 +529,22 @@ describe('Helpers', () => {
     });
 
     it('returns ALL_OPERATORS if non-detection, it should include value list operators and supports matches', () => {
-      const result = getOperatorOptions(getItem({ field: fieldSupportMatches }), 'endpoint_events', false, true);
+      const result = getOperatorOptions(
+        getItem({ field: fieldSupportMatches }),
+        'endpoint_events',
+        false,
+        true
+      );
       expect(result).toEqual(ALL_OPERATORS);
     });
 
     it('returns ALL_OPERATORS without matches if non-detection, it should include value list operators and does not support matches', () => {
-      const result = getOperatorOptions(getItem({ field: fieldNotSupportMatches }), 'endpoint_events', false, true);
+      const result = getOperatorOptions(
+        getItem({ field: fieldNotSupportMatches }),
+        'endpoint_events',
+        false,
+        true
+      );
       expect(result).toEqual(ALL_OPERATORS_SANS_MATCHES);
     });
   });

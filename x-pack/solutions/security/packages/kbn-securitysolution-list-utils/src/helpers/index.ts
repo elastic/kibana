@@ -716,31 +716,31 @@ export const getOperatorOptions = (
     return fieldSupportsMatches(item.field)
       ? EXCEPTION_OPERATORS_SANS_LISTS
       : [
-        isOperator,
-        isNotOperator,
-        isOneOfOperator,
-        isNotOneOfOperator,
-        existsOperator,
-        doesNotExistOperator,
-      ];
-  } else {
-    const supportMatches = fieldSupportsMatches(item.field)
-    return listType === 'detection'
-      ? supportMatches
-        ? DETECTION_ENGINE_EXCEPTION_OPERATORS
-        : [
           isOperator,
           isNotOperator,
           isOneOfOperator,
           isNotOneOfOperator,
           existsOperator,
           doesNotExistOperator,
-          isInListOperator,
-          isNotInListOperator,
-        ]
+        ];
+  } else {
+    const supportMatches = fieldSupportsMatches(item.field);
+    return listType === 'detection'
+      ? supportMatches
+        ? DETECTION_ENGINE_EXCEPTION_OPERATORS
+        : [
+            isOperator,
+            isNotOperator,
+            isOneOfOperator,
+            isNotOneOfOperator,
+            existsOperator,
+            doesNotExistOperator,
+            isInListOperator,
+            isNotInListOperator,
+          ]
       : supportMatches
-        ? ALL_OPERATORS
-        : ALL_OPERATORS_SANS_MATCHES;
+      ? ALL_OPERATORS
+      : ALL_OPERATORS_SANS_MATCHES;
   }
 };
 
@@ -874,13 +874,13 @@ export const getFormattedBuilderEntries = (
         field: isNewNestedEntry
           ? undefined
           : // This type below is really a FieldSpec type from "src/platform/plugins/shared/data/common/index_patterns/fields/types.ts", we cast it here to keep using the DataViewFieldBase interface
-          ({
-            aggregatable: false,
-            esTypes: ['nested'],
-            name: item.field != null ? item.field : '',
-            searchable: false,
-            type: 'string',
-          } as DataViewFieldBase),
+            ({
+              aggregatable: false,
+              esTypes: ['nested'],
+              name: item.field != null ? item.field : '',
+              searchable: false,
+              type: 'string',
+            } as DataViewFieldBase),
         id: item.id != null ? item.id : `${index}`,
         nested: 'parent',
         operator: isOperator,
