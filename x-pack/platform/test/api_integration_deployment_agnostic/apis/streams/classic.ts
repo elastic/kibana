@@ -119,14 +119,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ingest: {
             lifecycle: { inherit: {} },
             processing: {
-              steps: {
-                action: 'grok',
-                from: 'message',
-                patterns: [
-                  '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-                ],
-                where: { always: {} },
-              },
+              steps: [
+                {
+                  action: 'grok',
+                  from: 'message',
+                  patterns: [
+                    '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                  ],
+                  where: { always: {} },
+                },
+              ],
             },
             classic: {},
           },
