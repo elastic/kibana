@@ -15,8 +15,10 @@ import {
   CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
   FIELD_USAGE_EVENT_NAME,
   FIELD_USAGE_EVENT_TYPE,
+  FIELD_USAGE_IN_QUERY_EVENT_TYPE,
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
+  FIELD_USAGE_IN_QUERY_FIELD_NAMES,
 } from './discover_ebt_manager_registrations';
 import { ContextualProfileLevel } from '../context_awareness';
 import type {
@@ -35,10 +37,20 @@ enum FieldUsageEventName {
   dataTableRemoval = 'dataTableRemoval',
   filterAddition = 'filterAddition',
 }
+
+enum FieldUsageInQueryEventName {
+  kqlQueryUpdate = 'kqlQueryUpdate',
+  esqlQueryUpdate = 'esqlQueryUpdate',
+}
 interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
   [FIELD_USAGE_FIELD_NAME]?: string;
   [FIELD_USAGE_FILTER_OPERATION]?: FilterOperation;
+}
+
+interface FieldUsageInQueryEventData {
+  [FIELD_USAGE_EVENT_NAME]: FieldUsageInQueryEventName;
+  [FIELD_USAGE_IN_QUERY_FIELD_NAMES]?: string[];
 }
 
 interface ContextualProfileResolvedEventData {
@@ -64,7 +76,7 @@ export class ScopedDiscoverEBTManager {
     public readonly setAsActiveManager: SetAsActiveManager
   ) {}
 
-  public async getFieldsFromMetadata({
+  private async getFieldsFromMetadata({
     fieldsMetadata,
     fieldNames,
   }: {
@@ -166,14 +178,67 @@ export class ScopedDiscoverEBTManager {
     });
   }
 
-  public async trackSubmittingQueryEvent({
+  private async trackFieldUsageInQueryEvent({
+    eventName,
+    fieldNames,
+    fieldsMetadata,
+  }: {
+    eventName: FieldUsageInQueryEventName;
+    fieldNames: string[];
+    fieldsMetadata: FieldsMetadataPublicStart | undefined;
+  }) {
+    if (!this.reportEvent) {
+      return;
+    }
+
+    const eventData: FieldUsageInQueryEventData = {
+      [FIELD_USAGE_EVENT_NAME]: eventName,
+    };
+
+    if (fieldsMetadata) {
+      const fields = await this.getFieldsFromMetadata({
+        fieldsMetadata,
+        fieldNames,
+      });
+      console.log({ fieldNames });
+
+      const categorizedFields = fieldNames.map((fieldName) =>
+        fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
+      );
+
+      eventData[FIELD_USAGE_IN_QUERY_FIELD_NAMES] = categorizedFields;
+    }
+
+    console.log({ FIELD_USAGE_EVENT_TYPE, eventData });
+    this.reportEvent(FIELD_USAGE_IN_QUERY_EVENT_TYPE, eventData);
+  }
+
+  public async trackSubmittingKQLQuery({
     fieldNames,
     fieldsMetadata,
   }: {
     fieldNames: string[];
     fieldsMetadata: FieldsMetadataPublicStart | undefined;
   }) {
-    console.log({ fieldNames });
+    await this.trackFieldUsageInQueryEvent({
+      eventName: FieldUsageInQueryEventName.kqlQueryUpdate,
+      fieldNames,
+      fieldsMetadata,
+    });
+  }
+
+  public async trackSubmittingESQLQuery({
+    fieldNames,
+    fieldsMetadata,
+  }: {
+    fieldNames: string[];
+    fieldsMetadata: FieldsMetadataPublicStart | undefined;
+  }) {
+    await this.trackFieldUsageInQueryEvent({
+      eventName: FieldUsageInQueryEventName.esqlQueryUpdate,
+      fieldNames,
+      fieldsMetadata,
+    });
   }
 
   public trackContextualProfileResolvedEvent({
