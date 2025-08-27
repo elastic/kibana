@@ -47298,6 +47298,11 @@ paths:
                                                       destination:
                                                         minLength: 1
                                                         type: string
+                                                      status:
+                                                        enum:
+                                                          - enabled
+                                                          - disabled
+                                                        type: string
                                                       where:
                                                         anyOf:
                                                           - anyOf:
@@ -52026,6 +52031,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                status:
+                  enum:
+                    - enabled
+                    - disabled
+                  type: string
                 stream:
                   additionalProperties: false
                   type: object
@@ -53771,6 +53781,11 @@ paths:
                                     properties:
                                       destination:
                                         minLength: 1
+                                        type: string
+                                      status:
+                                        enum:
+                                          - enabled
+                                          - disabled
                                         type: string
                                       where:
                                         anyOf:
