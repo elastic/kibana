@@ -98,15 +98,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await searchStart.expectToBeOnIndexListPage();
       });
 
-      it('should support switching between UI and Code Views', async () => {
-        await searchNavigation.navigateToElasticsearchStartPage(false, `/s/${spaceCreated.id}`);
-        await searchStart.expectCreateIndexUIView();
-        await searchStart.clickCodeViewButton();
-        await searchStart.expectCreateIndexCodeView();
-        await searchStart.clickUIViewButton();
-        await searchStart.expectCreateIndexUIView();
-      });
-
       it('should have file upload link', async () => {
         await searchStart.expectToBeOnStartPage();
         await searchStart.clickFileUploadLink();

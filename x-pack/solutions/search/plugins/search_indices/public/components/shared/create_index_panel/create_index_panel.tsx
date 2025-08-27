@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import {
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../../common/doc_links';
 import { useKibana } from '../../../hooks/use_kibana';
-import { CreateIndexViewMode } from '../../../types';
 import { CreateIndexCalloutBrowseIntegrationBtn } from './callout_browse_integration_stack';
 import { CreateIndexPanelCreateO11ySpaceBtn } from './callout_create_o11y_space_stack';
 
@@ -32,21 +30,12 @@ const WIDTH = '980px';
 
 export interface CreateIndexPanelProps {
   children: React.ReactNode | React.ReactNode[];
-  createIndexView: CreateIndexViewMode;
-  onChangeView: (id: string) => void;
   onClose: () => void;
   showSkip?: boolean;
   title?: React.ReactNode;
 }
 
-export const CreateIndexPanel = ({
-  children,
-  createIndexView,
-  onChangeView,
-  onClose,
-  showSkip,
-  title,
-}: CreateIndexPanelProps) => {
+export const CreateIndexPanel = ({ children, onClose, showSkip, title }: CreateIndexPanelProps) => {
   const { cloud, http } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
@@ -128,41 +117,6 @@ export const CreateIndexPanel = ({
                       })}
                   </h4>
                 </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  legend={i18n.translate(
-                    'xpack.searchIndices.shared.createIndex.viewSelect.legend',
-                    {
-                      defaultMessage: 'Create index view selection',
-                    }
-                  )}
-                  options={[
-                    {
-                      id: CreateIndexViewMode.UI,
-                      label: i18n.translate(
-                        'xpack.searchIndices.shared.createIndex.viewSelect.ui',
-                        {
-                          defaultMessage: 'UI',
-                        }
-                      ),
-                      'data-test-subj': 'createIndexUIViewBtn',
-                    },
-                    {
-                      id: CreateIndexViewMode.Code,
-                      label: i18n.translate(
-                        'xpack.searchIndices.shared.createIndex.viewSelect.code',
-                        {
-                          defaultMessage: 'Code',
-                        }
-                      ),
-                      'data-test-subj': 'createIndexCodeViewBtn',
-                    },
-                  ]}
-                  buttonSize="compressed"
-                  idSelected={createIndexView}
-                  onChange={onChangeView}
-                />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiText color="subdued">

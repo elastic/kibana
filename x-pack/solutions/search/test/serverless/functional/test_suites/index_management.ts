@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 import { testHasEmbeddedConsole } from './embedded_console';
@@ -69,16 +69,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.common.navigateToApp('indexManagement');
         await pageObjects.indexManagement.changeTabs('indicesTab');
         await pageObjects.indexManagement.expectIndexToExist(testIndexName);
-      });
-      it('should redirect to index details when index is created via API and on the code view', async () => {
-        await pageObjects.indexManagement.clickCreateIndexButton();
-
-        await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
-        await pageObjects.svlSearchCreateIndexPage.expectCreateIndexUIView();
-        await pageObjects.svlSearchCreateIndexPage.clickCodeViewButton();
-        await pageObjects.svlSearchCreateIndexPage.expectCreateIndexCodeView();
-        await es.indices.create({ index: testAPIIndexName });
-        await pageObjects.svlSearchCreateIndexPage.expectToBeOnIndexDetailsPage();
       });
       it('should have file upload link', async () => {
         await pageObjects.indexManagement.clickCreateIndexButton();

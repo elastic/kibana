@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProviderContext) {
@@ -81,19 +81,8 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
       expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
       await testSubjects.click('createIndexBtn');
     },
-    async expectCreateIndexCodeView() {
-      await testSubjects.existOrFail('createIndexCodeView');
-    },
     async expectCreateIndexUIView() {
       await testSubjects.existOrFail('createIndexUIView');
-    },
-    async clickUIViewButton() {
-      await testSubjects.existOrFail('createIndexUIViewBtn');
-      await testSubjects.click('createIndexUIViewBtn');
-    },
-    async clickCodeViewButton() {
-      await testSubjects.existOrFail('createIndexCodeViewBtn');
-      await testSubjects.click('createIndexCodeViewBtn');
     },
     async clickFileUploadLink() {
       await testSubjects.existOrFail('uploadFileLink');
@@ -113,26 +102,6 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
       );
       expect(await testSubjects.getAttribute('startO11yTrialBtn', 'target')).equal('_blank');
     },
-    async expectAPIKeyVisibleInCodeBlock(apiKey: string) {
-      await testSubjects.existOrFail('createIndex-code-block');
-      await retry.try(async () => {
-        expect(await testSubjects.getVisibleText('createIndex-code-block')).to.contain(apiKey);
-      });
-    },
-
-    async expectAPIKeyPreGenerated() {
-      await testSubjects.existOrFail('apiKeyHasBeenGenerated');
-    },
-
-    async expectAPIKeyNotPreGenerated() {
-      await testSubjects.existOrFail('apiKeyHasNotBeenGenerated');
-    },
-
-    async expectAPIKeyFormNotAvailable() {
-      await testSubjects.missingOrFail('apiKeyHasNotBeenGenerated');
-      await testSubjects.missingOrFail('apiKeyHasBeenGenerated');
-    },
-
     async clearSkipEmptyStateStorageFlag() {
       await browser.removeLocalStorageItem('search_onboarding_global_empty_state_skip');
     },
