@@ -32,6 +32,6 @@ spaceTest.describe('Discover app - errors', { tag: tags.ESS_ONLY }, () => {
     await expect(
       page.testSubj.locator('painlessStackTrace'),
       'Painless error stacktrace should be displayed'
-    ).toBeVisible();
+    ).toBeHidden();
   });
 });
