@@ -9,10 +9,14 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { Client as EsClient } from '@elastic/elasticsearch';
-import { keyBy, uniq } from 'lodash';
-import { mean, median, deviation, min, max } from 'd3';
 import { hostname } from 'os';
 import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
+import {
+  processExperimentsToDatasetScores,
+  getUniqueEvaluatorNames,
+  calculateEvaluatorStats,
+  type DatasetScore,
+} from './evaluation_stats';
 
 interface ModelScoreDocument {
   '@timestamp': string;
@@ -46,26 +50,6 @@ interface ModelScoreDocument {
     hostname: string;
   };
   tags: string[];
-}
-
-interface DatasetScore {
-  id: string;
-  name: string;
-  numExamples: number;
-  evaluatorScores: Map<string, number[]>;
-  experiments: Array<{
-    id?: string;
-  }>;
-}
-
-interface EvaluatorStats {
-  mean: number;
-  median: number;
-  stdDev: number;
-  min: number;
-  max: number;
-  count: number;
-  percentage: number;
 }
 
 const ELASTICSEARCH_INDEX = '.kibana-evals-scores';
@@ -161,81 +145,11 @@ export class ScoreExporter {
     }
   }
 
-  private processExperiments(
+  private async processExperiments(
     experiments: RanExperiment[],
-    phoenixClient: KibanaPhoenixClient,
-    datasetInfosById: Record<string, any>
-  ): DatasetScore[] {
-    const datasetScoresMap = new Map<string, DatasetScore>();
-
-    for (const experiment of experiments) {
-      const { datasetId, evaluationRuns, runs } = experiment;
-
-      const numExamplesForExperiment = runs ? Object.keys(runs).length : 0;
-
-      if (!datasetScoresMap.has(datasetId)) {
-        datasetScoresMap.set(datasetId, {
-          id: datasetId,
-          name: datasetInfosById[datasetId]?.name ?? datasetId,
-          numExamples: 0,
-          evaluatorScores: new Map<string, number[]>(),
-          experiments: [],
-        });
-      }
-
-      const datasetScore = datasetScoresMap.get(datasetId)!;
-      datasetScore.numExamples += numExamplesForExperiment;
-
-      // Add experiment info if not already present
-      const experimentInfo = {
-        id: experiment.id,
-      };
-      const existingExperiment = datasetScore.experiments.find(
-        (exp) => exp.id === experimentInfo.id
-      );
-      if (!existingExperiment) {
-        datasetScore.experiments.push(experimentInfo);
-      }
-
-      if (evaluationRuns) {
-        evaluationRuns.forEach((evalRun) => {
-          const score = evalRun.result?.score ?? 0;
-
-          if (!datasetScore.evaluatorScores.has(evalRun.name)) {
-            datasetScore.evaluatorScores.set(evalRun.name, []);
-          }
-
-          datasetScore.evaluatorScores.get(evalRun.name)!.push(score);
-        });
-      }
-    }
-
-    return Array.from(datasetScoresMap.values());
-  }
-
-  private calculateStats(scores: number[], totalExamples: number): EvaluatorStats {
-    if (scores.length === 0) {
-      return {
-        mean: 0,
-        median: 0,
-        stdDev: 0,
-        min: 0,
-        max: 0,
-        count: 0,
-        percentage: 0,
-      };
-    }
-
-    const totalScore = scores.reduce((sum, score) => sum + score, 0);
-    return {
-      mean: mean(scores) ?? 0,
-      median: median(scores) ?? 0,
-      stdDev: deviation(scores) ?? 0,
-      min: min(scores) ?? 0,
-      max: max(scores) ?? 0,
-      count: scores.length,
-      percentage: totalExamples > 0 ? totalScore / totalExamples : 0,
-    };
+    phoenixClient: KibanaPhoenixClient
+  ): Promise<DatasetScore[]> {
+    return processExperimentsToDatasetScores(experiments, phoenixClient, true);
   }
 
   async exportScores({
@@ -259,19 +173,8 @@ export class ScoreExporter {
         return;
       }
 
-      const allDatasetIds = uniq(experiments.flatMap((experiment) => experiment.datasetId));
-      const datasetInfos = await phoenixClient.getDatasets(allDatasetIds);
-      const datasetInfosById = keyBy(datasetInfos, (datasetInfo) => datasetInfo.id);
-
-      const datasetScores = this.processExperiments(experiments, phoenixClient, datasetInfosById);
-
-      const allEvaluatorNames = new Set<string>();
-      datasetScores.forEach((dataset) => {
-        dataset.evaluatorScores.forEach((_, evaluatorName) => {
-          allEvaluatorNames.add(evaluatorName);
-        });
-      });
-      const evaluatorNames = Array.from(allEvaluatorNames).sort();
+      const datasetScores = await this.processExperiments(experiments, phoenixClient);
+      const evaluatorNames = getUniqueEvaluatorNames(datasetScores);
 
       const documents: ModelScoreDocument[] = [];
       const timestamp = new Date().toISOString();
@@ -279,7 +182,7 @@ export class ScoreExporter {
       for (const dataset of datasetScores) {
         for (const evaluatorName of evaluatorNames) {
           const scores = dataset.evaluatorScores.get(evaluatorName) || [];
-          const stats = this.calculateStats(scores, dataset.numExamples);
+          const stats = calculateEvaluatorStats(scores, dataset.numExamples);
 
           if (stats.count === 0) {
             continue;
@@ -310,7 +213,7 @@ export class ScoreExporter {
                 percentage: stats.percentage,
               },
             },
-            experiments: dataset.experiments,
+            experiments: dataset.experiments || [],
             environment: {
               hostname: hostname(),
             },
