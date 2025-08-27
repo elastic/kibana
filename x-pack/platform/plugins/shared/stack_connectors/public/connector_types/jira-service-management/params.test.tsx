@@ -27,7 +27,7 @@ describe('JiraServiceManagementParamFields', () => {
 
   const connector = {
     secrets: { apiKey: '123' },
-    config: { apiUrl: 'http://test.com' },
+    config: {},
     id: 'test',
     actionTypeId: '.test',
     name: 'Test',

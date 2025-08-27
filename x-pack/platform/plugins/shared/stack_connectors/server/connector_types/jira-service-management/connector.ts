@@ -11,6 +11,7 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { isEmpty } from 'lodash';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { Writable } from 'type-fest';
 import { CloseAlertParamsSchema, CreateAlertParamsSchema, Response } from './schema';
 import type {
   CloseAlertParams,
@@ -26,6 +27,9 @@ const JSM_INTEGRATION_EVENTS_API_BASE_PATH = 'https://api.atlassian.com/jsm/ops/
 
 export class JiraServiceManagementConnector extends SubActionConnector<Config, Secrets> {
   constructor(params: ServiceParams<Config, Secrets>) {
+    if (!params.config.apiUrl) {
+      (params.config as Writable<Config>).apiUrl = JSM_INTEGRATION_EVENTS_API_BASE_PATH;
+    }
     super(params);
 
     this.registerSubAction({
@@ -149,7 +153,6 @@ export class JiraServiceManagementConnector extends SubActionConnector<Config, S
   }
 
   private concatPathToURL(path: string) {
-    // const baseCloudPath = [JSM_API_BASE_PATH, `${this.config.cloudId}/v1`].join('/');
-    return new URL(path, JSM_INTEGRATION_EVENTS_API_BASE_PATH);
+    return new URL(path, this.config.apiUrl);
   }
 }
