@@ -12,6 +12,8 @@ import {
   mapVariableToColumn,
 } from '@kbn/esql-utils';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion, mapVisToChartType } from '@kbn/visualization-utils';
@@ -31,7 +33,12 @@ export interface ESQLDataGridAttrs {
   columns: DatatableColumn[];
 }
 
-const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldName?: string) => {
+const getDSLFilter = (
+  queryService: DataPublicPluginStart['query'],
+  uiSettings: IUiSettingsClient,
+  timeFieldName?: string
+) => {
+  const esQueryConfigs = getEsQueryConfig(uiSettings);
   const kqlQuery = queryService.queryString.getQuery();
   const filters = queryService.filterManager.getFilters();
   const timeFilter =
@@ -40,16 +47,19 @@ const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldNam
       fieldName: timeFieldName,
     });
 
-  return buildEsQuery(undefined, kqlQuery || [], [
-    ...(filters ?? []),
-    ...(timeFilter ? [timeFilter] : []),
-  ]);
+  return buildEsQuery(
+    undefined,
+    kqlQuery || [],
+    [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])],
+    esQueryConfigs
+  );
 };
 
 export const getGridAttrs = async (
   query: AggregateQuery,
   adHocDataViews: DataViewSpec[],
   data: DataPublicPluginStart,
+  uiSettings: IUiSettingsClient,
   abortController?: AbortController,
   esqlVariables: ESQLControlVariable[] = []
 ): Promise<ESQLDataGridAttrs> => {
@@ -62,7 +72,7 @@ export const getGridAttrs = async (
     ? await data.dataViews.create(dataViewSpec)
     : await getESQLAdHocDataview(query.esql, data.dataViews);
 
-  const filter = getDSLFilter(data.query, dataView.timeFieldName);
+  const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
 
   const results = await getESQLResults({
     esqlQuery: query.esql,
@@ -93,6 +103,7 @@ export const getGridAttrs = async (
 export const getSuggestions = async (
   query: AggregateQuery,
   data: DataPublicPluginStart,
+  uiSettings: IUiSettingsClient,
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
@@ -108,6 +119,7 @@ export const getSuggestions = async (
       query,
       adHocDataViews,
       data,
+      uiSettings,
       abortController,
       esqlVariables
     );
