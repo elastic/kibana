@@ -835,7 +835,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "lens|global: 0267d37678684c5f234bd74f0f6ae2a5f6180eb4",
         "lens|mappings: a7f9fb8ae5efb47f6ee930168cb1cdd221cd9d91",
         "lens|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "lens|10.1.0: ee344a4ecfb86ced0dacc3034eeb78b12e9c426e",
+        "lens|10.1.0: ade3bfc8ccb8ecfafd6ac49f42b729405f8c4a23",
         "lens|8.9.0: f6592efb2500e39d1d31b1effdfad7d7ad1eca32",
         "lens|8.6.0: 54c152a2584673672445346cf69d72bda587cc52",
         "lens|8.5.0: 54c152a2584673672445346cf69d72bda587cc52",
