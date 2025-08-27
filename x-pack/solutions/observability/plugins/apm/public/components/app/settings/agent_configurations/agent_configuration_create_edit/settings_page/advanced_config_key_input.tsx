@@ -49,6 +49,11 @@ export function AdvancedConfigKeyInput({
           defaultMessage: 'Key cannot be empty',
         });
       }
+      if (key !== '' && key.trim() === '') {
+        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
+          defaultMessage: 'Key cannot be only whitespace characters',
+        });
+      }
       if (checkIfPredefinedConfigKeyExists(key)) {
         return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
           defaultMessage: 'This key is already predefined in the standard configuration above',
