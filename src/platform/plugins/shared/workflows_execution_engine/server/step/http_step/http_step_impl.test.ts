@@ -9,8 +9,11 @@
 
 import type { HttpGraphNode } from '@kbn/workflows';
 import axios from 'axios';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
-import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import { UrlValidator } from '../../lib/url_validator';
+import type {
+  WorkflowContextManager,
+  WorkflowExecutionRuntimeManager,
+} from '../../workflow_context_manager/workflow_context_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import { HttpStepImpl } from './http_step_impl';
 
@@ -22,6 +25,7 @@ describe('HttpStepImpl', () => {
   let mockContextManager: jest.Mocked<WorkflowContextManager>;
   let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
   let mockWorkflowLogger: jest.Mocked<IWorkflowEventLogger>;
+  let mockUrlValidator: UrlValidator;
   let mockStep: HttpGraphNode;
 
   beforeEach(() => {
@@ -42,6 +46,8 @@ describe('HttpStepImpl', () => {
       logDebug: jest.fn(),
     } as any;
 
+    mockUrlValidator = new UrlValidator({ allowedHosts: ['*'] });
+
     mockStep = {
       id: 'test-http-step',
       type: 'http',
@@ -61,7 +67,8 @@ describe('HttpStepImpl', () => {
       mockStep,
       mockContextManager,
       mockWorkflowRuntime,
-      mockWorkflowLogger
+      mockWorkflowLogger,
+      mockUrlValidator
     );
 
     jest.clearAllMocks();
@@ -209,20 +216,6 @@ describe('HttpStepImpl', () => {
       expect(result.output?.status).toBe(201);
       expect(result.output?.data).toEqual({ id: 123 });
     });
-
-    it('should skip execution when condition is false', async () => {
-      mockStep.configuration.if = 'false';
-      jest.spyOn(httpStep as any, 'evaluateCondition').mockResolvedValue(false);
-
-      const result = await (httpStep as any).executeHttpRequest({});
-
-      expect(mockedAxios).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        input: undefined,
-        output: undefined,
-        error: undefined,
-      });
-    });
   });
 
   describe('run', () => {
@@ -243,6 +236,123 @@ describe('HttpStepImpl', () => {
       expect(mockWorkflowRuntime.setStepResult).toHaveBeenCalled();
       expect(mockWorkflowRuntime.finishStep).toHaveBeenCalledWith('test-http-step');
       expect(mockWorkflowRuntime.goToNextStep).toHaveBeenCalled();
+    });
+  });
+
+  describe('URL validation', () => {
+    it('should allow requests to permitted hosts', async () => {
+      mockUrlValidator = new UrlValidator({ allowedHosts: ['api.example.com'] });
+      httpStep = new HttpStepImpl(
+        mockStep,
+        mockContextManager,
+        mockWorkflowRuntime,
+        mockWorkflowLogger,
+        mockUrlValidator
+      );
+
+      mockContextManager.getContext.mockReturnValue({
+        spaceId: 'default',
+        workflowRunId: 'test-run',
+        steps: {},
+      });
+
+      (mockedAxios as any).mockResolvedValueOnce({ data: { success: true }, status: 200 });
+
+      await httpStep.run();
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://api.example.com/data',
+          method: 'GET',
+        })
+      );
+    });
+
+    it('should block requests to non-permitted hosts', async () => {
+      mockUrlValidator = new UrlValidator({ allowedHosts: ['api.example.com'] });
+      httpStep = new HttpStepImpl(
+        {
+          ...mockStep,
+          configuration: {
+            ...mockStep.configuration,
+            with: {
+              url: 'https://malicious.com/test',
+              method: 'GET',
+              headers: {},
+              timeout: 30000,
+            },
+          },
+        },
+        mockContextManager,
+        mockWorkflowRuntime,
+        mockWorkflowLogger,
+        mockUrlValidator
+      );
+
+      mockContextManager.getContext.mockReturnValue({
+        spaceId: 'default',
+        workflowRunId: 'test-run',
+        steps: {},
+      });
+
+      await httpStep.run();
+
+      // Should not make any HTTP request
+      expect(mockedAxios).not.toHaveBeenCalled();
+
+      // Should log the security error
+      expect(mockWorkflowLogger.logError).toHaveBeenCalledWith(
+        expect.stringContaining('HTTP request blocked'),
+        expect.any(Error),
+        expect.objectContaining({
+          tags: ['http', 'security', 'blocked'],
+        })
+      );
+
+      // Should still complete the workflow step lifecycle
+      expect(mockWorkflowRuntime.startStep).toHaveBeenCalled();
+      expect(mockWorkflowRuntime.setStepResult).toHaveBeenCalled();
+      expect(mockWorkflowRuntime.finishStep).toHaveBeenCalled();
+      expect(mockWorkflowRuntime.goToNextStep).toHaveBeenCalled();
+    });
+
+    it('should allow all hosts when wildcard is configured', async () => {
+      mockUrlValidator = new UrlValidator({ allowedHosts: ['*'] });
+      httpStep = new HttpStepImpl(
+        {
+          ...mockStep,
+          configuration: {
+            ...mockStep.configuration,
+            with: {
+              url: 'https://any-host.com/test',
+              method: 'GET',
+              headers: {},
+              timeout: 30000,
+            },
+          },
+        },
+        mockContextManager,
+        mockWorkflowRuntime,
+        mockWorkflowLogger,
+        mockUrlValidator
+      );
+
+      mockContextManager.getContext.mockReturnValue({
+        spaceId: 'default',
+        workflowRunId: 'test-run',
+        steps: {},
+      });
+
+      (mockedAxios as any).mockResolvedValueOnce({ data: { success: true }, status: 200 });
+
+      await httpStep.run();
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://any-host.com/test',
+          method: 'GET',
+        })
+      );
     });
   });
 });

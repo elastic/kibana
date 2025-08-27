@@ -137,7 +137,8 @@ describe('EnterForeachNodeImpl', () => {
         await underTest.run();
 
         expect(logDebug).toHaveBeenCalledWith(
-          `Foreach step \"testStep\" will iterate over 3 items.`
+          `Foreach step \"testStep\" will iterate over 3 items.`,
+          { workflow: { step_id: 'testStep' } }
         );
       });
     });
@@ -168,7 +169,8 @@ describe('EnterForeachNodeImpl', () => {
       it('should log debug message', async () => {
         await underTest.run();
         expect(logDebug).toHaveBeenCalledWith(
-          `Foreach step "testStep" has no items to iterate over. Skipping execution.`
+          `Foreach step "testStep" has no items to iterate over. Skipping execution.`,
+          { workflow: { step_id: 'testStep' } }
         );
       });
     });

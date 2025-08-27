@@ -9,9 +9,9 @@
 
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 
+import { graphlib } from '@dagrejs/dagre';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { graphlib } from '@dagrejs/dagre';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
@@ -137,6 +137,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith({
         id: 'step-execution-id',
         stepId: 'node1',
+        input: {},
         output: fakeResult,
         error: null,
       } as Partial<EsWorkflowStepExecution>);
@@ -151,6 +152,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       } as Partial<EsWorkflowStepExecution>);
       const stepResult = underTest.getStepResult('node1');
       expect(stepResult).toEqual({
+        input: {},
         output: { success: true, data: {} },
         error: 'Fake error',
       });
@@ -274,6 +276,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'node3' started`, {
         event: { action: 'step-start', category: ['workflow', 'step'] },
         tags: ['workflow', 'step', 'start'],
+        workflow: { step_id: 'node3' },
       });
     });
   });
@@ -338,6 +341,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
             outcome: 'success',
           },
           tags: ['workflow', 'step', 'complete'],
+          workflow: { step_id: 'node1' },
         });
       });
     });
@@ -373,6 +377,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
             outcome: 'failure',
           },
           tags: ['workflow', 'step', 'complete'],
+          workflow: { step_id: 'node1' },
         });
       });
     });

@@ -9,11 +9,14 @@
 
 import type { HttpGraphNode } from '@kbn/workflows';
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import type { UrlValidator } from '../../lib/url_validator';
 import { WorkflowTemplatingEngine } from '../../templating_engine';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { StepImplementation } from '../step_base';
+
+type HttpHeaders = Record<string, string | number | boolean>;
 
 export class HttpStepImpl implements StepImplementation {
   private templatingEngine: WorkflowTemplatingEngine;
@@ -22,7 +25,8 @@ export class HttpStepImpl implements StepImplementation {
     private node: HttpGraphNode,
     private contextManager: WorkflowContextManager,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
-    private workflowLogger: IWorkflowEventLogger
+    private workflowLogger: IWorkflowEventLogger,
+    private urlValidator: UrlValidator
   ) {
     this.templatingEngine = new WorkflowTemplatingEngine();
   }
@@ -46,11 +50,11 @@ export class HttpStepImpl implements StepImplementation {
     };
   }
 
-  private renderHeaders(headers: Record<string, string>, context: any): Record<string, string> {
+  private renderHeaders(headers: HttpHeaders, context: any): HttpHeaders {
     return Object.entries(headers).reduce((acc, [key, value]) => {
       acc[key] = typeof value === 'string' ? this.templatingEngine.render(value, context) : value;
       return acc;
-    }, {} as Record<string, string>);
+    }, {} as HttpHeaders);
   }
 
   private renderBody(body: any, context: any): any {
@@ -63,6 +67,12 @@ export class HttpStepImpl implements StepImplementation {
     return body;
   }
 
+  /**
+   * Recursively render the object template.
+   * @param obj - The object to render.
+   * @param context - The context to use for rendering.
+   * @returns The rendered object.
+   */
   private renderObjectTemplate(obj: any, context: any): any {
     if (Array.isArray(obj)) {
       return obj.map((item) => this.renderObjectTemplate(item, context));
@@ -99,6 +109,22 @@ export class HttpStepImpl implements StepImplementation {
 
   private async executeHttpRequest(input?: any): Promise<any> {
     const { url, method, headers, body, timeout } = input;
+
+    // Validate that the URL is allowed based on the allowedHosts configuration
+    try {
+      this.urlValidator.ensureUrlAllowed(url);
+    } catch (error) {
+      this.workflowLogger.logError(
+        `HTTP request blocked: ${error.message}`,
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          workflow: { step_id: this.node.configuration.name },
+          event: { action: 'http_request', outcome: 'failure' },
+          tags: ['http', 'security', 'blocked'],
+        }
+      );
+      throw error;
+    }
 
     this.workflowLogger.logInfo(`Making HTTP ${method} request to ${url}`, {
       workflow: { step_id: this.node.configuration.name },

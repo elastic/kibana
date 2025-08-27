@@ -12,6 +12,7 @@ import type { WorkflowContextManager } from '../workflow_context_manager/workflo
 import type { StepImplementation } from './step_base';
 // Import schema and inferred types
 import type { ConnectorExecutor } from '../connector_executor';
+import type { UrlValidator } from '../lib/url_validator';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
@@ -38,7 +39,8 @@ export class StepFactory {
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
-    private workflowTaskManager: WorkflowTaskManager
+    private workflowTaskManager: WorkflowTaskManager,
+    private urlValidator: UrlValidator
   ) {}
 
   public create<TStep extends BaseStep>(
@@ -93,7 +95,8 @@ export class StepFactory {
           step as any,
           this.contextManager,
           this.workflowRuntime,
-          this.workflowLogger
+          this.workflowLogger,
+          this.urlValidator
         );
       case 'parallel':
       // return new ParallelStepImpl(step as ParallelStep, contextManager);
