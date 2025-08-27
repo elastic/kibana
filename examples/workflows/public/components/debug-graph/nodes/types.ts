@@ -5,8 +5,15 @@ export const openScopeNodes = [
   'enter-foreach',
   'enter-condition-branch',
   'enter-retry',
+  'enter-continue',
 ];
-export const closeScopeNodes = ['exit-if', 'exit-foreach', 'exit-condition-branch', 'exit-retry'];
+export const closeScopeNodes = [
+  'exit-if',
+  'exit-foreach',
+  'exit-condition-branch',
+  'exit-retry',
+  'exit-continue',
+];
 
 export const mainScopeNodes = [
   'enter-if',
@@ -15,6 +22,8 @@ export const mainScopeNodes = [
   'exit-foreach',
   'enter-retry',
   'exit-retry',
+  'enter-continue',
+  'exit-continue',
 ];
 export const secondaryScopeNodes = ['enter-condition-branch', 'exit-condition-branch'];
 export const atomicNodes = ['atomic'];

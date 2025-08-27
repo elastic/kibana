@@ -49,24 +49,41 @@ function applyLayout(graph: dagre.graphlib.Graph) {
   });
 
   const stack = [] as string[];
+  const baseWidth = 300;
+  let maxDepth = 0;
+
   topologySort
     .map((nodeId) => graph.node(nodeId))
     .forEach((node: any) => {
       if (closeScopeNodes.includes(node.type)) {
         stack.pop();
       }
-      const baseWidth = 400;
 
       dagreGraph.setNode(node.id, {
         node,
         type: (node as any).type,
-        width: baseWidth - stack.length * 70,
-        height: 50,
+        currentDepth: stack.length,
       });
+      if (stack.length > maxDepth) {
+        maxDepth = stack.length;
+      }
       if (openScopeNodes.includes(node.type)) {
         stack.push(node.type);
       }
     });
+  dagreGraph
+    .nodes()
+    .map((id) => ({ id, node: dagreGraph.node(id) as any }))
+    .forEach((x) =>
+      dagreGraph.setNode(x.id, {
+        ...x.node,
+        width:
+          x.node.currentDepth === maxDepth
+            ? baseWidth
+            : baseWidth + (maxDepth - x.node.currentDepth) * 70,
+        height: 50,
+      })
+    );
 
   graph.edges().forEach((edge) => dagreGraph.setEdge(edge.v, edge.w));
 
