@@ -7,6 +7,17 @@
 import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
-export default createPlaywrightEvalsConfig({
+const baseConfig = createPlaywrightEvalsConfig({
   testDir: Path.join(__dirname, './reports'),
 });
+
+// Override projects to only include a single project for reporting
+export default {
+  ...baseConfig,
+  projects: [
+    {
+      name: 'reporting',
+      use: baseConfig.projects?.[0]?.use || {},
+    },
+  ],
+};
