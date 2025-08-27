@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import dedent from 'dedent';
+import moment from 'moment';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -27,12 +29,13 @@ import { useParams } from 'react-router-dom';
 import { getTestRunDetailLink } from '../../common/links/test_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
-import type {
-  EncryptedSyntheticsSavedMonitor,
-  Ping,
-  SyntheticsJourneyApiResponse,
+import {
+  ConfigKey,
+  MonitorTypeEnum,
+  type EncryptedSyntheticsSavedMonitor,
+  type Ping,
+  type SyntheticsJourneyApiResponse,
 } from '../../../../../../common/runtime_types';
-import { ConfigKey, MonitorTypeEnum } from '../../../../../../common/runtime_types';
 
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
@@ -42,9 +45,12 @@ import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/
 import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
-import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { useDateFormat, useUTCDateFormat } from '../../../../../hooks/use_date_format';
+import { getErrorDuration } from '../../../utils/formatting';
+import { useScreenContext } from '../../../hooks/use_screen_context';
 
 export const LastTestRun = () => {
+  const { monitor } = useSelectedMonitor();
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
   const { lastRefresh } = useSyntheticsRefreshContext();
 
@@ -55,15 +61,16 @@ export const LastTestRun = () => {
 
   const loading = stepsLoading || pingsLoading;
 
-  return (
+  return monitor ? (
     <LastTestRunComponent
       stepsData={stepsData}
       latestPing={latestPing}
       loading={loading}
       stepsLoading={stepsLoading}
       isErrorDetails={false}
+      monitor={monitor}
     />
-  );
+  ) : null;
 };
 
 export const LastTestRunComponent = ({
@@ -72,23 +79,63 @@ export const LastTestRunComponent = ({
   stepsData,
   stepsLoading,
   isErrorDetails = false,
+  monitor,
 }: {
   stepsLoading: boolean;
   latestPing?: Ping;
   loading: boolean;
   stepsData?: SyntheticsJourneyApiResponse;
   isErrorDetails?: boolean;
+  monitor: EncryptedSyntheticsSavedMonitor;
 }) => {
-  const { monitor } = useSelectedMonitor();
   const { euiTheme } = useEuiTheme();
 
   const selectedLocation = useSelectedLocation();
   const { basePath } = useSyntheticsSettingsContext();
 
+  const isDown = latestPing?.summary?.down! > 0;
+  const status = parseBadgeStatus(isDown ? 'fail' : 'success');
+  const formatter = useDateFormat();
+  const utcFormatter = useUTCDateFormat();
+  const lastRunTimestamp = formatter(latestPing?.['@timestamp']);
+  const lastRunTimestampUTC = utcFormatter(latestPing?.['@timestamp']);
+  const errorMessage = latestPing?.error?.message;
+  const stateStartedAt = latestPing?.state?.started_at;
+  const stateEndsAt = Date.now();
+  const formattedStateStartedAt = formatter(latestPing?.state?.started_at);
+  const utcStateStartedAt = utcFormatter(latestPing?.state?.started_at);
+  const stateDuration =
+    stateStartedAt && stateEndsAt
+      ? getErrorDuration(moment(stateStartedAt), moment(stateEndsAt))
+      : 0;
+  const location = latestPing?.observer?.geo?.name || '';
+
+  useScreenContext({
+    screenDescription: dedent(`The user is viewing the last test run for monitor "${monitor.name}". 
+    The last test run ${status} and was executed at ${lastRunTimestamp} (${lastRunTimestampUTC} UTC)
+    from location "${location}".
+
+    ${errorMessage ? `The latest error was: ${errorMessage}` : ''}. 
+
+    ${
+      stateStartedAt && stateDuration
+        ? `The monitor has been ${
+            isDown ? 'down' : 'up'
+          } for ${stateDuration} since ${formattedStateStartedAt} (${utcStateStartedAt} UTC).`
+        : ''
+    }
+    `),
+  });
+
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 356 }}>
       {loading && <EuiProgress size="xs" color="accent" />}
-      <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
+      <PanelHeader
+        monitor={monitor}
+        latestPing={latestPing}
+        loading={loading}
+        lastRunTimestamp={lastRunTimestamp}
+      />
       {!(loading && !latestPing) && latestPing?.error ? (
         <EuiCallOut
           data-test-subj="monitorTestRunErrorCallout"
@@ -141,10 +188,12 @@ const PanelHeader = ({
   monitor,
   latestPing,
   loading,
+  lastRunTimestamp,
 }: {
   monitor: EncryptedSyntheticsSavedMonitor | null;
   latestPing?: Ping;
   loading: boolean;
+  lastRunTimestamp: string;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -153,9 +202,6 @@ const PanelHeader = ({
   const selectedLocation = useSelectedLocation();
 
   const { monitorId } = useParams<{ monitorId: string }>();
-
-  const formatter = useDateFormat();
-  const lastRunTimestamp = formatter(latestPing?.['@timestamp']);
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
 

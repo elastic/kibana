@@ -95,7 +95,7 @@ export const PlaygroundsList = () => {
           >
             <FormattedMessage
               id="xpack.searchPlayground.playgroundsList.page.cta.text"
-              defaultMessage="New Playground"
+              defaultMessage="New RAG Playground"
             />
           </EuiButton>,
         ]}
