@@ -33,9 +33,10 @@ export function createConfig(
     );
     encryptionKey = crypto.randomBytes(16).toString('hex');
   }
-  if (encryptionKey.length < 32) {
+  const minEncryptionKeyLength = 32;
+  if (encryptionKey.length < minEncryptionKeyLength) {
     logger.warn(
-      'The xpack.reporting.encryptionKey config is shorter than the recommended minimum length of 32 characters. For enhanced security, please update the encryption key to be at least 32 characters long.'
+      `The xpack.reporting.encryptionKey config is shorter than the recommended minimum length of ${minEncryptionKeyLength} characters. For enhanced security, please update the encryption key to be at least ${minEncryptionKeyLength} characters long.`
     );
   }
 
