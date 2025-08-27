@@ -758,7 +758,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         {isTAAdvancedModeFeatureFlagEnabled && isFormAdvancedMode && (
           <>
             <EuiSpacer size="s" />
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiIcon type="warningFilled" size="s" color="warning" />
               </EuiFlexItem>
