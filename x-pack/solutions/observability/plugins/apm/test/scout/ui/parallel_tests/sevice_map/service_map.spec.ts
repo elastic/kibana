@@ -24,9 +24,7 @@ test.describe('Service map', { tag: ['@ess', '@svlOblt'] }, () => {
     expect(page.url()).toContain('/app/apm/service-map');
     await serviceMapPage.waitForServiceMapToLoad();
     await serviceMapPage.clickZoomIn();
-    await serviceMapPage.serviceMap.focus();
     await serviceMapPage.centerServiceMapBtn.click();
-    await serviceMapPage.serviceMap.focus();
     await serviceMapPage.waitForServiceMapToLoad();
   });
 
@@ -38,11 +36,8 @@ test.describe('Service map', { tag: ['@ess', '@svlOblt'] }, () => {
     expect(page.url()).toContain('/services/opbeans-java/service-map');
     await serviceMapPage.waitForServiceMapToLoad();
     await serviceMapPage.clickZoomOut();
-    await serviceMapPage.serviceMap.focus();
     await serviceMapPage.centerServiceMapBtn.click();
-    await serviceMapPage.serviceMap.focus();
     await serviceMapPage.clickZoomIn();
-    await serviceMapPage.serviceMap.focus();
     await serviceMapPage.waitForServiceMapToLoad();
   });
 
