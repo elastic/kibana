@@ -14,11 +14,12 @@ import dateMath from '@kbn/datemath';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { buildEsQuery } from '@kbn/es-query';
-import type {
-  OptionsListFailureResponse,
-  OptionsListRequest,
-  OptionsListResponse,
-  OptionsListSuccessResponse,
+import {
+  isOptionsListESQLRequest,
+  type OptionsListFailureResponse,
+  type OptionsListRequest,
+  type OptionsListResponse,
+  type OptionsListSuccessResponse,
 } from '../../../../common/options_list/types';
 import { coreServices, dataService } from '../../../services/kibana_services';
 
@@ -42,6 +43,8 @@ export class OptionsListFetchCache {
   }
 
   private getRequestHash = (request: OptionsListRequest) => {
+    if (isOptionsListESQLRequest(request)) throw new Error('ES|QL request not yet implemented');
+
     const {
       size,
       sort,
@@ -82,6 +85,8 @@ export class OptionsListFetchCache {
     request: OptionsListRequest,
     abortSignal: AbortSignal
   ): Promise<OptionsListResponse> {
+    if (isOptionsListESQLRequest(request)) throw new Error('ES|QL request not yet implemented');
+
     const requestHash = this.getRequestHash(request);
 
     if (this.cache.has(requestHash)) {
