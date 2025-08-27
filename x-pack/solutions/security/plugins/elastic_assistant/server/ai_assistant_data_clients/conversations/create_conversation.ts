@@ -107,6 +107,13 @@ export const transformToCreateScheme = (
             },
           }
         : {}),
+      ...(message.metadata
+        ? {
+            metadata: {
+              content_references: message.metadata.contentReferences,
+            },
+          }
+        : {}),
     })),
     updated_at: createdAt,
     replacements: replacements
