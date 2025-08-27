@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { AgentForm } from './agent_form';
+import { checkValidColor } from '@elastic/eui';
 
-export const CreateAgent = () => {
-  return <AgentForm />;
+export const isValidAgentAvatarColor = (color: string) => {
+  try {
+    checkValidColor(color);
+  } catch (error) {
+    return false;
+  }
+  return true;
 };
