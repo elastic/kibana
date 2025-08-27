@@ -21,11 +21,13 @@ export interface GroundednessAnalysis {
       | 'CONTRADICTED'
       | 'NOT_FOUND'
       | 'UNGROUNDED_BUT_DISCLOSED';
-    evidence: {
-      tool_call_id: string | null;
-      tool_id: string | null;
-      evidence_snippet: string | null;
-    };
+    evidence:
+      | {
+          tool_call_id: string | undefined;
+          tool_id: string | undefined;
+          evidence_snippet: string | undefined;
+        }
+      | undefined;
     explanation: string;
   }>;
 }

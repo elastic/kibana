@@ -71,6 +71,7 @@ export const LlmGroundednessEvaluationPrompt = createPrompt({
                   },
                   evidence: {
                     type: 'object',
+                    nullable: true,
                     properties: {
                       tool_call_id: {
                         type: 'string',
