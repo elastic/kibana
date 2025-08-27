@@ -8,7 +8,7 @@
  */
 
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
-import { type ESQLCommand, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { type ESQLCommand, BasicPrettyPrinter, Builder, EDITOR_MARKER } from '@kbn/esql-ast';
 
 /**
  * This function is used to build the query that will be used to compute the
@@ -32,11 +32,37 @@ export function getQueryForFields(queryString: string, root: ESQLAstQueryExpress
      * previous context is equivalent to a query without the FORK command.:
      *
      * Original query: FROM lolz | EVAL foo = 1 | FORK (EVAL bar = 2) (EVAL baz = 3 | WHERE /)
-     * Simplified: FROM lolz | EVAL foo = 1 | EVAL baz = 3 | WHERE /
+     * Simplified:     FROM lolz | EVAL foo = 1 | EVAL baz = 3
      */
     const currentBranch = lastCommand.args[lastCommand.args.length - 1] as ESQLAstQueryExpression;
     const newCommands = commands.slice(0, -1).concat(currentBranch.commands.slice(0, -1));
     return BasicPrettyPrinter.print({ ...root, commands: newCommands });
+  }
+
+  if (lastCommand && lastCommand.name === 'eval') {
+    const endsWithComma = queryString.replace(EDITOR_MARKER, '').trim().endsWith(',');
+    if (lastCommand.args.length > 1 || endsWithComma) {
+      /**
+       * If we get here, we know that we have a multi-expression EVAL statement.
+       *
+       * e.g. EVAL foo = 1, bar = foo + 1, baz = bar + 1
+       *
+       * In order for this to work with the caching system which expects field availability to be
+       * delineated by pipes, we need to split the current EVAL command into an equivalent
+       * set of single-expression EVAL commands.
+       *
+       * Original query: FROM lolz | EVAL foo = 1, bar = foo + 1, baz = bar + 1, /
+       * Simplified:     FROM lolz | EVAL foo = 1 | EVAL bar = foo + 1 | EVAL baz = bar + 1
+       */
+      const individualEVALCommands: ESQLCommand[] = [];
+      for (const expression of lastCommand.args) {
+        individualEVALCommands.push(Builder.command({ name: 'eval', args: [expression] }));
+      }
+      const newCommands = commands
+        .slice(0, -1)
+        .concat(endsWithComma ? individualEVALCommands : individualEVALCommands.slice(0, -1));
+      return BasicPrettyPrinter.print({ ...root, commands: newCommands });
+    }
   }
 
   // If there is only one source command and it does not require fields, do not
