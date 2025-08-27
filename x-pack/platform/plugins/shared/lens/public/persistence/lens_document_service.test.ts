@@ -60,11 +60,7 @@ describe('LensStore', () => {
       }));
       const doc = await service.save(docToSave);
 
-      expect(doc).toEqual({
-        savedObjectId: 'new-id',
-        ...docToSave,
-        extraProp: 'test', // should replace doc with response properties
-      });
+      expect(doc).toEqual({ savedObjectId: 'new-id' });
 
       expect(client.create).toHaveBeenCalledTimes(1);
       const { references, ...attributes } = docToSave;
@@ -94,7 +90,7 @@ describe('LensStore', () => {
 
       const doc = await service.save(docToUpdate);
       // should replace doc with response properties
-      expect(doc).toEqual({ ...docToUpdate, extraProp: 'test' });
+      expect(doc).toEqual({ savedObjectId: 'update-id' });
 
       expect(client.update).toHaveBeenCalledTimes(1);
       const { savedObjectId, references, ...attributes } = docToUpdate;

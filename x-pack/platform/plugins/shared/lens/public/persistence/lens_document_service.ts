@@ -21,8 +21,12 @@ export interface CheckDuplicateTitleOptions {
   isTitleDuplicateConfirmed: boolean;
 }
 
+interface LensSaveResult {
+  savedObjectId: string;
+}
+
 interface ILensDocumentService {
-  save: (vis: LensDocument) => Promise<{ savedObjectId: string }>;
+  save: (vis: LensDocument) => Promise<LensSaveResult>;
   load: (savedObjectId: string) => Promise<unknown>;
   checkForDuplicateTitle: (
     options: CheckDuplicateTitleOptions,
@@ -37,22 +41,22 @@ export class LensDocumentService implements ILensDocumentService {
     this.client = new LensClient(http);
   }
 
-  save = async (vis: LensDocument) => {
+  save = async (vis: LensDocument): Promise<LensSaveResult> => {
     // TODO: Flatten LenDocument types to align with new LensItem, for now just keep it.
     const { savedObjectId, references, ...attributes } = vis;
 
     if (savedObjectId) {
       const {
-        item: { id, ...newVis },
+        item: { id },
       } = await this.client.update(savedObjectId, attributes, references);
-      return { ...newVis, savedObjectId: id };
+      return { savedObjectId: id };
     }
 
     const {
-      item: { id: newId, ...newVis },
+      item: { id: newId },
     } = await this.client.create(attributes, references);
 
-    return { ...newVis, savedObjectId: newId };
+    return { savedObjectId: newId };
   };
 
   async load(savedObjectId: string) {
