@@ -173,7 +173,7 @@ test.beforeEach(async ({ pageObjects }) => {
 
 6. **src/servers/**
 
-Here we have logic to start Kibana and Elasticsearch servers using `kbn-test` functionality in Scout flavor. The instance of the `Config` class is passed to start servers for the specific deployment type. The `flags.ts` file contains server-related command-line flags and options. The `loadServersConfig` function not only returns a `kbn-test` compatible config instance, but also converts it to `ScoutServiceConfig` format and saves it on disk to `./scout/servers/local.json` in the Kibana root directory. Scout `config` fixture reads it and expose to UI tests.
+Here we have logic to start Kibana and Elasticsearch servers using `kbn-test` functionality in Scout flavor. The instance of the `Config` class is passed to start servers for the specific deployment type. The `flags.ts` file contains server-related command-line flags and options. The `loadServersConfig` function not only returns a `kbn-test` compatible config instance, but also converts it to `ScoutServiceConfig` format and saves it on disk to `./scout/servers/local.json` in the Kibana root directory. Scout `config` fixture reads it and exposes it to UI tests.
 
 ### Test Types and Directory Structure
 
