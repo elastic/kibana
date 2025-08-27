@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+export const EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER = 'EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER';
+export const SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER =
+  'SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER';
+
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';

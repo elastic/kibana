@@ -11,7 +11,7 @@ import { Redirect } from 'react-router-dom';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 import type { MlRoute } from '../../router';
-import { createPath } from '../../router';
+import { createPath } from '../../create_path';
 
 export const newJobRouteFactory = (): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB),
