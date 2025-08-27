@@ -6,13 +6,32 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { ScaleType, Settings, Tooltip, Chart, AreaSeries } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { Coordinate } from '../../../common/types';
 
 export function SparkPlot({
+  valueLabel,
+  isLoading,
+  series,
+}: {
+  valueLabel: React.ReactNode;
+  isLoading: boolean;
+  series?: Coordinate[] | null;
+}) {
+  return (
+    <EuiFlexGroup justifyContent="flexStart" gutterSize="s" responsive={false} alignItems="center">
+      <EuiFlexItem grow={false}>{valueLabel}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SparkPlotItem isLoading={isLoading} series={series} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function SparkPlotItem({
   isLoading,
   series,
 }: {

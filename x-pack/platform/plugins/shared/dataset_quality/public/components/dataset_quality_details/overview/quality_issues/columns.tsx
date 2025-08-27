@@ -20,6 +20,7 @@ import {
   fieldColumnName,
   issueColumnName,
   lastOccurrenceColumnName,
+  overviewPanelDatasetQualityIndicatorFailedDocs,
 } from '../../../../../common/translations';
 import type { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
 import { SparkPlot } from '../../../common/spark_plot';
@@ -31,19 +32,32 @@ const expandDatasetAriaLabel = i18n.translate(
   }
 );
 
+const collapseDatasetAriaLabel = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTable.collapseLabel',
+  {
+    defaultMessage: 'Collapse',
+  }
+);
+
 export const getQualityIssuesColumns = ({
   dateFormatter,
   isLoading,
+  expandedQualityIssue,
   openQualityIssueFlyout,
 }: {
   dateFormatter: FieldFormat;
   isLoading: boolean;
+  expandedQualityIssue?: {
+    name: string;
+    type: QualityIssueType;
+  };
   openQualityIssueFlyout: (name: string, type: QualityIssueType) => void;
 }): Array<EuiBasicTableColumn<QualityIssue>> => [
   {
     name: '',
     field: 'name',
     render: (_, { name, type }) => {
+      const isExpanded = name === expandedQualityIssue?.name && type === expandedQualityIssue?.type;
       const onExpandClick = () => {
         openQualityIssueFlyout(name, type);
       };
@@ -54,9 +68,9 @@ export const getQualityIssuesColumns = ({
           size="xs"
           color="text"
           onClick={onExpandClick}
-          iconType={'expand'}
-          title={expandDatasetAriaLabel}
-          aria-label={expandDatasetAriaLabel}
+          iconType={isExpanded ? 'minimize' : 'expand'}
+          title={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
+          aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
         />
       );
     },
@@ -71,13 +85,17 @@ export const getQualityIssuesColumns = ({
     name: fieldColumnName,
     field: 'name',
     render: (_, { name, type }) => {
-      return <EuiText size="s">{name}</EuiText>;
+      return (
+        <EuiText size="s">
+          {type === 'degraded' ? name : overviewPanelDatasetQualityIndicatorFailedDocs}
+        </EuiText>
+      );
     },
   },
   {
     name: issueColumnName,
     field: 'name',
-    render: (_, { name, type }) => {
+    render: (_, { type }) => {
       return (
         <EuiText size="s">{type === 'degraded' ? degradedField : documentIndexFailed}</EuiText>
       );
@@ -86,18 +104,10 @@ export const getQualityIssuesColumns = ({
   {
     name: documentsColumnName,
     field: 'count',
-    align: 'right',
-    render: (_, { count, timeSeries }) => {
-      const countValue = formatNumber(count, NUMBER_FORMAT);
-      return <EuiText size="s">{countValue}</EuiText>;
-    },
-  },
-  {
-    name: '',
-    field: 'count',
     align: 'left',
     render: (_, { count, timeSeries }) => {
-      return <SparkPlot series={timeSeries} isLoading={isLoading} />;
+      const countValue = formatNumber(count, NUMBER_FORMAT);
+      return <SparkPlot series={timeSeries} valueLabel={countValue} isLoading={isLoading} />;
     },
   },
   {

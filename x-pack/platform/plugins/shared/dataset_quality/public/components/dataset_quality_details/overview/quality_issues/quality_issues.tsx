@@ -6,10 +6,21 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiSpacer, EuiTitle, EuiFilterGroup } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiTitle,
+  EuiFilterGroup,
+  EuiIconTip,
+  EuiBetaBadge,
+} from '@elastic/eui';
 import { QualityIssuesTable } from './table';
-import { issuesTableName } from '../../../../../common/translations';
-import { FieldSelector, DegradedFieldsToggleButton, IssueTypeSelector } from './filters';
+import {
+  issuesTableName,
+  overviewQualityIssueSectionTitleTooltip,
+  overviewQualityIssuesAccordionTechPreviewBadge,
+} from '../../../../../common/translations';
+import { FieldSelector, CurrentQualityIssuesToggle, IssueTypeSelector } from './filters';
 
 export function QualityIssues() {
   return (
@@ -20,13 +31,22 @@ export function QualityIssues() {
         justifyContent="spaceBetween"
         data-test-subj="datasetQualityDetailsFiltersContainer"
       >
-        <EuiTitle size="xxs">
-          <h4>{issuesTableName}</h4>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
+          <EuiTitle size="xxs">
+            <h4>{issuesTableName}</h4>
+          </EuiTitle>
+          <EuiIconTip content={overviewQualityIssueSectionTitleTooltip} color="subdued" size="m" />
+          <EuiBetaBadge
+            label={overviewQualityIssuesAccordionTechPreviewBadge}
+            color="hollow"
+            data-test-subj="datasetQualityDetailsOverviewDegradedFieldsTechPreview"
+            size="s"
+          />
+        </EuiFlexGroup>
         <EuiFilterGroup>
           <FieldSelector />
           <IssueTypeSelector />
-          <DegradedFieldsToggleButton />
+          <CurrentQualityIssuesToggle />
         </EuiFilterGroup>
       </EuiFlexGroup>
       <EuiSpacer size="l" />

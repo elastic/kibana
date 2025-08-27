@@ -12,7 +12,7 @@ import {
   currentIssuesToggleSwitch,
   currentIssuesToggleSwitchTooltip,
 } from '../../../../../../common/translations';
-export function DegradedFieldsToggleButton() {
+export function CurrentQualityIssuesToggle() {
   const toggleTextSwitchId = useGeneratedHtmlId({ prefix: 'toggleTextSwitch' });
   const { toggleCurrentQualityIssues, showCurrentQualityIssues } = useQualityIssuesFilters();
   return (

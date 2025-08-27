@@ -282,8 +282,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       actions: ['toggleCurrentQualityIssues'],
                     },
                     UPDATE_SELECTED_ISSUE_TYPES: {
-                      target:
-                        '#DatasetQualityDetailsController.initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields',
+                      target: 'doneFetchingQualityIssues',
                       actions: ['updateSelectedIssueTypes'],
                     },
                     UPDATE_SELECTED_FIELDS: {

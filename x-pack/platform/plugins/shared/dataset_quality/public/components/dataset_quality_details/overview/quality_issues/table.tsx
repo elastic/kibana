@@ -23,6 +23,7 @@ export const QualityIssuesTable = () => {
     onTableChange,
     sort,
     fieldFormats,
+    expandedDegradedField,
     openDegradedFieldFlyout,
   } = useQualityIssues();
 
@@ -33,6 +34,7 @@ export const QualityIssuesTable = () => {
   const columns = getQualityIssuesColumns({
     dateFormatter,
     isLoading: isDegradedFieldsLoading,
+    expandedQualityIssue: expandedDegradedField,
     openQualityIssueFlyout: openDegradedFieldFlyout,
   });
 
