@@ -27,20 +27,18 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
-  EuiModalFooter,
-  EuiButtonEmpty,
-  EuiTitle,
   EuiText,
   EuiListGroup,
   EuiListGroupItem,
-  EuiPanel,
   EuiImage,
   EuiSwitch,
-  EuiPagination,
   EuiSpacer,
   EuiButtonIcon,
+  EuiPanel,
+  EuiTitle,
+  EuiIcon,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -61,6 +59,10 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
   const [showTourModal, setShowTourModal] = useState(false);
   const [selectedHighlight, setSelectedHighlight] = useState(0);
   const [dontShowAgain, setDontShowAgain] = useState(false);
+
+  // Demo toggles for demonstration purposes
+  const [demoCanManageSpaces, setDemoCanManageSpaces] = useState(true);
+  const [demoIsTrial, setDemoIsTrial] = useState(false);
 
   // Get current Discover state for navigation
   const dataViewId = useAppStateSelector((state) => state.dataSource?.dataViewId);
@@ -156,6 +158,22 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
     true
   );
 
+  // Check if user can manage spaces (with demo override)
+  const canManageSpaces =
+    demoCanManageSpaces && (services.application.capabilities.spaces?.manage ?? false);
+
+  // Check if current license is a trial (with demo override)
+  const isTrial = demoIsTrial || services.licensing?.license?.type === 'trial';
+
+  // Get conditional callout message based on trial status
+  const getCalloutMessage = () => {
+    if (isTrial) {
+      return 'Switching to the Observability view unlocks tailored tools and workflows for your data.';
+    } else {
+      return 'Switching to the Observability view unlocks tailored tools and workflows for everyone in this space.';
+    }
+  };
+
   // Highlights data for the tour modal
   const highlights = useMemo(
     () => [
@@ -163,25 +181,25 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
         id: 'span',
         title: 'Span overview at a glance',
         blurb: "See a mini waterfall of parent and child spans in Discover's flyout.",
-        color: '#006BB4', // EUI blue
+        image: services.addBasePath('/plugins/discover/assets/highlight-span.png'),
         alt: 'Discover flyout with Span overview tab and mini waterfall.',
       },
       {
         id: 'txn',
         title: 'Transaction & Error details',
         blurb: 'Get rich context for request flow and exceptions with dedicated tabs.',
-        color: '#00BFB3', // EUI teal
+        image: services.addBasePath('/plugins/discover/assets/highlight-trace.png'),
         alt: 'Discover flyout with Transaction overview tab highlighted.',
       },
       {
         id: 'corr',
         title: 'Seamless trace correlation',
         blurb: 'Pivot from spans to related logs and metrics for end-to-end visibility.',
-        color: '#6B73C7', // EUI purple
+        image: services.addBasePath('/plugins/discover/assets/highlight-pivot.png'),
         alt: 'Discover flyout showing link to related logs/metrics.',
       },
     ],
-    []
+    [services.addBasePath]
   );
 
   // Navigation helpers
@@ -206,87 +224,160 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
   // - No span data detected
   // - Still loading
   // - User dismissed the cue
+  // - User cannot manage spaces
   const shouldRenderCallout =
-    isFeatureEnabled && solutionType !== 'oblt' && hasSpanData && !isLoading && !isDismissed;
+    isFeatureEnabled &&
+    solutionType !== 'oblt' &&
+    hasSpanData &&
+    !isLoading &&
+    !isDismissed &&
+    canManageSpaces;
 
   return (
     <>
       {/* Only render the callout in Classic view */}
       {shouldRenderCallout && (
+        // <EuiCallOut
+        //   iconType="apmApp"
+        //   title="Trace data detected."
+        //   color="primary"
+        //   className={className}
+        //   onDismiss={handleDismiss}
+        // >
+        //   <p>{getCalloutMessage()}</p>
+        //   <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
+        //     <EuiFlexItem grow={false}>
+        //       <EuiButton
+        //         onClick={handleSwitchToObservability}
+        //         data-test-subj="obsSpanCueSwitchBtn"
+        //         size="s"
+        //         fill
+        //       >
+        //         Try Observability
+        //       </EuiButton>
+        //     </EuiFlexItem>
+        //     <EuiFlexItem grow={false}>
+        //       <EuiLink
+        //         href="https://www.elastic.co/docs/solutions/observability/apm/get-started"
+        //         target="_blank"
+        //         onClick={handleInfoLinkClick}
+        //         data-test-subj="obsSpanCueInfoLink"
+        //       >
+        //         Why am I seeing this?
+        //       </EuiLink>
+        //     </EuiFlexItem>
+        //   </EuiFlexGroup>
+        // </EuiCallOut>
         <EuiCallOut
-          iconType="apmApp"
-          title="Trace/span data detected."
-          color="primary"
-          className={className}
-          onDismiss={handleDismiss}
-        >
-          <p>Switch to Observability to see the Span overview and mini waterfall.</p>
-          <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={handleSwitchToObservability}
-                data-test-subj="obsSpanCueSwitchBtn"
-                size="s"
-                fill
-              >
-                Switch to Observability
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiLink
-                href="https://elastic.co/guide/observability/discover/span-overview"
-                target="_blank"
-                onClick={handleInfoLinkClick}
-                data-test-subj="obsSpanCueInfoLink"
-              >
-                Why am I seeing this?
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiCallOut>
+          size="s"
+          color="success"
+          // onDismiss={handleDismiss}
+          title={
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon color="success" type="apmApp" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <span>
+                      <strong>Trace data detected</strong>. {getCalloutMessage()}
+                    </span>
+                  </EuiFlexItem>
+                  {/* <EuiFlexItem grow={false}>
+                    <EuiButton
+                      onClick={handleSwitchToObservability}
+                      data-test-subj="obsSpanCueSwitchBtn"
+                      size="s"
+                      color="success"
+                    >
+                      Try Observability
+                    </EuiButton>
+                  </EuiFlexItem> */}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      color="success"
+                      onClick={handleDismiss}
+                      aria-label="Dismiss"
+                      size="s"
+                    >
+                      Mabye later
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      onClick={handleSwitchToObservability}
+                      data-test-subj="obsSpanCueSwitchBtn"
+                      size="s"
+                      color="success"
+                      fill
+                    >
+                      Try Observability
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        />
       )}
 
       {/* Tour Modal - render regardless of solution type */}
       {showTourModal && (
-        <EuiModal onClose={() => setShowTourModal(false)} style={{ maxWidth: 920 }}>
-          <EuiModalHeader>
+        <EuiModal
+          onClose={() => setShowTourModal(false)}
+          style={{
+            minWidth: 820,
+            maxWidth: 920,
+            border: 'none',
+            boxShadow: 'none',
+          }}
+          aria-labelledby="discover-traces-modal-title"
+        >
+          <EuiModalHeader style={{ width: '50%' }}>
             <EuiModalHeaderTitle>Discover more with Traces</EuiModalHeaderTitle>
           </EuiModalHeader>
 
-          <EuiModalBody>
-            <EuiFlexGroup gutterSize="l" responsive>
-              <EuiFlexItem grow={1}>
-                <EuiText color="subdued" size="s">
-                  <p>Explore these trace-focused enhancements in Observability:</p>
-                </EuiText>
-                <EuiSpacer size="m" />
-                <EuiListGroup>
-                  {highlights.map((h, i) => (
-                    <EuiListGroupItem
-                      key={h.id}
-                      label={
-                        <div>
-                          <strong>{h.title}</strong>
-                          <EuiText size="s" color="subdued">
-                            <p style={{ margin: 0 }}>{h.blurb}</p>
-                          </EuiText>
-                        </div>
-                      }
-                      isActive={selectedHighlight === i}
-                      onClick={() => setSelectedHighlight(i)}
-                      size="s"
-                      wrapText
-                    />
-                  ))}
-                </EuiListGroup>
+          <EuiModalBody
+            style={{ position: 'relative', paddingRight: 0, paddingBottom: '24px', width: '50%' }}
+          >
+            <EuiText color="subdued" size="s">
+              <p>Explore these trace-focused enhancements in Observability:</p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiListGroup>
+              {highlights.map((h, i) => (
+                <EuiListGroupItem
+                  key={h.id}
+                  label={
+                    <div>
+                      <strong>{h.title}</strong>
+                      <EuiText size="s" color="subdued">
+                        <p style={{ margin: 0 }}>{h.blurb}</p>
+                      </EuiText>
+                    </div>
+                  }
+                  isActive={selectedHighlight === i}
+                  onClick={() => setSelectedHighlight(i)}
+                  size="s"
+                  wrapText
+                />
+              ))}
+            </EuiListGroup>
 
-                <EuiFlexGroup
-                  gutterSize="s"
-                  alignItems="center"
-                  responsive={false}
-                  style={{ marginTop: 12 }}
-                  justifyContent="flexStart"
-                >
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              style={{ marginTop: 12 }}
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem>
+                <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
                       iconType="arrowLeft"
@@ -302,57 +393,89 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiSpacer />
-                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiSwitch
-                      label="Don't show again"
-                      checked={dontShowAgain}
-                      onChange={(e) => setDontShowAgain(e.target.checked)}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      size="s"
-                      fill
-                      onClick={onFinish}
-                      data-test-subj="obsTracesModalCloseBtn"
-                    >
-                      Got it
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
               </EuiFlexItem>
-
-              <EuiFlexItem grow={1}>
-                <EuiPanel paddingSize="none" hasShadow>
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '300px',
-                      backgroundColor: highlights[selectedHighlight].color,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontSize: '16px',
-                      fontWeight: 'bold',
-                      textAlign: 'center',
-                      padding: '20px',
-                    }}
-                  >
-                    {highlights[selectedHighlight].title}
-                    <br />
-                    <span style={{ fontSize: '14px', fontWeight: 'normal', marginTop: '8px' }}>
-                      (Placeholder for {highlights[selectedHighlight].id} screenshot)
-                    </span>
-                  </div>
-                </EuiPanel>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  <p>Change views in space settings</p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  label="Don't show again"
+                  checked={dontShowAgain}
+                  onChange={(e) => setDontShowAgain(e.target.checked)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" fill onClick={onFinish} data-test-subj="obsTracesModalCloseBtn">
+                  Got it
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiModalBody>
+          {/* Absolutely positioned image */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '50%',
+              height: '100%',
+              overflow: 'hidden',
+            }}
+          >
+            <EuiImage
+              url={highlights[selectedHighlight].image}
+              alt={highlights[selectedHighlight].alt}
+              size="original"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          </div>
         </EuiModal>
       )}
+
+      {/* Demo Bar - Floating at bottom for demonstration purposes */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 9999,
+          backgroundColor: '#222222',
+          color: '#ffffff',
+          borderRadius: '24px',
+          padding: '12px 16px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        }}
+      >
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label="Can manage spaces"
+              checked={demoCanManageSpaces}
+              onChange={(e) => setDemoCanManageSpaces(e.target.checked)}
+              compressed
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label="Trial mode"
+              checked={demoIsTrial}
+              onChange={(e) => setDemoIsTrial(e.target.checked)}
+              compressed
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     </>
   );
 };
