@@ -50,6 +50,7 @@ export const DATASTREAM_LIFECYCLE_NAME = 'lifecycle.yml';
 
 export const KIBANA_FOLDER_NAME = 'kibana';
 export const TAGS_NAME = 'tags.yml';
+
 const DEFAULT_RELEASE_VALUE = 'ga';
 
 // Ingest pipelines are specified in a `data_stream/<name>/elasticsearch/ingest_pipeline/` directory where a `default`
@@ -148,12 +149,7 @@ const PARSE_AND_VERIFY_ASSETS_NAME = [
  * Filter assets needed for the parse and verify archive function
  */
 export function filterAssetPathForParseAndVerifyArchive(assetPath: string): boolean {
-  // Check for specific asset files
-  const isSpecificAsset = PARSE_AND_VERIFY_ASSETS_NAME.some((endWithPath) =>
-    assetPath.endsWith(endWithPath)
-  );
-
-  return isSpecificAsset;
+  return PARSE_AND_VERIFY_ASSETS_NAME.some((endWithPath) => assetPath.endsWith(endWithPath));
 }
 
 /*
