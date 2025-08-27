@@ -45,46 +45,51 @@ ruleTester.run('@kbn/imports/no_direct_handlebars_import', NoDirectHandlebarsImp
       code: 'import Handlebars from "handlebars";',
       errors: [
         {
-          message: 'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
+          message:
+            'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
         },
       ],
-      output: 'import Handlebars from \'@kbn/handlebars\';',
+      output: "import Handlebars from '@kbn/handlebars';",
     },
     {
       code: 'import { compile } from "handlebars";',
       errors: [
         {
-          message: 'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
+          message:
+            'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
         },
       ],
-      output: 'import { compile } from \'@kbn/handlebars\';',
+      output: "import { compile } from '@kbn/handlebars';",
     },
     {
       code: 'import * as Handlebars from "handlebars";',
       errors: [
         {
-          message: 'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
+          message:
+            'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
         },
       ],
-      output: 'import * as Handlebars from \'@kbn/handlebars\';',
+      output: "import * as Handlebars from '@kbn/handlebars';",
     },
     {
       code: 'import "handlebars/lib/handlebars";',
       errors: [
         {
-          message: 'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
+          message:
+            'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
         },
       ],
-      output: 'import \'@kbn/handlebars/lib/handlebars\';',
+      output: "import '@kbn/handlebars/lib/handlebars';",
     },
     {
       code: 'const Handlebars = require("handlebars");',
       errors: [
         {
-          message: 'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
+          message:
+            'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
         },
       ],
-      output: 'const Handlebars = require(\'@kbn/handlebars\');',
+      output: "const Handlebars = require('@kbn/handlebars');",
     },
   ],
 });
