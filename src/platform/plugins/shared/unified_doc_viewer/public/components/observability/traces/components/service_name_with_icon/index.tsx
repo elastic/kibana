@@ -19,7 +19,7 @@ interface Props {
 
 export function ServiceNameWithIcon({ agentName, serviceName }: Props) {
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {agentName && (
         <EuiFlexItem grow={false}>
           <AgentIcon agentName={agentName as AgentName} size="m" />
