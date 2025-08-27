@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ObjectType } from '@kbn/config-schema';
 import type { z } from '@kbn/zod';
+import type { ObjectType } from '@kbn/config-schema';
 import type { MaybePromise } from '@kbn/utility-types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ToolType } from '@kbn/onechat-common';
 import type { InternalToolDefinition } from '../../tool_provider';
 import type { ToolPersistedDefinition } from '../client';
@@ -19,13 +20,19 @@ export type ToolDefinitionConverter<
   persisted: ToolPersistedDefinition<ToolTypeConfig>
 ) => InternalToolDefinition<ToolTypeConfig, TSchema>;
 
+export interface ToolTypeValidatorContext {
+  esClient: ElasticsearchClient;
+}
+
 export type ToolTypeCreateValidator<ToolTypeConfig extends object = Record<string, any>> = (
-  config: ToolTypeConfig
+  config: ToolTypeConfig,
+  context: ToolTypeValidatorContext
 ) => MaybePromise<ToolTypeConfig>;
 
 export type ToolTypeUpdateValidator<ToolTypeConfig extends object = Record<string, any>> = (
   update: Partial<ToolTypeConfig>,
-  config: ToolTypeConfig
+  config: ToolTypeConfig,
+  context: ToolTypeValidatorContext
 ) => MaybePromise<ToolTypeConfig>;
 
 export interface PersistedToolTypeDefinition<ToolTypeConfig extends object = Record<string, any>> {

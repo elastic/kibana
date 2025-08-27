@@ -14,6 +14,7 @@ export {
   builtinToolIds,
   builtinTags,
   defaultAgentToolIds,
+  editableToolTypes,
   isReservedToolId,
   isBuiltInToolId,
   type ByIdsToolSelection,

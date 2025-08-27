@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createBadRequestError, isToolNotFoundError, ToolType } from '@kbn/onechat-common';
+import type { ToolType } from '@kbn/onechat-common';
+import { createBadRequestError, isToolNotFoundError } from '@kbn/onechat-common';
 import type { Logger } from '@kbn/logging';
 import type {
   ElasticsearchClient,
@@ -14,8 +15,8 @@ import type {
 import type { ToolTypeClient, ToolSource } from '../tool_provider';
 import type { ToolPersistedDefinition } from './client';
 import { createClient } from './client';
-import { createEsqlToolType } from './tool_types/esql';
-import type { PersistedToolTypeDefinition } from './tool_types/types';
+import { createEsqlToolType, createIndexSearchToolType } from './tool_types';
+import type { PersistedToolTypeDefinition, ToolTypeValidatorContext } from './tool_types/types';
 
 export const createPersistedToolSource = ({
   logger,
@@ -23,12 +24,16 @@ export const createPersistedToolSource = ({
 }: {
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
-}): ToolSource<ToolType.esql | ToolType.index_search> => {
-  const toolDefinitions: PersistedToolTypeDefinition<any>[] = [createEsqlToolType()];
+}): ToolSource => {
+  const toolDefinitions: PersistedToolTypeDefinition<any>[] = [
+    createEsqlToolType(),
+    createIndexSearchToolType(),
+  ];
+  const toolTypes = toolDefinitions.map((def) => def.toolType);
 
   return {
     id: 'persisted',
-    toolTypes: [ToolType.esql, ToolType.index_search],
+    toolTypes,
     readonly: false,
     getClient: ({ request }) => {
       const esClient = elasticsearch.client.asInternalUser;
@@ -57,6 +62,12 @@ export const createPersistedToolClient = ({
     map[def.toolType] = def;
     return map;
   }, {} as Record<ToolType, PersistedToolTypeDefinition>);
+
+  const createContext = (): ToolTypeValidatorContext => {
+    return {
+      esClient,
+    };
+  };
 
   return {
     async has(toolId: string) {
@@ -104,7 +115,10 @@ export const createPersistedToolClient = ({
 
       let updatedConfig: Record<string, unknown>;
       try {
-        updatedConfig = await definition.validateForCreate(createRequest.configuration);
+        updatedConfig = await definition.validateForCreate(
+          createRequest.configuration,
+          createContext()
+        );
       } catch (e) {
         throw createBadRequestError(
           `Invalid configuration for tool type ${createRequest.type}: ${e.message}`
@@ -140,7 +154,8 @@ export const createPersistedToolClient = ({
       try {
         updatedConfig = await definition.validateForUpdate(
           updateRequest.configuration ?? {},
-          existingTool.configuration
+          existingTool.configuration,
+          createContext()
         );
       } catch (e) {
         throw createBadRequestError(
