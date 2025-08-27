@@ -215,7 +215,6 @@ export const getInfoHandler: FleetRequestHandler<
   TypeOf<typeof GetInfoRequestSchema.query>
 > = async (context, request, response) => {
   const savedObjectsClient = (await context.fleet).internalSoClient;
-  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const { limitedToPackages } = await context.fleet;
   const { pkgName, pkgVersion } = request.params;
 
@@ -232,7 +231,6 @@ export const getInfoHandler: FleetRequestHandler<
     skipArchive: !full,
     ignoreUnverified,
     prerelease,
-    esClient,
   });
   const flattenedRes = soToInstallationInfo(res) as PackageInfo;
   let metadata: any;

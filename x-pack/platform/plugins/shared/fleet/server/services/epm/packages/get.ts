@@ -503,7 +503,6 @@ export async function getPackageInfo({
   skipArchive = false,
   ignoreUnverified = false,
   prerelease,
-  esClient,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -512,7 +511,6 @@ export async function getPackageInfo({
   skipArchive?: boolean;
   ignoreUnverified?: boolean;
   prerelease?: boolean;
-  esClient?: ElasticsearchClient;
 }): Promise<PackageInfo> {
   const cacheResult = getPackageInfoCache(pkgName, pkgVersion);
   if (cacheResult) {
@@ -564,23 +562,23 @@ export async function getPackageInfo({
   // add properties that aren't (or aren't yet) on the package
   let allPaths = paths || [];
 
-  // If package is installed and esClient is available, include knowledge base assets
-  if (savedObject && esClient) {
-    try {
-      const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(esClient, pkgName);
-      if (knowledgeBaseItems.length > 0) {
-        // Add knowledge base paths in the format expected by groupPathsByService
-        const knowledgeBasePaths = knowledgeBaseItems.map(
-          (item) => `${pkgName}-${resolvedPkgVersion}/elasticsearch/knowledge_base/${item.fileName}`
-        );
-        allPaths = [...allPaths, ...knowledgeBasePaths];
-      }
-    } catch (error) {
-      // Log warning but don't fail the entire request
-      appContextService
-        .getLogger()
-        .warn(`Error retrieving knowledge base assets for package ${pkgName}: ${error.message}`);
-    }
+  // Always include knowledge base assets from package structure if they exist
+  const knowledgeBasePaths = allPaths
+    .filter((path) => path.includes('docs/knowledge_base/'))
+    .map((path) => {
+      // Extract filename from docs/knowledge_base/ path
+      const knowledgeBaseIndex = path.indexOf('docs/knowledge_base/');
+      const fileName =
+        knowledgeBaseIndex >= 0
+          ? path.substring(knowledgeBaseIndex + 'docs/knowledge_base/'.length)
+          : path.split('/').pop() || '';
+
+      // Transform to elasticsearch knowledge_base asset path format
+      return `${pkgName}-${resolvedPkgVersion}/elasticsearch/knowledge_base/${fileName}`;
+    });
+
+  if (knowledgeBasePaths.length > 0) {
+    allPaths = [...allPaths, ...knowledgeBasePaths];
   }
 
   const additions: EpmPackageAdditions = {
