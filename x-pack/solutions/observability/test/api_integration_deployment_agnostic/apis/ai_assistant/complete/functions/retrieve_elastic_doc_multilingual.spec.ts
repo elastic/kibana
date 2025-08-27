@@ -17,16 +17,16 @@ import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { installProductDoc, uninstallProductDoc } from '../../utils/product_doc_base';
 import {
-  TINY_ELSER_INFERENCE_ID,
-  deployTinyElserAndSetupKb,
-  teardownTinyElserModelAndInferenceEndpoint,
+  TINY_MULTILINGUAL_E5_SMALL_INFERENCE_ID,
+  deployTinyE5AndSetupKb,
+  teardownTinyE5ModelAndInferenceEndpoint,
 } from '../../utils/model_and_inference';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('tool: retrieve_elastic_doc', function () {
+  describe('tool: retrieve_elastic_doc (multilingual)', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['skipCloud']);
     const supertest = getService('supertest');
@@ -98,9 +98,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
           port: llmProxy.getPort(),
         });
-        await deployTinyElserAndSetupKb(getService);
+        await deployTinyE5AndSetupKb(getService);
 
-        await installProductDoc(supertest, TINY_ELSER_INFERENCE_ID);
+        await installProductDoc(supertest, TINY_MULTILINGUAL_E5_SMALL_INFERENCE_ID);
 
         void llmProxy.interceptQueryRewrite('This is a rewritten user prompt.');
 
@@ -127,12 +127,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       after(async () => {
-        await uninstallProductDoc(supertest, TINY_ELSER_INFERENCE_ID);
+        await uninstallProductDoc(supertest, TINY_MULTILINGUAL_E5_SMALL_INFERENCE_ID);
         llmProxy.close();
         await observabilityAIAssistantAPIClient.deleteActionConnector({
           actionId: connectorId,
         });
-        await teardownTinyElserModelAndInferenceEndpoint(getService);
+        await teardownTinyE5ModelAndInferenceEndpoint(getService);
       });
 
       it('makes 3 requests to the LLM', () => {

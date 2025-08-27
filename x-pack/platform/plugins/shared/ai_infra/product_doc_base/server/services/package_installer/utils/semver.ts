@@ -32,6 +32,10 @@ export const latestVersion = (availableVersions: string[], kibanaVer?: string): 
     }
   }
 
+  //@TODO: remove
+  console.log(`--@@latest`, latest);
+  //@TODO: remove
+  console.log(`--@@availableVersions[0]`, availableVersions[0]);
   return latest ?? availableVersions[0];
 };
 

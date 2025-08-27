@@ -107,6 +107,14 @@ export async function teardownTinyElserModelAndInferenceEndpoint(
   await deleteModel(getService, { modelId: TINY_ELSER_MODEL_ID });
   await deleteInferenceEndpoint(getService, { inferenceId: TINY_ELSER_INFERENCE_ID });
 }
+export async function teardownTinyE5ModelAndInferenceEndpoint(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  await deleteModel(getService, { modelId: TINY_MULTILINGUAL_E5_SMALL_MODEL_ID });
+  await deleteInferenceEndpoint(getService, {
+    inferenceId: TINY_MULTILINGUAL_E5_SMALL_INFERENCE_ID,
+  });
+}
 
 export function createTinyElserInferenceEndpoint(
   getService: DeploymentAgnosticFtrProviderContext['getService'],
@@ -183,6 +191,20 @@ export async function deployTinyElserAndSetupKb(
   await setupTinyElserModelAndInferenceEndpoint(getService);
 
   const { status, body } = await setupKnowledgeBase(getService, TINY_ELSER_INFERENCE_ID);
+  await waitForKnowledgeBaseReady(getService);
+
+  return { status, body };
+}
+
+export async function deployTinyE5AndSetupKb(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  await setupTinyMultilingualE5SmallModelAndInferenceEndpoint(getService);
+
+  const { status, body } = await setupKnowledgeBase(
+    getService,
+    TINY_MULTILINGUAL_E5_SMALL_INFERENCE_ID
+  );
   await waitForKnowledgeBaseReady(getService);
 
   return { status, body };
