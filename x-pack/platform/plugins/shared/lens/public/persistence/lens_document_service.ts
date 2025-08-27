@@ -60,12 +60,11 @@ export class LensDocumentService implements ILensDocumentService {
   };
 
   async load(savedObjectId: string) {
-    return await this.client.get(savedObjectId);
+    return this.client.get(savedObjectId);
   }
 
   async search(options: LensSearchRequestQuery) {
-    const result = await this.client.search(options);
-    return result;
+    return this.client.search(options);
   }
 
   /**
