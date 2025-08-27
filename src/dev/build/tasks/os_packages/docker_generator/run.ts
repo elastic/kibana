@@ -14,8 +14,8 @@ import { promisify } from 'util';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import type { Config, Build } from '../../../lib';
 import { write, copyAll, mkdirp, exec } from '../../../lib';
+import type { Config, Build, Solution } from '../../../lib';
 import * as dockerTemplates from './templates';
 import type { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
@@ -39,6 +39,7 @@ export async function runDockerGenerator(
     serverless?: boolean;
     dockerBuildDate?: string;
     fips?: boolean;
+    solution?: Solution;
   }
 ) {
   let baseImageName = '';
@@ -58,6 +59,7 @@ export async function runDockerGenerator(
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
+  if (flags.solution) imageFlavor += `-${flags.solution}`;
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
@@ -76,8 +78,10 @@ export async function runDockerGenerator(
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
   let artifactVariant = '';
+  let artifactSolution = '';
   if (flags.serverless) artifactVariant = '-serverless';
-  const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
+  if (flags.solution) artifactSolution = `-${flags.solution}`;
+  const artifactPrefix = `kibana${artifactVariant}${artifactSolution}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
   const metricbeatTarball = `metricbeat${
