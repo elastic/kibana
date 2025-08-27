@@ -1,13 +1,69 @@
+
+
 name: Reassign Copilot Commit
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
-  # pull_request_target:
-  #   types: [closed]
+    inputs:
+      pr_number:
+        description: 'Pull request number to check (for debugging)'
+        required: false
+        type: string
+      branch:
+        description: 'Branch to checkout (for debugging)'
+        required: false
+        type: string
 
 jobs:
-  reassign-copilot-commits:
+  check-copilot-commits:
     runs-on: ubuntu-latest
     steps:
-      - name: Log dummy message
-        run: echo "I am working fine with the branch"
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch || github.head_ref || github.ref_name }}
+
+      - name: Get PR number
+        id: prnum
+        run: |
+          if [ -n "${{ github.event.inputs.pr_number }}" ]; then
+            echo "PR_NUMBER=${{ github.event.inputs.pr_number }}" >> $GITHUB_ENV
+          elif [ -n "${{ github.event.pull_request.number }}" ]; then
+            echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          else
+            echo "::error::PR number not found. Provide pr_number input or run on PR event."
+            exit 1
+          fi
+
+      - name: Get PR commits
+        id: commits
+        run: |
+          COMMITS=$(gh pr view $PR_NUMBER --json commits -q '.commits[].oid')
+          echo "COMMITS=$COMMITS" >> $GITHUB_ENV
+          echo "$COMMITS" > commits.txt
+
+      - name: Check for Copilot as author
+        id: check_copilot
+        run: |
+          COPILOT_EMAILS="github-actions[bot]@users.noreply.github.com\ncopilot-bot@users.noreply.github.com\ncopilot@github.com"
+          FOUND=0
+          for COMMIT in $(cat commits.txt); do
+            AUTHOR_EMAIL=$(git show -s --format='%ae' $COMMIT)
+            for EMAIL in $COPILOT_EMAILS; do
+              if [ "$AUTHOR_EMAIL" = "$EMAIL" ]; then
+                FOUND=1
+                break
+              fi
+            done
+          done
+          echo "COPILOT_FOUND=$FOUND" >> $GITHUB_ENV
+          echo "found=$FOUND" >> $GITHUB_OUTPUT
+
+      - name: Fail if Copilot is author
+        if: steps.check_copilot.outputs.found == '1'
+        run: |
+          echo "❌ Copilot is the author of one or more commits in this PR. Please rebase and change the commit author to yourself before merging."
+          exit 1
