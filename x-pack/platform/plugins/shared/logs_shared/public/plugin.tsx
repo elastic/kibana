@@ -90,6 +90,9 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       render: createLogsAIAssistantRenderer(LogAIAssistant),
     });
 
+    // Register "Log Events" as a feature in Discover.
+    // The LazySavedSearchComponent cannot be used directly because of circular dependencies
+    // (see https://github.com/elastic/kibana/issues/233132).
     discoverShared.features.registry.register({
       id: 'observability-log-events',
       render: createLogEventsRenderer({
