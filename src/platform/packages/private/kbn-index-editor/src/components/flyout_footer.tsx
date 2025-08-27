@@ -53,8 +53,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
     }
 
     try {
-      await indexUpdateService.createIndex();
-      onClose();
+      await indexUpdateService.createIndex({ exitAfterFlush });
     } catch (error) {
       notifications.toasts.addError(error as Error, {
         title: i18n.translate('indexEditor.saveIndex.ErrorTitle', {

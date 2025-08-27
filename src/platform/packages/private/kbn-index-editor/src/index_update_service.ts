@@ -962,17 +962,14 @@ export class IndexUpdateService {
     this.data.dataViews.clearInstanceCache();
   }
 
-  public async createIndex() {
+  public async createIndex({ exitAfterFlush = false }) {
     try {
       this._isSaving$.next(true);
 
-      const updates = await firstValueFrom(this.bufferState$);
-
       await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
-      await this.bulkUpdate(updates);
 
       this.setIndexCreated(true);
-      this.addAction('discard-unsaved-changes');
+      this.flush({ exitAfterFlush });
     } catch (error) {
       throw error;
     } finally {
