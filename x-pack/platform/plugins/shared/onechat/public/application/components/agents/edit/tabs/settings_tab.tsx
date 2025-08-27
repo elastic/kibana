@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -45,6 +46,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   isFormDisabled,
 }) => {
   const { labels: existingLabels, isLoading: labelsLoading } = useAgentLabels();
+
+  /* Enable shrinking; default min-width:auto blocks it and causes overflow */
+  const formFlexColumnStyles = css`
+    min-width: 0;
+  `;
 
   return (
     <>
@@ -125,7 +131,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={2} css={formFlexColumnStyles}>
           <EuiFormRow
             label={i18n.translate('xpack.onechat.agents.form.idLabel', {
               defaultMessage: 'Agent ID',
@@ -222,8 +228,9 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             </EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={2} css={formFlexColumnStyles}>
           <EuiFormRow
+            fullWidth
             label={i18n.translate('xpack.onechat.agents.form.labelsLabel', {
               defaultMessage: 'Labels',
             })}
@@ -336,7 +343,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             </EuiPanel>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={2} css={formFlexColumnStyles}>
           <EuiFormRow
             label={i18n.translate('xpack.onechat.agents.form.nameLabel', {
               defaultMessage: 'Display name',
