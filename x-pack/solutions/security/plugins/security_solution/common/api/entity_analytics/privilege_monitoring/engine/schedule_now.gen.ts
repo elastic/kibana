@@ -19,7 +19,7 @@ import { z } from '@kbn/zod';
 export type ScheduleMonitoringEngineResponse = z.infer<typeof ScheduleMonitoringEngineResponse>;
 export const ScheduleMonitoringEngineResponse = z.object({
   /**
-   * Indicates if the scheduling was successful
+   * Indicates the scheduling was successful
    */
   success: z.boolean().optional(),
 });
