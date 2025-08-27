@@ -9451,10 +9451,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^134.0.2:
-  version "134.0.2"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-134.0.2.tgz#a9ccfbb4e1f3398c3289e755ddec657ed8158ccf"
-  integrity sha512-r1yIHP0Lo61CdFGjZXITSY2ZGYBS5B/qwOs8NMm0r31qnyS4MAuSmMiIiZKhu+ThxfcT8zPrGPGT6RmM0LWljQ==
+chromedriver@^139.0.3:
+  version "139.0.3"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-139.0.3.tgz#b8ede3e30e4fe9751e39e14fa0f269ce307be5bb"
+  integrity sha512-NrSqRL2QWXsGk1/EXk5xf9q07mEUMsIA7szr9nxSOzENSdFOi+ZvEYq4H8P3tqQL61EKS0tS9m9TnVCJoQHn2Q==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
@@ -16243,6 +16243,7 @@ is-symbol@^1.0.2, is-symbol@^1.0.3:
     has-symbols "^1.0.1"
 
 is-typed-array@^1.1.13, is-typed-array@^1.1.14, is-typedarray@^1.0.0:
+  name is-typed-array
   version "1.1.15"
   resolved "https://registry.yarnpkg.com/is-typed-array/-/is-typed-array-1.1.15.tgz#4bfb4a45b61cee83a5a46fba778e4e8d59c0ce0b"
   integrity sha512-p3EcsicXjit7SaskXHs1hA91QxgTw46Fv6EFKKGS5DRFLD8yKnohjF3hxoju94b/OcMZoQukzpPpBE9uLVKzgQ==
