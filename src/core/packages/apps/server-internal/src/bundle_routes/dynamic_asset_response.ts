@@ -22,6 +22,11 @@ const MINUTE = 60;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
+export interface SupportedAssetHeaders {
+  // {@see https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Service-Worker-Allowed}
+  'Service-Worker-Allowed': string;
+}
+
 /**
  *  Serve asset for the requested path. This is designed
  *  to replicate a subset of the features provided by Hapi's Inert
@@ -44,11 +49,13 @@ export const createDynamicAssetHandler = ({
   fileHashCache,
   isDist,
   publicPath,
+  headers: supportedAssetHeaders = {},
 }: {
   bundlesPath: string;
   publicPath: string;
   fileHashCache: IFileHashCache;
   isDist: boolean;
+  headers?: Partial<SupportedAssetHeaders>;
 }): RequestHandler<{ path: string }, {}, {}> => {
   return async (ctx, req, res) => {
     agent.setTransactionName('GET ?/bundles/?');
@@ -107,7 +114,7 @@ export const createDynamicAssetHandler = ({
 
       return res.ok({
         body: content,
-        headers,
+        headers: { ...headers, ...supportedAssetHeaders },
       });
     } catch (error) {
       if (fd) {

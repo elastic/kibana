@@ -259,6 +259,21 @@ export const BuildPackages: Task = {
             });
           }
 
+          if (pkg.manifest.id === '@kbn/serviceworker') {
+            // add step
+            await scanCopy({
+              source: config.resolveFromRepo(
+                'target',
+                'build',
+                pkg.normalizedRepoRelativeDir,
+                'workbox'
+              ),
+              destination: build.resolvePath(pkg.normalizedRepoRelativeDir, 'workbox'),
+              permissions: distPerms,
+              filter: (rec) => rec.source.ext !== '.map',
+            });
+          }
+
           if (pkg.manifest.id === '@kbn/repo-packages') {
             // rewrite package map to point into node_modules
             await write(
