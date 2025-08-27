@@ -33,22 +33,22 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unknownColumn':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unknownColumn', {
-          defaultMessage: 'Unknown column [{name}]',
+          defaultMessage: 'Unknown column "{name}"',
           values: { name: out.name },
         }),
       };
     case 'unknownIndex':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unknownIndex', {
-          defaultMessage: 'Unknown index [{name}]',
+          defaultMessage: 'Unknown index "{name}"',
           values: { name: out.name },
         }),
       };
     case 'unknownFunction':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.missingFunction', {
-          defaultMessage: 'Unknown function [{name}]',
-          values: { name: out.name },
+          defaultMessage: 'Unknown function {name}',
+          values: { name: out.name.toUpperCase() },
         }),
       };
     case 'noMatchingCallSignature':
@@ -73,9 +73,9 @@ Expected one of:
     case 'wrongNumberArgsVariadic':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsVariadic', {
-          defaultMessage: '[{fn}] expected {validArgCounts} arguments, but got {actual}.',
+          defaultMessage: '{fn} expected {validArgCounts} arguments, but got {actual}.',
           values: {
-            fn: out.fn,
+            fn: out.fn.toUpperCase(),
             validArgCounts: i18n.formatList(
               'disjunction',
               Array.from(out.validArgCounts).map(String)
@@ -88,9 +88,9 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsExact', {
           defaultMessage:
-            '[{fn}] expected {expected, plural, one {one argument} other {{expected} arguments}}, but got {actual}.',
+            '{fn} expected {expected, plural, one {one argument} other {{expected} arguments}}, but got {actual}.',
           values: {
-            fn: out.fn,
+            fn: out.fn.toUpperCase(),
             expected: out.expected,
             actual: out.actual,
           },
@@ -100,9 +100,9 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsAtLeast', {
           defaultMessage:
-            '[{fn}] expected at least {minArgs, plural, one {one argument} other {{minArgs} arguments}}, but got {actual}.',
+            '{fn} expected at least {minArgs, plural, one {one argument} other {{minArgs} arguments}}, but got {actual}.',
           values: {
-            fn: out.fn,
+            fn: out.fn.toUpperCase(),
             minArgs: out.minArgs,
             actual: out.actual,
           },
@@ -112,9 +112,9 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedColumnTypeForCommand', {
           defaultMessage:
-            '{command} only supports values of type [{type}]. Found [{column}] of type [{givenType}]',
+            '{command} only supports values of type {type}. Found "{column}" of type {givenType}',
           values: {
-            command: out.command,
+            command: out.command.toUpperCase(),
             type: out.type,
             column: out.column,
             givenType: out.givenType,
@@ -133,10 +133,10 @@ Expected one of:
     case 'functionNotAllowedHere':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.functionNotAvailableInLocation', {
-          defaultMessage: 'Function [{name}] not allowed in [{locationName}]',
+          defaultMessage: 'Function {name} not allowed in {locationName}',
           values: {
-            locationName: out.locationName,
-            name: out.name,
+            locationName: out.locationName.toUpperCase(),
+            name: out.name.toUpperCase(),
           },
         }),
       };
@@ -152,7 +152,7 @@ Expected one of:
     case 'unknownPolicy':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unknownPolicy', {
-          defaultMessage: 'Unknown policy [{name}]',
+          defaultMessage: 'Unknown policy "{name}"',
           values: {
             name: out.name,
           },
@@ -172,7 +172,7 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unknowAggregateFunction', {
           defaultMessage:
-            'Expected an aggregate function or group but got [{value}] of type [{type}]',
+            'Expected an aggregate function or group but got "{value}" of type {type}',
           values: {
             type: out.type,
             value: out.value,
@@ -183,7 +183,7 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedFieldType', {
           defaultMessage:
-            'Field [{field}] cannot be retrieved, it is unsupported or not indexed; returning null',
+            'Field "{field}" cannot be retrieved, it is unsupported or not indexed; returning null',
           values: {
             field: out.field,
           },
@@ -194,11 +194,11 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedSettingValue', {
           defaultMessage:
-            'Unrecognized value [{value}] for {command}, mode needs to be one of [{expected}]',
+            'Unrecognized value "{value}" for {command}, mode needs to be one of [{expected}]',
           values: {
             expected: out.expected,
             value: out.value,
-            command: out.command,
+            command: out.command.toUpperCase(),
           },
         }),
         type: 'error',
@@ -214,7 +214,7 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.wrongMetadataArgumentType', {
           defaultMessage:
-            'Metadata field [{value}] is not available. Available metadata fields are: [{availableFields}]',
+            'Metadata field "{value}" is not available. Available metadata fields are: [{availableFields}]',
           values: {
             value: out.value,
             availableFields: out.availableFields,
@@ -237,8 +237,7 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.invalidJoinIndex', {
           defaultMessage:
-            '[{identifier}] index is not a valid JOIN index.' +
-            ' Please use a "lookup" mode index JOIN commands.',
+            '"{identifier}" is not a valid JOIN index. Please use a "lookup" mode index.',
           values: { identifier: out.identifier },
         }),
       };
@@ -264,7 +263,7 @@ Expected one of:
           defaultMessage:
             '{name} with {signatureDescription} requires a {requiredLicense} license.',
           values: {
-            name: out.name,
+            name: out.name.toUpperCase(),
             signatureDescription: out.signatureDescription,
             requiredLicense: out.requiredLicense.toUpperCase(),
           },
