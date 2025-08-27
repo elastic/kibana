@@ -1852,7 +1852,7 @@
     "tough-cookie": "^5.0.0",
     "tree-kill": "^1.2.2",
     "ts-morph": "^15.1.0",
-    "tsd": "^0.32.0",
+    "tsd": "^0.33.0",
     "typescript": "5.1.6",
     "val-loader": "^6.0.0",
     "vinyl-fs": "^4.0.0",
