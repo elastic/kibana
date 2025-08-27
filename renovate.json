@@ -4641,7 +4641,7 @@
       ],
       "labels": [
         "Team:Operations",
-        "backport:prev-minor",
+        "backport:all-open",
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
