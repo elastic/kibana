@@ -22,16 +22,7 @@ export type NodeType =
   | 'http'
   | 'trigger';
 
-export const flowNodeTypes = [
-  'if',
-  'merge',
-  'parallel',
-  'foreach',
-  'atomic',
-  'http',
-  'merge',
-  'trigger',
-];
+export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'http', 'trigger'];
 
 export function transformYamlToNodesAndEdges(
   triggers: WorkflowYaml['triggers'],

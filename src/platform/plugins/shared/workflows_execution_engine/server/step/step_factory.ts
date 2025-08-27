@@ -92,7 +92,7 @@ export class StepFactory {
         );
       case 'http':
         return new HttpStepImpl(
-          step as any,
+          step as BaseStep,
           this.contextManager,
           this.workflowRuntime,
           this.workflowLogger,

@@ -61,7 +61,7 @@ export class UrlValidator {
   ensureUrlAllowed(uri: string): void {
     if (!this.isUrlAllowed(uri)) {
       throw new Error(
-        `target url "${uri}" is not added to the Kibana config xpack.actions.allowedHosts`
+        `target url "${uri}" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts`
       );
     }
   }

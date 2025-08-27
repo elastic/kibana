@@ -31,16 +31,7 @@ export interface WorkflowGraphNodeLabel {
 
 export type WorkflowGraph = graphlib.Graph<WorkflowGraphNodeLabel>;
 
-export const flowNodeTypes = [
-  'if',
-  'merge',
-  'parallel',
-  'foreach',
-  'atomic',
-  'http',
-  'merge',
-  'trigger',
-];
+export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'http', 'trigger'];
 
 function transformYamlToNodesAndEdges(
   triggers: WorkflowYaml['triggers'],
