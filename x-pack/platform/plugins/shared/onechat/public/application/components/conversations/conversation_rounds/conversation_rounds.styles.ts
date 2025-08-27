@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getConnectorList, getDefaultConnector } from './src/connectors';
+export const conversationRoundsId = 'onechatConversationRoundsContainer';
