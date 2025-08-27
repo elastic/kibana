@@ -22,9 +22,7 @@ export abstract class ResourceIdentifier<I> {
     this.identifier = identifiers[this.vendor];
   }
 
-  public abstract fromOriginal(
-    item?: I
-  ): SiemMigrationResourceBase[] | Promise<SiemMigrationResourceBase[]>;
+  public abstract fromOriginal(item?: I): Promise<SiemMigrationResourceBase[]>;
 
   public async fromOriginals(originalItem: I[]): Promise<SiemMigrationResourceBase[]> {
     const lookups = new Set<string>();
