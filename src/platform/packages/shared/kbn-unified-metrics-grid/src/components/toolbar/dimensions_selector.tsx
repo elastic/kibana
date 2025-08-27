@@ -87,7 +87,7 @@ export const DimensionsSelector = ({
   }, [allDimensions, selectedDimensions, intersectingDimensions]);
 
   const handleChange = useCallback(
-    (chosenOption?: SelectableEntry[] | undefined) => {
+    (chosenOption?: SelectableEntry[]) => {
       onChange(chosenOption?.map((p) => p.value) ?? []);
     },
     [onChange]

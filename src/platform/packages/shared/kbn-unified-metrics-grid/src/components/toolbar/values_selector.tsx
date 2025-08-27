@@ -77,7 +77,7 @@ export const ValuesSelector = ({
   }, [values, selectedValues]);
 
   const handleChange = useCallback(
-    (chosenOption?: SelectableEntry[] | undefined) => {
+    (chosenOption?: SelectableEntry[]) => {
       const newSelectedValues = chosenOption
         ?.filter((option) => !option.isGroupLabel && option.key)
         .map((option) => option.key!);

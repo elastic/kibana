@@ -43,12 +43,12 @@ export interface BaseToolbarProps {
 
 export interface ToolbarSingleSelectorProps {
   singleSelection?: true;
-  onChange?: (c: SelectableEntry | undefined) => void;
+  onChange?: (c?: SelectableEntry) => void;
 }
 
 export interface ToolbarMultiSelectorProps {
   singleSelection: false;
-  onChange?: (c: SelectableEntry[] | undefined) => void;
+  onChange?: (c?: SelectableEntry[]) => void;
 }
 
 export type ToolbarSelectorProps = BaseToolbarProps &
