@@ -64,13 +64,29 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
       if (!id) return;
 
       untilLoaded(id).then(() => {
-        setScrollToPanelId(undefined);
         if (scrollPosition !== undefined) {
           window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
           scrollPosition = undefined;
         } else {
-          panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
+          const dashboardTop =
+            document.querySelector('.dashboardContainer')?.getBoundingClientRect().top || 0;
+          const clientBottom = window.innerHeight;
+          const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
+
+          console.log(
+            panelTop,
+            dashboardTop,
+            panelTop < dashboardTop,
+            panelBottom,
+            clientBottom,
+            panelBottom > clientBottom
+          );
+          // only scroll if panel is not fully visible within the current viewport
+          if (panelTop < dashboardTop || panelBottom > clientBottom) {
+            panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
+          }
         }
+        setScrollToPanelId(undefined);
       });
     },
     scrollToTop: () => {
