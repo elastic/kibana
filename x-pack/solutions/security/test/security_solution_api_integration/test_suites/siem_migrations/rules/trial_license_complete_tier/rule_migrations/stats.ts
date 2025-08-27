@@ -160,22 +160,20 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await migrationRulesRoutes.translationStats({
         migrationId,
       });
-      expect(response.body).toEqual(
-        expect.objectContaining({
-          id: migrationId,
-          rules: {
-            total,
-            success: {
-              total: completed,
-              result: { full: 4, partial: 5, untranslatable: 1 },
-              installable: 4,
-              prebuilt: 0,
-              missing_index: 0,
-            },
-            failed,
+      expect(response.body).toEqual({
+        id: migrationId,
+        rules: {
+          total,
+          success: {
+            total: completed,
+            result: { full: 4, partial: 5, untranslatable: 1 },
+            installable: 4,
+            prebuilt: 0,
+            missing_index: 10,
           },
-        })
-      );
+          failed,
+        },
+      });
     });
 
     describe('Error handling', () => {

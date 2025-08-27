@@ -7,6 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { dsl as genericDsl } from '../../common/data/dsl_queries';
+import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
 
 export const dsl = {
   isInstalled(): QueryDslQueryContainer {
@@ -30,5 +31,11 @@ export const dsl = {
   isNotInstallable(): QueryDslQueryContainer[] {
     return [genericDsl.isNotFullyTranslated(), dsl.isInstalled()];
   },
-  isMissingIndex: genericDsl.isMissingIndex,
+  isMissingIndex(): QueryDslQueryContainer {
+    return {
+      query_string: {
+        query: `elastic_rule.query: "${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}"`,
+      },
+    };
+  },
 };
