@@ -54,7 +54,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   metadata?: ChatCompleteMetadata;
   system?: string;
   maxCallsAllowed?: number;
-} & Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'>) => {
+}) => {
   return function askLlmToRespond({
     documentationRequest: { commands, functions },
     callCount = 0,
