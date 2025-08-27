@@ -53,7 +53,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          COPILOT_EMAILS="github-actions[bot]@users.noreply.github.com\ncopilot-bot@users.noreply.github.com\ncopilot@github.com"
+          COPILOT_EMAILS="github-actions[bot]@users.noreply.github.com\ncopilot-bot@users.noreply.github.com\ncopilot@github.com\n198982749+Copilot@users.noreply.github.com"
           FOUND=0
           for COMMIT in $(cat commits.txt); do
             echo "Checking commit: $COMMIT"
