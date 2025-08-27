@@ -159,7 +159,6 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
           return `${params.otherBucketLabel}`;
         }
         if (val === '__missing__' && params.missingBucketLabel) {
-          console.log(`missingBucketLabel: ${params.missingBucketLabel}`, params);
           return `${params.missingBucketLabel}`;
         }
 

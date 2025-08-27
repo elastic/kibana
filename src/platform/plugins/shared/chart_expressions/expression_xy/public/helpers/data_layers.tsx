@@ -126,8 +126,6 @@ export type DatatablesWithFormatInfo = Record<string, DatatableWithFormatInfo>;
 
 export type FormattedDatatables = Record<string, Datatable>;
 
-const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
-
 export const getFormattedRow = (
   row: Datatable['rows'][number],
   columns: Datatable['columns'],
