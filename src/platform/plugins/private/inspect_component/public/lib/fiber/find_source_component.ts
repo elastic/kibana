@@ -12,18 +12,18 @@ import { getFiberType } from './get_fiber_type';
 import type { ReactFiberNode, ReactFiberNodeWithHtmlElement, SourceComponent } from './types';
 
 /**
- * Find the source component from target Fiber node.
- * @param {ReactFiberNodeWithHtmlElement} fiberNode The Fiber node.
- * @return {SourceComponent | null} The source component, or null if it cannot be determined.
+ * Finds the {@link SourceComponent source component} for a {@link ReactFiberNode React Fiber node}.
+ * @param {ReactFiberNodeWithHtmlElement} fiber The {@link ReactFiberNode React Fiber node} to start the search from.
+ * @return {SourceComponent | null} {@link SourceComponent Source component}, or null if it cannot be determined.
  */
 export const findSourceComponent = (
-  fiberNode: ReactFiberNodeWithHtmlElement
+  fiber: ReactFiberNodeWithHtmlElement
 ): SourceComponent | null => {
-  let current: HTMLElement | null = fiberNode.element;
+  let current: HTMLElement | null = fiber.element;
   let sourceComponent: SourceComponent | null = null;
 
   while (current && !sourceComponent) {
-    let fiberCursor: ReactFiberNode | null | undefined = fiberNode;
+    let fiberCursor: ReactFiberNode | null | undefined = fiber;
 
     while (fiberCursor && !sourceComponent) {
       const type = getFiberType(fiberCursor);

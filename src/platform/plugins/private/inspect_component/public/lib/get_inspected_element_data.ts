@@ -20,21 +20,21 @@ import type {
   SourceComponent,
 } from './fiber/types';
 
-/** Information about the file where the component is defined. */
+/** Information about the file where the React component is defined. */
 interface FileData extends DebugSource, InspectComponentResponse {
-  /** List of all teams who are codeowners for specified file. */
+  /** List of codeowners for the component. */
   codeowners: string[];
 }
 
 /**
- * Represents information about inspected component.
+ * Represents information about an inspected component.
  */
 export interface ComponentData {
-  /** Represents information about an EUI component. */
+  /** {@link EuiData} */
   euiData: EuiData;
-  /** The name of the top-level React component and the associated HTML element. */
+  /** {@link SourceComponent} */
   sourceComponent: SourceComponent;
-  /** Information about the file where the component is defined. */
+  /** {@link FileData} */
   fileData: FileData;
 }
 
@@ -42,11 +42,11 @@ export interface ComponentData {
  * Options for {@link getInspectedElementData}.
  */
 export interface GetInspectedElementDataOptions {
-  /** Kibana HTTP service. */
+  /** {@link HttpStart} */
   httpService: HttpStart;
-  /** The name of the top-level React component and the associated HTML element. */
+  /** {@link SourceComponent} */
   sourceComponent: SourceComponent | null;
-  /** The React Fiber node associated with the target element and the element itself. */
+  /** {@link ReactFiberNodeWithHtmlElement} */
   targetFiberNodeWithHtmlElement: ReactFiberNodeWithHtmlElement | null;
 }
 
@@ -54,10 +54,10 @@ export interface GetInspectedElementDataOptions {
  * Fetches and compiles data about the inspected component.
  * @async
  * @param {GetInspectedElementDataOptions} options
- * @param {HttpStart} options.httpService Kibana HTTP service.
- * @param {string | null} options.sourceComponent The name of the top-level React component and the associated HTML element.
- * @param {ReactFiberNodeWithHtmlElement | null} options.targetFiberNodeWithHtmlElement The React Fiber node associated with the inspected element and the element itself.
- * @returns {Promise<ComponentData | null>} Resolves with the component data if found, otherwise null.
+ * @param {HttpStart} options.httpService {@link HttpStart}
+ * @param {string | null} options.sourceComponent {@link SourceComponent}
+ * @param {ReactFiberNodeWithHtmlElement | null} options.targetFiberNodeWithHtmlElement {@link ReactFiberNodeWithHtmlElement}
+ * @returns {Promise<ComponentData | null>} Resolves with {@link ComponentData component data} if found, otherwise null.
  */
 export const getInspectedElementData = async ({
   httpService,

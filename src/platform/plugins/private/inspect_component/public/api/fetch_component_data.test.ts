@@ -45,7 +45,7 @@ describe('fetchComponentData', () => {
     expect(result).toEqual(mockResponse);
   });
 
-  it('should return undefined when an error occurs', async () => {
+  it('should return null when an error occurs', async () => {
     mockHttpService.post.mockRejectedValueOnce(new Error('Network error'));
 
     const result = await fetchComponentData({
@@ -53,6 +53,6 @@ describe('fetchComponentData', () => {
       fileName: '/path/to/component.tsx',
     });
 
-    expect(result).toBeUndefined();
+    expect(result).toBeNull();
   });
 });

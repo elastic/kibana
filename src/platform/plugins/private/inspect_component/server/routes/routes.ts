@@ -14,17 +14,17 @@ import { getComponentData, getComponentDataBodySchema } from './component_data/g
  * Options for {@link registerInspectComponentRoutes}.
  */
 interface InspectComponentRoutesOptions {
-  /** The HTTP service setup contract. */
+  /** {@link HttpServiceSetup} */
   httpService: HttpServiceSetup;
-  /** The logger instance. */
+  /** {@link Logger} */
   logger: Logger;
 }
 
 /**
  * Register routes for the Inspect Component plugin.
  * @param {InspectComponentRoutesOptions} options
- * @param {http} options.httpService The HTTP service setup contract.
- * @param {Logger} options.logger The logger instance.
+ * @param {http} options.httpService {@link HttpServiceSetup}
+ * @param {Logger} options.logger {@link Logger}
  */
 export const registerInspectComponentRoutes = ({
   httpService,
@@ -34,11 +34,11 @@ export const registerInspectComponentRoutes = ({
 
   /**
    * @internal
-   * Route to inspect a component at a given path.
-   * @returns {Object} Result object
-   * @returns {string[]} result.codeowners - List of codeowners for the component
-   * @returns {string} result.relativePath - Path relative to the repo root
-   * @returns {string} result.baseFileName - Base file name of the component
+   * Route for getting data about a React component at a given path.
+   * @returns {Object} Result object.
+   * @returns {string[]} result.codeowners - List of codeowners for the file.
+   * @returns {string} result.relativePath - Path relative to the repo root.
+   * @returns {string} result.baseFileName - Base file name.
    */
   router.post(
     {

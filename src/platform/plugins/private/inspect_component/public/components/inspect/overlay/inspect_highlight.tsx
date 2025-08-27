@@ -19,7 +19,7 @@ interface Props {
 
 /**
  * InspectHighlight displays a highlight box around the currently
- * inspected HTML element, along with a badge containing the source component name.
+ * inspected HTML element, along with a badge containing the source component display name.
  */
 export const InspectHighlight = ({ currentPosition, path }: Props) => {
   const { euiTheme } = useEuiTheme();

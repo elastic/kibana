@@ -23,7 +23,7 @@ describe('getFiberFromHtmlElement', () => {
     expect(result).toBeNull();
   });
 
-  it('should return the Fiber node when Fiber exists', () => {
+  it('should return the React Fiber node when Fiber exists', () => {
     const mockFiberNode = { tag: 5, type: 'div' } as unknown as ReactFiberNode;
     const mockElement = document.createElement('div');
 

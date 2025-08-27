@@ -12,9 +12,9 @@ import { getFiberType } from './get_fiber_type';
 import type { ReactFiberNode } from './types';
 
 /**
- * Find the first EUI component in the Fiber's node owner chain.
- * @param {ReactFiberNode} fiber The Fiber node.
- * @return {string | null} The EUI component name, or null if none is found.
+ * Find the first EUI component in the {@link ReactFiberNode React Fiber node} owner chain.
+ * @param {ReactFiberNode} fiber {@link ReactFiberNode React Fiber node} to start the search from.
+ * @return {string | null} The EUI component display name, or null if none is found.
  */
 export const findFirstEuiComponent = (fiber: ReactFiberNode) => {
   let fiberCursor: ReactFiberNode | null | undefined = fiber;

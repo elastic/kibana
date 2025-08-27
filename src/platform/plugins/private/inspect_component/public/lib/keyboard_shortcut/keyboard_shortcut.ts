@@ -10,7 +10,7 @@
 /**
  * Check if single quote was pressed.
  * @param {KeyboardEvent} event The keyboard event.
- * @return {boolean} True if the keyboard shortcut is pressed, false otherwise.
+ * @return {boolean} 'true' if the keyboard shortcut is pressed, 'false' otherwise.
  */
 const isSingleQuote = (event: KeyboardEvent): boolean =>
   event.code === 'Quote' || event.key === "'";
@@ -18,14 +18,14 @@ const isSingleQuote = (event: KeyboardEvent): boolean =>
 /**
  * Check if the keyboard event corresponds to the defined keyboard shortcut (Meta/Ctrl + ').
  * @param {KeyboardEvent} event The keyboard event.
- * @return {boolean} True if the keyboard shortcut is pressed, false otherwise.
+ * @return {boolean} 'true' if the keyboard shortcut is pressed, 'false' otherwise.
  */
 export const isKeyboardShortcut = (event: KeyboardEvent) =>
   (event.metaKey || event.ctrlKey) && isSingleQuote(event);
 
 /**
  * Check if the current platform is macOS.
- * @return {boolean} True if the platform is macOS, false otherwise.
+ * @return {boolean} 'true' if the platform is macOS, 'false' otherwise.
  */
 export const isMac = (): boolean =>
   ((navigator as any)?.userAgentData?.platform || navigator.userAgent)

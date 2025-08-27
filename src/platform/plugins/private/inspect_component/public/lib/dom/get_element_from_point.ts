@@ -10,7 +10,7 @@
 import { INSPECT_OVERLAY_ID } from '../constants';
 
 /**
- * Get the topmost HTML element at the given pointer event's coordinates.
+ * Get the topmost HTML element at the given mouse event's coordinates.
  * @param {MouseEvent} event The mouse event containing the coordinates.
  * @return {HTMLElement | null} The topmost inspectable HTML element at the event's coordinates, or null if none found.
  */
@@ -21,7 +21,6 @@ export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
     const isSvg = el instanceof SVGElement;
     const isOverlay = el.id === INSPECT_OVERLAY_ID;
     const isPath = isSvg && el.tagName.toLowerCase() === 'path';
-    /** There is some edge case with SVG elements that are not inspectable. */
     const isNotInspectable = !(el instanceof HTMLElement) && !isSvg;
 
     if (isNotInspectable || isOverlay || isPath) continue;

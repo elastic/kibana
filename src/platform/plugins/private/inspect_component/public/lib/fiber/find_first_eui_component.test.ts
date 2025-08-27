@@ -81,7 +81,7 @@ describe('findFirstEuiComponent', () => {
     expect(mockIsExcludedComponent).toHaveBeenCalledWith('EuiButton');
   });
 
-  it('should return EUI component when found in current Fiber node', () => {
+  it('should return EUI component when found in current React Fiber node', () => {
     const fiberNode = createMockFiberNode('EuiButton');
     mockGetFiberType.mockReturnValue('EuiButton');
     mockIsEuiMainComponent.mockReturnValue(true);

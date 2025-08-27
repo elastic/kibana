@@ -17,11 +17,10 @@ const hasDebugSource = (
 };
 
 /**
- * Finds the first React fiber node associated with the given HTML element (or its ancestors)
- * that has a debug source attached to it. It traverses up the DOM tree and for each element,
- * it checks the associated React fiber node and its ancestors for a debug source.
- * @param {HTMLElement} element The HTML element.
- * @return {ReactFiberNodeWithHtmlElement | null} The first fiber node with debug source and its associated HTML element, or null if none found.
+ * Finds the first {@link ReactFiberNode React Fiber node} associated with the given HTML element (or its ancestors)
+ * that has a {@link DebugSource _debugSource} attached to it.
+ * @param {HTMLElement} element The HTML element to start the search from.
+ * @return {ReactFiberNodeWithHtmlElement | null} {@link ReactFiberNodeWithHtmlElement React Fiber node with its associated HTML element}, or null if none found.
  */
 export const findFirstFiberWithDebugSource = (
   element: HTMLElement

@@ -10,54 +10,58 @@
 import type { ComponentType } from 'react';
 
 /**
- * Represents the content of _debugSource property on a React Fiber node.
+ * Represents the content of _debugSource property on a {@link ReactFiberNode React Fiber node}.
  */
 export interface DebugSource {
   /** Component definition column number. */
   columnNumber: number;
   /** Component definition line number. */
   lineNumber: number;
-  /** Full component path. */
+  /** Full file path. */
   fileName: string;
 }
 
 /**
- * The subset of React Fiber node properties we care about, extended
- * for DOM traversal and Fiber tree navigation.
+ * Subset of React Fiber node properties needed for Inspect Component functionality.
  */
 export interface ReactFiberNode {
   /** The resolved type of the component. */
   type: ComponentType | string;
-  /** The type of the React element represented by this Fiber node. */
+  /** The type of the React element represented by this {@link ReactFiberNode React Fiber node}. */
   elementType?: string | null;
-  /** Metadata about the source file where this Fiber was created. */
+  /** {@link DebugSource} */
   _debugSource?: DebugSource;
-  /** The Fiber node that created this node. */
+  /**
+   * The {@link ReactFiberNode React Fiber node} that created this node.
+   */
   _debugOwner?: ReactFiberNode | null;
   /** The actual HTML element for host components, or component instance for class components. */
   stateNode?: HTMLElement | null;
-  /** First child Fiber node. */
+  /** First child {@link ReactFiberNode React Fiber node}. */
   child?: ReactFiberNode | null;
-  /** Next sibling Fiber node. */
+  /** Next sibling {@link ReactFiberNode React Fiber node}. */
   sibling?: ReactFiberNode | null;
-  /** Parent Fiber node. */
+  /** Parent {@link ReactFiberNode React Fiber node}. */
   return?: ReactFiberNode | null;
 }
 
+/**
+ * {@link ReactFiberNode Fiber node} with its associated HTML element.
+ */
 export interface ReactFiberNodeWithHtmlElement extends ReactFiberNode {
-  /** Metadata about the source file where this Fiber was created. */
+  /** {@link DebugSource} */
   _debugSource: DebugSource;
-  /** HTML element associated with the Fiber node. */
+  /** HTML element associated with the {@link ReactFiberNode React Fiber node}. */
   element: HTMLElement;
 }
 
 /**
- * The name of the closest user-defined React component and the associated HTML element.
+ * The display name of the closest user-defined React component and the associated HTML element.
  */
 export interface SourceComponent {
-  /** The component name. */
+  /** The component display name. */
   type: string;
-  /** The HTML element associated with the source component. */
+  /** The HTML element associated with the component. */
   element: HTMLElement | null;
 }
 
@@ -65,10 +69,10 @@ export interface SourceComponent {
  * Represents information about an EUI component.
  */
 export interface EuiData {
-  /** The React component name of this EUI component. */
+  /** The React component display name of this EUI component. */
   componentType: string;
-  /** Link to the EUI documentation for this EUI component. */
+  /** Link to EUI documentation for this EUI component. */
   docsLink: string;
-  /** The EUI icon type for the icon inside this component. */
+  /** EUI icon type for the icon inside this component. */
   iconType: string | null;
 }

@@ -31,8 +31,11 @@ export type GetComponentDataRequestBody = TypeOf<typeof getComponentDataBodySche
  * Options for {@link getComponentData}.
  */
 interface GetComponentDataOptions {
+  /** {@link KibanaRequest} */
   req: KibanaRequest<unknown, unknown, GetComponentDataRequestBody>;
+  /** {@link KibanaResponseFactory} */
   res: KibanaResponseFactory;
+  /** {@link Logger} */
   logger: Logger;
 }
 
@@ -50,12 +53,13 @@ export interface GetComponentDataResponse {
 
 /**
  * Get data about a component at a given path.
+ * @async
  * @internal
  * @param {GetComponentDataOptions} options
- * @param {KibanaRequest<unknown, unknown, GetComponentDataRequestBody>} options.req
- * @param {KibanaResponseFactory} options.res
- * @param {Logger} options.logger
- * @returns {Promise<IKibanaResponse<GetComponentDataResponse>>}
+ * @param {KibanaRequest<unknown, unknown, GetComponentDataRequestBody>} options.req {@link KibanaRequest}
+ * @param {KibanaResponseFactory} options.res {@link KibanaResponseFactory}
+ * @param {Logger} options.logger {@link Logger}
+ * @returns {Promise<IKibanaResponse<GetComponentDataResponse>>} Resolves with {@link GetComponentDataResponse component data}.
  */
 export const getComponentData = async ({
   req,

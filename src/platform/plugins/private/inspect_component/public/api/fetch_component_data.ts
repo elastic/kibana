@@ -13,17 +13,17 @@ import type { HttpStart } from '@kbn/core/public';
  * Options for {@link fetchComponentData}.
  */
 interface FetchComponentDataOptions {
-  /** Kibana HTTP service. */
+  /** {@link HttpStart} */
   httpService: HttpStart;
   /** Full component path. */
   fileName: string;
 }
 
 /**
- * Response type for POST "/internal/inspect_component/inspect" route.
+ * Response type for POST '/internal/inspect_component/inspect' route.
  */
 export interface InspectComponentResponse {
-  /** List of all teams who are codeowners for the specified file. */
+  /** List of all teams who are codeowners for the file. */
   codeowners: string[];
   /** File path relative to the repository root. */
   relativePath: string;
@@ -35,14 +35,14 @@ export interface InspectComponentResponse {
  * Fetch component data.
  * @async
  * @param {FetchComponentDataOptions} options
- * @param {HttpStart} options.httpService Kibana HTTP service.
+ * @param {HttpStart} options.httpService {@link HttpStart}
  * @param {string} options.fileName Full component path.
- * @returns {Promise<InspectComponentResponse | undefined>} Resolves with component data or undefined if an error occurs.
+ * @returns {Promise<InspectComponentResponse | undefined>} Resolves with {@link InspectComponentResponse component data} or null if an error occurs.
  */
 export const fetchComponentData = async ({
   httpService,
   fileName,
-}: FetchComponentDataOptions): Promise<InspectComponentResponse | undefined> => {
+}: FetchComponentDataOptions): Promise<InspectComponentResponse | null> => {
   try {
     const response: InspectComponentResponse = await httpService.post(
       '/internal/inspect_component/inspect',
@@ -53,6 +53,6 @@ export const fetchComponentData = async ({
 
     return response;
   } catch (e) {
-    return undefined;
+    return null;
   }
 };

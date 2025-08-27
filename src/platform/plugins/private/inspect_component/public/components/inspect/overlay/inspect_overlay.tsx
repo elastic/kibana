@@ -30,7 +30,7 @@ interface Props {
 }
 
 /**
- * nspectOverlay renders an overlay over the entire viewport when inspect mode is enabled.
+ * InspectOverlay renders an overlay over the entire viewport when inspect mode is enabled.
  * It highlights HTML elements as they get hovered over.
  */
 export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: Props) => {
@@ -41,7 +41,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
     useState<ReactFiberNodeWithHtmlElement | null>(null);
 
   /**
-   * pointer-events: none is required for {@link handleEventPropagation} to work properly.
+   * 'pointer-events: none' is required for {@link handleEventPropagation} to work properly.
    */
   const overlayCss = useMemo(
     () => css`
@@ -122,14 +122,14 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
   useEffect(() => {
     /**
      * Capture all click events on the document and stop them from propagating.
-     * EuiWindowEvent can't be used here as it doesn't allow for setting 'capture: true'.
+     * 'EuiWindowEvent' can't be used here as it doesn't allow for setting 'capture: true'.
      */
     const handleMouseEvent = (event: MouseEvent) => {
       handleEventPropagation({ event, callback: handleClickAtPositionOfInspectedElement });
     };
 
     /**
-     * pointer-events: none on overlay has a drawback of rendering the appropriate cursor for each component.
+     * 'pointer-events: none' on overlay causes the appropriate cursor to render.
      * This is a workaround which forces the crosshair cursor when inspecting.
      */
     const forceCrosshairCursor = document.createElement('style');

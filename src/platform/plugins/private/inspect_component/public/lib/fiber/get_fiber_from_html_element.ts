@@ -10,9 +10,9 @@
 import type { ReactFiberNode } from './types';
 
 /**
- * Get the React Fiber node associated with a HTML element.
- * @param {HTMLElement | null} element - The HTML element to get the Fiber from.
- * @returns {ReactFiberNode | null} The corresponding React Fiber node, or null if not found.
+ * Get the {@link ReactFiberNode React Fiber node} associated with a HTML element.
+ * @param {HTMLElement | null} element The HTML element to get the {@link ReactFiberNode React Fiber node} from.
+ * @returns {ReactFiberNode | null} The corresponding {@link ReactFiberNode React Fiber node}, or null if not found.
  */
 export const getFiberFromHtmlElement = (element: HTMLElement | null): ReactFiberNode | null => {
   if (!element) return null;

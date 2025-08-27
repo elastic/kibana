@@ -50,7 +50,7 @@ module.exports = (api) => ({
       ],
     },
 
-    // development: true adds _debugSource and _debugOwner to React fiber, which is required for @kbn/inspect-component-plugin to work
+    // 'development: true' adds '_debugSource' and '_debugOwner' properties to React Fiber nodes, which is required for @kbn/inspect-component-plugin to work
     [require.resolve('@babel/preset-react'), { development: api.env('development') }],
 
     [

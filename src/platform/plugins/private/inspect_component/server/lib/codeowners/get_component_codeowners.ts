@@ -13,9 +13,9 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 /**
  * Get the list of codeowners for a given file path by reading the CODEOWNERS file in the repository.
- * It matches the most specific path in the CODEOWNERS file to the given file path.
+ * It matches the most specific path.
  * @param {string} path The file path to look up codeowners for, relative to the repository root.
- * @returns {string[]} An array of codeowners responsible for the specified path.
+ * @returns {string[]} An array of codeowners responsible for the given path.
  */
 export function getComponentCodeowners(path: string): string[] {
   const codeownersPath = join(REPO_ROOT, '.github', 'CODEOWNERS');
