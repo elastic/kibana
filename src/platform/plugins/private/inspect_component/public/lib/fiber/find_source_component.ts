@@ -33,7 +33,7 @@ export const findSourceComponent = (
           break;
         }
       }
-      fiberCursor = fiberCursor._debugOwner;
+      fiberCursor = fiberCursor._debugOwner ?? fiberCursor.return;
     }
 
     current = current.parentElement;
