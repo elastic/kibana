@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
-import { Optional } from 'utility-types';
-import {
+import type { Optional } from 'utility-types';
+import type {
   lensCreateRequestBodySchema,
   lensCreateResponseBodySchema,
   lensDeleteRequestParamsSchema,

@@ -6,7 +6,7 @@
  */
 
 import { convertToRawColorMappingsFn } from '.';
-import { LensAttributes } from '../../../../../server/content_management/v1/types';
+import type { LensAttributes } from '../../../../../server/content_management/v1/types';
 import { convertXYToRawColorMappings } from './xy';
 import { convertPieToRawColorMappings } from './partition';
 import { convertDatatableToRawColorMappings } from './datatable';

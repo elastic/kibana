@@ -6,7 +6,7 @@
  */
 
 import { convertToLegendStats } from '.';
-import { LensAttributes } from '../../../../../server/content_management/v1/types';
+import type { LensAttributes } from '../../../../../server/content_management/v1/types';
 import { convertPartitionToLegendStats } from './partition';
 import { convertXYToLegendStats } from './xy';
 

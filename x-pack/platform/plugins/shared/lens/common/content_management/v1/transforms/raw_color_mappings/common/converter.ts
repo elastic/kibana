@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ColorMapping } from '@kbn/coloring';
-import { MultiFieldKey, RangeKey, SerializedValue } from '@kbn/data-plugin/common';
+import type { ColorMapping } from '@kbn/coloring';
+import type { SerializedValue } from '@kbn/data-plugin/common';
+import { MultiFieldKey, RangeKey } from '@kbn/data-plugin/common';
 
 import type { DeprecatedColorMappingConfig } from './types';
 import type { ColumnMeta } from './utils';

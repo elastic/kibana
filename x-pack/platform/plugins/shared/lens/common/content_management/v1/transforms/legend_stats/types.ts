@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DeprecatedLegendValuePieVisualizationState } from './partition';
-import { DeprecatedLegendValueXYState } from './xy';
+import type { DeprecatedLegendValuePieVisualizationState } from './partition';
+import type { DeprecatedLegendValueXYState } from './xy';
 
 export type DeprecatedLegendValueState =
   | DeprecatedLegendValueXYState

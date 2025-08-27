@@ -7,7 +7,7 @@
 
 import type { DatatableVisualizationState } from '../../../../../public';
 import type { GeneralDatasourceStates } from '../../../../../public/state_management';
-import { ColumnState } from '../../../../expressions';
+import type { ColumnState } from '../../../../expressions';
 import {
   convertToRawColorMappings,
   getColumnMetaFn,

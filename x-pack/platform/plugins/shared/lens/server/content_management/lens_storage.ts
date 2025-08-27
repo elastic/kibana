@@ -14,9 +14,10 @@ import type {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import type { StorageContext } from '@kbn/content-management-plugin/server';
-import { SOContentStorage, SOWithMetadata, tagsToFindOptions } from '@kbn/content-management-utils';
+import type { SOWithMetadata } from '@kbn/content-management-utils';
+import { SOContentStorage, tagsToFindOptions } from '@kbn/content-management-utils';
 
-import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { LENS_CONTENT_TYPE } from '../../common/constants';
 import type {
   LensAttributes,

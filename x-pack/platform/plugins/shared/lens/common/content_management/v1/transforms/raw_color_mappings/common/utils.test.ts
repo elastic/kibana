@@ -12,7 +12,8 @@ import type {
 } from '../../../../../../public';
 import type { TextBasedLayer } from '../../../../../../public/datasources/form_based/esql_layer/types';
 import type { StructuredDatasourceStates } from '../../../../../../public/react_embeddable/types';
-import { ColumnMeta, getColumnMetaFn } from './utils';
+import type { ColumnMeta } from './utils';
+import { getColumnMetaFn } from './utils';
 
 const layerId = 'layer-1';
 const columnId = 'column-1';

@@ -9,7 +9,7 @@ import type { LensAttributes, LensSavedObject } from '../../../../server/content
 import { addVersion } from './add_version';
 import { convertToLegendStats } from './legend_stats';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
-import { LensSavedObjectV0, LensAttributesV0 } from './types';
+import type { LensSavedObjectV0, LensAttributesV0 } from './types';
 
 /**
  * Transforms existing unversioned Lens SO attributes to v1 Lens Item attributes

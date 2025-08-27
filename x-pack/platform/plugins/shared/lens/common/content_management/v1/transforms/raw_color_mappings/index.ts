@@ -10,10 +10,8 @@ import type { StructuredDatasourceStates } from '../../../../../public/react_emb
 import type { PieVisualizationState } from '../../../../types';
 import type { LensAttributes } from '../../../../../server/content_management/v1/types';
 import { convertXYToRawColorMappings, type DeprecatedColorMappingsXYState } from './xy';
-import {
-  DeprecatedColorMappingPieVisualizationState,
-  convertPieToRawColorMappings,
-} from './partition';
+import type { DeprecatedColorMappingPieVisualizationState } from './partition';
+import { convertPieToRawColorMappings } from './partition';
 import {
   convertDatatableToRawColorMappings,
   type DeprecatedColorMappingsDatatableState,

@@ -8,8 +8,8 @@
 import type { SOWithMetadata } from '@kbn/content-management-utils';
 
 import type { LensAttributes } from '../../../../server/content_management/v1';
-import { DeprecatedLegendValueState } from './legend_stats/types';
-import { DeprecatedColorMappingsState } from './raw_color_mappings/types';
+import type { DeprecatedLegendValueState } from './legend_stats/types';
+import type { DeprecatedColorMappingsState } from './raw_color_mappings/types';
 
 export type DeprecatedV0State = DeprecatedLegendValueState | DeprecatedColorMappingsState;
 

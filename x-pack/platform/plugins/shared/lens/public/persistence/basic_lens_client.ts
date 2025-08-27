@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type {
   SerializableAttributes,

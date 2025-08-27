@@ -23,7 +23,7 @@ import type {
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
 
-import {
+import type {
   lensItemAttributesSchema,
   lensCMCreateOptionsSchema,
   lensCMUpdateOptionsSchema,
@@ -34,7 +34,7 @@ import {
   lensAPIAttributesSchema,
   lensAPIConfigSchema,
 } from './schema';
-import { LENS_CONTENT_TYPE } from '../../../common/constants';
+import type { LENS_CONTENT_TYPE } from '../../../common/constants';
 
 export type LensAttributes = TypeOf<typeof lensItemAttributesSchema>;
 export type LensAPIAttributes = TypeOf<typeof lensAPIAttributesSchema>;

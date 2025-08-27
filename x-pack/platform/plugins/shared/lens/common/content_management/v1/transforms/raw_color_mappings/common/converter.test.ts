@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ColorMapping } from '@kbn/coloring';
-import { SerializedRangeKey } from '@kbn/data-plugin/common/search';
+import type { ColorMapping } from '@kbn/coloring';
+import type { SerializedRangeKey } from '@kbn/data-plugin/common/search';
 
 import type { DataType, GenericIndexPatternColumn } from '../../../../../../public';
 import type { DeprecatedColorMappingConfig } from './types';

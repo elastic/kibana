@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { LENS_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
-import { LensSearchResponseBody } from '@kbn/lens-plugin/server';
+import type { LensSearchResponseBody } from '@kbn/lens-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

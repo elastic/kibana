@@ -21,7 +21,7 @@ import {
   lensCMSearchResultSchema,
   lensCMUpdateOptionsSchema,
 } from './schema';
-import { LensAttributes, LensGetOut, LensSavedObject } from './types';
+import type { LensAttributes, LensGetOut, LensSavedObject } from './types';
 
 export const serviceDefinition = {
   get: {

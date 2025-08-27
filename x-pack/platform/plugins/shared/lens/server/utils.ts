@@ -7,8 +7,8 @@
 
 import { pick } from 'lodash';
 
-import { Props } from '@kbn/config-schema';
-import { Assign } from 'utility-types';
+import type { Props } from '@kbn/config-schema';
+import type { Assign } from 'utility-types';
 
 /**
  * Picks a subset of props from base schema definition
