@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { discoverServiceMock } from '../../__mocks__/services';
 import { createStartContractMock } from '../../__mocks__/start_contract';
-import type { SearchEmbeddableApi } from '@kbn/discover-utils';
+import type { SearchEmbeddableApi } from '../types';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 import { ViewSavedSearchAction } from './view_saved_search_action';
 import type { SolutionId } from '@kbn/core-chrome-browser';

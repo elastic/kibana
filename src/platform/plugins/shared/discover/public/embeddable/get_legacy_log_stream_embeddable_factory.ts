@@ -11,8 +11,8 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { LEGACY_LOG_STREAM_EMBEDDABLE } from '@kbn/discover-utils';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
+import { LEGACY_LOG_STREAM_EMBEDDABLE } from './constants';
 
 export const getLegacyLogStreamEmbeddableFactory = (
   ...[{ startServices, discoverServices }]: Parameters<typeof getSearchEmbeddableFactory>

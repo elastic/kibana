@@ -11,7 +11,7 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { SearchEmbeddableSerializedState } from './types';
 
-export { SEARCH_EMBEDDABLE_TYPE } from '../../..';
+export { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 
 export const SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID =
   'SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID';

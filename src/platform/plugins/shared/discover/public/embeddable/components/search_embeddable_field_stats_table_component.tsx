@@ -14,9 +14,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '@kbn/discover-utils';
 import { FieldStatisticsTable } from '../../application/main/components/field_stats_table';
 import { isEsqlMode } from '../initialize_fetch';
+import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 interface SavedSearchEmbeddableComponentProps {

@@ -25,16 +25,16 @@ import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
 
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { EDITABLE_SAVED_SEARCH_KEYS } from '@kbn/discover-utils';
+import type { DiscoverServices } from '../build_services';
+import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
+import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
 import type {
   PublishesWritableSavedSearch,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedAttributes,
   SearchEmbeddableSerializedState,
   SearchEmbeddableStateManager,
-} from '@kbn/discover-utils';
-import type { DiscoverServices } from '../build_services';
-import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
+} from './types';
 
 const initializeSearchSource = async (
   dataService: DiscoverServices['data'],

@@ -9,8 +9,8 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { ROW_HEIGHT_OPTION, SAMPLE_SIZE_SETTING } from '@kbn/discover-utils';
-import { DEFAULT_HEADER_ROW_HEIGHT_LINES } from '@kbn/discover-utils';
 import { getDefaultRowsPerPage } from '../../common/constants';
+import { DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
 
 export interface SearchEmbeddableDefaults {
   rowHeight: number | undefined;

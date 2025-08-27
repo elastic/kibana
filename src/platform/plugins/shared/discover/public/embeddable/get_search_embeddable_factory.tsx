@@ -31,7 +31,6 @@ import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warni
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import type { SearchEmbeddableApi, SearchEmbeddableSerializedState } from '@kbn/discover-utils';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
@@ -39,6 +38,7 @@ import { SearchEmbeddableGridComponent } from './components/search_embeddable_gr
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
+import type { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';

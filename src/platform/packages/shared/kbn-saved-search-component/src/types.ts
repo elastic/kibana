@@ -10,14 +10,9 @@
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataViewsContract, ISearchStartSearchSource } from '@kbn/data-plugin/public';
-// import type { NonPersistedDisplayOptions } from '@kbn/discover-plugin/public';
+import type { NonPersistedDisplayOptions } from '@kbn/discover-plugin/public';
 import type { CSSProperties } from 'react';
 
-export interface NonPersistedDisplayOptions {
-  solutionNavIdOverride?: 'oblt' | 'security' | 'search';
-  enableDocumentViewer?: boolean;
-  enableFilters?: boolean;
-}
 export interface SavedSearchComponentDependencies {
   embeddable: EmbeddableStart;
   searchSource: ISearchStartSearchSource;

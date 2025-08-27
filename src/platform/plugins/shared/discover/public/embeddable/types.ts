@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
@@ -36,7 +37,6 @@ import type {
   DynamicActionsSerializedState,
   HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
-import type { DataTableRecord } from '../../types';
 import type { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 export type SearchEmbeddableState = Pick<
