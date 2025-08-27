@@ -79,7 +79,7 @@ export class SiemMigrationTaskRunner<
     protected readonly logger: Logger,
     protected readonly dependencies: SiemMigrationsClientDependencies
   ) {
-    this.actionsClientChat = new ActionsClientChat(this.request, this.dependencies, this.logger);
+    this.actionsClientChat = new ActionsClientChat(this.request, this.dependencies);
     this.abort = abortSignalToPromise(this.abortController.signal);
   }
 

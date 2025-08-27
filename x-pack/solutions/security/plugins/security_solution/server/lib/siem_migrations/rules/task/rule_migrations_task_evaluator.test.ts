@@ -43,7 +43,6 @@ describe('RuleMigrationTaskEvaluator', () => {
       get: jest.fn().mockResolvedValue({ id: 'test-connector-id', name: 'Test Connector' }),
     },
     telemetry: {},
-    featureFlags: {},
   } as unknown as SiemMigrationsClientDependencies;
 
   const mockRequest = {} as unknown as KibanaRequest;

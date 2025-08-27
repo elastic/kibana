@@ -13,7 +13,6 @@ import type {
 } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   DashboardMigration,
@@ -31,7 +30,6 @@ export interface SiemMigrationsClientDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   packageService?: PackageService;
   telemetry: AnalyticsServiceSetup;
-  featureFlags: FeatureFlagsRequestHandlerContext;
 }
 
 export interface SiemMigrationsCreateClientParams {
