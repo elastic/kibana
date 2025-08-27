@@ -128,9 +128,9 @@ steps:
         'consts',
         'event',
         'now',
-        'spaceId',
+        'workflow',
         'steps',
-        'workflowRunId',
+        'execution',
       ]);
     });
 
@@ -185,9 +185,9 @@ steps:
         'consts',
         'event',
         'now',
-        'spaceId',
+        'workflow',
         'steps',
-        'workflowRunId',
+        'execution',
       ]);
       testCompletion(completionProvider, yamlContent, (suggestion) => {
         return !suggestion.insertText.startsWith('"') && !suggestion.insertText.endsWith('"');
