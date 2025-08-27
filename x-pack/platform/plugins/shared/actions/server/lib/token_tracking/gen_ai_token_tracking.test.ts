@@ -459,7 +459,7 @@ describe('getGenAiTokenTracking', () => {
     );
   });
 
-  it.only('should return the total, prompt, and completion token counts when given a valid Inference stream response', async () => {
+  it('should return the total, prompt, and completion token counts when given a valid Inference stream response', async () => {
     const actionTypeId = '.inference';
     const mockReader = new IncomingMessage(new Socket());
     const result = {
