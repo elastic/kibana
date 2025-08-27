@@ -251,6 +251,9 @@ export function getDiscoverStateContainer({
   const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
 
+  const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+  const scopedEbtManager = scopedEbtManager$.getValue();
+
   /**
    * Search session logic
    */
@@ -528,6 +531,37 @@ export function getDiscoverStateContainer({
     return newDataView;
   };
 
+  const trackQueryFieldUsage = (query: Query | AggregateQuery | undefined) => {
+    if (!query) {
+      return;
+    }
+
+    const { fieldsMetadata } = services;
+
+    if (isOfAggregateQueryType(query)) {
+      const fieldNames = getQueryColumnsFromESQLQuery(query.esql);
+
+      if (fieldNames.length === 0) {
+        return;
+      }
+
+      scopedEbtManager.trackSubmittingESQLQuery({
+        fieldNames,
+        fieldsMetadata,
+      });
+    } else if (isOfQueryType(query) && typeof query.query === 'string') {
+      const fieldNames = getKqlFieldNamesFromExpression(query.query);
+
+      if (fieldNames.length === 0) {
+        return;
+      }
+      scopedEbtManager.trackSubmittingKQLQuery({
+        fieldNames,
+        fieldsMetadata,
+      });
+    }
+  };
+
   /**
    * Triggered when a user submits a query in the search bar
    */
@@ -535,29 +569,7 @@ export function getDiscoverStateContainer({
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => {
-    const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const scopedEbtManager = scopedEbtManager$.getValue();
-    let fields: string[] = [];
-
-    if (isOfAggregateQueryType(payload.query)) {
-      fields = getQueryColumnsFromESQLQuery(payload.query.esql);
-
-      if (fields.length > 0) {
-        scopedEbtManager.trackSubmittingESQLQuery({
-          fieldNames: fields,
-          fieldsMetadata: services.fieldsMetadata,
-        });
-      }
-    } else if (isOfQueryType(payload.query) && typeof payload.query.query === 'string') {
-      fields = getKqlFieldNamesFromExpression(payload.query?.query);
-
-      if (fields.length > 0) {
-        scopedEbtManager.trackSubmittingKQLQuery({
-          fieldNames: fields,
-          fieldsMetadata: services.fieldsMetadata,
-        });
-      }
-    }
+    trackQueryFieldUsage(payload.query);
 
     if (isUpdate === false) {
       // remove the search session if the given query is not just updated
