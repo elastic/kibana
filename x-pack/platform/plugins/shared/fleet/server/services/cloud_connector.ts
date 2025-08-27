@@ -18,7 +18,10 @@ import type {
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type { CreateCloudConnectorRequest } from '../routes/cloud_connector/handlers';
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME } from '../../common/constants/cloud_connector';
+import {
+  AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,
+  AWS_ROLE_ARN_VAR_NAME,
+} from '../../common/constants/cloud_connector';
 
 import { CloudConnectorCreateError, CloudConnectorGetListError } from '../errors';
 
@@ -139,9 +142,13 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     let name = cloudConnector.name;
 
     if (cloudConnector.cloudProvider === 'aws') {
-      // Handle both string and object formats for role_arn
-      const roleArn: string | undefined =
-        typeof vars.role_arn === 'string' ? vars.role_arn : vars.role_arn?.value;
+      const roleArnVar = typeof vars.role_arn === 'string' ? vars.role_arn : vars.role_arn?.value;
+      const awsRoleArnVar =
+        typeof vars[AWS_ROLE_ARN_VAR_NAME] === 'string'
+          ? vars[AWS_ROLE_ARN_VAR_NAME]
+          : vars[AWS_ROLE_ARN_VAR_NAME]?.value;
+      const roleArn: string = roleArnVar || awsRoleArnVar;
+
       if (!roleArn) {
         logger.error('AWS package policy must contain role_arn variable');
         throw new Error('AWS package policy must contain role_arn variable');
@@ -152,22 +159,24 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         let externalId: CloudConnectorSecretVar | undefined;
         name = roleArn;
 
-        const externalIdSecretReference: string =
-          vars.external_id?.value?.id || vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME].value?.id;
-        const isSecretRef =
-          vars.external_id?.value?.isSecretRef ||
-          vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME].value?.isSecretRef;
+        if (vars.external_id || vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME]) {
+          const externalIdSecretReference: string =
+            vars.external_id?.value?.id || vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME].value?.id;
+          const isSecretRef =
+            vars.external_id?.value?.isSecretRef ||
+            vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME].value?.isSecretRef;
 
-        if (externalIdSecretReference && isSecretRef) {
-          const isValid = CloudConnectorService.EXTERNAL_ID_REGEX.test(externalIdSecretReference);
-          if (!isValid) {
-            logger.error('External ID secret reference must be a valid secret reference');
-            throw new Error('External ID secret reference is not valid');
+          if (externalIdSecretReference && isSecretRef) {
+            const isValid = CloudConnectorService.EXTERNAL_ID_REGEX.test(externalIdSecretReference);
+            if (!isValid) {
+              logger.error('External ID secret reference must be a valid secret reference');
+              throw new Error('External ID secret reference is not valid');
+            }
+
+            externalId = vars.external_id?.value?.isSecretRef
+              ? vars.external_id
+              : vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME];
           }
-
-          externalId = vars.external_id?.value?.isSecretRef
-            ? vars.external_id
-            : vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME];
         }
 
         if (!externalId) {
