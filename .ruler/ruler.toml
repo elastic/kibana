@@ -13,6 +13,11 @@ enabled = true
 # Global merge strategy: 'merge' or 'overwrite' (default: 'merge')
 merge_strategy = "merge"
 
+# --- MCP Server Definitions ---
+[mcp_servers.kibana]
+command = "bash"
+args = ["-lc", "source \"$NVM_DIR/nvm.sh\" && cd ${KIBANA_WORKSPACE} && nvm use --silent && node --no-experimental-require-module ./scripts/mcp_dev.js"]
+
 # --- Global .gitignore Configuration ---
 [gitignore]
 # Enable/disable automatic .gitignore updates (default: true)
@@ -24,16 +29,12 @@ enabled = true
 
 [agents.copilot]
 enabled = true
-output_path = ".github/copilot-instructions.md"
 
 [agents.claude]
 enabled = true
-output_path = "CLAUDE.md"
 
 [agents.cursor]
 enabled = true
-output_path = ".cursor/rules/ruler_cursor_instructions.mdc"
 
 [agents.gemini-cli]
 enabled = true
-output_path = "GEMINI.md"
