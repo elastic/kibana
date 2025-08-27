@@ -230,8 +230,8 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
     case SET_PAUSE_SYNC_DATA:
       return {
         ...state,
-        __pauseSyncData: action.pauseSyncData
-      }
+        __pauseSyncData: action.pauseSyncData,
+      };
     case SET_SELECTED_LAYER:
       const selectedMatch = state.layerList.find((layer) => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: selectedMatch ? action.selectedLayerId : null };

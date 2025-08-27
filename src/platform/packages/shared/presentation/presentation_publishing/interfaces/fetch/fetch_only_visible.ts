@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, Subject, combineLatestWith, map, of } from 'rxjs';
-import { PublishesPauseFetch } from '../..';
+import type { Observable } from 'rxjs';
+import { Subject, combineLatestWith, map, of } from 'rxjs';
+import type { PublishesPauseFetch } from '../..';
 
 export type FetchSetting = 'onlyVisible' | 'always';
 
