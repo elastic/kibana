@@ -265,11 +265,32 @@ export const WorkflowSchema = z.object({
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 
-export const WorkflowContextSchema = z.object({
+export const WorkflowExecutionContextSchema = z.object({
+  id: z.string(),
+  isTestRun: z.boolean(),
+  startedAt: z.date(),
+});
+export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
+
+export const WorkflowDataContextSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  enabled: z.boolean(),
   spaceId: z.string(),
-  workflowRunId: z.string(),
+});
+export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
+
+export const WorkflowContextSchema = z.object({
   event: z.any().optional(),
+  execution: WorkflowExecutionContextSchema,
+  workflow: WorkflowDataContextSchema,
   consts: z.record(z.string(), z.any()).optional(),
+  now: z.date().optional(),
+});
+
+export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
+
+export const StepContextSchema = WorkflowContextSchema.extend({
   steps: z.record(
     z.string(),
     z.object({
@@ -279,10 +300,11 @@ export const WorkflowContextSchema = z.object({
   ),
   foreach: z
     .object({
+      items: z.array(z.any()),
+      index: z.number().int(),
       item: z.any(),
+      total: z.number().int(),
     })
     .optional(),
-  now: z.date().optional(),
 });
-
-export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
+export type StepContext = z.infer<typeof StepContextSchema>;

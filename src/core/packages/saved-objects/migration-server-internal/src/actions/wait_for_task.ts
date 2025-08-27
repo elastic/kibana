@@ -19,8 +19,16 @@ import {
 } from './catch_retryable_es_client_errors';
 
 /** @internal */
+export interface WaitForTaskResponseError {
+  type: string;
+  reason?: string | null;
+  index?: string;
+  caused_by?: WaitForTaskResponseError;
+}
+
+/** @internal */
 export interface WaitForTaskResponse {
-  error: Option.Option<{ type: string; reason?: string | null; index?: string }>;
+  error: Option.Option<WaitForTaskResponseError>;
   completed: boolean;
   failures: Option.Option<any[]>;
   description?: string;
