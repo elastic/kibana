@@ -475,13 +475,10 @@ export class IndexUpdateService {
     this._subscription.add(
       combineLatest([this._docs$, this._savingDocs$]).subscribe(([rows, savingDocs]) => {
         const resultRows = rows
-          // Filter out docs that are scheduled for deletion
+          // Filter out docs that are scheduled for deletion or placeholder rows (that are handled apart)
           .filter((v) => {
             const pendingUpdate = savingDocs.get(v.id);
-            if (pendingUpdate?.type === 'delete-doc') {
-              return false;
-            }
-            return true;
+            return pendingUpdate?.type !== 'delete-doc' && !v.id.startsWith(ROW_PLACEHOLDER_PREFIX);
           })
           .map((v) => {
             const pendingUpdate = savingDocs.get(v.id);
