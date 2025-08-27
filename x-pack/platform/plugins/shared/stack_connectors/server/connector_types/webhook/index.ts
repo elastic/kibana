@@ -167,12 +167,7 @@ export async function executor(
 
   const axiosInstance = axios.create();
 
-  console.log('headers: ', headers);
-  console.log('secretHeaders: ', secrets.secretHeaders);
-
   const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
-
-  console.log('mergedHeaders: ', mergedHeaders);
 
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
