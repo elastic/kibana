@@ -18,7 +18,8 @@ import { checkCreateJobsCapabilitiesResolver } from '@kbn/ml-services/capabiliti
 import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
 import { basicResolvers } from '../../resolvers';
 import type { MlRoute, PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
 import {
   loadNewJobCapabilities,

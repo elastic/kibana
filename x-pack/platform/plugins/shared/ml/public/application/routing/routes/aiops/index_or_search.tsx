@@ -16,7 +16,8 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';

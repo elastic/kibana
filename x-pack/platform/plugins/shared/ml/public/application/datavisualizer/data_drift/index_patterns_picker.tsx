@@ -21,7 +21,7 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import { useNavigateToPath } from '../../contexts/kibana';
-import { createPath } from '../../routing/router';
+import { createPath } from '../../routing/create_path';
 import { MlPageHeader } from '../../components/page_header';
 import { PageTitle } from '../../components/page_title';
 

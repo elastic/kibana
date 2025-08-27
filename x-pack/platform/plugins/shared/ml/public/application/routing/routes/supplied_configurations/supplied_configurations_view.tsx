@@ -18,7 +18,8 @@ import { MlPageHeader } from '../../../components/page_header';
 import { PageTitle } from '../../../components/page_title';
 
 import type { MlRoute } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import {

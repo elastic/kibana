@@ -15,7 +15,8 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { basicResolvers } from '../../resolvers';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
