@@ -8068,6 +8068,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/split-button@link:src/platform/packages/private/kbn-split-button":
+  version "0.0.0"
+  uid ""
+
 "@kbn/sse-example-plugin@link:examples/sse_example":
   version "0.0.0"
   uid ""
