@@ -98,6 +98,7 @@ export class MapsStorage {
       }
     }
     const { value, error: resultError } = transforms.get.out.result.down<MapsGetOut, MapsGetOut>(
+      // @ts-expect-error - fix type error
       response,
       undefined,
       { validate: false }
@@ -232,6 +233,7 @@ export class MapsStorage {
       MapsUpdateOut,
       MapsUpdateOut
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
