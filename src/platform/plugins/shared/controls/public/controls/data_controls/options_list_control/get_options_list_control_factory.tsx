@@ -49,7 +49,7 @@ import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
 import { initializeSelectionsManager, selectionComparators } from './selections_manager';
 import { OptionsListStrings } from './options_list_strings';
-import { type OptionsListComponentApi, type OptionsListControlApi } from './types';
+import type { OptionsListComponentApi, OptionsListControlApi } from './types';
 import { initializeTemporayStateManager } from './temporay_state_manager';
 import type { EditorState } from './editor_state_manager';
 import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
