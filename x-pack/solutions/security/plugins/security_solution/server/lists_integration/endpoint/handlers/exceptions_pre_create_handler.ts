@@ -18,6 +18,7 @@ import {
   EventFilterValidator,
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
+  TrustedDeviceValidator,
 } from '../validators';
 import {
   hasGlobalOrPerPolicyTag,
@@ -41,6 +42,14 @@ export const getExceptionsPreCreateItemHandler = (
       const trustedAppValidator = new TrustedAppValidator(endpointAppContext, request);
       validatedItem = await trustedAppValidator.validatePreCreateItem(data);
       trustedAppValidator.notifyFeatureUsage(data, 'TRUSTED_APP_BY_POLICY');
+    }
+
+    // Validate trusted devices
+    if (TrustedDeviceValidator.isTrustedDevice(data)) {
+      isEndpointArtifact = true;
+      const trustedDeviceValidator = new TrustedDeviceValidator(endpointAppContext, request);
+      validatedItem = await trustedDeviceValidator.validatePreCreateItem(data);
+      trustedDeviceValidator.notifyFeatureUsage(data, 'TRUSTED_DEVICE_BY_POLICY');
     }
 
     // Validate event filter
