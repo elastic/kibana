@@ -167,6 +167,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
           display="large"
           fullWidth
           id={filePickerId}
+          data-test-subj="knowledgeBaseBulkImportFilePicker"
           initialPromptText={i18n.translate(
             'xpack.observabilityAiAssistantManagement.knowledgeBaseBulkImportFlyout.euiFilePicker.selectOrDragAndLabel',
             { defaultMessage: 'Select or drag and drop a .ndjson file' }

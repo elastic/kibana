@@ -283,22 +283,32 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         await openBulkImportFlyout();
         const entries = await prepareBulkImportData();
-        const saveButton = await testSubjects.find(ui.pages.kbManagementTab.bulkImportSaveButton);
 
+        let saveButton = await testSubjects.find(ui.pages.kbManagementTab.bulkImportSaveButton);
         expect(await saveButton.isEnabled()).to.be(false);
 
         await retry.try(async () => {
           await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
-          const fileInput = await find.byCssSelector('input[type="file"]');
-          const value = await fileInput.getAttribute('value');
-          if (!value || !value.includes('bulk_import.ndjson')) {
-            throw new Error(`File not bound yet: ${value}`);
-          } else {
-            log.debug('File input bound correctly:', value);
+
+          const filePicker = await testSubjects.find(ui.pages.kbManagementTab.bulkImportFilePicker);
+          const fileNameElement = await filePicker.findByXpath(
+            'following-sibling::div//span[contains(@class,"euiFilePicker__promptText")]'
+          );
+          const fileNameText = await fileNameElement.getVisibleText();
+          log.debug('PickerText: ', fileNameText);
+          if (!fileNameText.includes('bulk_import.ndjson')) {
+            throw new Error(`UI has not acknowledged the uploaded file yet: ${fileNameText}`);
           }
+
+          log.debug('UI acknowledged file:', fileNameText);
         });
 
-        expect(await saveButton.isEnabled()).to.be(true);
+        await retry.waitFor('save button to be enabled', async () => {
+          const saveButton = await testSubjects.find(ui.pages.kbManagementTab.bulkImportSaveButton);
+          return await saveButton.isEnabled();
+        });
+
+        saveButton = await testSubjects.find(ui.pages.kbManagementTab.bulkImportSaveButton);
         await saveButton.click();
 
         const toastText = await retry.try(async () => {
