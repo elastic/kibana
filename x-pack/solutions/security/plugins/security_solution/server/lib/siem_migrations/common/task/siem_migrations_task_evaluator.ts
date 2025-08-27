@@ -32,7 +32,7 @@ export type SiemMigrationEvaluatorConstructor<
   C extends object = {},
   O extends object = {}
 > = new (
-  ...params: ConstructorParameters<typeof SiemMigrationsBaseEvaluator>
+  ...params: ConstructorParameters<typeof SiemMigrationsBaseEvaluator<M, I, P, C, O>>
 ) => SiemMigrationsBaseEvaluator<M, I, P, C, O>;
 
 export abstract class SiemMigrationsBaseEvaluator<
