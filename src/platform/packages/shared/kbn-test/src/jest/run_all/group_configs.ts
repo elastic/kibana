@@ -26,24 +26,10 @@ export function groupConfigs({
     const rootDir = config.rootDir || REPO_ROOT;
     const configDir = Path.dirname(configPath!);
 
-    const nextConfig = !globalConfig.collectCoverage
-      ? omit(
-          config,
-          'coverage',
-          'collectCoverage',
-          'collectCoverageFrom',
-          'coverageDirectory',
-          'coveragePathIgnorePatterns',
-          'coverageProvider',
-          'coverageReporters',
-          'coverageThreshold'
-        )
-      : config;
-
     return {
       configPath,
       config: {
-        ...nextConfig,
+        ...config,
         rootDir: Path.isAbsolute(rootDir) ? rootDir : Path.join(configDir, rootDir),
       },
     };

@@ -25,6 +25,14 @@ export function createConfigHash(obj: Config.InitialOptions): string {
     onlyFailures,
     onlyChanged,
     reporters,
+    collectCoverage,
+    collectCoverageFrom,
+    coverageDirectory,
+    coveragePathIgnorePatterns,
+    coverageProvider,
+    coverageReporters,
+    coverageThreshold,
+    forceCoverageMatch,
     ...rest
   } = obj;
 

@@ -202,7 +202,7 @@ export function runJestAll() {
         const setupFilesAfterEnv = [
           ...(jestConfig.projectConfig.setupFilesAfterEnv ?? []),
           retriesFile,
-          require.resolve('../setup/disable_console_logs'),
+          ...(process.env.CI ? [] : [require.resolve('../setup/disable_console_logs')]),
         ];
 
         // Include targetPaths in the hash so runs with different path filters
