@@ -6,17 +6,30 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AgentForm } from './agent_form';
-import { labels } from '../../../utils/i18n';
-import { DeleteAgentProvider } from '../../../context/delete_agent_context';
+import { DeleteAgentProvider, useDeleteAgent } from '../../../context/delete_agent_context';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
+import { useOnechatAgentById } from '../../../hooks/agents/use_agent_by_id';
 
 interface EditAgentProps {
   agentId: string;
 }
+
+const EditAgentForm: React.FC<EditAgentProps> = ({ agentId }) => {
+  const { deleteAgent } = useDeleteAgent();
+  const { agent } = useOnechatAgentById(agentId);
+  return (
+    <AgentForm
+      editingAgentId={agentId}
+      onDelete={() => {
+        if (agent) {
+          deleteAgent({ agent });
+        }
+      }}
+    />
+  );
+};
 
 export const EditAgent: React.FC<EditAgentProps> = ({ agentId }) => {
   const { navigateToOnechatUrl } = useNavigation();
@@ -26,18 +39,7 @@ export const EditAgent: React.FC<EditAgentProps> = ({ agentId }) => {
         navigateToOnechatUrl(appPaths.agents.list);
       }}
     >
-      <KibanaPageTemplate>
-        <KibanaPageTemplate.Header
-          pageTitle={labels.agents.editAgent}
-          description={i18n.translate('xpack.onechat.editAgent.description', {
-            defaultMessage:
-              'Customize your AI agent, select tools and provide custom instructions.',
-          })}
-        />
-        <KibanaPageTemplate.Section>
-          <AgentForm editingAgentId={agentId} />
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+      <EditAgentForm agentId={agentId} />
     </DeleteAgentProvider>
   );
 };

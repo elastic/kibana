@@ -8,9 +8,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import {
   type AttackDiscoveryAlert,
-  type AttackDiscoveryCreateProps,
-  type AttackDiscoveryUpdateProps,
-  type AttackDiscoveryResponse,
   type CreateAttackDiscoveryAlertsParams,
   type FindAttackDiscoveryAlertsParams,
   type AttackDiscoveryFindResponse,
@@ -24,13 +21,8 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { AIAssistantDataClientParams } from '../../../ai_assistant_data_clients';
 import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
 import { findDocuments } from '../../../ai_assistant_data_clients/find';
-import { findAllAttackDiscoveries } from './find_all_attack_discoveries/find_all_attack_discoveries';
 import { combineFindAttackDiscoveryFilters } from './combine_find_attack_discovery_filters';
-import { findAttackDiscoveryByConnectorId } from './find_attack_discovery_by_connector_id/find_attack_discovery_by_connector_id';
-import { updateAttackDiscovery } from './update_attack_discovery/update_attack_discovery';
-import { createAttackDiscovery } from './create_attack_discovery/create_attack_discovery';
 import { createAttackDiscoveryAlerts } from './create_attack_discovery_alerts';
-import { getAttackDiscovery } from './get_attack_discovery/get_attack_discovery';
 import { getAttackDiscoveryGenerations } from './get_attack_discovery_generations';
 import { getAttackDiscoveryGenerationByIdQuery } from './get_attack_discovery_generation_by_id_query';
 import { getAttackDiscoveryGenerationsQuery } from './get_attack_discovery_generations_query';
@@ -56,55 +48,6 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
 
     this.adhocAttackDiscoveryDataClient = this.options.adhocAttackDiscoveryDataClient;
   }
-
-  /**
-   * Fetches an attack discovery
-   * @param options
-   * @param options.id The existing attack discovery id.
-   * @param options.authenticatedUser Current authenticated user.
-   * @returns The attack discovery response
-   */
-  public getAttackDiscovery = async ({
-    id,
-    authenticatedUser,
-  }: {
-    id: string;
-    authenticatedUser: AuthenticatedUser;
-  }): Promise<AttackDiscoveryResponse | null> => {
-    const esClient = await this.options.elasticsearchClientPromise;
-    return getAttackDiscovery({
-      esClient,
-      logger: this.options.logger,
-      attackDiscoveryIndex: this.indexTemplateAndPattern.alias,
-      id,
-      user: authenticatedUser,
-    });
-  };
-
-  /**
-   * Creates an attack discovery, if given at least the "apiConfig"
-   * @param options
-   * @param options.attackDiscoveryCreate
-   * @param options.authenticatedUser
-   * @returns The Attack Discovery created
-   */
-  public createAttackDiscovery = async ({
-    attackDiscoveryCreate,
-    authenticatedUser,
-  }: {
-    attackDiscoveryCreate: AttackDiscoveryCreateProps;
-    authenticatedUser: AuthenticatedUser;
-  }): Promise<AttackDiscoveryResponse | null> => {
-    const esClient = await this.options.elasticsearchClientPromise;
-    return createAttackDiscovery({
-      esClient,
-      logger: this.options.logger,
-      attackDiscoveryIndex: this.indexTemplateAndPattern.alias,
-      spaceId: this.spaceId,
-      user: authenticatedUser,
-      attackDiscoveryCreate,
-    });
-  };
 
   public getAdHocAlertsIndexPattern = () => {
     if (this.adhocAttackDiscoveryDataClient === undefined) {
@@ -469,72 +412,5 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     }
 
     return result?.generations[0];
-  };
-
-  /**
-   * Find attack discovery by apiConfig connectorId
-   * @param options
-   * @param options.connectorId
-   * @param options.authenticatedUser
-   * @returns The Attack Discovery found
-   */
-  public findAttackDiscoveryByConnectorId = async ({
-    connectorId,
-    authenticatedUser,
-  }: {
-    connectorId: string;
-    authenticatedUser: AuthenticatedUser;
-  }): Promise<AttackDiscoveryResponse | null> => {
-    const esClient = await this.options.elasticsearchClientPromise;
-    return findAttackDiscoveryByConnectorId({
-      esClient,
-      logger: this.options.logger,
-      attackDiscoveryIndex: this.indexTemplateAndPattern.alias,
-      connectorId,
-      user: authenticatedUser,
-    });
-  };
-
-  /**
-   * Finds all attack discovery for authenticated user
-   * @param options
-   * @param options.authenticatedUser
-   * @returns The Attack Discovery
-   */
-  public findAllAttackDiscoveries = async ({
-    authenticatedUser,
-  }: {
-    authenticatedUser: AuthenticatedUser;
-  }): Promise<AttackDiscoveryResponse[]> => {
-    const esClient = await this.options.elasticsearchClientPromise;
-    return findAllAttackDiscoveries({
-      esClient,
-      logger: this.options.logger,
-      attackDiscoveryIndex: this.indexTemplateAndPattern.alias,
-      user: authenticatedUser,
-    });
-  };
-
-  /**
-   * Updates an attack discovery
-   * @param options
-   * @param options.attackDiscoveryUpdateProps
-   * @param options.authenticatedUser
-   */
-  public updateAttackDiscovery = async ({
-    attackDiscoveryUpdateProps,
-    authenticatedUser,
-  }: {
-    attackDiscoveryUpdateProps: AttackDiscoveryUpdateProps;
-    authenticatedUser: AuthenticatedUser;
-  }): Promise<AttackDiscoveryResponse | null> => {
-    const esClient = await this.options.elasticsearchClientPromise;
-    return updateAttackDiscovery({
-      esClient,
-      logger: this.options.logger,
-      attackDiscoveryIndex: attackDiscoveryUpdateProps.backingIndex,
-      attackDiscoveryUpdateProps,
-      user: authenticatedUser,
-    });
   };
 }
