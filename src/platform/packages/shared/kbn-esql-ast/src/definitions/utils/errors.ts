@@ -57,14 +57,14 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         .join('\n  ');
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.noMatchingCallSignatures', {
-          defaultMessage: `The arguments to [{functionName}] don't match a valid call signature.
+          defaultMessage: `Invalid input types for {functionName}.
 
 Received ({argTypes}).
 
 Expected one of:
   {validSignatures}`,
           values: {
-            functionName: out.functionName,
+            functionName: out.functionName.toUpperCase(),
             argTypes: out.argTypes,
             validSignatures: signatureList,
           },
