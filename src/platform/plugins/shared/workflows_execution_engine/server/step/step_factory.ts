@@ -86,7 +86,7 @@ export class StepFactory {
         );
       case 'http':
         return new HttpStepImpl(
-          step,
+          step as any,
           this.contextManager,
           this.workflowRuntime,
           this.workflowLogger,
