@@ -546,7 +546,7 @@ export function getDiscoverStateContainer({
   /**
    * Triggered when a user submits a query in the search bar
    */
-  const onUpdateQuery = async (
+  const onUpdateQuery = (
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => {
