@@ -7,25 +7,27 @@
 
 import React, { type ReactNode, useMemo } from 'react';
 import { css } from '@emotion/css';
-import { EuiCode, EuiCommentList } from '@elastic/eui';
+import { EuiCommentList, useEuiTheme } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
-import {
+import type {
   ChatActionClickPayload,
   ChatState,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import {
   type Feedback,
   type Message,
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,
-  aiAssistantAnonymizationRules,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { AnonymizationRule } from '@kbn/observability-ai-assistant-plugin/common';
-import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
+import { aiAnonymizationSettings } from '@kbn/inference-common';
+import type { AnonymizationSettings } from '@kbn/inference-common';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 import { useKibana } from '../hooks/use_kibana';
 import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
+import { KnowledgeBaseReindexingCallout } from '../knowledge_base/knowledge_base_reindexing_callout';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -53,7 +55,6 @@ export interface ChatTimelineItem
 export interface ChatTimelineProps {
   conversationId?: string;
   messages: Message[];
-  knowledgeBase: UseKnowledgeBaseResult;
   chatService: ObservabilityAIAssistantChatService;
   hasConnector: boolean;
   chatState: ChatState;
@@ -61,6 +62,7 @@ export interface ChatTimelineProps {
   isArchived: boolean;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   showElasticLlmCalloutInChat: boolean;
+  showKnowledgeBaseReIndexingCallout: boolean;
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (feedback: Feedback) => void;
   onRegenerate: (message: Message) => void;
@@ -76,41 +78,56 @@ export interface ChatTimelineProps {
 }
 
 // helper using detected entity positions to transform user messages into react node to add text highlighting
-function highlightContent(
+export function highlightContent(
   content: string,
-  detectedEntities: Array<{ start_pos: number; end_pos: number; entity: string }>
+  detectedEntities: Array<{
+    start: number;
+    end: number;
+    entity: { class_name: string; value: string; mask: string };
+  }>
 ): React.ReactNode {
   // Sort the entities by start position
-  const sortedEntities = [...detectedEntities].sort((a, b) => a.start_pos - b.start_pos);
+  const sortedEntities = [...detectedEntities].sort((a, b) => a.start - b.start);
   const parts: Array<string | React.ReactNode> = [];
   let lastIndex = 0;
   sortedEntities.forEach((entity, index) => {
     // Add the text before the entity
-    if (entity.start_pos > lastIndex) {
-      parts.push(content.substring(lastIndex, entity.start_pos));
+    if (entity.start > lastIndex) {
+      parts.push(content.substring(lastIndex, entity.start));
     }
-    // Wrap the sensitive text in a span with highlight styles
-    parts.push(
-      <EuiCode key={`user-highlight-${index}`}>
-        {content.substring(entity.start_pos, entity.end_pos)}
-      </EuiCode>
-    );
-    lastIndex = entity.end_pos;
+
+    // Currently only highlighting the content that's not inside code blocks
+    if (isInsideInlineCode(content, entity.start) || isInsideCodeBlock(content, entity.start)) {
+      parts.push(`${content.substring(entity.start, entity.end)}`);
+    } else {
+      parts.push(
+        `!{anonymized{"entityClass":"${entity.entity.class_name}","content":"${content.substring(
+          entity.start,
+          entity.end
+        )}"}}`
+      );
+    }
+    lastIndex = entity.end;
   });
   // Add any remaining text after the last entity
   if (lastIndex < content.length) {
     parts.push(content.substring(lastIndex));
   }
-  return parts;
+  return parts.join('');
 }
+
+// Count how many ``` fences exist before pos. An odd count means pos is inside a fenced block
+const isInsideCodeBlock = (src: string, pos: number): boolean =>
+  (src.slice(0, pos).match(/```/g) || []).length % 2 === 1;
+
+const isInsideInlineCode = (src: string, pos: number): boolean =>
+  Array.from(src.matchAll(/`([^`\\]|\\.)*?`/g)).some((m) => {
+    const start = m.index!;
+    return pos >= start && pos < start + m[0].length;
+  });
+
 const euiCommentListClassName = css`
   padding-bottom: 32px;
-`;
-
-const stickyElasticLlmCalloutContainerClassName = css`
-  position: sticky;
-  top: 0;
-  z-index: 1;
 `;
 
 export function ChatTimeline({
@@ -122,6 +139,7 @@ export function ChatTimeline({
   isConversationOwnedByCurrentUser,
   isArchived,
   showElasticLlmCalloutInChat,
+  showKnowledgeBaseReIndexingCallout,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -134,15 +152,28 @@ export function ChatTimeline({
     services: { uiSettings },
   } = useKibana();
 
+  const { euiTheme } = useEuiTheme();
+
+  const stickyCalloutContainerClassName = css`
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: ${euiTheme.colors.backgroundBasePlain};
+    &:empty {
+      display: none;
+    }
+  `;
+
   const { anonymizationEnabled } = useMemo(() => {
-    try {
-      const rules = uiSettings?.get<AnonymizationRule[]>(aiAssistantAnonymizationRules);
-      return {
-        anonymizationEnabled: Array.isArray(rules) && rules.some((rule) => rule.enabled),
-      };
-    } catch (e) {
+    const settings = uiSettings?.get<AnonymizationSettings | undefined>(aiAnonymizationSettings);
+
+    if (!settings) {
       return { anonymizationEnabled: false };
     }
+
+    return {
+      anonymizationEnabled: settings.rules.some((rule) => rule.enabled),
+    };
   }, [uiSettings]);
 
   const items = useMemo(() => {
@@ -162,11 +193,11 @@ export function ChatTimeline({
     let currentGroup: ChatTimelineItem[] | null = null;
 
     for (const item of timelineItems) {
-      const { role, content, unredactions } = item.message.message;
+      const { content, deanonymizations } = item.message.message;
       if (item.display.hide || !item) continue;
 
-      if (anonymizationEnabled && role === 'user' && content && unredactions) {
-        item.anonymizedHighlightedContent = highlightContent(content, unredactions);
+      if (anonymizationEnabled && content && deanonymizations) {
+        item.anonymizedHighlightedContent = highlightContent(content, deanonymizations);
       }
 
       if (item.display.collapsed) {
@@ -198,11 +229,10 @@ export function ChatTimeline({
 
   return (
     <EuiCommentList className={euiCommentListClassName}>
-      {showElasticLlmCalloutInChat ? (
-        <div className={stickyElasticLlmCalloutContainerClassName}>
-          <ElasticLlmConversationCallout />
-        </div>
-      ) : null}
+      <div className={stickyCalloutContainerClassName}>
+        {showKnowledgeBaseReIndexingCallout ? <KnowledgeBaseReindexingCallout /> : null}
+        {showElasticLlmCalloutInChat ? <ElasticLlmConversationCallout /> : null}
+      </div>
       {items.map((item, index) => {
         return Array.isArray(item) ? (
           <ChatConsolidatedItems

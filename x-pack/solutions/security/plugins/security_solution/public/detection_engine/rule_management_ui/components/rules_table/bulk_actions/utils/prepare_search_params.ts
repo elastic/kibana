@@ -60,6 +60,18 @@ export const prepareSearchParams = ({
           excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'esql'],
         };
         break;
+      case BulkActionsDryRunErrCodeEnum.THRESHOLD_RULE_TYPE_IN_SUPPRESSION:
+        modifiedFilterOptions = {
+          ...modifiedFilterOptions,
+          excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'threshold'],
+        };
+        break;
+      case BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD:
+        modifiedFilterOptions = {
+          ...modifiedFilterOptions,
+          includeRuleTypes: [...(modifiedFilterOptions.includeRuleTypes ?? []), 'threshold'],
+        };
+        break;
     }
   });
 

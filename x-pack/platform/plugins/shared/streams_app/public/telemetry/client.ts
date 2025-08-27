@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import {
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
   StreamsAssetClickEventProps,

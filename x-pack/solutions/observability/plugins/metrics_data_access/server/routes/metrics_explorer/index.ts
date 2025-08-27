@@ -16,7 +16,7 @@ import {
 import { convertRequestToMetricsAPIOptions } from './lib/convert_request_to_metrics_api_options';
 import { createSearchClient } from '../../lib/create_search_client';
 import { findIntervalForMetrics } from './lib/find_interval_for_metrics';
-import { query } from '../../lib/metrics';
+import { fetchMetrics } from '../../lib/metrics/query';
 import { queryTotalGroupings } from './lib/query_total_groupings';
 import { transformSeries } from './lib/transform_series';
 import type { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
@@ -55,7 +55,7 @@ export const initMetricExplorerRoute = (framework: KibanaFramework) => {
             };
 
         const metricsApiOptions = convertRequestToMetricsAPIOptions(optionsWithInterval);
-        const metricsApiResponse = await query(client, metricsApiOptions);
+        const metricsApiResponse = await fetchMetrics(client, metricsApiOptions);
         const totalGroupings = await queryTotalGroupings(client, metricsApiOptions);
         const hasGroupBy =
           Array.isArray(metricsApiOptions.groupBy) && metricsApiOptions.groupBy.length > 0;

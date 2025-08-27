@@ -7,13 +7,14 @@
 
 import type { Logger } from '@kbn/core/server';
 
+import { findSecurityAIPromptsRoute } from './security_ai_prompts/find_prompts';
 import { findAlertSummaryRoute } from './alert_summary/find_route';
 import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
 import { findAttackDiscoveriesRoute } from './attack_discovery/get/find_attack_discoveries';
 import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
 import { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
 import { postAttackDiscoveryBulkRoute } from './attack_discovery/post/post_attack_discovery_bulk';
-import { ElasticAssistantPluginRouter } from '../types';
+import type { ElasticAssistantPluginRouter } from '../types';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
 import { readConversationRoute } from './user_conversations/read_route';
@@ -21,7 +22,6 @@ import { updateConversationRoute } from './user_conversations/update_route';
 import { findUserConversationsRoute } from './user_conversations/find_route';
 import { bulkActionConversationsRoute } from './user_conversations/bulk_actions_route';
 import { appendConversationMessageRoute } from './user_conversations/append_conversation_messages_route';
-import { getKnowledgeBaseIndicesRoute } from './knowledge_base/get_knowledge_base_indices';
 import { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 import { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
 import { getEvaluateRoute } from './evaluate/get_evaluate';
@@ -55,6 +55,7 @@ import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/
 import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
 import type { ConfigSchema } from '../config_schema';
+import { deleteAllConversationsRoute } from './user_conversations/delete_all_route';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -74,6 +75,7 @@ export const registerRoutes = (
   readConversationRoute(router);
   updateConversationRoute(router);
   deleteConversationRoute(router);
+  deleteAllConversationsRoute(router);
   appendConversationMessageRoute(router);
 
   // User Conversations bulk CRUD
@@ -83,7 +85,6 @@ export const registerRoutes = (
   findUserConversationsRoute(router);
 
   // Knowledge Base Setup
-  getKnowledgeBaseIndicesRoute(router);
   getKnowledgeBaseStatusRoute(router);
   postKnowledgeBaseRoute(router);
 
@@ -105,6 +106,9 @@ export const registerRoutes = (
   // Prompts
   bulkPromptsRoute(router, logger);
   findPromptsRoute(router, logger);
+
+  // Security AI Prompts
+  findSecurityAIPromptsRoute(router, logger);
 
   // Anonymization Fields
   bulkActionAnonymizationFieldsRoute(router, logger);

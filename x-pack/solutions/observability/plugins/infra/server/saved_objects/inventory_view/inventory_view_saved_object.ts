@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { fold } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
+import type {
+  SavedObjectModelTransformationDoc,
+  SavedObjectModelUnsafeTransformFn,
+} from '@kbn/core-saved-objects-server';
 import { inventoryViewSavedObjectRT } from './types';
 
 export const inventoryViewSavedObjectName = 'inventory-view';
@@ -31,6 +36,37 @@ const schemaV2 = schema.object(
   },
   { unknowns: 'allow' }
 );
+
+type V1 = TypeOf<typeof schemaV1>;
+type V2 = TypeOf<typeof schemaV2>;
+
+const inventoryV2Transform: SavedObjectModelUnsafeTransformFn<V1, V2> = (doc) => {
+  // steps property did exist, even though it wasn't present in the schema
+  const asV2 = doc as SavedObjectModelTransformationDoc<V2>;
+
+  if (typeof asV2.attributes.legend?.steps === 'undefined') {
+    return { document: asV2 };
+  } else {
+    let steps = asV2.attributes.legend?.steps;
+    if (steps > 18) {
+      steps = 18;
+    } else if (steps < 2) {
+      steps = 2;
+    }
+
+    const document: SavedObjectModelTransformationDoc<V2> = {
+      ...asV2,
+      attributes: {
+        ...asV2.attributes,
+        legend: {
+          ...asV2.attributes.legend,
+          steps,
+        },
+      },
+    };
+    return { document };
+  }
+};
 
 export const inventoryViewSavedObjectType: SavedObjectsType = {
   name: inventoryViewSavedObjectName,
@@ -58,14 +94,7 @@ export const inventoryViewSavedObjectType: SavedObjectsType = {
       changes: [
         {
           type: 'unsafe_transform',
-          transformFn: (document) => {
-            if (document.attributes.legend?.steps > 18) {
-              document.attributes.legend.steps = 18;
-            } else if (document.attributes.legend?.steps < 2) {
-              document.attributes.legend.steps = 2;
-            }
-            return { document };
-          },
+          transformFn: (typeSafeGuard) => typeSafeGuard(inventoryV2Transform),
         },
       ],
       schemas: {

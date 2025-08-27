@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableSetup, EmbeddableStart } from './plugin';
+import type { EmbeddableSetup, EmbeddableStart } from './plugin';
 
 export type { EmbeddableSetup, EmbeddableStart };
 
-export type { EnhancementRegistryDefinition } from './types';
+export type { EmbeddableRegistryDefinition, EnhancementRegistryDefinition } from './types';
 
-export type { EmbeddableRegistryDefinition } from '../common';
+export type {
+  EmbeddableStateWithType,
+  EmbeddablePersistableStateService,
+} from './persistable_state';
 
 export const plugin = async () => {
   const { EmbeddableServerPlugin } = await import('./plugin');

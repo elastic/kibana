@@ -18,45 +18,7 @@ import type { Query, Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SimpleSavedObject } from '@kbn/core/public';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getDefaultDSLQuery, type SearchQueryLanguage } from '@kbn/ml-query-utils';
-
-export type SavedSearchSavedObject = SimpleSavedObject<any>;
-
-export function isSavedSearchSavedObject(arg: unknown): arg is SavedSearchSavedObject {
-  return isPopulatedObject(arg, ['id', 'type', 'attributes']);
-}
-
-/**
- * Parse the stringified searchSourceJSON
- * from a saved search or saved search object
- */
-export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObject | SavedSearch) {
-  const search = isSavedSearchSavedObject(savedSearch)
-    ? savedSearch?.attributes?.kibanaSavedObjectMeta
-    : // @ts-ignore
-      savedSearch?.kibanaSavedObjectMeta;
-
-  const parsed =
-    typeof search?.searchSourceJSON === 'string'
-      ? (JSON.parse(search.searchSourceJSON) as {
-          query: Query;
-          filter: Filter[];
-        })
-      : undefined;
-
-  // Remove indexRefName because saved search might no longer be relevant
-  // if user modifies the query or filter
-  // after opening a saved search
-  if (parsed && Array.isArray(parsed.filter)) {
-    parsed.filter.forEach((f) => {
-      // @ts-expect-error indexRefName does appear in meta for newly created saved search
-      f.meta.indexRefName = undefined;
-    });
-  }
-  return parsed;
-}
 
 function getSavedSearchSource(savedSearch: SavedSearch) {
   return savedSearch &&

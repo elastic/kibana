@@ -40,23 +40,7 @@
           "label": "chatComplete",
           "description": [],
           "signature": [
-            "<TToolOptions extends ",
-            {
-              "pluginId": "@kbn/inference-common",
-              "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.ToolOptions",
-              "text": "ToolOptions"
-            },
-            "<string> = ",
-            {
-              "pluginId": "@kbn/inference-common",
-              "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.ToolOptions",
-              "text": "ToolOptions"
-            },
-            "<string>, TStream extends boolean = false>(options: ",
+            "<TOptions extends ",
             {
               "pluginId": "@kbn/inference-common",
               "scope": "common",
@@ -64,15 +48,15 @@
               "section": "def-common.ChatCompleteOptions",
               "text": "ChatCompleteOptions"
             },
-            "<TToolOptions, TStream>) => ",
+            ">(options: TOptions) => ",
             {
               "pluginId": "@kbn/inference-common",
               "scope": "common",
               "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.ChatCompleteCompositeResponse",
-              "text": "ChatCompleteCompositeResponse"
+              "section": "def-common.ChatCompleteAPIResponse",
+              "text": "ChatCompleteAPIResponse"
             },
-            "<TToolOptions, TStream>"
+            "<TOptions>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
           "deprecated": false,
@@ -82,44 +66,12 @@
             {
               "parentPluginId": "inference",
               "id": "def-public.InferencePublicStart.chatComplete.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "options",
               "description": [],
               "signature": [
-                "{ connectorId: string; stream?: TStream | undefined; system?: string | undefined; messages: ",
-                {
-                  "pluginId": "@kbn/inference-common",
-                  "scope": "common",
-                  "docId": "kibKbnInferenceCommonPluginApi",
-                  "section": "def-common.Message",
-                  "text": "Message"
-                },
-                "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
-                {
-                  "pluginId": "@kbn/inference-common",
-                  "scope": "common",
-                  "docId": "kibKbnInferenceCommonPluginApi",
-                  "section": "def-common.FunctionCallingMode",
-                  "text": "FunctionCallingMode"
-                },
-                " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
-                {
-                  "pluginId": "@kbn/inference-common",
-                  "scope": "common",
-                  "docId": "kibKbnInferenceCommonPluginApi",
-                  "section": "def-common.ChatCompleteMetadata",
-                  "text": "ChatCompleteMetadata"
-                },
-                " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
-                {
-                  "pluginId": "@kbn/inference-common",
-                  "scope": "common",
-                  "docId": "kibKbnInferenceCommonPluginApi",
-                  "section": "def-common.ChatCompleteRetryConfiguration",
-                  "text": "ChatCompleteRetryConfiguration"
-                },
-                " | undefined; } & TToolOptions"
+                "TOptions"
               ],
               "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
               "deprecated": false,
@@ -307,7 +259,7 @@
             "label": "getDocumentation",
             "description": [],
             "signature": [
-              "(keywords: string[], { generateMissingKeywordDoc, addSuggestions, addOverview, resolveAliases, }?: ",
+              "(rawKeywords: string[], { generateMissingKeywordDoc, addSuggestions, addOverview, resolveAliases, }?: ",
               "GetDocsOptions",
               ") => Record<string, string>"
             ],
@@ -320,7 +272,7 @@
                 "id": "def-server.EsqlDocumentBase.getDocumentation.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "keywords",
+                "label": "rawKeywords",
                 "description": [],
                 "signature": [
                   "string[]"
@@ -563,7 +515,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -1347,6 +1299,8 @@
                   "default",
                   "; ssl: ",
                   "default",
+                  "; streams: ",
+                  "default",
                   "; synonyms: ",
                   "default",
                   "; tasks: ",
@@ -1756,7 +1710,7 @@
         "label": "createRestClient",
         "description": [],
         "signature": [
-          "(options: UnboundOptions) => ",
+          "(options: RestOptions) => ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1777,7 +1731,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "UnboundOptions"
+              "RestOptions"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
             "deprecated": false,
@@ -1796,7 +1750,7 @@
         "label": "createRestClient",
         "description": [],
         "signature": [
-          "(options: BoundOptions) => ",
+          "(options: BoundRestOptions) => ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1817,7 +1771,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "BoundOptions"
+              "BoundRestOptions"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
             "deprecated": false,
@@ -1836,7 +1790,7 @@
         "label": "createRestClient",
         "description": [],
         "signature": [
-          "(options: UnboundOptions | BoundOptions) => ",
+          "(options: RestOptions | BoundRestOptions) => ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1865,7 +1819,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "UnboundOptions | BoundOptions"
+              "RestOptions | BoundRestOptions"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
             "deprecated": false,

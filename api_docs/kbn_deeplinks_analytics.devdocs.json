@@ -39,6 +39,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.CANVAS_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "CANVAS_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"CANVAS_APP_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
         "id": "def-common.DASHBOARD_APP_ID",
         "type": "string",
         "tags": [],
@@ -91,6 +106,21 @@
         "description": [],
         "signature": [
           "\"discover\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.DISCOVER_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"DISCOVER_APP_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { RulesContainer } from './rules_container';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
@@ -16,6 +17,7 @@ import { TestProvider } from '../../test/test_provider';
 import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { useParams } from 'react-router-dom';
 import { coreMock } from '@kbn/core/public/mocks';
+import { SECURITY_FEATURE_ID } from '../../test/constants';
 
 const chance = new Chance();
 
@@ -47,7 +49,7 @@ const getWrapper =
         ...coreStart.application,
         capabilities: {
           ...coreStart.application.capabilities,
-          siemV2: { crud: canUpdate },
+          [SECURITY_FEATURE_ID]: { crud: canUpdate },
         },
       },
     };

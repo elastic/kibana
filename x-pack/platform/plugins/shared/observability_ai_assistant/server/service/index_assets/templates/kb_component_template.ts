@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/types';
 
 const keyword = {
   type: 'keyword' as const,
@@ -66,8 +66,9 @@ export function getComponentTemplate(inferenceId: string) {
         'ml.tokens': {
           type: 'rank_features',
         },
-        confidence: keyword,
+        confidence: keyword, // deprecated but kept for backwards compatibility
         is_correction: {
+          // deprecated but kept for backwards compatibility
           type: 'boolean',
         },
         public: {

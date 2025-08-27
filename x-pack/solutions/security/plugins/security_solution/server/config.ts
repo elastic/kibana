@@ -182,10 +182,28 @@ export const configSchema = schema.object({
         pipelineDebugMode: schema.boolean({ defaultValue: false }),
       }),
     }),
+    monitoring: schema.object({
+      privileges: schema.object({
+        users: schema.object({
+          maxPrivilegedUsersAllowed: schema.number({ defaultValue: 10000 }),
+          csvUpload: schema.object({
+            errorRetries: schema.number({ defaultValue: 1 }),
+            maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
+          }),
+        }),
+      }),
+    }),
   }),
   siemRuleMigrations: schema.maybe(
     schema.object({
       elserInferenceId: schema.maybe(schema.string()),
+    })
+  ),
+  cdn: schema.maybe(
+    schema.object({
+      url: schema.maybe(schema.string()),
+      // PEM-encoded public key used to verify the global artifact manifest signature.
+      publicKey: schema.maybe(schema.string()),
     })
   ),
 });

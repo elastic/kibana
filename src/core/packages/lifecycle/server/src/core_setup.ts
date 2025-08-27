@@ -30,6 +30,7 @@ import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-server';
 import type { PricingServiceSetup } from '@kbn/core-pricing-server';
 import type { SecurityServiceSetup } from '@kbn/core-security-server';
 import type { UserProfileServiceSetup } from '@kbn/core-user-profile-server';
+import type { CoreDiServiceSetup } from '@kbn/core-di';
 import type { CoreStart } from './core_start';
 
 /**
@@ -89,6 +90,8 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   security: SecurityServiceSetup;
   /** {@link UserProfileServiceSetup} */
   userProfile: UserProfileServiceSetup;
+  /** {@link CoreDiServiceSetup} */
+  injection: CoreDiServiceSetup;
 }
 
 /**

@@ -7,19 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLoadingChart, UseEuiTheme } from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useMemoizedStyles } from '@kbn/core/public';
-import { DashboardPanelState } from '../../../common';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { presentationUtilService } from '../../services/kibana_services';
-import { DASHBOARD_MARGIN_SIZE } from './constants';
 import { printViewportVisStyles } from '../print_styles';
+import { DASHBOARD_MARGIN_SIZE } from './constants';
+import { getHighlightStyles } from './highlight_styles';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -28,7 +32,7 @@ export interface Props extends DivProps {
   dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
   id: string;
   index?: number;
-  type: DashboardPanelState['type'];
+  type: string;
   key: string;
   isRenderable?: boolean;
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
@@ -105,7 +109,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
     const dashboardContainerTopOffset = dashboardContainerRef?.current?.offsetTop || 0;
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
-    const styles = useMemoizedStyles(dashboardGridItemStyles);
+    const styles = useMemoCss(dashboardGridItemStyles);
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
@@ -131,11 +135,17 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       );
     }, [id, dashboardApi, dashboardInternalApi, type, useMargins, setDragHandles]);
 
+    const { euiTheme } = useEuiTheme();
+    const hoverActionsHeight = euiTheme.base * 2;
+
     const focusStyles = blurPanel
       ? styles.focusPanelBlur
       : css({
           scrollMarginTop: `${
-            dashboardContainerTopOffset + globalNavTopOffset + DASHBOARD_MARGIN_SIZE
+            dashboardContainerTopOffset +
+            globalNavTopOffset +
+            DASHBOARD_MARGIN_SIZE +
+            hoverActionsHeight
           }px`,
         });
 
@@ -196,20 +206,14 @@ export const ObservedItem = React.forwardRef<HTMLDivElement, Props>((props, pane
 
 export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props, ref) => {
   const dashboardApi = useDashboardApi();
-  const [focusedPanelId, viewMode] = useBatchedPublishingSubjects(
-    dashboardApi.focusedPanelId$,
-    dashboardApi.viewMode$
-  );
+  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
 
   const deferBelowFoldEnabled = useMemo(
     () => presentationUtilService.labsService.isProjectEnabled('labs:dashboard:deferBelowFold'),
     []
   );
 
-  const isEnabled =
-    viewMode !== 'print' &&
-    deferBelowFoldEnabled &&
-    (!focusedPanelId || focusedPanelId === props.id);
+  const isEnabled = viewMode !== 'print' && deferBelowFoldEnabled;
 
   return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
 });
@@ -219,12 +223,6 @@ const dashboardGridItemStyles = {
     css([
       {
         height: '100%',
-        '&.dshDashboardGrid__item--highlighted .embPanel': {
-          borderRadius: context.euiTheme.border.radius.small,
-          animationName: highlightOutline(context.euiTheme),
-          animationDuration: '4s',
-          animationTimingFunction: 'ease-out',
-        },
         // Remove padding in fullscreen mode
         '.kbnAppWrapper--hiddenChrome &.dshDashboardGrid__item--expanded': {
           padding: 0,
@@ -233,6 +231,7 @@ const dashboardGridItemStyles = {
           padding: 0,
         },
       },
+      getHighlightStyles(context),
       printViewportVisStyles(context),
     ]),
   focusPanelBlur: css({
@@ -240,16 +239,3 @@ const dashboardGridItemStyles = {
     opacity: '0.25',
   }),
 };
-
-const highlightOutline = (euiTheme: UseEuiTheme['euiTheme']) =>
-  keyframes({
-    '0%': {
-      outline: `solid ${euiTheme.size.xs} transparent`,
-    },
-    '25%': {
-      outline: `solid ${euiTheme.size.xs} ${euiTheme.colors.backgroundLightSuccess}`,
-    },
-    '100%': {
-      outline: `solid ${euiTheme.size.xs} transparent`,
-    },
-  });

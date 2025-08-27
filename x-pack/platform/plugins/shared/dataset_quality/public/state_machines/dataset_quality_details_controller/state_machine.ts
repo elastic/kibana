@@ -7,8 +7,9 @@
 
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { getDateISORange } from '@kbn/timerange';
-import { assign, createMachine, DoneInvokeEvent, InterpreterFrom, raise } from 'xstate';
-import {
+import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { assign, createMachine, raise } from 'xstate';
+import type {
   Dashboard,
   DataStreamDetails,
   DataStreamSettings,
@@ -21,17 +22,17 @@ import {
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { indexNameToDataStreamParts } from '../../../common/utils';
-import { IDataStreamDetailsClient } from '../../services/data_stream_details';
-import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
-import { DatasetQualityStartDeps } from '../../types';
+import type { IDataStreamDetailsClient } from '../../services/data_stream_details';
+import type { IDataStreamsStatsClient } from '../../services/data_streams_stats';
+import type { DatasetQualityStartDeps } from '../../types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
-import {
+import type {
   DatasetQualityDetailsControllerContext,
   DatasetQualityDetailsControllerEvent,
   DatasetQualityDetailsControllerTypeState,
 } from './types';
 
-import { IntegrationType } from '../../../common/data_stream_details';
+import type { IntegrationType } from '../../../common/data_stream_details';
 import {
   assertBreakdownFieldEcsFailedNotifier,
   fetchDataStreamDetailsFailedNotifier,
@@ -40,6 +41,8 @@ import {
   fetchIntegrationDashboardsFailedNotifier,
   rolloverDataStreamFailedNotifier,
   updateFieldLimitFailedNotifier,
+  updateFailureStoreFailedNotifier,
+  updateFailureStoreSuccessNotifier,
 } from './notifications';
 import {
   filterIssues,
@@ -530,6 +533,32 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 ],
               },
             },
+            failureStoreUpdate: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    UPDATE_FAILURE_STORE: {
+                      target: 'updating',
+                      actions: ['storeDataStreamDetails'],
+                    },
+                  },
+                },
+                updating: {
+                  invoke: {
+                    src: 'updateFailureStore',
+                    onDone: {
+                      target: 'idle',
+                      actions: ['notifyUpdateFailureStoreSuccess', 'raiseForceTimeRangeRefresh'],
+                    },
+                    onError: {
+                      target: 'idle',
+                      actions: ['notifyUpdateFailureStoreFailed', 'raiseForceTimeRangeRefresh'],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         indexNotFound: {
@@ -772,7 +801,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         canReadFailureStore: (context) => {
           return (
             'dataStreamSettings' in context &&
-            Boolean(context.dataStreamSettings.datasetUserPrivileges?.canReadFailureStore)
+            Boolean(
+              context.dataStreamSettings.datasetUserPrivileges?.datasetsPrivilages[
+                context.dataStream
+              ].canReadFailureStore
+            )
           );
         },
       },
@@ -813,6 +846,9 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         updateFieldLimitFailedNotifier(toasts, event.data),
       notifyRolloverDataStreamError: (context, event: DoneInvokeEvent<Error>) =>
         rolloverDataStreamFailedNotifier(toasts, event.data, context.dataStream),
+      notifyUpdateFailureStoreSuccess: () => updateFailureStoreSuccessNotifier(toasts),
+      notifyUpdateFailureStoreFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        updateFailureStoreFailedNotifier(toasts, event.data),
     },
     services: {
       checkDatasetIsAggregatable: (context) => {
@@ -955,6 +991,21 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return dataStreamDetailsClient.rolloverDataStream({
           dataStream: context.dataStream,
         });
+      },
+      updateFailureStore: (context) => {
+        if (
+          'dataStreamDetails' in context &&
+          context.dataStreamDetails &&
+          context.dataStreamDetails.hasFailureStore
+        ) {
+          return dataStreamDetailsClient.updateFailureStore({
+            dataStream: context.dataStream,
+            failureStoreEnabled: context.dataStreamDetails.hasFailureStore,
+            customRetentionPeriod: context.dataStreamDetails.customRetentionPeriod,
+          });
+        }
+
+        return Promise.resolve();
       },
     },
   });

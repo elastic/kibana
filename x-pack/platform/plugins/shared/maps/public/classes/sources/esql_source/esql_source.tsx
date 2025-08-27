@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
@@ -28,7 +28,7 @@ import type {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
-import { DataRequest } from '../../util/data_request';
+import type { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import type { SourceEditorArgs } from '../source';
 import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_source';
@@ -50,13 +50,23 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
 });
 
+export type NormalizedESQLSourceDescriptor = ESQLSourceDescriptor &
+  Required<
+    Pick<
+      ESQLSourceDescriptor,
+      'narrowByGlobalSearch' | 'narrowByGlobalTime' | 'narrowByMapBounds' | 'applyForceRefresh'
+    >
+  >;
+
 export class ESQLSource
   extends AbstractVectorSource
   implements IVectorSource, Pick<IESSource, 'getIndexPatternId' | 'getGeoFieldName'>
 {
-  readonly _descriptor: ESQLSourceDescriptor;
+  readonly _descriptor: NormalizedESQLSourceDescriptor;
 
-  static createDescriptor(descriptor: Partial<ESQLSourceDescriptor>): ESQLSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<ESQLSourceDescriptor>
+  ): NormalizedESQLSourceDescriptor {
     if (!isValidStringConfig(descriptor.esql)) {
       throw new Error('Cannot create ESQLSourceDescriptor when esql is not provided');
     }

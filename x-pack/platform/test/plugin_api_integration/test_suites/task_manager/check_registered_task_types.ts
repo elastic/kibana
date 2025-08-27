@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Response as SupertestResponse } from 'supertest';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { Response as SupertestResponse } from 'supertest';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -22,7 +22,9 @@ export default function ({ getService }: FtrProviderContext) {
   const TEST_TYPES = [
     'sampleAdHocTaskTimingOut',
     'lowPriorityTask',
+    'normalLongRunningPriorityTask',
     'sampleOneTimeTaskThrowingError',
+    'sampleRecurringTaskDisablesItself',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
     'sampleRecurringTaskThatDeletesItself',
@@ -50,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Fleet-Metrics-Task',
         'Fleet-Usage-Logger',
         'Fleet-Usage-Sender',
+        'IndicesMetadata:IndicesMetadataTask',
         'ML:saved-objects-sync',
         'ProductDocBase:EnsureUpToDate',
         'ProductDocBase:InstallAll',
@@ -88,6 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.torq',
         'actions:.webhook',
         'actions:.xmatters',
+        'actions:.xsoar',
         'actions:connector_usage_reporting',
         'actions_telemetry',
         'ad_hoc_run-backfill',
@@ -99,6 +103,8 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:apm.error_rate',
         'alerting:apm.transaction_duration',
         'alerting:apm.transaction_error_rate',
+        'alerting:attack-discovery',
+        'alerting:datasetQuality.degradedDocs',
         'alerting:logs.alert.document.count',
         'alerting:metrics.alert.inventory.threshold',
         'alerting:metrics.alert.threshold',
@@ -127,6 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:siem.savedQueryRule',
         'alerting:siem.thresholdRule',
         'alerting:slo.rules.burnRate',
+        'alerting:streams.rules.esql',
         'alerting:transform_health',
         'alerting:xpack.ml.anomaly_detection_alert',
         'alerting:xpack.ml.anomaly_detection_jobs_health',
@@ -141,6 +148,8 @@ export default function ({ getService }: FtrProviderContext) {
         'alerts_invalidate_api_keys',
         'apm-source-map-migration-task',
         'apm-telemetry-task',
+        'cai:cases_analytics_index_backfill',
+        'cai:cases_analytics_index_synchronization',
         'cases-telemetry-task',
         'cloud_security_posture-stats_task',
         'dashboard_telemetry',
@@ -150,6 +159,8 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_analytics:monitoring:privileges:engine',
         'entity_store:data_view:refresh',
         'entity_store:field_retention:enrichment',
+        'fleet:agent-status-change-task',
+        'fleet:auto-install-content-packages-task',
         'fleet:automatic-agent-upgrade-task',
         'fleet:bump_agent_policies',
         'fleet:check-deleted-files-task',
@@ -166,15 +177,18 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:upgrade-agentless-deployments-task',
         'fleet:upgrade_action:retry',
         'logs-data-telemetry',
+        'maintenance-window:generate-events',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',
         'osquery:telemetry-saved-queries',
         'report:execute',
+        'report:execute-scheduled',
         'risk_engine:risk_scoring',
         'search:agentless-connectors-manager',
         'security-solution-ea-asset-criticality-ecs-migration',
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',
+        'security:health-diagnostic',
         'security:indices-metadata-telemetry',
         'security:ingest-pipelines-stats-telemetry',
         'security:telemetry-configuration',
@@ -183,12 +197,14 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-filterlist-artifact',
         'security:telemetry-lists',
         'security:telemetry-prebuilt-rule-alerts',
+        'security:telemetry-response-actions-rules',
         'security:telemetry-timelines',
         'session_cleanup',
         'slo:bulk-delete-task',
         'slo:temp-summary-cleanup-task',
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:mark_removed_tasks_as_unrecognized',
+        'unusedUrlsCleanupTask',
       ]);
     });
   });

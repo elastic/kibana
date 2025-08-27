@@ -78,7 +78,6 @@ export enum PlaygroundFormFields {
   indices = 'indices',
   elasticsearchQuery = 'elasticsearch_query',
   userElasticsearchQuery = 'user_elasticsearch_query',
-  userElasticsearchQueryValidations = 'user_elasticsearch_query_validations',
   summarizationModel = 'summarization_model',
   sourceFields = 'source_fields',
   docSize = 'doc_size',
@@ -91,21 +90,28 @@ export interface PlaygroundForm {
   [PlaygroundFormFields.prompt]: string;
   [PlaygroundFormFields.citations]: boolean;
   [PlaygroundFormFields.indices]: string[];
-  [PlaygroundFormFields.summarizationModel]: LLMModel;
+  [PlaygroundFormFields.summarizationModel]: LLMModel | undefined;
   [PlaygroundFormFields.elasticsearchQuery]: { retriever: any }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
   [PlaygroundFormFields.sourceFields]: { [index: string]: string[] };
   [PlaygroundFormFields.docSize]: number;
   [PlaygroundFormFields.queryFields]: { [index: string]: string[] };
   [PlaygroundFormFields.searchQuery]: string;
   [PlaygroundFormFields.userElasticsearchQuery]: string | null | undefined;
-  [PlaygroundFormFields.userElasticsearchQueryValidations]: UserQueryValidations | undefined;
 }
 
-export interface UserQueryValidations {
-  isValid: boolean;
-  isUserCustomized: boolean;
-  userQueryErrors?: string[];
+enum SavedPlaygroundFields {
+  name = 'name',
 }
+
+export type SavedPlaygroundFormFields = PlaygroundFormFields | SavedPlaygroundFields;
+export const SavedPlaygroundFormFields = { ...PlaygroundFormFields, ...SavedPlaygroundFields };
+export interface SavedPlaygroundForm extends PlaygroundForm {
+  [SavedPlaygroundFields.name]: string;
+}
+
+export type SavedPlaygroundFormFetchError = SavedPlaygroundForm & {
+  error: Error;
+};
 
 export interface Message {
   id: string;
@@ -238,11 +244,18 @@ export interface LLMModel {
   icon: string;
   disabled: boolean;
   promptTokenLimit?: number;
+  isElasticConnector?: boolean;
 }
 
 export type { ActionConnector, UserConfiguredActionConnector };
 export type InferenceActionConnector = ActionConnector & {
-  config: { provider: ServiceProviderKeys; inferenceId: string };
+  config: {
+    providerConfig?: {
+      model_id?: string;
+    };
+    provider: ServiceProviderKeys;
+    inferenceId: string;
+  };
 };
 export type PlaygroundConnector = ActionConnector & { title: string; type: LLMs };
 
@@ -257,4 +270,15 @@ export enum PlaygroundViewMode {
 export interface PlaygroundRouterParameters {
   pageMode: PlaygroundPageMode;
   viewMode?: PlaygroundViewMode;
+}
+
+export interface SavedPlaygroundRouterParameters {
+  playgroundId: string;
+  pageMode?: PlaygroundPageMode;
+  viewMode?: PlaygroundViewMode;
+}
+
+export interface SavedPlaygroundLoadErrors {
+  missingIndices: string[];
+  missingModel?: string;
 }

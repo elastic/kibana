@@ -14,8 +14,10 @@ import minimatch from 'minimatch';
 
 import { load as loadYaml } from 'js-yaml';
 
-import { BuildkiteClient, BuildkiteStep } from '../buildkite';
-import { CiStatsClient, TestGroupRunOrderResponse } from './client';
+import type { BuildkiteStep } from '../buildkite';
+import { BuildkiteClient } from '../buildkite';
+import type { TestGroupRunOrderResponse } from './client';
+import { CiStatsClient } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
@@ -461,7 +463,10 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 80,
+              diskSizeGb: 85,
+            },
+            env: {
+              SCOUT_TARGET_TYPE: 'local',
             },
             retry: {
               automatic: [
@@ -481,6 +486,9 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 120,
             key: 'jest-integration',
             agents: expandAgentQueue('n2-4-spot'),
+            env: {
+              SCOUT_TARGET_TYPE: 'local',
+            },
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -516,6 +524,7 @@ export async function pickTestGroupRunOrder() {
                   timeout_in_minutes: 90,
                   agents: expandAgentQueue(queue),
                   env: {
+                    SCOUT_TARGET_TYPE: 'local',
                     FTR_CONFIG_GROUP_KEY: key,
                     ...ftrExtraArgs,
                     ...envFromlabels,
@@ -564,7 +573,6 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     [
       {
         group: 'Scout Configs',
-        key: 'scout-configs',
         depends_on: ['build'],
         steps: scoutGroups.map(
           ({ title, key, group, usesParallelWorkers }): BuildkiteStep => ({

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: SIEM Rule Migration common components
+  title: SIEM Migration common components
   version: 'not applicable'
 paths: {}
 components:
@@ -24,7 +24,7 @@ components:
           type: string
           description: The API key to use for tracing.
 
-    LangSmithEvaluationSettings:
+    LangSmithEvaluationOptions:
       description: The LangSmith settings object for evaluations.
       allOf:
         - $ref: '#/components/schemas/LangSmithOptions'
@@ -35,3 +35,106 @@ components:
             dataset:
               type: string
               description: The dataset name to use for evaluations.
+
+    MigrationStatus:
+      type: string
+      description: The status of migration.
+      enum: # should match SiemMigrationsStatus enum at ../constants.ts
+        - pending
+        - processing
+        - completed
+        - failed
+
+    MigrationTaskStatus:
+      type: string
+      description: The status of the migration task.
+      enum: # should match SiemMigrationTaskStatus enum at ../constants.ts
+        - ready
+        - running
+        - stopped
+        - finished
+        - interrupted
+
+    MigrationLastExecution:
+      type: object
+      description: The last execution of a migration task.
+      properties:
+        started_at:
+          type: string
+          description: The moment the last execution started.
+        finished_at:
+          type: string
+          nullable: true
+          description: The moment the last execution finished.
+        connector_id:
+          type: string
+          description: The connector ID used for the last execution.
+        error:
+          type: string
+          nullable: true
+          description: The error message if the last execution failed.
+        is_stopped:
+          type: boolean
+          description: Indicates if the last execution was stopped by the user.
+
+    SiemMigrationResourceType:
+      type: string
+      description: The type of the resource
+      enum:
+        - macro
+        - lookup
+
+    SiemMigrationResourceBase:
+      type: object
+      description: A resource of a migration
+      required:
+        - type
+        - name
+      properties:
+        type:
+          $ref: '#/components/schemas/SiemMigrationResourceType'
+        name:
+          description: The name of the resource
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    SiemMigrationResourceContent:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: The resource content value. Can be an empty string.
+        metadata:
+          type: object
+          description: The resource arbitrary metadata.
+
+    SiemMigrationResourceData:
+      description: The rule migration resource data.
+      allOf:
+        - $ref: '#/components/schemas/SiemMigrationResourceBase'
+        - $ref: '#/components/schemas/SiemMigrationResourceContent'
+
+    SiemMigrationResource:
+      description: The rule migration resource document object.
+      allOf:
+        - $ref: '#/components/schemas/SiemMigrationResourceBase'
+        - $ref: '#/components/schemas/SiemMigrationResourceContent'
+          x-modify: partial
+        - type: object
+          required:
+            - id
+            - migration_id
+          properties:
+            id:
+              description: The rule resource migration id
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+            migration_id:
+              description: The migration id
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+            updated_at:
+              type: string
+              description: The moment of the last update
+            updated_by:
+              type: string
+              description: The user who last updated the resource

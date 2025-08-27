@@ -10,10 +10,10 @@ import type {
   AggregationsMultiBucketBase,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { calculatePostureScore } from '../../../../common/utils/helpers';
 import type { CspmAccountsStats } from './types';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
 interface Value {
   value: number;
@@ -54,10 +54,16 @@ interface AccountEntity {
   resources: {
     pods_count: Value;
   };
+  kspm_namespaces_count: {
+    namespaces_count: Value;
+  };
+  cspm_namespaces_count: {
+    namespaces_count: Value;
+  };
 }
 
 const getAccountsStatsQuery = (): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
   runtime_mappings: getIdentifierRuntimeMapping(),
   query: {
     match_all: {},
@@ -193,6 +199,34 @@ const getAccountsStatsQuery = (): SearchRequest => ({
             },
           },
         },
+        kspm_namespaces_count: {
+          filter: {
+            term: {
+              'rule.benchmark.posture_type': 'kspm',
+            },
+          },
+          aggs: {
+            namespaces_count: {
+              cardinality: {
+                field: 'data_stream.namespace',
+              },
+            },
+          },
+        },
+        cspm_namespaces_count: {
+          filter: {
+            term: {
+              'rule.benchmark.posture_type': 'cspm',
+            },
+          },
+          aggs: {
+            namespaces_count: {
+              cardinality: {
+                field: 'data_stream.namespace',
+              },
+            },
+          },
+        },
       },
     },
   },
@@ -223,6 +257,8 @@ const getCspmAccountsStats = (
     agents_count: account.agents_count.value,
     nodes_count: account.nodes_count.value,
     pods_count: account.resources.pods_count.value,
+    kspm_namespaces_count: account.kspm_namespaces_count.namespaces_count.value,
+    cspm_namespaces_count: account.cspm_namespaces_count.namespaces_count.value,
   }));
 
   return cspmAccountsStats;
@@ -234,7 +270,7 @@ export const getAccountsStats = async (
 ): Promise<CspmAccountsStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     });
 
     if (isIndexExists) {

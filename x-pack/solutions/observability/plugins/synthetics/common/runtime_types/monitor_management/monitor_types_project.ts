@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/Either';
+import type { Either } from 'fp-ts/Either';
 import { AlertConfigsCodec } from './alert_config';
 import { ScreenshotOptionCodec } from './monitor_configs';
 
@@ -64,6 +64,8 @@ export const ProjectMonitorCodec = t.intersection([
     retestOnFailure: t.boolean,
     fields: t.record(t.string, t.string),
     'service.name': t.string,
+    maintenanceWindows: t.array(t.string),
+    spaces: t.array(t.string),
   }),
 ]);
 

@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import {
+import type {
   AssistantMessage,
   ChatCompleteCompositeResponse,
   Message,
-  MessageRole,
   Model,
   ToolCall,
   ToolChoice,
   ToolDefinition,
   ToolMessage,
-  ToolOptions,
   UserMessage,
+} from '@kbn/inference-common';
+import {
+  MessageRole,
   isChatCompletionMessageEvent,
   isChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
-import { Span } from '@opentelemetry/api';
+import type { Span } from '@opentelemetry/api';
 import { isObservable, tap } from 'rxjs';
 import { isPromise } from 'util/types';
-import { withInferenceSpan } from './with_inference_span';
-import {
+import { withActiveInferenceSpan } from './with_active_inference_span';
+import type {
   AssistantMessageEvent,
   ChoiceEvent,
-  ElasticGenAIAttributes,
   GenAISemConvAttributes,
-  GenAISemanticConventions,
   MessageEvent,
   SystemMessageEvent,
   ToolMessageEvent,
   UserMessageEvent,
 } from './types';
+import { ElasticGenAIAttributes, GenAISemanticConventions } from './types';
 import { flattenAttributes } from './util/flatten_attributes';
 
 function addEvent(span: Span, event: MessageEvent) {
@@ -48,7 +48,10 @@ function addEvent(span: Span, event: MessageEvent) {
   });
 }
 
-function setChoice(span: Span, { content, toolCalls }: { content: string; toolCalls: ToolCall[] }) {
+export function setChoice(
+  span: Span,
+  { content, toolCalls }: { content: string; toolCalls: ToolCall[] }
+) {
   addEvent(span, {
     name: GenAISemanticConventions.GenAIChoice,
     body: {
@@ -142,31 +145,33 @@ function mapAssistantResponse({
 }
 
 /**
- * Wrapper around {@link withInferenceSpan} that sets the right attributes for a chat operation span.
+ * Wrapper around {@link withActiveInferenceSpan} that sets the right attributes for a chat operation span.
  * @param options
  * @param cb
  */
-export function withChatCompleteSpan<T extends ChatCompleteCompositeResponse<ToolOptions, boolean>>(
+export function withChatCompleteSpan<T extends ChatCompleteCompositeResponse>(
   options: InferenceGenerationOptions,
   cb: (span?: Span) => T
 ): T;
 
 export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
-  cb: (span?: Span) => ChatCompleteCompositeResponse<ToolOptions, boolean>
-): ChatCompleteCompositeResponse<ToolOptions, boolean> {
+  cb: (span?: Span) => ChatCompleteCompositeResponse
+): ChatCompleteCompositeResponse {
   const { system, messages, model, toolChoice, tools, ...attributes } = options;
 
-  const next = withInferenceSpan(
+  const next = withActiveInferenceSpan(
+    'ChatComplete',
     {
-      name: 'chatComplete',
-      ...attributes,
-      [GenAISemanticConventions.GenAIOperationName]: 'chat',
-      [GenAISemanticConventions.GenAIResponseModel]: model?.family ?? 'unknown',
-      [GenAISemanticConventions.GenAISystem]: model?.provider ?? 'unknown',
-      [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
-      [ElasticGenAIAttributes.Tools]: tools ? JSON.stringify(tools) : undefined,
-      [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
+      attributes: {
+        ...attributes,
+        [GenAISemanticConventions.GenAIOperationName]: 'chat',
+        [GenAISemanticConventions.GenAIResponseModel]: model?.family ?? 'unknown',
+        [GenAISemanticConventions.GenAISystem]: model?.provider ?? 'unknown',
+        [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
+        [ElasticGenAIAttributes.Tools]: tools ? JSON.stringify(tools) : undefined,
+        [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
+      },
     },
     (span) => {
       if (!span) {

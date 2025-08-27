@@ -17,11 +17,11 @@ import merge from 'lodash/merge';
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   SUPPORTED_CLOUDBEAT_INPUTS,
   ASSET_POLICY_TEMPLATE,
-  ASSET_NAMESPACE,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
@@ -37,7 +37,11 @@ import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form
 import type { AssetInput, AssetInventoryInputTypes, NewPackagePolicyAssetInput } from './types';
 import type { AwsCredentialsType } from './aws_credentials_form/types';
 import googleCloudLogo from './assets/icons/google_cloud_logo.svg';
-import { AWS_CREDENTIALS_TYPE, CLOUDBEAT_AWS } from './aws_credentials_form/constants';
+import {
+  AWS_CREDENTIALS_TYPE,
+  AWS_SINGLE_ACCOUNT,
+  CLOUDBEAT_AWS,
+} from './aws_credentials_form/constants';
 import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
 import { AZURE_CREDENTIALS_TYPE, CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import {
@@ -80,7 +84,15 @@ const getAssetType = (policyTemplateInput: AssetInput) => {
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {
   input: NewPackagePolicyAssetInput;
-  cloud: Pick<CloudSetup, 'isCloudEnabled' | 'deploymentId' | 'serverless'>;
+  cloud: Pick<
+    CloudSetup,
+    | 'isCloudEnabled'
+    | 'cloudId'
+    | 'cloudHost'
+    | 'deploymentUrl'
+    | 'serverless'
+    | 'isServerlessEnabled'
+  >;
   packageInfo: PackageInfo;
 }
 
@@ -131,7 +143,6 @@ export const getAssetPolicy = (
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
   ...newPolicy,
-  namespace: ASSET_NAMESPACE,
   // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => getAssetInput(item, inputType, inputVars)),
   // Set hidden policy vars
@@ -539,18 +550,53 @@ export const getCloudCredentialVarsConfig = ({
     [credentialType]: { value: optionId },
   };
 };
+export const getCloudProviderFromCloudHost = (
+  cloudHost: string | undefined
+): string | undefined => {
+  if (!cloudHost) return undefined;
+  const match = cloudHost.match(/\b(aws|gcp|azure)\b/);
+  return match?.[1];
+};
+
+export const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
+  if (!url) return undefined;
+  const match = url.match(/\/deployments\/([^/?#]+)/);
+  return match?.[1];
+};
+
+export const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
+  if (!cloudId) return undefined;
+
+  const base64Part = cloudId.split(':')[1];
+  const decoded = atob(base64Part);
+  const [, , kibanaComponentId] = decoded.split('$');
+
+  return kibanaComponentId || undefined;
+};
 
 export const getCloudConnectorRemoteRoleTemplate = ({
   input,
   cloud,
   packageInfo,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  const SINGLE_ACCOUNT = 'single_account';
-  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
+  let elasticResourceId: string | undefined;
+  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
 
-  const elasticResourceId = cloud?.isCloudEnabled
-    ? cloud?.deploymentId
-    : cloud?.serverless?.projectId;
+  const provider = getCloudProviderFromCloudHost(cloud?.cloudHost);
+
+  if (!provider || provider !== 'aws') return undefined;
+
+  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+
+  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
+
+  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
+    elasticResourceId = cloud.serverless.projectId;
+  }
+
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    elasticResourceId = kibanaComponentId;
+  }
 
   if (!elasticResourceId) return undefined;
 
@@ -560,5 +606,5 @@ export const getCloudConnectorRemoteRoleTemplate = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
   )
     ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, 'elasticResourceId');
+    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
 };

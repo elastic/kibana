@@ -7,13 +7,15 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
-import { EnrichedDeprecationInfo, ResponseError } from '../../../../../../common/types';
+import type { EnrichedDeprecationInfo, ResponseError } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
-import { DeprecationTableColumns, Status } from '../../../types';
+import type { DeprecationTableColumns, Status } from '../../../types';
 import { ClusterSettingsResolutionCell } from './resolution_table_cell';
-import { RemoveClusterSettingsFlyout, RemoveClusterSettingsFlyoutProps } from './flyout';
+import type { RemoveClusterSettingsFlyoutProps } from './flyout';
+import { RemoveClusterSettingsFlyout } from './flyout';
+import { ClusterSettingsActionsCell } from './actions_table_cell';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -101,11 +103,15 @@ export const ClusterSettingsTableRow: React.FunctionComponent<Props> = ({
             key={field}
             truncateText={false}
             data-test-subj={`clusterSettingsTableCell-${field}`}
+            align={field === 'actions' ? 'right' : 'left'}
           >
             <EsDeprecationsTableCells
               fieldName={field}
               deprecation={deprecation}
               resolutionTableCell={<ClusterSettingsResolutionCell status={status} />}
+              actionsTableCell={
+                <ClusterSettingsActionsCell openFlyout={() => setShowFlyout(true)} />
+              }
             />
           </EuiTableRowCell>
         );

@@ -18,7 +18,9 @@
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/intercepts-plugin",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/cloud-plugin",
+    "@kbn/core-analytics-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }

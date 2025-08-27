@@ -157,13 +157,6 @@ export const DISK_SPACE_AVAILABLE_LABEL = i18n.translate(
   }
 );
 
-export const DISK_SPACE_AVAILABILITY_LABEL = i18n.translate(
-  'xpack.metricsData.assetDetails.metrics.label.diskSpaceAvailablity',
-  {
-    defaultMessage: 'Disk Space Availability',
-  }
-);
-
 export const NETWORK_LABEL = i18n.translate(
   'xpack.metricsData.assetDetails.metrics.label.network',
   {

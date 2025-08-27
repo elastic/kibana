@@ -80,7 +80,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   }
 
   return (
-    <EuiToolTip content={VIEW_IN_LENS}>
+    <EuiToolTip content={VIEW_IN_LENS} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="lensApp"
         disabled={false}

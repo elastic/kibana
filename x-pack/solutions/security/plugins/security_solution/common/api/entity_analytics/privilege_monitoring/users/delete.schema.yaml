@@ -26,7 +26,7 @@ paths:
                 required:
                   - success
                 properties:
-                  aknowledged:
+                  acknowledged:
                     type: boolean
                     description: Indicates if the deletion was successful
                   message:

@@ -1,0 +1,182 @@
+{
+  "id": "@kbn/cache-cli",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cache-cli",
+        "id": "def-common.createLocalDirDiskCacheStore",
+        "type": "Function",
+        "tags": [],
+        "label": "createLocalDirDiskCacheStore",
+        "description": [],
+        "signature": [
+          "(opts: ",
+          "LocalDiskCacheOptions",
+          ") => ",
+          "Keyv",
+          "<any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-cache-cli/src/stores/create_local_disk_cache_store.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cache-cli",
+            "id": "def-common.createLocalDirDiskCacheStore.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "LocalDiskCacheOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-cache-cli/src/stores/create_local_disk_cache_store.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cache-cli",
+        "id": "def-common.createTmpDirDiskCacheStore",
+        "type": "Function",
+        "tags": [],
+        "label": "createTmpDirDiskCacheStore",
+        "description": [],
+        "signature": [
+          "(opts: ",
+          "TmpDirDiskCacheOptions",
+          ") => ",
+          "Keyv",
+          "<any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-cache-cli/src/stores/create_tmp_dir_disk_cache_store.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cache-cli",
+            "id": "def-common.createTmpDirDiskCacheStore.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "TmpDirDiskCacheOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-cache-cli/src/stores/create_tmp_dir_disk_cache_store.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cache-cli",
+        "id": "def-common.fromCache",
+        "type": "Function",
+        "tags": [],
+        "label": "fromCache",
+        "description": [],
+        "signature": [
+          "(key: string, store: ",
+          "Cache",
+          ", cb: () => Promise<T>, cacheValidator: ((val: T) => boolean) | undefined) => Promise<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-cache-cli/src/from_cache.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cache-cli",
+            "id": "def-common.fromCache.$1",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-cache-cli/src/from_cache.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cache-cli",
+            "id": "def-common.fromCache.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "store",
+            "description": [],
+            "signature": [
+              "Cache"
+            ],
+            "path": "src/platform/packages/shared/kbn-cache-cli/src/from_cache.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cache-cli",
+            "id": "def-common.fromCache.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "() => Promise<T>"
+            ],
+            "path": "src/platform/packages/shared/kbn-cache-cli/src/from_cache.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cache-cli",
+            "id": "def-common.fromCache.$4",
+            "type": "Function",
+            "tags": [],
+            "label": "cacheValidator",
+            "description": [],
+            "signature": [
+              "((val: T) => boolean) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cache-cli/src/from_cache.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

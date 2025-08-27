@@ -17,7 +17,7 @@ describe('WiredStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: { steps: [] },
           wired: {
             fields: {},
             routing: [],
@@ -37,7 +37,9 @@ describe('WiredStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           wired: {
             fields: {},
             routing: [],
@@ -61,8 +63,8 @@ describe('WiredStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
-          unwired: {},
+          processing: { steps: [] },
+          classic: {},
           wired: {
             fields: {},
             routing: [],
@@ -70,7 +72,7 @@ describe('WiredStream', () => {
         },
       },
     ])('is not valid %s', (val) => {
-      expect(WiredStream.Definition.is(val as any)).toBe(false);
+      expect(() => WiredStream.Definition.asserts(val as any)).toThrow();
     });
   });
 
@@ -84,7 +86,7 @@ describe('WiredStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             wired: {
               fields: {},
               routing: [],
@@ -99,7 +101,7 @@ describe('WiredStream', () => {
           text_structure: true,
         },
         effective_lifecycle: {
-          inherit: {},
+          dsl: {},
           from: 'logs',
         },
         inherited_fields: {},
@@ -119,7 +121,7 @@ describe('WiredStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             wired: {
               fields: {},
               routing: [],
@@ -127,7 +129,7 @@ describe('WiredStream', () => {
           },
         },
         effective_lifecycle: {
-          inherit: {},
+          dsl: {},
           from: 'logs',
         },
         inherited_fields: {},
@@ -157,7 +159,7 @@ describe('WiredStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             wired: {
               fields: {},
               routing: [],
@@ -181,7 +183,9 @@ describe('WiredStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             wired: {
               fields: {},
               routing: [],

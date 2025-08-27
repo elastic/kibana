@@ -12,7 +12,7 @@ import {
   validateLogEntryDatasetsResponsePayloadRT,
 } from '@kbn/infra-plugin/common/http_api';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -20,10 +20,14 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('API /infra/log_analysis/validation/log_entry_datasets', () => {
     before(() =>
-      esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
+      )
     );
     after(() =>
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
+      )
     );
 
     it('works', async () => {

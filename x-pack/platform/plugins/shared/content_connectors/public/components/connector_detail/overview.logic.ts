@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { CachedFetchIndexApiLogic } from '../../api/index/cached_fetch_index_api_logic';
 import { Status } from '../../../common/types/api';

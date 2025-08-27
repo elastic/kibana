@@ -18,6 +18,7 @@ import { NetworkRoutes } from './navigation';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 jest.mock('../../../common/components/empty_prompt');
 jest.mock('../../../sourcerer/containers');
@@ -77,6 +78,9 @@ const mockProps = {
 
 const mockMapVisibility = jest.fn();
 const mockNavigateToApp = jest.fn();
+const mockSecurityCapabilities = {
+  [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+};
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
 
@@ -88,7 +92,7 @@ jest.mock('../../../common/lib/kibana', () => {
         application: {
           ...original.useKibana().services.application,
           capabilities: {
-            siemV2: { crud_alerts: true, read_alerts: true },
+            ...mockSecurityCapabilities,
             maps_v2: mockMapVisibility(),
           },
           navigateToApp: mockNavigateToApp,
@@ -108,6 +112,7 @@ jest.mock('../../../common/lib/kibana', () => {
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
   };

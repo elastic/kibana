@@ -6,6 +6,28 @@
   "scripts": {
     "build:antlr4:painless": "antlr -Dlanguage=TypeScript ./src/languages/painless/antlr/painless_lexer.g4 ./src/languages/painless/antlr/painless_parser.g4 && node ./scripts/fix_generated_antlr.js painless",
     "prebuild:antlr4": "brew bundle --file=./scripts/antlr4_tools/brewfile",
-    "build:antlr4": "yarn run build:antlr4:painless && npm run build:antlr4:esql"
+    "build:antlr4": "yarn run build:antlr4:painless && npm run build:antlr4:esql",
+    "build": "node ${REPO_ROOT:-`git rev-parse --show-toplevel`}/scripts/build_package.js $PWD --task-name target_workers"
+  },
+  "buildSourcePaths": {
+    "include": [
+      "src/**/*",
+      "index.ts",
+      "server.ts"
+    ],
+    "exclude": [
+      "**/*.config.js",
+      "**/*.mock.*",
+      "**/*.test.*",
+      "**/*.stories.*",
+      "**/__jest_/**",
+      "**/__snapshots__/**",
+      "**/integration_tests/**",
+      "**/mocks/**",
+      "**/scripts/**",
+      "**/storybook/**",
+      "**/test_fixtures/**",
+      "**/test_helpers/**"
+    ]
   }
 }

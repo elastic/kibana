@@ -33,7 +33,7 @@ export const WaitingForConnectorStep: React.FC<WaitingForConnectorStepProps> = (
             defaultMessage: 'Waiting for your connector',
           }
         )}
-        iconType="iInCircle"
+        iconType="info"
       >
         {i18n.translate(
           'xpack.contentConnectors.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.description',

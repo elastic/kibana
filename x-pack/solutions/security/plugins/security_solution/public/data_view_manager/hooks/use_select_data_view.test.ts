@@ -21,6 +21,8 @@ jest.mock('react-redux', () => {
 });
 
 describe('useSelectDataView', () => {
+  beforeEach(jest.clearAllMocks);
+
   it('should render and dispatch data view selection actions', () => {
     const { result } = renderHook(
       () => {
@@ -34,6 +36,28 @@ describe('useSelectDataView', () => {
     expect(useDispatch()).toHaveBeenCalledWith({
       payload: { id: 'test', scope: 'default' },
       type: 'x-pack/security_solution/dataViewManager/selectDataView',
+    });
+  });
+
+  describe('when trying to call the hook with empty params', () => {
+    it('should render but not dispatch data view selection', () => {
+      const { result } = renderHook(
+        () => {
+          return useSelectDataView();
+        },
+        { wrapper: TestProviders }
+      );
+
+      result.current({
+        id: undefined,
+        fallbackPatterns: [],
+        scope: DataViewManagerScopeName.default,
+      });
+
+      expect(useDispatch()).not.toHaveBeenCalledWith({
+        payload: { id: 'test', scope: 'default' },
+        type: 'x-pack/security_solution/dataViewManager/selectDataView',
+      });
     });
   });
 });

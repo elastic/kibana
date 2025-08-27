@@ -26,7 +26,8 @@ import {
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { SectionError, Error } from '../../../../../shared_imports';
+import type { Error } from '../../../../../shared_imports';
+import { SectionError } from '../../../../../shared_imports';
 
 import { useCore, useServices } from '../../../../app_context';
 import {
@@ -39,7 +40,7 @@ import { linkToSnapshots, linkToEditRepository } from '../../../../services/navi
 
 import { REPOSITORY_TYPES } from '../../../../../../common';
 
-import {
+import type {
   Repository,
   RepositoryVerification,
   RepositoryCleanup,
@@ -190,7 +191,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             <EuiCallOut
               size="s"
               color="warning"
-              iconType="iInCircle"
+              iconType="info"
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.repositoryDetails.managedRepositoryWarningTitle"
@@ -224,7 +225,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               flush="right"
               href={getRepositoryTypeDocUrl(docLinks, type)}
               target="_blank"
-              iconType="help"
+              iconType="question"
               data-test-subj="documentationLink"
             >
               <FormattedMessage

@@ -14,7 +14,7 @@ import * as i18n from '../translations';
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -255,6 +255,38 @@ describe('AlertDelete Modal', () => {
 
     await waitFor(() => {
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith(i18n.ALERT_DELETE_SUCCESS);
+      expect(closeModalMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('shows a warning toast when schedule returns a message', async () => {
+    mockHttpGet({ affectedAlertCount: 100 });
+    http.post.mockResolvedValueOnce(`task is already running!`);
+
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={servicesMock}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
+
+    const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
+    fireEvent.click(activeCheckbox);
+
+    const deleteInput = screen.getByTestId('alert-delete-delete-confirmation');
+    fireEvent.change(deleteInput, { target: { value: i18n.DELETE_PASSKEY } });
+
+    const submitButton = screen.getByTestId('alert-delete-submit');
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled();
+    });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(notifications.toasts.addInfo).toHaveBeenCalledWith(`task is already running!`);
       expect(closeModalMock).toHaveBeenCalledTimes(1);
     });
   });

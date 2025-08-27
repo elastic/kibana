@@ -7,17 +7,20 @@
 
 import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { EuiCallOut, EuiFlexItem, EuiSpacer, OnRefreshProps } from '@elastic/eui';
-import { noAccessToFailureStoreWarningDescription } from '../../../../common/translations';
+import type { OnRefreshProps } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer, EuiSplitPanel } from '@elastic/eui';
+import type { QualityIssueType } from '../../../state_machines/dataset_quality_details_controller';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { QualityIssues } from './quality_issues';
+import { FailureStoreWarning } from '../../failure_store/failure_store_warning';
 
 const OverviewHeader = dynamic(() => import('./header'));
 const Summary = dynamic(() => import('./summary'));
+const QualitySummaryCards = dynamic(() => import('./quality_summary_cards'));
 const DocumentTrends = dynamic(() => import('./document_trends'));
 
-export function Overview() {
+export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
   const {
     dataStream,
     isNonAggregatable,
@@ -25,7 +28,11 @@ export function Overview() {
     updateTimeRange,
     loadingState: { dataStreamSettingsLoading },
   } = useDatasetQualityDetailsState();
+
   const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
+
+  const [selectedQualityCard, setSelectedQualityCard] =
+    React.useState<QualityIssueType>('degraded');
 
   const handleRefresh = useCallback(
     (refreshProps: OnRefreshProps) => {
@@ -39,19 +46,39 @@ export function Overview() {
       {isNonAggregatable && <AggregationNotSupported dataStream={dataStream} />}
       <OverviewHeader handleRefresh={handleRefresh} />
       <EuiSpacer size="m" />
+
       {!dataStreamSettingsLoading && !canUserReadFailureStore && (
         <EuiFlexItem>
-          <EuiCallOut
-            title={noAccessToFailureStoreWarningDescription}
-            color="warning"
-            iconType="warning"
-          />
+          <FailureStoreWarning />
           <EuiSpacer size="m" />
         </EuiFlexItem>
       )}
+
+      {/* This should be hidden in `streams` view */}
       <Summary />
       <EuiSpacer size="m" />
-      <DocumentTrends lastReloadTime={lastReloadTime} />
+
+      <EuiSplitPanel.Outer
+        direction="row"
+        data-test-subj="datasetQualityDetailsOverview"
+        hasShadow={false}
+        hasBorder={true}
+      >
+        <EuiSplitPanel.Inner color="subdued" grow={false}>
+          <QualitySummaryCards
+            selectedCard={selectedQualityCard}
+            setSelectedCard={setSelectedQualityCard}
+          />
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner grow={true}>
+          <DocumentTrends
+            lastReloadTime={lastReloadTime}
+            displayCreateRuleButton={selectedQualityCard === 'degraded'}
+            openAlertFlyout={openAlertFlyout}
+          />
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+
       <EuiSpacer size="m" />
       <QualityIssues />
     </>

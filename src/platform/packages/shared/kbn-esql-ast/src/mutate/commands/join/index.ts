@@ -8,7 +8,7 @@
  */
 
 import type { WalkerAstNode } from '../../../walker/walker';
-import { isAsExpression } from '../../../ast/helpers';
+import { isAsExpression } from '../../../ast/is';
 import { Walker } from '../../../walker';
 import type {
   ESQLAstExpression,

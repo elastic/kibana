@@ -6,12 +6,7 @@
  */
 
 export function isDescendantOf(parent: string, child: string) {
-  const parentSegments = parent.split('.');
-  const childSegments = child.split('.');
-  return (
-    parentSegments.length < childSegments.length &&
-    parentSegments.every((segment, index) => segment === childSegments[index])
-  );
+  return child.startsWith(parent + '.');
 }
 
 export function isChildOf(parent: string, child: string) {
@@ -42,3 +37,5 @@ export function getAncestorsAndSelf(id: string) {
 export function getSegments(id: string) {
   return id.split('.');
 }
+
+export const MAX_NESTING_LEVEL = 5;

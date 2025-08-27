@@ -17,6 +17,7 @@
     "@kbn/code-editor",
     "@kbn/datemath",
     "@kbn/file-upload-common",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",

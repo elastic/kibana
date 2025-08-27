@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutTestConfig } from '../../types';
-import { ScoutLogger } from './logger';
+import type { ScoutTestConfig } from '../../types';
+import type { ScoutLogger } from './logger';
 
 export interface PathOptions {
   /**

@@ -10,11 +10,14 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InternalServices } from '../types';
 import { isTaskCurrentlyRunningError } from './utils';
 
 export const ENSURE_DOC_UP_TO_DATE_TASK_TYPE = 'ProductDocBase:EnsureUpToDate';
 export const ENSURE_DOC_UP_TO_DATE_TASK_ID = 'ProductDocBase:EnsureUpToDate';
+export const ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL =
+  'ProductDocBase:EnsureUpToDateMultilingual';
 
 export const registerEnsureUpToDateTaskDefinition = ({
   getServices,
@@ -31,8 +34,9 @@ export const registerEnsureUpToDateTaskDefinition = ({
       createTaskRunner: (context) => {
         return {
           async run() {
+            const inferenceId = context.taskInstance?.params?.inferenceId;
             const { packageInstaller } = getServices();
-            return packageInstaller.ensureUpToDate({});
+            return packageInstaller.ensureUpToDate({ inferenceId });
           },
         };
       },
@@ -44,27 +48,32 @@ export const registerEnsureUpToDateTaskDefinition = ({
 export const scheduleEnsureUpToDateTask = async ({
   taskManager,
   logger,
+  inferenceId,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
+  inferenceId: string;
 }) => {
+  const taskId = isImpliedDefaultElserInferenceId(inferenceId)
+    ? ENSURE_DOC_UP_TO_DATE_TASK_ID
+    : ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL;
   try {
     await taskManager.ensureScheduled({
-      id: ENSURE_DOC_UP_TO_DATE_TASK_ID,
+      id: taskId,
       taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE,
-      params: {},
+      params: { inferenceId },
       state: {},
       scope: ['productDoc'],
     });
 
-    await taskManager.runSoon(ENSURE_DOC_UP_TO_DATE_TASK_ID);
+    await taskManager.runSoon(taskId);
 
-    logger.info(`Task ${ENSURE_DOC_UP_TO_DATE_TASK_ID} scheduled to run soon`);
+    logger.info(`Task ${taskId} scheduled to run soon`);
   } catch (e) {
     if (!isTaskCurrentlyRunningError(e)) {
       throw e;
     }
   }
 
-  return ENSURE_DOC_UP_TO_DATE_TASK_ID;
+  return taskId;
 };

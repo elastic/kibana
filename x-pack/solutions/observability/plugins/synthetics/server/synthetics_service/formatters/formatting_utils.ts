@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
-import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
-import { ParsedVars, replaceVarsWithParams } from './lightweight_param_formatter';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import type { ParsedVars } from './lightweight_param_formatter';
+import { replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
 
 export type FormatterFn = (
@@ -82,4 +84,58 @@ export const secondsToCronFormatter: FormatterFn = (fields, key) => {
 
 export const maxAttemptsFormatter: FormatterFn = (fields, key) => {
   return (fields[key] as number) ?? 2;
+};
+
+enum Frequency {
+  YEARLY,
+  MONTHLY,
+  WEEKLY,
+  DAILY,
+  HOURLY,
+  MINUTELY,
+  SECONDLY,
+}
+
+function frequencyToString(value?: number): string | undefined {
+  if (value === undefined || value === null) {
+    return;
+  }
+  const name = Frequency[value];
+  return name ? name.toLowerCase() : 'unknown';
+}
+
+export const formatMWs = (mws?: MaintenanceWindow[], strRes = true) => {
+  if (!mws) {
+    return;
+  }
+  const formatted = mws.map((mw) => {
+    const mwRule = mw?.rRule;
+    if (mw && mwRule) {
+      return {
+        ...mwRule,
+        freq: frequencyToString(mwRule.freq),
+        duration: `${mw.duration}ms`,
+      };
+    }
+  });
+  if (!strRes) {
+    return formatted;
+  }
+  return JSON.stringify(formatted);
+};
+
+function escapeTemplateLiterals(script: string): string {
+  return script.replace(/\$\{/g, '$$${');
+}
+
+export const inlineSourceFormatter: FormatterFn = (fields, key) => {
+  const value = fields[key] as string;
+  if (!value?.trim()) return value;
+
+  // Escape template literals to prevent unintended interpolation
+  return escapeTemplateLiterals(value).trim();
+};
+
+export const handleMultilineStringFormatter = (value: string) => {
+  return value.replace(/(\n+)/g, '$1\n');
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { AttackDiscoveryFindResponse } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS, ATTACK_DISCOVERY_FIND } from '@kbn/elastic-assistant-common';
 import type {
@@ -15,13 +15,19 @@ import type {
 } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef } from 'react';
+
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import * as i18n from './translations';
 import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
+
+type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 interface Props {
   alertIds?: string[];
   ids?: string[];
   connectorNames?: string[];
   http: HttpSetup;
+  includeUniqueAlertIds?: boolean;
   isAssistantEnabled: boolean;
   end?: string;
   search?: string;
@@ -59,6 +65,7 @@ export const useFindAttackDiscoveries = ({
   ids,
   connectorNames,
   http,
+  includeUniqueAlertIds = false,
   isAssistantEnabled,
   end,
   search,
@@ -71,6 +78,7 @@ export const useFindAttackDiscoveries = ({
   sortField = '@timestamp',
   sortOrder = 'desc',
 }: Props): UseFindAttackDiscoveries => {
+  const { addError } = useAppToasts();
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const abortController = useRef(new AbortController());
 
@@ -88,6 +96,7 @@ export const useFindAttackDiscoveries = ({
           alert_ids: alertIds,
           connector_names: connectorNames,
           end,
+          include_unique_alert_ids: includeUniqueAlertIds,
           ids,
           page: pageParam?.page ?? page,
           per_page: pageParam?.perPage ?? perPage,
@@ -106,6 +115,7 @@ export const useFindAttackDiscoveries = ({
       end,
       http,
       ids,
+      includeUniqueAlertIds,
       page,
       perPage,
       search,
@@ -161,6 +171,11 @@ export const useFindAttackDiscoveries = ({
     {
       enabled: isAssistantEnabled && attackDiscoveryAlertsEnabled,
       getNextPageParam,
+      onError: (e: ServerError) => {
+        addError(e.body && e.body.message ? new Error(e.body.message) : e, {
+          title: i18n.ERROR_FINDING_ATTACK_DISCOVERIES,
+        });
+      },
       refetchOnWindowFocus,
     }
   );

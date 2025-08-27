@@ -8,7 +8,11 @@
  */
 
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectMigration,
+  SavedObjectModelUnsafeTransformFn,
+  SavedObjectsType,
+} from '@kbn/core-saved-objects-server';
 import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
 import type { ElasticsearchClientWrapperFactory } from './elasticsearch_client_wrapper';
 import {
@@ -39,13 +43,33 @@ const defaultType: SavedObjectsType<any> = {
       changes: [],
     },
   },
-  switchToModelVersionAt: '8.10.0',
   migrations: {},
 };
 
 export const REMOVED_TYPES = ['deprecated', 'server'];
 
+interface ComplexTypeV0 {
+  name: string;
+  value: number;
+  firstHalf: boolean;
+}
+
+interface ComplexTypeV1 {
+  name: string;
+  value: number;
+  firstHalf: boolean;
+}
+
 export const baselineTypes: Array<SavedObjectsType<any>> = [
+  {
+    // an old type with no model versions defined
+    ...defaultType,
+    modelVersions: undefined,
+    name: 'old',
+    migrations: {
+      '8.8.0': ((doc) => doc) as SavedObjectMigration,
+    },
+  },
   {
     ...defaultType,
     name: 'server',
@@ -123,8 +147,18 @@ export const getCompatibleBaselineTypes = (removedTypes: string[]) =>
     }
   });
 
-export const getReindexingBaselineTypes = (removedTypes: string[]) =>
-  getUpToDateBaselineTypes(removedTypes).map<SavedObjectsType>((type) => {
+export const getReindexingBaselineTypes = (removedTypes: string[]) => {
+  const transformComplex: SavedObjectModelUnsafeTransformFn<ComplexTypeV0, ComplexTypeV1> = (
+    doc
+  ) => {
+    if (doc.attributes.value % 100 === 0) {
+      throw new Error(
+        `Cannot convert 'complex' objects with values that are multiple of 100 ${doc.id}`
+      );
+    }
+    return { document: doc };
+  };
+  return getUpToDateBaselineTypes(removedTypes).map<SavedObjectsType>((type) => {
     // introduce an incompatible change
     if (type.name === 'complex') {
       return {
@@ -152,14 +186,7 @@ export const getReindexingBaselineTypes = (removedTypes: string[]) =>
               },
               {
                 type: 'unsafe_transform',
-                transformFn: (doc) => {
-                  if (doc.attributes.value % 100 === 0) {
-                    throw new Error(
-                      `Cannot convert 'complex' objects with values that are multiple of 100 ${doc.id}`
-                    );
-                  }
-                  return { document: doc };
-                },
+                transformFn: (typeSafeGuard) => typeSafeGuard(transformComplex),
               },
             ],
           },
@@ -188,10 +215,25 @@ export const getReindexingBaselineTypes = (removedTypes: string[]) =>
           },
         },
       };
+    } else if (type.name === 'old') {
+      return {
+        ...type,
+        migrations: {
+          ...type.migrations,
+          '8.9.0': ((doc) => ({
+            ...doc,
+            attributes: {
+              ...(doc.attributes as any),
+              name: `${(doc.attributes as any).name}_8.9.0`,
+            },
+          })) as SavedObjectMigration,
+        },
+      };
     } else {
       return type;
     }
   });
+};
 
 export interface GetBaselineDocumentsParams {
   documentsPerType?: number;
@@ -203,6 +245,12 @@ export const getBaselineDocuments = (
   const documentsPerType = params.documentsPerType ?? 4;
 
   return [
+    ...new Array(documentsPerType).fill(true).map((_, index) => ({
+      type: 'old',
+      attributes: {
+        name: `old-${index}`,
+      },
+    })),
     ...new Array(documentsPerType).fill(true).map((_, index) => ({
       type: 'server',
       attributes: {

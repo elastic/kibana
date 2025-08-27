@@ -111,7 +111,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       const prevValue = prev(params);
 
       // This is what is available via params:
-      // const { dataView, services, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = params;
+      // const { dataView, services, isEsqlMode, adHocDataViews, actions } = params;
 
       return {
         appMenuRegistry: (registry) => {

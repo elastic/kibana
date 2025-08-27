@@ -6,4 +6,4 @@
  */
 
 export type { FlyoutEditDrilldownParams } from './flyout_edit_drilldown';
-export { FlyoutEditDrilldownAction, OPEN_FLYOUT_EDIT_DRILLDOWN } from './flyout_edit_drilldown';
+export { flyoutEditDrilldownAction, OPEN_FLYOUT_EDIT_DRILLDOWN } from './flyout_edit_drilldown';

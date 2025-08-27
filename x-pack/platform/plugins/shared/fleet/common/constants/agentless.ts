@@ -52,4 +52,6 @@ export const AGENTLESS_DISABLED_INPUTS = [
   'logfile',
   'aws-s3',
   'streaming',
+  'gcs',
+  'azure-blob-storage',
 ];

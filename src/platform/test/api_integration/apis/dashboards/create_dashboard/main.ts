@@ -10,8 +10,8 @@
 import expect from '@kbn/expect';
 import { type SavedObjectReference } from '@kbn/core/server';
 import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
-import { DEFAULT_IGNORE_PARENT_SETTINGS } from '@kbn/controls-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { DEFAULT_IGNORE_PARENT_SETTINGS } from '@kbn/controls-constants';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -155,7 +155,6 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 panelConfig: {},
                 panelIndex: 'bizz',
-                panelRefName: 'panel_bizz',
               },
             ],
           },

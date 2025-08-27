@@ -18,6 +18,7 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
+import { MigrationStatus, MigrationTaskStatus, MigrationLastExecution } from './common.gen';
 
 /**
  * The original rule vendor identifier.
@@ -109,7 +110,7 @@ export const ElasticRule = z.object({
   /**
    * The Elastic prebuilt rule id matched.
    */
-  prebuilt_rule_id: NonEmptyString.optional(),
+  prebuilt_rule_id: NonEmptyString.nullable().optional(),
   /**
    * The IDs of the Elastic integrations suggested to be installed for this rule.
    */
@@ -145,28 +146,14 @@ export const PrebuiltRuleVersion = z.object({
  * The last execution of the rule migration task.
  */
 export type RuleMigrationLastExecution = z.infer<typeof RuleMigrationLastExecution>;
-export const RuleMigrationLastExecution = z.object({
-  /**
-   * The moment the last execution started.
-   */
-  started_at: z.string().optional(),
-  /**
-   * The moment the last execution ended.
-   */
-  ended_at: z.string().nullable().optional(),
-  /**
-   * The connector ID used for the last execution.
-   */
-  connector_id: z.string().optional(),
-  /**
-   * The error message if the last execution failed.
-   */
-  error: z.string().nullable().optional(),
-  /**
-   * Indicates if the last execution was aborted by the user.
-   */
-  is_aborted: z.boolean().optional(),
-});
+export const RuleMigrationLastExecution = z
+  .object({
+    /**
+     * Indicates if the last execution skipped matching prebuilt rules.
+     */
+    skip_prebuilt_rules_matching: z.boolean().optional(),
+  })
+  .merge(MigrationLastExecution);
 
 /**
  * The rule migration object ( without Id ) with its settings.
@@ -182,7 +169,7 @@ export const RuleMigrationData = z.object({
    */
   created_at: NonEmptyString,
   /**
-   * The last execution of the rule migration task.
+   * The last execution details of a rule migration task.
    */
   last_execution: RuleMigrationLastExecution.optional(),
 });
@@ -197,6 +184,10 @@ export const RuleMigration = z
      * The rule migration id
      */
     id: NonEmptyString,
+    /**
+     * The rule migration name
+     */
+    name: NonEmptyString,
   })
   .merge(RuleMigrationData);
 
@@ -207,14 +198,6 @@ export type RuleMigrationTranslationResult = z.infer<typeof RuleMigrationTransla
 export const RuleMigrationTranslationResult = z.enum(['full', 'partial', 'untranslatable']);
 export type RuleMigrationTranslationResultEnum = typeof RuleMigrationTranslationResult.enum;
 export const RuleMigrationTranslationResultEnum = RuleMigrationTranslationResult.enum;
-
-/**
- * The status of each rule migration.
- */
-export type RuleMigrationStatus = z.infer<typeof RuleMigrationStatus>;
-export const RuleMigrationStatus = z.enum(['pending', 'processing', 'completed', 'failed']);
-export type RuleMigrationStatusEnum = typeof RuleMigrationStatus.enum;
-export const RuleMigrationStatusEnum = RuleMigrationStatus.enum;
 
 /**
  * The comment for the migration
@@ -273,7 +256,7 @@ export const RuleMigrationRuleData = z.object({
   /**
    * The status of the rule migration process.
    */
-  status: RuleMigrationStatus.default('pending'),
+  status: MigrationStatus.default('pending'),
   /**
    * The comments for the migration including a summary from the LLM in markdown.
    */
@@ -302,20 +285,6 @@ export const RuleMigrationRule = z
   .merge(RuleMigrationRuleData);
 
 /**
- * The status of the migration task.
- */
-export type RuleMigrationTaskStatus = z.infer<typeof RuleMigrationTaskStatus>;
-export const RuleMigrationTaskStatus = z.enum([
-  'ready',
-  'running',
-  'stopped',
-  'finished',
-  'aborted',
-]);
-export type RuleMigrationTaskStatusEnum = typeof RuleMigrationTaskStatus.enum;
-export const RuleMigrationTaskStatusEnum = RuleMigrationTaskStatus.enum;
-
-/**
  * The rule migration task stats object.
  */
 export type RuleMigrationTaskStats = z.infer<typeof RuleMigrationTaskStats>;
@@ -325,9 +294,13 @@ export const RuleMigrationTaskStats = z.object({
    */
   id: NonEmptyString,
   /**
+   * The migration name
+   */
+  name: NonEmptyString,
+  /**
    * Indicates if the migration task status.
    */
-  status: RuleMigrationTaskStatus,
+  status: MigrationTaskStatus,
   /**
    * The rules migration stats.
    */
@@ -362,9 +335,9 @@ export const RuleMigrationTaskStats = z.object({
    */
   last_updated_at: z.string(),
   /**
-   * The last error message if the migration task execution failed.
+   * The last execution of the migration task.
    */
-  last_error: z.string().optional(),
+  last_execution: RuleMigrationLastExecution.optional(),
 });
 
 /**
@@ -417,6 +390,10 @@ export const RuleMigrationTranslationStats = z.object({
        * The number of rules that have been successfully translated and matched Elastic prebuilt rules.
        */
       prebuilt: z.number().int(),
+      /**
+       * The number of rules that have the placeholder for the missing index pattern in the query.
+       */
+      missing_index: z.number().int(),
     }),
     /**
      * The number of rules that have failed translation.
@@ -474,68 +451,16 @@ export type RuleMigrationAllIntegrationsStats = z.infer<typeof RuleMigrationAllI
 export const RuleMigrationAllIntegrationsStats = z.array(RuleMigrationIntegrationStats);
 
 /**
- * The type of the rule migration resource.
+ * The rule migration task execution settings.
  */
-export type RuleMigrationResourceType = z.infer<typeof RuleMigrationResourceType>;
-export const RuleMigrationResourceType = z.enum(['macro', 'lookup']);
-export type RuleMigrationResourceTypeEnum = typeof RuleMigrationResourceType.enum;
-export const RuleMigrationResourceTypeEnum = RuleMigrationResourceType.enum;
-
-/**
- * The rule migration resource basic information.
- */
-export type RuleMigrationResourceBase = z.infer<typeof RuleMigrationResourceBase>;
-export const RuleMigrationResourceBase = z.object({
-  type: RuleMigrationResourceType,
+export type RuleMigrationTaskExecutionSettings = z.infer<typeof RuleMigrationTaskExecutionSettings>;
+export const RuleMigrationTaskExecutionSettings = z.object({
   /**
-   * The resource name identifier.
+   * The connector ID used for the last execution.
    */
-  name: z.string(),
+  connector_id: z.string(),
+  /**
+   * Indicates if the current execution should skip matching prebuilt rules.
+   */
+  skip_prebuilt_rules_matching: z.boolean().optional(),
 });
-
-export type RuleMigrationResourceContent = z.infer<typeof RuleMigrationResourceContent>;
-export const RuleMigrationResourceContent = z.object({
-  /**
-   * The resource content value. Can be an empty string.
-   */
-  content: z.string(),
-  /**
-   * The resource arbitrary metadata.
-   */
-  metadata: z.object({}).optional(),
-});
-
-/**
- * The rule migration resource data.
- */
-export type RuleMigrationResourceData = z.infer<typeof RuleMigrationResourceData>;
-export const RuleMigrationResourceData = RuleMigrationResourceBase.merge(
-  RuleMigrationResourceContent
-);
-
-/**
- * The rule migration resource document object.
- */
-export type RuleMigrationResource = z.infer<typeof RuleMigrationResource>;
-export const RuleMigrationResource = RuleMigrationResourceBase.merge(
-  RuleMigrationResourceContent.partial()
-).merge(
-  z.object({
-    /**
-     * The rule resource migration id
-     */
-    id: NonEmptyString,
-    /**
-     * The migration id
-     */
-    migration_id: NonEmptyString,
-    /**
-     * The moment of the last update
-     */
-    updated_at: z.string().optional(),
-    /**
-     * The user who last updated the resource
-     */
-    updated_by: z.string().optional(),
-  })
-);

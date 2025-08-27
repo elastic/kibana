@@ -6,14 +6,16 @@
  */
 
 import { flow } from 'lodash';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
 
 import { TextEditor } from '../field_components';
 
-import { EDITOR_PX_HEIGHT, FieldsConfig, from, to, isJSONStringValidator } from './shared';
+import type { FieldsConfig } from './shared';
+import { EDITOR_PX_HEIGHT, from, to, isJSONStringValidator } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { TargetField } from './common_fields/target_field';

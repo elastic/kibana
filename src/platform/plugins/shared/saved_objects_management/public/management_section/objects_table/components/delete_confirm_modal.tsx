@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiInMemoryTable,
   EuiLoadingElastic,
@@ -26,6 +27,7 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiLoadingSpinner,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -50,6 +52,8 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   allowedTypes,
   showPlainSpinner,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const hiddenObjects = useMemo(() => {
     return selectedObjects.filter((obj) => obj.meta.hiddenType);
   }, [selectedObjects]);
@@ -76,9 +80,13 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   // can't use `EuiConfirmModal` here as the confirm modal body is wrapped
   // inside a `<p>` element, causing UI glitches with the table.
   return (
-    <EuiModal initialFocus="soDeleteConfirmModalConfirmBtn" onClose={onCancel}>
+    <EuiModal
+      initialFocus="soDeleteConfirmModalConfirmBtn"
+      onClose={onCancel}
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
             defaultMessage="Delete saved objects"

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import {
+import type {
+  GetResponse,
+  IndicesGetMappingResponse,
   QueryRulesQueryRule,
   QueryRulesQueryRuleCriteria,
   QueryRulesQueryRuleset,
@@ -33,11 +35,17 @@ export type SearchQueryRulesQueryRuleset = Omit<QueryRulesQueryRuleset, 'rules'>
   rules: SearchQueryRulesQueryRule[];
 };
 
+export interface SearchQueryDocumentResponse {
+  document: GetResponse<unknown>;
+  mappings: IndicesGetMappingResponse;
+}
+
 export type QueryRuleEditorForm = Pick<
   SearchQueryRulesQueryRule,
   'criteria' | 'type' | 'actions'
 > & {
   mode: 'create' | 'edit';
+  isAlways: boolean;
   rulesetId: string;
   ruleId: string;
 };

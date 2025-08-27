@@ -7,7 +7,8 @@
 
 import { omit } from 'lodash';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { PromptAPI, PromptOptions, ToolOptions, createPrompt } from '@kbn/inference-common';
+import type { PromptAPI, PromptOptions, ToolOptions } from '@kbn/inference-common';
+import { createPrompt } from '@kbn/inference-common';
 import { z, ZodError } from '@kbn/zod';
 import { createPromptRestApi } from './prompt';
 import { lastValueFrom } from 'rxjs';
@@ -158,12 +159,14 @@ describe('createPromptRestApi', () => {
       modelName: 'test-model-invalid-stream',
       prompt,
       stream: false,
-      input: { anotherWrongKey: 'invalid stream input' },
-    } satisfies PromptOptions;
+    } as const;
 
-    // @ts-expect-error input type doesn't match schema type
     const response = await promptApi({
       ...params,
+      // @ts-expect-error input type doesn't match schema type
+      input: {
+        anotherWrongKey: 'foo',
+      },
     }).catch((error) => {
       return error;
     });

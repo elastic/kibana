@@ -52,9 +52,9 @@ export const PlaygroundRouteNotFound = () => {
           </p>
         }
         actions={
-          <EuiButton onClick={goToPlayground} fill>
+          <EuiButton data-test-subj="playgroundRouteNotFoundCTA" onClick={goToPlayground} fill>
             {i18n.translate('xpack.searchPlayground.notFound.action1', {
-              defaultMessage: 'Back to Playground',
+              defaultMessage: 'Back to RAG Playground',
             })}
           </EuiButton>
         }

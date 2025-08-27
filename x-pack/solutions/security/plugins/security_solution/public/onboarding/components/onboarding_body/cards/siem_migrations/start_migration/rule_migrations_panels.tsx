@@ -75,8 +75,8 @@ export const RuleMigrationsPanels = React.memo<RuleMigrationsPanelsProps>(
           >
             {[
               SiemMigrationTaskStatus.READY,
+              SiemMigrationTaskStatus.INTERRUPTED,
               SiemMigrationTaskStatus.STOPPED,
-              SiemMigrationTaskStatus.ABORTED,
             ].includes(migrationStats.status) && (
               <MigrationReadyPanel migrationStats={migrationStats} />
             )}

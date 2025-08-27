@@ -51,8 +51,5 @@ export interface SearchConnectorsPluginSetupDependencies {
   log: Logger;
   ml?: MlPluginSetup;
   router: IRouter;
-  getStartServices: StartServicesAccessor<
-    SearchConnectorsPluginStartDependencies,
-    SearchConnectorsPluginStart
-  >;
+  getStartServices: StartServicesAccessor<SearchConnectorsPluginStartDependencies, unknown>;
 }

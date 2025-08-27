@@ -19,6 +19,7 @@ You do not need to configure any settings to run Kibana in English.
     * Chinese - `zh-CN`
     * Japanese - `ja-JP`
     * French - `fr-FR`
+    * German - `de-DE`
     
     **Default: `en`**
 

@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import { screen, render, waitFor, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import { TestProviders, mockDataViewSpec } from '../../mock';
+import { mockDataViewSpec, TestProviders } from '../../mock';
 
 import { allEvents, defaultOptions } from './helpers';
 import type { Props as TopNProps } from './top_n';
 import { TopN } from './top_n';
 import { InputsModelId } from '../../store/inputs/constants';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 jest.mock('../visualization_actions/visualization_embeddable');
 
@@ -105,6 +106,7 @@ describe('TopN', () => {
     field,
     filters: [],
     from: '2020-04-14T00:31:47.695Z',
+    dataView: createStubDataView({ spec: {} }),
     dataViewSpec: mockDataViewSpec,
     options: defaultOptions,
     query,

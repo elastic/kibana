@@ -6,28 +6,32 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import {
+import type {
   EuiDataGridColumnSortingConfig,
+  EuiDataGridCellProps,
+  EuiDataGridControlColumn,
+} from '@elastic/eui';
+import {
   EuiSearchBar,
   EuiScreenReaderOnly,
   EuiDataGrid,
-  EuiDataGridCellProps,
-  EuiDataGridControlColumn,
   EuiIconTip,
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import { TABLE_COLUMNS, EMPTY_CONTENT, TableColumnName } from './constants';
+import type { TableColumnName } from './constants';
+import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
 import { FieldActionsCell } from './field_actions';
 import { FieldParent } from './field_parent';
 import { FieldStatusBadge } from './field_status';
-import { TControls } from './hooks/use_controls';
-import { SchemaField } from './types';
+import type { TControls } from './hooks/use_controls';
+import type { SchemaField } from './types';
 import { FieldType } from './field_type';
 
 export function FieldsTable({
+  isLoading,
   controls,
   defaultColumns,
   fields,
@@ -35,6 +39,7 @@ export function FieldsTable({
   withTableActions,
   withToolbar,
 }: {
+  isLoading: boolean;
   controls: TControls;
   defaultColumns: TableColumnName[];
   fields: SchemaField[];
@@ -65,6 +70,11 @@ export function FieldsTable({
 
   return (
     <EuiDataGrid
+      data-test-subj={
+        isLoading
+          ? 'streamsAppSchemaEditorFieldsTableLoading'
+          : 'streamsAppSchemaEditorFieldsTableLoaded'
+      }
       aria-label={i18n.translate(
         'xpack.streams.streamDetailSchemaEditor.fieldsTable.actionsTitle',
         { defaultMessage: 'Preview' }

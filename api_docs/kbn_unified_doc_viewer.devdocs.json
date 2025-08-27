@@ -1,26 +1,10 @@
 {
   "id": "@kbn/unified-doc-viewer",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/unified-doc-viewer",
-        "id": "def-common.DocViewsRegistry",
+        "id": "def-public.DocViewsRegistry",
         "type": "Class",
         "tags": [],
         "label": "DocViewsRegistry",
@@ -31,7 +15,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
-            "id": "def-common.DocViewsRegistry.Unnamed",
+            "id": "def-public.DocViewsRegistry.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -45,7 +29,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/unified-doc-viewer",
-                "id": "def-common.DocViewsRegistry.Unnamed.$1",
+                "id": "def-public.DocViewsRegistry.Unnamed.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "initialValue",
@@ -53,9 +37,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/unified-doc-viewer",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnUnifiedDocViewerPluginApi",
-                    "section": "def-common.DocViewsRegistry",
+                    "section": "def-public.DocViewsRegistry",
                     "text": "DocViewsRegistry"
                   },
                   " | ",
@@ -72,7 +56,7 @@
           },
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
-            "id": "def-common.DocViewsRegistry.getAll",
+            "id": "def-public.DocViewsRegistry.getAll",
             "type": "Function",
             "tags": [],
             "label": "getAll",
@@ -90,7 +74,7 @@
           },
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
-            "id": "def-common.DocViewsRegistry.add",
+            "id": "def-public.DocViewsRegistry.add",
             "type": "Function",
             "tags": [],
             "label": "add",
@@ -108,7 +92,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/unified-doc-viewer",
-                "id": "def-common.DocViewsRegistry.add.$1",
+                "id": "def-public.DocViewsRegistry.add.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "docViewRaw",
@@ -128,7 +112,7 @@
           },
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
-            "id": "def-common.DocViewsRegistry.removeById",
+            "id": "def-public.DocViewsRegistry.removeById",
             "type": "Function",
             "tags": [],
             "label": "removeById",
@@ -142,7 +126,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/unified-doc-viewer",
-                "id": "def-common.DocViewsRegistry.removeById.$1",
+                "id": "def-public.DocViewsRegistry.removeById.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -160,7 +144,7 @@
           },
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
-            "id": "def-common.DocViewsRegistry.enableById",
+            "id": "def-public.DocViewsRegistry.enableById",
             "type": "Function",
             "tags": [],
             "label": "enableById",
@@ -174,7 +158,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/unified-doc-viewer",
-                "id": "def-common.DocViewsRegistry.enableById.$1",
+                "id": "def-public.DocViewsRegistry.enableById.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -192,7 +176,7 @@
           },
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
-            "id": "def-common.DocViewsRegistry.disableById",
+            "id": "def-public.DocViewsRegistry.disableById",
             "type": "Function",
             "tags": [],
             "label": "disableById",
@@ -206,7 +190,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/unified-doc-viewer",
-                "id": "def-common.DocViewsRegistry.disableById.$1",
+                "id": "def-public.DocViewsRegistry.disableById.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -224,7 +208,7 @@
           },
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
-            "id": "def-common.DocViewsRegistry.clone",
+            "id": "def-public.DocViewsRegistry.clone",
             "type": "Function",
             "tags": [],
             "label": "clone",
@@ -233,9 +217,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/unified-doc-viewer",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnUnifiedDocViewerPluginApi",
-                "section": "def-common.DocViewsRegistry",
+                "section": "def-public.DocViewsRegistry",
                 "text": "DocViewsRegistry"
               }
             ],
@@ -252,7 +236,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/unified-doc-viewer",
-        "id": "def-common.DocViewer",
+        "id": "def-public.DocViewer",
         "type": "Function",
         "tags": [],
         "label": "DocViewer",
@@ -263,9 +247,9 @@
           "React.ForwardRefExoticComponent<DocViewerInternalProps & React.RefAttributes<",
           {
             "pluginId": "@kbn/unified-doc-viewer",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-common.DocViewerApi",
+            "section": "def-public.DocViewerApi",
             "text": "DocViewerApi"
           },
           ">>"
@@ -277,7 +261,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
-            "id": "def-common.DocViewer.$1",
+            "id": "def-public.DocViewer.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -294,13 +278,13 @@
       },
       {
         "parentPluginId": "@kbn/unified-doc-viewer",
-        "id": "def-common.FieldName",
+        "id": "def-public.FieldName",
         "type": "Function",
         "tags": [],
         "label": "FieldName",
         "description": [],
         "signature": [
-          "({\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  scripted = false,\n  highlight = '',\n}: Props) => React.JSX.Element"
+          "({\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  displayNameOverride,\n  scripted = false,\n  highlight = '',\n}: Props) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/field_name/field_name.tsx",
         "deprecated": false,
@@ -308,10 +292,10 @@
         "children": [
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
-            "id": "def-common.FieldName.$1",
+            "id": "def-public.FieldName.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  scripted = false,\n  highlight = '',\n}",
+            "label": "{\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  displayNameOverride,\n  scripted = false,\n  highlight = '',\n}",
             "description": [],
             "signature": [
               "Props"
@@ -329,7 +313,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/unified-doc-viewer",
-        "id": "def-common.DocViewerApi",
+        "id": "def-public.DocViewerApi",
         "type": "Interface",
         "tags": [],
         "label": "DocViewerApi",
@@ -340,7 +324,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
-            "id": "def-common.DocViewerApi.setSelectedTabId",
+            "id": "def-public.DocViewerApi.setSelectedTabId",
             "type": "Function",
             "tags": [],
             "label": "setSelectedTabId",
@@ -354,7 +338,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/unified-doc-viewer",
-                "id": "def-common.DocViewerApi.setSelectedTabId.$1",
+                "id": "def-public.DocViewerApi.setSelectedTabId.$1",
                 "type": "string",
                 "tags": [],
                 "label": "tabId",
@@ -377,7 +361,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/unified-doc-viewer",
-        "id": "def-common.ElasticRequestState",
+        "id": "def-public.ElasticRequestState",
         "type": "Enum",
         "tags": [],
         "label": "ElasticRequestState",
@@ -391,7 +375,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/unified-doc-viewer",
-        "id": "def-common.DocViewerProps",
+        "id": "def-public.DocViewerProps",
         "type": "Type",
         "tags": [],
         "label": "DocViewerProps",
@@ -400,9 +384,9 @@
           "DocViewerInternalProps & React.RefAttributes<",
           {
             "pluginId": "@kbn/unified-doc-viewer",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-common.DocViewerApi",
+            "section": "def-public.DocViewerApi",
             "text": "DocViewerApi"
           },
           ">"
@@ -413,6 +397,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

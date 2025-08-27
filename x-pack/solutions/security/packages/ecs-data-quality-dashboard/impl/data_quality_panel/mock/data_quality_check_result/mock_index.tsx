@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataQualityCheckResult } from '../../types';
+import type { DataQualityCheckResult } from '../../types';
 
 export const mockDataQualityCheckResult: Record<string, DataQualityCheckResult> = {
   'auditbeat-custom-index-1': {

@@ -30,6 +30,7 @@ export const functions = {
         defaultMessage: 'BUCKET',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -62,7 +63,11 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.categorize', {
         defaultMessage: 'CATEGORIZE',
       }),
-      preview: true,
+      preview: false,
+      license: {
+        licenses: [{ name: 'platinum', isSignatureSpecific: false, paramsWithLicense: [] }],
+        hasMultipleLicenses: false,
+      },
       description: (
         <Markdown
           openLinksInNewTab

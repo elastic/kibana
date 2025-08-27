@@ -16,4 +16,8 @@ export interface EsConfigApiResponse {
    * to complete the host portion of the URL.
    */
   host?: string;
+  /**
+   * List of all configured Elasticsearch hosts from elasticsearch.hosts
+   */
+  allHosts?: string[];
 }

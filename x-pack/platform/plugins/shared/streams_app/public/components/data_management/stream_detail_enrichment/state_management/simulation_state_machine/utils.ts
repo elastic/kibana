@@ -5,80 +5,78 @@
  * 2.0.
  */
 
-import { Condition, FieldDefinition, UnaryOperator, getProcessorConfig } from '@kbn/streams-schema';
-import { isEmpty, uniq } from 'lodash';
-import { ALWAYS_CONDITION } from '../../../../../util/condition';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { PreviewDocsFilterOption } from './preview_docs_filter';
-import { DetectedField, Simulation } from './types';
-import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../../../schema_editor/types';
+import type { FieldDefinition } from '@kbn/streams-schema';
+import { uniq } from 'lodash';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
+import type { DetectedField, Simulation } from './types';
+import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
-export function composeSamplingCondition(
-  processors: ProcessorDefinitionWithUIAttributes[]
-): Condition | undefined {
-  if (isEmpty(processors)) {
-    return undefined;
-  }
+export function getSourceField(processor: StreamlangProcessorDefinition): string | undefined {
+  const processorSourceField = (() => {
+    switch (processor.action) {
+      case 'append':
+      case 'set':
+        return processor.to;
+      case 'rename':
+      case 'grok':
+      case 'dissect':
+      case 'date':
+        return processor.from;
+      case 'manual_ingest_pipeline':
+        return undefined;
+      default:
+        return undefined;
+    }
+  })();
 
-  const uniqueFields = uniq(getSourceFields(processors));
-
-  if (isEmpty(uniqueFields)) {
-    return ALWAYS_CONDITION;
-  }
-
-  const conditions = uniqueFields.map((field) => ({
-    field,
-    operator: 'exists' as UnaryOperator,
-  }));
-
-  return { or: conditions };
+  const trimmedSourceField = processorSourceField?.trim();
+  return trimmedSourceField && trimmedSourceField.length > 0 ? trimmedSourceField : undefined;
 }
 
-export function getSourceFields(processors: ProcessorDefinitionWithUIAttributes[]): string[] {
-  return processors
-    .map((processor) => {
-      const config = getProcessorConfig(processor);
-      if ('field' in config) {
-        return config.field.trim();
-      }
-      return '';
-    })
-    .filter(Boolean);
+export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
+  return uniq(detectedFields.map((field) => field.name));
 }
 
-export function getTableColumns(
-  processors: ProcessorDefinitionWithUIAttributes[],
-  fields: DetectedField[],
-  filter: PreviewDocsFilterOption
-) {
-  const uniqueProcessorsFields = uniq(getSourceFields(processors));
-
-  if (filter === 'outcome_filter_failed' || filter === 'outcome_filter_skipped') {
-    return uniqueProcessorsFields;
+export function getTableColumns({
+  currentProcessorSourceField,
+  detectedFields = [],
+  previewDocsFilter,
+}: {
+  currentProcessorSourceField?: string;
+  detectedFields?: DetectedField[];
+  previewDocsFilter: PreviewDocsFilterOption;
+}) {
+  if (!currentProcessorSourceField) {
+    return [];
   }
 
-  const uniqueDetectedFields = uniq(fields.map((field) => field.name));
+  if (['outcome_filter_failed', 'outcome_filter_skipped'].includes(previewDocsFilter)) {
+    return [currentProcessorSourceField];
+  }
 
-  return uniq([...uniqueProcessorsFields, ...uniqueDetectedFields]);
+  const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
+
+  return uniq([currentProcessorSourceField, ...uniqueDetectedFields]);
 }
 
-export function filterSimulationDocuments(
-  documents: Simulation['documents'],
-  filter: PreviewDocsFilterOption
-) {
+type SimulationDocReport = Simulation['documents'][number];
+
+export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) {
   switch (filter) {
     case 'outcome_filter_parsed':
-      return documents.filter((doc) => doc.status === 'parsed').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'parsed';
     case 'outcome_filter_partially_parsed':
-      return documents.filter((doc) => doc.status === 'partially_parsed').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'partially_parsed';
     case 'outcome_filter_skipped':
-      return documents.filter((doc) => doc.status === 'skipped').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'skipped';
     case 'outcome_filter_failed':
-      return documents.filter((doc) => doc.status === 'failed').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'failed';
     case 'outcome_filter_all':
     default:
-      return documents.map((doc) => doc.value);
+      return (doc: SimulationDocReport) => true;
   }
 }
 

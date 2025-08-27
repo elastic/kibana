@@ -62,6 +62,7 @@ export enum KibanaAssetType {
   securityAIPrompt = 'security_ai_prompt',
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
+  alert = 'alert',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
@@ -81,6 +82,7 @@ export enum KibanaSavedObjectType {
   securityAIPrompt = 'security-ai-prompt',
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
+  alert = 'alert',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
@@ -283,6 +285,7 @@ export enum RegistryInputKeys {
   input_group = 'input_group',
   required_vars = 'required_vars',
   vars = 'vars',
+  deployment_modes = 'deployment_modes',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -296,6 +299,7 @@ export interface RegistryInput {
   [RegistryInputKeys.input_group]?: RegistryInputGroup;
   [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
+  [RegistryInputKeys.deployment_modes]?: string[];
 }
 
 export enum RegistryStreamKeys {
@@ -341,6 +345,7 @@ export type RegistrySearchResult = Pick<
   | 'policy_templates_behavior'
   | 'policy_templates'
   | 'categories'
+  | 'discovery'
 >;
 
 // from /categories
@@ -479,7 +484,8 @@ export type RegistryVarType =
   | 'text'
   | 'yaml'
   | 'string'
-  | 'textarea';
+  | 'textarea'
+  | 'url';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -494,6 +500,7 @@ export enum RegistryVarsEntryKeys {
   secret = 'secret',
   hide_in_deployment_modes = 'hide_in_deployment_modes',
   full_width = 'full_width',
+  url_allowed_schemes = 'url_allowed_schemes',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -517,6 +524,7 @@ export interface RegistryVarsEntry {
   };
   [RegistryVarsEntryKeys.hide_in_deployment_modes]?: string[];
   [RegistryVarsEntryKeys.full_width]?: boolean;
+  [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
 }
 
 // Deprecated as part of the removing public references to saved object schemas
@@ -684,10 +692,12 @@ export interface Installation {
   latest_uninstall_failed_attempts?: FailedAttempt[];
   latest_executed_state?: InstallLatestExecutedState;
   latest_custom_asset_install_failed_attempts?: { [asset: string]: CustomAssetFailedAttempt };
+  previous_version?: string | null;
 }
 
 export interface PackageUsageStats {
   agent_policy_count: number;
+  package_policy_count: number;
 }
 
 export type Installable<T> =
@@ -762,6 +772,13 @@ export interface IndexTemplate {
   composed_of: string[];
   ignore_missing_component_templates?: string[];
   _meta: object;
+
+  // These properties are returned on ES read operations and
+  // not allowed to be set on ES write operations
+  created_date?: number;
+  created_date_millis?: number;
+  modified_date?: number;
+  modified_date_millis?: number;
 }
 
 export interface ESAssetMetadata {
@@ -790,3 +807,27 @@ export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
 }
+
+// Experimental support for Otel integrations
+export interface OTelCollectorConfig {
+  extensions?: Record<OTelCollectorComponentID, any>;
+  receivers?: Record<OTelCollectorComponentID, any>;
+  processors?: Record<OTelCollectorComponentID, any>;
+  connectors?: Record<OTelCollectorComponentID, any>;
+  exporters?: Record<OTelCollectorComponentID, any>;
+  service?: {
+    extensions?: OTelCollectorComponentID[];
+    pipelines?: Record<OTelCollectorPipelineID, OTelCollectorPipeline>;
+  };
+}
+
+export interface OTelCollectorPipeline {
+  receivers?: OTelCollectorComponentID[];
+  processors?: OTelCollectorComponentID[];
+  exporters?: OTelCollectorComponentID[];
+}
+
+export type OTelCollectorComponentID = string;
+
+export type OTelCollectorPipelineGroup = 'logs' | 'metrics' | 'traces';
+export type OTelCollectorPipelineID = OTelCollectorPipelineGroup | string;

@@ -22,14 +22,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { createDetectionRuleFromBenchmarkRule } from '@kbn/cloud-security-posture/src/utils/create_detection_rule_from_benchmark';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleState } from './use_change_csp_rule_state';
-import { CspBenchmarkRulesWithStates } from './rules_container';
+import type { CspBenchmarkRulesWithStates } from './rules_container';
 import { TakeAction } from '../../components/take_action';
 
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
@@ -182,7 +182,7 @@ const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Pr
               defaultMessage: `Disabling a rule will also disable its associated detection rules and alerts. Enabling it again does not automatically re-enable them`,
             })}
           >
-            <EuiIcon size="m" color="subdued" type="iInCircle" />
+            <EuiIcon size="m" color="subdued" type="info" />
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>

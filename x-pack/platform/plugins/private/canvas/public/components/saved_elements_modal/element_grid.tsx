@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import { ElementControls } from './element_controls';
-import { CustomElement } from '../../../types';
+import type { CustomElement } from '../../../types';
 import { ElementCard } from '../element_card';
 
 export interface Props {

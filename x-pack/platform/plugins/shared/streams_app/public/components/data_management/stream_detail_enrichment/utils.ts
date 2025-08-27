@@ -7,41 +7,44 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
-  FlattenRecord,
-  ProcessorDefinition,
-  ProcessorDefinitionWithId,
-  ProcessorType,
-  getProcessorType,
-} from '@kbn/streams-schema';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { isSchema } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
+import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import { DraftGrokExpression } from '@kbn/grok-ui';
-import { isEmpty, mapValues, omit, countBy, orderBy } from 'lodash';
-import {
+import type { GrokProcessor, ProcessorType, StreamlangProcessorDefinition } from '@kbn/streamlang';
+import { ALWAYS_CONDITION, streamlangProcessorSchema } from '@kbn/streamlang';
+import type { EnrichmentDataSource } from '../../../../common/url_schema';
+import type {
   DissectFormState,
-  ProcessorDefinitionWithUIAttributes,
   GrokFormState,
   ProcessorFormState,
-  WithUIAttributes,
   DateFormState,
   ManualIngestPipelineFormState,
+  EnrichmentDataSourceWithUIAttributes,
+  SetFormState,
 } from './types';
-import { ALWAYS_CONDITION } from '../../../util/condition';
 import { configDrivenProcessors } from './processors/config_driven';
-import {
+import type {
   ConfigDrivenProcessorType,
   ConfigDrivenProcessors,
 } from './processors/config_driven/types';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
-import { ProcessorResources } from './state_management/processor_state_machine';
+import type { ProcessorResources } from './state_management/processor_state_machine';
 
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
  */
-export const SPECIALISED_TYPES = ['date', 'dissect', 'grok'];
+export const SPECIALISED_TYPES = ['date', 'dissect', 'grok', 'set'];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
+}
+interface RecalcColumnWidthsParams {
+  columnId: string;
+  width: number | undefined; // undefined -> reset width
+  prevWidths: Record<string, number | undefined>;
+  visibleColumns: string[];
 }
 
 const PRIORITIZED_CONTENT_FIELDS = [
@@ -83,24 +86,22 @@ const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: str
 };
 
 const defaultDateProcessorFormState = (sampleDocs: FlattenRecord[]): DateFormState => ({
-  type: 'date',
-  field: getDefaultTextField(sampleDocs, PRIORITIZED_DATE_FIELDS),
+  action: 'date',
+  from: getDefaultTextField(sampleDocs, PRIORITIZED_DATE_FIELDS),
   formats: [],
-  locale: '',
-  target_field: '',
-  timezone: '',
+  to: '',
   output_format: '',
   ignore_failure: true,
-  if: ALWAYS_CONDITION,
+  where: ALWAYS_CONDITION,
 });
 
 const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectFormState => ({
-  type: 'dissect',
-  field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+  action: 'dissect',
+  from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
   pattern: '',
   ignore_failure: true,
   ignore_missing: true,
-  if: ALWAYS_CONDITION,
+  where: ALWAYS_CONDITION,
 });
 
 const defaultGrokProcessorFormState: (
@@ -110,20 +111,28 @@ const defaultGrokProcessorFormState: (
   sampleDocs: FlattenRecord[],
   formStateDependencies: FormStateDependencies
 ) => ({
-  type: 'grok',
-  field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+  action: 'grok',
+  from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
   patterns: [new DraftGrokExpression(formStateDependencies.grokCollection, '')],
-  pattern_definitions: {},
   ignore_failure: true,
   ignore_missing: true,
-  if: ALWAYS_CONDITION,
+  where: ALWAYS_CONDITION,
 });
 
 const defaultManualIngestPipelineProcessorFormState = (): ManualIngestPipelineFormState => ({
-  type: 'manual_ingest_pipeline',
+  action: 'manual_ingest_pipeline',
   processors: [],
   ignore_failure: true,
-  if: ALWAYS_CONDITION,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultSetProcessorFormState = (): SetFormState => ({
+  action: 'set' as const,
+  to: '',
+  value: '',
+  ignore_failure: false,
+  override: true,
+  where: ALWAYS_CONDITION,
 });
 
 const configDrivenDefaultFormStates = mapValues(
@@ -141,6 +150,7 @@ const defaultProcessorFormStateByType: Record<
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
+  set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -153,83 +163,62 @@ export const getDefaultFormStateByType = (
 export const getFormStateFrom = (
   sampleDocuments: FlattenRecord[],
   formStateDependencies: FormStateDependencies,
-  processor?: ProcessorDefinitionWithUIAttributes
+  processor?: StreamlangProcessorDefinition
 ): ProcessorFormState => {
   if (!processor) return defaultGrokProcessorFormState(sampleDocuments, formStateDependencies);
 
-  if (isGrokProcessor(processor)) {
-    const { grok } = processor;
-
+  if (processor.action === 'grok') {
     const clone: GrokFormState = structuredClone({
-      ...omit(grok, 'patterns'),
+      ...omit(processor, 'patterns'),
       patterns: [],
-      type: 'grok',
     });
 
-    clone.patterns = grok.patterns.map(
+    clone.patterns = processor.patterns.map(
       (pattern) => new DraftGrokExpression(formStateDependencies.grokCollection, pattern)
     );
 
     return clone;
   }
 
-  if (isDissectProcessor(processor)) {
-    const { dissect } = processor;
-
+  if (
+    processor.action === 'dissect' ||
+    processor.action === 'manual_ingest_pipeline' ||
+    processor.action === 'date' ||
+    processor.action === 'set'
+  ) {
     return structuredClone({
-      ...dissect,
-      type: 'dissect',
+      ...processor,
     });
   }
 
-  if (isManualIngestPipelineJsonProcessor(processor)) {
-    const { manual_ingest_pipeline } = processor;
-
-    return structuredClone({
-      ...manual_ingest_pipeline,
-      type: 'manual_ingest_pipeline',
-    });
-  }
-
-  if (isDateProcessor(processor)) {
-    const { date } = processor;
-
-    return structuredClone({
-      ...date,
-      type: 'date',
-    });
-  }
-
-  if (processor.type in configDrivenProcessors) {
+  if (processor.action in configDrivenProcessors) {
     return configDrivenProcessors[
-      processor.type as ConfigDrivenProcessorType
+      processor.action as ConfigDrivenProcessorType
     ].convertProcessorToFormState(processor as any);
   }
 
-  throw new Error(`Form state for processor type "${processor.type}" is not implemented.`);
+  throw new Error(`Form state for processor type "${processor.action}" is not implemented.`);
 };
 
 export const convertFormStateToProcessor = (
   formState: ProcessorFormState
 ): {
-  processorDefinition: ProcessorDefinition;
+  processorDefinition: StreamlangProcessorDefinition;
   processorResources?: ProcessorResources;
 } => {
-  if (formState.type === 'grok') {
-    const { patterns, field, pattern_definitions, ignore_failure, ignore_missing } = formState;
+  if (formState.action === 'grok') {
+    const { patterns, from, ignore_failure, ignore_missing } = formState;
 
     return {
       processorDefinition: {
-        grok: {
-          if: formState.if,
-          patterns: patterns
-            .map((pattern) => pattern.getExpression())
-            .filter((pattern): pattern is string => pattern !== undefined),
-          field,
-          pattern_definitions,
-          ignore_failure,
-          ignore_missing,
-        },
+        action: 'grok',
+        where: formState.where,
+        patterns: patterns
+          .map((pattern) => pattern.getExpression().trim())
+          .filter((pattern) => !isEmpty(pattern)),
+        from,
+        ignore_failure,
+        ignore_missing,
       },
       processorResources: {
         grokExpressions: patterns,
@@ -237,60 +226,79 @@ export const convertFormStateToProcessor = (
     };
   }
 
-  if (formState.type === 'dissect') {
-    const { field, pattern, append_separator, ignore_failure, ignore_missing } = formState;
+  if (formState.action === 'dissect') {
+    const { from, pattern, append_separator, ignore_failure, ignore_missing } = formState;
 
     return {
       processorDefinition: {
-        dissect: {
-          if: formState.if,
-          field,
-          pattern,
-          append_separator: isEmpty(append_separator) ? undefined : append_separator,
-          ignore_failure,
-          ignore_missing,
-        },
+        action: 'dissect',
+        where: formState.where,
+        from,
+        pattern,
+        append_separator: isEmpty(append_separator) ? undefined : append_separator,
+        ignore_failure,
+        ignore_missing,
       },
     };
   }
 
-  if (formState.type === 'manual_ingest_pipeline') {
+  if (formState.action === 'manual_ingest_pipeline') {
     const { processors, ignore_failure } = formState;
 
     return {
       processorDefinition: {
-        manual_ingest_pipeline: {
-          if: formState.if,
-          processors,
-          ignore_failure,
-        },
+        action: 'manual_ingest_pipeline',
+        where: formState.where,
+        processors,
+        ignore_failure,
       },
     };
   }
 
-  if (formState.type === 'date') {
-    const { field, formats, locale, ignore_failure, target_field, timezone, output_format } =
-      formState;
+  if (formState.action === 'date') {
+    const { from, formats, ignore_failure, to, output_format } = formState;
 
     return {
       processorDefinition: {
-        date: {
-          if: formState.if,
-          field,
-          formats,
-          ignore_failure,
-          locale: isEmpty(locale) ? undefined : locale,
-          target_field: isEmpty(target_field) ? undefined : target_field,
-          timezone: isEmpty(timezone) ? undefined : timezone,
-          output_format: isEmpty(output_format) ? undefined : output_format,
-        },
+        action: 'date',
+        where: formState.where,
+        from,
+        formats,
+        ignore_failure,
+        to: isEmpty(to) ? undefined : to,
+        output_format: isEmpty(output_format) ? undefined : output_format,
       },
     };
   }
 
-  if (configDrivenProcessors[formState.type]) {
+  if (formState.action === 'set') {
+    const { to, value, copy_from, ignore_failure, override } = formState;
+
+    const getValueOrCopyFrom = () => {
+      if (typeof copy_from === 'string' && !isEmpty(copy_from)) {
+        return { copy_from };
+      }
+      if (typeof value === 'string' && !isEmpty(value)) {
+        return { value };
+      }
+      return { value: '' };
+    };
+
     return {
-      processorDefinition: configDrivenProcessors[formState.type].convertFormStateToConfig(
+      processorDefinition: {
+        action: 'set',
+        where: formState.where,
+        to,
+        ...getValueOrCopyFrom(),
+        override,
+        ignore_failure,
+      },
+    };
+  }
+
+  if (configDrivenProcessors[formState.action]) {
+    return {
+      processorDefinition: configDrivenProcessors[formState.action].convertFormStateToConfig(
         formState as any
       ),
     };
@@ -302,41 +310,98 @@ export const convertFormStateToProcessor = (
 const createProcessorGuardByType =
   <TProcessorType extends ProcessorType>(type: TProcessorType) =>
   (
-    processor: ProcessorDefinitionWithUIAttributes
-  ): processor is WithUIAttributes<
-    Extract<ProcessorDefinition, { [K in TProcessorType]: unknown }>
-  > =>
-    processor.type === type;
+    processor: StreamlangProcessorDefinition
+  ): processor is Extract<StreamlangProcessorDefinition, { [K in TProcessorType]: unknown }> =>
+    processor.action === type;
 
 export const isDateProcessor = createProcessorGuardByType('date');
 export const isDissectProcessor = createProcessorGuardByType('dissect');
 export const isManualIngestPipelineJsonProcessor =
   createProcessorGuardByType('manual_ingest_pipeline');
 export const isGrokProcessor = createProcessorGuardByType('grok');
+export const isSetProcessor = createProcessorGuardByType('set');
 
 const createId = htmlIdGenerator();
-const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
+
+const processorToUIDefinition = <TProcessorDefinition extends StreamlangProcessorDefinition>(
   processor: TProcessorDefinition
-): ProcessorDefinitionWithUIAttributes => ({
-  id: createId(),
-  type: getProcessorType(processor),
+): StreamlangProcessorDefinition => ({
+  customIdentifier: createId(),
   ...processor,
 });
 
-const toAPIDefinition = (processor: ProcessorDefinitionWithUIAttributes): ProcessorDefinition => {
-  const { id, type, ...processorConfig } = processor;
-  return processorConfig;
+const processorToAPIDefinition = (
+  processor: StreamlangProcessorDefinition
+): StreamlangProcessorDefinition => {
+  // Remove customIdentifier, as we only use this for simulation tracing.
+  const { customIdentifier, ...rest } = processor;
+  return rest;
 };
 
-const toSimulateDefinition = (
-  processor: ProcessorDefinitionWithUIAttributes
-): ProcessorDefinitionWithId => {
-  const { type, ...processorConfig } = processor;
-  return processorConfig;
+const processorToSimulateDefinition = (
+  processor: StreamlangProcessorDefinition
+): StreamlangProcessorDefinition => {
+  return processor;
 };
 
 export const processorConverter = {
-  toAPIDefinition,
-  toSimulateDefinition,
-  toUIDefinition,
+  toAPIDefinition: processorToAPIDefinition,
+  toSimulateDefinition: processorToSimulateDefinition,
+  toUIDefinition: processorToUIDefinition,
 };
+
+const dataSourceToUIDefinition = <TEnrichementDataSource extends EnrichmentDataSource>(
+  dataSource: TEnrichementDataSource
+): EnrichmentDataSourceWithUIAttributes => ({
+  id: createId(),
+  ...dataSource,
+});
+
+const dataSourceToUrlSchema = (
+  dataSourceWithUIAttributes: EnrichmentDataSourceWithUIAttributes
+): EnrichmentDataSource => {
+  const { id, ...dataSource } = dataSourceWithUIAttributes;
+  return dataSource;
+};
+
+export const dataSourceConverter = {
+  toUIDefinition: dataSourceToUIDefinition,
+  toUrlSchema: dataSourceToUrlSchema,
+};
+
+export const getDefaultGrokProcessor = ({
+  sampleDocs,
+}: {
+  sampleDocs: FlattenRecord[];
+}): GrokProcessor => ({
+  action: 'grok',
+  from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+  patterns: [''],
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+export const recalcColumnWidths = ({
+  columnId,
+  width,
+  prevWidths,
+  visibleColumns,
+}: RecalcColumnWidthsParams): Record<string, number | undefined> => {
+  const next = { ...prevWidths };
+  if (width === undefined) {
+    delete next[columnId];
+  } else {
+    next[columnId] = width;
+  }
+
+  const allExplicit = visibleColumns.every((c) => next[c] !== undefined);
+  if (allExplicit) {
+    delete next[visibleColumns[visibleColumns.length - 1]];
+  }
+
+  return next;
+};
+
+export const isValidProcessor = (processor: StreamlangProcessorDefinition) =>
+  isSchema(streamlangProcessorSchema, processorConverter.toAPIDefinition(processor));

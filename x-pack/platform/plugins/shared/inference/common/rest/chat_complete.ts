@@ -6,7 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import {
+import type {
   ChatCompleteAPI,
   ChatCompleteCompositeResponse,
   ChatCompleteOptions,
@@ -14,7 +14,7 @@ import {
   ToolOptions,
 } from '@kbn/inference-common';
 import { defer, from, lastValueFrom } from 'rxjs';
-import { ChatCompleteRequestBody } from '../http_apis';
+import type { ChatCompleteRequestBody } from '../http_apis';
 import { retryWithExponentialBackoff } from '../utils/retry_with_exponential_backoff';
 import { getRetryFilter } from '../utils/error_retry_filter';
 import { combineSignal } from '../utils/combine_signal';
@@ -47,10 +47,7 @@ export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCom
     maxRetries,
     metadata,
     retryConfiguration,
-  }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
-    ToolOptions,
-    boolean
-  > => {
+  }: ChatCompleteOptions): ChatCompleteCompositeResponse => {
     const body: ChatCompleteRequestBody = {
       connectorId,
       system,

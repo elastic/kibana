@@ -81,6 +81,7 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
         content={i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenButtonLabel', {
           defaultMessage: 'Revoke token',
         })}
+        disableScreenReaderOutput
       >
         <EuiButtonIcon
           data-test-subj="enrollmentTokenTable.revokeBtn"

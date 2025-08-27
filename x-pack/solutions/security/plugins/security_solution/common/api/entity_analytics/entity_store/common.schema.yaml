@@ -13,7 +13,13 @@ components:
         - host
         - service
         - generic
-
+    BaseECSEntityField:
+      type: string
+      enum:
+        - user
+        - host
+        - service
+        - entity
     EngineDescriptor:
       type: object
       required:
@@ -95,6 +101,7 @@ components:
             - green
             - yellow
             - red
+            - unavailable
             - unknown
         errors:
           type: array

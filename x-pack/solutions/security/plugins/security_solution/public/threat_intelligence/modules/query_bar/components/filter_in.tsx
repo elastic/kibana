@@ -16,7 +16,7 @@ import {
 import { useFilterInOut } from '../hooks/use_filter_in_out';
 import { FilterIn } from '../utils/filter';
 import { type Indicator } from '../../../../../common/threat_intelligence/types/indicator';
-import { FILTER_FOR_TITLE } from './translations';
+import { FILTER_FOR_TITLE, FILTER_IN_ANNOUNCEMENT } from './translations';
 
 const ICON_TYPE = 'plusInCircle';
 
@@ -42,6 +42,10 @@ export interface FilterInCellActionProps extends FilterInProps {
   Component: typeof EuiButtonEmpty | typeof EuiButtonIcon;
 }
 
+export interface FilterInContextMenuProps extends FilterInProps {
+  onAnnounce: (filterInMessage: string) => void;
+}
+
 /**
  * Retrieves the indicator's field and value, then creates a new {@link Filter} and adds it to the {@link FilterManager}.
  *
@@ -60,7 +64,7 @@ export const FilterInButtonIcon: FC<FilterInProps> = ({
   }
 
   return (
-    <EuiToolTip content={FILTER_FOR_TITLE}>
+    <EuiToolTip content={FILTER_FOR_TITLE} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={FILTER_FOR_TITLE}
         iconType={ICON_TYPE}
@@ -114,10 +118,11 @@ export const FilterInButtonEmpty: FC<FilterInProps> = ({
  *
  * @returns filter in {@link EuiContextMenuItem} for a context menu
  */
-export const FilterInContextMenu: FC<FilterInProps> = ({
+export const FilterInContextMenu: FC<FilterInContextMenuProps> = ({
   data,
   field,
   'data-test-subj': dataTestSub,
+  onAnnounce,
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
   if (!filterFn) {
@@ -129,7 +134,10 @@ export const FilterInContextMenu: FC<FilterInProps> = ({
       key="filterIn"
       icon="plusInCircle"
       size="s"
-      onClick={filterFn}
+      onClick={() => {
+        filterFn();
+        onAnnounce(FILTER_IN_ANNOUNCEMENT(field, typeof data === 'string' ? data : ''));
+      }}
       data-test-subj={dataTestSub}
     >
       {FILTER_FOR_TITLE}

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import dateMath from '@kbn/datemath';
 import { memoize } from 'lodash';
-import { UI_SETTINGS, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
+import type { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
 import { buildQueryFromFilters } from '@kbn/es-query';
@@ -26,7 +27,7 @@ interface ValueSuggestionsGetFnArgs {
   boolFilter?: any[];
   signal?: AbortSignal;
   method?: ValueSuggestionsMethod;
-  querySuggestionKey?: 'rules' | 'cases' | 'alerts';
+  querySuggestionKey?: 'rules' | 'cases' | 'alerts' | 'endpoints';
 }
 
 const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, indexPattern: DataView) => {
@@ -70,7 +71,11 @@ export const setupValueSuggestionProvider = (
       usageCollector?.trackRequest();
       let path = `/internal/kibana/suggestions/values/${index}`;
       if (querySuggestionKey) {
-        path = `/internal/${querySuggestionKey}/suggestions/values`;
+        if (querySuggestionKey === 'endpoints') {
+          path = '/internal/api/endpoint/suggestions/endpoints';
+        } else {
+          path = `/internal/${querySuggestionKey}/suggestions/values`;
+        }
       }
       return core.http
         .fetch<T>(path, {

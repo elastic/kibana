@@ -10,7 +10,8 @@
 import React from 'react';
 
 import { buildMockDashboardApi } from '../../mocks';
-import { Item, Props as DashboardGridItemProps } from './dashboard_grid_item';
+import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
+import { Item } from './dashboard_grid_item';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
 import { act, render } from '@testing-library/react';
@@ -35,18 +36,20 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
 const TEST_EMBEDDABLE = 'TEST_EMBEDDABLE';
 
 const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
-  const panels = {
-    '1': {
+  const panels = [
+    {
       gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
       type: TEST_EMBEDDABLE,
-      explicitInput: { id: '1' },
+      panelConfig: {},
+      panelIndex: '1',
     },
-    '2': {
+    {
       gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
       type: TEST_EMBEDDABLE,
-      explicitInput: { id: '2' },
+      panelConfig: {},
+      panelIndex: '2',
     },
-  };
+  ];
   const { api, internalApi } = buildMockDashboardApi({ overrides: { panels } });
 
   const component = render(

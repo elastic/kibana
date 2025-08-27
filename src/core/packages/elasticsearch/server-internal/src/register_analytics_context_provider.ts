@@ -15,7 +15,7 @@ import type { ClusterInfo } from './get_cluster_info';
  * Registers the Analytics context provider to enrich events with the cluster info.
  * @param analytics Analytics service.
  * @param context$ Observable emitting the cluster info.
- * @private
+ * @internal
  */
 export function registerAnalyticsContextProvider(
   analytics: AnalyticsServiceSetup,

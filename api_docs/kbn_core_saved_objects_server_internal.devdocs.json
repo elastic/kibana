@@ -989,7 +989,7 @@
         "label": "SAVED_OBJECT_TYPES_COUNT",
         "description": [],
         "signature": [
-          "134"
+          "137"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/object_types/index.ts",
         "deprecated": false,

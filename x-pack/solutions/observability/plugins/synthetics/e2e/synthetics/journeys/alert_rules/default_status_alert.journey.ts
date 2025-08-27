@@ -7,7 +7,7 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { v4 as uuidv4 } from 'uuid';
 import { getReasonMessage } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
@@ -111,7 +111,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name: 'Test Monitor',
       location: 'North America - US Central',
-      status: 'down',
+      reason: 'down',
       checks: {
         downWithinXChecks: 1,
         down: 1,
@@ -176,7 +176,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name,
       location: 'North America - US Central',
-      status: 'down',
+      reason: 'down',
       checks: {
         downWithinXChecks: 1,
         down: 1,

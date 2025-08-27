@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -38,7 +38,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
       bannerId = coreServices.overlays.banners.replace(
         bannerId,
         toMountPoint(
-          <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
+          <EuiCallOut color="warning" iconType="info" title={bannerMessage}>
             <p>
               <FormattedMessage
                 id="dashboard.noMatchRoute.bannerText"

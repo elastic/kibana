@@ -6,15 +6,16 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
+import type {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import {
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_SEVERITY,
 } from '@kbn/cloud-security-posture-common';
@@ -22,16 +23,15 @@ import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { getMutedRulesFilterQuery } from '../routes/benchmark_rules/get_states/v1';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
-import { FindingsStatsTaskResult, ScoreAggregationResponse, VulnSeverityAggs } from './types';
+import type { FindingsStatsTaskResult, ScoreAggregationResponse, VulnSeverityAggs } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   CSPM_FINDINGS_STATS_INTERVAL,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
 import { scheduleTaskSafe, removeTaskSafe } from '../lib/task_manager_util';
-import { CspServerPluginStartServices } from '../types';
+import type { CspServerPluginStartServices } from '../types';
 import {
   stateSchemaByVersion,
   emptyState,
@@ -218,7 +218,7 @@ const getScoreAggregationQuery = () => ({
 });
 
 const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
   size: 0,
   // creates the safe_posture_type and asset_identifier runtime fields
   runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },

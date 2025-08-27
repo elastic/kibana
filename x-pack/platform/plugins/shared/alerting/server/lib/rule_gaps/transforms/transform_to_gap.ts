@@ -31,7 +31,16 @@ export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'dat
   return events?.data
     ?.map((doc) => {
       const gap = doc?.kibana?.alert?.rule?.gap;
-      if (!gap) return null;
+      // Filter out deleted gaps in the event that we request them by id.
+      // Due to a race condition when we update gaps, we could end up requesting a deleted gap by id
+      // Deleted gaps should not be used by Kibana at all because it means that the rule they are associated with has been deleted
+      if (!gap || gap.deleted) return null;
+
+      const ruleId = doc.rule?.id;
+
+      if (!ruleId) {
+        return null;
+      }
 
       const range = validateInterval(gap.range);
 
@@ -41,6 +50,7 @@ export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'dat
       const inProgressIntervals = validateIntervals(gap?.in_progress_intervals);
 
       return new Gap({
+        ruleId,
         timestamp: doc['@timestamp'],
         range,
         filledIntervals,

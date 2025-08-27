@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstExpression, ESQLAstItem, ESQLProperNode, ESQLSingleAstItem } from '../types';
+import type { ESQLAstExpression, ESQLAstItem, ESQLProperNode, ESQLSingleAstItem } from '../types';
 
 /**
  * Normalizes AST "item" list to only contain *single* items.
@@ -38,7 +38,7 @@ export const firstItem = (items: ESQLAstItem[]): ESQLAstExpression | undefined =
   }
 };
 
-export const resolveItem = (items: ESQLAstItem | ESQLAstItem[]): ESQLAstItem => {
+export const resolveItem = (items: ESQLAstItem | ESQLAstItem[]): ESQLSingleAstItem => {
   return Array.isArray(items) ? resolveItem(items[0]) : items;
 };
 

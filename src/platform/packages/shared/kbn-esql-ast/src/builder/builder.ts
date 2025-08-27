@@ -9,9 +9,10 @@
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
-import { isStringLiteral } from '../ast/helpers';
+import { isStringLiteral } from '../ast/is';
+import { TIME_DURATION_UNITS } from '../parser/constants';
 import { LeafPrinter } from '../pretty_print';
-import {
+import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLAstCommentSingleLine,
@@ -36,15 +37,16 @@ import {
   ESQLStringLiteral,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
-  ESQLTimeInterval,
   ESQLBooleanLiteral,
   ESQLNullLiteral,
   BinaryExpressionOperator,
   ESQLParamKinds,
   ESQLMap,
   ESQLMapEntry,
+  ESQLTimeDurationLiteral,
+  ESQLDatePeriodLiteral,
 } from '../types';
-import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
+import type { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
 export namespace Builder {
   /**
@@ -317,6 +319,37 @@ export namespace Builder {
       fromParser?: Partial<AstNodeParserFields>
     ) => Builder.expression.func.binary('where', args, template, fromParser);
 
+    export namespace list {
+      export const literal = (
+        template: Omit<AstNodeTemplate<ESQLList>, 'name' | 'values'> &
+          Partial<Pick<ESQLList, 'values'>> = {},
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLList => {
+        return {
+          values: [],
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'list',
+          name: '',
+        };
+      };
+
+      export const tuple = (
+        template: Omit<AstNodeTemplate<ESQLList>, 'name' | 'values'> &
+          Partial<Pick<ESQLList, 'values'>> = {},
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLList => {
+        return {
+          values: [],
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'list',
+          subtype: 'tuple',
+          name: '',
+        };
+      };
+    }
+
     export namespace literal {
       /**
        * Constructs a NULL literal node.
@@ -412,20 +445,22 @@ export namespace Builder {
       };
 
       /**
-       * Constructs "time interval" literal node.
-       *
-       * @example 1337 milliseconds
+       * Constructs AST nodes from timespan literals (e.g. 1 day, 2s)
        */
-      export const qualifiedInteger = (
-        quantity: ESQLTimeInterval['quantity'],
-        unit: ESQLTimeInterval['unit'],
+      export const timespan = (
+        quantity: ESQLTimeDurationLiteral['quantity'],
+        unit: ESQLTimeDurationLiteral['unit'],
         fromParser?: Partial<AstNodeParserFields>
-      ): ESQLTimeInterval => {
+      ): ESQLTimeDurationLiteral | ESQLDatePeriodLiteral => {
         return {
           ...Builder.parserFields(fromParser),
-          type: 'timeInterval',
+          type: 'literal',
+          literalType: TIME_DURATION_UNITS.has(unit.toLowerCase())
+            ? 'time_duration'
+            : 'date_period',
           unit,
           quantity,
+          value: `${quantity} ${unit}`,
           name: `${quantity} ${unit}`,
         };
       };
@@ -461,18 +496,6 @@ export namespace Builder {
         };
 
         return node;
-      };
-
-      export const list = (
-        template: Omit<AstNodeTemplate<ESQLList>, 'name'>,
-        fromParser?: Partial<AstNodeParserFields>
-      ): ESQLList => {
-        return {
-          ...template,
-          ...Builder.parserFields(fromParser),
-          type: 'list',
-          name: '',
-        };
       };
     }
 

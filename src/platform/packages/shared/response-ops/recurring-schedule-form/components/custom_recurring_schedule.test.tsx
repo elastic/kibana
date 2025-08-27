@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { fireEvent, render, within, screen } from '@testing-library/react';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Frequency } from '@kbn/rrule';
@@ -37,6 +38,8 @@ const TestWrapper = ({ children, iv = initialValue }: PropsWithChildren<{ iv?: F
   return <Form form={form}>{children}</Form>;
 };
 
+const startDate = new Date().toISOString();
+
 describe('CustomRecurringSchedule', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -45,7 +48,7 @@ describe('CustomRecurringSchedule', () => {
   it('renders all form fields', async () => {
     render(
       <TestWrapper>
-        <CustomRecurringSchedule />
+        <CustomRecurringSchedule startDate={startDate} />
       </TestWrapper>
     );
 
@@ -58,7 +61,7 @@ describe('CustomRecurringSchedule', () => {
   it('renders byweekday field if custom frequency = weekly', async () => {
     render(
       <TestWrapper>
-        <CustomRecurringSchedule />
+        <CustomRecurringSchedule startDate={startDate} />
       </TestWrapper>
     );
 
@@ -83,7 +86,7 @@ describe('CustomRecurringSchedule', () => {
     };
     render(
       <TestWrapper iv={iv}>
-        <CustomRecurringSchedule />
+        <CustomRecurringSchedule startDate={startDate} />
       </TestWrapper>
     );
 
@@ -93,7 +96,7 @@ describe('CustomRecurringSchedule', () => {
   it('renders bymonth field if custom frequency = monthly', async () => {
     render(
       <TestWrapper>
-        <CustomRecurringSchedule />
+        <CustomRecurringSchedule startDate={startDate} />
       </TestWrapper>
     );
 
@@ -111,7 +114,7 @@ describe('CustomRecurringSchedule', () => {
   it('should initialize the form when no initialValue provided', () => {
     render(
       <TestWrapper>
-        <CustomRecurringSchedule />
+        <CustomRecurringSchedule startDate={startDate} />
       </TestWrapper>
     );
 
@@ -139,7 +142,7 @@ describe('CustomRecurringSchedule', () => {
     };
     render(
       <TestWrapper iv={iv}>
-        <CustomRecurringSchedule />
+        <CustomRecurringSchedule startDate={startDate} />
       </TestWrapper>
     );
 

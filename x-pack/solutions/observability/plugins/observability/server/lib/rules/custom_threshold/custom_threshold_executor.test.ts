@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { ISearchSource } from '@kbn/data-plugin/common';
@@ -16,15 +17,15 @@ import {
 } from '@kbn/task-manager-plugin/server/task_running/errors';
 import { createCustomThresholdExecutor } from './custom_threshold_executor';
 import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
-import { Evaluation } from './lib/evaluate_rule';
+import type { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import {
-  Aggregators,
+import type {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
@@ -67,7 +68,7 @@ const mockOptions = {
   previousStartedAt: null,
   params: {
     searchConfiguration: {
-      index: {},
+      index: 'valid-index-name',
       query: {
         query: mockQuery,
         language: 'kuery',
@@ -745,7 +746,7 @@ describe('The custom threshold alert type', () => {
               },
             ],
             searchConfiguration: {
-              index: {},
+              index: 'valid-index-name',
               query: {
                 query: filterQuery,
                 language: 'kuery',
@@ -1682,7 +1683,7 @@ describe('The custom threshold alert type', () => {
           id: 'a',
         });
         expect(getViewInAppUrl).lastCalledWith({
-          dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
+          dataViewId: 'valid-index-name',
           spaceId: MOCKED_SPACE_ID,
           groups: [
             {
@@ -1690,11 +1691,11 @@ describe('The custom threshold alert type', () => {
               value: 'a',
             },
           ],
-          logsExplorerLocator: undefined,
+          logsLocator: undefined,
           metrics: customThresholdCountCriterion.metrics,
           startedAt: expect.stringMatching(ISO_DATE_REGEX),
           searchConfiguration: {
-            index: {},
+            index: 'valid-index-name',
             query: {
               query: mockQuery,
               language: 'kuery',
@@ -1751,11 +1752,11 @@ describe('The custom threshold alert type', () => {
               value: 'host-0',
             },
           ],
-          logsExplorerLocator: undefined,
+          logsLocator: undefined,
           metrics: customThresholdCountCriterion.metrics,
           startedAt: expect.stringMatching(ISO_DATE_REGEX),
           searchConfiguration: {
-            index: {},
+            index: 'valid-index-name',
             query: {
               query: mockQuery,
               language: 'kuery',
@@ -2836,7 +2837,7 @@ describe('The custom threshold alert type', () => {
               },
             ],
             searchConfiguration: {
-              index: {},
+              index: 'mockedIndexId',
               query: {
                 query: filterQuery,
                 language: 'kuery',

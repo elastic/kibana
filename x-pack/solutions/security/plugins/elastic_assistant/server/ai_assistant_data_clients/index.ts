@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { AuditLogger, AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuditLogger, AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import type { estypes } from '@elastic/elasticsearch';
-import { IIndexPatternString } from '../types';
+import type { IIndexPatternString } from '../types';
 import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
 import { DocumentsDataWriter } from '../lib/data_stream/documents_data_writer';
-import { FindResponse, findDocuments } from './find';
+import type { FindResponse } from './find';
+import { findDocuments } from './find';
 
 export interface AIAssistantDataClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -100,7 +101,6 @@ export class AIAssistantDataClient {
     sortOrder,
     filter,
     fields,
-    index,
     aggs,
     mSearch,
   }: {
@@ -110,7 +110,6 @@ export class AIAssistantDataClient {
     sortOrder?: string;
     filter?: string;
     fields?: string[];
-    index?: string;
     aggs?: Record<string, estypes.AggregationsAggregationContainer>;
     mSearch?: {
       filter: string;
@@ -125,7 +124,7 @@ export class AIAssistantDataClient {
       perPage,
       filter,
       sortField,
-      index: index ?? this.indexTemplateAndPattern.alias,
+      index: this.indexTemplateAndPattern.alias,
       sortOrder: sortOrder as estypes.SortOrder,
       logger: this.options.logger,
       aggs,

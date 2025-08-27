@@ -13,6 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import { buildEsQuery } from '@kbn/es-query';
+import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
@@ -33,6 +34,7 @@ import { FlowTargetSelectConnected } from '../../components/flow_target_select_c
 import type { IpOverviewProps } from '../../components/details';
 import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
+import { PageLoader } from '../../../../common/components/page_loader';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useNetworkDetails, ID } from '../../containers/details';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -62,7 +64,6 @@ import {
 } from '../../../../common/components/cell_actions';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
@@ -118,13 +119,11 @@ const NetworkDetailsComponent: React.FC = () => {
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
-  const experimentalSelectedPatterns = useSelectedPatterns();
+  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
   const indicesExist = newDataViewPickerEnabled
-    ? !!dataView?.matchedIndices?.length
+    ? experimentalDataView.hasMatchedIndices()
     : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
@@ -137,7 +136,9 @@ const NetworkDetailsComponent: React.FC = () => {
     try {
       return [
         buildEsQuery(
-          dataViewSpecToViewBase(sourcererDataView),
+          newDataViewPickerEnabled
+            ? experimentalDataView
+            : dataViewSpecToViewBase(oldSourcererDataView),
           [query],
           [...networkDetailsFilter, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -146,7 +147,15 @@ const NetworkDetailsComponent: React.FC = () => {
     } catch (e) {
       return [undefined, e];
     }
-  }, [globalFilters, networkDetailsFilter, query, sourcererDataView, uiSettings]);
+  }, [
+    experimentalDataView,
+    globalFilters,
+    networkDetailsFilter,
+    newDataViewPickerEnabled,
+    oldSourcererDataView,
+    query,
+    uiSettings,
+  ]);
 
   const additionalFilters = useMemo(
     () => (rawFilteredQuery ? [rawFilteredQuery] : []),
@@ -190,15 +199,24 @@ const NetworkDetailsComponent: React.FC = () => {
   );
 
   const indexPattern = useMemo(() => {
-    return dataViewSpecToViewBase(sourcererDataView);
-  }, [sourcererDataView]);
+    return newDataViewPickerEnabled
+      ? experimentalDataView || { title: '', fields: [] }
+      : dataViewSpecToViewBase(oldSourcererDataView);
+  }, [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataView]);
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
 
   return (
     <div data-test-subj="network-details-page">
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
+            <SiemSearchBar
+              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              id={InputsModelId.global}
+            />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>
@@ -246,7 +264,7 @@ const NetworkDetailsComponent: React.FC = () => {
               narrowDateRange={narrowDateRange}
               indexPatterns={selectedPatterns}
               jobNameById={jobNameById}
-              scopeId={SourcererScopeName.default}
+              scopeId={SourcererScopeName.explore}
             />
 
             <EuiHorizontalRule />

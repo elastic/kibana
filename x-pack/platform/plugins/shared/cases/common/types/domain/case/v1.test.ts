@@ -93,6 +93,10 @@ const basicCase = {
   ],
   observables: [],
   incremental_id: undefined,
+  in_progress_at: undefined,
+  time_to_acknowledge: undefined,
+  time_to_investigate: undefined,
+  time_to_resolve: undefined,
 };
 
 describe('RelatedCaseRt', () => {
@@ -207,7 +211,10 @@ describe('CaseAttributesRt', () => {
       },
     ],
     observables: [],
-    incremental_id: undefined,
+    in_progress_at: undefined,
+    time_to_acknowledge: undefined,
+    time_to_investigate: undefined,
+    time_to_resolve: undefined,
   };
 
   it('has expected attributes in request', () => {

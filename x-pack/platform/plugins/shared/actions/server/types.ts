@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type {
   KibanaRequest,
   SavedObjectsClientContract,
@@ -281,3 +281,9 @@ export interface ConnectorToken extends SavedObjectAttributes {
 // This unallowlist should only contain connector types that require a request or API key for
 // execution.
 export const UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS = ['.index'];
+
+export type AwsSesConfig = {
+  host: string;
+  port: number;
+  secure: boolean;
+} | null;

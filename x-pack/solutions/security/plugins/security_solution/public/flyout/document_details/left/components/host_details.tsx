@@ -390,6 +390,8 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
               refetch={refetch}
               inspect={inspect}
               deleteQuery={deleteQuery}
+              scopeId={scopeId}
+              isFlyoutOpen={true}
             />
           )}
         </AnomalyTableProvider>
@@ -443,7 +445,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
                   />
                 }
               >
-                <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+                <EuiIcon color="subdued" type="info" className="eui-alignTop" />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>

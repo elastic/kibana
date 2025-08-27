@@ -6,4 +6,4 @@
  */
 
 export * from './fields_metadata_service';
-export * from './types';
+export type * from './types';

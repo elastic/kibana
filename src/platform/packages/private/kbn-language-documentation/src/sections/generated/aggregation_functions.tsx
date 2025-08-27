@@ -30,6 +30,7 @@ export const functions = {
         defaultMessage: 'AVG',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -58,6 +59,7 @@ export const functions = {
         defaultMessage: 'COUNT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -89,6 +91,7 @@ export const functions = {
         defaultMessage: 'COUNT_DISTINCT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -120,6 +123,7 @@ export const functions = {
         defaultMessage: 'MAX',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -148,6 +152,7 @@ export const functions = {
         defaultMessage: 'MEDIAN',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -160,11 +165,12 @@ export const functions = {
   ### MEDIAN
   The value that is greater than half of all values and less than half of all values, also known as the 50% [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile).
 
+  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile), \`MEDIAN\` is [usually approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile-approximate).
+
   \`\`\`esql
   FROM employees
   | STATS MEDIAN(salary), PERCENTILE(salary, 50)
   \`\`\`
-  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile), \`MEDIAN\` is [usually approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile-approximate).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -180,6 +186,7 @@ export const functions = {
         defaultMessage: 'MEDIAN_ABSOLUTE_DEVIATION',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -194,11 +201,12 @@ export const functions = {
 
   It is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable \`X\`, the median absolute deviation is \`median(|median(X) - X|)\`.
 
+  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile), \`MEDIAN_ABSOLUTE_DEVIATION\` is [usually approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile-approximate).
+
   \`\`\`esql
   FROM employees
   | STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
   \`\`\`
-  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile), \`MEDIAN_ABSOLUTE_DEVIATION\` is [usually approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile-approximate).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -214,6 +222,7 @@ export const functions = {
         defaultMessage: 'MIN',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -242,6 +251,7 @@ export const functions = {
         defaultMessage: 'PERCENTILE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -275,6 +285,7 @@ export const functions = {
         defaultMessage: 'SAMPLE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -305,7 +316,8 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_centroid_agg', {
         defaultMessage: 'ST_CENTROID_AGG',
       }),
-      preview: false,
+      preview: true,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -336,7 +348,17 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_extent_agg', {
         defaultMessage: 'ST_EXTENT_AGG',
       }),
-      preview: false,
+      preview: true,
+      license: {
+        licenses: [
+          {
+            name: 'platinum',
+            isSignatureSpecific: true,
+            paramsWithLicense: ['cartesian_shape', 'geo_shape'],
+          },
+        ],
+        hasMultipleLicenses: false,
+      },
       description: (
         <Markdown
           openLinksInNewTab
@@ -369,6 +391,7 @@ export const functions = {
         defaultMessage: 'STD_DEV',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -379,7 +402,7 @@ export const functions = {
             {
               defaultMessage: `
   ### STD DEV
-  The standard deviation of a numeric field.
+  The population standard deviation of a numeric field.
 
   \`\`\`esql
   FROM employees
@@ -400,6 +423,7 @@ export const functions = {
         defaultMessage: 'SUM',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -428,6 +452,7 @@ export const functions = {
         defaultMessage: 'TOP',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -456,6 +481,7 @@ export const functions = {
         defaultMessage: 'VALUES',
       }),
       preview: true,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -491,6 +517,7 @@ export const functions = {
         defaultMessage: 'WEIGHTED_AVG',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab

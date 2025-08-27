@@ -14,11 +14,11 @@ import { render, waitFor } from '@testing-library/react';
 
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
-import { buildMockDashboardApi, getMockDashboardPanels } from '../../mocks';
+import { buildMockDashboardApi, getMockPanels } from '../../mocks';
 import { DashboardViewport } from './dashboard_viewport';
 
 const createAndMountDashboardViewport = async () => {
-  const panels = getMockDashboardPanels().panels;
+  const panels = getMockPanels();
   const { api, internalApi } = buildMockDashboardApi({
     overrides: {
       panels,

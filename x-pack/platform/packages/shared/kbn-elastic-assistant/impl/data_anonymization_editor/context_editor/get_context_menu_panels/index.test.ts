@@ -6,33 +6,27 @@
  */
 import { getContextMenuPanels, PRIMARY_PANEL_ID } from '.';
 import * as i18n from '../translations';
-import { ContextEditorRow } from '../types';
 
 describe('getContextMenuPanels', () => {
   const closePopover = jest.fn();
   const onListUpdated = jest.fn();
-  const selected: ContextEditorRow[] = [
-    {
-      allowed: true,
-      anonymized: true,
-      denied: false,
-      field: 'user.name',
-      rawValues: ['jodi'],
-    },
-  ];
+
+  const params = {
+    disableAllow: false,
+    disableAnonymize: false,
+    disableDeny: false,
+    disableUnanonymize: false,
+    closePopover,
+    onListUpdated,
+    selectedField: 'user.name',
+    selectedFields: ['user.name'],
+    handleRowChecked: jest.fn(),
+  };
 
   beforeEach(() => jest.clearAllMocks());
 
   it('the first panel has a `primary-panel-id`', () => {
-    const panels = getContextMenuPanels({
-      disableAllow: false,
-      disableAnonymize: false,
-      disableDeny: false,
-      disableUnanonymize: false,
-      closePopover,
-      onListUpdated,
-      selected,
-    });
+    const panels = getContextMenuPanels(params);
 
     expect(panels[0].id).toEqual(PRIMARY_PANEL_ID);
   });
@@ -42,13 +36,8 @@ describe('getContextMenuPanels', () => {
       const disableAllow = true;
 
       const panels = getContextMenuPanels({
+        ...params,
         disableAllow,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
       });
 
       const allowItem = panels[0].items?.find((item) => item.name === i18n.ALLOW);
@@ -59,15 +48,7 @@ describe('getContextMenuPanels', () => {
     it('is NOT disabled when `disableAlow` is false', () => {
       const disableAllow = false;
 
-      const panels = getContextMenuPanels({
-        disableAllow,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
-      });
+      const panels = getContextMenuPanels({ ...params, disableAllow });
 
       const allowItem = panels[0].items?.find((item) => item.name === i18n.ALLOW);
 
@@ -76,13 +57,7 @@ describe('getContextMenuPanels', () => {
 
     it('calls closePopover when allow is clicked', () => {
       const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
+        ...params,
       });
 
       const allowItem = panels[0].items?.find((item) => item.name === i18n.ALLOW);
@@ -99,13 +74,7 @@ describe('getContextMenuPanels', () => {
 
     it('calls onListUpdated to add the field to the `allow` list', () => {
       const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
+        ...params,
       });
 
       const allowItem = panels[0].items?.find((item) => item.name === i18n.ALLOW);
@@ -128,13 +97,8 @@ describe('getContextMenuPanels', () => {
       const disableDeny = true;
 
       const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
+        ...params,
         disableDeny,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
       });
 
       const denyItem = panels[0].items?.find((item) => item.name === i18n.DENY);
@@ -146,13 +110,8 @@ describe('getContextMenuPanels', () => {
       const disableDeny = false;
 
       const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
+        ...params,
         disableDeny,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
       });
 
       const denyItem = panels[0].items?.find((item) => item.name === i18n.DENY);
@@ -162,13 +121,7 @@ describe('getContextMenuPanels', () => {
 
     it('calls closePopover when deny is clicked', () => {
       const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
+        ...params,
       });
 
       const denyByDefaultItem = panels[0].items?.find((item) => item.name === i18n.DENY);
@@ -185,13 +138,7 @@ describe('getContextMenuPanels', () => {
 
     it('calls onListUpdated to remove the field from the `allow` list', () => {
       const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
+        ...params,
       });
 
       const denyItem = panels[0].items?.find((item) => item.name === i18n.DENY);
@@ -214,13 +161,8 @@ describe('getContextMenuPanels', () => {
       const disableAnonymize = true;
 
       const panels = getContextMenuPanels({
-        disableAllow: false,
+        ...params,
         disableAnonymize,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
       });
 
       const anonymizeItem = panels[0].items?.find((item) => item.name === i18n.ANONYMIZE);
@@ -232,13 +174,8 @@ describe('getContextMenuPanels', () => {
       const disableAnonymize = false;
 
       const panels = getContextMenuPanels({
-        disableAllow: false,
+        ...params,
         disableAnonymize,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
       });
 
       const anonymizeItem = panels[0].items?.find((item) => item.name === i18n.ANONYMIZE);
@@ -248,13 +185,7 @@ describe('getContextMenuPanels', () => {
 
     it('calls closePopover when anonymize is clicked', () => {
       const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
+        ...params,
       });
 
       const anonymizeItem = panels[0].items?.find((item) => item.name === i18n.ANONYMIZE);
@@ -271,13 +202,7 @@ describe('getContextMenuPanels', () => {
 
     it('calls onListUpdated to add the field to both the `allowReplacement` and `defaultAllowReplacement` lists', () => {
       const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
+        ...params,
       });
 
       const anonymizeItem = panels[0].items?.find((item) => item.name === i18n.ANONYMIZE);
@@ -300,13 +225,8 @@ describe('getContextMenuPanels', () => {
       const disableUnanonymize = true;
 
       const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
+        ...params,
         disableUnanonymize,
-        closePopover,
-        onListUpdated,
-        selected,
       });
 
       const unanonymizeItem = panels[0].items?.find((item) => item.name === i18n.UNANONYMIZE);
@@ -318,13 +238,8 @@ describe('getContextMenuPanels', () => {
       const disableUnanonymize = false;
 
       const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
+        ...params,
         disableUnanonymize,
-        closePopover,
-        onListUpdated,
-        selected,
       });
 
       const unanonymizeItem = panels[0].items?.find((item) => item.name === i18n.UNANONYMIZE);
@@ -334,13 +249,7 @@ describe('getContextMenuPanels', () => {
 
     it('calls closePopover when unanonymize is clicked', () => {
       const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
+        ...params,
       });
 
       const unAnonymizeItem = panels[0].items?.find((item) => item.name === i18n.UNANONYMIZE);
@@ -357,13 +266,7 @@ describe('getContextMenuPanels', () => {
 
     it('calls onListUpdated to remove the field from the `allowReplacement` list', () => {
       const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
+        ...params,
       });
 
       const unAnonymizeItem = panels[0].items?.find((item) => item.name === i18n.UNANONYMIZE);

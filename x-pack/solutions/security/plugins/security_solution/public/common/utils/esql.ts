@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse, mutate, BasicPrettyPrinter, synth } from '@kbn/esql-ast';
+import { Parser, mutate, BasicPrettyPrinter, synth } from '@kbn/esql-ast';
 import { isString } from 'lodash/fp';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { escapeKQLStringParam } from '../../../common/utils/kql';
@@ -14,13 +14,13 @@ import { escapeKQLStringParam } from '../../../common/utils/kql';
  * This function is used to add a KQL query to an ESQL query.
  */
 export const buildESQLWithKQLQuery = (esql: string, kqlQuery: string | undefined) => {
-  const { errors, root } = parse(esql);
+  const { errors, root } = Parser.parse(esql);
   if (errors.length > 0) {
     return esql;
   }
 
   if (isString(kqlQuery) && kqlQuery !== '') {
-    const kqlWhere = synth.cmd`WHERE KQL("${escapeKQLStringParam(kqlQuery)}")`;
+    const kqlWhere = synth.cmd(`WHERE KQL("${escapeKQLStringParam(kqlQuery)}")`);
     const index = root.commands.findIndex((cmd) => cmd.name === 'from');
     mutate.generic.commands.insert(root, kqlWhere, index + 1); // add 'where'command after the 'from' command
     return BasicPrettyPrinter.print(root);

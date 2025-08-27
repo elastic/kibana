@@ -14,7 +14,7 @@ import type {
   VectorSourceRequestMeta,
 } from '@kbn/maps-plugin/common';
 import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '@kbn/maps-plugin/common';
-import type { AbstractSourceDescriptor, MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
+import type { MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
 import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
 import type { DataFilters } from '@kbn/maps-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -39,16 +39,17 @@ import type { MlApi } from '../application/services/ml_api_service';
 
 const RESULT_LIMIT = 1000;
 
-export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
+export type AnomalySourceDescriptor = SerializableRecord & {
   jobId: string;
   typicalActual: MlAnomalyLayersType;
-}
+  type: SOURCE_TYPES.ES_ML_ANOMALIES;
+};
 
 export class AnomalySource implements IVectorSource {
   static mlResultsService: MlApi['results'];
   static mlLocator?: LocatorPublic<SerializableRecord>;
 
-  static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>) {
+  static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>): AnomalySourceDescriptor {
     if (typeof descriptor.jobId !== 'string') {
       throw new Error('Job id is required for anomaly layer creation');
     }

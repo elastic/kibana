@@ -11,9 +11,10 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
-  BoundChatCompleteOptions,
   BoundInferenceClient,
+  BoundOptions,
   InferenceClient,
+  InferenceConnector,
 } from '@kbn/inference-common';
 import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
 
@@ -49,7 +50,7 @@ export interface InferenceBoundClientCreateOptions extends InferenceUnboundClien
   /**
    * The parameters to bind the client to.
    */
-  bindTo: BoundChatCompleteOptions;
+  bindTo: BoundOptions;
 }
 
 /**
@@ -113,6 +114,32 @@ export interface InferenceServerStart {
    * });
    */
   getChatModel: (options: CreateChatModelOptions) => Promise<InferenceChatModel>;
+
+  /**
+   * Returns a list of all available inference connectors.
+   *
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to an array of inference connectors
+   */
+  getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
+
+  /**
+   * Retrieves the default inference connector configured for the system.
+   *
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to the default inference connector
+   */
+  getDefaultConnector: (request: KibanaRequest) => Promise<InferenceConnector>;
+
+  /**
+   * Retrieves a specific inference connector by its ID.
+   *
+   * @param id - The unique identifier of the connector to retrieve
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to the requested inference connector
+   * @throws Error if the connector with the specified ID does not exist
+   */
+  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
 }
 
 /**

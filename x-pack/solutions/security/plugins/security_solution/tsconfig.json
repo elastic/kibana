@@ -8,15 +8,14 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
-    "ui_tests/**/*",
+    "test/scout/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*",
-    "emotion.d.ts"
-  ],
+    "emotion.d.ts" ],
   "exclude": [
     "target/**/*",
     "**/cypress/**",
@@ -78,7 +77,6 @@
     "@kbn/lens-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/ecs-data-quality-dashboard",
@@ -137,7 +135,6 @@
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-import-export-server-mocks",
     "@kbn/user-profile-components",
-    "@kbn/guided-onboarding",
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
     "@kbn/shared-ux-router",
@@ -253,6 +250,11 @@
     "@kbn/actions-types",
     "@kbn/triggers-actions-ui-types",
     "@kbn/unified-histogram",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/elastic-assistant-shared-state",
+    "@kbn/elastic-assistant-shared-state-plugin",
+    "@kbn/spaces-utils",
+    "@kbn/licensing-types",
+    "@kbn/core-metrics-server",
   ]
 }

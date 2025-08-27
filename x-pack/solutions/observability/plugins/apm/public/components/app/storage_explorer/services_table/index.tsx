@@ -202,7 +202,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
             {i18n.translate('xpack.apm.storageExplorer.table.samplingColumnName', {
               defaultMessage: 'Sampling rate',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -300,7 +300,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
 
       <EuiInMemoryTable
         tableCaption={i18n.translate('xpack.apm.storageExplorer.table.caption', {
-          defaultMessage: 'Storage Explorer',
+          defaultMessage: 'Storage explorer',
         })}
         items={items ?? []}
         columns={columns}

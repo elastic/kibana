@@ -9,7 +9,7 @@
 
 import { v4 as uuid } from 'uuid';
 import { i18n } from '@kbn/i18n';
-import type { TabItem } from '@kbn/unified-tabs';
+import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
@@ -44,15 +44,15 @@ export const createTabActionInjector =
 export type TabActionInjector = ReturnType<typeof createTabActionInjector>;
 
 const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
-  defaultMessage: 'Untitled session',
+  defaultMessage: 'Untitled',
 });
-const DEFAULT_TAB_REGEX = new RegExp(`^${DEFAULT_TAB_LABEL}( \\d+)?$`);
 
 export const createTabItem = (allTabs: TabState[]): TabItem => {
   const id = uuid();
-  const untitledTabCount = allTabs.filter((tab) => DEFAULT_TAB_REGEX.test(tab.label.trim())).length;
-  const label =
-    untitledTabCount > 0 ? `${DEFAULT_TAB_LABEL} ${untitledTabCount}` : DEFAULT_TAB_LABEL;
+  const baseLabel = DEFAULT_TAB_LABEL;
+
+  const nextNumber = getNextTabNumber(allTabs, baseLabel);
+  const label = nextNumber ? `${baseLabel} ${nextNumber}` : baseLabel;
 
   return { id, label };
 };

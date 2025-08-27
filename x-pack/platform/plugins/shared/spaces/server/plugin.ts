@@ -63,17 +63,17 @@ export interface SpacesPluginSetup {
 
   /**
    * Registries exposed for the security plugin to transparently provide authorization and audit logging.
-   * @private
+   * @internal
    */
   spacesClient: {
     /**
      * Sets the client repository factory.
-     * @private
+     * @internal
      */
     setClientRepositoryFactory: (factory: SpacesClientRepositoryFactory) => void;
     /**
      * Registers a client wrapper.
-     * @private
+     * @internal
      */
     registerClientWrapper: (wrapper: SpacesClientWrapper) => void;
   };

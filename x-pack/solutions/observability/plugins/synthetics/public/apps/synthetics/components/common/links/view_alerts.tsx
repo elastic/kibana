@@ -14,7 +14,7 @@ export const AlertsLink = () => {
   const alertUrl = useAlertsUrl({ rangeFrom: 'now-12h/h', rangeTo: 'now' });
 
   return (
-    <EuiToolTip content={VIEW_ALERTS}>
+    <EuiToolTip content={VIEW_ALERTS} disableScreenReaderOutput>
       <EuiButtonIcon
         data-test-subj="syntheticsAlertsLinkButton"
         aria-label={VIEW_ALERTS}

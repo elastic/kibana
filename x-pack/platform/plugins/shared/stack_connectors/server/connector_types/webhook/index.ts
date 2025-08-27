@@ -26,6 +26,8 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { SSLCertType } from '../../../common/auth/constants';
 import type {
   WebhookConnectorType,
   ActionParamsType,
@@ -95,7 +97,7 @@ function validateConnectorTypeConfig(
   } catch (err) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.configurationErrorNoHostname', {
-        defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
+        defaultMessage: 'error validation webhook action config: unable to parse url: {err}',
         values: {
           err: err.toString(),
         },
@@ -108,7 +110,7 @@ function validateConnectorTypeConfig(
   } catch (allowListError) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.configurationError', {
-        defaultMessage: 'error configuring webhook action: {message}',
+        defaultMessage: 'error validation webhook action config: {message}',
         values: {
           message: allowListError.message,
         },
@@ -120,9 +122,24 @@ function validateConnectorTypeConfig(
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.authConfigurationError', {
         defaultMessage:
-          'error configuring webhook action: authType must be null or undefined if hasAuth is false',
+          'error validation webhook action config: authType must be null or undefined if hasAuth is false',
       })
     );
+  }
+
+  if (configObject.certType === SSLCertType.PFX) {
+    const webhookSettings = configurationUtilities.getWebhookSettings();
+    if (!webhookSettings.ssl.pfx.enabled) {
+      throw new Error(
+        i18n.translate('xpack.stackConnectors.webhook.pfxConfigurationError', {
+          defaultMessage:
+            'error validation webhook action config: certType "{certType}" is disabled',
+          values: {
+            certType: SSLCertType.PFX,
+          },
+        })
+      );
+    }
   }
 }
 
@@ -204,6 +221,11 @@ export async function executor(
           getOrElse(() => retryResult(actionId, message))
         );
       }
+
+      if (status === 404) {
+        return errorResultInvalid(actionId, message, TaskErrorSource.USER);
+      }
+
       return errorResultInvalid(actionId, message);
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
@@ -227,7 +249,8 @@ function successResult(actionId: string, data: unknown): ConnectorTypeExecutorRe
 
 function errorResultInvalid(
   actionId: string,
-  serviceMessage: string
+  serviceMessage: string,
+  errorSource?: TaskErrorSource
 ): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.webhook.invalidResponseErrorMessage', {
     defaultMessage: 'error calling webhook, invalid response',
@@ -237,6 +260,7 @@ function errorResultInvalid(
     message: errMessage,
     actionId,
     serviceMessage,
+    errorSource,
   };
 }
 

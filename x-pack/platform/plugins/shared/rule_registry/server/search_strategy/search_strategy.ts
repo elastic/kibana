@@ -10,6 +10,7 @@ import { map, mergeMap, catchError, of } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { from } from 'rxjs';
+import type { RegistryRuleType } from '@kbn/alerting-plugin/server/rule_type_registry';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
@@ -61,8 +62,11 @@ export const ruleRegistrySearchStrategyProvider = (
 
       const registeredRuleTypes = alerting.listTypes();
 
+      const ruleTypesWithoutInternalRuleTypes =
+        getRuleTypesWithoutInternalRuleTypes(registeredRuleTypes);
+
       const [validRuleTypeIds, _] = partition(request.ruleTypeIds, (ruleTypeId) =>
-        registeredRuleTypes.has(ruleTypeId)
+        ruleTypesWithoutInternalRuleTypes.has(ruleTypeId)
       );
 
       if (isAnyRuleTypeESAuthorized && !isEachRuleTypeESAuthorized) {
@@ -235,3 +239,11 @@ export const ruleRegistrySearchStrategyProvider = (
     },
   };
 };
+
+const getRuleTypesWithoutInternalRuleTypes = (registeredRuleTypes: Map<string, RegistryRuleType>) =>
+  new Map(
+    Array.from(registeredRuleTypes).filter(
+      ([_id, ruleType]) =>
+        ruleType.internallyManaged == null || !Boolean(ruleType.internallyManaged)
+    )
+  );

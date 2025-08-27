@@ -18,7 +18,13 @@ export type SecuritySolutionRowCellRendererGetter = Awaited<
   ReturnType<SecuritySolutionCellRendererFeature['getRenderer']>
 >;
 
-const ALLOWED_DISCOVER_RENDERED_FIELDS = ['host.name', 'user.name', 'source.ip', 'destination.ip'];
+/**
+ *
+ * This controls the list of fields that are allowed custom security solution rendering
+ * in Discover's contextual View
+ *
+ */
+const ALLOWED_DISCOVER_RENDERED_FIELDS = ['kibana.alert.workflow_status'];
 
 export const getCellRendererForGivenRecord: SecuritySolutionRowCellRendererGetter = (
   fieldName: string

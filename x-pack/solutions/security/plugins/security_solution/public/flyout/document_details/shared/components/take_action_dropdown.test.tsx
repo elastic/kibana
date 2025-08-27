@@ -28,6 +28,7 @@ import {
   ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
 } from '../../../../common/components/toolbar/bulk_actions/translations';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 jest.mock('../../../../common/components/endpoint/host_isolation');
 jest.mock('../../../../common/components/endpoint/responder');
@@ -38,7 +39,6 @@ jest.mock('../../../../detections/components/user_info', () => ({
 }));
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
 
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
@@ -108,7 +108,10 @@ describe('take action dropdown', () => {
             isOsqueryAvailable: jest.fn().mockReturnValue(true),
           },
           application: {
-            capabilities: { siemV2: { crud_alerts: true, read_alerts: true }, osquery: true },
+            capabilities: {
+              [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+              osquery: true,
+            },
           },
         },
       };

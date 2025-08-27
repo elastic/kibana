@@ -12,6 +12,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
@@ -95,6 +96,7 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
     selectedPatterns,
     sourcererDataView,
   } = useSourcererDataView(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
   /*
    * `pageIndex` needs to be maintained for each table in each tab independently
    * and consequently it cannot be the part of common redux state
@@ -117,12 +119,22 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
       config: esQueryConfig,
       dataProviders,
       dataViewSpec: sourcererDataView,
+      dataView: experimentalDataView,
       browserFields,
       filters,
       kqlQuery,
       kqlMode,
     });
-  }, [esQueryConfig, dataProviders, sourcererDataView, browserFields, filters, kqlQuery, kqlMode]);
+  }, [
+    esQueryConfig,
+    dataProviders,
+    sourcererDataView,
+    experimentalDataView,
+    browserFields,
+    filters,
+    kqlQuery,
+    kqlMode,
+  ]);
 
   useInvalidFilterQuery({
     id: timelineId,

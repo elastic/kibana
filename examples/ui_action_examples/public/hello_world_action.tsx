@@ -9,12 +9,12 @@
 
 import React from 'react';
 import { EuiText, EuiModalBody, EuiButton } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
 
-type StartServices = Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
+type StartServices = Pick<CoreStart, 'overlays' | 'rendering'>;
 
 export const createHelloWorldActionDefinition = (
   getStartServices: () => Promise<StartServices>
@@ -23,7 +23,7 @@ export const createHelloWorldActionDefinition = (
   type: ACTION_HELLO_WORLD,
   getDisplayName: () => 'Hello World!',
   execute: async () => {
-    const { overlays, ...startServices } = await getStartServices();
+    const { overlays, rendering } = await getStartServices();
     const overlay = overlays.openModal(
       toMountPoint(
         <EuiModalBody>
@@ -32,7 +32,7 @@ export const createHelloWorldActionDefinition = (
             Close
           </EuiButton>
         </EuiModalBody>,
-        startServices
+        rendering
       )
     );
   },

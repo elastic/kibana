@@ -29,5 +29,7 @@
     "@kbn/presentation-publishing",
     "@kbn/reporting-common",
     "@kbn/es-query",
+    "@kbn/deeplinks-analytics",
+    "@kbn/licensing-types",
   ]
 }

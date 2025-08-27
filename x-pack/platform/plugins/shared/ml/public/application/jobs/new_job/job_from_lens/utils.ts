@@ -240,8 +240,18 @@ export async function getChartInfoFromVisualization(
   vis: LensSavedObjectAttributes
 ): Promise<ChartInfo> {
   const chartInfo = await (await (await lens.stateHelperApi()).chartInfo).getChartInfo(vis);
+
+  // getChartInfo relies on getVisualizationInfo which is optional to be implemented
+  // by the visualization type, for example for Lens Region Maps.
+  // If it is not implemented, it returns undefined.
   if (!chartInfo) {
-    throw new Error('Cannot create job, chart info is undefined');
+    return {
+      layers: [],
+      visualizationType: 'unknown',
+      filters: [],
+      query: { query: '', language: 'kql' },
+    };
   }
+
   return chartInfo;
 }

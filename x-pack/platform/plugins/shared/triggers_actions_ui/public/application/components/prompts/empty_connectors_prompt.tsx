@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 export const EmptyConnectorsPrompt = ({
   onCTAClicked,
@@ -94,7 +94,7 @@ export const EmptyConnectorsPrompt = ({
             key="documentation-button"
             target="_blank"
             href={docLinks.links.alerting.connectors}
-            iconType="help"
+            iconType="question"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.actionsConnectorsList.documentationButtonLabel"

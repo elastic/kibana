@@ -10,7 +10,7 @@ import 'jquery';
 
 import { debounce, includes } from 'lodash';
 import { RendererStrings } from '../../../i18n';
-import { RendererFactory, RendererSpec } from '../../../types';
+import type { RendererFactory, RendererSpec } from '../../../types';
 // @ts-expect-error Not going to convert
 import { size } from './plugins/size';
 // @ts-expect-error Not going to convert

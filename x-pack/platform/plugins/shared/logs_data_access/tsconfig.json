@@ -24,6 +24,6 @@
     "@kbn/es-query",
     "@kbn/use-tracked-promise",
     "@kbn/core-application-browser",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
   ]
 }

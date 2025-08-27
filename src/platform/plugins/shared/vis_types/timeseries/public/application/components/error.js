@@ -13,6 +13,7 @@ import React, { useMemo } from 'react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { visContainerStyle } from '@kbn/visualizations-plugin/public';
 
 const guidPattern = /\[[[a-f\d-\\]{36}\]/g;
 
@@ -74,7 +75,7 @@ export function ErrorComponent(props) {
   }
 
   return (
-    <div className="visError">
+    <div className="visError" css={visContainerStyle}>
       <EuiText size="xs" color="subdued">
         <EuiIcon type="warning" size="m" color="danger" aria-hidden="true" />
 

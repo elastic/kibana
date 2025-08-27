@@ -17,7 +17,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { openInDiscoverText } from '../../../common/translations';
+import { AlertFlyout } from '../../alerts/alert_flyout';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
   useDatasetDetailsTelemetry,
@@ -26,7 +28,13 @@ import {
 } from '../../hooks';
 import { IntegrationIcon } from '../common';
 
-export function Header() {
+export function Header({
+  isAlertFlyoutOpen,
+  closeAlertFlyout,
+}: {
+  isAlertFlyoutOpen: boolean;
+  closeAlertFlyout: () => void;
+}) {
   const { datasetDetails, timeRange, integrationDetails, loadingState } =
     useDatasetQualityDetailsState();
 
@@ -39,7 +47,7 @@ export function Header() {
     navigationSource: navigationSources.Header,
   });
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails,
+    dataStreamStat: `${datasetDetails.rawName},${datasetDetails.rawName}${FAILURE_STORE_SELECTOR}`,
     timeRangeConfig: timeRange,
     sendTelemetry,
   });
@@ -95,6 +103,7 @@ export function Header() {
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {isAlertFlyoutOpen && <AlertFlyout dataStream={rawName} closeFlyout={closeAlertFlyout} />}
     </EuiFlexGroup>
   );
 }

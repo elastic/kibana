@@ -5,25 +5,22 @@
  * 2.0.
  */
 
-import { ChatCompleteRequestBody } from '@kbn/inference-plugin/common';
-import {
+import type { ChatCompleteRequestBody } from '@kbn/inference-plugin/common';
+import type {
   BoundChatCompleteAPI,
   ChatCompleteResponse,
   ChatCompletionEvent,
-  ToolOptions,
   UnboundChatCompleteOptions,
 } from '@kbn/inference-common';
 import { defer, from } from 'rxjs';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import { InferenceCliClientOptions } from './types';
+import type { InferenceCliClientOptions } from './types';
 import { combineSignal } from './combine_signal';
 
 export function createChatComplete(options: InferenceCliClientOptions): BoundChatCompleteAPI;
 
 export function createChatComplete({ connector, kibanaClient, signal }: InferenceCliClientOptions) {
-  return <TToolOptions extends ToolOptions, TStream extends boolean = false>(
-    options: UnboundChatCompleteOptions<TToolOptions, TStream>
-  ) => {
+  return (options: UnboundChatCompleteOptions) => {
     const {
       messages,
       abortSignal,
@@ -67,16 +64,13 @@ export function createChatComplete({ connector, kibanaClient, signal }: Inferenc
             })
             .then((response) => ({ response }))
         );
-      }).pipe(httpResponseIntoObservable<ChatCompletionEvent<TToolOptions>>());
+      }).pipe(httpResponseIntoObservable<ChatCompletionEvent>());
     }
 
-    return kibanaClient.fetch<ChatCompleteResponse<TToolOptions>>(
-      `/internal/inference/chat_complete`,
-      {
-        method: 'POST',
-        body,
-        signal: combineSignal(signal, abortSignal),
-      }
-    );
+    return kibanaClient.fetch<ChatCompleteResponse>(`/internal/inference/chat_complete`, {
+      method: 'POST',
+      body,
+      signal: combineSignal(signal, abortSignal),
+    });
   };
 }

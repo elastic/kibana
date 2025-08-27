@@ -9,14 +9,15 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { PINGS_DATE_RANGE_START, PINGS_DATE_RANGE_END } from './constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('get_all_pings', () => {
-    const archive = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
+    const archive =
+      'x-pack/solutions/observability/test/fixtures/es_archives/uptime/full_heartbeat';
 
     before('load heartbeat data', async () => await esArchiver.load(archive));
     after('unload heartbeat data', async () => await esArchiver.unload(archive));

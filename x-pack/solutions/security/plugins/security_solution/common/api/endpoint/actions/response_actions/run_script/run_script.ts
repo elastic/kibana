@@ -8,51 +8,108 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { BaseActionRequestSchema } from '../../common/base';
+import type { DeepMutable } from '../../../../../endpoint/types';
 
 const { parameters, ...restBaseSchema } = BaseActionRequestSchema;
-const NonEmptyString = schema.string({
-  minLength: 1,
-  validate: (value) => {
-    if (!value.trim().length) {
-      return 'Raw cannot be an empty string';
-    }
+const getNonEmptyString = (fieldName: string) =>
+  schema.string({
+    minLength: 1,
+    validate: (value) => {
+      if (!value.trim().length) {
+        return `${fieldName} cannot be an empty string`;
+      }
+    },
+  });
+
+// CrowdStrike schemas
+const CrowdStrikeRunScriptActionRequestParamsSchema = schema.object(
+  {
+    /**
+     * The script to run
+     */
+    raw: schema.maybe(getNonEmptyString('Raw')),
+    /**
+     * The path to the script on the host to run
+     */
+    hostPath: schema.maybe(getNonEmptyString('HostPath')),
+    /**
+     * The path to the script in the cloud to run
+     */
+    cloudFile: schema.maybe(getNonEmptyString('CloudFile')),
+    /**
+     * The command line to run
+     */
+    commandLine: schema.maybe(getNonEmptyString('CommandLine')),
+    /**
+     * The max timeout value before the command is killed. Number represents milliseconds
+     */
+    timeout: schema.maybe(schema.number({ min: 1 })),
   },
+  {
+    validate: (params) => {
+      if (!params.raw && !params.hostPath && !params.cloudFile) {
+        return 'At least one of Raw, HostPath, or CloudFile must be provided';
+      }
+    },
+  }
+);
+
+// Microsoft Defender Endpoint schemas
+export const MSDefenderEndpointRunScriptActionRequestParamsSchema = schema.object({
+  /**
+   * The path to the script in the cloud to run
+   */
+  scriptName: getNonEmptyString('ScriptName'),
+  args: schema.maybe(getNonEmptyString('Args')),
 });
+
+const SentinelOneRunScriptActionRequestParamsSchema = schema.object({
+  /**
+   * The SentinelOne Script ID to be executed
+   */
+  scriptId: getNonEmptyString('ScriptName'),
+  /**
+   * Any input arguments for the selected script
+   */
+  scriptInput: schema.maybe(getNonEmptyString('scriptInput')),
+});
+
 export const RunScriptActionRequestSchema = {
   body: schema.object({
     ...restBaseSchema,
-    parameters: schema.object(
-      {
-        /**
-         * The script to run
-         */
-        raw: schema.maybe(NonEmptyString),
-        /**
-         * The path to the script on the host to run
-         */
-        hostPath: schema.maybe(NonEmptyString),
-        /**
-         * The path to the script in the cloud to run
-         */
-        cloudFile: schema.maybe(NonEmptyString),
-        /**
-         * The command line to run
-         */
-        commandLine: schema.maybe(NonEmptyString),
-        /**
-         * The max timeout value before the command is killed. Number represents milliseconds
-         */
-        timeout: schema.maybe(schema.number({ min: 1 })),
-      },
-      {
-        validate: (params) => {
-          if (!params.raw && !params.hostPath && !params.cloudFile) {
-            return 'At least one of Raw, HostPath, or CloudFile must be provided';
-          }
-        },
-      }
+    parameters: schema.conditional(
+      schema.siblingRef('agent_type'),
+      'crowdstrike',
+      CrowdStrikeRunScriptActionRequestParamsSchema,
+      schema.conditional(
+        schema.siblingRef('agent_type'),
+        'microsoft_defender_endpoint',
+        MSDefenderEndpointRunScriptActionRequestParamsSchema,
+        schema.conditional(
+          schema.siblingRef('agent_type'),
+          'sentinel_one',
+          SentinelOneRunScriptActionRequestParamsSchema,
+          schema.never()
+        )
+      )
     ),
   }),
 };
 
-export type RunScriptActionRequestBody = TypeOf<typeof RunScriptActionRequestSchema.body>;
+type RunScriptActionRequestParameters = DeepMutable<
+  TypeOf<typeof RunScriptActionRequestSchema.body>['parameters']
+>;
+
+export type MSDefenderRunScriptActionRequestParams = TypeOf<
+  typeof MSDefenderEndpointRunScriptActionRequestParamsSchema
+>;
+
+export type RunScriptActionRequestBody<
+  TParams extends RunScriptActionRequestParameters = RunScriptActionRequestParameters
+> = Omit<TypeOf<typeof RunScriptActionRequestSchema.body>, 'parameters'> & {
+  parameters: TParams;
+};
+
+export type SentinelOneRunScriptActionRequestParams = DeepMutable<
+  TypeOf<typeof SentinelOneRunScriptActionRequestParamsSchema>
+>;

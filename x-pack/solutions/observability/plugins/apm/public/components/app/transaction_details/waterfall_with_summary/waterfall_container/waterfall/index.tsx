@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import {
   TimelineAxisContainer,
   VerticalLinesContainer,
@@ -38,6 +39,8 @@ interface Props {
   onNodeClick?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
   displayLimit?: number;
   isEmbeddable?: boolean;
+  scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {
@@ -77,6 +80,8 @@ export function Waterfall({
   onNodeClick,
   displayLimit,
   isEmbeddable,
+  scrollElement,
+  getRelatedErrorsHref,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
@@ -120,8 +125,11 @@ export function Waterfall({
       <div
         css={css`
           display: flex;
-          position: sticky;
-          top: var(--euiFixedHeadersOffset, 0);
+          ${isEmbeddable
+            ? 'position: relative;'
+            : `
+            position: sticky;
+            top: var(--euiFixedHeadersOffset, 0);`}
           z-index: ${euiTheme.levels.menu};
           background-color: ${euiTheme.colors.emptyShade};
           border-bottom: 1px solid ${euiTheme.colors.mediumShade};
@@ -154,7 +162,7 @@ export function Waterfall({
           }}
         />
         <TimelineAxisContainer
-          marks={[...agentMarks, ...errorMarks]}
+          marks={[...agentMarks, ...(isEmbeddable ? [] : errorMarks)]}
           xMax={duration}
           margins={timelineMargins}
         />
@@ -180,6 +188,8 @@ export function Waterfall({
             }
             displayLimit={displayLimit}
             isEmbeddable={isEmbeddable}
+            scrollElement={scrollElement}
+            getRelatedErrorsHref={getRelatedErrorsHref}
           />
         )}
       </WaterfallItemsContainer>
