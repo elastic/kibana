@@ -10,10 +10,10 @@ import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 
 describe('getSharedIcon', () => {
   it('returns globe for Global', () => {
-    expect(getSharedIcon(ConversationSharedState.SHARED)).toBe('globe');
+    expect(getSharedIcon(ConversationSharedState.SHARED)).toBe('users');
   });
   it('returns users for Shared', () => {
-    expect(getSharedIcon(ConversationSharedState.RESTRICTED)).toBe('users');
+    expect(getSharedIcon(ConversationSharedState.RESTRICTED)).toBe('user');
   });
   it('returns lock for Private', () => {
     expect(getSharedIcon(ConversationSharedState.PRIVATE)).toBe('lock');
