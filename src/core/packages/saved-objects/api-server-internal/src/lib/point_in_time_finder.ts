@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
+import type { errors as EsErrors, estypes } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 import type {
-  SavedObjectsFindOptions,
-  SavedObjectsFindResponse,
+  ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
-  ISavedObjectsPointInTimeFinder,
-  SavedObjectsPointInTimeFinderClient,
   SavedObjectsFindInternalOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsPointInTimeFinderClient,
 } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
 
 /**
  * @internal
@@ -117,7 +118,9 @@ export class PointInTimeFinder<T = unknown, A = unknown>
       }
       this.#open = false;
     } catch (e) {
-      this.#log.error(`Failed to close PIT for types [${this.#findOptions.type}]`);
+      this.#log.error(
+        `Failed to close PIT for types [${this.#findOptions.type}]: ${this.getErrorMessage(e)}`
+      );
       throw e;
     }
   }
@@ -135,7 +138,9 @@ export class PointInTimeFinder<T = unknown, A = unknown>
       // Since `find` swallows 404s, it is expected that finder will do the same,
       // so we only rethrow non-404 errors here.
       if (e.output?.statusCode !== 404) {
-        this.#log.error(`Failed to open PIT for types [${this.#findOptions.type}]`);
+        this.#log.error(
+          `Failed to open PIT for types [${this.#findOptions.type}]: ${this.getErrorMessage(e)}`
+        );
         throw e;
       }
       this.#log.debug(`Unable to open PIT for types [${this.#findOptions.type}]: 404 ${e}`);
@@ -170,6 +175,9 @@ export class PointInTimeFinder<T = unknown, A = unknown>
         // Clean up PIT on any errors.
         await this.close();
       }
+      this.#log.error(
+        `Failed to find next page for types [${this.#findOptions.type}]: ${this.getErrorMessage(e)}`
+      );
       throw e;
     }
   }
@@ -179,5 +187,27 @@ export class PointInTimeFinder<T = unknown, A = unknown>
       return undefined;
     }
     return res.saved_objects[res.saved_objects.length - 1].sort;
+  }
+
+  /**
+   * Safely extracts error message and status information from various error types
+   * @param error - The error object that could be any type
+   * @returns A safe string representation of the error
+   */
+  private getErrorMessage(error: unknown): string {
+    if (Boom.isBoom(error)) {
+      return error.output.payload.statusCode
+        ? `${error.output.payload.statusCode} ${error.message}`
+        : error.message;
+    }
+
+    if (error && typeof error === 'object' && 'statusCode' in error && 'body' in error) {
+      const es = error as EsErrors.ResponseError;
+      return `${es.statusCode} ${es.body?.error?.type || 'unknown'}: ${
+        es.body?.error?.reason || es.message || 'Unknown ES error'
+      }`;
+    }
+
+    return error instanceof Error ? error.message : String(error) || 'Unknown error';
   }
 }

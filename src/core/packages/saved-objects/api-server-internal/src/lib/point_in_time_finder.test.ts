@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 import type {
-  SavedObjectsFindResult,
   SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { savedObjectsPointInTimeFinderMock } from '../mocks';
 
 import { PointInTimeFinder } from './point_in_time_finder';
@@ -515,6 +517,77 @@ describe('createPointInTimeFinder()', () => {
       expect(repository.openPointInTimeForType).toHaveBeenCalledTimes(2);
       expect(repository.find).toHaveBeenCalledTimes(2);
       expect(repository.closePointInTime).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('error logging', () => {
+    test('logs Elasticsearch ResponseError when openPointInTimeForType fails', async () => {
+      const esError = new EsErrors.ResponseError({
+        body: { error: { type: 'bad_request', reason: 'Invalid query syntax' }, status: 400 },
+        statusCode: 400,
+        warnings: null,
+        headers: {},
+        meta: {} as any,
+      });
+      repository.openPointInTimeForType.mockRejectedValueOnce(esError);
+
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+        type: ['visualization'],
+        search: 'foo*',
+      };
+
+      const finder = new PointInTimeFinder(findOptions, {
+        logger,
+        client: repository,
+      });
+
+      await expect(finder.find().next()).rejects.toThrow('bad_request');
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to open PIT for types [visualization]: 400 bad_request: Invalid query syntax'
+      );
+    });
+
+    test('logs Boom error when openPointInTimeForType fails with Boom error', async () => {
+      const boomError = Boom.boomify(new Error('Forbidden'), { statusCode: 403 });
+      repository.openPointInTimeForType.mockRejectedValueOnce(boomError);
+
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+        type: ['visualization'],
+        search: 'foo*',
+      };
+
+      const finder = new PointInTimeFinder(findOptions, {
+        logger,
+        client: repository,
+      });
+
+      await expect(finder.find().next()).rejects.toThrow('Forbidden');
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to open PIT for types [visualization]: 403 Forbidden'
+      );
+    });
+
+    test('logs generic error when openPointInTimeForType fails with standard Error', async () => {
+      const genericError = new Error('Generic error message');
+      repository.openPointInTimeForType.mockRejectedValueOnce(genericError);
+
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+        type: ['visualization'],
+        search: 'foo*',
+      };
+
+      const finder = new PointInTimeFinder(findOptions, {
+        logger,
+        client: repository,
+      });
+
+      await expect(finder.find().next()).rejects.toThrow('Generic error message');
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to open PIT for types [visualization]: Generic error message'
+      );
     });
   });
 });
