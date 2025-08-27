@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import type { MenuItem } from '../../../types';
 import { MenuItem as MenuItemComponent } from '../menu_item';
 import { useTooltip } from '../../hooks/use_tooltip';
@@ -70,10 +71,17 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
     const getTooltipContent = () => {
       if (isHorizontal || (isCollapsed && hasContent)) return null;
       if (isCollapsed) return badgeType ? getLabelWithBeta(children) : children;
-      // TODO: translate
       if (!isCollapsed && badgeType)
         return getLabelWithBeta(
-          badgeType === 'beta' ? 'Beta' : badgeType === 'techPreview' ? 'Tech preview' : children
+          badgeType === 'beta'
+            ? i18n.translate('core.ui.chrome.sideNavigation.betaTooltipLabel', {
+                defaultMessage: 'Beta',
+              })
+            : badgeType === 'techPreview'
+            ? i18n.translate('core.ui.chrome.sideNavigation.techPreviewTooltipLabel', {
+                defaultMessage: 'Tech preview',
+              })
+            : children
         );
 
       return null;
@@ -107,6 +115,7 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
           disableScreenReaderOutput
           onMouseOut={handleMouseOut}
           position="right"
+          repositionOnScroll
         >
           {menuItem}
         </EuiToolTip>
