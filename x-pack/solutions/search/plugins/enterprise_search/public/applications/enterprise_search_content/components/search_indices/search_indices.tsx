@@ -18,6 +18,7 @@ import {
   EuiSearchBar,
   EuiToolTip,
   EuiCode,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -35,7 +36,7 @@ import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndicesLogic } from './indices_logic';
 import { IndicesTable } from './indices_table';
-import './search_indices.scss';
+import * as Styles from './styles';
 
 export const baseBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.breadcrumb', {
@@ -44,6 +45,7 @@ export const baseBreadcrumbs = [
 ];
 
 export const SearchIndices: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { fetchIndices, onPaginate, openDeleteModal, setIsFirstRequest } = useActions(IndicesLogic);
   const { meta, indices, hasNoIndices, isLoading, searchParams } = useValues(IndicesLogic);
   const [showHiddenIndices, setShowHiddenIndices] = useState(false);
@@ -197,7 +199,7 @@ export const SearchIndices: React.FC = () => {
                         />
                       </EuiToolTip>
                     </EuiFlexItem>
-                    <EuiFlexItem className="entSearchIndicesSearchBar">
+                    <EuiFlexItem css={Styles.entSearchIndicesSearchBar(euiTheme)}>
                       <EuiSearchBar
                         query={searchQuery}
                         box={{
