@@ -9,9 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
-
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
 
@@ -31,25 +29,19 @@ export interface TraceContextLogEventsProps {
   spanId?: string;
 }
 export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEventsProps) {
-  const { data: dataService, discoverShared, embeddable } = getUnifiedDocViewerServices();
-
-  console.log('discoverShared', discoverShared);
+  const { data: dataService, discoverShared } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
+  const { from, to } = dataService.query.timefilter.timefilter.getTime();
 
-  const { from: start, to: end } = dataService.query.timefilter.timefilter.getTime();
-
-  const timeRange = useMemo(() => ({ start, end }), [start, end]);
+  const timeRange = useMemo(() => ({ from, to }), [from, to]);
 
   const savedSearchTimeRange = React.useMemo(
     () => ({
-      from: timeRange.start,
-      to: timeRange.end,
+      from: timeRange.from,
+      to: timeRange.to,
     }),
-    [timeRange.start, timeRange.end]
+    [timeRange.from, timeRange.to]
   );
-
-  // console.log('indexes', indexes);
-  // console.log('savedSearchTimeRange', savedSearchTimeRange);
 
   const query = useMemo(() => {
     const queryStrings = [`(trace.id:"${traceId}" OR (not trace.id:* AND "${traceId}"))`];
@@ -70,7 +62,7 @@ export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEvents
     return null;
   }
 
-  console.log('LogEvents', 'exists');
+  const LogEventsComponent = LogEvents.render;
 
   return (
     <ContentFrameworkSection
@@ -79,22 +71,7 @@ export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEvents
       id="traceContextLogEvents"
     >
       <div tabIndex={0} className="eui-yScrollWithShadows" style={{ maxHeight: '400px' }}>
-        <LazySavedSearchComponent
-          query={query}
-          index={indexes.logs}
-          timeRange={savedSearchTimeRange}
-          dependencies={{
-            embeddable,
-            searchSource: dataService.search.searchSource,
-            dataViews: dataService.dataViews,
-          }}
-          displayOptions={{
-            solutionNavIdOverride: 'oblt',
-            enableDocumentViewer: false,
-            enableFilters: false,
-          }}
-          height="100%"
-        />
+        <LogEventsComponent query={query} timeRange={savedSearchTimeRange} index={indexes.logs} />
       </div>
     </ContentFrameworkSection>
   );

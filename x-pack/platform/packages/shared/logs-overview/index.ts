@@ -20,3 +20,6 @@ export type {
   LogsSourceConfiguration,
   SharedSettingLogsSourceConfiguration,
 } from './src/utils/logs_source';
+
+export { LogEventsResultContent } from './src/components/log_events/log_events_result_content';
+export type { LogEventsResultContentProps } from './src/components/log_events/log_events_result_content';

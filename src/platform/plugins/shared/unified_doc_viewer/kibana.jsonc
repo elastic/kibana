@@ -11,6 +11,6 @@
     "server": false,
     "requiredPlugins": ["data", "fieldFormats", "share", "embeddable", "discoverShared"],
     "optionalPlugins": ["fieldsMetadata"],
-    "requiredBundles": ["kibanaUtils", "savedSearch"]
+    "requiredBundles": ["kibanaUtils"]
   }
 }

@@ -15,7 +15,6 @@ import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -49,7 +48,6 @@ export interface UnifiedDocViewerStartDeps {
   fieldsMetadata: FieldsMetadataPublicStart;
   share: SharePluginStart;
   discoverShared: DiscoverSharedPublicStart;
-  embeddable: EmbeddableStart;
 }
 
 export class UnifiedDocViewerPublicPlugin

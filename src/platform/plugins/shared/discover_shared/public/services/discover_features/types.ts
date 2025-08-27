@@ -10,6 +10,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { Query, TimeRange } from '@kbn/es-query';
 import type { FeaturesRegistry } from '../../../common';
 
 /**
@@ -52,7 +53,16 @@ export interface ObservabilityCreateSLOFeature {
 
 export interface ObservabilityLogEventsFeature {
   id: 'observability-log-events';
-  render: (deps: { doc: DataTableRecord }) => React.ReactNode;
+  render: (props: {
+    query: Query;
+    timeRange: TimeRange;
+    index: string;
+    displayOptions?: {
+      solutionNavIdOverride: 'oblt';
+      enableDocumentViewer: false;
+      enableFilters: false;
+    };
+  }) => JSX.Element;
 }
 
 /** **************** Security Solution ****************/
