@@ -68,13 +68,17 @@ export function createMergedMappings(
 
   const mappings = files.map((file) => file.getMappings() ?? { properties: {} });
 
-  // compare the mappings of all files to see if they are all the same
+  // compare the mappings of all files and the existing index mappings to see if they are all the same
   // if they are, return early
-  if (mappings.every((m) => isEqual(m, mappings[0]))) {
+  const tempMappings = [
+    ...(existingIndexMappings !== null ? [existingIndexMappings] : []),
+    ...mappings,
+  ];
+  if (tempMappings.every((m) => isEqual(m, mappings[0]))) {
     return { mergedMappings: mappings[0] as MappingTypeMapping, mappingClashes: [] };
   }
 
-  const fieldsPerFile = mappings.map((m) => getFieldsFromMappings(m as MappingTypeMapping));
+  const fieldsPerFile = tempMappings.map((m) => getFieldsFromMappings(m as MappingTypeMapping));
 
   if (existingIndexMappings !== null) {
     // add the existing index mappings to the beginning of the fields array
