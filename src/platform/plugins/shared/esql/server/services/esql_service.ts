@@ -15,6 +15,7 @@ import type {
 } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import { getListOfCCSIndices } from '../lookup/utils';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;
@@ -51,7 +52,8 @@ export class EsqlService {
   }
 
   public async getIndicesByIndexMode(
-    mode: 'lookup' | 'time_series'
+    mode: 'lookup' | 'time_series',
+    remoteClusters?: string
   ): Promise<IndicesAutocompleteResult> {
     const { client } = this.options;
 
@@ -69,26 +71,48 @@ export class EsqlService {
       flat_settings: true,
     })) as IndexModeResponse;
 
-    const ccsSources = (await client.indices.resolveIndex({
-      name: '*:*',
-      expand_wildcards: 'open',
-    })) as ResolveIndexResponse;
-
     const indices: IndexAutocompleteItem[] = [];
     const indexNames: string[] = [];
+    const indexNamesSet = new Set<string>(); // Track unique index names
+
+    if (remoteClusters) {
+      const remoteClustersArray = remoteClusters.split(',');
+      // attach a wildcard * for each remoteCluster
+      const clustersArray = remoteClustersArray.map((cluster) => `${cluster.trim()}:*`);
+      const ccsSources = (await client.indices.resolveIndex({
+        name: clustersArray,
+        expand_wildcards: 'open',
+      })) as ResolveIndexResponse;
+
+      const cssIndicesForMode: string[] = [];
+      // ES will provide a filter for mode on the resolveIndex api so we can use this instead of
+      // filtering at the kibana side
+      ccsSources.indices?.forEach((index) => {
+        // filter by mode
+        if (index.mode === mode) {
+          // indices.push({ name: index.name, mode, aliases: [] });
+          cssIndicesForMode.push(index.name);
+        }
+      });
+
+      const remoteIndices: string[] = getListOfCCSIndices(remoteClustersArray, cssIndicesForMode);
+      remoteIndices.forEach((index) => {
+        if (!indexNamesSet.has(index)) {
+          indexNamesSet.add(index);
+          indices.push({ name: index, mode, aliases: [] });
+        }
+      });
+    }
 
     for (const [name, { settings }] of Object.entries(queryByIndexModeResponse)) {
       if (settings['index.mode'] === mode && !settings['index.hidden']) {
-        indexNames.push(name);
-        indices.push({ name, mode, aliases: [] });
+        if (!indexNamesSet.has(name)) {
+          indexNamesSet.add(name);
+          indexNames.push(name);
+          indices.push({ name, mode, aliases: [] });
+        }
       }
     }
-
-    ccsSources.indices?.forEach((index) => {
-      if (index.mode === mode) {
-        indices.push({ name: index.name, mode, aliases: [] });
-      }
-    });
 
     const aliases = await this.getIndexAliases(indexNames);
 
