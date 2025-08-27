@@ -28,6 +28,8 @@ import type {
   WaitGraphNode,
   EnterRetryNode,
   ExitRetryNode,
+  EnterContinueNode,
+  ExitContinueNode,
 } from '../../types/execution';
 
 /**
@@ -39,6 +41,12 @@ interface RetryStep extends BaseStep {
   type: 'retry';
   steps: BaseStep[];
   retry: WorkflowRetry;
+}
+
+interface ContinueStep extends BaseStep {
+  name: string;
+  type: 'continue';
+  steps: BaseStep[];
 }
 
 function getNodeId(node: BaseStep): string {
@@ -59,6 +67,10 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
 
   if ((modifiedCurrentStep as WaitStep).type === 'wait') {
     return visitWaitStep(graph, previousStep, modifiedCurrentStep);
+  }
+
+  if ((modifiedCurrentStep as ContinueStep).type === 'continue') {
+    return visitContinueStep(graph, previousStep, modifiedCurrentStep as ContinueStep);
   }
 
   if ((modifiedCurrentStep as RetryStep).type === 'retry') {
@@ -213,6 +225,40 @@ function visitRetryStep(graph: graphlib.Graph, previousStep: any, currentStep: R
   return exitRetryNode;
 }
 
+function visitContinueStep(
+  graph: graphlib.Graph,
+  previousStep: any,
+  currentStep: ContinueStep
+): any {
+  const enterContinueNodeId = getNodeId(currentStep);
+  const retryNestedSteps: BaseStep[] = currentStep.steps || [];
+  const exitNodeId = `exitContinue(${enterContinueNodeId})`;
+  const enterContinueNode: EnterContinueNode = {
+    id: enterContinueNodeId,
+    type: 'enter-continue',
+    exitNodeId,
+  };
+  const exitContinueNode: ExitContinueNode = {
+    type: 'exit-continue',
+    id: exitNodeId,
+  };
+
+  let previousNodeToLink: any = enterContinueNode;
+  retryNestedSteps.forEach(
+    (step: any) => (previousNodeToLink = visitAbstractStep(graph, previousNodeToLink, step))
+  );
+
+  graph.setNode(exitContinueNode.id, exitContinueNode);
+  graph.setEdge(getNodeId(previousNodeToLink), exitContinueNode.id);
+  graph.setNode(enterContinueNodeId, enterContinueNode);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), enterContinueNodeId);
+  }
+
+  return exitContinueNode;
+}
+
 function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
   const enterForeachNodeId = getNodeId(currentStep);
   const foreachStep = currentStep as ForEachStep;
@@ -290,6 +336,24 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
       foreach: currentStep.foreach,
       steps: [handleStepLevelOperations(modifiedStep)],
     } as ForEachStep;
+  }
+
+  if ((currentStep as BaseStep)?.['on-failure']?.continue) {
+    // Wrap the current step in a continue step
+    // and remove the continue from the current step's on-failure to avoid infinite nesting
+    // The continue logic will be handled by the outer continue step
+    // We keep other on-failure properties (like fallback-step, retry) on the inner step
+    // so they can be handled if needed
+    return {
+      name: `continue_${getNodeId(currentStep)}`,
+      type: 'continue',
+      steps: [
+        handleStepLevelOperations({
+          ...currentStep,
+          'on-failure': omit(currentStep['on-failure'], ['continue']) as any,
+        }),
+      ],
+    } as ContinueStep;
   }
 
   if ((currentStep as BaseStep)?.['on-failure']?.retry) {
