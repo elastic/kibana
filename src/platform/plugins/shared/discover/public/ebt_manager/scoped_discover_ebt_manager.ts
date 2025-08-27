@@ -252,7 +252,13 @@ export class ScopedDiscoverEBTManager {
     query: AggregateQuery;
     fieldsMetadata: FieldsMetadataPublicStart | undefined;
   }) {
-    const fieldNames = [...new Set(getQueryColumnsFromESQLQuery(query.esql))];
+    if (query.esql === '') {
+      return;
+    }
+
+    const extractedFieldNames = [...new Set(getQueryColumnsFromESQLQuery(query.esql))];
+
+    const fieldNames = extractedFieldNames.length === 0 ? [FREE_TEXT] : extractedFieldNames;
 
     if (fieldNames.length === 0) {
       return;
