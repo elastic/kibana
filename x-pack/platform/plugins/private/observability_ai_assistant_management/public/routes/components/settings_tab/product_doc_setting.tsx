@@ -14,7 +14,7 @@ import {
   EuiIcon,
   EuiTextColor,
   useEuiTheme,
-  EuiIconTip,
+  EuiBetaBadge,
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,22 +26,32 @@ import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/publ
 import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { useKibana } from '../../../hooks/use_kibana';
 
-const statusToLabelMap: Record<Exclude<InstallationStatus, 'error'>, string> = {
-  installing: i18n.translate(
-    'xpack.observabilityAiAssistantManagement.settingsPage.installingText',
-    { defaultMessage: 'Installing...' }
-  ),
-  uninstalling: i18n.translate(
-    'xpack.observabilityAiAssistantManagement.settingsPage.uninstallingText',
-    { defaultMessage: 'Uninstalling...' }
-  ),
+type LabelStatus = Exclude<InstallationStatus, 'error'>;
+
+const statusToLabelMap: Record<LabelStatus, string> = {
   installed: i18n.translate(
-    'xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel',
-    { defaultMessage: 'Installed' }
+    'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocInstalledLabel',
+    {
+      defaultMessage: 'Installed',
+    }
   ),
   uninstalled: i18n.translate(
-    'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocButtonLabel',
-    { defaultMessage: 'Not installed' }
+    'xpack.observabilityAiAssistantManagement.settingsPage.status.uninstalled',
+    {
+      defaultMessage: 'Not installed',
+    }
+  ),
+  installing: i18n.translate(
+    'xpack.observabilityAiAssistantManagement.settingsPage.installingText',
+    {
+      defaultMessage: 'Installing…',
+    }
+  ),
+  uninstalling: i18n.translate(
+    'xpack.observabilityAiAssistantManagement.settingsPage.status.uninstalling',
+    {
+      defaultMessage: 'Uninstalling…',
+    }
   ),
 };
 
@@ -95,7 +105,7 @@ export function ProductDocSetting({
     ? i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.notAvailableLabel', {
         defaultMessage: 'Not available',
       })
-    : statusToLabelMap[productDocStatus];
+    : statusToLabelMap[productDocStatus as LabelStatus];
 
   const linkCss = {
     display: 'inline-flex',
@@ -156,14 +166,18 @@ export function ProductDocSetting({
   }, [installProductDoc, currentlyDeployedInferenceId]);
 
   const TechPreviewTip = (
-    <EuiIconTip
-      position="bottom"
-      content={i18n.translate(
+    <EuiBetaBadge
+      tooltipPosition="bottom"
+      label=""
+      tooltipContent={i18n.translate(
         'xpack.observabilityAiAssistantManagement.settingsPage.techPreviewAriaLabel',
         { defaultMessage: 'Technical preview' }
       )}
-      type="beaker"
+      iconType="beaker"
       size="s"
+      anchorProps={{
+        style: { verticalAlign: 'middle' },
+      }}
     />
   );
 
@@ -233,7 +247,7 @@ export function ProductDocSetting({
           <EuiIcon type="cross" size="s" />
           <span>
             {i18n.translate(
-              'xpack.observabilityAiAssistantManagement.settingsPage.uninstallLinkLabel',
+              'xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel',
               { defaultMessage: 'Uninstall' }
             )}
           </span>
@@ -252,7 +266,7 @@ export function ProductDocSetting({
         <EuiIcon type="download" size="s" />
         <span>
           {i18n.translate(
-            'xpack.observabilityAiAssistantManagement.settingsPage.installLinkLabel',
+            'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocButtonLabel',
             { defaultMessage: 'Install' }
           )}
         </span>
@@ -291,7 +305,7 @@ export function ProductDocSetting({
             {isLoading && (
               <EuiLoadingSpinner
                 size="s"
-                data-test-subj="observabilityAiAssistantKnowledgeBaseLoadingSpinner"
+                data-test-subj="observabilityAiAssistantProductDocLoadingSpinner"
               />
             )}
           </EuiFlexItem>
@@ -316,7 +330,7 @@ export function ProductDocSetting({
                   'xpack.observabilityAiAssistantManagement.settingsPage.productDocNotAvailableLine1',
                   {
                     defaultMessage:
-                      'The Elastic Documentation is not available. Try doing ABC and DCE to side-load the product docs and make them available to Kibana.',
+                      'The Elastic Documentation is not available. If you are in an air-gapped environment, try using a local artifact to access the product docs and make them available to Kibana.',
                   }
                 )}
               </p>
@@ -326,7 +340,7 @@ export function ProductDocSetting({
                   { defaultMessage: 'Check our ' }
                 )}
                 <EuiLink
-                  href="https://www.elastic.co/docs/explore-analyze/ai-assistant#observability-ai-assistant-requirements"
+                  href="https://www.elastic.co/docs/reference/kibana/configuration-reference/ai-assistant-settings"
                   target="_blank"
                   external
                 >

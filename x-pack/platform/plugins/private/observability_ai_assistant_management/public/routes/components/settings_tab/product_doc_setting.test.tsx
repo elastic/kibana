@@ -113,7 +113,7 @@ describe('ProductDocSetting', () => {
     });
   });
 
-  it('dont render an install link when the model is NOT_INSTALLED', async () => {
+  it('doesnt render an install link when the model is NOT_INSTALLED', async () => {
     const mockKnowledgeBase = createMockKnowledgeBase({
       isInstalling: false,
       isWarmingUpModel: false,
