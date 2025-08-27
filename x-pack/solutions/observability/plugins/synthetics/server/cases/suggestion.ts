@@ -5,13 +5,16 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/common';
 import { type SuggestionContext, type SuggestionHandlerResponse } from '@kbn/cases-plugin/common';
 import type { SuggestionType } from '@kbn/cases-plugin/server';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AttachmentItem } from '@kbn/cases-plugin/common/types/domain/suggestion/v1';
-import type { OverviewStatusMetaData } from '../../common/runtime_types';
+import { syntheticsMonitorSavedObjectType } from '../../common/types/saved_objects';
+import type {
+  EncryptedSyntheticsMonitorAttributes,
+  OverviewStatusMetaData,
+} from '../../common/runtime_types';
 import type { SyntheticsSuggestion } from '../../common/types';
 import type { SyntheticsAggregationsResponse } from './types';
 
@@ -35,6 +38,8 @@ export function getMonitorByServiceName(
           context: SuggestionContext;
           request: KibanaRequest;
         }): Promise<SuggestionHandlerResponse<SyntheticsSuggestion>> => {
+          const scopedSavedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+
           if (!serviceNames || !serviceNames.length) {
             return { suggestions: [] };
           }
@@ -99,31 +104,62 @@ export function getMonitorByServiceName(
             },
           });
 
-          const uniqueMonitor = (
-            results.aggregations as SyntheticsAggregationsResponse['aggregations']
-          ).by_monitor.buckets;
-          const rawMonitorsData: Array<OverviewStatusMetaData> = uniqueMonitor.map((monitor) => {
-            const source = monitor.latest_run.hits.hits[0]._source;
-            return {
-              monitorQueryId: source.monitor.id,
-              configId: source.config_id,
-              status: source.monitor.status ?? 'unknown',
-              name: source.monitor.name,
-              isEnabled: true,
-              isStatusAlertEnabled: true,
-              type: source.monitor.type,
-              schedule: '1',
-              tags: [],
-              maintenanceWindows: [],
-              timestamp: source['@timestamp'],
-              spaces: source.meta.space_id,
-              locationLabel: source.observer.geo.name,
-              locationId: source.observer.name,
-              urls: source.url.full,
-            };
-          });
+          const monitors = (results.aggregations as SyntheticsAggregationsResponse['aggregations'])
+            .by_monitor.buckets;
 
-          const suggestions = rawMonitorsData.map((monitor) => {
+          if (monitors.length === 0) {
+            logger.debug(`No Synthetics monitors found for service ${serviceNames.join(', ')}`);
+            return { suggestions: [] };
+          }
+
+          const savedObjectsAttrHash: Record<string, EncryptedSyntheticsMonitorAttributes> = {};
+          const bulkGetRequests: Array<{ id: string; type: string }> = [];
+
+          for (const mon of monitors) {
+            bulkGetRequests.push({
+              id: mon.latest_run.hits.hits[0]._source.config_id,
+              type: syntheticsMonitorSavedObjectType,
+            });
+          }
+
+          const monitorsSavedObject = await scopedSavedObjectsClient.bulkGet<{
+            monitor: Record<string, any>;
+          }>(bulkGetRequests);
+
+          for (const savedObj of monitorsSavedObject.saved_objects) {
+            if (!savedObj.error && savedObj.id) {
+              savedObjectsAttrHash[savedObj.id] =
+                savedObj.attributes as unknown as EncryptedSyntheticsMonitorAttributes;
+            }
+          }
+
+          const monitorsOverviewMetaData: Array<OverviewStatusMetaData> = monitors.map(
+            (monitor) => {
+              const source = monitor.latest_run.hits.hits[0]._source;
+              const relatedSavedObjectAttr: EncryptedSyntheticsMonitorAttributes | undefined =
+                savedObjectsAttrHash[source.config_id];
+              return {
+                monitorQueryId: source.monitor.id,
+                configId: source.config_id,
+                status: source.monitor.status ?? 'unknown',
+                name: source.monitor.name,
+                isEnabled: relatedSavedObjectAttr.enabled,
+                isStatusAlertEnabled: relatedSavedObjectAttr.alert?.status?.enabled ?? false,
+                type: source.monitor.type,
+                schedule: relatedSavedObjectAttr.schedule.number,
+                tags: relatedSavedObjectAttr.tags ?? [],
+                maintenanceWindows: relatedSavedObjectAttr.maintenance_windows ?? [],
+                timestamp: source['@timestamp'],
+                spaces: source.meta.space_id,
+                locationLabel: source.observer.geo.name,
+                locationId: source.observer.name,
+                urls: source.url.full,
+                projectId: relatedSavedObjectAttr.project_id,
+              };
+            }
+          );
+
+          const suggestions = monitorsOverviewMetaData.map((monitor) => {
             const item: AttachmentItem<SyntheticsSuggestion> = {
               description: `Synthetic ${monitor.name} is ${
                 monitor.status
