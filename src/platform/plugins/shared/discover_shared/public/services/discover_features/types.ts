@@ -50,6 +50,11 @@ export interface ObservabilityCreateSLOFeature {
   }) => React.ReactNode;
 }
 
+export interface ObservabilityLogEventsFeature {
+  id: 'observability-log-events';
+  render: (deps: { doc: DataTableRecord }) => React.ReactNode;
+}
+
 /** **************** Security Solution ****************/
 
 export interface SecuritySolutionCellRendererFeature {
@@ -75,6 +80,7 @@ export type DiscoverFeature =
   | ObservabilityStreamsFeature
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityCreateSLOFeature
+  | ObservabilityLogEventsFeature
   | SecuritySolutionFeature;
 
 /**

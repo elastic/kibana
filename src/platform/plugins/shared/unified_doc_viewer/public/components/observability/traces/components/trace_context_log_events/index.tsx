@@ -31,8 +31,9 @@ export interface TraceContextLogEventsProps {
   spanId?: string;
 }
 export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEventsProps) {
-  const { data: dataService, embeddable } = getUnifiedDocViewerServices();
+  const { data: dataService, discoverShared, embeddable } = getUnifiedDocViewerServices();
 
+  console.log('discoverShared', discoverShared);
   const { indexes } = useDataSourcesContext();
 
   const { from: start, to: end } = dataService.query.timefilter.timefilter.getTime();
@@ -47,6 +48,9 @@ export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEvents
     [timeRange.start, timeRange.end]
   );
 
+  // console.log('indexes', indexes);
+  // console.log('savedSearchTimeRange', savedSearchTimeRange);
+
   const query = useMemo(() => {
     const queryStrings = [`(trace.id:"${traceId}" OR (not trace.id:* AND "${traceId}"))`];
 
@@ -60,31 +64,38 @@ export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEvents
     };
   }, [traceId, spanId]);
 
+  const LogEvents = discoverShared.features.registry.getById('observability-log-events');
+
+  if (!LogEvents) {
+    return null;
+  }
+
+  console.log('LogEvents', 'exists');
+
   return (
     <ContentFrameworkSection
       title={logsTitle}
       description={logsDescription}
       id="traceContextLogEvents"
-      children={
-        <div tabIndex={0} className="eui-yScrollWithShadows" style={{ maxHeight: '400px' }}>
-          <LazySavedSearchComponent
-            query={query}
-            index={indexes.logs}
-            timeRange={savedSearchTimeRange}
-            dependencies={{
-              embeddable,
-              searchSource: dataService.search.searchSource,
-              dataViews: dataService.dataViews,
-            }}
-            displayOptions={{
-              solutionNavIdOverride: 'oblt',
-              enableDocumentViewer: false,
-              enableFilters: false,
-            }}
-            height="100%"
-          />
-        </div>
-      }
-    />
+    >
+      <div tabIndex={0} className="eui-yScrollWithShadows" style={{ maxHeight: '400px' }}>
+        <LazySavedSearchComponent
+          query={query}
+          index={indexes.logs}
+          timeRange={savedSearchTimeRange}
+          dependencies={{
+            embeddable,
+            searchSource: dataService.search.searchSource,
+            dataViews: dataService.dataViews,
+          }}
+          displayOptions={{
+            solutionNavIdOverride: 'oblt',
+            enableDocumentViewer: false,
+            enableFilters: false,
+          }}
+          height="100%"
+        />
+      </div>
+    </ContentFrameworkSection>
   );
 }

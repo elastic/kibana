@@ -103,7 +103,7 @@ export class UnifiedDocViewerPublicPlugin
       uiSettings,
       notifications: { toasts },
     } = core;
-    const { data, fieldFormats, fieldsMetadata, share, embeddable } = deps;
+    const { data, fieldFormats, fieldsMetadata, share, discoverShared } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
@@ -119,7 +119,7 @@ export class UnifiedDocViewerPublicPlugin
       unifiedDocViewer,
       share,
       core,
-      embeddable,
+      discoverShared,
     };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;

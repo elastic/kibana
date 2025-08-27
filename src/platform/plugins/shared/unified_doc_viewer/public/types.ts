@@ -10,7 +10,7 @@
 export type { JsonCodeEditorProps } from './components';
 export type { EsDocSearchProps } from './hooks';
 export type { UnifiedDocViewerSetup, UnifiedDocViewerStart } from './plugin';
-
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -33,5 +33,6 @@ export interface UnifiedDocViewerServices {
   unifiedDocViewer: UnifiedDocViewerStart;
   share: SharePluginStart;
   core: CoreStart;
+  discoverShared: DiscoverSharedPublicStart;
   embeddable: EmbeddableStart;
 }

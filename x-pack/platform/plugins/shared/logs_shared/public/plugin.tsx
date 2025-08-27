@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import { LogEventsResultContent } from '@kbn/logs-overview';
 import { LogsLocatorDefinition } from '../common/locators';
 import { createLogAIAssistant, createLogsAIAssistantRenderer } from './components/log_ai_assistant';
 import { createLogsOverview } from './components/logs_overview';
@@ -88,6 +90,29 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
     discoverShared.features.registry.register({
       id: 'observability-logs-ai-assistant',
       render: createLogsAIAssistantRenderer(LogAIAssistant),
+    });
+
+    discoverShared.features.registry.register({
+      id: 'observability-log-events',
+      render: (
+        <LogEventsResultContent
+          query=""
+          index={
+            'remote_cluster:filebeat-*,remote_cluster:logs-*,re…_logs*,filebeat-*,kibana_sample_data_logs*,logs-*'
+          }
+          timeRange={{ from: 'now-15m', to: 'now' }}
+          dependencies={{
+            dataViews,
+            embeddable: plugins.embeddable,
+            searchSource: data.search.searchSource,
+          }}
+          displayOptions={{
+            solutionNavIdOverride: 'oblt',
+            enableDocumentViewer: false,
+            enableFilters: false,
+          }}
+        />
+      ),
     });
 
     return {
