@@ -34,7 +34,6 @@ export const CUSTOM_SCRIPTS_CONFIG: BaseSelectorConfig = {
     'xpack.securitySolution.consoleArgumentSelectors.customScriptSelector.tooltipText',
     { defaultMessage: 'Click to choose script' }
   ),
-  errorMessageId: 'xpack.securitySolution.endpoint.customScriptSelector.errorLoading',
   minWidth: 400,
   rowHeight: 60,
   selectableId: 'options-combobox',
@@ -52,7 +51,6 @@ export const PENDING_ACTIONS_CONFIG: BaseSelectorConfig = {
     'xpack.securitySolution.consoleArgumentSelectors.pendingActionsSelector.tooltipText',
     { defaultMessage: 'Click to choose pending action to cancel' }
   ),
-  errorMessageId: 'xpack.securitySolution.endpoint.pendingActionsSelector.errorLoading',
   minWidth: 500,
   rowHeight: 70,
   selectableId: 'pending-actions-combobox',

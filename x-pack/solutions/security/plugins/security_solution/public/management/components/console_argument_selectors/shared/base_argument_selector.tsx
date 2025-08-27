@@ -155,7 +155,10 @@ const BaseArgumentSelectorComponent = <
           }}
           errorMessage={
             error ? (
-              <FormattedMessage id={config.errorMessageId} defaultMessage="Error loading data" />
+              <FormattedMessage
+                id="xpack.securitySolution.baseArgumentSelector.errorLoading"
+                defaultMessage="Error loading data"
+              />
             ) : undefined
           }
         >
