@@ -35,15 +35,18 @@ export async function readStream({
 }): Promise<Streams.all.GetResponse> {
   const [streamDefinition, { [name]: dashboardsAndQueries }] = await Promise.all([
     streamsClient.getStream(name),
-    assetClient.getAssetLinks([name], ['dashboard', 'query']),
+    assetClient.getAssetLinks([name], ['dashboard', 'rule', 'query']),
   ]);
 
-  const [dashboardLinks, queryLinks] = partition(
+  const [dashboardLinks, otherAssets] = partition(
     dashboardsAndQueries,
     (asset): asset is DashboardLink => asset[ASSET_TYPE] === 'dashboard'
   );
 
+  const [ruleLinks, queryLinks] = partition(otherAssets, (asset) => asset[ASSET_TYPE] === 'rule');
+
   const dashboards = dashboardLinks.map((dashboard) => dashboard['asset.id']);
+  const rules = ruleLinks.map((rule) => rule['asset.id']);
   const queries = queryLinks.map((query) => {
     return query.query;
   });
@@ -52,6 +55,7 @@ export async function readStream({
     return {
       stream: streamDefinition,
       dashboards,
+      rules,
       queries,
     };
   }
@@ -82,6 +86,7 @@ export async function readStream({
       data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
+      rules,
       queries,
     } satisfies Streams.ClassicStream.GetResponse;
   }
@@ -94,6 +99,7 @@ export async function readStream({
   const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
     dashboards,
+    rules,
     privileges,
     queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
