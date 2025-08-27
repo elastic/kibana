@@ -58,6 +58,7 @@ jobs:
           for COMMIT in $(cat commits.txt); do
             echo "Checking commit: $COMMIT"
             AUTHOR_EMAIL=$(git show -s --format='%ae' $COMMIT)
+            echo "Author email: $AUTHOR_EMAIL"
             for EMAIL in $COPILOT_EMAILS; do
               if [ "$AUTHOR_EMAIL" = "$EMAIL" ]; then
                 FOUND=1
