@@ -82,6 +82,7 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
     AssetInventory?: number;
     GenerateESQLTool?: number;
     AskAboutESQLTool?: number;
+    GenerateAssetESQLTool?: number;
     KnowledgeBaseRetrievalTool?: number;
     KnowledgeBaseWriteTool?: number;
     OpenAndAcknowledgedAlertsTool?: number;
@@ -156,6 +157,13 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
           },
         },
         AskAboutESQLTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        GenerateAssetESQLTool: {
           type: 'long',
           _meta: {
             description: 'Number of times tool was invoked.',

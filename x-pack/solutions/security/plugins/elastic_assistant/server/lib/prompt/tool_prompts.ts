@@ -143,4 +143,36 @@ If no relevant information is found, inform the user you could not locate the re
       default: 'Call this for Elastic Defend insights.',
     },
   },
+  {
+    promptId: 'AssetInventory',
+    promptGroupId,
+    prompt: {
+      default: `Call this tool to get detailed information about assets from the asset inventory. This includes hosts, users, services, and other entities.
+      
+Use this tool when the user wants to:
+- Get information about a specific asset, host, user, or service
+- Understand asset details like criticality, location, network info, or configuration
+- Look up asset ownership, cloud provider information, or last seen data
+- Investigate an entity by name, ID, or ARN
+
+Provide the asset identifier (hostname, entity ID, ARN, username, or service name) to get comprehensive asset details.`,
+    },
+  },
+  {
+    promptId: 'GenerateAssetESQLTool',
+    promptGroupId,
+    prompt: {
+      default: `You MUST use the "GenerateAssetESQLTool" function when the user wants to:
+- generate ES|QL queries for investigating a specific asset, host, user, or service
+- create queries to find activity, events, or logs related to a particular entity
+- investigate security incidents for a specific asset identifier
+- generate asset-focused queries for common investigation patterns
+
+This tool creates ES|QL queries pre-filtered by asset identifiers (host.id, host.name, entity.id, user.name, service.name).
+
+Use query types like: recent_activity, login_attempts, network_connections, process_execution, file_access, or provide custom requirements.
+
+ALWAYS use this tool instead of the general GenerateESQLTool when the user wants to investigate a specific asset or entity.`,
+    },
+  },
 ];
