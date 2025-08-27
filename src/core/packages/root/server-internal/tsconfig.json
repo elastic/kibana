@@ -84,6 +84,7 @@
     "@kbn/core-di-internal",
     "@kbn/core-di-mocks",
     "@kbn/core-di-server-internal",
+    "@kbn/security-hardening"
   ],
   "exclude": [
     "target/**/*",

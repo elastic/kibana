@@ -66,6 +66,12 @@ describe('config schema', () => {
         "fipsMode": Object {
           "enabled": false,
         },
+        "hardening": Object {
+          "fs": Object {
+            "enabled": false,
+            "enforcing": Object {},
+          },
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -124,6 +130,12 @@ describe('config schema', () => {
         "fipsMode": Object {
           "enabled": false,
         },
+        "hardening": Object {
+          "fs": Object {
+            "enabled": false,
+            "enforcing": Object {},
+          },
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -180,6 +192,12 @@ describe('config schema', () => {
         "cookieName": "sid",
         "fipsMode": Object {
           "enabled": false,
+        },
+        "hardening": Object {
+          "fs": Object {
+            "enabled": false,
+            "enforcing": Object {},
+          },
         },
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -240,6 +258,12 @@ describe('config schema', () => {
         "cookieName": "sid",
         "fipsMode": Object {
           "enabled": false,
+        },
+        "hardening": Object {
+          "fs": Object {
+            "enabled": false,
+            "enforcing": Object {},
+          },
         },
         "loginAssistanceMessage": "",
         "public": Object {},
