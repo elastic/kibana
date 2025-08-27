@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
+import type { FC } from 'react';
 import React from 'react';
 import type { RouteProps } from 'react-router-dom';
 import { type Location } from 'history';
@@ -13,13 +13,10 @@ import { Router } from '@kbn/shared-ux-router';
 
 import type { AppMountParameters, ChromeStart, ChromeBreadcrumb } from '@kbn/core/public';
 
-import { EuiSkeletonText } from '@elastic/eui';
 import { UrlStateProvider } from '@kbn/ml-url-state';
-import type { MlPages } from '@kbn/ml-common-types/locator_ml_pages';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
 
 import { MlPage } from '../components/ml_page';
-import { type RouteResolverContext } from './use_resolver';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -60,23 +57,6 @@ export interface PageDependencies {
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 
-export const PageLoader: FC<PropsWithChildren<{ context: RouteResolverContext }>> = ({
-  context,
-  children,
-}) => {
-  const isLoading = !context.initialized;
-
-  if (context?.resolvedComponent) {
-    return context.resolvedComponent;
-  }
-
-  return (
-    <EuiSkeletonText lines={10} isLoading={isLoading}>
-      {!isLoading ? children : null}
-    </EuiSkeletonText>
-  );
-};
-
 /**
  * `MlRouter` is based on `BrowserRouter` and takes in `ScopedHistory` provided
  * by Kibana. `LegacyHashUrlRedirect` provides compatibility with legacy hash based URLs.
@@ -95,7 +75,3 @@ export const MlRouter: FC<{
     </UrlStateProvider>
   </Router>
 );
-
-export function createPath(page: MlPages, additionalPrefix?: string) {
-  return `/${page}${additionalPrefix ? `${additionalPrefix}` : ''}`;
-}
