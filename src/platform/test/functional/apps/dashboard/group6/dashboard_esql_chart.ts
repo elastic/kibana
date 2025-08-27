@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const log = getService('log');
+  const elasticChart = getService('elasticChart');
 
   describe('dashboard add ES|QL chart', function () {
     before(async () => {
@@ -41,7 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
-      await dashboard.switchToEditMode();
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectEditorMenuClosed();
@@ -153,6 +153,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(2);
       });
+    });
+
+    it('should reflect renamed dimensions', async () => {
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.expectEditorMenuClosed();
+      await dashboard.waitForRenderComplete();
+
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats maxB = max(bytes), minB = min(bytes) BY BUCKET(@timestamp, 50, ?_tstart, ?_tend)'
+      );
+      await testSubjects.click('ESQLEditor-run-query-button');
+      await header.waitUntilLoadingHasFinished();
+
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
+
+      // rename maxB to MAX B
+      await dimensions[1].click();
+      await testSubjects.setValue('name-input', 'MAX B', { clearWithKeyboard: true });
+      await retry.try(async () => {
+        await testSubjects.click('lns-indexPattern-dimensionContainerClose');
+        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+
+      // rename minB to MIN B
+      await dimensions[2].click();
+      await testSubjects.setValue('name-input', 'MIN B', { clearWithKeyboard: true });
+      await retry.try(async () => {
+        await testSubjects.click('lns-indexPattern-dimensionContainerClose');
+        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+
+      // validate on editor
+      const dimensionElements = await testSubjects.findAll(`lns-dimensionTrigger-textBased`);
+      const dimensionTexts = await Promise.all(
+        await dimensionElements.map(async (el) => await el.getVisibleText())
+      );
+      expect(dimensionTexts).to.eql(['BUCKET(@timestamp, 50, ?_tstart, ?_tend)', 'MAX B', 'MIN B']);
+
+      // validate on chart
+      const chartData = await elasticChart.getChartDebugData(undefined, 1);
+      expect(chartData?.bars?.map((b) => b.name)).to.eql(['MAX B', 'MIN B']);
     });
   });
 }
