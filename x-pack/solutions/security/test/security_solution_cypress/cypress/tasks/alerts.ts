@@ -132,6 +132,10 @@ export const closeFirstAlertModalOff = () => {
 };
 
 export const confirmAlertCloseModal = () => {
+  // TODO remove this if statement when the FF continueSuppressionWindowAdvancedSettingEnabled is GA.
+  if (Cypress.env('CLOUD_SERVERLESS')) {
+    return;
+  }
   cy.get('[data-test-subj="confirmModalConfirmButton"]').click();
   cy.get('[data-test-subj="alertCloseInfoModal"]').should('not.exist');
 };

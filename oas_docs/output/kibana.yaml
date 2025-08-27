@@ -53513,6 +53513,11 @@ paths:
                                                       destination:
                                                         minLength: 1
                                                         type: string
+                                                      status:
+                                                        enum:
+                                                          - enabled
+                                                          - disabled
+                                                        type: string
                                                       where:
                                                         anyOf:
                                                           - anyOf:
@@ -58248,6 +58253,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                status:
+                  enum:
+                    - enabled
+                    - disabled
+                  type: string
                 stream:
                   additionalProperties: false
                   type: object
@@ -60021,6 +60031,11 @@ paths:
                                     properties:
                                       destination:
                                         minLength: 1
+                                        type: string
+                                      status:
+                                        enum:
+                                          - enabled
+                                          - disabled
                                         type: string
                                       where:
                                         anyOf:
@@ -81780,6 +81795,7 @@ components:
         - rule_default
         - endpoint
         - endpoint_trusted_apps
+        - endpoint_trusted_devices
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
@@ -84432,6 +84448,7 @@ components:
         - rule_default
         - endpoint
         - endpoint_trusted_apps
+        - endpoint_trusted_devices
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
