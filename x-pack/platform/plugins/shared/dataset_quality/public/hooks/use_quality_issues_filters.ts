@@ -9,7 +9,11 @@ import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 import type { Item } from '../components/dataset_quality/filters/selector';
-import { documentIndexFailed, degradedField } from '../../common/translations';
+import {
+  documentIndexFailed,
+  degradedField,
+  overviewPanelDatasetQualityIndicatorFailedDocs,
+} from '../../common/translations';
 
 const ISSUE_TYPE_OPTIONS = [
   { value: 'degraded', label: degradedField },
@@ -56,28 +60,39 @@ export const useQualityIssuesFilters = () => {
   // Field filter logic
   const availableFields = useMemo(() => {
     if (!data) return [];
-    return [...new Set(data.map((issue) => issue.name))].sort();
+    return [
+      ...new Set(
+        data.map((issue) =>
+          issue.type === 'degraded'
+            ? { label: issue.name, value: issue.name }
+            : { label: overviewPanelDatasetQualityIndicatorFailedDocs, value: issue.name }
+        )
+      ),
+    ].sort();
   }, [data]);
 
   const fieldItems: Item[] = useMemo(() => {
-    return availableFields.map((fieldName) => ({
-      label: fieldName,
-      checked: selectedFields?.includes(fieldName) ? 'on' : undefined,
+    return availableFields.map((field) => ({
+      label: field.label,
+      checked: selectedFields?.includes(field.value) ? 'on' : undefined,
     }));
   }, [availableFields, selectedFields]);
 
   const onFieldsChange = useCallback(
     (newFieldItems: Item[]) => {
-      const selectedFieldNames = newFieldItems
+      const selectedFieldsValues = newFieldItems
         .filter((item) => item.checked === 'on')
-        .map((item) => item.label);
+        .map((item) => {
+          const option = availableFields.find((opt) => opt.label === item.label);
+          return option?.value || item.label.toLowerCase();
+        });
 
       service.send({
         type: 'UPDATE_SELECTED_FIELDS',
-        selectedFields: selectedFieldNames,
+        selectedFields: selectedFieldsValues,
       });
     },
-    [service]
+    [availableFields, service]
   );
 
   return {
