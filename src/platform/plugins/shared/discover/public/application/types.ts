@@ -29,5 +29,5 @@ export interface RecordsFetchResponse {
 
 export interface SidebarToggleState {
   isCollapsed: boolean;
-  toggle: undefined | ((isCollapsed: boolean, shouldPersist?: boolean) => void);
+  toggle: undefined | ((isCollapsed: boolean) => void);
 }
