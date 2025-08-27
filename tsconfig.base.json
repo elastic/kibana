@@ -1026,6 +1026,8 @@
       "@kbn/expressions-explorer-plugin/*": ["examples/expressions_explorer/*"],
       "@kbn/expressions-plugin": ["src/platform/plugins/shared/expressions"],
       "@kbn/expressions-plugin/*": ["src/platform/plugins/shared/expressions/*"],
+      "@kbn/extract-plugin-translations": ["packages/kbn-extract-plugin-translations"],
+      "@kbn/extract-plugin-translations/*": ["packages/kbn-extract-plugin-translations/*"],
       "@kbn/failed-test-reporter-cli": ["packages/kbn-failed-test-reporter-cli"],
       "@kbn/failed-test-reporter-cli/*": ["packages/kbn-failed-test-reporter-cli/*"],
       "@kbn/failure-store-modal": ["x-pack/platform/packages/shared/kbn-failure-store-modal"],
