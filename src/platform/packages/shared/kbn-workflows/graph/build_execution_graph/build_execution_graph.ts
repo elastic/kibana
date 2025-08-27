@@ -316,28 +316,6 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
    * The order affects what context will be available in the step if/foreach/etc operation.
    */
 
-  // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
-  // when the step is already a foreach step
-  if (currentStep.if) {
-    const modifiedStep = omit(currentStep, ['if']);
-    return {
-      name: `if_${getNodeId(currentStep)}`,
-      type: 'if',
-      condition: currentStep.if,
-      steps: [handleStepLevelOperations(modifiedStep)],
-    } as IfStep;
-  }
-
-  if (currentStep.foreach && (currentStep as ForEachStep).type !== 'foreach') {
-    const modifiedStep = omit(currentStep, ['foreach']);
-    return {
-      name: `foreach_${getNodeId(currentStep)}`,
-      type: 'foreach',
-      foreach: currentStep.foreach,
-      steps: [handleStepLevelOperations(modifiedStep)],
-    } as ForEachStep;
-  }
-
   if ((currentStep as BaseStep)?.['on-failure']?.continue) {
     // Wrap the current step in a continue step
     // and remove the continue from the current step's on-failure to avoid infinite nesting
@@ -373,6 +351,28 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
       ],
       retry: (currentStep as BaseStep)['on-failure']?.retry,
     } as RetryStep;
+  }
+
+  // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
+  // when the step is already a foreach step
+  if (currentStep.if) {
+    const modifiedStep = omit(currentStep, ['if']);
+    return {
+      name: `if_${getNodeId(currentStep)}`,
+      type: 'if',
+      condition: currentStep.if,
+      steps: [handleStepLevelOperations(modifiedStep)],
+    } as IfStep;
+  }
+
+  if (currentStep.foreach && (currentStep as ForEachStep).type !== 'foreach') {
+    const modifiedStep = omit(currentStep, ['foreach']);
+    return {
+      name: `foreach_${getNodeId(currentStep)}`,
+      type: 'foreach',
+      foreach: currentStep.foreach,
+      steps: [handleStepLevelOperations(modifiedStep)],
+    } as ForEachStep;
   }
 
   return currentStep;

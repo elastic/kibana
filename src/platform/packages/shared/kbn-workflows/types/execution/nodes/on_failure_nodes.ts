@@ -20,7 +20,6 @@ export type EnterContinueNode = z.infer<typeof EnterContinueNodeSchema>;
 export const ExitContinueNodeSchema = z.object({
   id: z.string(),
   type: z.literal('exit-continue'),
-  enterNodeId: z.string(),
 });
 export type ExitContinueNode = z.infer<typeof ExitContinueNodeSchema>;
 
