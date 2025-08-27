@@ -543,17 +543,10 @@ export const DocViewerTable = ({
 };
 
 const componentStyles = {
-  fieldsGridWrapper: ({ euiTheme }: UseEuiTheme) =>
+  fieldsGridWrapper: () =>
     css({
       minBlockSize: 0,
       display: 'block',
-
-      '.euiDataGridRow': {
-        '&:hover': {
-          // we keep using a deprecated shade until proper token is available
-          backgroundColor: euiTheme.colors.lightestShade,
-        },
-      },
     }),
   fieldsGrid: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
