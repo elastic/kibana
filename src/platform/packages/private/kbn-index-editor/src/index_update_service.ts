@@ -173,7 +173,7 @@ export class IndexUpdateService {
   public readonly isSaving$: Observable<boolean> = this._isSaving$.asObservable();
 
   /** Subject to manually flush changes, e.g. on user click */
-  private readonly _flush$ = new Subject<number>();
+  private readonly _flush$ = new Subject<{ exitAfterFlush: boolean }>();
 
   private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
   public readonly isFetching$: Observable<boolean> = this._isFetching$.asObservable();
@@ -314,8 +314,8 @@ export class IndexUpdateService {
   private readonly _hasUnsavedChanges$ = new BehaviorSubject<boolean>(false);
   public readonly hasUnsavedChanges$: Observable<boolean> = this._hasUnsavedChanges$.asObservable();
 
-  public flush() {
-    this._flush$.next(Date.now());
+  public flush({ exitAfterFlush = false } = {}) {
+    this._flush$.next({ exitAfterFlush });
     return this;
   }
 
@@ -529,20 +529,22 @@ export class IndexUpdateService {
               })
             );
           }),
-          withLatestFrom(this._docs$, this.dataView$, this._savingDocs$),
-          switchMap(([{ updates, response }, docs, dataView, savingDocs]) =>
+          withLatestFrom(this._flush$, this._docs$, this.dataView$, this._savingDocs$),
+          switchMap(([{ updates, response }, { exitAfterFlush }, docs, dataView, savingDocs]) =>
             // Refresh the data view fields to get new columns types if any
             from(this.data.dataViews.refreshFields(dataView, false, true)).pipe(
-              map(() => ({ updates, response, docs, savingDocs }))
+              map(() => ({ updates, response, exitAfterFlush, docs, savingDocs }))
             )
           )
         )
         .subscribe({
-          next: ({ updates: bulkUpdateOperations, response, docs, savingDocs }) => {
+          next: ({ updates: bulkUpdateOperations, response, exitAfterFlush, docs, savingDocs }) => {
             this._isSaving$.next(false);
 
             if (!response.errors) {
-              this.destroy();
+              if (exitAfterFlush) {
+                this.destroy();
+              }
               // Close the flyout after successful save
             } else {
               const errorDetail = response.items
@@ -556,7 +558,7 @@ export class IndexUpdateService {
 
             const savedIds = new Set(
               response.items
-                .filter((v) => !v.delete && Object.values(v)[0].status === 200)
+                .filter((v) => !v.delete && [200, 201].includes(Object.values(v)[0].status))
                 .map((v) => Object.values(v)[0]._id)
             );
 
@@ -564,10 +566,9 @@ export class IndexUpdateService {
               docs.map((row) => {
                 const update =
                   savedIds.has(row.id) && savingDocs.has(row.id)
-                    ? savingDocs.get(row.id) ?? {}
+                    ? (savingDocs.get(row.id) as PendingDocUpdate).update ?? {}
                     : {};
                 const mergedSource = { ...row.raw, ...update };
-
                 return { ...row, raw: mergedSource, flattened: mergedSource };
               })
             );

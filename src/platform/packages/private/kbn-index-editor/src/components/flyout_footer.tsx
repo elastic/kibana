@@ -46,9 +46,9 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
     await onImportClick();
   }, [indexUpdateService, onImportClick]);
 
-  const onSave = async () => {
+  const onSave = async ({ exitAfterFlush = false }) => {
     if (isIndexCreated) {
-      indexUpdateService.flush();
+      indexUpdateService.flush({ exitAfterFlush });
       return;
     }
 
@@ -86,14 +86,31 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {isSaveButtonVisible ? (
-              <EuiFlexItem grow={false}>
-                <EuiButton data-test-subj="indexEditorSaveChangesButton" onClick={onSave}>
-                  <FormattedMessage
-                    id="indexEditor.flyout.footer.primaryButtonLabel.saveIndex"
-                    defaultMessage="Save changes"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="indexEditorSaveAndCloseButton"
+                    onClick={() => onSave({ exitAfterFlush: true })}
+                  >
+                    <FormattedMessage
+                      id="indexEditor.flyout.footer.primaryButtonLabel.saveAndClose"
+                      defaultMessage="Save and close"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="indexEditorSaveChangesButton"
+                    fill
+                    onClick={() => onSave({ exitAfterFlush: false })}
+                  >
+                    <FormattedMessage
+                      id="indexEditor.flyout.footer.primaryButtonLabel.saveIndex"
+                      defaultMessage="Save"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </>
             ) : null}
 
             {uploadStatus.overallImportStatus === STATUS.NOT_STARTED && canImport ? (
