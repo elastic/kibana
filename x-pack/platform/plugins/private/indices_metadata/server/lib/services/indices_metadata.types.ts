@@ -64,7 +64,7 @@ export interface IndexTemplateInfo {
   managed_by?: string;
   beat?: string;
   is_managed?: boolean;
-  composed_of: string[];
+  composed_of?: string[];
   source_enabled?: boolean;
   source_includes: string[];
   source_excludes: string[];
