@@ -245,7 +245,6 @@ export function ContentFrameworkTable({
         onAddColumn={onAddColumn}
         onRemoveColumn={onRemoveColumn}
         columns={columns}
-        onFindSearchTermMatch={() => null}
         initialPageSize={0}
         customRenderCellValue={cellValueRenderer}
         customRenderCellPopover={cellPopoverRenderer}

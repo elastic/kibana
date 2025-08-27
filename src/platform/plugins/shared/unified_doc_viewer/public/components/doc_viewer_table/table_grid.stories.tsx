@@ -89,7 +89,6 @@ export const Default: Story = {
     onAddColumn: () => {},
     onRemoveColumn: () => {},
     columns: [GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE],
-    onFindSearchTermMatch: (_row, _term) => null,
   },
 };
 
@@ -104,7 +103,6 @@ export const CustomRenderers: Story = {
     onAddColumn: () => {},
     onRemoveColumn: () => {},
     columns: [GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE],
-    onFindSearchTermMatch: (_row, _term) => null,
     initialPageSize: 25,
     pinnedFields: [],
     hidePinColumn: false,
