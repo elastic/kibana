@@ -37,8 +37,8 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import {
   type QueryHistoryItem,
   getHistoryItems,
-  MAX_HISTORY_QUERIES_NUMBER,
   dateFormat,
+  getStorageStats,
 } from '../history_local_storage';
 import { type ESQLEditorDeps, HistoryTabId } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
@@ -342,6 +342,34 @@ export function QueryList({
 
   const starredQueriesCellStyling = cssFavoriteHoverWithinEuiTableRow(theme.euiTheme);
 
+  const containerStyling = css`
+    background-color: ${euiTheme.colors.lightestShade};
+    border-radius: ${euiTheme.border.radius.medium};
+    overflow: hidden;
+    padding: ${euiTheme.size.s} !important;
+
+    /* Target the search bar area with table-matching padding */
+    & > .euiInMemoryTable > div:first-child,
+    & .euiInMemoryTable__searchbar {
+      background-color: ${euiTheme.colors.lightestShade} !important;
+    }
+
+    & .euiFieldSearch,
+    & input[type='search'] {
+      background-color: ${euiTheme.colors.lightestShade} !important;
+      block-size: ${euiTheme.size.xl} !important;
+    }
+
+    & .euiSearchBar__searchHolder {
+      block-size: ${euiTheme.size.xl} !important;
+      max-inline-size: 500px;
+    }
+
+    & .euiSpacer {
+      block-size: ${euiTheme.size.s} !important;
+    }
+  `;
+
   const tableStyling = css`
     .euiTable {
       background-color: ${euiTheme.colors.lightestShade};
@@ -354,8 +382,6 @@ export function QueryList({
       vertical-align: top;
       border: none;
     }
-    border-bottom-left-radius: ${euiTheme.border.radius.medium};
-    border-top-left-radius: ${euiTheme.border.radius.medium};
     max-height: ${height}px;
     overflow-y: auto;
     ${scrollBarStyles}
@@ -370,7 +396,10 @@ export function QueryList({
   });
 
   return (
-    <div data-test-subj={dataTestSubj ?? 'ESQLEditor-queryList'} css={containerCSS}>
+    <div
+      data-test-subj={dataTestSubj ?? 'ESQLEditor-queryList'}
+      css={[containerCSS, containerStyling]}
+    >
       <EuiInMemoryTable
         tableCaption={
           tableCaption ||
@@ -383,6 +412,18 @@ export function QueryList({
         columns={columns}
         sorting={sorting}
         onChange={onTableChange}
+        search={{
+          box: {
+            incremental: true,
+            placeholder: isStarredTab
+              ? i18n.translate('esqlEditor.query.starredQueriesSearchPlaceholder', {
+                  defaultMessage: 'Search starred queries...',
+                })
+              : i18n.translate('esqlEditor.query.queryHistorySearchPlaceholder', {
+                  defaultMessage: 'Search query history...',
+                }),
+          },
+        }}
         css={tableStyling}
         tableLayout={containerWidth < 560 ? 'auto' : 'fixed'}
       />
@@ -620,10 +661,16 @@ export function HistoryAndStarredQueriesTabs({
             >
               <p>
                 {selectedTabId === 'history-queries-tab'
-                  ? i18n.translate('esqlEditor.history.historyItemslimit', {
-                      defaultMessage: 'Showing last {historyItemsLimit} queries',
-                      values: { historyItemsLimit: MAX_HISTORY_QUERIES_NUMBER },
-                    })
+                  ? (() => {
+                      const stats = getStorageStats();
+                      return i18n.translate('esqlEditor.history.historyItemsStorage', {
+                        defaultMessage: 'Showing {queryCount} queries ({storageSizeKB}KB used)',
+                        values: {
+                          queryCount: stats.queryCount,
+                          storageSizeKB: stats.storageSizeKB,
+                        },
+                      });
+                    })()
                   : i18n.translate('esqlEditor.history.starredItemslimit', {
                       defaultMessage:
                         'Showing {starredItemsCount} queries (max {starredItemsLimit})',

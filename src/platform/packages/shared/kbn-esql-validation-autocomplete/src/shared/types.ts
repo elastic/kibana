@@ -60,6 +60,8 @@ export interface ESQLCallbacks {
   ) => Promise<InferenceEndpointsAutocompleteResult>;
   getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
   getActiveProduct?: () => PricingProduct | undefined;
+  getHistoryStarredItems?: () => Promise<string[]>;
+  getESQLCompletionFromLLM?: (queryString: string) => Promise<string>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
