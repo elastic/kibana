@@ -87,11 +87,11 @@ export class WorkflowContextManager {
     return {
       execution: {
         id: workflowExecution.id,
-        isTestRun: !!workflowExecution.isTestRun, // This can be set based on the execution type
+        isTestRun: !!workflowExecution.isTestRun,
         startedAt: new Date(workflowExecution.startedAt),
       },
       workflow: {
-        id: workflowExecution.workflowId, // This can be set based on the workflow ID
+        id: workflowExecution.workflowId,
         name: workflowExecution.workflowDefinition.name,
         enabled: workflowExecution.workflowDefinition.enabled,
         spaceId: workflowExecution.spaceId,
