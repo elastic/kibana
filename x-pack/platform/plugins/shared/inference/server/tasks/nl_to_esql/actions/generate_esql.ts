@@ -38,8 +38,6 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   toolOptions: { tools, toolChoice },
   docBase,
   functionCalling,
-  maxRetries,
-  retryConfiguration,
   logger,
   system,
   metadata,
