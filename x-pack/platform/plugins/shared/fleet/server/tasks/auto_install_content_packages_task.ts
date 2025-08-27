@@ -62,7 +62,6 @@ interface DiscoveryMap {
 export class AutoInstallContentPackagesTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController?: AbortController;
   private taskInterval: string;
   private discoveryMap?: DiscoveryMap;
   private discoveryMapLastFetched: number = 0;
@@ -80,12 +79,9 @@ export class AutoInstallContentPackagesTask {
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              this.abortController = new AbortController();
               return this.runTask(taskInstance, core);
             },
-            cancel: async () => {
-              this.abortController?.abort('Task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },
