@@ -73,6 +73,8 @@ export async function getDataStreams(options: {
       canReadFailureStore: dataStreamsPrivileges[dataStream.name][FAILURE_STORE_PRIVILEGE],
     },
     hasFailureStore: dataStream.failure_store?.enabled,
+    // @ts-expect-error
+    customRetentionPeriod: dataStream.failure_store?.lifecycle?.data_retention,
   }));
 
   return {
