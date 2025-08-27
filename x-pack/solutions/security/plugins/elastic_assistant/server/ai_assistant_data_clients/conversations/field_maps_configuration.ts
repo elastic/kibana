@@ -5,6 +5,28 @@
  * 2.0.
  */
 import type { FieldMap } from '@kbn/data-stream-adapter';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+
+/**
+ * These are legacy fields that were never used, but we cannot just remove it from mapping.
+ */
+const legacySummaryFields: FieldMap = {
+  'summary.content': {
+    type: 'text',
+    array: false,
+    required: false,
+  },
+  'summary.public': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'summary.confidence': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+};
 
 export const conversationsFieldMap: FieldMap = {
   '@timestamp': {
@@ -122,26 +144,23 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  'summary.content': {
-    type: 'text',
-    array: false,
-    required: false,
-  },
   'summary.@timestamp': {
     type: 'date',
     array: false,
     required: true,
   },
-  'summary.public': {
-    type: 'boolean',
+  'summary.semantic_content': {
+    type: 'semantic_text',
     array: false,
     required: false,
+    inference_id: defaultInferenceEndpoints.ELSER,
   },
-  'summary.confidence': {
+  'summary.summarized_message_ids': {
     type: 'keyword',
-    array: false,
+    array: true,
     required: false,
   },
+  ...legacySummaryFields,
   api_config: {
     type: 'object',
     array: false,

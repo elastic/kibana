@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core/server';
+import type { CreateDashboardsInput } from '../../../../../../common/siem_migrations/dashboards/types';
 import {
   CreateDashboardMigrationDashboardsRequestBody,
   CreateDashboardMigrationDashboardsRequestParams,
@@ -17,6 +18,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../../../common/utils/authz';
 import { withLicense } from '../../../common/utils/with_license';
 import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
+import { DashboardResourceIdentifier } from '../../../../../../common/siem_migrations/dashboards/resources';
 
 export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -60,10 +62,47 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
             migrationId,
             count: originalDashboardsCount,
           });
-          await dashboardMigrationsClient.data.dashboards.create(
-            migrationId,
-            originalDashboardsExport
+
+          // Convert the original splunk dashboards format to the migration dashboard item document format
+          const dashboardsInput = originalDashboardsExport.map<CreateDashboardsInput>(
+            ({ result: { ...originalDashboard } }) => {
+              return {
+                migration_id: migrationId,
+                original_dashboard: {
+                  id: originalDashboard.id,
+                  title: originalDashboard.label ?? originalDashboard.title,
+                  description: originalDashboard.description ?? originalDashboard.title,
+                  data: originalDashboard['eai:data'],
+                  format: 'xml',
+                  vendor: 'splunk',
+                  last_updated: originalDashboard.updated ?? new Date().toISOString(),
+                  splunk_properties: {
+                    app: originalDashboard['eai:acl.app'],
+                    owner: originalDashboard['eai:acl.owner'],
+                    sharing: originalDashboard['eai:acl.sharing'],
+                  },
+                },
+              };
+            }
           );
+
+          await dashboardMigrationsClient.data.dashboards.create(migrationId, dashboardsInput);
+
+          const resourceIdentifier = new DashboardResourceIdentifier(
+            dashboardsInput[0].original_dashboard.vendor
+          );
+          const extractedResources = await resourceIdentifier.fromOriginals(
+            dashboardsInput.map((dash) => dash.original_dashboard)
+          );
+
+          const resources = extractedResources.map((resource) => ({
+            ...resource,
+            migration_id: migrationId,
+          }));
+
+          if (resources.length > 0) {
+            await dashboardMigrationsClient.data.resources.create(resources);
+          }
           return res.ok();
         } catch (error) {
           logger.error(`Error creating dashboards for migration ID ${migrationId}: ${error}`);

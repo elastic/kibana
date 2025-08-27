@@ -19,7 +19,7 @@ import { TableText } from '..';
 import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../common';
 import type { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns as getDefaultColumns } from './columns/get_columns';
-import type { LocatorsStart, UISession } from '../../types';
+import type { BackgroundSearchOpenedHandler, LocatorsStart, UISession } from '../../types';
 import type { OnActionComplete } from './actions';
 import { getAppFilter } from './utils/get_app_filter';
 import { getStatusFilter } from './utils/get_status_filter';
@@ -36,6 +36,8 @@ interface Props {
   kibanaVersion: string;
   searchUsageCollector: SearchUsageCollector;
   hideRefreshButton?: boolean;
+  appId?: string;
+  onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
   getColumns?: (params: {
     core: CoreStart;
     api: SearchSessionsMgmtAPI;
@@ -44,6 +46,7 @@ interface Props {
     kibanaVersion: string;
     searchUsageCollector: SearchUsageCollector;
     onActionComplete: OnActionComplete;
+    onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
   }) => Array<EuiBasicTableColumn<UISession>>;
 }
 
@@ -59,6 +62,8 @@ export function SearchSessionsMgmtTable({
   searchUsageCollector,
   hideRefreshButton = false,
   getColumns = getDefaultColumns,
+  appId,
+  onBackgroundSearchOpened,
   ...props
 }: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
@@ -104,7 +109,7 @@ export function SearchSessionsMgmtTable({
     if (document.visibilityState !== 'hidden') {
       let results: UISession[] = [];
       try {
-        const { savedObjects, statuses } = await api.fetchTableData();
+        const { savedObjects, statuses } = await api.fetchTableData({ appId });
         results = savedObjects.map((savedObject) =>
           mapToUISession({ savedObject, locators, sessionStatuses: statuses })
         );
@@ -120,7 +125,7 @@ export function SearchSessionsMgmtTable({
       if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
       refreshTimeoutRef.current = window.setTimeout(doRefresh, refreshInterval);
     }
-  }, [api, refreshInterval, locators]);
+  }, [api, refreshInterval, locators, appId]);
 
   // initial data load
   useEffect(() => {
@@ -143,13 +148,14 @@ export function SearchSessionsMgmtTable({
     onActionComplete,
     kibanaVersion,
     searchUsageCollector,
+    onBackgroundSearchOpened,
   });
 
   const filters = useMemo(() => {
     const _filters = [];
 
     const hasAppColumn = columns.some((column) => 'field' in column && column.field === 'appId');
-    if (hasAppColumn) _filters.push(getAppFilter(tableData));
+    if (hasAppColumn && !appId) _filters.push(getAppFilter(tableData));
 
     const hasStatusColumn = columns.some(
       (column) => 'field' in column && column.field === 'status'
@@ -157,7 +163,7 @@ export function SearchSessionsMgmtTable({
     if (hasStatusColumn) _filters.push(getStatusFilter(tableData));
 
     return _filters;
-  }, [columns, tableData]);
+  }, [columns, tableData, appId]);
 
   // table config: search / filters
   const search: EuiSearchBarProps = {

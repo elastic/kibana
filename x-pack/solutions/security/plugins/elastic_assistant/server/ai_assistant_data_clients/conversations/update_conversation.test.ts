@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { ConversationUpdateProps } from '@kbn/elastic-assistant-common';
+
 import type { UpdateConversationSchema } from './update_conversation';
 import { transformToUpdateScheme, updateConversation } from './update_conversation';
-import { getConversation } from './get_conversation';
+import type { EsConversationSchema } from './types';
 import { authenticatedUser } from '../../__mocks__/user';
-import type { ConversationResponse, ConversationUpdateProps } from '@kbn/elastic-assistant-common';
+import type { DocumentsDataWriter } from '../../lib/data_stream/documents_data_writer';
 
 export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => ({
   id: 'test',
@@ -26,50 +27,82 @@ export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => (
   excludeFromLastConversationStorage: false,
   messages: [],
   replacements: {},
+  summary: {
+    semanticContent: 'Updated semantic content.',
+  },
 });
 
 const mockUser1 = authenticatedUser;
 
-export const getConversationResponseMock = (): ConversationResponse => ({
-  id: 'test',
-  title: 'test',
-  apiConfig: {
-    actionTypeId: '.gen-ai',
-    connectorId: '1',
-    defaultSystemPromptId: 'default-system-prompt',
-    model: 'test-model',
-    provider: 'OpenAI',
-  },
-  category: 'assistant',
-  excludeFromLastConversationStorage: false,
-  messages: [
-    {
-      content: 'Message 3',
-      role: 'user',
-      timestamp: '2024-02-14T22:29:43.862Z',
+const getEsConversationMock = (): EsConversationSchema => {
+  return {
+    summary: {
+      '@timestamp': '2025-08-19T13:26:01.746Z',
+      semantic_content: 'Very nice demo semantic content 4.',
     },
-    {
-      content: 'Message 4',
-      role: 'user',
-      timestamp: '2024-02-14T22:29:43.862Z',
+    '@timestamp': '2025-08-19T10:49:52.884Z',
+    updated_at: '2025-08-19T13:26:01.746Z',
+    api_config: {
+      action_type_id: '.gen-ai',
+      connector_id: 'gpt-4-1',
     },
-  ],
-  replacements: {},
-  createdAt: '2020-04-20T15:25:31.830Z',
-  namespace: 'default',
-  updatedAt: '2020-04-20T15:25:31.830Z',
-  timestamp: '2020-04-20T15:25:31.830Z',
-  users: [
-    {
-      id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-      name: 'elastic',
-    },
-  ],
-});
+    namespace: 'default',
+    created_at: '2025-08-19T10:49:52.884Z',
+    messages: [
+      {
+        '@timestamp': '2025-08-19T10:49:53.799Z',
+        role: 'user',
+        content: 'Hello there, how many opened alerts do I have?',
+      },
+      {
+        metadata: {
+          content_references: {
+            oQ5xL: {
+              id: 'oQ5xL',
+              type: 'SecurityAlertsPage',
+            },
+          },
+        },
+        '@timestamp': '2025-08-19T10:49:57.398Z',
+        role: 'assistant',
+        is_error: false,
+        trace_data: {
+          transaction_id: 'ee432e8be6ad3f9c',
+          trace_id: 'f44d01b6095d35dce15aa8137df76e29',
+        },
+        content: 'You currently have 61 open alerts in your environment. {reference(oQ5xL)}',
+      },
+    ],
+    replacements: [],
+    title: 'Viewing the Number of Open Alerts in Elastic Security',
+    category: 'assistant',
+    users: [
+      {
+        name: 'elastic',
+        id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+      },
+    ],
+    id: 'a565baa8-5566-47b2-ab69-807248b2fc46',
+  };
+};
 
-jest.mock('./get_conversation', () => ({
-  getConversation: jest.fn(),
-}));
+const getNothingToUpdateErrorResponseMock = () => {
+  return {
+    errors: [
+      {
+        status_code: 500,
+        conversations: [{ id: '', name: '' }],
+        message:
+          'null_pointer_exception\n\tRoot causes:\n\t\tnull_pointer_exception: Cannot invoke "org.elasticsearch.xcontent.XContentType.xContent()" because "xContentType" is null',
+      },
+    ],
+    docs_updated: [],
+  };
+};
+
+const dataWriterMock = {
+  bulk: jest.fn(),
+} as unknown as DocumentsDataWriter;
 
 describe('updateConversation', () => {
   beforeEach(() => {
@@ -80,42 +113,131 @@ describe('updateConversation', () => {
     jest.clearAllMocks();
   });
 
-  test('it returns a conversation with serializer and deserializer', async () => {
+  test('it calls a `dataWriter.bulk` with the correct parameters', async () => {
     const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
-    const existingConversation = getConversationResponseMock();
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(existingConversation);
+    const updatedESConversation = getEsConversationMock();
 
-    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.updateByQuery.mockResolvedValue({ updated: 1 });
+    (dataWriterMock.bulk as jest.Mock).mockResolvedValue({
+      errors: [],
+      docs_updated: [updatedESConversation],
+    });
 
-    const updatedList = await updateConversation({
-      esClient,
-      logger: loggerMock.create(),
-      conversationIndex: 'index-1',
+    await updateConversation({
       conversationUpdateProps: conversation,
+      dataWriter: dataWriterMock,
+      logger: loggerMock.create(),
       user: mockUser1,
     });
-    const expected: ConversationResponse = {
-      ...getConversationResponseMock(),
-      id: conversation.id,
-      title: 'test',
-    };
-    expect(updatedList).toEqual(expected);
+
+    expect(dataWriterMock.bulk).toHaveBeenCalledWith({
+      documentsToUpdate: [
+        {
+          api_config: {
+            action_type_id: '.gen-ai',
+            connector_id: '1',
+            default_system_prompt_id: 'default-system-prompt',
+            model: 'test-model',
+            provider: 'OpenAI',
+          },
+          exclude_from_last_conversation_storage: false,
+          id: 'test',
+          messages: [],
+          replacements: [],
+          summary: {
+            '@timestamp': expect.anything(),
+            semantic_content: 'Updated semantic content.',
+            summarized_message_ids: undefined,
+          },
+          title: 'test',
+          updated_at: expect.anything(),
+        },
+      ],
+      getUpdateScript: expect.anything(),
+      authenticatedUser: mockUser1,
+    });
+  });
+
+  test('it returns a conversation with serializer and deserializer', async () => {
+    const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
+    const updatedESConversation = getEsConversationMock();
+
+    (dataWriterMock.bulk as jest.Mock).mockResolvedValue({
+      errors: [],
+      docs_updated: [updatedESConversation],
+    });
+
+    const updatedList = await updateConversation({
+      conversationUpdateProps: conversation,
+      dataWriter: dataWriterMock,
+      logger: loggerMock.create(),
+      user: mockUser1,
+    });
+
+    expect(updatedList).toEqual({
+      timestamp: '2025-08-19T10:49:52.884Z',
+      createdAt: '2025-08-19T10:49:52.884Z',
+      users: [
+        {
+          id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+          name: 'elastic',
+        },
+      ],
+      title: 'Viewing the Number of Open Alerts in Elastic Security',
+      category: 'assistant',
+      summary: {
+        timestamp: '2025-08-19T13:26:01.746Z',
+        semanticContent: 'Very nice demo semantic content 4.',
+      },
+      apiConfig: {
+        actionTypeId: '.gen-ai',
+        connectorId: 'gpt-4-1',
+      },
+      messages: [
+        {
+          timestamp: '2025-08-19T10:49:53.799Z',
+          content: 'Hello there, how many opened alerts do I have?',
+          role: 'user',
+        },
+        {
+          timestamp: '2025-08-19T10:49:57.398Z',
+          content: 'You currently have 61 open alerts in your environment. {reference(oQ5xL)}',
+          role: 'assistant',
+          metadata: {
+            contentReferences: {
+              oQ5xL: {
+                id: 'oQ5xL',
+                type: 'SecurityAlertsPage',
+              },
+            },
+          },
+          traceData: {
+            traceId: 'f44d01b6095d35dce15aa8137df76e29',
+            transactionId: 'ee432e8be6ad3f9c',
+          },
+        },
+      ],
+      updatedAt: '2025-08-19T13:26:01.746Z',
+      replacements: {},
+      namespace: 'default',
+      id: 'a565baa8-5566-47b2-ab69-807248b2fc46',
+    });
   });
 
   test('it returns null when there is not a conversation to update', async () => {
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(null);
     const conversation = getUpdateConversationOptionsMock();
+    (dataWriterMock.bulk as jest.Mock).mockResolvedValue(getNothingToUpdateErrorResponseMock());
 
-    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    const mockedLogger = loggerMock.create();
     const updatedList = await updateConversation({
-      esClient,
-      logger: loggerMock.create(),
-      conversationIndex: 'index-1',
       conversationUpdateProps: conversation,
+      dataWriter: dataWriterMock,
+      logger: mockedLogger,
       user: mockUser1,
     });
     expect(updatedList).toEqual(null);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Error updating conversation: null_pointer_exception')
+    );
   });
 });
 
@@ -126,8 +248,6 @@ describe('transformToUpdateScheme', () => {
 
   test('it returns a transformed conversation with converted string datetime to ISO from the client', async () => {
     const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
-    const existingConversation = getConversationResponseMock();
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(existingConversation);
 
     const updateAt = new Date().toISOString();
     const transformed = transformToUpdateScheme(updateAt, {
@@ -202,13 +322,15 @@ describe('transformToUpdateScheme', () => {
           role: 'user',
         },
       ],
+      summary: {
+        '@timestamp': updateAt,
+        semantic_content: 'Updated semantic content.',
+      },
     };
     expect(transformed).toEqual(expected);
   });
   test('it does not pass api_config if apiConfig is not updated', async () => {
     const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
-    const existingConversation = getConversationResponseMock();
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(existingConversation);
 
     const updateAt = new Date().toISOString();
     const transformed = transformToUpdateScheme(updateAt, {

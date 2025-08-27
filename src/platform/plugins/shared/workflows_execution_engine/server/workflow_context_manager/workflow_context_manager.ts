@@ -8,41 +8,28 @@
  */
 
 import type { graphlib } from '@dagrejs/dagre';
-import type { WorkflowContext, WorkflowSchema } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
+import type { StepContext, WorkflowContext } from '@kbn/workflows';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
-  spaceId: string;
-  workflow: z.infer<typeof WorkflowSchema>;
-  event: any;
   // New properties for logging
   workflowExecutionGraph: graphlib.Graph;
   workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 }
 
 export class WorkflowContextManager {
-  // 'now' will be added by the templating engine
-  private context: Omit<WorkflowContext, 'now'>;
   private workflowExecutionGraph: graphlib.Graph;
   private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(init: ContextManagerInit) {
-    this.context = {
-      spaceId: init.spaceId,
-      event: init.event,
-      consts: init.workflow.consts || {},
-      steps: {},
-    } as Partial<typeof this.context> as WorkflowContext;
-
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionRuntime = init.workflowExecutionRuntime;
   }
 
-  public getContext() {
-    const stepContext: WorkflowContext = {
-      ...this.context,
-      workflowRunId: this.workflowExecutionRuntime.getWorkflowExecution().id,
+  public getContext(): StepContext {
+    const stepContext: StepContext = {
+      ...this.buildWorkflowContext(),
+      steps: {},
     };
 
     const visited = new Set<string>();
@@ -76,11 +63,7 @@ export class WorkflowContextManager {
     const directPredecessors = this.workflowExecutionGraph.predecessors(currentNodeId) || [];
     directPredecessors.forEach((nodeId) => collectPredecessors(nodeId));
 
-    return this.enrichContextAccordingToScope(stepContext);
-  }
-
-  public getContextKey(key: string): any {
-    return this.context[key as keyof typeof this.context];
+    return this.enrichStepContextAccordingToStepScope(stepContext);
   }
 
   public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
@@ -98,7 +81,27 @@ export class WorkflowContextManager {
     return { pathExists: true, value: result };
   }
 
-  private enrichContextAccordingToScope(stepContext: WorkflowContext): WorkflowContext {
+  private buildWorkflowContext(): WorkflowContext {
+    const workflowExecution = this.workflowExecutionRuntime.getWorkflowExecution();
+
+    return {
+      execution: {
+        id: workflowExecution.id,
+        isTestRun: !!workflowExecution.isTestRun,
+        startedAt: new Date(workflowExecution.startedAt),
+      },
+      workflow: {
+        id: workflowExecution.workflowId,
+        name: workflowExecution.workflowDefinition.name,
+        enabled: workflowExecution.workflowDefinition.enabled,
+        spaceId: workflowExecution.spaceId,
+      },
+      consts: workflowExecution.workflowDefinition.consts || {},
+      event: workflowExecution.context?.event,
+    };
+  }
+
+  private enrichStepContextAccordingToStepScope(stepContext: StepContext): StepContext {
     for (const nodeId of this.workflowExecutionRuntime.getWorkflowExecution().stack) {
       const node = this.workflowExecutionGraph.node(nodeId) as any;
       const nodeType = node?.type;

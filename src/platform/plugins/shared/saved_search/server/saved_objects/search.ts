@@ -21,6 +21,7 @@ import {
   SCHEMA_SEARCH_MODEL_VERSION_4,
   SCHEMA_SEARCH_MODEL_VERSION_5,
   SCHEMA_SEARCH_MODEL_VERSION_6,
+  SCHEMA_SEARCH_MODEL_VERSION_7,
 } from './schema';
 
 export function getSavedSearchObjectType(
@@ -93,6 +94,13 @@ export function getSavedSearchObjectType(
         schemas: {
           forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_6.extends({}, { unknowns: 'ignore' }),
           create: SCHEMA_SEARCH_MODEL_VERSION_6,
+        },
+      },
+      7: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_7.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_7,
         },
       },
     },

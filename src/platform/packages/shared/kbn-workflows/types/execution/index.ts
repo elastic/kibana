@@ -15,5 +15,10 @@ export type {
   ExitConditionBranchNode,
   ExitConditionBranchNodeSchema,
 } from './nodes/branching_nodes';
-export type { EnterForeachNode, ExitForeachNode } from './nodes/loop_nodes';
+export type {
+  EnterForeachNode,
+  ExitForeachNode,
+  EnterRetryNode,
+  ExitRetryNode,
+} from './nodes/loop_nodes';
 export type { AtomicGraphNode, WaitGraphNodeSchema, WaitGraphNode } from './nodes/base';

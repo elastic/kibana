@@ -58,7 +58,6 @@ describe('createAttackDiscoverySchedulesRoute', () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    context.core.featureFlags.getBooleanValue.mockResolvedValue(true);
     createAttackDiscoverySchedulesRoute(server.router);
     createAttackDiscoverySchedule.mockResolvedValue(
       getAttackDiscoveryScheduleMock(mockRequestBody)
@@ -101,17 +100,6 @@ describe('createAttackDiscoverySchedulesRoute', () => {
         success: false,
       },
       status_code: 500,
-    });
-  });
-
-  describe('Disabled feature flag', () => {
-    it('should return a 404 if scheduling feature is not registered', async () => {
-      context.core.featureFlags.getBooleanValue.mockResolvedValue(false);
-      const response = await server.inject(
-        createAttackDiscoverySchedulesRequest(mockRequestBody),
-        requestContextMock.convertContext(context)
-      );
-      expect(response.status).toEqual(404);
     });
   });
 });

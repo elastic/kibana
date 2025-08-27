@@ -16,7 +16,6 @@ const MAX_LENGTH = 1024;
 export const writeAttackDiscoveryEvent = async ({
   action,
   alertsContextCount,
-  attackDiscoveryAlertsEnabled,
   authenticatedUser,
   connectorId,
   dataClient,
@@ -44,8 +43,6 @@ export const writeAttackDiscoveryEvent = async ({
   alertsContextCount?: number;
   /** This client is used to wait for an event log refresh */
   dataClient: AttackDiscoveryDataClient | null;
-  /** Feature flag */
-  attackDiscoveryAlertsEnabled: boolean;
   /** The authenticated user generating Attack discoveries */
   authenticatedUser: AuthenticatedUser;
   /** The connector id (event.dataset) for this generation */
@@ -75,73 +72,71 @@ export const writeAttackDiscoveryEvent = async ({
   /** When generation started (event.start) */
   start?: Date;
 }) => {
-  if (attackDiscoveryAlertsEnabled) {
-    const alertsCountActive =
-      alertsContextCount != null
-        ? {
-            active: alertsContextCount,
-          }
-        : undefined;
+  const alertsCountActive =
+    alertsContextCount != null
+      ? {
+          active: alertsContextCount,
+        }
+      : undefined;
 
-    const alertsCountsNew =
-      newAlerts != null
-        ? {
-            new: newAlerts,
-          }
-        : undefined;
+  const alertsCountsNew =
+    newAlerts != null
+      ? {
+          new: newAlerts,
+        }
+      : undefined;
 
-    const metrics =
-      alertsCountActive != null || alertsCountsNew != null
-        ? {
-            alert_counts: {
-              ...alertsCountActive,
-              ...alertsCountsNew,
-            },
-          }
-        : undefined;
+  const metrics =
+    alertsCountActive != null || alertsCountsNew != null
+      ? {
+          alert_counts: {
+            ...alertsCountActive,
+            ...alertsCountsNew,
+          },
+        }
+      : undefined;
 
-    const status = loadingMessage;
+  const status = loadingMessage;
 
-    // required because reason is mapped with "ignore_above": 1024, so it won't be returned in the search result if it exceeds this length:
-    const trimmedReason =
-      reason != null && reason.length > MAX_LENGTH ? reason.substring(0, MAX_LENGTH) : reason;
+  // required because reason is mapped with "ignore_above": 1024, so it won't be returned in the search result if it exceeds this length:
+  const trimmedReason =
+    reason != null && reason.length > MAX_LENGTH ? reason.substring(0, MAX_LENGTH) : reason;
 
-    const attackDiscoveryEvent = {
-      '@timestamp': new Date().toISOString(),
-      event: {
-        action, // e.g. generation-started, generation-succeeded, generation-failed
-        dataset: connectorId, // The connector id for this generation
-        duration, // The duration of a successful generation in nanoseconds
-        end: end?.toISOString(), // When generation ended
-        outcome, // The outcome of the generation (success or failure)
-        provider: ATTACK_DISCOVERY_EVENT_PROVIDER, // The plugin-registered provider name
-        reason: trimmedReason, // for failed generations
-        start: start?.toISOString(), // When generation started
-      },
-      kibana: {
-        alert: {
-          rule: {
-            consumer: 'siem',
-            execution: {
-              metrics,
-              status,
-              uuid: executionUuid, // The unique identifier for the generation
-            },
+  const attackDiscoveryEvent = {
+    '@timestamp': new Date().toISOString(),
+    event: {
+      action, // e.g. generation-started, generation-succeeded, generation-failed
+      dataset: connectorId, // The connector id for this generation
+      duration, // The duration of a successful generation in nanoseconds
+      end: end?.toISOString(), // When generation ended
+      outcome, // The outcome of the generation (success or failure)
+      provider: ATTACK_DISCOVERY_EVENT_PROVIDER, // The plugin-registered provider name
+      reason: trimmedReason, // for failed generations
+      start: start?.toISOString(), // When generation started
+    },
+    kibana: {
+      alert: {
+        rule: {
+          consumer: 'siem',
+          execution: {
+            metrics,
+            status,
+            uuid: executionUuid, // The unique identifier for the generation
           },
         },
-        space_ids: [spaceId], // The Kibana space ID
       },
-      message,
-      tags: ['securitySolution', 'attackDiscovery'],
-      user: {
-        name: authenticatedUser.username, // only user.name is supported
-      },
-    };
+      space_ids: [spaceId], // The Kibana space ID
+    },
+    message,
+    tags: ['securitySolution', 'attackDiscovery'],
+    user: {
+      name: authenticatedUser.username, // only user.name is supported
+    },
+  };
 
-    try {
-      eventLogger.logEvent(attackDiscoveryEvent);
-    } finally {
-      await dataClient?.refreshEventLogIndex(eventLogIndex);
-    }
+  try {
+    eventLogger.logEvent(attackDiscoveryEvent);
+  } finally {
+    await dataClient?.refreshEventLogIndex(eventLogIndex);
   }
 };

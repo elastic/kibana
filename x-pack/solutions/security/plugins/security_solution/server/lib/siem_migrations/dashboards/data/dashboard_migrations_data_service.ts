@@ -19,7 +19,11 @@ import type {
   DashboardMigrationsClientDependencies,
 } from '../types';
 import { SiemMigrationsBaseDataService } from '../../common/siem_migrations_base_service';
-import { dashboardMigrationsDashboardsFieldMap, dashboardMigrationsFieldMap } from './field_maps';
+import {
+  dashboardMigrationResourcesFieldMap,
+  dashboardMigrationsDashboardsFieldMap,
+  dashboardMigrationsFieldMap,
+} from './field_maps';
 import { DashboardMigrationsDataClient } from './dashboard_migrations_data_client';
 export const INDEX_PATTERN = '.kibana-siem-dashboard-migrations';
 
@@ -53,6 +57,10 @@ export class DashboardMigrationsDataService extends SiemMigrationsBaseDataServic
         adapterId: 'dashboards',
         fieldMap: dashboardMigrationsDashboardsFieldMap,
       }),
+      resources: this.createDashboardIndexPatternAdapter({
+        adapterId: 'resources',
+        fieldMap: dashboardMigrationResourcesFieldMap,
+      }),
     };
   }
 
@@ -72,6 +80,7 @@ export class DashboardMigrationsDataService extends SiemMigrationsBaseDataServic
     await Promise.all([
       this.adapters.dashboards.install({ ...params, logger: this.logger }),
       this.adapters.migrations.install({ ...params, logger: this.logger }),
+      this.adapters.resources.install({ ...params, logger: this.logger }),
     ]);
   }
 
@@ -83,6 +92,7 @@ export class DashboardMigrationsDataService extends SiemMigrationsBaseDataServic
     const indexNameProviders: DashboardMigrationIndexNameProviders = {
       dashboards: this.createIndexNameProvider(this.adapters.dashboards, spaceId),
       migrations: this.createIndexNameProvider(this.adapters.migrations, spaceId),
+      resources: this.createIndexNameProvider(this.adapters.resources, spaceId),
     };
 
     return new DashboardMigrationsDataClient(

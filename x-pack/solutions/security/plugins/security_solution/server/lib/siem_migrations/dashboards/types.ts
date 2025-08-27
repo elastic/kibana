@@ -11,6 +11,7 @@ import type { SiemMigrationsClientDependencies } from '../common/types';
 export interface DashboardMigrationAdapters {
   migrations: IndexPatternAdapter;
   dashboards: IndexPatternAdapter;
+  resources: IndexPatternAdapter;
 }
 
 export type DashboardMigrationAdapterId = keyof DashboardMigrationAdapters;

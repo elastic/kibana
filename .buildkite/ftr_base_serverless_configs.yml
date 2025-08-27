@@ -5,9 +5,6 @@ disabled:
   - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/serverless.config.base.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/feature_flag.serverless.config.base.ts
   # Serverless base config files
-  - x-pack/test_serverless/api_integration/config.base.ts
-  - x-pack/test_serverless/functional/config.base.ts
-  - x-pack/test_serverless/shared/config.base.ts
   - x-pack/platform/test/serverless/shared/config.base.ts
   - x-pack/platform/test/serverless/api_integration/config.base.ts
   - x-pack/platform/test/serverless/functional/config.base.ts

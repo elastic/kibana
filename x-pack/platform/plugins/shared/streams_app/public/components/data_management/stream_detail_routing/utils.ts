@@ -15,6 +15,7 @@ const toUIDefinition = <TRoutingDefinition extends RoutingDefinition>(
   routingDefinition: TRoutingDefinition
 ): RoutingDefinitionWithUIAttributes => ({
   id: createId(),
+  status: routingDefinition.status ?? 'enabled',
   ...routingDefinition,
 });
 

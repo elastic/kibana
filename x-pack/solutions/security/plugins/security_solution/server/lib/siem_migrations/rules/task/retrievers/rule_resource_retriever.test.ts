@@ -6,21 +6,21 @@
  */
 
 import { RuleResourceRetriever } from './rule_resource_retriever'; // Adjust path as needed
-import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 
 jest.mock('../../data/rule_migrations_data_service');
 jest.mock('../../../../../../common/siem_migrations/rules/resources');
 
-const MockResourceIdentifier = ResourceIdentifier as jest.Mock;
+const MockResourceIdentifier = RuleResourceIdentifier as jest.Mock;
 
 const migration = { original_rule: { vendor: 'splunk' } } as unknown as RuleMigrationRule;
 
 describe('RuleResourceRetriever', () => {
   let retriever: RuleResourceRetriever;
   let mockDataClient: jest.Mocked<RuleMigrationsDataClient>;
-  let mockResourceIdentifier: jest.Mocked<ResourceIdentifier>;
+  let mockResourceIdentifier: jest.Mocked<RuleResourceIdentifier>;
 
   beforeEach(() => {
     mockDataClient = {
@@ -30,12 +30,12 @@ describe('RuleResourceRetriever', () => {
     retriever = new RuleResourceRetriever('mockMigrationId', mockDataClient);
 
     MockResourceIdentifier.mockImplementation(() => ({
-      fromOriginalRule: jest.fn().mockReturnValue([]),
+      fromOriginal: jest.fn().mockReturnValue([]),
       fromResources: jest.fn().mockReturnValue([]),
     }));
     mockResourceIdentifier = new MockResourceIdentifier(
       'splunk'
-    ) as jest.Mocked<ResourceIdentifier>;
+    ) as jest.Mocked<RuleResourceIdentifier>;
   });
 
   it('throws an error if initialize is not called before getResources', async () => {
@@ -46,7 +46,7 @@ describe('RuleResourceRetriever', () => {
 
   it('returns an empty object if no matching resources are found', async () => {
     // Mock the resource identifier to return no resources
-    mockResourceIdentifier.fromOriginalRule.mockReturnValue([]);
+    mockResourceIdentifier.fromOriginal.mockResolvedValue([]);
     await retriever.initialize(); // Pretend initialize has been called
 
     const result = await retriever.getResources(migration);
@@ -67,7 +67,7 @@ describe('RuleResourceRetriever', () => {
       { name: 'lookup1', type: 'lookup' as const },
     ];
     MockResourceIdentifier.mockImplementation(() => ({
-      fromOriginalRule: jest.fn().mockReturnValue(mockResourcesIdentified),
+      fromOriginal: jest.fn().mockReturnValue(mockResourcesIdentified),
       fromResources: jest.fn().mockReturnValue([]),
     }));
 
@@ -103,7 +103,7 @@ describe('RuleResourceRetriever', () => {
     ];
 
     MockResourceIdentifier.mockImplementation(() => ({
-      fromOriginalRule: jest.fn().mockReturnValue(mockResourcesIdentifiedFromRule),
+      fromOriginal: jest.fn().mockReturnValue(mockResourcesIdentifiedFromRule),
       fromResources: jest.fn().mockReturnValue([]).mockReturnValueOnce(mockNestedResources),
     }));
 

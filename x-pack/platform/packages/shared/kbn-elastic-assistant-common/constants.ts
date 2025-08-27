@@ -77,8 +77,6 @@ export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insi
 export const DEFEND_INSIGHTS_BY_ID = `${DEFEND_INSIGHTS}/{id}`;
 
 // Attack Discovery
-export const ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG =
-  'securitySolution.assistantAttackDiscoverySchedulingEnabled' as const;
 export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
 export const ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID = 'siem' as const;
 
@@ -106,18 +104,6 @@ export const ATTACK_DISCOVERY_AD_HOC_RULE_ID = 'attack_discovery_ad_hoc_rule_id'
 
 /** A fake `kibana.alert.rule.rule_type_id` for ad hock rules */
 export const ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID = 'attack_discovery_ad_hoc_rule_type_id' as const;
-
-/**
- * This feature flag enables the Attack discoveries alerts feature.
- *
- * It may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:
- * ```
- * feature_flags.overrides:
- *   securitySolution.attackDiscoveryAlertsEnabled: true
- * ```
- */
-export const ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG =
-  'securitySolution.attackDiscoveryAlertsEnabled' as const;
 
 /**
  * The common prefix for all (ad hoc and scheduled) Attack discovery alerts indices

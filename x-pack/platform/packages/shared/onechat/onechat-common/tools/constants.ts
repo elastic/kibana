@@ -37,3 +37,9 @@ export const builtinTags = {
    */
   retrieval: 'retrieval',
 } as const;
+
+/**
+ * The number of active tools that will trigger a warning in the UI.
+ * Agent will perform poorly if it has too many tools.
+ */
+export const activeToolsCountWarningThreshold = 24;

@@ -306,25 +306,30 @@ components:
           description: Model
           example: 'gpt-4'
 
-    ConversationSummary:
+    ConversationSummaryBase:
       type: object
       properties:
-        content:
+        semanticContent:
           type: string
           description: Summary text of the conversation over time.
           example: 'This conversation covered how to configure the Security AI Assistant.'
-        timestamp:
-          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
-          description: The timestamp summary was updated.
-          example: '2025-04-30T16:00:00Z'
-        public:
-          type: boolean
-          description: Define if summary is marked as publicly available.
-          example: true
-        confidence:
-          $ref: '#/components/schemas/ConversationConfidence'
-          description: How confident you are about this being a correct and useful learning.
-          example: 'high'
+        summarizedMessageIds:
+          type: array
+          description: The list of summarized messages.
+          items:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+
+    ConversationSummary:
+      allOf:
+        - $ref: '#/components/schemas/ConversationSummaryBase'
+        - type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
+              description: The timestamp summary was updated.
+              example: '2025-04-30T16:00:00Z'
 
     ErrorSchema:
       type: object
@@ -426,7 +431,7 @@ components:
           $ref: '#/components/schemas/ApiConfig'
           description: LLM API configuration.
         summary:
-          $ref: '#/components/schemas/ConversationSummary'
+          $ref: '#/components/schemas/ConversationSummaryBase'
         excludeFromLastConversationStorage:
           description: Exclude from last conversation storage.
           type: boolean

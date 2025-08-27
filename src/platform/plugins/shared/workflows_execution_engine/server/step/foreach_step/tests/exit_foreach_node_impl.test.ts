@@ -132,7 +132,8 @@ describe('ExitForeachNodeImpl', () => {
       await underTest.run();
 
       expect(logDebug).toHaveBeenCalledWith(
-        `Exiting foreach step ${step.startNodeId} after processing all items.`
+        `Exiting foreach step ${step.startNodeId} after processing all items.`,
+        { workflow: { step_id: step.startNodeId } }
       );
     });
 

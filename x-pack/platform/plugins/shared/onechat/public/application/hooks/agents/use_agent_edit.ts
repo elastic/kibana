@@ -31,6 +31,9 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
+  labels: [],
+  avatar_color: '',
+  avatar_symbol: '',
   configuration: {
     instructions: '',
     tools: defaultToolSelection,
@@ -77,8 +80,6 @@ export function useAgentEdit({
       return agentService.update(agentId, data);
     },
     onSuccess: (result) => {
-      // Invalidate specific agent and agent profiles list
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId!) });
       queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
       onSaveSuccess(result);
     },

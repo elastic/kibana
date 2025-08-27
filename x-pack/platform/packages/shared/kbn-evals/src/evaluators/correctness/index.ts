@@ -27,12 +27,17 @@ export function createCorrectnessAnalysisEvaluator({
   return {
     evaluate: async ({ input, output, expected }) => {
       async function runCorrectnessAnalysis(): Promise<CorrectnessAnalysis> {
+        const userQuery = input.question;
+        const messages = (output as any)?.messages ?? [];
+        const latestMessage = messages[messages.length - 1]?.message;
+        const groundTruthResponse = expected?.expected;
+
         const response = await inferenceClient.prompt({
           prompt: LlmCorrectnessEvaluationPrompt,
           input: {
-            user_query: JSON.stringify(input),
-            agent_response: JSON.stringify(output),
-            ground_truth_response: JSON.stringify(expected),
+            user_query: `${userQuery}`,
+            agent_response: `${latestMessage}`,
+            ground_truth_response: `${groundTruthResponse}`,
           },
         });
 

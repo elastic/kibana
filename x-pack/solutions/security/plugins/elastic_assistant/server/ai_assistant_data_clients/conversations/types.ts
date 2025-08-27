@@ -7,7 +7,6 @@
 
 import type {
   ConversationCategory,
-  ConversationConfidence,
   MessageRole,
   Provider,
   Reader,
@@ -24,10 +23,9 @@ export interface EsConversationSchema {
   created_at: string;
   title: string;
   summary?: {
-    content?: string;
-    timestamp?: string;
-    public?: boolean;
-    confidence?: ConversationConfidence;
+    '@timestamp': string;
+    semantic_content?: string;
+    summarized_message_ids?: string[];
   };
   category: ConversationCategory;
   messages?: Array<{
@@ -39,6 +37,9 @@ export interface EsConversationSchema {
     trace_data?: {
       transaction_id?: string;
       trace_id?: string;
+    };
+    metadata?: {
+      content_references?: unknown;
     };
   }>;
   api_config?: {

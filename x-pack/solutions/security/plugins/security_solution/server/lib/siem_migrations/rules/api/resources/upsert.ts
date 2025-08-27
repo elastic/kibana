@@ -14,7 +14,7 @@ import {
   UpsertRuleMigrationResourcesRequestParams,
   type UpsertRuleMigrationResourcesResponse,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
+import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { CreateRuleMigrationResourceInput } from '../../data/rule_migrations_data_resources_client';
 import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
@@ -79,7 +79,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             await ruleMigrationsClient.data.resources.upsert(resourcesUpsert);
 
             // Create identified resource documents to keep track of them (without content)
-            const resourceIdentifier = new ResourceIdentifier(rule.original_rule.vendor);
+            const resourceIdentifier = new RuleResourceIdentifier(rule.original_rule.vendor);
             const resourcesToCreate = resourceIdentifier
               .fromResources(resources)
               .map<CreateRuleMigrationResourceInput>((resource) => ({
@@ -92,7 +92,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
           } catch (error) {
             logger.error(error);
             await siemMigrationAuditLogger.logUploadResources({ migrationId, error });
-            return res.badRequest({ body: error.message });
+            return res.customError({ statusCode: 500, body: error.message });
           }
         }
       )

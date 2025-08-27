@@ -15,6 +15,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
@@ -294,7 +295,9 @@ interface BaseOperationDefinitionProps<
   paramEditor?: React.ComponentType<
     AR extends true ? ParamEditorProps<C, GenericIndexPatternColumn> : ParamEditorProps<C>
   >;
-  getAdvancedOptions?: (params: ParamEditorProps<C>) => AdvancedOption[] | undefined;
+  getAdvancedOptions?: (
+    params: ParamEditorProps<C> & { euiTheme: EuiThemeComputed }
+  ) => AdvancedOption[] | undefined;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern

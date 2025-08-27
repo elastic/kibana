@@ -70,4 +70,5 @@ export const storybookAliases = {
   unified_search: 'src/platform/plugins/shared/unified_search/.storybook',
   unified_tabs: 'src/platform/packages/shared/kbn-unified-tabs/.storybook',
   upgrade_assistant: 'x-pack/platform/packages/private/upgrade-assistant/public/.storybook',
+  workflows_management: 'src/platform/plugins/shared/workflows_management/.storybook',
 };

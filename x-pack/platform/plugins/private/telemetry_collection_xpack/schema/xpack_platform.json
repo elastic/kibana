@@ -3642,6 +3642,19 @@
                 },
                 "totalWithAlerts": {
                   "type": "long"
+                },
+                "status": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -3745,6 +3758,19 @@
                 },
                 "totalWithAlerts": {
                   "type": "long"
+                },
+                "status": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -3848,6 +3874,19 @@
                 },
                 "totalWithAlerts": {
                   "type": "long"
+                },
+                "status": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }

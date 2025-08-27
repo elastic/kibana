@@ -45,7 +45,6 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
   typeof useSourcererDataView
 >;
-const getBooleanValueMock = jest.fn();
 
 const defaultProps = {
   connectorId: undefined,
@@ -67,13 +66,8 @@ describe('CreateFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    getBooleanValueMock.mockReturnValue(true);
-
     mockUseKibana.mockReturnValue({
       services: {
-        featureFlags: {
-          getBooleanValue: getBooleanValueMock,
-        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },

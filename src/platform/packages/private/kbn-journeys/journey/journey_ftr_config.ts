@@ -31,10 +31,10 @@ export function makeFtrConfigProvider(
     const isServerless = !!process.env.TEST_SERVERLESS;
     // Use the same serverless FTR config for all journeys
     const configPath = isServerless
-      ? 'x-pack/test_serverless/shared/config.base.ts'
+      ? 'x-pack/platform/test/serverless/shared/config.base.ts'
       : config.getFtrConfigPath();
     const defaultConfigPath = config.isXpack()
-      ? 'x-pack/test/functional/config.base.js'
+      ? 'x-pack/platform/test/functional/config.base.ts'
       : 'src/platform/test/functional/config.base.js';
     const ftrConfigPath = configPath ?? defaultConfigPath;
     const baseConfig = (await readConfigFile(Path.resolve(REPO_ROOT, ftrConfigPath))).getAll();

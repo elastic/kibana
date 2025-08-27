@@ -32,6 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'logs.forked',
         },
         where: { always: {} },
+        status: 'enabled',
       });
     });
 
@@ -43,7 +44,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const response = await forkStream(
         editorApiClient,
         'logs',
-        { stream: { name: 'logs.forked2' }, where: { always: {} } },
+        { stream: { name: 'logs.forked2' }, where: { always: {} }, status: 'enabled' },
         403
       );
 

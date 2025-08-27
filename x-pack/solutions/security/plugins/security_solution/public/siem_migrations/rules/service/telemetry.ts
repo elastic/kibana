@@ -6,11 +6,10 @@
  */
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SiemMigrationResourceType } from '../../../../common/siem_migrations/model/common.gen';
 import { siemMigrationEventNames } from '../../../common/lib/telemetry/events/siem_migrations';
-import type {
-  RuleMigrationResourceType,
-  RuleMigrationRule,
-} from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
+
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type {
   BaseResultActionParams,
@@ -79,7 +78,7 @@ export class SiemRulesMigrationsTelemetry {
 
   reportSetupResourceUploaded = (params: {
     migrationId: string;
-    type: RuleMigrationResourceType;
+    type: SiemMigrationResourceType;
     count: number;
     error?: Error;
   }) => {

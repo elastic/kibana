@@ -43,7 +43,8 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
             provider: 'Azure OpenAI',
           },
           summary: {
-            content: 'test',
+            '@timestamp': '2020-04-20T15:25:31.830Z',
+            semantic_content: 'test',
           },
           category: 'assistant',
           users: [
@@ -117,7 +118,8 @@ describe('findDocuments', () => {
                 namespace: 'default',
                 replacements: undefined,
                 summary: {
-                  content: 'test',
+                  '@timestamp': '2020-04-20T15:25:31.830Z',
+                  semantic_content: 'test',
                 },
                 title: 'title-1',
                 updated_at: '2020-04-20T15:25:31.830Z',

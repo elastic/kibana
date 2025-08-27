@@ -50,6 +50,8 @@
     "@kbn/home-sample-data-tab",
     "@kbn/config-schema",
     "@kbn/page-attachment-schema",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/react-hooks",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/shared-ux-utility",
   ],

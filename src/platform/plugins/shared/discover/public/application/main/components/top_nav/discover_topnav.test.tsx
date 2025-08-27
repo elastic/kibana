@@ -160,12 +160,21 @@ describe('Discover topnav component', () => {
     });
 
     describe('share service available', () => {
+      let availableIntegrationsSpy: jest.SpyInstance;
+
       beforeAll(() => {
         mockDiscoverService.share = sharePluginMock.createStartContract();
       });
 
       afterAll(() => {
         mockDiscoverService.share = undefined;
+      });
+
+      beforeEach(() => {
+        (availableIntegrationsSpy = jest.spyOn(
+          mockDiscoverService.share!,
+          'availableIntegrations'
+        )).mockImplementation(() => []);
       });
 
       it('will include share menu item if the share service is available', () => {
@@ -178,11 +187,6 @@ describe('Discover topnav component', () => {
       });
 
       it('will include export menu item if there are export integrations available', () => {
-        const availableIntegrationsSpy = jest.spyOn(
-          mockDiscoverService.share!,
-          'availableIntegrations'
-        );
-
         availableIntegrationsSpy.mockImplementation((_objectType, groupId) => {
           if (groupId === 'export') {
             return [
@@ -190,7 +194,7 @@ describe('Discover topnav component', () => {
                 id: 'export',
                 shareType: 'integration',
                 groupId: 'export',
-                config: () => ({}),
+                config: () => Promise.resolve({}),
               },
             ];
           }

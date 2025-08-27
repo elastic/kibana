@@ -49506,6 +49506,13 @@
                                                           "minLength": 1,
                                                           "type": "string"
                                                         },
+                                                        "status": {
+                                                          "enum": [
+                                                            "enabled",
+                                                            "disabled"
+                                                          ],
+                                                          "type": "string"
+                                                        },
                                                         "where": {
                                                           "anyOf": [
                                                             {
@@ -58604,6 +58611,13 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "status": {
+                    "enum": [
+                      "enabled",
+                      "disabled"
+                    ],
+                    "type": "string"
+                  },
                   "stream": {
                     "additionalProperties": false,
                     "properties": {
@@ -61920,6 +61934,13 @@
                                       "properties": {
                                         "destination": {
                                           "minLength": 1,
+                                          "type": "string"
+                                        },
+                                        "status": {
+                                          "enum": [
+                                            "enabled",
+                                            "disabled"
+                                          ],
                                           "type": "string"
                                         },
                                         "where": {

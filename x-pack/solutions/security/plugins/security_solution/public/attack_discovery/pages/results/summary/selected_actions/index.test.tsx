@@ -52,12 +52,6 @@ jest.mock('../../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assi
   }),
 }));
 
-jest.mock('../../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => ({
-    attackDiscoveryAlertsEnabled: true,
-  }),
-}));
-
 describe('SelectedActions', () => {
   const defaultProps = {
     refetchFindAttackDiscoveries: jest.fn(),

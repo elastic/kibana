@@ -105,3 +105,10 @@ export const COPIED_TOOLTIP = i18n.translate(
     defaultMessage: 'Copied!',
   }
 );
+
+export const BODY_INVALID = i18n.translate(
+  'xpack.stackConnectors.components.inference.error.invalidBodyText',
+  {
+    defaultMessage: 'The request body is not in a valid JSON format.',
+  }
+);

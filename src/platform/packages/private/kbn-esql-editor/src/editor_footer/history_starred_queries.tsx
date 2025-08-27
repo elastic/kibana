@@ -23,6 +23,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiNotificationBadge,
+  EuiFieldSearch,
   EuiText,
   EuiIconTip,
   EuiLink,
@@ -37,8 +38,8 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import {
   type QueryHistoryItem,
   getHistoryItems,
-  MAX_HISTORY_QUERIES_NUMBER,
   dateFormat,
+  getStorageStats,
 } from '../history_local_storage';
 import { type ESQLEditorDeps, HistoryTabId } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
@@ -479,6 +480,21 @@ export function HistoryAndStarredQueriesTabs({
     EsqlStarredQueriesService | null | undefined
   >();
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
+  const [historyItems, setHistoryItems] = useState<QueryHistoryItem[]>(() =>
+    getHistoryItems('desc')
+  );
+  const [searchQuery, setSearchQuery] = useState('');
+  const [starredSearchQuery, setStarredSearchQuery] = useState('');
+
+  useEffect(() => {
+    const updateHistoryItems = () => {
+      setHistoryItems(getHistoryItems('desc'));
+    };
+
+    updateHistoryItems();
+
+    // Update on mount and when onUpdateAndSubmit changes (indicating potential new queries)
+  }, [onUpdateAndSubmit]);
 
   useEffect(() => {
     const initializeService = async () => {
@@ -506,6 +522,26 @@ export function HistoryAndStarredQueriesTabs({
     }
   });
 
+  // Filter history items based on search query
+  const filteredHistoryItems = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return historyItems;
+    }
+    return historyItems.filter((item) =>
+      item.queryString.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, historyItems]);
+
+  // Filter starred queries based on search query
+  const filteredStarredQueries = useMemo(() => {
+    if (!starredSearchQuery.trim()) {
+      return starredQueries;
+    }
+    return starredQueries.filter((item) =>
+      item.queryString.toLowerCase().includes(starredSearchQuery.toLowerCase())
+    );
+  }, [starredSearchQuery, starredQueries]);
+
   const { euiTheme } = useEuiTheme();
   const tabs = useMemo(() => {
     // use typed helper instead of .filter directly to remove falsy values from result type
@@ -525,7 +561,7 @@ export function HistoryAndStarredQueriesTabs({
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={containerWidth}
             height={height}
-            listItems={getHistoryItems('desc')}
+            listItems={filteredHistoryItems}
             dataTestSubj="ESQLEditor-queryHistory"
             tableCaption={i18n.translate('esqlEditor.query.querieshistoryTable', {
               defaultMessage: 'Queries history table',
@@ -551,7 +587,7 @@ export function HistoryAndStarredQueriesTabs({
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={containerWidth}
             height={height}
-            listItems={starredQueries}
+            listItems={filteredStarredQueries}
             dataTestSubj="ESQLEditor-starredQueries"
             tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
               defaultMessage: 'Starred queries table',
@@ -564,11 +600,13 @@ export function HistoryAndStarredQueriesTabs({
     ]);
   }, [
     containerCSS,
+    onUpdateAndSubmit,
     containerWidth,
     height,
-    onUpdateAndSubmit,
-    starredQueries,
+    filteredHistoryItems,
     starredQueriesService,
+    starredQueries?.length,
+    filteredStarredQueries,
   ]);
 
   const [selectedTabId, setSelectedTabId] = useRestorableState(
@@ -603,8 +641,7 @@ export function HistoryAndStarredQueriesTabs({
         justifyContent="spaceBetween"
         css={css`
           background-color: ${euiTheme.colors.lightestShade};
-          padding-left: ${euiTheme.size.s};
-          padding-right: ${euiTheme.size.s};
+          padding: ${euiTheme.size.s};
           border-block-end: ${euiTheme.border.thin};
         `}
       >
@@ -620,20 +657,66 @@ export function HistoryAndStarredQueriesTabs({
             >
               <p>
                 {selectedTabId === 'history-queries-tab'
-                  ? i18n.translate('esqlEditor.history.historyItemslimit', {
-                      defaultMessage: 'Showing last {historyItemsLimit} queries',
-                      values: { historyItemsLimit: MAX_HISTORY_QUERIES_NUMBER },
-                    })
-                  : i18n.translate('esqlEditor.history.starredItemslimit', {
-                      defaultMessage:
-                        'Showing {starredItemsCount} queries (max {starredItemsLimit})',
-                      values: {
-                        starredItemsLimit: ESQL_STARRED_QUERIES_LIMIT,
-                        starredItemsCount: starredQueries.length ?? 0,
-                      },
-                    })}
+                  ? (() => {
+                      const stats = getStorageStats();
+                      const displayCount = searchQuery.trim()
+                        ? filteredHistoryItems.length
+                        : stats.queryCount;
+                      return i18n.translate('esqlEditor.history.historyItemsStorage', {
+                        defaultMessage: 'Showing {queryCount} queries ({storageSizeKB}KB used)',
+                        values: {
+                          queryCount: displayCount,
+                          storageSizeKB: stats.storageSizeKB,
+                        },
+                      });
+                    })()
+                  : (() => {
+                      const displayCount = starredSearchQuery.trim()
+                        ? filteredStarredQueries.length
+                        : starredQueries.length;
+                      return i18n.translate('esqlEditor.history.starredItemslimit', {
+                        defaultMessage:
+                          'Showing {starredItemsCount} queries (max {starredItemsLimit})',
+                        values: {
+                          starredItemsLimit: ESQL_STARRED_QUERIES_LIMIT,
+                          starredItemsCount: displayCount ?? 0,
+                        },
+                      });
+                    })()}
               </p>
             </EuiText>
+            {selectedTabId === 'history-queries-tab' && (
+              <EuiFlexItem grow={false}>
+                <EuiFieldSearch
+                  placeholder={i18n.translate('esqlEditor.history.searchPlaceholder', {
+                    defaultMessage: 'Search query history',
+                  })}
+                  compressed
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  data-test-subj="ESQLEditor-history-search"
+                  css={css`
+                    width: 400px;
+                  `}
+                />
+              </EuiFlexItem>
+            )}
+            {selectedTabId === 'starred-queries-tab' && (
+              <EuiFlexItem grow={false}>
+                <EuiFieldSearch
+                  placeholder={i18n.translate('esqlEditor.starred.searchPlaceholder', {
+                    defaultMessage: 'Search starred queries',
+                  })}
+                  compressed
+                  value={starredSearchQuery}
+                  onChange={(e) => setStarredSearchQuery(e.target.value)}
+                  data-test-subj="ESQLEditor-starred-search"
+                  css={css`
+                    width: 400px;
+                  `}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

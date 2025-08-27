@@ -30,7 +30,6 @@ import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_service
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
-import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import type { AssistantResourceNames, GetElser } from '../types';
@@ -102,7 +101,6 @@ export type CreateDataStream = (params: {
     | 'conversations'
     | 'knowledgeBase'
     | 'prompts'
-    | 'attackDiscovery'
     | 'defendInsights'
     | 'alertSummary';
   fieldMap: FieldMap;
@@ -122,7 +120,6 @@ export class AIAssistantService {
   private promptsDataStream: DataStreamSpacesAdapter;
   private alertSummaryDataStream: DataStreamSpacesAdapter;
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
-  private attackDiscoveryDataStream: DataStreamSpacesAdapter;
   private defendInsightsDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
@@ -156,12 +153,6 @@ export class AIAssistantService {
       kibanaVersion: options.kibanaVersion,
       fieldMap: assistantAnonymizationFieldsFieldMap,
     });
-    this.attackDiscoveryDataStream = this.createDataStream({
-      resource: 'attackDiscovery',
-      kibanaVersion: options.kibanaVersion,
-      fieldMap: attackDiscoveryFieldMap,
-    });
-
     this.defendInsightsDataStream = this.createDataStream({
       resource: 'defendInsights',
       kibanaVersion: options.kibanaVersion,
@@ -422,12 +413,6 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
 
-      await this.attackDiscoveryDataStream.install({
-        esClient,
-        logger: this.options.logger,
-        pluginStop$: this.options.pluginStop$,
-      });
-
       await this.defendInsightsDataStream.install({
         esClient,
         logger: this.options.logger,
@@ -457,7 +442,6 @@ export class AIAssistantService {
       knowledgeBase: getResourceName('component-template-knowledge-base'),
       prompts: getResourceName('component-template-prompts'),
       anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_COMPONENT_TEMPLATE),
-      attackDiscovery: getResourceName('component-template-attack-discovery'),
       defendInsights: getResourceName('component-template-defend-insights'),
     },
     aliases: {
@@ -466,7 +450,6 @@ export class AIAssistantService {
       knowledgeBase: getResourceName('knowledge-base'),
       prompts: getResourceName('prompts'),
       anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_RESOURCE),
-      attackDiscovery: getResourceName('attack-discovery'),
       defendInsights: getResourceName('defend-insights'),
     },
     indexPatterns: {
@@ -475,7 +458,6 @@ export class AIAssistantService {
       knowledgeBase: getResourceName('knowledge-base*'),
       prompts: getResourceName('prompts*'),
       anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_INDEX_PATTERN),
-      attackDiscovery: getResourceName('attack-discovery*'),
       defendInsights: getResourceName('defend-insights*'),
     },
     indexTemplate: {
@@ -484,7 +466,6 @@ export class AIAssistantService {
       knowledgeBase: getResourceName('index-template-knowledge-base'),
       prompts: getResourceName('index-template-prompts'),
       anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_INDEX_TEMPLATE),
-      attackDiscovery: getResourceName('index-template-attack-discovery'),
       defendInsights: getResourceName('index-template-defend-insights'),
     },
     pipelines: {
@@ -627,7 +608,7 @@ export class AIAssistantService {
       logger: this.options.logger.get('attackDiscovery'),
       currentUser: opts.currentUser,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
-      indexPatternsResourceName: this.resourceNames.aliases.attackDiscovery,
+      indexPatternsResourceName: '',
       kibanaVersion: this.options.kibanaVersion,
       spaceId: opts.spaceId,
     });

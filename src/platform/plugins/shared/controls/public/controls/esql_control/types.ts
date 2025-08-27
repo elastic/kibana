@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { PublishesESQLVariable } from '@kbn/esql-types';
-import type { HasEditCapabilities, PublishesTitle } from '@kbn/presentation-publishing';
+import type {
+  HasEditCapabilities,
+  PublishesDataLoading,
+  PublishesTitle,
+} from '@kbn/presentation-publishing';
 import type { DefaultControlApi } from '../types';
 import type { OptionsListState } from '../data_controls/options_list_control/types';
 
 export type ESQLControlApi = DefaultControlApi &
   PublishesESQLVariable &
   HasEditCapabilities &
-  Pick<Required<PublishesTitle>, 'defaultTitle$'>;
+  Pick<Required<PublishesTitle>, 'defaultTitle$'> &
+  PublishesDataLoading;
 
 type HideExcludeUnusedState = Pick<OptionsListState, 'exclude'>;
 type HideExistsUnusedState = Pick<OptionsListState, 'existsSelected'>;
