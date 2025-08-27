@@ -24,7 +24,7 @@ import {
   apiIsOfType,
   getInheritedViewMode,
 } from '@kbn/presentation-publishing';
-import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError, type Action } from '@kbn/ui-actions-browser/src/actions';
 
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';

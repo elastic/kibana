@@ -10,9 +10,9 @@
 import { uniqBy } from 'lodash';
 import type { Defer } from '@kbn/kibana-utils-plugin/public';
 import { defer as createDefer } from '@kbn/kibana-utils-plugin/public';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import type { CoreStart } from '@kbn/core/public';
+import type { Trigger } from '../triggers';
 import type { Action } from '../actions';
-import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 
 interface ExecuteActionTask {
   action: Action;
@@ -25,8 +25,13 @@ interface ExecuteActionTask {
 export class UiActionsExecutionService {
   private readonly batchingQueue: ExecuteActionTask[] = [];
   private readonly pendingTasks = new Set<ExecuteActionTask>();
+  private core?: CoreStart;
 
   constructor() {}
+
+  public start(core: CoreStart) {
+    this.core = core;
+  }
 
   async execute(
     {
@@ -116,6 +121,16 @@ export class UiActionsExecutionService {
   }
 
   private async showActionPopupMenu(tasks: ExecuteActionTask[]) {
+    if (!this.core) {
+      throw new Error('UiActionsExecutionService is not started. Call start() first.');
+    }
+
+    // Lazy load both modules and extract their default exports
+    const [{ buildContextMenuForActions }, { openContextMenu }] = await Promise.all([
+      import('../context_menu/build_eui_context_menu_panels'),
+      import('../context_menu/open_context_menu'),
+    ]);
+
     const panels = await buildContextMenuForActions({
       actions: tasks.map(({ action, context, trigger }) => ({
         action,
@@ -128,7 +143,8 @@ export class UiActionsExecutionService {
         session.close();
       },
     });
-    const session = openContextMenu(panels, {
+
+    const session = openContextMenu(panels, this.core, {
       'data-test-subj': 'multipleActionsContextMenu',
     });
   }

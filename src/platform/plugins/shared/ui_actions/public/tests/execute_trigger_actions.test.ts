@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionDefinition } from '../actions';
-import { openContextMenu } from '../context_menu';
+import type { ActionDefinition } from '@kbn/ui-actions-browser/src/actions';
+import { openContextMenu } from '@kbn/ui-actions-browser/src/context_menu/open_context_menu';
 import { uiActionsPluginMock } from '../mocks';
 import type { Trigger } from '@kbn/ui-actions-browser';
 import { waitFor } from '@testing-library/react';
 
-jest.mock('../context_menu');
+jest.mock('@kbn/ui-actions-browser/src/context_menu/open_context_menu');
 
 const executeFn = jest.fn();
 const openContextMenuSpy = openContextMenu as unknown as jest.SpyInstance;
@@ -41,7 +41,6 @@ const reset = () => {
   uiActions.setup.registerTrigger({
     id: CONTACT_USER_TRIGGER,
   });
-  // uiActions.setup.attachAction(CONTACT_USER_TRIGGER, 'ACTION_SEND_MESSAGE');
 
   executeFn.mockReset();
   openContextMenuSpy.mockReset();

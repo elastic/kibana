@@ -8,3 +8,4 @@
  */
 
 export type * from './presentable';
+export type * from './registry';

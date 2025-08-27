@@ -12,30 +12,35 @@ import type { ReactWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { ActionInternal } from '@kbn/ui-actions-plugin/public';
+import { ActionInternal } from '@kbn/ui-actions-browser/src/actions/action_internal';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { getFieldVisualizeButton } from './field_visualize_button';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-browser/src/actions';
 import {
-  ACTION_VISUALIZE_LENS_FIELD,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
-} from '@kbn/ui-actions-plugin/public';
-import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+} from '@kbn/ui-actions-browser/src/triggers';
+import type { TriggerContract } from '@kbn/ui-actions-browser/src/triggers';
 
 const ORIGINATING_APP = 'test';
 const mockExecuteAction = jest.fn();
 const uiActions = uiActionsPluginMock.createStartContract();
-const visualizeAction = new ActionInternal({
-  type: ACTION_VISUALIZE_LENS_FIELD,
-  id: ACTION_VISUALIZE_LENS_FIELD,
-  getDisplayName: () => 'test',
-  isCompatible: async () => true,
-  execute: async (context: VisualizeFieldContext) => {
-    mockExecuteAction(context);
+const notifications = notificationServiceMock.createStartContract();
+const visualizeAction = new ActionInternal(
+  {
+    type: ACTION_VISUALIZE_LENS_FIELD,
+    id: ACTION_VISUALIZE_LENS_FIELD,
+    getDisplayName: () => 'test',
+    isCompatible: async () => true,
+    execute: async (context: VisualizeFieldContext) => {
+      mockExecuteAction(context);
+    },
+    getHref: async () => '/app/test',
   },
-  getHref: async () => '/app/test',
-});
+  () => notifications
+);
 
 jest
   .spyOn(uiActions, 'getTriggerCompatibleActions')

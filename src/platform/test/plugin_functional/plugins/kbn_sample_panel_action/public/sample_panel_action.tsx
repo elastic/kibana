@@ -12,7 +12,7 @@ import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-browser/src/actions';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 export const SAMPLE_PANEL_ACTION = 'samplePanelAction';

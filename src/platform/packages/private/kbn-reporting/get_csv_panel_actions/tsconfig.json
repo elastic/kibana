@@ -31,5 +31,6 @@
     "@kbn/es-query",
     "@kbn/deeplinks-analytics",
     "@kbn/licensing-types",
+    "@kbn/ui-actions-browser",
   ]
 }

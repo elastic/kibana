@@ -8,7 +8,7 @@
  */
 
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-browser/src/triggers/dashboard_app_panel_trigger';
 import { ADD_SEARCH_ACTION_ID } from './constants';
 
 export const registerSearchPanelAction = (uiActions: UiActionsStart) => {

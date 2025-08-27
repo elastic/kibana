@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { createAction, IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { map } from 'rxjs';

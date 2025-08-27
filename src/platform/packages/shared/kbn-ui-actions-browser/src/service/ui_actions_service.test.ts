@@ -9,11 +9,11 @@
 
 import { UiActionsService } from './ui_actions_service';
 import type { ActionDefinition } from '../actions';
-import { ActionInternal } from '../actions';
-import { createHelloWorldAction } from '../tests/test_samples';
+import { ActionInternal } from '../actions/action_internal';
+import { createHelloWorldAction } from '../test_samples';
 import type { TriggerRegistry, ActionRegistry } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import type { Trigger } from '../triggers';
 
 const FOO_TRIGGER = 'FOO_TRIGGER';
 const BAR_TRIGGER = 'BAR_TRIGGER';
@@ -40,6 +40,7 @@ const testAction2: ActionDefinition = {
 };
 
 describe('UiActionsService', () => {
+  const core = coreMock.createStart();
   test('can instantiate', () => {
     new UiActionsService();
   });
@@ -161,12 +162,10 @@ describe('UiActionsService', () => {
   });
 
   describe('.getTriggerCompatibleActions()', () => {
-    const coreStart = coreMock.createStart();
-
     test('can register and get actions', async () => {
       const actions: ActionRegistry = new Map();
       const service = new UiActionsService({ actions });
-      const helloWorldAction = createHelloWorldAction(coreStart);
+      const helloWorldAction = createHelloWorldAction(core);
       const length = actions.size;
 
       service.registerAction(helloWorldAction);
@@ -178,7 +177,7 @@ describe('UiActionsService', () => {
 
     test('getTriggerCompatibleActions returns attached actions', async () => {
       const service = new UiActionsService();
-      const helloWorldAction = createHelloWorldAction(coreStart);
+      const helloWorldAction = createHelloWorldAction(core);
 
       service.registerAction(helloWorldAction);
 

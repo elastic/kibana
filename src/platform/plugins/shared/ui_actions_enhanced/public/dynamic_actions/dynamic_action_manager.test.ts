@@ -10,8 +10,8 @@
 import { DynamicActionManager } from './dynamic_action_manager';
 import type { ActionStorage } from './dynamic_action_storage';
 import { MemoryActionStorage } from './dynamic_action_storage';
-import { UiActionsService } from '@kbn/ui-actions-plugin/public';
-import type { ActionRegistry } from '@kbn/ui-actions-plugin/public/types';
+import { UiActionsService } from '@kbn/ui-actions-browser/src/service';
+import type { ActionRegistry } from '@kbn/ui-actions-browser/src/types';
 import { of } from '@kbn/kibana-utils-plugin/common';
 import { UiActionsServiceEnhancements } from '../services';
 import type { ActionFactoryDefinition } from './action_factory_definition';

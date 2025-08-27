@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import {
+  ADD_PANEL_TRIGGER,
+  addPanelMenuTrigger,
+} from '@kbn/ui-actions-browser/src/triggers/dashboard_app_panel_trigger';
 import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
 import { type TracksOverlays } from '@kbn/presentation-util';
 import type { PresentableGroup } from '@kbn/ui-actions-browser/src/types';
-import { addPanelMenuTrigger } from '@kbn/ui-actions-plugin/public';
 import type { HasAppContext } from '@kbn/presentation-publishing';
 import { uiActionsService } from '../../../services/kibana_services';
 import type { MenuItem, MenuItemGroup } from './types';

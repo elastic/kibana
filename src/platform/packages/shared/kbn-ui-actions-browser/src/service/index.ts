@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TriggerContract } from './trigger_contract';
-export { TriggerInternal } from './trigger_internal';
+export type { UiActionsServiceParams } from './ui_actions_service';
+export { UiActionsService } from './ui_actions_service';

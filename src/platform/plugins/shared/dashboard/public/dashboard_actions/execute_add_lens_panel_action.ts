@@ -8,7 +8,7 @@
  */
 
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { addPanelMenuTrigger } from '@kbn/ui-actions-plugin/public';
+import { addPanelMenuTrigger } from '@kbn/ui-actions-browser/src/triggers/dashboard_app_panel_trigger';
 import { i18n } from '@kbn/i18n';
 import { coreServices, uiActionsService } from '../services/kibana_services';
 import type { DashboardApi } from '../dashboard_api/types';

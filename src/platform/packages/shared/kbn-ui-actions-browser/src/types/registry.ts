@@ -10,8 +10,8 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { ActionInternal } from './actions/action_internal';
-import type { TriggerInternal } from './triggers/trigger_internal';
+import type { ActionInternal } from '../actions/action_internal';
+import type { TriggerInternal } from '../triggers/trigger_internal';
 
 export type TriggerRegistry = Map<string, TriggerInternal<object>>;
 export type ActionRegistry = Map<string, () => Promise<ActionInternal>>;
@@ -25,7 +25,3 @@ export interface VisualizeFieldContext {
   originatingApp?: string;
   query?: AggregateQuery;
 }
-
-export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
-export const ACTION_VISUALIZE_GEO_FIELD = 'ACTION_VISUALIZE_GEO_FIELD';
-export const ACTION_VISUALIZE_LENS_FIELD = 'ACTION_VISUALIZE_LENS_FIELD';

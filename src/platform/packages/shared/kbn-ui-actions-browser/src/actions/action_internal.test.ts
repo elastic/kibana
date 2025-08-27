@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import type { ActionDefinition } from './action';
 import { ActionInternal } from './action_internal';
 
@@ -16,46 +17,47 @@ const defaultActionDef: ActionDefinition = {
 };
 
 describe('ActionInternal', () => {
+  const notificationsMock = notificationServiceMock.createStartContract();
+  const addWarningToastSpy = jest.spyOn(notificationsMock.toasts, 'addWarning');
+
+  const getNotificationsService = () => notificationsMock;
+
   test('can instantiate from action definition', () => {
-    const action = new ActionInternal(defaultActionDef);
+    const action = new ActionInternal(defaultActionDef, getNotificationsService);
     expect(action.id).toBe('test-action');
   });
 
   describe('displays toasts when execute function throws', () => {
-    const addWarningMock = jest.fn();
-    beforeAll(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../services').getNotifications = () => ({
-        toasts: {
-          addWarning: addWarningMock,
-        },
-      });
-    });
-
     beforeEach(() => {
-      addWarningMock.mockReset();
+      addWarningToastSpy.mockReset();
     });
 
     test('execute function is sync', async () => {
-      const action = new ActionInternal({
-        id: 'test-action',
-        execute: () => {
-          throw new Error('');
+      const action = new ActionInternal(
+        {
+          id: 'test-action',
+          execute: () => {
+            throw new Error('');
+          },
         },
-      });
+        getNotificationsService
+      );
       await action.execute({});
-      expect(addWarningMock).toBeCalledTimes(1);
+      expect(addWarningToastSpy).toBeCalledTimes(1);
     });
 
     test('execute function is async', async () => {
-      const action = new ActionInternal({
-        id: 'test-action',
-        execute: async () => {
-          throw new Error('');
+      const action = new ActionInternal(
+        {
+          id: 'test-action',
+          execute: async () => {
+            throw new Error('');
+          },
         },
-      });
+        getNotificationsService
+      );
       await action.execute({});
-      expect(addWarningMock).toBeCalledTimes(1);
+      expect(addWarningToastSpy).toBeCalledTimes(1);
     });
   });
 });

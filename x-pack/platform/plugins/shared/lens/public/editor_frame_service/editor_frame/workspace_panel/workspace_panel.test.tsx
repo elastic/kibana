@@ -27,7 +27,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import type { TriggerContract } from '@kbn/ui-actions-browser/src/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable/events';
 import {
   applyChanges,

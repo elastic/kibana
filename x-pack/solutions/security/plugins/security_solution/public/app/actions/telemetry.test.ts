@@ -7,7 +7,7 @@
 
 import type { StartServices } from '../../types';
 import { enhanceActionWithTelemetry } from './telemetry';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-browser/src/actions';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { AppEventTypes } from '../../common/lib/telemetry';
 

@@ -25,7 +25,7 @@ import {
 } from '@kbn/presentation-publishing';
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import { MARKDOWN_ID } from './constants';
 import type {
   MarkdownEditorApi,

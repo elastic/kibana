@@ -25,5 +25,6 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/core-lifecycle-browser",
+    "@kbn/ui-actions-browser",
   ]
 }

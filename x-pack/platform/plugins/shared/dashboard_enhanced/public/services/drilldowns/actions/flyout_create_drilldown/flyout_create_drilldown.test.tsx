@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { ActionDefinitionContext } from '@kbn/ui-actions-plugin/public/actions';
+import type { ActionDefinitionContext } from '@kbn/ui-actions-plugin/public';
 import {
   UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,

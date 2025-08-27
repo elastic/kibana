@@ -24,7 +24,7 @@ import {
   apiHasUniqueId,
   getInheritedViewMode,
 } from '@kbn/presentation-publishing';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import type { HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 import { CONVERT_LEGACY_MARKDOWN_ACTION_ID, MARKDOWN_ID } from './constants';

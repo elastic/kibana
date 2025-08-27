@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import { EuiContextMenu } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
-import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 import { addCanvasElementTrigger } from '../../../state/triggers/add_canvas_element_trigger';
 import { useCanvasApi } from '../../hooks/use_canvas_api';

@@ -25,7 +25,7 @@ import {
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import type { RowClickContext } from '@kbn/ui-actions-plugin/public';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import type { ActionFactoryContext } from '../url_drilldown';
 import type { Primitive } from './util';

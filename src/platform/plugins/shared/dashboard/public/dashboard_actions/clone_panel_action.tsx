@@ -25,7 +25,7 @@ import {
   apiHasSerializableState,
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
 import { ACTION_CLONE_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
 

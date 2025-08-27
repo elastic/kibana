@@ -19,5 +19,13 @@
     "@kbn/i18n",
     "@kbn/expressions-plugin",
     "@kbn/presentation-publishing",
+    "@kbn/core",
+    "@kbn/react-kibana-context-render",
+    "@kbn/std",
+    "@kbn/react-kibana-mount",
+    "@kbn/es-query",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/core-notifications-browser-mocks",
   ]
 }

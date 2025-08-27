@@ -13,7 +13,7 @@ import type { CanAddNewSection } from '@kbn/presentation-containers';
 import { apiCanAddNewSection } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 
 import { ACTION_ADD_SECTION } from './constants';
 

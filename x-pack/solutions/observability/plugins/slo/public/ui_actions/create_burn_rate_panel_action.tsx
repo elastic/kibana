@@ -9,10 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import {
-  IncompatibleActionError,
-  type UiActionsActionDefinition,
-} from '@kbn/ui-actions-plugin/public';
+import { type UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import type { SLOPublicPluginsStart } from '..';
 import {
   ADD_BURN_RATE_ACTION_ID,

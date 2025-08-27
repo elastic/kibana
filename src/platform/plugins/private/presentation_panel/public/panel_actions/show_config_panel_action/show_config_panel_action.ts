@@ -21,7 +21,7 @@ import {
   hasReadOnlyCapabilities,
 } from '@kbn/presentation-publishing';
 import type { Action, FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import { map } from 'rxjs';
 import { ACTION_SHOW_CONFIG_PANEL } from './constants';
 

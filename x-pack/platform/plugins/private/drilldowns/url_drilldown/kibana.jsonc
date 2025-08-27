@@ -19,7 +19,6 @@
       "kibanaUtils",
       "kibanaReact",
       "imageEmbeddable",
-      "uiActions"
     ]
   }
 }

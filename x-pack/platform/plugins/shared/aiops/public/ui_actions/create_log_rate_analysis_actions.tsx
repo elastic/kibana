@@ -11,7 +11,7 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';

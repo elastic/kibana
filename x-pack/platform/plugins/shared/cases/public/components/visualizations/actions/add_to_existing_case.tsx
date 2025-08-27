@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { createAction, IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { CasesActionContextProps, Services } from './types';

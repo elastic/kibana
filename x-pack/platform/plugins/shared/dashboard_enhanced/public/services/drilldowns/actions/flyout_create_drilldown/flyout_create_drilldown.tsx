@@ -28,9 +28,9 @@ import {
   type HasType,
   apiHasUniqueId,
 } from '@kbn/presentation-publishing';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import React from 'react';
-import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import type { ActionDefinition } from '@kbn/ui-actions-browser/src/actions';
 import type { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,

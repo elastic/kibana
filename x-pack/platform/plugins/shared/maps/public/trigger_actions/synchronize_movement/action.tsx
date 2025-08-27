@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { type EmbeddableApiContext, apiIsOfType } from '@kbn/presentation-publishing';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-browser/src/actions';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isLensApi } from '@kbn/lens-plugin/public';
 import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
