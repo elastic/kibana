@@ -33,7 +33,7 @@ import {
 } from './components/session_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-import { TABS_ENABLED } from '../../constants';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../constants';
 import { ChartPortalsRenderer } from './components/chart';
 import { useStateManagers } from './state_management/hooks/use_state_managers';
 import { getUserAndSpaceIds } from './utils/get_user_and_space_ids';
@@ -58,6 +58,10 @@ export const DiscoverMainRoute = ({
   onAppLeave,
 }: MainRouteProps) => {
   const services = useDiscoverServices();
+  const tabsEnabled = services.core.featureFlags.getBooleanValue(
+    TABS_ENABLED_FEATURE_FLAG_KEY,
+    false
+  );
   const rootProfileState = useRootProfile();
   const history = useHistory();
   const [urlStateStorage] = useState(
@@ -183,7 +187,7 @@ export const DiscoverMainRoute = ({
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
         <ChartPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
-          {TABS_ENABLED ? (
+          {tabsEnabled ? (
             <TabsView {...sessionViewProps} />
           ) : (
             <DiscoverSessionView {...sessionViewProps} />

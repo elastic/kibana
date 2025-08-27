@@ -37,7 +37,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CREATE_CONNECTOR_PLUGIN } from '../../../../../../../common/constants';
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
 
-import { SelfManagePreference } from '../create_connector';
+import type { SelfManagePreference } from '../create_connector';
 
 const CLI_LABEL = i18n.translate(
   'xpack.enterpriseSearch.createConnector.manualConfiguration.cliLabel',

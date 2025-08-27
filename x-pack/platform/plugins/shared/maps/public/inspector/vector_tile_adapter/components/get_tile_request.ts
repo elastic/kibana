@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  MVT_GETGRIDTILE_API_PATH,
-  MVT_GETTILE_API_PATH,
-  RENDER_AS,
-} from '../../../../common/constants';
+import type { RENDER_AS } from '../../../../common/constants';
+import { MVT_GETGRIDTILE_API_PATH, MVT_GETTILE_API_PATH } from '../../../../common/constants';
 import { getAggsTileRequest, getHitsTileRequest } from '../../../../common/mvt_request_body';
 import type { TileRequest } from '../types';
 

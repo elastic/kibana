@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useCallback, useMemo } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink, EuiText } from '@elastic/eui';
 
-import {
-  FIELD_TYPES,
-  UseField,
-  useFormContext,
-  Field,
-  FieldHook,
-  FieldConfig,
-  SerializerFunc,
-} from '../../../../../../shared_imports';
-import { FieldsConfig, from, to } from './shared';
+import type { FieldHook, FieldConfig, SerializerFunc } from '../../../../../../shared_imports';
+import { FIELD_TYPES, UseField, useFormContext, Field } from '../../../../../../shared_imports';
+import type { FieldsConfig } from './shared';
+import { from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 

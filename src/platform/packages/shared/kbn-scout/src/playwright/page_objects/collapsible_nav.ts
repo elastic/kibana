@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Locator } from 'playwright/test';
-import { ScoutPage } from '..';
-import { ScoutTestConfig } from '../../types';
+import type { Locator } from 'playwright/test';
+import type { ScoutPage } from '..';
+import type { ScoutTestConfig } from '../../types';
 
 export class CollapsibleNav {
   private toggleNavButton: Locator;

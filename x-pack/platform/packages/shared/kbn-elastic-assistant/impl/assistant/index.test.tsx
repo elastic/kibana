@@ -13,20 +13,19 @@ import type { IHttpFetchError } from '@kbn/core/public';
 
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 
-import { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { TestProviders } from '../mock/test_providers/test_providers';
-import { FetchCurrentUserConversations, useFetchCurrentUserConversations } from './api';
+import type { FetchCurrentUserConversations } from './api';
+import { useFetchCurrentUserConversations } from './api';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
-import { AIConnector } from '../connectorland/connector_selector';
-import {
-  FetchAnonymizationFields,
-  useFetchAnonymizationFields,
-} from './api/anonymization_fields/use_fetch_anonymization_fields';
+import type { AIConnector } from '../connectorland/connector_selector';
+import type { FetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');

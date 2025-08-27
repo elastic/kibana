@@ -10,7 +10,7 @@ import {
   NoIndicesMeteringError,
   NoPrivilegeMeteringError,
 } from '@kbn/data-usage-plugin/server/errors';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'svlManagementPage', 'common']);

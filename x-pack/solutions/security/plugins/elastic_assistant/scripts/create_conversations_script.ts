@@ -12,7 +12,7 @@ import { Client } from '@elastic/elasticsearch';
 import axios from 'axios';
 import pLimit from 'p-limit';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
-import { CreateMessageSchema } from '../server/ai_assistant_data_clients/conversations/types';
+import type { CreateMessageSchema } from '../server/ai_assistant_data_clients/conversations/types';
 import { getEsCreateConversationSchemaMock } from '../server/__mocks__/conversations_schema.mock';
 
 /**

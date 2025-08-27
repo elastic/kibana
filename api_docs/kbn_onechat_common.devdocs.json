@@ -2931,20 +2931,6 @@
     "enums": [
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.AgentMode",
-        "type": "Enum",
-        "tags": [],
-        "label": "AgentMode",
-        "description": [
-          "\nExecution mode for agents."
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.ChatEventType",
         "type": "Enum",
         "tags": [],
@@ -3844,6 +3830,23 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.SerializedOnechatError",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializedOnechatError",
+        "description": [],
+        "signature": [
+          "{ error: { code: string; message: string; meta?: Record<string, any> | undefined; }; } & { type: ",
+          "ServerSentEventType",
+          ".error; }"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

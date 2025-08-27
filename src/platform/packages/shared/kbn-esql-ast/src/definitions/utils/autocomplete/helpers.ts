@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
-import { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type {
   ESQLSingleAstItem,
   ESQLFunction,
@@ -31,13 +33,8 @@ import {
   isLiteralDateItem,
 } from '../literals';
 import { EDITOR_MARKER } from '../../constants';
-import {
-  type SupportedDataType,
-  isParameterType,
-  FunctionDefinition,
-  FunctionReturnType,
-  FunctionDefinitionTypes,
-} from '../../types';
+import type { FunctionDefinition, FunctionReturnType } from '../../types';
+import { type SupportedDataType, isParameterType, FunctionDefinitionTypes } from '../../types';
 import { getColumnForASTNode, getOverlapRange } from '../shared';
 import { getExpressionType } from '../expressions';
 import { getColumnByName, isParamExpressionType } from '../shared';
@@ -190,7 +187,7 @@ export async function getFieldsOrFunctionsSuggestions(
     ignoreFn?: string[];
     ignoreColumns?: string[];
   } = {},
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean,
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
   activeProduct?: PricingProduct
 ): Promise<ISuggestionItem[]> {
   const filteredFieldsByType = pushItUpInTheList(
@@ -367,7 +364,7 @@ export async function suggestForExpression({
   activeProduct?: PricingProduct;
   advanceCursorAfterInitialColumn?: boolean;
   // @TODO should this be required?
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   // a set of columns not to suggest when the expression is empty
   ignoredColumnsForEmptyExpression?: string[];
 }): Promise<ISuggestionItem[]> {

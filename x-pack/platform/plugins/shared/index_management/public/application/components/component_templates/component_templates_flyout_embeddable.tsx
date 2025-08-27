@@ -12,8 +12,8 @@
  */
 
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ComponentType } from 'react';
-import { ComponentTemplatesFlyoutWithContextProps } from './component_templates_flyout_with_context_types';
+import type { ComponentType } from 'react';
+import type { ComponentTemplatesFlyoutWithContextProps } from './component_templates_flyout_with_context_types';
 
 export const ComponentTemplateFlyout = dynamic<
   ComponentType<ComponentTemplatesFlyoutWithContextProps>

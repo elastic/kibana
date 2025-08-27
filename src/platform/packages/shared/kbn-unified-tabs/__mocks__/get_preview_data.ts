@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TabStatus, TabItem } from '../src/types';
+import type { TabItem } from '../src/types';
+import { TabStatus } from '../src/types';
 
 export const getPreviewDataMock = (item: TabItem) => ({
   query: {

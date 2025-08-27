@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DashboardEnhancedSetupContract, DashboardEnhancedStartContract } from '.';
+import type { DashboardEnhancedSetupContract, DashboardEnhancedStartContract } from '.';
 
 export type Setup = jest.Mocked<DashboardEnhancedSetupContract>;
 export type Start = jest.Mocked<DashboardEnhancedStartContract>;

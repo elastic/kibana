@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import {
+import type {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -15,14 +15,13 @@ import {
 } from '@kbn/core/server';
 import { REINDEX_OP_TYPE, getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-server';
-import { FlatSettings } from '@kbn/upgrade-assistant-pkg-server';
-import {
+import type { FlatSettings } from '@kbn/upgrade-assistant-pkg-server';
+import type {
   ReindexOperation,
   ReindexOptions,
   ReindexSavedObject,
-  ReindexStatus,
-  ReindexStep,
 } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
 import { generateNewIndexName } from './index_settings';
 
 // TODO: base on elasticsearch.requestTimeout?

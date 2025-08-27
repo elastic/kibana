@@ -7,10 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { CertResult, GetCertsParams } from '../../../common/runtime_types';
+import type { CertResult, GetCertsParams } from '../../../common/runtime_types';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 import { getSyntheticsCerts } from '../../queries/get_certs';
 

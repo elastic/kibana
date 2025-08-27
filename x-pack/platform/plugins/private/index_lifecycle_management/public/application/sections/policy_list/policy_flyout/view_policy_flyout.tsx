@@ -21,10 +21,11 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { PolicyFromES } from '../../../../../common/types';
+import type { PolicyFromES } from '../../../../../common/types';
 import { trackUiMetric } from '../../../services/ui_metric';
 import { hasLinkedIndices } from '../../../lib/policies';
 import { getPoliciesListPath, getPolicyEditPath } from '../../../services/navigation';
@@ -43,6 +44,7 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
   const isReadOnly = useIsReadOnly();
   const { setListAction } = usePolicyListContext();
   const history = useHistory();
+  const flyoutTitleId = useGeneratedHtmlId();
   const onClose = () => {
     history.push(getPoliciesListPath());
   };
@@ -115,12 +117,13 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
       closeButtonProps={{
         'data-test-subj': 'policyFlyoutCloseButton',
       }}
+      aria-labelledby={flyoutTitleId}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiTitle data-test-subj="policyFlyoutTitle">
-              <h1>{policy.name}</h1>
+              <h1 id={flyoutTitleId}>{policy.name}</h1>
             </EuiTitle>
           </EuiFlexItem>
           {policy.policy.deprecated ? (
