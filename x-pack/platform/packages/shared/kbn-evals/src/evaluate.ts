@@ -26,6 +26,7 @@ import type { DefaultEvaluators } from './types';
 import { reportModelScore } from './utils/report_model_score';
 import { createConnectorFixture } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
+import { EvaluationScoreHelper } from './utils/evaluation_score_helper';
 
 /**
  * Test type for evaluations. Loads an inference client and a
@@ -41,6 +42,7 @@ export const evaluate = base.extend<
     connector: AvailableConnectorWithId;
     evaluationConnector: AvailableConnectorWithId;
     repetitions: number;
+    scoreHelper: EvaluationScoreHelper;
   }
 >({
   fetch: [
@@ -93,7 +95,7 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   phoenixClient: [
-    async ({ log, connector, repetitions }, use) => {
+    async ({ log, connector, repetitions, esClient }, use) => {
       const config = getPhoenixConfig();
 
       const inferenceConnector: InferenceConnector = {
@@ -135,10 +137,13 @@ export const evaluate = base.extend<
 
       await reportModelScore({
         phoenixClient,
+        esClient,
         log,
         model,
         experiments: await phoenixClient.getRanExperiments(),
         repetitions,
+        runId: process.env.TEST_RUN_ID,
+        exportToElasticsearch: true,
       });
     },
     {
@@ -177,6 +182,13 @@ export const evaluate = base.extend<
       // Get repetitions from test options (set in playwright config)
       const repetitions = (testInfo.project.use as any).repetitions || 1;
       await use(repetitions);
+    },
+    { scope: 'worker' },
+  ],
+  scoreHelper: [
+    async ({ esClient, log }, use) => {
+      const helper = new EvaluationScoreHelper(esClient, log);
+      await use(helper);
     },
     { scope: 'worker' },
   ],

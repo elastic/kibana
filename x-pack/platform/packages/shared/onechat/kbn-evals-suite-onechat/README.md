@@ -91,3 +91,15 @@ node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kb
 # Run with LLM-as-a-judge for consistent evaluation results
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
 ```
+
+### Run Reporting/Analysis
+
+To run the reporting and analysis tests:
+
+```bash
+# Run all reporting tests
+node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/reporting.playwright.config.ts
+
+# Run with specific connector
+node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/reporting.playwright.config.ts --project="my-connector"
+```

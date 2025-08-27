@@ -8,11 +8,14 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import { sumBy, keyBy, uniq } from 'lodash';
 import { table } from 'table';
 import chalk from 'chalk';
 import { mean, median, deviation, min, max } from 'd3';
+import { hostname } from 'os';
 import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
+import { ScoreExporter } from './score_exporter';
 
 interface DatasetScore {
   id: string;
@@ -38,12 +41,18 @@ export async function reportModelScore({
   model,
   experiments,
   repetitions,
+  esClient,
+  runId,
+  exportToElasticsearch = true,
 }: {
   log: SomeDevLog;
   phoenixClient: KibanaPhoenixClient;
+  esClient: EsClient;
   model: Model;
   experiments: RanExperiment[];
   repetitions: number;
+  runId?: string;
+  exportToElasticsearch?: boolean;
 }): Promise<void> {
   const allDatasetIds = uniq(experiments.flatMap((experiment) => experiment.datasetId));
 
@@ -58,7 +67,6 @@ export async function reportModelScore({
 
     const numExamplesForExperiment = runs ? Object.keys(runs).length : 0;
 
-    // Ensure dataset entry exists
     if (!datasetScoresMap.has(datasetId)) {
       datasetScoresMap.set(datasetId, {
         id: datasetId,
@@ -79,7 +87,6 @@ export async function reportModelScore({
         if (!datasetScore.evaluatorScores.has(evalRun.name)) {
           datasetScore.evaluatorScores.set(evalRun.name, []);
         }
-
         datasetScore.evaluatorScores.get(evalRun.name)!.push(score);
       });
     }
@@ -248,4 +255,32 @@ export async function reportModelScore({
 
   log.info(`\n\n${header[0]}`);
   log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);
+
+  if (exportToElasticsearch) {
+    try {
+      const exporter = new ScoreExporter(esClient, log);
+      const currentRunId = runId || process.env.TEST_RUN_ID || `run_${Date.now()}`;
+
+      log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
+
+      await exporter.exportScores({
+        phoenixClient,
+        model,
+        experiments,
+        runId: currentRunId,
+        tags: ['evaluation', 'model-score'],
+      });
+
+      log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
+      log.info(
+        chalk.gray(
+          `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${
+            model.id || 'unknown'
+          }" AND run_id:"${currentRunId}"`
+        )
+      );
+    } catch (error) {
+      log.warning(chalk.yellow('⚠️ Failed to export scores to Elasticsearch:'), error);
+    }
+  }
 }
