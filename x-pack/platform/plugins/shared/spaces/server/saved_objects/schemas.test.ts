@@ -10,7 +10,7 @@ import { SpacesSavedObjectSchemas } from './schemas';
 describe('8.8.0', () => {
   describe('only `name` is required', () => {
     it('should not throw an error because no schema fields are currently required', () => {
-      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo' })).not.toThrowError();
+      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo' })).not.toThrow();
     });
   });
 
@@ -22,7 +22,7 @@ describe('8.8.0', () => {
         `"[name]: expected value of type [string] but got [number]"`
       );
 
-      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo' })).not.toThrowError();
+      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo' })).not.toThrow();
     });
 
     it('should be minimum length of 1', () => {
@@ -32,7 +32,7 @@ describe('8.8.0', () => {
         `"[name]: value has length [0] but it must have a minimum length of [1]."`
       );
 
-      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo' })).not.toThrowError();
+      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo' })).not.toThrow();
     });
   });
 
@@ -46,7 +46,7 @@ describe('8.8.0', () => {
 
       expect(() =>
         SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', description: 'a' })
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 
@@ -60,7 +60,7 @@ describe('8.8.0', () => {
 
       expect(() =>
         SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', initials: 'a' })
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 
@@ -74,7 +74,7 @@ describe('8.8.0', () => {
 
       expect(() =>
         SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', color: 'a' })
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
   describe('disabledFeatures', () => {
@@ -87,7 +87,7 @@ describe('8.8.0', () => {
 
       expect(() =>
         SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', disabledFeatures: ['a'] })
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 
@@ -101,7 +101,7 @@ describe('8.8.0', () => {
 
       expect(() =>
         SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', imageUrl: 'a' })
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 
@@ -115,7 +115,7 @@ describe('8.8.0', () => {
 
       expect(() =>
         SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', _reserved: true })
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 });

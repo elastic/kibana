@@ -24,6 +24,6 @@ describe('get default data view', () => {
       id: 'abc',
       refreshFields: false,
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 });

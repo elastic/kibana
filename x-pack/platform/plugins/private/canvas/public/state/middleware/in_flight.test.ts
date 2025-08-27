@@ -37,14 +37,14 @@ describe('inflight middleware', () => {
 
       testMiddleware(inFlightActiveAction);
 
-      expect(loadingIndicator.show).toBeCalled();
+      expect(loadingIndicator.show).toHaveBeenCalled();
     });
 
     it('hides the loading indicator on inFlightComplete action', () => {
       const inFlightCompleteAction = inFlightComplete();
 
       testMiddleware(inFlightCompleteAction);
-      expect(loadingIndicator.hide).toBeCalled();
+      expect(loadingIndicator.hide).toHaveBeenCalled();
     });
 
     describe('value', () => {
@@ -60,7 +60,7 @@ describe('inflight middleware', () => {
 
         testMiddleware(loadingAction);
 
-        expect(dispatch).toBeCalledWith(inFlightActive());
+        expect(dispatch).toHaveBeenCalledWith(inFlightActive());
       });
 
       it('adds path to pendingCache for loadingValue actions', () => {
@@ -84,10 +84,10 @@ describe('inflight middleware', () => {
         pendingCache.push(resolvedPath2);
 
         testMiddleware(setAction1);
-        expect(dispatch).not.toBeCalled();
+        expect(dispatch).not.toHaveBeenCalled();
 
         testMiddleware(setAction2);
-        expect(dispatch).toBeCalledWith(inFlightComplete());
+        expect(dispatch).toHaveBeenCalledWith(inFlightComplete());
       });
     });
   });

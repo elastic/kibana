@@ -68,7 +68,7 @@ describe('create_list', () => {
       index: LIST_INDEX,
       refresh: 'wait_for',
     };
-    expect(options.esClient.create).toBeCalledWith(expected);
+    expect(options.esClient.create).toHaveBeenCalledWith(expected);
   });
 
   test('It returns an auto-generated id if id is sent in undefined', async () => {

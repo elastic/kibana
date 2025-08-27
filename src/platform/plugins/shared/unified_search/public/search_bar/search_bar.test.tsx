@@ -328,7 +328,7 @@ describe('SearchBar', () => {
     const submitButton = component.find(QUERY_SUBMIT_BUTTON);
     submitButton.simulate('click');
 
-    expect(mockedOnQuerySubmit).toBeCalledTimes(1);
+    expect(mockedOnQuerySubmit).toHaveBeenCalledTimes(1);
     expect(mockedOnQuerySubmit).toHaveBeenNthCalledWith(
       1,
       {
@@ -354,7 +354,7 @@ describe('SearchBar', () => {
     const submitButton = component.find(QUERY_SUBMIT_BUTTON);
     submitButton.simulate('click');
 
-    expect(mockedOnQuerySubmit).toBeCalledTimes(1);
+    expect(mockedOnQuerySubmit).toHaveBeenCalledTimes(1);
     expect(mockedOnQuerySubmit).toHaveBeenNthCalledWith(
       1,
       {

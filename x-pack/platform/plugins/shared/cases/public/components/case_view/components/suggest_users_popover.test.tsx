@@ -208,7 +208,7 @@ describe.skip('SuggestUsersPopover', () => {
 
     await userEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
 
-    expect(togglePopover).toBeCalled();
+    expect(togglePopover).toHaveBeenCalled();
   });
 
   it('shows results initially', async () => {

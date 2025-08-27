@@ -46,7 +46,7 @@ describe('saml_auth', () => {
         log,
       });
       expect(sessionToken).toBe('mocked_token');
-      expect(axiosRequestMock).toBeCalledTimes(1);
+      expect(axiosRequestMock).toHaveBeenCalledTimes(1);
     });
 
     test('retries until response has the token value', async () => {
@@ -72,7 +72,7 @@ describe('saml_auth', () => {
       );
 
       expect(sessionToken).toBe('mocked_token');
-      expect(axiosRequestMock).toBeCalledTimes(3);
+      expect(axiosRequestMock).toHaveBeenCalledTimes(3);
     });
 
     test('retries and throws error when response code is not 200', async () => {
@@ -94,7 +94,7 @@ describe('saml_auth', () => {
       ).rejects.toThrow(
         `Failed to create the new cloud session: 'POST https://cloud/api/v1/saas/auth/_login' returned 503`
       );
-      expect(axiosRequestMock).toBeCalledTimes(2);
+      expect(axiosRequestMock).toHaveBeenCalledTimes(2);
     });
 
     test('retries and throws error when response has no token value', async () => {
@@ -119,7 +119,7 @@ describe('saml_auth', () => {
       ).rejects.toThrow(
         `Failed to create the new cloud session: token is missing in response data\n{"user_id":"REDACTED","okta_session_id":"REDACTED","authenticated":false}`
       );
-      expect(axiosRequestMock).toBeCalledTimes(3);
+      expect(axiosRequestMock).toHaveBeenCalledTimes(3);
     });
 
     test(`throws error when retry 'attemptsCount' is below 1`, async () => {
@@ -165,7 +165,7 @@ describe('saml_auth', () => {
       ).rejects.toThrow(
         'Failed to create the new cloud session: MFA must be disabled for the test account'
       );
-      expect(axiosRequestMock).toBeCalledTimes(1);
+      expect(axiosRequestMock).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -263,7 +263,7 @@ describe('saml_auth', () => {
       });
 
       await expect(createSAMLResponse(createSAMLResponseParams)).rejects
-        .toThrowError(`Failed to parse SAML response value.\nMost likely the 'viewer@elastic.co' user has no access to the cloud deployment.
+        .toThrow(`Failed to parse SAML response value.\nMost likely the 'viewer@elastic.co' user has no access to the cloud deployment.
 Login to ${
         new URL(location).hostname
       } with the user from '.ftr/role_users.json' file and try to load

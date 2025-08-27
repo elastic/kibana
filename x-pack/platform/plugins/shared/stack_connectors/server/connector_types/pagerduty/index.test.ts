@@ -234,7 +234,7 @@ describe('validateParams()', () => {
         },
         { configurationUtilities }
       );
-    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
+    }).toThrow(`error validating action params: error parsing timestamp "${timestamp}"`);
   });
 
   test('should validate and throw error when dedupKey is missing on resolve', () => {
@@ -246,7 +246,7 @@ describe('validateParams()', () => {
         },
         { configurationUtilities }
       );
-    }).toThrowError(
+    }).toThrow(
       `error validating action params: DedupKey is required when eventAction is "resolve"`
     );
   });

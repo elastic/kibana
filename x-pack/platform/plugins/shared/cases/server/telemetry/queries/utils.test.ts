@@ -1173,7 +1173,7 @@ describe('utils', () => {
         savedObjectType: 'test',
       });
 
-      expect(savedObjectsClient.find).toBeCalledWith({
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
         aggs: {
           counts: {
             date_range: {
@@ -1424,7 +1424,7 @@ describe('utils', () => {
         savedObjectsClient: telemetrySavedObjectsClient,
       });
 
-      expect(savedObjectsClient.find).toBeCalledWith({
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
         aggs: {
           by_owner: {
             aggs: {

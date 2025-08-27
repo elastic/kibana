@@ -22,13 +22,13 @@ describe('useDebounceFn hook', () => {
       result.current.run();
     });
 
-    expect(fn).not.toBeCalled();
+    expect(fn).not.toHaveBeenCalled();
 
     act(() => {
       jest.advanceTimersByTime(200);
     });
 
-    expect(fn).toBeCalledTimes(1);
+    expect(fn).toHaveBeenCalledTimes(1);
   });
 
   it('should cancel the debounced function call', () => {
@@ -44,7 +44,7 @@ describe('useDebounceFn hook', () => {
       jest.advanceTimersByTime(200);
     });
 
-    expect(fn).not.toBeCalled();
+    expect(fn).not.toHaveBeenCalled();
   });
 
   it('should flush the debounced function call', () => {
@@ -56,7 +56,7 @@ describe('useDebounceFn hook', () => {
       result.current.flush();
     });
 
-    expect(fn).toBeCalledTimes(1);
+    expect(fn).toHaveBeenCalledTimes(1);
   });
 
   it('should handle leading option correctly', () => {
@@ -67,7 +67,7 @@ describe('useDebounceFn hook', () => {
       result.current.run();
     });
 
-    expect(fn).toBeCalledTimes(1);
+    expect(fn).toHaveBeenCalledTimes(1);
 
     act(() => {
       jest.advanceTimersByTime(200);
@@ -77,7 +77,7 @@ describe('useDebounceFn hook', () => {
       result.current.run();
     });
 
-    expect(fn).toBeCalledTimes(2);
+    expect(fn).toHaveBeenCalledTimes(2);
   });
 
   it('should handle trailing option correctly', () => {
@@ -89,12 +89,12 @@ describe('useDebounceFn hook', () => {
       result.current.run();
     });
 
-    expect(fn).not.toBeCalled();
+    expect(fn).not.toHaveBeenCalled();
 
     act(() => {
       jest.advanceTimersByTime(200);
     });
 
-    expect(fn).toBeCalledTimes(1);
+    expect(fn).toHaveBeenCalledTimes(1);
   });
 });

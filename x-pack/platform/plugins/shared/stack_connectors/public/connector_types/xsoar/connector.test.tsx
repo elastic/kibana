@@ -70,7 +70,7 @@ describe('XSOARActionConnectorFields renders', () => {
       });
 
       waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.xsoar',
             name: 'XSOAR',

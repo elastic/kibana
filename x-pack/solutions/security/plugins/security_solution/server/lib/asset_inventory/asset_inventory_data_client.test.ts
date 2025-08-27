@@ -566,7 +566,7 @@ describe('AssetInventoryDataClient', () => {
 
       await expect(
         client.enable(mockSecSolutionContext, {} as InitEntityStoreRequestBody)
-      ).rejects.toThrowError('uiSetting');
+      ).rejects.toThrow('uiSetting');
     });
 
     it('enables entity store and generic engine when entity store is not installed', async () => {
@@ -755,7 +755,7 @@ describe('AssetInventoryDataClient', () => {
     it('throws error when uisetting is disabled', async () => {
       uiSettingsClientMock.get.mockResolvedValue(false);
 
-      await expect(client.delete()).rejects.toThrowError('uiSetting');
+      await expect(client.delete()).rejects.toThrow('uiSetting');
     });
   });
 });

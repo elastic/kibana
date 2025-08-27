@@ -264,10 +264,10 @@ describe('SlackParamsFields renders', () => {
     );
 
     getByTestId('blockkit').click();
-    expect(mockEditFunc).toBeCalledWith('subAction', 'postBlockkit', 0);
+    expect(mockEditFunc).toHaveBeenCalledWith('subAction', 'postBlockkit', 0);
 
     getByTestId('text').click();
-    expect(mockEditFunc).toBeCalledWith('subAction', 'postMessage', 0);
+    expect(mockEditFunc).toHaveBeenCalledWith('subAction', 'postMessage', 0);
   });
 
   test('show the Channel label when using the old attribute "channels" in subActionParams', async () => {
@@ -382,12 +382,12 @@ describe('SlackParamsFields renders', () => {
     await userEvent.tab();
 
     await waitFor(() => {
-      expect(mockEditFunc).toBeCalledWith(
+      expect(mockEditFunc).toHaveBeenCalledWith(
         'subActionParams',
         { channelIds: ['new-channel-id'], channels: undefined, text: 'some text' },
         0
       );
-      expect(mockUseSubAction).toBeCalledWith({
+      expect(mockUseSubAction).toHaveBeenCalledWith({
         connectorId: 'connector-id',
         disabled: false,
         subAction: 'validChannelId',
@@ -465,12 +465,12 @@ describe('SlackParamsFields renders', () => {
       expect(
         within(getByTestId('slackChannelsComboBox')).getByText('channel-id-3 - channel 3')
       ).toBeInTheDocument();
-      expect(mockEditFunc).toBeCalledWith(
+      expect(mockEditFunc).toHaveBeenCalledWith(
         'subActionParams',
         { channelIds: ['channel-id-3'], channels: undefined, text: 'some text' },
         0
       );
-      expect(mockUseSubAction).toBeCalledWith({
+      expect(mockUseSubAction).toHaveBeenCalledWith({
         connectorId: 'connector-id',
         disabled: false,
         subAction: 'validChannelId',

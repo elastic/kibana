@@ -130,7 +130,7 @@ describe('toggleQuery', () => {
       fireEvent.click(getByTestId('query-toggle-header'));
     });
 
-    expect(mockSetIsExpanded).toBeCalledWith(false);
+    expect(mockSetIsExpanded).toHaveBeenCalledWith(false);
   });
 
   it('when isExpanded is true, render counts panel', () => {

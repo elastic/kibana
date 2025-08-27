@@ -154,7 +154,7 @@ describe('AppRoutes', () => {
         }
 
         if (scenario.expectReadOnly) {
-          expect(testRenderer.startServices.navigation.ui.TopNavMenu).toBeCalledWith(
+          expect(testRenderer.startServices.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
             expect.objectContaining({
               config: expect.arrayContaining([
                 expect.objectContaining({
@@ -165,7 +165,7 @@ describe('AppRoutes', () => {
             expect.anything()
           );
         } else {
-          expect(testRenderer.startServices.navigation.ui.TopNavMenu).not.toBeCalledWith(
+          expect(testRenderer.startServices.navigation.ui.TopNavMenu).not.toHaveBeenCalledWith(
             expect.objectContaining({
               config: expect.arrayContaining([
                 expect.objectContaining({

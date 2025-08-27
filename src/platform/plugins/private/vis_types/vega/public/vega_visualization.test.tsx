@@ -118,7 +118,7 @@ describe('VegaVisualizations', () => {
         vegaVis.destroy();
       }
       // eslint-disable-next-line no-console
-      expect(console.log).toBeCalledTimes(2);
+      expect(console.log).toHaveBeenCalledTimes(2);
       mockedConsoleLog.mockRestore();
     });
 

@@ -13,7 +13,7 @@ describe('config.validate()', () => {
   it(`does not allow "disableEmbedding" to be set to true`, () => {
     // This is intentionally not editable in the raw CSP config.
     // Users should set `server.securityResponseHeaders.disableEmbedding` to control this config property.
-    expect(() => cspConfig.schema.validate({ disableEmbedding: true })).toThrowError(
+    expect(() => cspConfig.schema.validate({ disableEmbedding: true })).toThrow(
       '[disableEmbedding]: expected value to equal [false]'
     );
   });

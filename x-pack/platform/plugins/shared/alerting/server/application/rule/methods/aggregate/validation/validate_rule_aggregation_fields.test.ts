@@ -25,7 +25,7 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   it('should allow for nested valid aggregations', () => {
@@ -51,7 +51,7 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   it('should allow for nested valid aggregations with root level aggs', () => {
@@ -92,12 +92,12 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   it('should allow for default and tags aggregations', () => {
-    expect(() => validateRuleAggregationFields(defaultRuleAggregationFactory())).not.toThrowError();
-    expect(() => validateRuleAggregationFields(getRuleTagsAggregation())).not.toThrowError();
+    expect(() => validateRuleAggregationFields(defaultRuleAggregationFactory())).not.toThrow();
+    expect(() => validateRuleAggregationFields(getRuleTagsAggregation())).not.toThrow();
   });
 
   it('should throw for simple aggregation with invalid fields', () => {

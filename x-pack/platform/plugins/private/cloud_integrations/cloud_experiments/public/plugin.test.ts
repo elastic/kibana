@@ -42,7 +42,7 @@ describe('Cloud Experiments public plugin', () => {
         dev: false,
         prod: true, // ensure it's true
       };
-      expect(() => new CloudExperimentsPlugin(initializerContext)).toThrowError(
+      expect(() => new CloudExperimentsPlugin(initializerContext)).toThrow(
         'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
       );
     });

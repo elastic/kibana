@@ -1876,7 +1876,7 @@ describe('Alerts Client', () => {
           alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
-          await expect(alertsClient.persistAlerts()).rejects.toThrowError(
+          await expect(alertsClient.persistAlerts()).rejects.toThrow(
             'index [.internal.alerts-default.alerts-default-000001] blocked by: [FORBIDDEN/8/index write (api)];'
           );
         });
@@ -2188,7 +2188,7 @@ describe('Alerts Client', () => {
 
             await expect(
               alertsClient.getSummarizedAlerts(paramsWithoutRuleId as GetSummarizedAlertsParams)
-            ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
+            ).rejects.toThrow(`Must specify both rule ID and space ID for AAD alert query.`);
           });
 
           test('if spaceId is not specified', async () => {
@@ -2196,7 +2196,7 @@ describe('Alerts Client', () => {
 
             await expect(
               alertsClient.getSummarizedAlerts(paramsWithoutSpaceId as GetSummarizedAlertsParams)
-            ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
+            ).rejects.toThrow(`Must specify both rule ID and space ID for AAD alert query.`);
           });
 
           test('if executionUuid or start date are not specified', async () => {
@@ -2206,7 +2206,7 @@ describe('Alerts Client', () => {
               alertsClient.getSummarizedAlerts(
                 paramsWithoutExecutionUuid as GetSummarizedAlertsParams
               )
-            ).rejects.toThrowError(
+            ).rejects.toThrow(
               'Must specify either execution UUID or time range for AAD alert query.'
             );
           });
@@ -2216,7 +2216,7 @@ describe('Alerts Client', () => {
 
             await expect(
               alertsClient.getSummarizedAlerts(paramsWithoutStart as GetSummarizedAlertsParams)
-            ).rejects.toThrowError(
+            ).rejects.toThrow(
               'Must specify either execution UUID or time range for AAD alert query.'
             );
           });
@@ -2226,7 +2226,7 @@ describe('Alerts Client', () => {
 
             await expect(
               alertsClient.getSummarizedAlerts(paramsWithoutEnd as GetSummarizedAlertsParams)
-            ).rejects.toThrowError(
+            ).rejects.toThrow(
               'Must specify either execution UUID or time range for AAD alert query.'
             );
           });
@@ -2334,7 +2334,7 @@ describe('Alerts Client', () => {
             alertsClient.getMaintenanceWindowScopedQueryAlerts(
               paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
             )
-          ).rejects.toThrowError(
+          ).rejects.toThrow(
             'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
           );
         });
@@ -2348,7 +2348,7 @@ describe('Alerts Client', () => {
             alertsClient.getMaintenanceWindowScopedQueryAlerts(
               paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
             )
-          ).rejects.toThrowError(
+          ).rejects.toThrow(
             'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
           );
         });
@@ -2362,7 +2362,7 @@ describe('Alerts Client', () => {
             alertsClient.getMaintenanceWindowScopedQueryAlerts(
               paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
             )
-          ).rejects.toThrowError(
+          ).rejects.toThrow(
             'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
           );
         });

@@ -98,7 +98,7 @@ describe('saved_object', () => {
     test('should send correct options if countsOnly is true', async () => {
       const countsOnly = true;
       await getExistingPrepackagedTimelines(mockRequest, countsOnly);
-      expect(mockFindSavedObject).toBeCalledWith({
+      expect(mockFindSavedObject).toHaveBeenCalledWith({
         filter:
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
         page: 1,
@@ -110,7 +110,7 @@ describe('saved_object', () => {
     test('should send correct options if countsOnly is false', async () => {
       const countsOnly = false;
       await getExistingPrepackagedTimelines(mockRequest, countsOnly);
-      expect(mockFindSavedObject).toBeCalledWith({
+      expect(mockFindSavedObject).toHaveBeenCalledWith({
         filter:
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
         type: 'siem-ui-timeline',
@@ -124,7 +124,7 @@ describe('saved_object', () => {
         pageIndex: 1,
       };
       await getExistingPrepackagedTimelines(mockRequest, countsOnly, pageInfo);
-      expect(mockFindSavedObject).toBeCalledWith({
+      expect(mockFindSavedObject).toHaveBeenCalledWith({
         filter:
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
         page: 1,
@@ -456,7 +456,7 @@ describe('saved_object', () => {
 
     test('should get draft filtered by current user', async () => {
       await getDraftTimeline(mockRequest, TimelineTypeEnum.default);
-      expect(mockFindSavedObject).toBeCalledWith({
+      expect(mockFindSavedObject).toHaveBeenCalledWith({
         filter:
           'not siem-ui-timeline.attributes.timelineType: template and siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.updatedBy: "username" and siem-ui-timeline.attributes.createdBy: "username"',
         sortField: 'created',

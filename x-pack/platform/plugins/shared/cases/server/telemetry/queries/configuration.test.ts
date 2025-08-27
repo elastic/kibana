@@ -92,7 +92,7 @@ describe('configuration', () => {
         savedObjectsClient: telemetrySavedObjectsClient,
         logger,
       });
-      expect(savedObjectsClient.find).toBeCalledWith({
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
         aggs: {
           closureType: {
             terms: {

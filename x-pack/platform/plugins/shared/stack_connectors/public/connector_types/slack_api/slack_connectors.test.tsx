@@ -106,8 +106,8 @@ describe('SlackActionFields renders', () => {
     });
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledTimes(1);
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {
           secrets: {
             token: 'some token',
@@ -148,8 +148,8 @@ describe('SlackActionFields renders', () => {
     });
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledTimes(1);
-      expect(onSubmit).toBeCalledWith(expect.objectContaining({ isValid: false }));
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
     });
   });
 });

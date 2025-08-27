@@ -24,7 +24,7 @@ describe('lifespan', () => {
     it('throws an error when the open date is invalid', () => {
       jest.setSystemTime(new Date(0));
 
-      expect(() => getStatusInfo([], new Date('blah'))).toThrowError('Invalid Date');
+      expect(() => getStatusInfo([], new Date('blah'))).toThrow('Invalid Date');
     });
 
     it('causes a reopen status goes from open -> closed -> open', () => {

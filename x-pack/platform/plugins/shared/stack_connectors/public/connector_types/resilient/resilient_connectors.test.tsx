@@ -90,7 +90,7 @@ describe('ResilientActionConnectorFields renders', () => {
       });
 
       waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.resilient',
             name: 'resilient',

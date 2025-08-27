@@ -45,6 +45,6 @@ describe('FilesUtilityBar', () => {
     renderWithTestingProviders(<FilesUtilityBar {...defaultProps} />);
 
     await userEvent.type(await screen.findByTestId('cases-files-search'), 'My search{enter}');
-    expect(defaultProps.onSearch).toBeCalledWith('My search');
+    expect(defaultProps.onSearch).toHaveBeenCalledWith('My search');
   });
 });

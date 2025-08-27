@@ -86,7 +86,7 @@ describe('POST /api/saved_objects/_bulk_create with allowApiAccess true', () => 
       .expect(200);
 
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.bulkCreate).nthCalledWith(1, expect.anything(), {
+    expect(savedObjectsClient.bulkCreate).toHaveBeenNthCalledWith(1, expect.anything(), {
       migrationVersionCompatibility: 'compatible',
       overwrite: true,
     });

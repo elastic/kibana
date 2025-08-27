@@ -427,7 +427,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.create).toBeCalled();
+        expect(soClient.create).toHaveBeenCalled();
 
         // ID should always be the same for a predefined id
         expect(soClient.create.mock.calls[0][2]?.id).toEqual(outputIdToUuid('output-test'));
@@ -451,7 +451,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.update).not.toBeCalled();
+        expect(soClient.update).not.toHaveBeenCalled();
       });
 
       it('should update existing default output when creating a new default output', async () => {
@@ -471,8 +471,8 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.update).toBeCalledTimes(1);
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledTimes(1);
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           outputIdToUuid('existing-default-output'),
           { is_default: false }
@@ -494,7 +494,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.update).not.toBeCalled();
+        expect(soClient.update).not.toHaveBeenCalled();
       });
 
       it('should update existing default monitoring output when creating a new default output', async () => {
@@ -514,8 +514,8 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.update).toBeCalledTimes(1);
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledTimes(1);
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           outputIdToUuid('existing-default-monitoring-output'),
           { is_default_monitoring: false }
@@ -562,7 +562,7 @@ describe('Output Service', () => {
           }
         );
 
-        expect(soClient.create).toBeCalledWith(
+        expect(soClient.create).toHaveBeenCalledWith(
           OUTPUT_SAVED_OBJECT_TYPE,
           // Preset should be inferred as balanced if not provided
           expect.objectContaining({
@@ -592,7 +592,7 @@ describe('Output Service', () => {
           }
         );
 
-        expect(soClient.create).toBeCalledWith(
+        expect(soClient.create).toHaveBeenCalledWith(
           OUTPUT_SAVED_OBJECT_TYPE,
           expect.objectContaining({
             preset: 'custom',
@@ -622,7 +622,7 @@ describe('Output Service', () => {
           }
         );
 
-        expect(soClient.create).toBeCalledWith(
+        expect(soClient.create).toHaveBeenCalledWith(
           OUTPUT_SAVED_OBJECT_TYPE,
           expect.objectContaining({
             preset: 'custom',
@@ -658,7 +658,7 @@ describe('Output Service', () => {
           )}`
         );
 
-        expect(soClient.create).not.toBeCalled();
+        expect(soClient.create).not.toHaveBeenCalled();
       });
 
       // With preconfigured outputs
@@ -701,8 +701,8 @@ describe('Output Service', () => {
           { id: 'output-test', fromPreconfiguration: true }
         );
 
-        expect(soClient.update).toBeCalledTimes(1);
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledTimes(1);
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           outputIdToUuid('existing-preconfigured-default-output'),
           { is_default: false }
@@ -745,7 +745,7 @@ describe('Output Service', () => {
           },
           { id: 'output-test' }
         );
-        expect(soClient.create).toBeCalled();
+        expect(soClient.create).toHaveBeenCalled();
       });
 
       it('should update fleet server policies with data_output_id=default_output_id if a new default logstash output is created', async () => {
@@ -778,7 +778,7 @@ describe('Output Service', () => {
           { id: 'output-1' }
         );
 
-        expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'fleet_server_policy',
@@ -817,7 +817,7 @@ describe('Output Service', () => {
           { id: 'output-1' }
         );
 
-        expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'synthetics_policy',
@@ -855,7 +855,7 @@ describe('Output Service', () => {
           { id: 'output-1' }
         );
 
-        expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'agentless_policy',
@@ -973,7 +973,7 @@ describe('Output Service', () => {
           { id: 'output-1' }
         );
 
-        expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'fleet_server_policy',
@@ -1012,7 +1012,7 @@ describe('Output Service', () => {
           { id: 'output-1' }
         );
 
-        expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'synthetics_policy',
@@ -1050,7 +1050,7 @@ describe('Output Service', () => {
           { id: 'output-1' }
         );
 
-        expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'agentless_policy',
@@ -1143,7 +1143,7 @@ describe('Output Service', () => {
           { id: 'output-1' }
         );
 
-        expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'agentless_policy',
@@ -1184,11 +1184,15 @@ describe('Output Service', () => {
         is_default: true,
       });
 
-      expect(soClient.update).toBeCalledTimes(2);
-      expect(soClient.update).toBeCalledWith(expect.anything(), outputIdToUuid('output-test'), {
-        is_default: true,
-      });
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledTimes(2);
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        outputIdToUuid('output-test'),
+        {
+          is_default: true,
+        }
+      );
+      expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-output'),
         { is_default: false }
@@ -1206,8 +1210,8 @@ describe('Output Service', () => {
         name: 'Test',
       });
 
-      expect(soClient.update).toBeCalledTimes(1);
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledTimes(1);
+      expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-output'),
         { is_default: true, name: 'Test' }
@@ -1263,11 +1267,15 @@ describe('Output Service', () => {
         is_default_monitoring: true,
       });
 
-      expect(soClient.update).toBeCalledTimes(2);
-      expect(soClient.update).toBeCalledWith(expect.anything(), outputIdToUuid('output-test'), {
-        is_default_monitoring: true,
-      });
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledTimes(2);
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        outputIdToUuid('output-test'),
+        {
+          is_default_monitoring: true,
+        }
+      );
+      expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-monitoring-output'),
         { is_default_monitoring: false }
@@ -1300,7 +1308,7 @@ describe('Output Service', () => {
         }
       );
 
-      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toHaveBeenCalled();
     });
 
     it('Allow to update preconfigured output allowed to edit field from preconfiguration', async () => {
@@ -1318,7 +1326,7 @@ describe('Output Service', () => {
         }
       );
 
-      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toHaveBeenCalled();
     });
 
     it('Should throw when an existing preconfigured default output and updating an output to become the default one outside of preconfiguration', async () => {
@@ -1358,8 +1366,8 @@ describe('Output Service', () => {
         { fromPreconfiguration: true }
       );
 
-      expect(soClient.update).toBeCalledTimes(2);
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledTimes(2);
+      expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-output'),
         { is_default: false }
@@ -1380,7 +1388,7 @@ describe('Output Service', () => {
         hosts: ['http://test:4343'],
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'elasticsearch',
         hosts: ['http://test:4343'],
         preset: 'balanced',
@@ -1400,7 +1408,7 @@ describe('Output Service', () => {
         hosts: ['http://test:4343'],
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'elasticsearch',
         hosts: ['http://test:4343'],
         auth_type: null,
@@ -1440,7 +1448,7 @@ describe('Output Service', () => {
         is_default: true,
       });
 
-      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toHaveBeenCalled();
     });
 
     it('Should call update with null fields if', async () => {
@@ -1459,8 +1467,8 @@ describe('Output Service', () => {
         ssl: null,
       });
 
-      expect(soClient.update).toBeCalled();
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalled();
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
@@ -1499,7 +1507,7 @@ describe('Output Service', () => {
         hosts: ['test:4343'],
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'logstash',
         hosts: ['test:4343'],
         ca_sha256: null,
@@ -1521,7 +1529,7 @@ describe('Output Service', () => {
         hosts: ['test:4343'],
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'logstash',
         hosts: ['test:4343'],
         ca_sha256: null,
@@ -1567,14 +1575,14 @@ describe('Output Service', () => {
         is_default: true,
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'logstash',
         hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
       });
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'fleet_server_policy',
@@ -1609,14 +1617,14 @@ describe('Output Service', () => {
         }
       );
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'logstash',
         hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
       });
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'fleet_server_policy',
@@ -1641,14 +1649,14 @@ describe('Output Service', () => {
         is_default: true,
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'logstash',
         hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
       });
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'synthetics_policy',
@@ -1681,14 +1689,14 @@ describe('Output Service', () => {
         }
       );
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'logstash',
         hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
       });
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'synthetics_policy',
@@ -1714,14 +1722,14 @@ describe('Output Service', () => {
         is_default: true,
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'logstash',
         hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
       });
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'agentless_policy',
@@ -1755,14 +1763,14 @@ describe('Output Service', () => {
         }
       );
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'logstash',
         hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
       });
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'agentless_policy',
@@ -1786,7 +1794,7 @@ describe('Output Service', () => {
           type: 'logstash',
           hosts: ['test:4343'],
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Logstash output cannot be used with Fleet Server integration in fleet server policy. Please create a new Elasticsearch output.'
       );
     });
@@ -1805,7 +1813,7 @@ describe('Output Service', () => {
           type: 'logstash',
           hosts: ['test:4343'],
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Logstash output cannot be used with Synthetics integration in synthetics policy. Please create a new Elasticsearch output.'
       );
     });
@@ -1823,7 +1831,7 @@ describe('Output Service', () => {
           type: 'logstash',
           hosts: ['test:4343'],
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Logstash output cannot be used with agentless integration in agentless policy. Please create a new Elasticsearch output.'
       );
     });
@@ -1861,7 +1869,7 @@ describe('Output Service', () => {
         hosts: ['test:4343'],
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
         hosts: ['test:4343'],
         ca_sha256: null,
@@ -1897,7 +1905,7 @@ describe('Output Service', () => {
         hosts: ['test:4343'],
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         hosts: ['test:4343'],
         broker_timeout: 10,
         required_acks: 1,
@@ -1935,7 +1943,7 @@ describe('Output Service', () => {
         is_default: true,
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
         hosts: ['test:4343'],
         is_default: true,
@@ -1954,7 +1962,7 @@ describe('Output Service', () => {
         broker_timeout: 10,
         required_acks: 1,
       });
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'fleet_server_policy',
@@ -1989,7 +1997,7 @@ describe('Output Service', () => {
         }
       );
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
         hosts: ['test:4343'],
         is_default: true,
@@ -2008,7 +2016,7 @@ describe('Output Service', () => {
         broker_timeout: 10,
         required_acks: 1,
       });
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'fleet_server_policy',
@@ -2033,7 +2041,7 @@ describe('Output Service', () => {
         is_default: true,
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
         hosts: ['test:4343'],
         is_default: true,
@@ -2052,7 +2060,7 @@ describe('Output Service', () => {
         broker_timeout: 10,
         required_acks: 1,
       });
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'synthetics_policy',
@@ -2085,7 +2093,7 @@ describe('Output Service', () => {
         }
       );
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
         hosts: ['test:4343'],
         is_default: true,
@@ -2104,7 +2112,7 @@ describe('Output Service', () => {
         broker_timeout: 10,
         required_acks: 1,
       });
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'synthetics_policy',
@@ -2130,7 +2138,7 @@ describe('Output Service', () => {
         is_default: true,
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
         hosts: ['test:4343'],
         is_default: true,
@@ -2149,7 +2157,7 @@ describe('Output Service', () => {
         broker_timeout: 10,
         required_acks: 1,
       });
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'agentless_policy',
@@ -2183,7 +2191,7 @@ describe('Output Service', () => {
         }
       );
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
         hosts: ['test:4343'],
         is_default: true,
@@ -2202,7 +2210,7 @@ describe('Output Service', () => {
         broker_timeout: 10,
         required_acks: 1,
       });
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'agentless_policy',
@@ -2224,7 +2232,7 @@ describe('Output Service', () => {
           type: 'kafka',
           hosts: ['test:4343'],
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Kafka output cannot be used with agentless integration in agentless policy. Please create a new Elasticsearch output.'
       );
     });
@@ -2257,7 +2265,7 @@ describe('Output Service', () => {
         type: 'remote_elasticsearch',
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'remote_elasticsearch',
         kibana_api_key: null,
         service_token: null,
@@ -2280,7 +2288,7 @@ describe('Output Service', () => {
         is_default: true,
       });
 
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'agentless_policy',
@@ -2313,7 +2321,7 @@ describe('Output Service', () => {
         }
       );
 
-      expect(mockedAgentPolicyService.update).toBeCalledWith(
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'agentless_policy',
@@ -2334,7 +2342,7 @@ describe('Output Service', () => {
         outputService.update(soClient, esClientMock, 'existing-es-output', {
           type: 'remote_elasticsearch',
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Remote_elasticsearch output cannot be used with agentless integration in agentless policy. Please create a new Elasticsearch output.'
       );
     });
@@ -2356,7 +2364,7 @@ describe('Output Service', () => {
         ssl: null,
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'logstash',
         hosts: ['0.0.0.0'],
         ssl: null,
@@ -2381,27 +2389,27 @@ describe('Output Service', () => {
         fromPreconfiguration: true,
       });
 
-      expect(soClient.delete).toBeCalled();
+      expect(soClient.delete).toHaveBeenCalled();
     });
 
     it('Call removeOutputFromAll before deleting the output', async () => {
       const soClient = getMockedSoClient();
       await outputService.delete(soClient, 'output-test');
-      expect(mockedAgentPolicyService.removeOutputFromAll).toBeCalledWith(
+      expect(mockedAgentPolicyService.removeOutputFromAll).toHaveBeenCalledWith(
         undefined,
         'output-test',
         {
           force: false,
         }
       );
-      expect(mockedPackagePolicyService.removeOutputFromAll).toBeCalledWith(
+      expect(mockedPackagePolicyService.removeOutputFromAll).toHaveBeenCalledWith(
         undefined,
         'output-test',
         {
           force: false,
         }
       );
-      expect(soClient.delete).toBeCalled();
+      expect(soClient.delete).toHaveBeenCalled();
     });
 
     it('Call removeOutputFromAll with with force before deleting the output, if deleted from preconfiguration', async () => {
@@ -2409,21 +2417,21 @@ describe('Output Service', () => {
       await outputService.delete(soClient, 'existing-preconfigured-default-output', {
         fromPreconfiguration: true,
       });
-      expect(mockedAgentPolicyService.removeOutputFromAll).toBeCalledWith(
+      expect(mockedAgentPolicyService.removeOutputFromAll).toHaveBeenCalledWith(
         undefined,
         'existing-preconfigured-default-output',
         {
           force: true,
         }
       );
-      expect(mockedPackagePolicyService.removeOutputFromAll).toBeCalledWith(
+      expect(mockedPackagePolicyService.removeOutputFromAll).toHaveBeenCalledWith(
         undefined,
         'existing-preconfigured-default-output',
         {
           force: true,
         }
       );
-      expect(soClient.delete).toBeCalled();
+      expect(soClient.delete).toHaveBeenCalled();
     });
 
     it('should call audit logger', async () => {

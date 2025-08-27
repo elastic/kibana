@@ -263,7 +263,7 @@ describe('EndpointServiceFactory', () => {
           agentIds: ['123'],
           agentPolicyIds: ['123'],
         })
-      ).rejects.toThrowError(NotFoundError);
+      ).rejects.toThrow(NotFoundError);
     });
   });
 

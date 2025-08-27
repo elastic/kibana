@@ -205,7 +205,7 @@ describe('<HostDetails />', () => {
   describe('Host overview', () => {
     it('should render the HostOverview with correct dates and indices', () => {
       const { getByTestId } = renderHostDetails(mockContextValue);
-      expect(mockUseHostDetails).toBeCalledWith({
+      expect(mockUseHostDetails).toHaveBeenCalledWith({
         id: 'entities-hosts-details-uuid',
         startDate: from,
         endDate: to,
@@ -237,7 +237,7 @@ describe('<HostDetails />', () => {
   describe('Related users', () => {
     it('should render the related user table with correct dates and indices', () => {
       const { getByTestId } = renderHostDetails(mockContextValue);
-      expect(mockUseHostsRelatedUsers).toBeCalledWith({
+      expect(mockUseHostsRelatedUsers).toHaveBeenCalledWith({
         from: timestamp,
         hostName: 'test host',
         indexNames: ['index'],

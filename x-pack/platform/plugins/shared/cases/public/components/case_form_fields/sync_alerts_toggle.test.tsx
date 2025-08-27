@@ -68,7 +68,7 @@ describe('SyncAlertsToggle', () => {
     await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           syncAlerts: false,
         },

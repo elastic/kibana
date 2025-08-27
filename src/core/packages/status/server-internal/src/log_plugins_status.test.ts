@@ -72,16 +72,16 @@ describe('logPluginsStatusChanges', () => {
     plugins$.next({ A: reportedAvailable, B: reportedAvailable, C: inferredAvailable });
 
     await delay();
-    expect(l.get).toBeCalledTimes(3);
-    expect(l.get).nthCalledWith(1, 'A');
-    expect(l.get).nthCalledWith(2, 'B');
-    expect(l.get).nthCalledWith(3, 'B');
-    expect(l.warn).not.toBeCalled();
-    expect(l.error).toBeCalledTimes(1);
-    expect(l.info).toBeCalledTimes(2);
-    expect(l.error).nthCalledWith(1, 'B plugin is now unavailable: Unavail!');
-    expect(l.info).nthCalledWith(1, 'A plugin is now available: Avail!');
-    expect(l.info).nthCalledWith(2, 'B plugin is now available: Avail!');
+    expect(l.get).toHaveBeenCalledTimes(3);
+    expect(l.get).toHaveBeenNthCalledWith(1, 'A');
+    expect(l.get).toHaveBeenNthCalledWith(2, 'B');
+    expect(l.get).toHaveBeenNthCalledWith(3, 'B');
+    expect(l.warn).not.toHaveBeenCalled();
+    expect(l.error).toHaveBeenCalledTimes(1);
+    expect(l.info).toHaveBeenCalledTimes(2);
+    expect(l.error).toHaveBeenNthCalledWith(1, 'B plugin is now unavailable: Unavail!');
+    expect(l.info).toHaveBeenNthCalledWith(1, 'A plugin is now available: Avail!');
+    expect(l.info).toHaveBeenNthCalledWith(2, 'B plugin is now available: Avail!');
   });
 
   it('stops logging when the stop$ observable has emitted', async () => {
@@ -98,14 +98,14 @@ describe('logPluginsStatusChanges', () => {
 
     await delay();
 
-    expect(l.get).toBeCalledTimes(2);
-    expect(l.get).nthCalledWith(1, 'A');
-    expect(l.get).nthCalledWith(2, 'B');
-    expect(l.warn).not.toBeCalled();
-    expect(l.error).toBeCalledTimes(1);
-    expect(l.info).toBeCalledTimes(1);
-    expect(l.info).nthCalledWith(1, 'A plugin is now available: Avail!');
-    expect(l.error).nthCalledWith(1, 'B plugin is now unavailable: Unavail!');
+    expect(l.get).toHaveBeenCalledTimes(2);
+    expect(l.get).toHaveBeenNthCalledWith(1, 'A');
+    expect(l.get).toHaveBeenNthCalledWith(2, 'B');
+    expect(l.warn).not.toHaveBeenCalled();
+    expect(l.error).toHaveBeenCalledTimes(1);
+    expect(l.info).toHaveBeenCalledTimes(1);
+    expect(l.info).toHaveBeenNthCalledWith(1, 'A plugin is now available: Avail!');
+    expect(l.error).toHaveBeenNthCalledWith(1, 'B plugin is now unavailable: Unavail!');
   });
 
   it('throttles and aggregates messages of plugins that emit too often', async () => {
@@ -146,19 +146,25 @@ describe('logPluginsStatusChanges', () => {
     // give the 'bufferTime' operator enough time to emit and log
     await delay(1_000);
 
-    expect(l.get).toBeCalledWith('A');
-    expect(l.get).toBeCalledWith('B');
-    expect(l.get).not.toBeCalledWith('C');
+    expect(l.get).toHaveBeenCalledWith('A');
+    expect(l.get).toHaveBeenCalledWith('B');
+    expect(l.get).not.toHaveBeenCalledWith('C');
     expect(l.warn).not.toHaveBeenCalled();
     expect(l.info).toHaveBeenCalledTimes(4);
     expect(l.error).toHaveBeenCalledTimes(3);
-    expect(l.error).nthCalledWith(1, 'A plugin is now unavailable: Unavail!');
-    expect(l.info).nthCalledWith(1, 'B plugin is now available: Avail!');
-    expect(l.error).nthCalledWith(2, 'B plugin is now unavailable: Unavail!');
-    expect(l.info).nthCalledWith(2, 'B plugin is now available: Avail!');
-    expect(l.info).nthCalledWith(3, 'A plugin is now available: Avail!');
-    expect(l.error).nthCalledWith(3, 'B plugin is now unavailable: Unavail! (repeated 10 times)');
-    expect(l.info).nthCalledWith(4, 'B plugin is now available: Avail! (repeated 10 times)');
+    expect(l.error).toHaveBeenNthCalledWith(1, 'A plugin is now unavailable: Unavail!');
+    expect(l.info).toHaveBeenNthCalledWith(1, 'B plugin is now available: Avail!');
+    expect(l.error).toHaveBeenNthCalledWith(2, 'B plugin is now unavailable: Unavail!');
+    expect(l.info).toHaveBeenNthCalledWith(2, 'B plugin is now available: Avail!');
+    expect(l.info).toHaveBeenNthCalledWith(3, 'A plugin is now available: Avail!');
+    expect(l.error).toHaveBeenNthCalledWith(
+      3,
+      'B plugin is now unavailable: Unavail! (repeated 10 times)'
+    );
+    expect(l.info).toHaveBeenNthCalledWith(
+      4,
+      'B plugin is now available: Avail! (repeated 10 times)'
+    );
   });
 
   it('discards messages when a plugin emits too many different ones', async () => {
@@ -193,27 +199,27 @@ describe('logPluginsStatusChanges', () => {
     // emit a last message (some time after)
     plugins$.next({ A: { ...reportedAvailable, summary: `attempt #${++attempt}` } });
 
-    expect(l.get).toBeCalledWith('A');
-    expect(l.get).not.toBeCalledWith('B');
+    expect(l.get).toHaveBeenCalledWith('A');
+    expect(l.get).not.toHaveBeenCalledWith('B');
     expect(l.info).toHaveBeenCalledTimes(5);
     expect(l.error).toHaveBeenCalledTimes(3);
     expect(l.warn).toHaveBeenCalledTimes(1);
     // the first 3 messages are the max allowed per interval
-    expect(l.info).nthCalledWith(1, 'A plugin is now available: attempt #1');
-    expect(l.error).nthCalledWith(1, 'A plugin is now unavailable: attempt #2');
-    expect(l.info).nthCalledWith(2, 'A plugin is now available: attempt #3');
+    expect(l.info).toHaveBeenNthCalledWith(1, 'A plugin is now available: attempt #1');
+    expect(l.error).toHaveBeenNthCalledWith(1, 'A plugin is now unavailable: attempt #2');
+    expect(l.info).toHaveBeenNthCalledWith(2, 'A plugin is now available: attempt #3');
     // the next 4 messages are throttled (emitted after 10ms)
-    expect(l.error).nthCalledWith(2, 'A plugin is now unavailable: attempt #4');
-    expect(l.info).nthCalledWith(3, 'A plugin is now available: attempt #5');
-    expect(l.error).nthCalledWith(3, 'A plugin is now unavailable: attempt #6');
-    expect(l.info).nthCalledWith(4, 'A plugin is now available: attempt #7');
+    expect(l.error).toHaveBeenNthCalledWith(2, 'A plugin is now unavailable: attempt #4');
+    expect(l.info).toHaveBeenNthCalledWith(3, 'A plugin is now available: attempt #5');
+    expect(l.error).toHaveBeenNthCalledWith(3, 'A plugin is now unavailable: attempt #6');
+    expect(l.info).toHaveBeenNthCalledWith(4, 'A plugin is now available: attempt #7');
 
     // these messages exceed the maxThrottledMessages quota, truncated + warning
-    expect(l.warn).nthCalledWith(
+    expect(l.warn).toHaveBeenNthCalledWith(
       1,
       '7 other status updates from [A] have been truncated to avoid flooding the logs'
     );
     // and the last message, after the buffered / truncated ones
-    expect(l.info).nthCalledWith(5, 'A plugin is now available: attempt #15');
+    expect(l.info).toHaveBeenNthCalledWith(5, 'A plugin is now available: attempt #15');
   });
 });

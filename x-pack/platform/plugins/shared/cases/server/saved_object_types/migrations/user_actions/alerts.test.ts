@@ -98,10 +98,10 @@ describe('alert user actions', () => {
 
           expect(removeRuleInformation(doc, context)).toEqual(doc);
 
-          expect(jsonParseSpy).not.toBeCalled();
+          expect(jsonParseSpy).not.toHaveBeenCalled();
 
           const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
-          expect(log.error).not.toBeCalled();
+          expect(log.error).not.toHaveBeenCalled();
         }
       );
     });
@@ -135,7 +135,7 @@ describe('alert user actions', () => {
       expect(removeRuleInformation(doc, context)).toEqual(doc);
 
       const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
-      expect(log.error).not.toBeCalled();
+      expect(log.error).not.toHaveBeenCalled();
     });
 
     it('does not modify the document when new_value is null', () => {

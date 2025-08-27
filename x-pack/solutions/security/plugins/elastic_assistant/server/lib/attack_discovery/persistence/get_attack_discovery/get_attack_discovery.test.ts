@@ -59,7 +59,7 @@ describe('getAttackDiscovery', () => {
   it('should throw error on elasticsearch search failure', async () => {
     mockEsClient.search.mockRejectedValueOnce(new Error('Elasticsearch error'));
 
-    await expect(getAttackDiscovery(mockRequest)).rejects.toThrowError('Elasticsearch error');
+    await expect(getAttackDiscovery(mockRequest)).rejects.toThrow('Elasticsearch error');
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(mockLogger.error).toHaveBeenCalledTimes(1);

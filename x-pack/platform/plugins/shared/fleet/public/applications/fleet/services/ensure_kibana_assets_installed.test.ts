@@ -37,12 +37,12 @@ describe('ensurePackageKibanaAssetsInstalled', () => {
       toasts,
     });
 
-    expect(sendInstallKibanaAssetsForRq).toBeCalledWith({
+    expect(sendInstallKibanaAssetsForRq).toHaveBeenCalledWith({
       pkgName: 'nginx',
       pkgVersion: '1.25.1',
     });
 
-    expect(toasts.addSuccess).toBeCalled();
+    expect(toasts.addSuccess).toHaveBeenCalled();
   });
 
   it('install assets in multiple space if not installed', async () => {
@@ -65,13 +65,13 @@ describe('ensurePackageKibanaAssetsInstalled', () => {
       toasts,
     });
 
-    expect(sendInstallKibanaAssetsForRq).toBeCalledWith({
+    expect(sendInstallKibanaAssetsForRq).toHaveBeenCalledWith({
       pkgName: 'nginx',
       pkgVersion: '1.25.1',
       spaceIds: ['test1', 'test2'],
     });
 
-    expect(toasts.addSuccess).toBeCalled();
+    expect(toasts.addSuccess).toHaveBeenCalled();
   });
 
   it('does nothing if assets are already installed', async () => {
@@ -97,9 +97,9 @@ describe('ensurePackageKibanaAssetsInstalled', () => {
       toasts,
     });
 
-    expect(sendInstallKibanaAssetsForRq).not.toBeCalled();
-    expect(toasts.addSuccess).not.toBeCalled();
-    expect(toasts.addError).not.toBeCalled();
+    expect(sendInstallKibanaAssetsForRq).not.toHaveBeenCalled();
+    expect(toasts.addSuccess).not.toHaveBeenCalled();
+    expect(toasts.addError).not.toHaveBeenCalled();
   });
 
   it('show an error toast if install assets failed', async () => {
@@ -124,7 +124,7 @@ describe('ensurePackageKibanaAssetsInstalled', () => {
       toasts,
     });
 
-    expect(toasts.addSuccess).not.toBeCalled();
-    expect(toasts.addError).toBeCalled();
+    expect(toasts.addSuccess).not.toHaveBeenCalled();
+    expect(toasts.addError).toHaveBeenCalled();
   });
 });

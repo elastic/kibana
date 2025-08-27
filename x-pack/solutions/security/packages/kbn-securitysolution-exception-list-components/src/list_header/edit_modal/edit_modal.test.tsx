@@ -36,7 +36,7 @@ describe('EditModal', () => {
     );
     fireEvent.submit(wrapper.getByTestId('editModalForm'));
     expect(wrapper.getByTestId('editModalProgess')).toBeInTheDocument();
-    expect(onSave).toBeCalled();
+    expect(onSave).toHaveBeenCalled();
   });
 
   it('should call onCancel', () => {
@@ -48,7 +48,7 @@ describe('EditModal', () => {
       />
     );
     fireEvent.click(wrapper.getByTestId('editModalCancelBtn'));
-    expect(onCancel).toBeCalled();
+    expect(onCancel).toHaveBeenCalled();
   });
 
   it('should change title, description and call onSave with the new props', () => {
@@ -67,7 +67,7 @@ describe('EditModal', () => {
     });
     fireEvent.submit(wrapper.getByTestId('editModalForm'));
 
-    expect(onSave).toBeCalledWith({
+    expect(onSave).toHaveBeenCalledWith({
       name: 'New list name',
       description: 'New description name',
     });
@@ -88,7 +88,7 @@ describe('EditModal', () => {
     });
     fireEvent.submit(wrapper.getByTestId('editModalForm'));
 
-    expect(onSave).toBeCalledWith({
+    expect(onSave).toHaveBeenCalledWith({
       name: 'New list name',
       description: 'New description name',
     });
@@ -110,7 +110,7 @@ describe('EditModal', () => {
     expect(nameField).toBeInvalid();
     expect(wrapper.queryByTestId('editModalProgess')).not.toBeInTheDocument();
     fireEvent.submit(wrapper.getByTestId('editModalForm'));
-    expect(onSave).not.toBeCalled();
+    expect(onSave).not.toHaveBeenCalled();
     expect(wrapper.getByText(i18n.LIST_NAME_REQUIRED_ERROR)).toBeTruthy();
   });
 
@@ -139,7 +139,7 @@ describe('EditModal', () => {
 
     expect(wrapper.queryByTestId('editModalProgess')).not.toBeInTheDocument();
     fireEvent.submit(wrapper.getByTestId('editModalForm'));
-    expect(onSave).not.toBeCalled();
+    expect(onSave).not.toHaveBeenCalled();
     expect(wrapper.getByText(i18n.LIST_NAME_REQUIRED_ERROR)).toBeTruthy();
   });
   it('should call onCanel when clicking on close button', () => {
@@ -152,6 +152,6 @@ describe('EditModal', () => {
     );
     const closeButton = wrapper.getByLabelText('Closes this modal window');
     fireEvent.click(closeButton);
-    expect(onCancel).toBeCalled();
+    expect(onCancel).toHaveBeenCalled();
   });
 });

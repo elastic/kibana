@@ -41,7 +41,7 @@ describe('agentPolicyUpdateEventHandler', () => {
       } as any);
       await agentPolicyUpdateEventHandler(esClient, 'deleted', 'test1');
 
-      expect(esClient.update).toBeCalledWith(
+      expect(esClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'agent1',
           doc: expect.objectContaining({

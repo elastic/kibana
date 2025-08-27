@@ -188,7 +188,7 @@ describe('helpers', () => {
 
       addBuildingBlockStyle(ecs, THEME, mockedSetCellProps);
 
-      expect(mockedSetCellProps).toBeCalledWith({
+      expect(mockedSetCellProps).toHaveBeenCalledWith({
         style: {
           backgroundColor: 'euiColorHighlight',
         },
@@ -200,7 +200,7 @@ describe('helpers', () => {
 
       addBuildingBlockStyle(mockDnsEvent, THEME, mockedSetCellProps);
 
-      expect(mockedSetCellProps).toBeCalledWith({ style: { backgroundColor: 'inherit' } });
+      expect(mockedSetCellProps).toHaveBeenCalledWith({ style: { backgroundColor: 'inherit' } });
     });
   });
 

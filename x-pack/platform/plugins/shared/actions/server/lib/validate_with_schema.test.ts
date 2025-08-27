@@ -242,7 +242,7 @@ test('should validate when custom validator is defined', () => {
   result = validateSecrets(actionType, testValue, { configurationUtilities });
   expect(result).toEqual(testValue);
 
-  expect(customValidator).toBeCalledTimes(3);
+  expect(customValidator).toHaveBeenCalledTimes(3);
 });
 
 test('should throw an error when custom validators fail', () => {

@@ -81,7 +81,7 @@ describe('removeInstallation', () => {
         esClient: esClientMock,
         force: false,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       `Unable to remove package system:1.0.0 with existing package policy(s) in use by agent(s)`
     );
   });
@@ -126,7 +126,7 @@ describe('deleteESAsset', () => {
       esClient
     );
 
-    expect(esClient.cluster.deleteComponentTemplate).not.toBeCalled();
+    expect(esClient.cluster.deleteComponentTemplate).not.toHaveBeenCalled();
   });
 
   it('should delete @package components template', async () => {
@@ -139,7 +139,7 @@ describe('deleteESAsset', () => {
       esClient
     );
 
-    expect(esClient.cluster.deleteComponentTemplate).toBeCalledWith(
+    expect(esClient.cluster.deleteComponentTemplate).toHaveBeenCalledWith(
       { name: 'logs-nginx.access@package' },
       expect.anything()
     );
@@ -219,7 +219,7 @@ describe('deleteESAsset', () => {
         soClientMock
       );
 
-      expect(soClientMock.update).toBeCalledWith('epm-packages', 'test', {
+      expect(soClientMock.update).toHaveBeenCalledWith('epm-packages', 'test', {
         installed_es: [
           {
             id: 'logs@custom',

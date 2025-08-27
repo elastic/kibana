@@ -111,11 +111,11 @@ describe('update timelines', () => {
       });
 
       test('should NOT Update new pinned events', async () => {
-        expect(mockPersistPinnedEventOnTimeline).not.toBeCalled();
+        expect(mockPersistPinnedEventOnTimeline).not.toHaveBeenCalled();
       });
 
       test('should NOT Update notes', async () => {
-        expect(mockPersistNote).not.toBeCalled();
+        expect(mockPersistNote).not.toHaveBeenCalled();
       });
 
       test('returns 200 when create timeline successfully', async () => {
@@ -232,11 +232,11 @@ describe('update timelines', () => {
       });
 
       test('should NOT Update new pinned events', async () => {
-        expect(mockPersistPinnedEventOnTimeline).not.toBeCalled();
+        expect(mockPersistPinnedEventOnTimeline).not.toHaveBeenCalled();
       });
 
       test('should NOT Update notes', async () => {
-        expect(mockPersistNote).not.toBeCalled();
+        expect(mockPersistNote).not.toHaveBeenCalled();
       });
 
       test('returns 200 when create timeline template successfully', async () => {

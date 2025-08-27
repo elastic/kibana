@@ -49,7 +49,7 @@ describe('useGetScheduledList', () => {
       expect(result.current.data).toEqual({ data: [] });
     });
 
-    expect(getScheduledReportsList).toBeCalledWith({
+    expect(getScheduledReportsList).toHaveBeenCalledWith({
       http,
       page: 1,
       perPage: 50,

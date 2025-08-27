@@ -31,7 +31,7 @@ test('should throw if force now is invalid', () => {
   const dateString = 'invalid-date';
   mockLocation(`https://elastic.co/?forceNow=${dateString}`);
 
-  expect(() => getForceNowFromUrl()).toThrowError();
+  expect(() => getForceNowFromUrl()).toThrow();
 });
 
 test('should return undefined if no forceNow', () => {

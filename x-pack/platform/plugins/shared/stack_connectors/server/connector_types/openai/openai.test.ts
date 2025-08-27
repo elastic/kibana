@@ -129,7 +129,7 @@ describe('OpenAIConnector', () => {
           { body: JSON.stringify(sampleOpenAiBody) },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -155,7 +155,7 @@ describe('OpenAIConnector', () => {
           { body: JSON.stringify(requestBody) },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -176,7 +176,7 @@ describe('OpenAIConnector', () => {
           { body: JSON.stringify(sampleOpenAiBody) },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -215,7 +215,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -266,7 +266,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: 'https://api.openai.com/v1/chat/completions',
@@ -296,7 +296,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             responseType: 'stream',
@@ -343,7 +343,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             responseType: 'stream',
@@ -403,7 +403,7 @@ describe('OpenAIConnector', () => {
 
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeStream(sampleOpenAiBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: 'https://api.openai.com/v1/chat/completions',
@@ -500,7 +500,7 @@ describe('OpenAIConnector', () => {
     describe('invokeAI', () => {
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.invokeAI(sampleOpenAiBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -580,7 +580,7 @@ describe('OpenAIConnector', () => {
     describe('invokeAsyncIterator', () => {
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(0);
+        expect(mockRequest).toHaveBeenCalledTimes(0);
         expect(mockCreate).toHaveBeenCalledWith(
           {
             ...sampleOpenAiBody,
@@ -589,7 +589,7 @@ describe('OpenAIConnector', () => {
           },
           { signal: undefined }
         );
-        expect(mockTee).toBeCalledTimes(1);
+        expect(mockTee).toHaveBeenCalledTimes(1);
       });
       it('signal and timeout is properly passed', async () => {
         const timeout = 180000;
@@ -598,7 +598,7 @@ describe('OpenAIConnector', () => {
           { ...sampleOpenAiBody, signal, timeout },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(0);
+        expect(mockRequest).toHaveBeenCalledTimes(0);
         expect(mockCreate).toHaveBeenCalledWith(
           {
             ...sampleOpenAiBody,
@@ -610,7 +610,7 @@ describe('OpenAIConnector', () => {
             timeout,
           }
         );
-        expect(mockTee).toBeCalledTimes(1);
+        expect(mockTee).toHaveBeenCalledTimes(1);
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -753,7 +753,7 @@ describe('OpenAIConnector', () => {
         { body: JSON.stringify(sampleOpenAiBody) },
         connectorUsageCollector
       );
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           ...mockDefaults,
@@ -811,7 +811,7 @@ describe('OpenAIConnector', () => {
           { body: JSON.stringify(sampleOpenAiBody) },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -872,7 +872,7 @@ describe('OpenAIConnector', () => {
           { body: JSON.stringify(sampleOpenAiBody) },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -912,7 +912,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -951,7 +951,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: 'http://localhost:1234/v1/chat/completions',
@@ -980,7 +980,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             responseType: 'stream',
@@ -1026,7 +1026,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             responseType: 'stream',
@@ -1085,7 +1085,7 @@ describe('OpenAIConnector', () => {
 
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeStream(sampleOpenAiBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: 'http://localhost:1234/v1/chat/completions',
@@ -1176,7 +1176,7 @@ describe('OpenAIConnector', () => {
     describe('invokeAI', () => {
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.invokeAI(sampleOpenAiBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -1292,7 +1292,7 @@ describe('OpenAIConnector', () => {
           { body: JSON.stringify(sampleAzureAiBody) },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -1323,7 +1323,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -1358,7 +1358,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
@@ -1383,7 +1383,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             responseType: 'stream',
@@ -1424,7 +1424,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             responseType: 'stream',
@@ -1482,7 +1482,7 @@ describe('OpenAIConnector', () => {
     });
     it('the create dashboard API call returns available: true when user has correct permissions', async () => {
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -1501,7 +1501,7 @@ describe('OpenAIConnector', () => {
     it('the create dashboard API call returns available: false when user has correct permissions', async () => {
       mockRequest.mockResolvedValue({ has_all_requested: false });
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -1521,7 +1521,7 @@ describe('OpenAIConnector', () => {
     it('the create dashboard API call returns available: false when init dashboard fails', async () => {
       mockGenAi.mockResolvedValue({ success: false });
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',

@@ -111,7 +111,7 @@ describe('SearchResponseCache', () => {
       await err$.toPromise().catch(errHandler);
       await res$.toPromise().catch(errHandler);
 
-      expect(errHandler).toBeCalledTimes(1);
+      expect(errHandler).toHaveBeenCalledTimes(1);
       expect(cache.get('123')).toBeUndefined();
       expect(cache.get('234')).not.toBeUndefined();
     });
@@ -132,7 +132,7 @@ describe('SearchResponseCache', () => {
       const errHandler = jest.fn();
       await err$.toPromise().catch(errHandler);
 
-      expect(errHandler).toBeCalledTimes(1);
+      expect(errHandler).toHaveBeenCalledTimes(1);
       expect(cache.get('123')).toBeUndefined();
     });
 

@@ -71,7 +71,7 @@ describe('POST workpad', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ok: true, id });
-    expect(mockRouteContext.canvas.workpad.create).toBeCalledWith(mockWorkpad);
+    expect(mockRouteContext.canvas.workpad.create).toHaveBeenCalledWith(mockWorkpad);
   });
 
   it(`returns bad request if create is unsuccessful`, async () => {
@@ -131,7 +131,7 @@ describe('POST workpad', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ok: true, id });
-    expect(mockRouteContext.canvas.workpad.create).toBeCalledWith(
+    expect(mockRouteContext.canvas.workpad.create).toHaveBeenCalledWith(
       mockTemplateResponse.attributes.template
     );
   });

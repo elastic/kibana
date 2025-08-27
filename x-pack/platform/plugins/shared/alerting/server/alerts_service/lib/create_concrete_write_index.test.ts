@@ -641,9 +641,9 @@ describe('createConcreteWriteIndex', () => {
             dataStreamAdapter,
           });
 
-          expect(clusterClient.indices.putSettings).toBeCalledTimes(4);
-          expect(clusterClient.indices.putIndexTemplate).toBeCalledTimes(3);
-          expect(logger.info).toBeCalledTimes(3);
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
+          expect(logger.info).toHaveBeenCalledTimes(3);
 
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(1, {
             index: '.alerts-test.alerts-default',
@@ -734,9 +734,9 @@ describe('createConcreteWriteIndex', () => {
             dataStreamAdapter,
           });
 
-          expect(clusterClient.indices.putSettings).toBeCalledTimes(4);
-          expect(clusterClient.indices.putIndexTemplate).toBeCalledTimes(3);
-          expect(logger.info).toBeCalledTimes(5);
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
+          expect(logger.info).toHaveBeenCalledTimes(5);
 
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(1, {
             composed_of: ['test-mappings'],
@@ -1085,7 +1085,7 @@ describe('createConcreteWriteIndex', () => {
             'Failed to update mappings for write index of alias: .alerts-test.alerts-default, rolling over instead'
           );
         }
-        expect(clusterClient.indices.rollover).toBeCalledTimes(1);
+        expect(clusterClient.indices.rollover).toHaveBeenCalledTimes(1);
       });
 
       it('should throw if rolling over fails', async () => {
@@ -1122,7 +1122,7 @@ describe('createConcreteWriteIndex', () => {
             'Failed to update mappings for write index of alias: .alerts-test.alerts-default, rolling over instead'
           );
         }
-        expect(clusterClient.indices.rollover).toBeCalledTimes(1);
+        expect(clusterClient.indices.rollover).toHaveBeenCalledTimes(1);
       });
     });
   }

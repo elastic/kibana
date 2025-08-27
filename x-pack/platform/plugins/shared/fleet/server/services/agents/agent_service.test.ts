@@ -101,7 +101,7 @@ describe('AgentService', () => {
       it('rejects on listAgents', async () => {
         await expect(
           agentClient.listAgents({ showAgentless: true, showInactive: true })
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet agents.`
           )
@@ -109,7 +109,7 @@ describe('AgentService', () => {
       });
 
       it('rejects on getAgent', async () => {
-        await expect(agentClient.getAgent('foo')).rejects.toThrowError(
+        await expect(agentClient.getAgent('foo')).rejects.toThrow(
           new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet agents.`
           )
@@ -117,7 +117,7 @@ describe('AgentService', () => {
       });
 
       it('rejects on getAgentStatusById', async () => {
-        await expect(agentClient.getAgentStatusById('foo')).rejects.toThrowError(
+        await expect(agentClient.getAgentStatusById('foo')).rejects.toThrow(
           new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet agents.`
           )
@@ -125,7 +125,7 @@ describe('AgentService', () => {
       });
 
       it('rejects on getAgentStatusForAgentPolicy', async () => {
-        await expect(agentClient.getAgentStatusForAgentPolicy()).rejects.toThrowError(
+        await expect(agentClient.getAgentStatusForAgentPolicy()).rejects.toThrow(
           new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet agents.`
           )
@@ -133,7 +133,7 @@ describe('AgentService', () => {
       });
 
       it('rejects on getLatestAgentAvailableVersion', async () => {
-        await expect(agentClient.getLatestAgentAvailableVersion()).rejects.toThrowError(
+        await expect(agentClient.getLatestAgentAvailableVersion()).rejects.toThrow(
           new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet agents.`
           )
@@ -196,7 +196,7 @@ describe('AgentService', () => {
         savedObjectsClientMock.create()
       );
 
-      expect(() => agentService.asInternalScopedUser('')).toThrowError(TypeError);
+      expect(() => agentService.asInternalScopedUser('')).toThrow(TypeError);
     });
 
     {

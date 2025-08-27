@@ -167,7 +167,10 @@ describe('#getActionsColumns', () => {
 
     wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
 
-    expect(onOpenTimeline).toBeCalledWith({ duplicate: true, timelineId: 'saved-timeline-11' });
+    expect(onOpenTimeline).toHaveBeenCalledWith({
+      duplicate: true,
+      timelineId: 'saved-timeline-11',
+    });
   });
 
   test('it renders the export icon when enableExportTimelineDownloader is including the action export', () => {
@@ -232,7 +235,7 @@ describe('#getActionsColumns', () => {
 
     wrapper.find('[data-test-subj="export-timeline"]').first().simulate('click');
 
-    expect(enableExportTimelineDownloader).toBeCalledWith(mockResults[0]);
+    expect(enableExportTimelineDownloader).toHaveBeenCalledWith(mockResults[0]);
   });
 
   test('it should not render "export timeline" if it is not included', () => {

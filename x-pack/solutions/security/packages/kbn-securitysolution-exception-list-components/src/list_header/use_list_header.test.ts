@@ -58,7 +58,7 @@ describe('useExceptionListHeader', () => {
 
     waitFor(() => {
       expect(isModalVisible).toBeFalsy();
-      expect(onEditListDetails).toBeCalledWith({
+      expect(onEditListDetails).toHaveBeenCalledWith({
         name: 'New name',
         description: 'New Description',
       });

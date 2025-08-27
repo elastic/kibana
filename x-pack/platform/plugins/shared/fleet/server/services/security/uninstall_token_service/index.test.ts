@@ -387,7 +387,7 @@ describe('UninstallTokenService', () => {
           const so = decorateSOWithMissingToken(getDefaultSO(canEncrypt));
           mockCreatePointInTimeFinderAsInternalUser([so]);
 
-          await expect(uninstallTokenService.getToken(so.id)).rejects.toThrowError(
+          await expect(uninstallTokenService.getToken(so.id)).rejects.toThrow(
             new UninstallTokenError(
               'Invalid uninstall token: Saved object is missing the token attribute.'
             )
@@ -398,7 +398,7 @@ describe('UninstallTokenService', () => {
           const so = decorateSOWithError(getDefaultSO2(canEncrypt));
           mockCreatePointInTimeFinderAsInternalUser([so]);
 
-          await expect(uninstallTokenService.getToken(so.id)).rejects.toThrowError(
+          await expect(uninstallTokenService.getToken(so.id)).rejects.toThrow(
             new UninstallTokenError("Error when reading Uninstall Token with id 'test-so-id-two'.")
           );
         });
@@ -501,7 +501,7 @@ describe('UninstallTokenService', () => {
           defaultBuckets[0].latest.hits.hits[0]._source.created_at = '';
           mockCreatePointInTimeFinder(canEncrypt, defaultBuckets);
 
-          await expect(uninstallTokenService.getTokenMetadata()).rejects.toThrowError(
+          await expect(uninstallTokenService.getTokenMetadata()).rejects.toThrow(
             'Invalid uninstall token: Saved object is missing creation date.'
           );
         });
@@ -513,7 +513,7 @@ describe('UninstallTokenService', () => {
           ].policy_id = '';
           mockCreatePointInTimeFinder(canEncrypt, defaultBuckets);
 
-          await expect(uninstallTokenService.getTokenMetadata()).rejects.toThrowError(
+          await expect(uninstallTokenService.getTokenMetadata()).rejects.toThrow(
             'Invalid uninstall token: Saved object is missing the policy id attribute.'
           );
         });
@@ -601,20 +601,20 @@ describe('UninstallTokenService', () => {
           it('does not create new token when calling generateTokenForPolicyId', async () => {
             const so = getDefaultSO(canEncrypt);
             await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
-            expect(soClientMock.bulkCreate).not.toBeCalled();
+            expect(soClientMock.bulkCreate).not.toHaveBeenCalled();
           });
 
           it('does not create new token when calling generateTokensForPolicyIds', async () => {
             const so = getDefaultSO(canEncrypt);
             await uninstallTokenService.generateTokensForPolicyIds([so.attributes.policy_id]);
-            expect(soClientMock.bulkCreate).not.toBeCalled();
+            expect(soClientMock.bulkCreate).not.toHaveBeenCalled();
           });
 
           it('does not create new token when calling generateTokensForAllPolicies', async () => {
             mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
             await uninstallTokenService.generateTokensForAllPolicies();
-            expect(soClientMock.bulkCreate).not.toBeCalled();
+            expect(soClientMock.bulkCreate).not.toHaveBeenCalled();
           });
         });
 
@@ -623,7 +623,7 @@ describe('UninstallTokenService', () => {
             const so = getDefaultSO(canEncrypt);
             await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id, true);
 
-            expect(soClientMock.bulkCreate).toBeCalledWith([
+            expect(soClientMock.bulkCreate).toHaveBeenCalledWith([
               {
                 type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
                 attributes: {
@@ -632,7 +632,7 @@ describe('UninstallTokenService', () => {
                 },
               },
             ]);
-            expect(agentPolicyService.deployPolicies).toBeCalledWith(soClientMock, [
+            expect(agentPolicyService.deployPolicies).toHaveBeenCalledWith(soClientMock, [
               so.attributes.policy_id,
             ]);
           });
@@ -645,7 +645,7 @@ describe('UninstallTokenService', () => {
               [so.attributes.policy_id, so2.attributes.policy_id],
               true
             );
-            expect(soClientMock.bulkCreate).toBeCalledWith([
+            expect(soClientMock.bulkCreate).toHaveBeenCalledWith([
               {
                 type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
                 attributes: {
@@ -661,7 +661,7 @@ describe('UninstallTokenService', () => {
                 },
               },
             ]);
-            expect(agentPolicyService.deployPolicies).toBeCalledWith(soClientMock, [
+            expect(agentPolicyService.deployPolicies).toHaveBeenCalledWith(soClientMock, [
               so.attributes.policy_id,
               so2.attributes.policy_id,
             ]);
@@ -674,7 +674,7 @@ describe('UninstallTokenService', () => {
             mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
             await uninstallTokenService.generateTokensForAllPolicies(true);
-            expect(soClientMock.bulkCreate).toBeCalledWith([
+            expect(soClientMock.bulkCreate).toHaveBeenCalledWith([
               {
                 type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
                 attributes: {
@@ -690,7 +690,7 @@ describe('UninstallTokenService', () => {
                 },
               },
             ]);
-            expect(agentPolicyService.deployPolicies).toBeCalledWith(soClientMock, [
+            expect(agentPolicyService.deployPolicies).toHaveBeenCalledWith(soClientMock, [
               so.attributes.policy_id,
               so2.attributes.policy_id,
             ]);
@@ -707,7 +707,7 @@ describe('UninstallTokenService', () => {
         it('creates a new token when calling generateTokenForPolicyId', async () => {
           const so = getDefaultSO(canEncrypt);
           await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
-          expect(soClientMock.bulkCreate).toBeCalledWith([
+          expect(soClientMock.bulkCreate).toHaveBeenCalledWith([
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               attributes: {
@@ -726,7 +726,7 @@ describe('UninstallTokenService', () => {
             so.attributes.policy_id,
             so2.attributes.policy_id,
           ]);
-          expect(soClientMock.bulkCreate).toBeCalledWith([
+          expect(soClientMock.bulkCreate).toHaveBeenCalledWith([
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               attributes: {
@@ -751,7 +751,7 @@ describe('UninstallTokenService', () => {
           mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
           await uninstallTokenService.generateTokensForAllPolicies();
-          expect(soClientMock.bulkCreate).toBeCalledWith([
+          expect(soClientMock.bulkCreate).toHaveBeenCalledWith([
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               attributes: {
@@ -797,8 +797,12 @@ describe('UninstallTokenService', () => {
 
             await uninstallTokenService.checkTokenValidityForAllPolicies();
 
-            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledTimes(1);
-            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledWith({
+            expect(
+              esoClientMock.createPointInTimeFinderDecryptedAsInternalUser
+            ).toHaveBeenCalledTimes(1);
+            expect(
+              esoClientMock.createPointInTimeFinderDecryptedAsInternalUser
+            ).toHaveBeenCalledWith({
               filter:
                 'fleet-uninstall-tokens.id: "test-so-id" or fleet-uninstall-tokens.id: "test-so-id-two"',
               perPage: 10000,
@@ -816,7 +820,9 @@ describe('UninstallTokenService', () => {
 
             await uninstallTokenService.checkTokenValidityForAllPolicies();
 
-            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledTimes(2);
+            expect(
+              esoClientMock.createPointInTimeFinderDecryptedAsInternalUser
+            ).toHaveBeenCalledTimes(2);
 
             expect(
               esoClientMock.createPointInTimeFinderDecryptedAsInternalUser
@@ -893,9 +899,9 @@ describe('UninstallTokenService', () => {
 
           mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
-          await expect(
-            uninstallTokenService.checkTokenValidityForAllPolicies()
-          ).rejects.toThrowError('Unknown error happened while checking Uninstall Tokens validity');
+          await expect(uninstallTokenService.checkTokenValidityForAllPolicies()).rejects.toThrow(
+            'Unknown error happened while checking Uninstall Tokens validity'
+          );
         });
       });
 
@@ -963,7 +969,7 @@ describe('UninstallTokenService', () => {
             uninstallTokenService.checkTokenValidityForPolicy(
               errorWithDecryptionSO2.attributes.policy_id
             )
-          ).rejects.toThrowError('Unknown error happened while checking Uninstall Tokens validity');
+          ).rejects.toThrow('Unknown error happened while checking Uninstall Tokens validity');
         });
       });
     });

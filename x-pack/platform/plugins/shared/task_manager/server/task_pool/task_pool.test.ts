@@ -180,9 +180,9 @@ describe('TaskPool', () => {
         throw new Error(`Mark Task as running has failed miserably`);
       });
 
-      await expect(
-        pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()])
-      ).rejects.toThrowError('Mark Task as running has failed miserably');
+      await expect(pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()])).rejects.toThrow(
+        'Mark Task as running has failed miserably'
+      );
 
       expect((logger as jest.Mocked<Logger>).error.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -562,9 +562,9 @@ describe('TaskPool', () => {
         throw new Error(`Mark Task as running has failed miserably`);
       });
 
-      await expect(
-        pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()])
-      ).rejects.toThrowError('Mark Task as running has failed miserably');
+      await expect(pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()])).rejects.toThrow(
+        'Mark Task as running has failed miserably'
+      );
 
       expect((logger as jest.Mocked<Logger>).error.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

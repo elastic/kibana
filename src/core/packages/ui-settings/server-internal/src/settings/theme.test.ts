@@ -32,8 +32,8 @@ describe('theme settings', () => {
       expect(() => validate('disabled')).not.toThrow();
       expect(() => validate('system')).not.toThrow();
 
-      expect(() => validate('foo')).toThrowError();
-      expect(() => validate(12)).toThrowError();
+      expect(() => validate('foo')).toThrow();
+      expect(() => validate(12)).toThrow();
     });
   });
 

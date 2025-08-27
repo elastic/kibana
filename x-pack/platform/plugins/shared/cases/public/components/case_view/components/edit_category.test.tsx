@@ -122,7 +122,7 @@ describe('EditCategory ', () => {
 
     await user.click(screen.getByTestId('edit-category-submit'));
 
-    await waitFor(() => expect(onSubmit).toBeCalledWith(categories[0]));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(categories[0]));
   });
 
   it('should add new category', async () => {
@@ -142,7 +142,7 @@ describe('EditCategory ', () => {
 
     await user.click(screen.getByTestId('edit-category-submit'));
 
-    await waitFor(() => expect(onSubmit).toBeCalledWith('new'));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith('new'));
   });
 
   it('should trim category', async () => {
@@ -162,7 +162,7 @@ describe('EditCategory ', () => {
 
     await user.click(screen.getByTestId('edit-category-submit'));
 
-    await waitFor(() => expect(onSubmit).toBeCalledWith('category-with-space'));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith('category-with-space'));
   });
 
   it('should not save category on cancel click', async () => {
@@ -183,7 +183,7 @@ describe('EditCategory ', () => {
     await user.click(screen.getByTestId('edit-category-cancel'));
 
     await waitFor(() => {
-      expect(onSubmit).not.toBeCalled();
+      expect(onSubmit).not.toHaveBeenCalled();
     });
 
     expect(screen.getByTestId('no-categories')).toBeInTheDocument();
@@ -208,7 +208,7 @@ describe('EditCategory ', () => {
 
     await user.click(screen.getByTestId('edit-category-submit'));
 
-    await waitFor(() => expect(onSubmit).toBeCalledWith(null));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(null));
   });
 
   it('should disabled the save button on error', async () => {
@@ -304,6 +304,6 @@ describe('EditCategory ', () => {
 
     await user.click(screen.getByTestId('category-remove-button'));
 
-    await waitFor(() => expect(onSubmit).toBeCalledWith(null));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(null));
   });
 });

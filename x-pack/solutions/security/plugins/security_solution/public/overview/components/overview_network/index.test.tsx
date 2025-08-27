@@ -128,7 +128,7 @@ describe('OverviewNetwork', () => {
 
     fireEvent.click(screen.getByTestId('overview-network-go-to-network-page'));
 
-    expect(mockNavigateToApp).toBeCalledWith('securitySolutionUI', {
+    expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '',
       deepLinkId: SecurityPageName.network,
     });

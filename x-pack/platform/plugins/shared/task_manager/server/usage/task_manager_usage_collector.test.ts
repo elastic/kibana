@@ -49,7 +49,7 @@ describe('registerTaskManagerUsageCollector', () => {
     monitoringUtilization$.next(mockUtilization);
     await sleep(1001);
 
-    expect(usageCollectionMock.makeUsageCollector).toBeCalled();
+    expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalled();
     const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
     expect(telemetry.task_type_exclusion).toEqual(['actions:*']);
   });
@@ -79,7 +79,7 @@ describe('registerTaskManagerUsageCollector', () => {
     monitoringUtilization$.next(mockUtilization);
     await sleep(1001);
 
-    expect(usageCollectionMock.makeUsageCollector).toBeCalled();
+    expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalled();
     const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
     expect(telemetry.recurring_tasks).toEqual({
       actual_service_time: mockUtilizationStats?.value.recurring.ran.service_time.actual,
@@ -114,7 +114,7 @@ describe('registerTaskManagerUsageCollector', () => {
     monitoringUtilization$.next(mockUtilization);
     await sleep(1001);
 
-    expect(usageCollectionMock.makeUsageCollector).toBeCalled();
+    expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalled();
     const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
     expect(telemetry.capacity).toEqual(10);
   });

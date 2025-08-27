@@ -16,7 +16,7 @@ describe('Cancellation Token', () => {
     cancellationToken.on(onCancelled);
     cancellationToken.cancel();
 
-    expect(onCancelled).toBeCalled();
+    expect(onCancelled).toHaveBeenCalled();
   });
 
   it('emits a cancellation event immediately when already cancelled', () => {
@@ -25,7 +25,7 @@ describe('Cancellation Token', () => {
     cancellationToken.cancel();
     cancellationToken.on(onCancelled);
 
-    expect(onCancelled).toBeCalled();
+    expect(onCancelled).toHaveBeenCalled();
   });
 
   it('binds the `on` method properly so that it can be passed around', () => {
@@ -36,7 +36,7 @@ describe('Cancellation Token', () => {
     cancellationToken.cancel();
     unboundOn(onCancelled);
 
-    expect(onCancelled).toBeCalled();
+    expect(onCancelled).toHaveBeenCalled();
   });
 
   it('binds the `cancel` method properly so that it can be passed around', () => {
@@ -47,6 +47,6 @@ describe('Cancellation Token', () => {
     unboundCancel();
     cancellationToken.on(onCancelled);
 
-    expect(onCancelled).toBeCalled();
+    expect(onCancelled).toHaveBeenCalled();
   });
 });

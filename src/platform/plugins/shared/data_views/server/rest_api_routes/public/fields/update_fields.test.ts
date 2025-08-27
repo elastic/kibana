@@ -35,6 +35,6 @@ describe('create runtime field', () => {
       id: 'dataViewId',
       fields: { thisField: { count: 1 } },
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 });

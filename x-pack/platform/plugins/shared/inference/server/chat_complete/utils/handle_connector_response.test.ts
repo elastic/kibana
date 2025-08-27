@@ -50,7 +50,7 @@ describe('handleConnectorResponse', () => {
 
     await expect(
       firstValueFrom(of(input).pipe(handleConnectorResponse({ processStream }), take(1)))
-    ).rejects.toThrowError(/something went bad/);
+    ).rejects.toThrow(/something went bad/);
   });
 
   it('errors when the response data is not a readable stream', async () => {
@@ -65,6 +65,6 @@ describe('handleConnectorResponse', () => {
 
     await expect(
       firstValueFrom(of(input).pipe(handleConnectorResponse({ processStream }), take(1)))
-    ).rejects.toThrowError(/Unexpected error/);
+    ).rejects.toThrow(/Unexpected error/);
   });
 });

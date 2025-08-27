@@ -75,6 +75,6 @@ describe.skip('useFleetServerUnhealthy', () => {
     const { result } = testRenderer.renderHook(() => useFleetServerUnhealthy());
     await testRenderer.waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.isUnhealthy).toBeFalsy();
-    expect(testRenderer.startServices.notifications.toasts.addError).toBeCalled();
+    expect(testRenderer.startServices.notifications.toasts.addError).toHaveBeenCalled();
   });
 });

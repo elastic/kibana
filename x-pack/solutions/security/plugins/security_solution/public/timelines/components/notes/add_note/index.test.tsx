@@ -78,7 +78,7 @@ describe('AddNote', () => {
 
     wrapper.find('[data-test-subj="cancel"]').first().simulate('click');
 
-    expect(onCancelAddNote).toBeCalled();
+    expect(onCancelAddNote).toHaveBeenCalled();
   });
 
   test('it does NOT invoke associateNote when the Cancel button is clicked', () => {
@@ -96,7 +96,7 @@ describe('AddNote', () => {
 
     wrapper.find('[data-test-subj="cancel"]').first().simulate('click');
 
-    expect(associateNote).not.toBeCalled();
+    expect(associateNote).not.toHaveBeenCalled();
   });
 
   test('it does NOT render the Cancel button when onCancelAddNote is NOT provided', () => {
@@ -140,7 +140,7 @@ describe('AddNote', () => {
 
     wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
 
-    expect(associateNote).toBeCalled();
+    expect(associateNote).toHaveBeenCalled();
   });
 
   // test('it invokes getNewNoteId when the Add Note button is clicked', () => {
@@ -154,7 +154,7 @@ describe('AddNote', () => {
 
   //   wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
-  //   expect(getNewNoteId).toBeCalled();
+  //   expect(getNewNoteId).toHaveBeenCalled();
   // });
 
   test('it invokes updateNewNote when the Add Note button is clicked', () => {
@@ -172,7 +172,7 @@ describe('AddNote', () => {
 
     wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
 
-    expect(updateNewNote).toBeCalled();
+    expect(updateNewNote).toHaveBeenCalled();
   });
 
   test('it invokes updateNote when the Add Note button is clicked', () => {
@@ -184,6 +184,6 @@ describe('AddNote', () => {
 
     wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
 
-    expect(mockDispatch).toBeCalled();
+    expect(mockDispatch).toHaveBeenCalled();
   });
 });

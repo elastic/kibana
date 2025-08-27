@@ -288,7 +288,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     it('should throw error upon attempt to finish a step that is not running', async () => {
       (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue(undefined);
-      await expect(underTest.finishStep('node2')).rejects.toThrowError(
+      await expect(underTest.finishStep('node2')).rejects.toThrow(
         'Step execution not found for step ID: node2'
       );
     });

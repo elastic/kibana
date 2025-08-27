@@ -53,7 +53,7 @@ describe('FieldBrowserModal', () => {
     const wrapper = mountComponent();
 
     wrapper.find('[data-test-subj="close"]').last().simulate('click');
-    expect(mockOnHide).toBeCalled();
+    expect(mockOnHide).toHaveBeenCalled();
   });
 
   test('it renders the Reset Fields button', () => {
@@ -74,7 +74,7 @@ describe('FieldBrowserModal', () => {
 
     wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
 
-    expect(mockOnHide).toBeCalled();
+    expect(mockOnHide).toHaveBeenCalled();
   });
 
   test('it renders the search', () => {
@@ -117,7 +117,7 @@ describe('FieldBrowserModal', () => {
     onChange?.(changeEvent);
     searchField.simulate('change').update();
 
-    expect(onSearchInputChange).toBeCalledWith(inputText);
+    expect(onSearchInputChange).toHaveBeenCalledWith(inputText);
   });
 
   test('it renders the CreateFieldButton when it is provided', () => {

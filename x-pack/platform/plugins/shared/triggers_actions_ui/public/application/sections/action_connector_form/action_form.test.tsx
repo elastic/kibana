@@ -429,14 +429,14 @@ describe('action_form', () => {
       ).toBeFalsy();
 
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
-      expect(loadActionTypes).toBeCalledWith(
+      expect(loadActionTypes).toHaveBeenCalledWith(
         expect.objectContaining({
           featureId: 'alerting',
           includeSystemActions: true,
         })
       );
 
-      expect(loadAllActions).toBeCalledWith(
+      expect(loadAllActions).toHaveBeenCalledWith(
         expect.objectContaining({
           includeSystemActions: true,
         })

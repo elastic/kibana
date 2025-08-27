@@ -195,7 +195,7 @@ describe('SLOs Page', () => {
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+        expect(mockNavigate).toHaveBeenCalledWith(paths.slosWelcome);
       });
     });
   });
@@ -217,7 +217,7 @@ describe('SLOs Page', () => {
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+        expect(mockNavigate).toHaveBeenCalledWith(paths.slosWelcome);
       });
     });
 
@@ -237,7 +237,7 @@ describe('SLOs Page', () => {
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+        expect(mockNavigate).toHaveBeenCalledWith(paths.slosWelcome);
       });
     });
 
@@ -301,7 +301,9 @@ describe('SLOs Page', () => {
 
         button.click();
 
-        expect(mockNavigate).toBeCalledWith(`${paths.sloEdit(sloList.results.at(0)?.id || '')}`);
+        expect(mockNavigate).toHaveBeenCalledWith(
+          `${paths.sloEdit(sloList.results.at(0)?.id || '')}`
+        );
       });
 
       it('allows creating a new rule for an SLO', async () => {
@@ -355,7 +357,7 @@ describe('SLOs Page', () => {
 
         button.click();
 
-        expect(mockLocator).toBeCalled();
+        expect(mockLocator).toHaveBeenCalled();
       });
 
       it('allows deleting an SLO', async () => {
@@ -386,7 +388,7 @@ describe('SLOs Page', () => {
 
         screen.getByTestId('observabilitySolutionSloDeleteModalConfirmButton').click();
 
-        expect(mockDeleteSlo).toBeCalledWith({
+        expect(mockDeleteSlo).toHaveBeenCalledWith({
           id: sloList.results.at(0)?.id,
           name: sloList.results.at(0)?.name,
         });
@@ -418,7 +420,7 @@ describe('SLOs Page', () => {
 
         await waitFor(() => {
           const slo = sloList.results.at(0);
-          expect(mockNavigate).toBeCalledWith(
+          expect(mockNavigate).toHaveBeenCalledWith(
             paths.sloCreateWithEncodedForm(
               encodeURIComponent(encode(transformSloToCloneState(slo!)))
             )

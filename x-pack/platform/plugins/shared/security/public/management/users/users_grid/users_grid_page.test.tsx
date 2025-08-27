@@ -67,7 +67,7 @@ describe('UsersGridPage', () => {
 
     await waitForRender(wrapper);
 
-    expect(apiClientMock.getUsers).toBeCalledTimes(1);
+    expect(apiClientMock.getUsers).toHaveBeenCalledTimes(1);
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(findTestSubject(wrapper, 'userDisabled')).toHaveLength(0);
@@ -182,7 +182,7 @@ describe('UsersGridPage', () => {
 
     await waitForRender(wrapper);
 
-    expect(apiClient.getUsers).toBeCalledTimes(1);
+    expect(apiClient.getUsers).toHaveBeenCalledTimes(1);
     expect(wrapper.find('[data-test-subj="permissionDeniedMessage"]')).toHaveLength(1);
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(0);
   });

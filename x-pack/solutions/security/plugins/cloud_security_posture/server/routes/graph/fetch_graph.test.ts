@@ -62,7 +62,7 @@ describe('fetchGraph', () => {
       esQuery: undefined,
     };
 
-    await expect(() => fetchGraph(params)).rejects.toThrowError(/Invalid index pattern/);
+    await expect(() => fetchGraph(params)).rejects.toThrow(/Invalid index pattern/);
   });
 
   it('should execute the esql query and return records for valid inputs with no origin events', async () => {
@@ -81,7 +81,7 @@ describe('fetchGraph', () => {
 
     const result = await fetchGraph(params);
     // Verify that our stubbed esClient has been called with the correct query and params
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(1);
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     expect(esqlCallArgs[0].query).toContain('FROM valid_index');
     expect(result).toEqual([{ id: 'dummy' }]);
@@ -116,7 +116,7 @@ describe('fetchGraph', () => {
     };
 
     const result = await fetchGraph(params);
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(1);
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     expect(esqlCallArgs[0].query).toContain('FROM valid_index');
 
@@ -169,7 +169,7 @@ describe('fetchGraph', () => {
 
     const result = await fetchGraph(params);
 
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(1);
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     const query = esqlCallArgs[0].query;
 
@@ -215,7 +215,7 @@ describe('fetchGraph', () => {
 
     const result = await fetchGraph(params);
 
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(1);
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     const query = esqlCallArgs[0].query;
 
@@ -257,7 +257,7 @@ describe('fetchGraph', () => {
 
     expect(logger.error).toHaveBeenCalled();
 
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(1);
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     const query = esqlCallArgs[0].query;
     expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()}`);

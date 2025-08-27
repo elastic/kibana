@@ -27,7 +27,7 @@ describe('useCytoscapeEventHandlers', () => {
     it('runs', () => {
       expect(() => {
         renderHook(() => useCytoscapeEventHandlers({ cy: undefined, euiTheme }));
-      }).not.toThrowError();
+      }).not.toThrow();
     });
   });
 

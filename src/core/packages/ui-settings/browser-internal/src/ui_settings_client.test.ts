@@ -159,7 +159,7 @@ describe('#set', () => {
 
   it('stores a value in a previously unknown client key', () => {
     const { client } = setup();
-    expect(() => client.set('unrecognizedProperty', 'somevalue')).not.toThrowError();
+    expect(() => client.set('unrecognizedProperty', 'somevalue')).not.toThrow();
     expect(client.get('unrecognizedProperty')).toBe('somevalue');
   });
 

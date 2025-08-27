@@ -162,7 +162,7 @@ describe('BedrockConnector', () => {
       });
       it('the Bedrock API call is successful with Claude 3 parameters; returns the response formatted for Claude 2 along with usage object', async () => {
         const response = await connector.runApi({ body: DEFAULT_BODY }, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -192,7 +192,7 @@ describe('BedrockConnector', () => {
         // @ts-ignore
         connector.request = mockRequest;
         const response = await connector.runApi({ body: v2Body }, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -264,7 +264,7 @@ describe('BedrockConnector', () => {
 
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeStream(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -480,7 +480,7 @@ describe('BedrockConnector', () => {
 
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.invokeAI(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -524,7 +524,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -570,7 +570,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -620,7 +620,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -744,7 +744,7 @@ describe('BedrockConnector', () => {
 
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.converse(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -771,7 +771,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -816,7 +816,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -877,7 +877,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -982,7 +982,7 @@ describe('BedrockConnector', () => {
 
       it('the API call is successful with correct request parameters', async () => {
         await connector.converseStream(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -1267,7 +1267,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     });
     it('the create dashboard API call returns available: true when user has correct permissions', async () => {
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -1286,7 +1286,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     it('the create dashboard API call returns available: false when user has correct permissions', async () => {
       mockRequest.mockResolvedValue({ has_all_requested: false });
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -1306,7 +1306,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     it('the create dashboard API call returns available: false when init dashboard fails', async () => {
       mockGenAi.mockResolvedValue({ success: false });
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',

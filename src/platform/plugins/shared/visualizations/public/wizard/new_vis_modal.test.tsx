@@ -139,7 +139,9 @@ describe('NewVisModal', () => {
     it('should open the editor for visualizations without search', async () => {
       renderNewVisModal();
       await userEvent.click(screen.getByText('Vis Type 1'));
-      expect(window.location.assign).toBeCalledWith('testbasepath/app/visualize#/create?type=vis');
+      expect(window.location.assign).toHaveBeenCalledWith(
+        'testbasepath/app/visualize#/create?type=vis'
+      );
     });
 
     it('passes through editor params to the editor URL', async () => {
@@ -147,7 +149,7 @@ describe('NewVisModal', () => {
         editorParams: ['foo=true', 'bar=42'],
       });
       await userEvent.click(screen.getByText('Vis Type 1'));
-      expect(window.location.assign).toBeCalledWith(
+      expect(window.location.assign).toHaveBeenCalledWith(
         'testbasepath/app/visualize#/create?type=vis&foo=true&bar=42'
       );
     });
@@ -164,7 +166,7 @@ describe('NewVisModal', () => {
         stateTransfer,
       });
       await userEvent.click(screen.getByText('Vis with alias Url'));
-      expect(stateTransfer.navigateToEditor).toBeCalledWith('otherApp', {
+      expect(stateTransfer.navigateToEditor).toHaveBeenCalledWith('otherApp', {
         path: '#/aliasUrl',
         state: { originatingApp: 'coolJestTestApp' },
       });
@@ -181,7 +183,7 @@ describe('NewVisModal', () => {
         application: { navigateToApp } as unknown as ApplicationStart,
       });
       await userEvent.click(screen.getByText('Vis with alias Url'));
-      expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl' });
+      expect(navigateToApp).toHaveBeenCalledWith('otherApp', { path: '#/aliasUrl' });
       expect(onClose).toHaveBeenCalled();
     });
   });

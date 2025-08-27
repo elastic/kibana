@@ -183,7 +183,7 @@ describe('EnterForeachNodeImpl', () => {
     it('should throw an error if foreach configuration is not provided', async () => {
       step.configuration.foreach = undefined as any;
 
-      await expect(underTest.run()).rejects.toThrowError('Foreach configuration is required');
+      await expect(underTest.run()).rejects.toThrow('Foreach configuration is required');
       expect(workflowExecutionRuntimeManager.startStep).toHaveBeenCalledTimes(1);
       expect(workflowExecutionRuntimeManager.goToNextStep).not.toHaveBeenCalled();
     });
@@ -191,7 +191,7 @@ describe('EnterForeachNodeImpl', () => {
     it('should throw an error if foreach configuration is not an array', async () => {
       step.configuration.foreach = JSON.stringify({ key: 'value' });
 
-      await expect(underTest.run()).rejects.toThrowError('Foreach configuration must be an array');
+      await expect(underTest.run()).rejects.toThrow('Foreach configuration must be an array');
       expect(workflowExecutionRuntimeManager.startStep).toHaveBeenCalledTimes(1);
       expect(workflowExecutionRuntimeManager.goToNextStep).not.toHaveBeenCalled();
     });

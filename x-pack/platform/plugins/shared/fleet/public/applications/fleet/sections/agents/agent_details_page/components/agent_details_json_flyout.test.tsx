@@ -67,7 +67,7 @@ describe('AgentDetailsJsonFlyout', () => {
       .mockReturnValueOnce(anchorMocked);
 
     downloadButton.click();
-    expect(createElementSpyOn).toBeCalledWith('a');
+    expect(createElementSpyOn).toHaveBeenCalledWith('a');
     expect(result.queryAllByRole('link')).toHaveLength(1); // The only link is the one from the flyout's description.
     expect(result.getByRole('link')).toHaveAttribute('href', 'https://elastic.co');
   });

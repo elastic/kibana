@@ -64,7 +64,7 @@ describe('CustomFields', () => {
     await userEvent.click(await screen.findByTestId('add-custom-field'));
 
     await waitFor(() => {
-      expect(props.handleAddCustomField).toBeCalled();
+      expect(props.handleAddCustomField).toHaveBeenCalled();
     });
   });
 
@@ -78,7 +78,9 @@ describe('CustomFields', () => {
     );
 
     await waitFor(() => {
-      expect(props.handleEditCustomField).toBeCalledWith(customFieldsConfigurationMock[0].key);
+      expect(props.handleEditCustomField).toHaveBeenCalledWith(
+        customFieldsConfigurationMock[0].key
+      );
     });
   });
 

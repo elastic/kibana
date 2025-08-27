@@ -280,7 +280,7 @@ describe('handles errors during migrations', () => {
       });
       expect(() => {
         migration800(taskInstance, migrationContext);
-      }).toThrowError();
+      }).toThrow();
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `savedObject 8.0.0 migration failed for task instance ${taskInstance.id} with error: Expected property name or '}' in JSON at position 2 (line 1 column 3)`,
         {

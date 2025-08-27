@@ -27,7 +27,7 @@ describe('ThemeService', () => {
   describe('darkModeEnabled$', () => {
     it('should throw error if service has not been initialized', () => {
       const themeService = new ThemeService();
-      expect(() => themeService.darkModeEnabled$).toThrowError();
+      expect(() => themeService.darkModeEnabled$).toThrow();
     });
 
     it('returns the false when not in dark mode', async () => {

@@ -203,7 +203,7 @@ describe('Drag and drop reordering', () => {
     const { startDragging, drop } = renderDragAndDropGroup();
     startDragging(0);
     drop(1);
-    expect(onDrop).toBeCalled();
+    expect(onDrop).toHaveBeenCalled();
   });
 
   test('reordered elements get extra styling showing the new position', () => {
@@ -232,7 +232,7 @@ describe('Drag and drop reordering', () => {
       // 0 -> 0
       await startDraggingByKeyboard(0);
       await dropByKeyboard();
-      expect(onDrop).not.toBeCalled();
+      expect(onDrop).not.toHaveBeenCalled();
     });
     test('doesn`t run onDrop when dropping into an original position after some movements', async () => {
       const {
@@ -246,7 +246,7 @@ describe('Drag and drop reordering', () => {
       await reorderDownByKeyboard();
       await reorderUpByKeyboard();
       await dropByKeyboard();
-      expect(onDrop).not.toBeCalled();
+      expect(onDrop).not.toHaveBeenCalled();
     });
     test('doesn’t run onDrop when the movement is cancelled', async () => {
       const { startDraggingByKeyboard, reorderDownByKeyboard, cancelByKeyboard } =
@@ -256,7 +256,7 @@ describe('Drag and drop reordering', () => {
       await reorderDownByKeyboard();
       await reorderDownByKeyboard();
       await cancelByKeyboard();
-      expect(onDrop).not.toBeCalled();
+      expect(onDrop).not.toHaveBeenCalled();
     });
     test('runs onDrop when the element is reordered and dropped', async () => {
       const {
@@ -270,14 +270,14 @@ describe('Drag and drop reordering', () => {
       await reorderDownByKeyboard();
       await reorderDownByKeyboard();
       await dropByKeyboard();
-      expect(onDrop).toBeCalledWith(expectLabel('0'), 'reorder');
+      expect(onDrop).toHaveBeenCalledWith(expectLabel('0'), 'reorder');
 
       // 2 --> 0
       await startDraggingByKeyboard(2);
       await reorderUpByKeyboard();
       await reorderUpByKeyboard();
       await dropByKeyboard();
-      expect(onDrop).toBeCalledWith(expectLabel('2'), 'reorder');
+      expect(onDrop).toHaveBeenCalledWith(expectLabel('2'), 'reorder');
     });
     test('reordered elements get extra styling showing the new position from element 0 to element 2', async () => {
       const { startDraggingByKeyboard, reorderDownByKeyboard } = renderDragAndDropGroup();

@@ -279,13 +279,13 @@ describe('MetricsAxisOptions component', () => {
         .find(ValueAxesPanel)
         .prop('onValueAxisPositionChanged');
       onValueAxisPositionChanged(0, Position.Bottom);
-      expect(setValue).nthCalledWith(1, 'categoryAxes', [
+      expect(setValue).toHaveBeenNthCalledWith(1, 'categoryAxes', [
         expect.objectContaining({
           id: 'CategoryAxis-1',
           position: Position.Right,
         }),
       ]);
-      expect(setValue).nthCalledWith(2, 'valueAxes', [
+      expect(setValue).toHaveBeenNthCalledWith(2, 'valueAxes', [
         expect.objectContaining({
           id: 'ValueAxis-1',
           position: Position.Bottom,
@@ -308,13 +308,13 @@ describe('MetricsAxisOptions component', () => {
         .find(ValueAxesPanel)
         .prop('onValueAxisPositionChanged');
       onValueAxisPositionChanged(1, Position.Left);
-      expect(setValue).nthCalledWith(1, 'categoryAxes', [
+      expect(setValue).toHaveBeenNthCalledWith(1, 'categoryAxes', [
         expect.objectContaining({
           id: 'CategoryAxis-1',
           position: Position.Top,
         }),
       ]);
-      expect(setValue).nthCalledWith(2, 'valueAxes', [
+      expect(setValue).toHaveBeenNthCalledWith(2, 'valueAxes', [
         expect.objectContaining({
           id: 'ValueAxis-1',
           position: Position.Right,
@@ -337,7 +337,7 @@ describe('MetricsAxisOptions component', () => {
         .find(ValueAxesPanel)
         .prop('onValueAxisPositionChanged');
       onValueAxisPositionChanged(0, Position.Left);
-      expect(setValue).nthCalledWith(1, 'valueAxes', [
+      expect(setValue).toHaveBeenNthCalledWith(1, 'valueAxes', [
         expect.objectContaining({
           id: 'ValueAxis-1',
           position: Position.Left,
@@ -360,7 +360,7 @@ describe('MetricsAxisOptions component', () => {
         .find(ValueAxesPanel)
         .prop('onValueAxisPositionChanged');
       onValueAxisPositionChanged(1, Position.Top);
-      expect(setValue).nthCalledWith(1, 'valueAxes', [
+      expect(setValue).toHaveBeenNthCalledWith(1, 'valueAxes', [
         expect.objectContaining({
           id: 'ValueAxis-1',
           position: Position.Top,
@@ -415,7 +415,7 @@ describe('MetricsAxisOptions component', () => {
       setValue.mockClear();
       const onPositionChanged = component.find(CategoryAxisPanel).prop('onPositionChanged');
       onPositionChanged(Position.Left);
-      expect(setValue).nthCalledWith(1, 'valueAxes', [
+      expect(setValue).toHaveBeenNthCalledWith(1, 'valueAxes', [
         expect.objectContaining({
           id: 'ValueAxis-1',
           position: Position.Bottom,
@@ -436,7 +436,7 @@ describe('MetricsAxisOptions component', () => {
       setValue.mockClear();
       const onPositionChanged = component.find(CategoryAxisPanel).prop('onPositionChanged');
       onPositionChanged(Position.Top);
-      expect(setValue).nthCalledWith(1, 'valueAxes', [
+      expect(setValue).toHaveBeenNthCalledWith(1, 'valueAxes', [
         expect.objectContaining({
           id: 'ValueAxis-1',
           position: Position.Left,
@@ -457,7 +457,7 @@ describe('MetricsAxisOptions component', () => {
       setValue.mockClear();
       const onPositionChanged = component.find(CategoryAxisPanel).prop('onPositionChanged');
       onPositionChanged(Position.Top);
-      expect(setValue).not.toBeCalled();
+      expect(setValue).not.toHaveBeenCalled();
     });
 
     it('should not update value axes if category axis stays vertical', () => {
@@ -465,7 +465,7 @@ describe('MetricsAxisOptions component', () => {
       setValue.mockClear();
       const onPositionChanged = component.find(CategoryAxisPanel).prop('onPositionChanged');
       onPositionChanged(Position.Right);
-      expect(setValue).not.toBeCalled();
+      expect(setValue).not.toHaveBeenCalled();
     });
   });
 });

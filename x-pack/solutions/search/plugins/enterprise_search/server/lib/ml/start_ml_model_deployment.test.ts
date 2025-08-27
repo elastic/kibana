@@ -27,7 +27,7 @@ describe('startMlModelDeployment', () => {
   });
 
   it('should error when there is no trained model provider', async () => {
-    await expect(() => startMlModelDeployment(modelName, undefined)).rejects.toThrowError(
+    await expect(() => startMlModelDeployment(modelName, undefined)).rejects.toThrow(
       'Machine Learning is not enabled'
     );
   });
@@ -115,6 +115,6 @@ describe('startMlModelDeployment', () => {
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
     expect(response.deploymentState).toEqual(MlModelDeploymentState.Starting);
-    expect(mockTrainedModelsProvider.startTrainedModelDeployment).toBeCalledTimes(1);
+    expect(mockTrainedModelsProvider.startTrainedModelDeployment).toHaveBeenCalledTimes(1);
   });
 });

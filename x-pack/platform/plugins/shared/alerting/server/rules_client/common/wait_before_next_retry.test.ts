@@ -27,7 +27,7 @@ describe('waitBeforeNextRetry', () => {
   for (let i = 1; i <= RETRY_IF_CONFLICTS_ATTEMPTS; i++) {
     it(`should set timout for ${i} tries`, async () => {
       await waitBeforeNextRetry(i);
-      expect(setTimeout).toBeCalledTimes(1);
+      expect(setTimeout).toHaveBeenCalledTimes(1);
       expect(setTimeout).toHaveBeenCalledWith(
         expect.any(Function),
         RETRY_IF_CONFLICTS_DELAY * getExponentialDelayMultiplier(i) + randomDelayMs

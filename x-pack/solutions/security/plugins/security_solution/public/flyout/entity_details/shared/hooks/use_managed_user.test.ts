@@ -111,7 +111,7 @@ describe('useManagedUser', () => {
       wrapper: TestProviders,
     });
 
-    expect(mockSearch).toBeCalledWith(
+    expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
         userEmail: email,
       })

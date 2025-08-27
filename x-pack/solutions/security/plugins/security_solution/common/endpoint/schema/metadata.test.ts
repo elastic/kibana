@@ -33,27 +33,27 @@ describe('endpoint metadata schema', () => {
     });
 
     it('should throw if page param is not a number', () => {
-      expect(() => query.validate({ page: 'notanumber' })).toThrowError();
+      expect(() => query.validate({ page: 'notanumber' })).toThrow();
     });
 
     it('should throw if page param is less than 0', () => {
-      expect(() => query.validate({ page: -1 })).toThrowError();
+      expect(() => query.validate({ page: -1 })).toThrow();
     });
 
     it('should throw if pageSize param is not a number', () => {
-      expect(() => query.validate({ pageSize: 'notanumber' })).toThrowError();
+      expect(() => query.validate({ pageSize: 'notanumber' })).toThrow();
     });
 
     it('should throw if pageSize param is less than 1', () => {
-      expect(() => query.validate({ pageSize: 0 })).toThrowError();
+      expect(() => query.validate({ pageSize: 0 })).toThrow();
     });
 
     it('should throw if pageSize param is greater than 10000', () => {
-      expect(() => query.validate({ pageSize: 10001 })).toThrowError();
+      expect(() => query.validate({ pageSize: 10001 })).toThrow();
     });
 
     it('should throw if kuery is not string', () => {
-      expect(() => query.validate({ kuery: 123 })).toThrowError();
+      expect(() => query.validate({ kuery: 123 })).toThrow();
     });
 
     it('should work with valid hostStatus', () => {
@@ -69,7 +69,7 @@ describe('endpoint metadata schema', () => {
     it('should throw if invalid hostStatus', () => {
       expect(() =>
         query.validate({ hostStatuses: [HostStatus.UNHEALTHY, 'invalidstatus'] })
-      ).toThrowError();
+      ).toThrow();
     });
   });
 });

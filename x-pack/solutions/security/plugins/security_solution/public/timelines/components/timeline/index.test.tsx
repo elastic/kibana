@@ -148,7 +148,7 @@ describe('StatefulTimeline', () => {
         <StatefulTimeline {...props} />
       </TestProviders>
     );
-    expect(mockDispatch).toBeCalledTimes(1);
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
     expect(mockDispatch.mock.calls[0][0].payload.indexNames).toEqual(
       mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline].selectedPatterns
     );
@@ -207,7 +207,7 @@ describe('StatefulTimeline', () => {
         <StatefulTimeline {...props} />
       </TestProviders>
     );
-    expect(mockDispatch).toBeCalledTimes(1);
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
     expect(mockDispatch).toHaveBeenNthCalledWith(1, {
       payload: {
         id: TimelineId.test,

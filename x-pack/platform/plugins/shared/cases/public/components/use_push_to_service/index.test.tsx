@@ -74,7 +74,7 @@ describe('usePushToService', () => {
       await result.current.handlePushToService();
     });
 
-    expect(pushCaseToExternalService).toBeCalledWith({
+    expect(pushCaseToExternalService).toHaveBeenCalledWith({
       caseId,
       connector: defaultArgs.connector,
     });
@@ -186,7 +186,7 @@ describe('usePushToService', () => {
       await result.current.handlePushToService();
     });
 
-    expect(pushCaseToExternalService).not.toBeCalled();
+    expect(pushCaseToExternalService).not.toHaveBeenCalled();
   });
 
   it('refresh case view page after push', async () => {

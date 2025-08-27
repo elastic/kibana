@@ -341,13 +341,13 @@ describe('Cookie based SessionStorage', () => {
         true
       );
 
-      expect(mockServer.register).toBeCalledTimes(1);
-      expect(mockServer.auth.strategy).toBeCalledTimes(1);
+      expect(mockServer.register).toHaveBeenCalledTimes(1);
+      expect(mockServer.auth.strategy).toHaveBeenCalledTimes(1);
 
       const session = await factory.asScoped(mockRequest).get();
       expect(session).toBe(null);
 
-      expect(mockServer.auth.test).toBeCalledTimes(1);
+      expect(mockServer.auth.test).toHaveBeenCalledTimes(1);
       expect(mockServer.auth.test).toHaveBeenCalledWith(
         'security-cookie',
         ensureRawRequest(mockRequest)
@@ -382,13 +382,13 @@ describe('Cookie based SessionStorage', () => {
         true
       );
 
-      expect(mockServer.register).toBeCalledTimes(1);
-      expect(mockServer.auth.strategy).toBeCalledTimes(1);
+      expect(mockServer.register).toHaveBeenCalledTimes(1);
+      expect(mockServer.auth.strategy).toHaveBeenCalledTimes(1);
 
       const session = await factory.asScoped(mockRequest).get();
       expect(session).toBe('foo');
 
-      expect(mockServer.auth.test).toBeCalledTimes(1);
+      expect(mockServer.auth.test).toHaveBeenCalledTimes(1);
       expect(mockServer.auth.test).toHaveBeenCalledWith(
         'security-cookie',
         ensureRawRequest(mockRequest)
@@ -422,13 +422,13 @@ describe('Cookie based SessionStorage', () => {
         true
       );
 
-      expect(mockServer.register).toBeCalledTimes(1);
-      expect(mockServer.auth.strategy).toBeCalledTimes(1);
+      expect(mockServer.register).toHaveBeenCalledTimes(1);
+      expect(mockServer.auth.strategy).toHaveBeenCalledTimes(1);
 
       const session = await factory.asScoped(mockRequest).get();
       expect(session).toBe('foo');
 
-      expect(mockServer.auth.test).toBeCalledTimes(1);
+      expect(mockServer.auth.test).toHaveBeenCalledTimes(1);
       expect(mockServer.auth.test).toHaveBeenCalledWith(
         'security-cookie',
         ensureRawRequest(mockRequest)
@@ -455,8 +455,8 @@ describe('Cookie based SessionStorage', () => {
         true
       );
 
-      expect(mockServer.register).toBeCalledTimes(1);
-      expect(mockServer.auth.strategy).toBeCalledTimes(1);
+      expect(mockServer.register).toHaveBeenCalledTimes(1);
+      expect(mockServer.auth.strategy).toHaveBeenCalledTimes(1);
 
       const session = await factory.asScoped(mockRequest).get();
       expect(session).toBe(null);

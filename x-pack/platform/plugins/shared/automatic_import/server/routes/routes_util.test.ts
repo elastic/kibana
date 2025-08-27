@@ -21,7 +21,7 @@ describe('handleError', () => {
     }).toThrow(RecursionLimitError);
     expect(() => {
       handleCustomErrors(recursionError, errorCode);
-    }).toThrowError(errorMessage);
+    }).toThrow(errorMessage);
   });
 
   it('should rethrow the error when given an error that is not a GraphRecursionError', () => {
@@ -34,6 +34,6 @@ describe('handleError', () => {
     }).toThrow(otherError);
     expect(() => {
       handleCustomErrors(otherError, errorCode);
-    }).toThrowError(errorMessage);
+    }).toThrow(errorMessage);
   });
 });

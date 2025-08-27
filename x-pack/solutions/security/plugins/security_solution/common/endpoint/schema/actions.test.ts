@@ -810,7 +810,7 @@ describe('actions schemas', () => {
           endpoint_ids: ['endpoint_id'],
           parameters: { path: ' ' },
         });
-      }).toThrowError('path cannot be an empty string');
+      }).toThrow('path cannot be an empty string');
     });
 
     it('should not accept when payload does not match', () => {
@@ -819,7 +819,7 @@ describe('actions schemas', () => {
           endpoint_ids: ['endpoint_id'],
           path: 'some/path',
         });
-      }).toThrowError('[parameters.path]: expected value of type [string] but got [undefined]');
+      }).toThrow('[parameters.path]: expected value of type [string] but got [undefined]');
     });
 
     it('should accept path in payload if not empty', () => {

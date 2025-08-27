@@ -273,9 +273,7 @@ describe('SecureSpacesClientWrapper', () => {
           } as CheckPrivilegesResponse);
           authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpaces: checkPrivileges });
 
-          await expect(wrapper.getAll({ purpose: scenario.purpose })).rejects.toThrowError(
-            'Forbidden'
-          );
+          await expect(wrapper.getAll({ purpose: scenario.purpose })).rejects.toThrow('Forbidden');
 
           expect(baseClient.getAll).toHaveBeenCalledWith({ purpose: scenario.purpose ?? 'any' });
           expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);

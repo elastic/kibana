@@ -700,7 +700,7 @@ describe('SavedObjectsRepository Security Extension', () => {
 
     test(`throws an error when unauthorized`, async () => {
       setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'unauthorized');
-      await expect(repository.openPointInTimeForType(type)).rejects.toThrowError();
+      await expect(repository.openPointInTimeForType(type)).rejects.toThrow();
     });
 
     test(`calls authorizeOpenPointInTime with correct parameters`, async () => {
@@ -951,7 +951,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledTimes(
         generatedResults.hits.hits.length
       );
-      expect(mockSecurityExt.redactNamespaces).toBeCalledWith(
+      expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledWith(
         expect.objectContaining({
           typeMap: authMap,
         })

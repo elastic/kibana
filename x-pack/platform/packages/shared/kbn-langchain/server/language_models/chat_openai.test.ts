@@ -171,7 +171,7 @@ describe('ActionsClientChatOpenAI', () => {
         });
 
         expect(actionsClientChatOpenAI.completionWithRetry(defaultNonStreamingArgs))
-          .rejects.toThrowError(
+          .rejects.toThrow(
             'ActionsClientChatOpenAI: action result status is error: action-result-message - action-result-service-message'
           )
           .catch(() => {

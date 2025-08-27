@@ -72,6 +72,6 @@ describe('ExceptionsAddToRulesTable', () => {
     const selectedRow = getByText('My rule').closest('tr') as HTMLTableRowElement;
     const selectedSwitch = within(selectedRow).getByRole('switch');
     fireEvent.click(selectedSwitch);
-    expect(onRuleSelectionChangeMock).toBeCalledWith([rule]);
+    expect(onRuleSelectionChangeMock).toHaveBeenCalledWith([rule]);
   });
 });

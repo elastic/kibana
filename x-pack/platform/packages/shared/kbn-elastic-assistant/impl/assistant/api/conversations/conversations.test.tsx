@@ -45,7 +45,7 @@ describe('conversations api', () => {
     http.fetch.mockRejectedValue(new Error('this is an error'));
     const deleteProps = { http, toasts, id: 'test' } as unknown as DeleteConversationParams;
 
-    await expect(deleteConversation(deleteProps)).rejects.toThrowError('this is an error');
+    await expect(deleteConversation(deleteProps)).rejects.toThrow('this is an error');
     expect(toasts.addError).toHaveBeenCalled();
   });
 
@@ -69,7 +69,7 @@ describe('conversations api', () => {
     http.fetch.mockRejectedValue(new Error('this is an error'));
     const getProps = { http, toasts, id: 'test' } as unknown as GetConversationByIdParams;
 
-    await expect(getConversationById(getProps)).rejects.toThrowError('this is an error');
+    await expect(getConversationById(getProps)).rejects.toThrow('this is an error');
     expect(toasts.addError).toHaveBeenCalled();
   });
 });

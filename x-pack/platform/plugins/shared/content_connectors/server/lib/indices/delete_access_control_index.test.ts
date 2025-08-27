@@ -56,7 +56,7 @@ describe('deleteAccessControlIndex lib function', () => {
       });
       await expect(
         deleteAccessControlIndex(mockClient as unknown as IScopedClusterClient, 'indexName')
-      ).resolves.not.toThrowError();
+      ).resolves.not.toThrow();
       expect(mockClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
         index: '.search-acl-filter-indexName',
       });

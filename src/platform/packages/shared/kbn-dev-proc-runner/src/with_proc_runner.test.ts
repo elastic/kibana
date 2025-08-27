@@ -35,7 +35,7 @@ it('calls procRunner.teardown() if function throw synchronous error, and rejects
       teardownSpy = jest.spyOn(proc, 'teardown');
       throw error;
     })
-  ).rejects.toThrowError(error);
+  ).rejects.toThrow(error);
 
   expect(teardownSpy).toHaveBeenCalled();
 });
@@ -62,7 +62,7 @@ it('waits for promise to reject before tearing down proc and rejecting with the 
       teardownSpy = jest.spyOn(proc, 'teardown');
       throw error;
     })
-  ).rejects.toThrowError(error);
+  ).rejects.toThrow(error);
 
   expect(teardownSpy).not.toBe(undefined);
   expect(teardownSpy).toHaveBeenCalled();

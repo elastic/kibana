@@ -52,7 +52,7 @@ describe('Get SLO Instances', () => {
         instanceId: 'irrelevant',
         groupingKey: 'irrelevant',
       })
-    ).rejects.toThrowError('Ungrouped SLO cannot be queried for available groupings');
+    ).rejects.toThrow('Ungrouped SLO cannot be queried for available groupings');
   });
 
   it('throws when the provided groupingKey is not part of the SLO groupBy field', async () => {
@@ -71,7 +71,7 @@ describe('Get SLO Instances', () => {
         instanceId: 'irrelevant',
         groupingKey: 'not.found',
       })
-    ).rejects.toThrowError("Provided groupingKey doesn't match the SLO's groupBy field");
+    ).rejects.toThrow("Provided groupingKey doesn't match the SLO's groupBy field");
   });
 
   it('throws when the provided instanceId cannot be matched against the SLO grouping keys', async () => {
@@ -90,6 +90,6 @@ describe('Get SLO Instances', () => {
         instanceId: 'too,many,values',
         groupingKey: 'host.name',
       })
-    ).rejects.toThrowError('Provided instanceId does not match the number of grouping keys');
+    ).rejects.toThrow('Provided instanceId does not match the number of grouping keys');
   });
 });

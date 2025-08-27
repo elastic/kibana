@@ -167,7 +167,7 @@ describe('<ComponentTemplateEdit />', () => {
         })
       );
       // Mapping rollout modal should not be opened if the component template is not managed
-      expect(coreStart.overlays.openModal).not.toBeCalled();
+      expect(coreStart.overlays.openModal).not.toHaveBeenCalled();
     });
   });
 
@@ -232,7 +232,7 @@ describe('<ComponentTemplateEdit />', () => {
         expect.anything()
       );
 
-      expect(coreStart.overlays.openModal).toBeCalled();
+      expect(coreStart.overlays.openModal).toHaveBeenCalled();
     });
 
     it('should not show mappings rollover modal on save if apply mappings call succeed', async () => {
@@ -270,7 +270,7 @@ describe('<ComponentTemplateEdit />', () => {
         expect.anything()
       );
 
-      expect(coreStart.overlays.openModal).not.toBeCalled();
+      expect(coreStart.overlays.openModal).not.toHaveBeenCalled();
     });
 
     it('should show mappings rollover modal on save if referenced index template is managed and packaged', async () => {
@@ -341,7 +341,7 @@ describe('<ComponentTemplateEdit />', () => {
         expect.anything()
       );
 
-      expect(coreStart.overlays.openModal).toBeCalled();
+      expect(coreStart.overlays.openModal).toHaveBeenCalled();
     });
   });
 });

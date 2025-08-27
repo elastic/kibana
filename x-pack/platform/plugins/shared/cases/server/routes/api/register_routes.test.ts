@@ -170,7 +170,7 @@ describe('registerRoutes', () => {
         const [method, path] = endpoint;
 
         expect(router[method]).toHaveBeenCalledTimes(1);
-        expect(router[method]).toBeCalledWith(
+        expect(router[method]).toHaveBeenCalledWith(
           { path, validate: expect.anything() },
           expect.anything()
         );
@@ -304,13 +304,13 @@ describe('registerRoutes', () => {
     it('logs the error', async () => {
       await initAndSimulateError();
 
-      expect(logger.error).toBeCalledWith('API error');
+      expect(logger.error).toHaveBeenCalledWith('API error');
     });
 
     it('returns an error response', async () => {
       await initAndSimulateError();
 
-      expect(customError).toBeCalledWith({
+      expect(customError).toHaveBeenCalledWith({
         body: expect.anything(),
         headers: {},
         statusCode: 500,
@@ -325,7 +325,7 @@ describe('registerRoutes', () => {
         context: {} as CasesRequestHandlerContext,
       });
 
-      expect(badRequest).toBeCalledWith({
+      expect(badRequest).toHaveBeenCalledWith({
         body: 'RouteHandlerContext is not registered for cases',
       });
     });

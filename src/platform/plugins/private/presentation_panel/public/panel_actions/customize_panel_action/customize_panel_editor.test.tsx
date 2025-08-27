@@ -78,7 +78,7 @@ describe('customize panel editor', () => {
       renderPanelEditor();
       await userEvent.type(screen.getByTestId('customEmbeddablePanelTitleInput'), 'New title');
       await userEvent.click(screen.getByTestId('saveCustomizePanelButton'));
-      expect(setTitle).toBeCalledWith('New title');
+      expect(setTitle).toHaveBeenCalledWith('New title');
     });
 
     it('should use default title when title is undefined', () => {
@@ -162,7 +162,7 @@ describe('customize panel editor', () => {
         'New description'
       );
       await userEvent.click(screen.getByTestId('saveCustomizePanelButton'));
-      expect(setDescription).toBeCalledWith('New description');
+      expect(setDescription).toHaveBeenCalledWith('New description');
     });
 
     it('should use default description when description is undefined', () => {

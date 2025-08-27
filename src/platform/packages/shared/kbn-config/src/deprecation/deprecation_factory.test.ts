@@ -113,7 +113,7 @@ describe('DeprecationFactory', () => {
         context
       );
       expect(commands).toBeUndefined();
-      expect(addDeprecation).toBeCalledTimes(0);
+      expect(addDeprecation).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -170,7 +170,7 @@ describe('DeprecationFactory', () => {
         context
       );
       expect(commands).toBeUndefined();
-      expect(addDeprecation).toBeCalledTimes(0);
+      expect(addDeprecation).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -419,7 +419,7 @@ describe('DeprecationFactory', () => {
         context
       );
       expect(commands).toBeUndefined();
-      expect(addDeprecation).toBeCalledTimes(0);
+      expect(addDeprecation).toHaveBeenCalledTimes(0);
     });
 
     it('remove the old property but does not overrides the new one if they both exist, and logs a specific message', () => {
@@ -552,7 +552,7 @@ describe('DeprecationFactory', () => {
         context
       );
       expect(commands).toBeUndefined();
-      expect(addDeprecation).toBeCalledTimes(0);
+      expect(addDeprecation).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -611,7 +611,7 @@ describe('DeprecationFactory', () => {
         context
       );
       expect(commands).toBeUndefined();
-      expect(addDeprecation).toBeCalledTimes(0);
+      expect(addDeprecation).toHaveBeenCalledTimes(0);
     });
   });
 });

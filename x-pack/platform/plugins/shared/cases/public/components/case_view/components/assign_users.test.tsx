@@ -159,7 +159,7 @@ describe('AssignUsers', () => {
 
     fireEvent.click(screen.getByText('assign yourself'));
 
-    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
+    await waitFor(() => expect(onAssigneesChanged).toHaveBeenCalledTimes(1));
 
     expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -196,7 +196,7 @@ describe('AssignUsers', () => {
       )
     );
 
-    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
+    await waitFor(() => expect(onAssigneesChanged).toHaveBeenCalledTimes(1));
 
     expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`Array []`);
   });
@@ -222,7 +222,7 @@ describe('AssignUsers', () => {
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverClose();
 
-    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
+    await waitFor(() => expect(onAssigneesChanged).toHaveBeenCalledTimes(1));
 
     expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -257,7 +257,7 @@ describe('AssignUsers', () => {
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverClose();
 
-    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(0));
+    await waitFor(() => expect(onAssigneesChanged).toHaveBeenCalledTimes(0));
   });
 
   it('calls onAssigneesChanged without unknownId1', async () => {
@@ -273,7 +273,7 @@ describe('AssignUsers', () => {
     fireEvent.mouseEnter(screen.getByTestId(`user-profile-assigned-user-unknownId1-remove-group`));
     fireEvent.click(screen.getByTestId(`user-profile-assigned-user-unknownId1-remove-button`));
 
-    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
+    await waitFor(() => expect(onAssigneesChanged).toHaveBeenCalledTimes(1));
 
     expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -323,7 +323,7 @@ describe('AssignUsers', () => {
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverClose();
 
-    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
+    await waitFor(() => expect(onAssigneesChanged).toHaveBeenCalledTimes(1));
 
     expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -370,7 +370,7 @@ describe('AssignUsers', () => {
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverClose();
 
-    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
+    await waitFor(() => expect(onAssigneesChanged).toHaveBeenCalledTimes(1));
 
     expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [

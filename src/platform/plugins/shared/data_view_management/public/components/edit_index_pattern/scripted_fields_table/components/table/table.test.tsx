@@ -88,7 +88,7 @@ describe('Table', () => {
 
     // Click the delete button
     component.prop('columns')[4].actions[0].onClick();
-    expect(editField).toBeCalled();
+    expect(editField).toHaveBeenCalled();
   });
 
   test('should allow deletes', () => {
@@ -106,7 +106,7 @@ describe('Table', () => {
 
     // Click the delete button
     component.prop('columns')[4].actions[1].onClick();
-    expect(deleteField).toBeCalled();
+    expect(deleteField).toHaveBeenCalled();
   });
 
   test('should not allow edit or deletion for user with only read access', () => {

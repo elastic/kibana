@@ -120,7 +120,7 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 };
 
 const expectLogsLocatorToBeCalled = () => {
-  expect(logsLocatorMock.getRedirectUrl).toBeCalled();
+  expect(logsLocatorMock.getRedirectUrl).toHaveBeenCalled();
 };
 
 let useAdHocApmDataViewSpy: jest.SpyInstance;

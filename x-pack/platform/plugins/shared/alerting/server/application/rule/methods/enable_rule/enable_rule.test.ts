@@ -238,7 +238,7 @@ describe('enable()', () => {
         namespace: 'default',
       }
     );
-    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith(
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalledWith(
       API_KEY_PENDING_INVALIDATION_TYPE
     );
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -300,7 +300,7 @@ describe('enable()', () => {
         namespace: 'default',
       }
     );
-    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith(
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalledWith(
       API_KEY_PENDING_INVALIDATION_TYPE
     );
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name');

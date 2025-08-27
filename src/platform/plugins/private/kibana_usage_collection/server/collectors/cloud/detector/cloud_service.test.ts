@@ -116,15 +116,15 @@ describe('CloudService', () => {
       expect(() =>
         service._parseResponse(JSON.stringify(body), parseBody)
       ).toThrowErrorMatchingInlineSnapshot(`"Unable to handle body"`);
-      expect(parseBody).toBeCalledTimes(1);
-      expect(parseBody).toBeCalledWith(body);
+      expect(parseBody).toHaveBeenCalledTimes(1);
+      expect(parseBody).toHaveBeenCalledWith(body);
       parseBody.mockClear();
 
       expect(() => service._parseResponse(body, parseBody)).toThrowErrorMatchingInlineSnapshot(
         `"Unable to handle body"`
       );
-      expect(parseBody).toBeCalledTimes(1);
-      expect(parseBody).toBeCalledWith(body);
+      expect(parseBody).toHaveBeenCalledTimes(1);
+      expect(parseBody).toHaveBeenCalledWith(body);
     });
 
     it('uses parsed object to create response', async () => {
@@ -132,7 +132,7 @@ describe('CloudService', () => {
       const parseBody = jest.fn().mockReturnValue(serviceResponse);
 
       const response = await service._parseResponse(body, parseBody);
-      expect(parseBody).toBeCalledWith(body);
+      expect(parseBody).toHaveBeenCalledWith(body);
       expect(response).toBe(serviceResponse);
     });
 
@@ -141,7 +141,7 @@ describe('CloudService', () => {
       const parseBody = jest.fn().mockReturnValue(serviceResponse);
 
       const response = await service._parseResponse(JSON.stringify(body), parseBody);
-      expect(parseBody).toBeCalledWith(body);
+      expect(parseBody).toHaveBeenCalledWith(body);
       expect(response).toBe(serviceResponse);
     });
   });

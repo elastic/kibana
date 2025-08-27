@@ -53,6 +53,6 @@ describe('postEvaluation', () => {
       evalParams,
     };
 
-    await expect(postEvaluation(evaluationArgs)).rejects.toThrowError('simulated error');
+    await expect(postEvaluation(evaluationArgs)).rejects.toThrow('simulated error');
   });
 });

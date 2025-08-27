@@ -47,7 +47,7 @@ describe('toolMatchSelection', () => {
 
   it('should throw an error for invalid tool selection type', () => {
     const toolSelection: any = { invalid: true };
-    expect(() => toolMatchSelection(tool, toolSelection)).toThrowError(/Invalid tool selection/);
+    expect(() => toolMatchSelection(tool, toolSelection)).toThrow(/Invalid tool selection/);
   });
 });
 

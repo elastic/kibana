@@ -56,7 +56,7 @@ describe('saved_objects_count_collector', () => {
       others: 0,
     });
 
-    expect(mockGetSoClientWithHiddenIndices).toBeCalledTimes(1);
+    expect(mockGetSoClientWithHiddenIndices).toHaveBeenCalledTimes(1);
   });
 
   test('should return some values when the aggregations return something', async () => {
@@ -87,7 +87,7 @@ describe('saved_objects_count_collector', () => {
       total: 153,
     });
 
-    expect(mockGetSoClientWithHiddenIndices).toBeCalledTimes(1);
+    expect(mockGetSoClientWithHiddenIndices).toHaveBeenCalledTimes(1);
     expect(getSavedObjectsCountsMock).toHaveBeenCalledWith(
       fetchContextMock.soClient,
       ['type_one', 'type_two', 'type-three', 'type-four'],

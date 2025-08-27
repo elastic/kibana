@@ -101,7 +101,7 @@ describe('Transform: <DefinePivotForm />', () => {
     await waitFor(() => {
       expect(getByText('Data view')).toBeInTheDocument();
       expect(getByText(searchItems.dataView.getIndexPattern())).toBeInTheDocument();
-      expect(mockOnChange).toBeCalled();
+      expect(mockOnChange).toHaveBeenCalled();
     });
   }, 10000);
 });

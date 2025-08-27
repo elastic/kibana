@@ -68,13 +68,13 @@ describe('Fleet artifacts card', () => {
     expect(component.getByText('Manage')).not.toBeNull();
   });
   it('should render an error toast when api call fails', async () => {
-    expect(addDanger).toBeCalledTimes(0);
+    expect(addDanger).toHaveBeenCalledTimes(0);
     mockedApi.responseProvider.eventFiltersGetSummary.mockImplementation(() => {
       throw new Error('error getting summary');
     });
     const component = await render();
     expect(component.getByText('Event filters')).not.toBeNull();
     expect(component.getByText('Manage')).not.toBeNull();
-    await waitFor(() => expect(addDanger).toBeCalledTimes(1));
+    await waitFor(() => expect(addDanger).toHaveBeenCalledTimes(1));
   });
 });

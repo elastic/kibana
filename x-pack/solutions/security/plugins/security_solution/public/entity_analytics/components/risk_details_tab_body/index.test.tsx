@@ -56,7 +56,7 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
         <RiskDetailsTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseRiskScore).toBeCalledWith({
+    expect(mockUseRiskScore).toHaveBeenCalledWith({
       filterQuery: {
         terms: {
           [`${riskEntity}.name`]: ['testEntity'],

@@ -75,7 +75,7 @@ describe('<KeyValuePairsField />', () => {
     await waitFor(() => {
       expect(newRowKey.value).toEqual('');
       expect(newRowValue.value).toEqual('');
-      expect(onChange).toBeCalledWith([[newRowKey.value, newRowValue.value]]);
+      expect(onChange).toHaveBeenCalledWith([[newRowKey.value, newRowValue.value]]);
     });
 
     fireEvent.change(newRowKey, { target: { value: 'newKey' } });
@@ -84,7 +84,7 @@ describe('<KeyValuePairsField />', () => {
     await waitFor(() => {
       expect(newRowKey.value).toEqual('newKey');
       expect(newRowValue.value).toEqual('newValue');
-      expect(onChange).toBeCalledWith([[newRowKey.value, newRowValue.value]]);
+      expect(onChange).toHaveBeenCalledWith([[newRowKey.value, newRowValue.value]]);
     });
   });
 });

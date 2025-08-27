@@ -124,8 +124,8 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
-      expect(mockSavedObjectClient.create).toBeCalledWith(
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockSavedObjectClient.create).toHaveBeenCalledWith(
         'policy-settings-protection-updates-note',
         { note: 'note' },
         {
@@ -158,8 +158,10 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
-      expect(mockSavedObjectClient.update).toBeCalledWith(...mockedSOSuccessfulUpdateResponse);
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
+        ...mockedSOSuccessfulUpdateResponse
+      );
     });
 
     it('should return the note if one exists', async () => {
@@ -178,7 +180,7 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as { note: string };
       expect(result.note).toEqual('note');
     });
@@ -199,7 +201,7 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.notFound).toBeCalled();
+      expect(mockResponse.notFound).toHaveBeenCalled();
     });
 
     describe('with space awareness enabled', () => {
@@ -229,7 +231,7 @@ describe('test protection updates note handler', () => {
           mockRequest,
           mockResponse
         );
-        expect(mockEnsureInCurrentSpace).toBeCalledWith({
+        expect(mockEnsureInCurrentSpace).toHaveBeenCalledWith({
           integrationPolicyIds: ['integration-policy-id'],
         });
       });

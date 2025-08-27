@@ -114,7 +114,7 @@ describe('actions_connectors_list', () => {
       const createFirstActionButton = await screen.findByTestId('createFirstActionButton');
       await userEvent.click(createFirstActionButton);
       await waitFor(() => {
-        expect(setAddFlyoutVisibility).toBeCalled();
+        expect(setAddFlyoutVisibility).toHaveBeenCalled();
       });
     });
   });
@@ -398,7 +398,10 @@ describe('actions_connectors_list', () => {
 
       await setup();
 
-      expect(mockedEditItem).toBeCalledWith(selectedConnector, EditConnectorTabs.Configuration);
+      expect(mockedEditItem).toHaveBeenCalledWith(
+        selectedConnector,
+        EditConnectorTabs.Configuration
+      );
       expect(mockedCreateHref).toHaveBeenCalledWith({ pathname: '/connectors' });
       expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/connectors');
       replaceStateSpy.mockRestore();
@@ -545,7 +548,7 @@ describe('actions_connectors_list', () => {
         wrapper.update();
       });
       wrapper.find('[data-test-subj="edit1"]').first().find('button').simulate('click');
-      expect(editItem).toBeCalled();
+      expect(editItem).toHaveBeenCalled();
     });
   });
   describe('component empty with show only capability', () => {

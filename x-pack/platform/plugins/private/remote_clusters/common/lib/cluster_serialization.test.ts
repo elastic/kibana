@@ -12,7 +12,7 @@ describe('cluster_serialization', () => {
   describe('deserializeCluster()', () => {
     it('should throw an error for invalid arguments', () => {
       // @ts-ignore
-      expect(() => deserializeCluster('foo', 'bar')).toThrowError();
+      expect(() => deserializeCluster('foo', 'bar')).toThrow();
     });
 
     it('should deserialize a complete default cluster object', () => {
@@ -307,7 +307,7 @@ describe('cluster_serialization', () => {
   describe('serializeCluster()', () => {
     it('should throw an error for invalid arguments', () => {
       // @ts-ignore
-      expect(() => serializeCluster('foo')).toThrowError();
+      expect(() => serializeCluster('foo')).toThrow();
     });
 
     it('should serialize a cluster that has a deprecated proxy setting', () => {

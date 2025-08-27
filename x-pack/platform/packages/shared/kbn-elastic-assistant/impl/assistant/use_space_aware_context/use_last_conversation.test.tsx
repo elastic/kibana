@@ -57,7 +57,7 @@ describe('useAssistantLastConversation', () => {
   ])('useLocalStorage is called with keys with correct spaceId', ({ expected }) => {
     test(`local storage key: ${expected}`, () => {
       renderHook(() => useAssistantLastConversation({ spaceId }));
-      expect(useLocalStorage).toBeCalledWith(expected);
+      expect(useLocalStorage).toHaveBeenCalledWith(expected);
     });
   });
 });

@@ -82,6 +82,6 @@ describe('validateParamsForWarnings', () => {
         value: '{{',
         actionVariables,
       })
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 });

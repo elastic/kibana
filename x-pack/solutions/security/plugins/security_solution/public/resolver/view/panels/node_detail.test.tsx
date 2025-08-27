@@ -68,7 +68,7 @@ describe('<NodeDetailView />', () => {
     );
     expect(getByTestId('resolver:node-detail:title-link')).toBeInTheDocument();
     getByTestId('resolver:node-detail:title-link').click();
-    expect(nodeEventOnClick).toBeCalledWith({
+    expect(nodeEventOnClick).toHaveBeenCalledWith({
       documentId: 'test_id',
       indexName: '_index',
       scopeId: 'test',

@@ -79,6 +79,6 @@ describe('renderApp', () => {
         },
       });
       unmount();
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 });

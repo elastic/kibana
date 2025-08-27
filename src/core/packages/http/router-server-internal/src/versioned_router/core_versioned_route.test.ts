@@ -136,9 +136,7 @@ describe('Versioned route', () => {
         .addVersion({ version: '1', validate: false }, handlerFn)
         .addVersion({ version: '1', validate: false }, handlerFn)
         .addVersion({ version: '3', validate: false }, handlerFn)
-    ).toThrowError(
-      `Version "1" handler has already been registered for the route [get] [/test/{id}]`
-    );
+    ).toThrow(`Version "1" handler has already been registered for the route [get] [/test/{id}]`);
   });
 
   it('only allows versions that are numbers greater than 0 for internal APIs', () => {
@@ -154,7 +152,7 @@ describe('Versioned route', () => {
           },
         })
         .addVersion({ version: 'foo' as ApiVersion, validate: false }, handlerFn)
-    ).toThrowError(`Invalid version number`);
+    ).toThrow(`Invalid version number`);
     expect(() =>
       versionedRouter
         .get({
@@ -167,7 +165,7 @@ describe('Versioned route', () => {
           },
         })
         .addVersion({ version: '-1', validate: false }, handlerFn)
-    ).toThrowError(`Invalid version number`);
+    ).toThrow(`Invalid version number`);
     expect(() =>
       versionedRouter
         .get({
@@ -180,7 +178,7 @@ describe('Versioned route', () => {
           },
         })
         .addVersion({ version: '1.1', validate: false }, handlerFn)
-    ).toThrowError(`Invalid version number`);
+    ).toThrow(`Invalid version number`);
     expect(() =>
       versionedRouter
         .get({
@@ -209,7 +207,7 @@ describe('Versioned route', () => {
           },
         })
         .addVersion({ version: '1-1-2020' as ApiVersion, validate: false }, handlerFn)
-    ).toThrowError(/Invalid version/);
+    ).toThrow(/Invalid version/);
     expect(() =>
       versionedRouter
         .get({
@@ -222,7 +220,7 @@ describe('Versioned route', () => {
           },
         })
         .addVersion({ version: '', validate: false }, handlerFn)
-    ).toThrowError(/Invalid version/);
+    ).toThrow(/Invalid version/);
     expect(() =>
       versionedRouter
         .get({
@@ -235,7 +233,7 @@ describe('Versioned route', () => {
           },
         })
         .addVersion({ version: 'abc', validate: false }, handlerFn)
-    ).toThrowError(/Invalid version/);
+    ).toThrow(/Invalid version/);
     expect(() =>
       versionedRouter
         .get({

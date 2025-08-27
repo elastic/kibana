@@ -58,7 +58,7 @@ describe('FormFields ', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           label: 'hello',
           type: CustomFieldTypes.TOGGLE,

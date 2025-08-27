@@ -874,7 +874,7 @@ describe('Jira service', () => {
         throw error;
       });
 
-      await expect(service.getFieldsByIssueType('10006')).rejects.toThrowError(
+      await expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
         '[Action][Jira]: Unable to get fields. Error: An error has occurred. Reason: Could not get issue types'
       );
     });

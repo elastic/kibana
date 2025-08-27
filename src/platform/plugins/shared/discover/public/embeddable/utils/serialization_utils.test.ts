@@ -81,7 +81,7 @@ describe('Serialization utils', () => {
         discoverServices: discoverServiceMock,
       });
 
-      expect(discoverServiceMock.savedSearch.byValueToSavedSearch).toBeCalledWith(
+      expect(discoverServiceMock.savedSearch.byValueToSavedSearch).toHaveBeenCalledWith(
         serializedState.rawState,
         true // should be serializable
       );

@@ -25,7 +25,7 @@ describe('ApmFetchAgentslatestsVersion', () => {
     );
 
     await expect(fetchAgentsLatestVersion(logger, '')).rejects.toThrow(boom);
-    expect(fetchMock).toBeCalledTimes(0);
+    expect(fetchMock).toHaveBeenCalledTimes(0);
   });
 
   describe('when url is defined', () => {
@@ -38,7 +38,7 @@ describe('ApmFetchAgentslatestsVersion', () => {
 
       const { data, error } = await fetchAgentsLatestVersion(logger, 'my-url');
 
-      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(data).toEqual({});
       expect(error?.statusCode).toEqual('408');
     });
@@ -54,7 +54,7 @@ describe('ApmFetchAgentslatestsVersion', () => {
 
       const { data, error } = await fetchAgentsLatestVersion(logger, 'my-url');
 
-      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(data).toEqual({ java: '1.1.0' });
       expect(error).toBeFalsy();
     });

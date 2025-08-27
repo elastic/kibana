@@ -107,7 +107,7 @@ describe('fake elasticsearch', () => {
   });
 
   test('should fail to start Kibana because of the Product Check Error', async () => {
-    await expect(kibanaServer.start()).rejects.toThrowError(
+    await expect(kibanaServer.start()).rejects.toThrow(
       'The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
     );
   });

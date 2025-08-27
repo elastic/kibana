@@ -308,7 +308,7 @@ describe('AddToCaseComment', () => {
       />
     );
 
-    expect(onCommentChangeMock).not.toBeCalledWith(expect.any(Function));
+    expect(onCommentChangeMock).not.toHaveBeenCalledWith(expect.any(Function));
 
     expect(screen.getByText('Existing comment')).toBeInTheDocument();
 
@@ -317,7 +317,7 @@ describe('AddToCaseComment', () => {
     const handleStreamingUpdate = usePageSummarySpy.mock.calls[0]![0]!.onChunk!;
     handleStreamingUpdate(' Partial summary');
 
-    expect(onCommentChangeMock).toBeCalledWith(expect.any(Function));
+    expect(onCommentChangeMock).toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('calls notifications.toasts.addError when errors are present', () => {

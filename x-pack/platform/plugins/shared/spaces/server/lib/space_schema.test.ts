@@ -34,7 +34,7 @@ describe('#id', () => {
         ...defaultProperties,
         id: 'abcdefghijklmnopqrstuvwxyz0123456789_-',
       })
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test(`doesn't allow uppercase`, () => {
@@ -67,7 +67,7 @@ describe('#id', () => {
             ...defaultProperties,
             id: `foo-${invalidCharacter}`,
           })
-        ).toThrowError();
+        ).toThrow();
       });
     }
   );
@@ -80,7 +80,7 @@ describe('#disabledFeatures', () => {
         ...defaultProperties,
         disabledFeatures: undefined,
       })
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test('defaults to an empty array', () => {
@@ -108,7 +108,7 @@ describe('#disabledFeatures', () => {
         ...defaultProperties,
         disabledFeatures: ['foo', 'bar'],
       })
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test('does not allow an array containing non-string elements', () => {
@@ -130,7 +130,7 @@ describe('#color', () => {
         ...defaultProperties,
         color: undefined,
       })
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test(`doesn't allow an empty string`, () => {
@@ -150,7 +150,7 @@ describe('#color', () => {
         ...defaultProperties,
         color: '#aabbcc',
       })
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test(`allows upper case hex color code`, () => {
@@ -159,7 +159,7 @@ describe('#color', () => {
         ...defaultProperties,
         color: '#AABBCC',
       })
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test(`allows numeric hex color code`, () => {
@@ -168,7 +168,7 @@ describe('#color', () => {
         ...defaultProperties,
         color: '#123456',
       })
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test(`must start with a hash`, () => {
@@ -212,7 +212,7 @@ describe('#imageUrl', () => {
         ...defaultProperties,
         imageUrl: undefined,
       })
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test(`must start with data:image`, () => {
@@ -231,7 +231,7 @@ describe('#imageUrl', () => {
         imageUrl:
           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTnU1rJkAAAB3klEQVRYR+2WzUrDQBCARzwqehE8ir1WPfgqRRA1bePBXgpe/MGCB9/Aiw+j+ASCB6kotklaEwW1F0WwNSaps9lV69awGzBpDzt8pJP9mXxsmk3ABH2oUEIilJAIJSRCCYlQQiKUkIh4QgY5agZodVjBowFrBktWQzDBU2ykiYaDuQpCYgnl3QunGzM6Z6YF+b5SkcgK1UH/aLbYReQiYL9d9/o+XFop5IU0Vl4uapAzoXC3eEBPw9vH1/wT6Vs2otPSkoH/IZzlzO/TU2vgQm8nl69Hp0H7nZ4OXogLJSSKBIUC3w88n+Ueyfv56fVZnqCQNVnCHbLrkV0Gd2d+GNkglsk438dhaTxloZDutV4wb06Vf40JcWZ2sMttPpE8NaHGeBnzIAhwPXqHseVB11EyLD0hxLUeaYud2a3B0g3k7GyFtrhX7F2RqhC+yV3jgTb2Rqdqf7/kUxYiWBOlTtXxfPJEtc8b5thGb+8AhL4ohnCNqQjZ2T2+K5rnw2M6KwEhKNDSGM3pTdxjhDgLbHkw/v/zw4AiPuSsfMzAiTidKxiF/ArpFqyzK8SMOlkwvloUMYRCtNvZLWeuIomd2Za/WZS4QomjhEQoIRFKSIQSEqGERAyfEH4YDBFQ/ARU6BiBxCAIQQAAAABJRU5ErkJggg==',
       })
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 });
 

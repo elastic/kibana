@@ -269,7 +269,7 @@ describe('ConnectorsDropdown', () => {
           wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
         }
       )
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test('it shows the deprecated tooltip when the connector is deprecated', () => {

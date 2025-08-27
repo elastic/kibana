@@ -10,4 +10,5 @@
 const babelJest = require('babel-jest');
 const transformerConfig = require('./transformer_config');
 
+/** @type {import('@jest/transform').Transformer} */
 module.exports = babelJest.default.createTransformer(transformerConfig);

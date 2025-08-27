@@ -74,7 +74,7 @@ describe('Case Owner Selection', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onOwnerChange).toBeCalledWith('observability');
+      expect(onOwnerChange).toHaveBeenCalledWith('observability');
     });
   });
 });

@@ -269,7 +269,7 @@ describe('PackageService', () => {
           { packageClient: mockPackageService.asScoped(httpServerMock.createKibanaRequest()) },
           testKey
         );
-        await expect(method(...args)).rejects.toThrowError(unauthError);
+        await expect(method(...args)).rejects.toThrow(unauthError);
       });
     });
 

@@ -150,7 +150,7 @@ describe('Fleet proxies service', () => {
     it('should not allow to delete preconfigured proxy', async () => {
       await expect(() =>
         deleteFleetProxy(soClientMock, esClientMock, PROXY_IDS.PRECONFIGURED)
-      ).rejects.toThrowError(/Cannot delete test-preconfigured preconfigured proxy/);
+      ).rejects.toThrow(/Cannot delete test-preconfigured preconfigured proxy/);
     });
 
     it('should allow to delete preconfigured proxy with option fromPreconfiguration:true', async () => {
@@ -158,13 +158,13 @@ describe('Fleet proxies service', () => {
         fromPreconfiguration: true,
       });
 
-      expect(soClientMock.delete).toBeCalled();
+      expect(soClientMock.delete).toHaveBeenCalled();
     });
 
     it('should not allow to delete proxy with related preconfigured saved object', async () => {
       await expect(() =>
         deleteFleetProxy(soClientMock, esClientMock, PROXY_IDS.RELATED_PRECONFIGURED)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         /Cannot delete a proxy used in a preconfigured fleet server hosts or output./
       );
     });
@@ -173,9 +173,9 @@ describe('Fleet proxies service', () => {
       await deleteFleetProxy(soClientMock, esClientMock, PROXY_IDS.RELATED_PRECONFIGURED, {
         fromPreconfiguration: true,
       });
-      expect(mockedOutputService.update).toBeCalled();
-      expect(mockedFleetServerHostService.update).toBeCalled();
-      expect(soClientMock.delete).toBeCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(mockedFleetServerHostService.update).toHaveBeenCalled();
+      expect(soClientMock.delete).toHaveBeenCalled();
     });
   });
 });

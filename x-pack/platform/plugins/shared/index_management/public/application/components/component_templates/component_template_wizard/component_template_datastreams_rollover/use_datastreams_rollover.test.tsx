@@ -64,8 +64,8 @@ describe('useStepFromQueryString', () => {
 
     await showDatastreamRolloverModal('logs-test.data@custom');
 
-    expect(api.postDataStreamMappingsFromTemplate).toBeCalledTimes(1);
-    expect(startServices.overlays.openModal).not.toBeCalled();
+    expect(api.postDataStreamMappingsFromTemplate).toHaveBeenCalledTimes(1);
+    expect(startServices.overlays.openModal).not.toHaveBeenCalled();
   });
 
   it('should show datastream rollover modal if there is an error when updating mappings', async () => {
@@ -92,6 +92,6 @@ describe('useStepFromQueryString', () => {
     } = renderHook(() => useDatastreamsRollover());
 
     await showDatastreamRolloverModal('logs-test.data@custom');
-    expect(startServices.overlays.openModal).toBeCalled();
+    expect(startServices.overlays.openModal).toHaveBeenCalled();
   });
 });

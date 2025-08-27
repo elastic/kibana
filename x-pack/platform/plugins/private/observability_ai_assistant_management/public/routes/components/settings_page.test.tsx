@@ -67,7 +67,7 @@ describe('Settings Page', () => {
       appContextValue,
     });
 
-    expect(coreStartMock.application.navigateToApp).toBeCalledWith('home');
+    expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('home');
   });
 
   it('should render settings and knowledge base tabs', () => {

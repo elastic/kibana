@@ -141,7 +141,7 @@ describe('BedrockConnectorFields renders', () => {
         expect(onSubmit).toHaveBeenCalled();
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: bedrockConnector,
         isValid: true,
       });

@@ -267,7 +267,7 @@ describe('#updateObjectsSpaces', () => {
       const params = setup({ objects, spacesToAdd });
       mockMgetResultsNotFound();
 
-      await expect(() => updateObjectsSpaces(params)).rejects.toThrowError(
+      await expect(() => updateObjectsSpaces(params)).rejects.toThrow(
         SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError()
       );
     });

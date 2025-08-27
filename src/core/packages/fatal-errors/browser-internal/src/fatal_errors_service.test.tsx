@@ -43,7 +43,7 @@ describe('FatalErrorsService', () => {
   describe('add', () => {
     it('should call the `stopCoreSystem` param', () => {
       expect(stopCoreSystem).not.toHaveBeenCalled();
-      expect(() => fatalErrorsSetup.add(new Error('foo'))).toThrowError();
+      expect(() => fatalErrorsSetup.add(new Error('foo'))).toThrow();
       expect(stopCoreSystem).toHaveBeenCalledWith();
     });
 
@@ -63,7 +63,7 @@ describe('FatalErrorsService', () => {
         fatalErrorsSetup.catch(condition, handler);
 
         const renderSpy = jest.spyOn(ReactDOM, 'render').mockImplementation(() => {});
-        expect(() => fatalErrorsSetup.add(new Error('foo'))).toThrowError();
+        expect(() => fatalErrorsSetup.add(new Error('foo'))).toThrow();
         [element] = renderSpy.mock.lastCall as unknown as [ReactElement];
       });
 
@@ -84,7 +84,7 @@ describe('FatalErrorsService', () => {
       });
 
       it('should render a custom error', async () => {
-        expect(() => fatalErrorsSetup.add(new Error('bar'))).toThrowError();
+        expect(() => fatalErrorsSetup.add(new Error('bar'))).toThrow();
         condition.mockReturnValue(true);
         expect(render(element).queryByTestId('customError')).toBeTruthy();
         expect(condition).toHaveBeenCalledTimes(2);
@@ -104,7 +104,7 @@ describe('FatalErrorsService', () => {
       });
 
       it('should not render a custom error when errors are ambiguous', () => {
-        expect(() => fatalErrorsSetup.add(new Error('bar'))).toThrowError();
+        expect(() => fatalErrorsSetup.add(new Error('bar'))).toThrow();
         condition.mockReturnValueOnce(true);
         expect(render(element).queryByTestId('customError')).toBeFalsy();
       });

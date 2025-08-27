@@ -35,7 +35,7 @@ describe('EmptyPromptComponent component', () => {
       const { getByTestId } = render(<EmptyPromptComponent />);
       const link = getByTestId(`add-integrations-${place}`);
       fireEvent.click(link);
-      expect(mockNavigateTo).toBeCalledWith({
+      expect(mockNavigateTo).toHaveBeenCalledWith({
         deepLinkId: SecurityPageName.landing,
         path: `#${OnboardingCardId.integrations}`,
       });

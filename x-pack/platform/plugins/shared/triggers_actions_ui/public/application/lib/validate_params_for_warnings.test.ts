@@ -54,6 +54,6 @@ describe('validateParamsForWarnings', () => {
   });
 
   test('does not throw an error when passing in invalid mustache', () => {
-    expect(() => validateParamsForWarnings('{{', undefined, actionVariables)).not.toThrowError();
+    expect(() => validateParamsForWarnings('{{', undefined, actionVariables)).not.toThrow();
   });
 });

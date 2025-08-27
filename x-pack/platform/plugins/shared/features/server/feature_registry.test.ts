@@ -2057,7 +2057,7 @@ describe('FeatureRegistry', () => {
       };
 
       const featureRegistry = new FeatureRegistry();
-      expect(() => featureRegistry.registerKibanaFeature(feature)).not.toThrowError();
+      expect(() => featureRegistry.registerKibanaFeature(feature)).not.toThrow();
     });
 
     it('does not allow features with both regular and reserved privileges to be hidden', () => {

@@ -77,8 +77,8 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
-    expect(mockedAgentPolicyService.deployPolicies).not.toBeCalled();
+    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toHaveBeenCalledTimes(2);
+    expect(mockedAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
   });
 
   it('should do deploy policies out of sync', async () => {
@@ -107,8 +107,8 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
-    expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
+    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toHaveBeenCalledTimes(2);
+    expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledWith(undefined, [
       { id: 'policy2', spaceId: undefined },
     ]);
   });
@@ -133,8 +133,8 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
-    expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
+    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toHaveBeenCalledTimes(2);
+    expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledWith(undefined, [
       { id: 'policy2', spaceId: undefined },
     ]);
   });

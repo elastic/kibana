@@ -669,27 +669,27 @@ describe('asFiltersBySpaceId', () => {
 
 describe('ensureFieldIsSafeForQuery', () => {
   test('throws if field contains character that isnt safe in a KQL query', () => {
-    expect(() => ensureFieldIsSafeForQuery('id', 'alert-*')).toThrowError(
+    expect(() => ensureFieldIsSafeForQuery('id', 'alert-*')).toThrow(
       `expected id not to include invalid character: *`
     );
 
-    expect(() => ensureFieldIsSafeForQuery('id', '<=""')).toThrowError(
+    expect(() => ensureFieldIsSafeForQuery('id', '<=""')).toThrow(
       `expected id not to include invalid character: <=`
     );
 
-    expect(() => ensureFieldIsSafeForQuery('id', '>=""')).toThrowError(
+    expect(() => ensureFieldIsSafeForQuery('id', '>=""')).toThrow(
       `expected id not to include invalid character: >=`
     );
 
-    expect(() => ensureFieldIsSafeForQuery('id', '1 or alertid:123')).toThrowError(
+    expect(() => ensureFieldIsSafeForQuery('id', '1 or alertid:123')).toThrow(
       `expected id not to include whitespace and invalid character: :`
     );
 
-    expect(() => ensureFieldIsSafeForQuery('id', ') or alertid:123')).toThrowError(
+    expect(() => ensureFieldIsSafeForQuery('id', ') or alertid:123')).toThrow(
       `expected id not to include whitespace and invalid characters: ), :`
     );
 
-    expect(() => ensureFieldIsSafeForQuery('id', 'some space')).toThrowError(
+    expect(() => ensureFieldIsSafeForQuery('id', 'some space')).toThrow(
       `expected id not to include whitespace`
     );
   });

@@ -863,7 +863,7 @@ describe('normalizeCycle', () => {
     [['c', 'a', 'b', 'c']],
     [['a', 'c', 'b', 'a']],
   ])("throws error for invalid cycle format '%s'", (plugins: PluginName[]) => {
-    expect(() => normalizeCycle(plugins)).toThrowError();
+    expect(() => normalizeCycle(plugins)).toThrow();
   });
 });
 

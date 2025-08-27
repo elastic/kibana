@@ -95,7 +95,7 @@ describe('LinksEditor', () => {
       await userEvent.keyboard('test label');
       await userEvent.click(screen.getByTestId('links--linkEditor--saveBtn'));
 
-      expect(defaultProps.onSave).toBeCalledWith({
+      expect(defaultProps.onSave).toHaveBeenCalledWith({
         ...defaultProps.link,
         label: 'test label',
         options: nonDefaultOptions,

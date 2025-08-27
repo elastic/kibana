@@ -294,7 +294,7 @@ describe('fetchCategories', () => {
     });
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));
     await fetchCategories();
-    expect(mockFetchUrl).toBeCalledTimes(1);
+    expect(mockFetchUrl).toHaveBeenCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('capabilities')).toBe('apm,security');
   });
@@ -312,7 +312,7 @@ describe('fetchCategories', () => {
     });
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));
     await fetchCategories();
-    expect(mockFetchUrl).toBeCalledTimes(1);
+    expect(mockFetchUrl).toHaveBeenCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('spec.min')).toBe('3.0');
     expect(callUrl.searchParams.get('spec.max')).toBe('3.0');
@@ -321,7 +321,7 @@ describe('fetchCategories', () => {
     mockGetConfig.mockReturnValue({});
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));
     await fetchCategories();
-    expect(mockFetchUrl).toBeCalledTimes(1);
+    expect(mockFetchUrl).toHaveBeenCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('capabilities')).toBeNull();
   });
@@ -342,7 +342,7 @@ describe('fetchList', () => {
     });
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));
     await fetchList();
-    expect(mockFetchUrl).toBeCalledTimes(1);
+    expect(mockFetchUrl).toHaveBeenCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('capabilities')).toBe('apm,security');
   });
@@ -359,7 +359,7 @@ describe('fetchList', () => {
     });
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));
     await fetchList();
-    expect(mockFetchUrl).toBeCalledTimes(1);
+    expect(mockFetchUrl).toHaveBeenCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('spec.min')).toBe('3.0');
     expect(callUrl.searchParams.get('spec.max')).toBe('3.0');
@@ -369,7 +369,7 @@ describe('fetchList', () => {
     mockGetConfig.mockReturnValue({});
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));
     await fetchList();
-    expect(mockFetchUrl).toBeCalledTimes(1);
+    expect(mockFetchUrl).toHaveBeenCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('capabilities')).toBeNull();
   });
@@ -378,7 +378,7 @@ describe('fetchList', () => {
     mockGetConfig.mockReturnValue({ isAirGapped: true });
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));
     await fetchList();
-    expect(mockFetchUrl).toBeCalledTimes(0);
+    expect(mockFetchUrl).toHaveBeenCalledTimes(0);
   });
 
   it('does call registry with kibana.version if not explictly disabled', async () => {
@@ -389,7 +389,7 @@ describe('fetchList', () => {
     });
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));
     await fetchList();
-    expect(mockFetchUrl).toBeCalledTimes(1);
+    expect(mockFetchUrl).toHaveBeenCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('kibana.version')).not.toBeNull();
   });
@@ -404,7 +404,7 @@ describe('fetchList', () => {
     });
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));
     await fetchList();
-    expect(mockFetchUrl).toBeCalledTimes(1);
+    expect(mockFetchUrl).toHaveBeenCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('kibana.version')).toBeNull();
   });
@@ -501,7 +501,7 @@ describe('getPackage', () => {
     } as any);
 
     mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
-    await expect(getPackage('testpkg', '1.0.1')).rejects.toThrowError(
+    await expect(getPackage('testpkg', '1.0.1')).rejects.toThrow(
       new FleetError('Error fetching package')
     );
   });
@@ -601,7 +601,7 @@ describe('getPackage', () => {
     } as any);
 
     mockGetBundledPackageByName.mockResolvedValue(undefined);
-    await expect(getPackage('testpkg', '1.0.1')).rejects.toThrowError(
+    await expect(getPackage('testpkg', '1.0.1')).rejects.toThrow(
       new PackageNotFoundError('testpkg@1.0.1 not found')
     );
   });

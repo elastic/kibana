@@ -86,7 +86,7 @@ describe('useLoadRuleAggregations', () => {
     rerender();
 
     await waitFor(() => {
-      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
+      expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalledWith(
         expect.objectContaining({
           searchText: '',
           actionTypesFilter: [],
@@ -126,7 +126,7 @@ describe('useLoadRuleAggregations', () => {
     rerender();
 
     await waitFor(() => {
-      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
+      expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalledWith(
         expect.objectContaining({
           searchText: 'test',
           actionTypesFilter: ['action1', 'action2'],
@@ -162,7 +162,7 @@ describe('useLoadRuleAggregations', () => {
     renderHook(() => useLoadRuleAggregations(params), { wrapper });
 
     await waitFor(() =>
-      expect(useKibanaMock().services.notifications.toasts.addDanger).toBeCalled()
+      expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalled()
     );
   });
 });

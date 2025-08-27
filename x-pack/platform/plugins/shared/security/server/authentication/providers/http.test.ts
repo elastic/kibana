@@ -39,15 +39,15 @@ describe('HTTPAuthenticationProvider', () => {
   it('throws if `schemes` are not specified', () => {
     const providerOptions = mockAuthenticationProviderOptions();
 
-    expect(() => new HTTPAuthenticationProvider(providerOptions, undefined as any)).toThrowError(
+    expect(() => new HTTPAuthenticationProvider(providerOptions, undefined as any)).toThrow(
       'Supported schemes should be specified'
     );
-    expect(() => new HTTPAuthenticationProvider(providerOptions, {} as any)).toThrowError(
+    expect(() => new HTTPAuthenticationProvider(providerOptions, {} as any)).toThrow(
       'Supported schemes should be specified'
     );
     expect(
       () => new HTTPAuthenticationProvider(providerOptions, { supportedSchemes: new Set() })
-    ).toThrowError('Supported schemes should be specified');
+    ).toThrow('Supported schemes should be specified');
   });
 
   describe('`login` method', () => {

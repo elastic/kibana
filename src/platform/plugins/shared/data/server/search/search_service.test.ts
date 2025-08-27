@@ -146,7 +146,7 @@ describe('Search service', () => {
 
         expect(callOptions).toBe(options);
         expect(request).toBe(searchRequest);
-        expect(mockSessionClient.trackId).not.toBeCalled();
+        expect(mockSessionClient.trackId).not.toHaveBeenCalled();
       });
 
       it('searches using the original request if `id` is provided', async () => {
@@ -204,7 +204,7 @@ describe('Search service', () => {
 
         const result = await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).toBeCalledTimes(1);
+        expect(mockSessionClient.trackId).toHaveBeenCalledTimes(1);
         expect(result?.isStored).toBeUndefined();
       });
 
@@ -222,7 +222,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).toBeCalledTimes(0);
+        expect(mockSessionClient.trackId).toHaveBeenCalledTimes(0);
       });
 
       it('calls `trackId` once, if the response contains an `id`, session is stored and not restoring', async () => {
@@ -245,7 +245,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).toBeCalledTimes(1);
+        expect(mockSessionClient.trackId).toHaveBeenCalledTimes(1);
 
         expect(mockSessionClient.trackId.mock.calls[0]).toEqual([searchRequest, 'my_id', options]);
       });
@@ -258,7 +258,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).not.toBeCalled();
+        expect(mockSessionClient.trackId).not.toHaveBeenCalled();
       });
 
       it('does not call `trackId` if restoring', async () => {
@@ -269,7 +269,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).not.toBeCalled();
+        expect(mockSessionClient.trackId).not.toHaveBeenCalled();
       });
 
       it('does not call `trackId` if no session id provided', async () => {
@@ -280,7 +280,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).not.toBeCalled();
+        expect(mockSessionClient.trackId).not.toHaveBeenCalled();
       });
     });
 
@@ -497,9 +497,7 @@ describe('Search service', () => {
 
         const extendRes = mockScopedClient.extendSession('123', new Date('2020-01-01'));
 
-        await expect(extendRes).rejects.toThrowError(
-          'Failed to extend the expiration of some searches'
-        );
+        await expect(extendRes).rejects.toThrow('Failed to extend the expiration of some searches');
 
         expect(mockSessionClient.extend).not.toHaveBeenCalled();
         const [searchId, keepAlive, options] = mockStrategy.extend.mock.calls[0];
@@ -518,9 +516,7 @@ describe('Search service', () => {
 
         const extendRes = mockScopedClient.extendSession('123', new Date('2020-01-01'));
 
-        await expect(extendRes).rejects.toThrowError(
-          'Failed to extend the expiration of some searches'
-        );
+        await expect(extendRes).rejects.toThrow('Failed to extend the expiration of some searches');
 
         expect(mockSessionClient.extend).not.toHaveBeenCalled();
         const [searchId, keepAlive, options] = mockStrategy.extend.mock.calls[0];

@@ -121,7 +121,7 @@ describe('Alert by grouping', () => {
         fireEvent.click(button);
       });
 
-      expect(setGroupBySelection).toBeCalledWith(toBeSelected);
+      expect(setGroupBySelection).toHaveBeenCalledWith(toBeSelected);
     });
   });
 });

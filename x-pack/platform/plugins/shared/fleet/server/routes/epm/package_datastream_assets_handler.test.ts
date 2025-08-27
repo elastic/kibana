@@ -157,9 +157,9 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       },
     });
 
-    await expect(
-      deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError(new FleetNotFoundError('Version is not installed'));
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      new FleetNotFoundError('Version is not installed')
+    );
 
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
@@ -178,9 +178,9 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       },
     });
 
-    await expect(
-      deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError(new FleetNotFoundError('Version is not installed'));
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      new FleetNotFoundError('Version is not installed')
+    );
 
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
@@ -199,9 +199,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       },
     });
 
-    await expect(
-      deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError(
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
       new FleetNotFoundError('Requested package test-1.0.0 is not an input package')
     );
 
@@ -227,9 +225,9 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     packagePolicyServiceMock.list.mockRejectedValueOnce(
       new Error('Saved object [ingest-package-policies/idontexist] not found')
     );
-    await expect(
-      deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError('Saved object [ingest-package-policies/idontexist] not found');
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      'Saved object [ingest-package-policies/idontexist] not found'
+    );
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 
@@ -262,9 +260,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     } as any);
     mockedCheckExistingDataStreamsAreFromDifferentPackage.mockReturnValue(true);
 
-    await expect(
-      deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError(
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
       `Datastreams matching custom exist on other packages and cannot be removed`
     );
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
@@ -306,9 +302,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     } as any);
     mockedIsInputPackageDatasetUsedByMultiplePolicies.mockReturnValue(true);
 
-    await expect(
-      deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError(
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
       `Datastreams matching custom are in use by other package policies and cannot be removed`
     );
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();

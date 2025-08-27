@@ -58,7 +58,7 @@ describe('Configure routes', () => {
       expect(() =>
         bodySchema.validate({ host: 'localhost:9200' })
       ).toThrowErrorMatchingInlineSnapshot(`"[host]: expected URI with scheme [http|https]."`);
-      expect(() => bodySchema.validate({ host: 'http://localhost:9200' })).not.toThrowError();
+      expect(() => bodySchema.validate({ host: 'http://localhost:9200' })).not.toThrow();
     });
 
     it('fails if setup is not on hold.', async () => {

@@ -644,7 +644,7 @@ describe('action list services', () => {
         spaceId: 'default',
       });
 
-      await expect(getActionListPromise).rejects.toThrowError(
+      await expect(getActionListPromise).rejects.toThrow(
         'Unknown error while fetching action requests'
       );
       await expect(getActionListPromise).rejects.toBeInstanceOf(CustomHttpRequestError);

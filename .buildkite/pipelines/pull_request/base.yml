@@ -124,6 +124,7 @@ steps:
       diskSizeGb: 85
     timeout_in_minutes: 10
     env:
+      LIMIT_CONFIG_TYPE: 'unit,integration'
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'

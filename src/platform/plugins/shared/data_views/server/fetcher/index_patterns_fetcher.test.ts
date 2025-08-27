@@ -109,7 +109,7 @@ describe('Index Pattern Fetcher - server', () => {
         .mockResolvedValueOnce({ indices: ['length'] })
         .mockResolvedValue({ indices: [] });
       const result = await indexPatterns.getExistingIndices(['packetbeat-*', 'filebeat-*']);
-      expect(indexPatterns.getFieldsForWildcard).toBeCalledTimes(2);
+      expect(indexPatterns.getFieldsForWildcard).toHaveBeenCalledTimes(2);
       expect(result.length).toBe(1);
     });
 

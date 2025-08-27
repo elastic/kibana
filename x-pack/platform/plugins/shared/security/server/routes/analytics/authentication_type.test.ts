@@ -51,7 +51,7 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
     const response = await routeHandler(getMockContext(), request, kibanaResponseFactory);
 
     expect(response.status).toBe(204);
-    expect(routeParamsMock.logger.warn).toBeCalledWith(
+    expect(routeParamsMock.logger.warn).toHaveBeenCalledWith(
       'Cannot record authentication type: current user could not be retrieved.'
     );
 
@@ -366,7 +366,7 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
         httpAuthenticationScheme: 'ApiKey',
       });
       expect(routeParamsMock.logger.warn).toHaveBeenCalledTimes(1);
-      expect(routeParamsMock.logger.warn).toBeCalledWith(
+      expect(routeParamsMock.logger.warn).toHaveBeenCalledWith(
         'API keys are intended for programmatic access. Do not use API keys to authenticate access via a web browser.',
         { tags: ['deprecation'] }
       );

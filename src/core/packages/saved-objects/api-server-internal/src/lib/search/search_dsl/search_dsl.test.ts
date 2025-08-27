@@ -37,7 +37,7 @@ describe('getSearchDsl', () => {
           type: undefined as any,
           sortField: 'title',
         });
-      }).toThrowError(/type must be specified/);
+      }).toThrow(/type must be specified/);
     });
     it('throws when sortOrder without sortField', () => {
       expect(() => {
@@ -45,7 +45,7 @@ describe('getSearchDsl', () => {
           type: 'foo',
           sortOrder: 'desc',
         });
-      }).toThrowError(/sortOrder requires a sortField/);
+      }).toThrow(/sortOrder requires a sortField/);
     });
   });
 

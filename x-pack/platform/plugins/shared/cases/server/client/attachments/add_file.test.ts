@@ -89,7 +89,7 @@ describe('addFile', () => {
         clientArgs,
         casesClient
       )
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
     expect(clientArgs.fileService.delete).toHaveBeenCalledWith({ id });
   });
 
@@ -123,7 +123,7 @@ describe('addFile', () => {
         clientArgs,
         casesClient
       )
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
     expect(buildAttachmentRequestFromFileJSONMock).toHaveBeenCalledWith({ owner, fileMetadata });
   });
 });

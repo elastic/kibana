@@ -57,7 +57,7 @@ describe('comments', () => {
         savedObjectsClient: telemetrySavedObjectsClient,
         logger,
       });
-      expect(savedObjectsClient.find).toBeCalledWith({
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
         aggs: {
           counts: {
             date_range: {

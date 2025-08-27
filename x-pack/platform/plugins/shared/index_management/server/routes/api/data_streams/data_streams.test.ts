@@ -55,7 +55,7 @@ describe('Data streams API', () => {
       const error = new Error('Oh no!');
       updateDataLifecycle.mockRejectedValue(error);
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+      await expect(router.runRequest(mockRequest)).rejects.toThrow(error);
     });
 
     it('knows how to extract the es warning header from the response', () => {

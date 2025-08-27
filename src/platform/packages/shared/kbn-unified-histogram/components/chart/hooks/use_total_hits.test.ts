@@ -103,8 +103,8 @@ describe('useTotalHits', () => {
     );
     fetch$.next({ type: 'fetch' });
     rerender();
-    expect(onTotalHitsChange).toBeCalledTimes(1);
-    expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.loading, undefined);
+    expect(onTotalHitsChange).toHaveBeenCalledTimes(1);
+    expect(onTotalHitsChange).toHaveBeenCalledWith(UnifiedHistogramFetchStatus.loading, undefined);
     expect(setFieldSpy).toHaveBeenCalledWith('index', dataViewWithTimefieldMock);
     expect(setFieldSpy).toHaveBeenCalledWith('query', query);
     expect(setFieldSpy).toHaveBeenCalledWith('size', 0);
@@ -116,8 +116,8 @@ describe('useTotalHits', () => {
     expect(fetchOptions?.abortSignal).toBeInstanceOf(AbortSignal);
     expect(fetchOptions?.executionContext?.description).toBe('fetch total hits');
     await waitFor(() => {
-      expect(onTotalHitsChange).toBeCalledTimes(2);
-      expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.complete, 42);
+      expect(onTotalHitsChange).toHaveBeenCalledTimes(2);
+      expect(onTotalHitsChange).toHaveBeenCalledWith(UnifiedHistogramFetchStatus.complete, 42);
     });
   });
 
@@ -140,7 +140,7 @@ describe('useTotalHits', () => {
     const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     renderHook(() => useTotalHits({ ...getDeps(), chartVisible: true, onTotalHitsChange }));
-    expect(onTotalHitsChange).toBeCalledTimes(0);
+    expect(onTotalHitsChange).toHaveBeenCalledTimes(0);
     expect(setFieldSpy).not.toHaveBeenCalled();
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -150,7 +150,7 @@ describe('useTotalHits', () => {
     const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     renderHook(() => useTotalHits({ ...getDeps(), hits: undefined, onTotalHitsChange }));
-    expect(onTotalHitsChange).toBeCalledTimes(0);
+    expect(onTotalHitsChange).toHaveBeenCalledTimes(0);
     expect(setFieldSpy).not.toHaveBeenCalled();
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -162,7 +162,7 @@ describe('useTotalHits', () => {
     const options = { ...getDeps(), onTotalHitsChange };
     const { rerender } = renderHook(() => useTotalHits(options));
     rerender();
-    expect(onTotalHitsChange).toBeCalledTimes(0);
+    expect(onTotalHitsChange).toHaveBeenCalledTimes(0);
     expect(setFieldSpy).toHaveBeenCalledTimes(0);
     expect(fetchSpy).toHaveBeenCalledTimes(0);
   });
@@ -176,20 +176,20 @@ describe('useTotalHits', () => {
     const { rerender } = renderHook(() => useTotalHits(options));
     fetch$.next({ type: 'fetch' });
     rerender();
-    expect(onTotalHitsChange).toBeCalledTimes(1);
+    expect(onTotalHitsChange).toHaveBeenCalledTimes(1);
     expect(setFieldSpy).toHaveBeenCalled();
     expect(fetchSpy).toHaveBeenCalled();
     await waitFor(() => {
-      expect(onTotalHitsChange).toBeCalledTimes(2);
+      expect(onTotalHitsChange).toHaveBeenCalledTimes(2);
     });
     fetch$.next({ type: 'fetch' });
     rerender();
     expect(abortSpy).toHaveBeenCalled();
-    expect(onTotalHitsChange).toBeCalledTimes(3);
+    expect(onTotalHitsChange).toHaveBeenCalledTimes(3);
     expect(setFieldSpy).toHaveBeenCalledTimes(10);
     expect(fetchSpy).toHaveBeenCalledTimes(2);
     await waitFor(() => {
-      expect(onTotalHitsChange).toBeCalledTimes(4);
+      expect(onTotalHitsChange).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -204,8 +204,8 @@ describe('useTotalHits', () => {
     fetch$.next({ type: 'fetch' });
     rerender();
     await waitFor(() => {
-      expect(onTotalHitsChange).toBeCalledTimes(2);
-      expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.error, error);
+      expect(onTotalHitsChange).toHaveBeenCalledTimes(2);
+      expect(onTotalHitsChange).toHaveBeenCalledWith(UnifiedHistogramFetchStatus.error, error);
     });
   });
 

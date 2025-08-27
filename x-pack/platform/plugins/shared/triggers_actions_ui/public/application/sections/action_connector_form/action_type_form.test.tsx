@@ -204,11 +204,9 @@ describe('action_type_form', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')).toBeCalledWith(
-      'dedupKey',
-      'test',
-      1
-    );
+    expect(
+      wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')
+    ).toHaveBeenCalledWith('dedupKey', 'test', 1);
   });
 
   it('renders the actionParamsField with the execution mode set to ActionForm', async () => {
@@ -359,9 +357,9 @@ describe('action_type_form', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')).toBeCalledTimes(
-      0
-    );
+    expect(
+      wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')
+    ).toHaveBeenCalledTimes(0);
   });
 
   it('shows an error icon when there is a form error and the action accordion is closed ', async () => {

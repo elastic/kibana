@@ -19,12 +19,12 @@ describe('Chart helper', () => {
     } as unknown as History;
     it("doesn't push a new history when x is not defined", () => {
       onBrushEnd({ x: undefined, history });
-      expect(history.push).not.toBeCalled();
+      expect(history.push).not.toHaveBeenCalled();
     });
 
     it('pushes a new history with time range converted to ISO', () => {
       onBrushEnd({ x: [1593409448167, 1593415727797], history });
-      expect(history.push).toBeCalledWith({
+      expect(history.push).toHaveBeenCalledWith({
         search: 'rangeFrom=2020-06-29T05:44:08.167Z&rangeTo=2020-06-29T07:28:47.797Z',
       });
     });
@@ -32,7 +32,7 @@ describe('Chart helper', () => {
     it('pushes a new history keeping current search', () => {
       history.location.search = '?foo=bar';
       onBrushEnd({ x: [1593409448167, 1593415727797], history });
-      expect(history.push).toBeCalledWith({
+      expect(history.push).toHaveBeenCalledWith({
         search: 'foo=bar&rangeFrom=2020-06-29T05:44:08.167Z&rangeTo=2020-06-29T07:28:47.797Z',
       });
     });

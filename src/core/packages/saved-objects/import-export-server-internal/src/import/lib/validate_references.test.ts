@@ -263,7 +263,7 @@ describe('validateReferences()', () => {
       ],
     });
 
-    await expect(() => validateReferences(params)).rejects.toThrowError(
+    await expect(() => validateReferences(params)).rejects.toThrow(
       'Error fetching references for imported objects'
     );
   });

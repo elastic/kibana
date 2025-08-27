@@ -93,14 +93,14 @@ describe('convertToLens', () => {
     mockIsValidMetrics.mockReturnValue(null);
     const result = await convertToLens(vis);
     expect(result).toBeNull();
-    expect(mockIsValidMetrics).toBeCalledTimes(1);
+    expect(mockIsValidMetrics).toHaveBeenCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported metrics', async () => {
     mockGetMetricsColumns.mockReturnValue(null);
     const result = await convertToLens(vis);
     expect(result).toBeNull();
-    expect(mockGetMetricsColumns).toBeCalledTimes(1);
+    expect(mockGetMetricsColumns).toHaveBeenCalledTimes(1);
   });
 
   test('should return null if several series have different “Field” + “Aggregate function”', async () => {
@@ -113,7 +113,7 @@ describe('convertToLens', () => {
       },
     } as Vis<Panel>);
     expect(result).toBeNull();
-    expect(mockGetBucketsColumns).toBeCalledTimes(1);
+    expect(mockGetBucketsColumns).toHaveBeenCalledTimes(1);
   });
 
   test('should return null if “Aggregate function” is not supported', async () => {
@@ -126,7 +126,7 @@ describe('convertToLens', () => {
       },
     } as Vis<Panel>);
     expect(result).toBeNull();
-    expect(mockGetBucketsColumns).toBeCalledTimes(1);
+    expect(mockGetBucketsColumns).toHaveBeenCalledTimes(1);
   });
 
   test('should return null if model have not visible metrics', async () => {
@@ -170,9 +170,9 @@ describe('convertToLens', () => {
     const result = await convertToLens(vis);
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsDatatable');
-    expect(mockGetBucketsColumns).toBeCalledTimes(1);
+    expect(mockGetBucketsColumns).toHaveBeenCalledTimes(1);
     // every series + group by
-    expect(mockGetColumnState).toBeCalledTimes(model.series.length + 1);
+    expect(mockGetColumnState).toHaveBeenCalledTimes(model.series.length + 1);
   });
 
   test('should return state for valid model with “Field” + “Aggregate function”', async () => {
@@ -186,9 +186,9 @@ describe('convertToLens', () => {
     } as Vis<Panel>);
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsDatatable');
-    expect(mockGetBucketsColumns).toBeCalledTimes(2);
+    expect(mockGetBucketsColumns).toHaveBeenCalledTimes(2);
     // every series + group by + (“Field” + “Aggregate function”)
-    expect(mockGetColumnState).toBeCalledTimes(model.series.length + 2);
+    expect(mockGetColumnState).toHaveBeenCalledTimes(model.series.length + 2);
   });
 
   test('should return correct sorting config', async () => {
@@ -207,9 +207,9 @@ describe('convertToLens', () => {
       direction: 'decs',
       columnId: 'metric-column-1',
     });
-    expect(mockGetBucketsColumns).toBeCalledTimes(1);
+    expect(mockGetBucketsColumns).toHaveBeenCalledTimes(1);
     // every series + group by
-    expect(mockGetColumnState).toBeCalledTimes(model.series.length + 1);
+    expect(mockGetColumnState).toHaveBeenCalledTimes(model.series.length + 1);
   });
 
   test('should skip hidden series', async () => {
@@ -231,7 +231,7 @@ describe('convertToLens', () => {
     } as Vis<Panel>);
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsDatatable');
-    expect(mockIsValidMetrics).toBeCalledTimes(1);
+    expect(mockIsValidMetrics).toHaveBeenCalledTimes(1);
   });
 
   test('should set the ignoreGlobalFilters if set on the panel', async () => {

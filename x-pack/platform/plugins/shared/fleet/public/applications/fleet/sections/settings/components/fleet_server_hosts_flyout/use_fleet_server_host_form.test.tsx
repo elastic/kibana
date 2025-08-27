@@ -41,7 +41,7 @@ describe('useFleetServerHostsForm', () => {
           },
         ]
       `);
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
   });
@@ -67,7 +67,7 @@ describe('useFleetServerHostsForm', () => {
 
     await act(() => result.current.submit());
 
-    await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
   });
 
   it('should submit a valid form with SSL options', async () => {
@@ -97,7 +97,7 @@ describe('useFleetServerHostsForm', () => {
 
     await act(() => result.current.submit());
 
-    await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
   });
 
   it('should allow the user to correct and submit an invalid form', async () => {
@@ -124,7 +124,7 @@ describe('useFleetServerHostsForm', () => {
     await act(() => result.current.submit());
 
     await testRenderer.waitFor(() => {
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
 
@@ -132,6 +132,6 @@ describe('useFleetServerHostsForm', () => {
     expect(result.current.isDisabled).toBeFalsy();
 
     await act(() => result.current.submit());
-    await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
   });
 });

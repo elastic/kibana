@@ -131,7 +131,7 @@ describe('isInlineScriptingEnabled', () => {
       mockErrorOnce();
       mockSuccessOnce();
 
-      await expect(isInlineScriptingEnabled({ client, maxRetryDelay: 0.1 })).rejects.toThrowError(
+      await expect(isInlineScriptingEnabled({ client, maxRetryDelay: 0.1 })).rejects.toThrow(
         'ERR CON REFUSED'
       );
     });
@@ -146,7 +146,7 @@ describe('isInlineScriptingEnabled', () => {
 
       await expect(
         isInlineScriptingEnabled({ client, maxRetryDelay: 0.1, maxRetries: 2 })
-      ).rejects.toThrowError('ERR CON REFUSED');
+      ).rejects.toThrow('ERR CON REFUSED');
       expect(client.cluster.getSettings).toHaveBeenCalledTimes(3);
     });
   });

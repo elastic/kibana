@@ -30,7 +30,7 @@ describe('delete synonyms sets lib function', () => {
       )
     );
     expect(mockClient.synonyms.deleteSynonym).toHaveBeenCalledWith({ id: 'my-synonyms-set' });
-    await expect(deleteSynonymsSet(client(), 'my-synonyms-set')).rejects.toThrowError(
+    await expect(deleteSynonymsSet(client(), 'my-synonyms-set')).rejects.toThrow(
       'synonyms set [my-synonyms-set] cannot be deleted as it is used in the following indices: index-1, index-2'
     );
   });

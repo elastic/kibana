@@ -446,7 +446,7 @@ describe('createInitialState', () => {
   it('initializes the `discardUnknownObjects` flag to false if the flag is not provided in the config', () => {
     const initialState = createInitialState(createInitialStateParams);
 
-    expect(logger.warn).not.toBeCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(initialState.discardUnknownObjects).toEqual(false);
   });
 
@@ -460,8 +460,8 @@ describe('createInitialState', () => {
     });
 
     expect(initialState.discardUnknownObjects).toEqual(false);
-    expect(logger.warn).toBeCalledTimes(1);
-    expect(logger.warn).toBeCalledWith(
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
       'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be discarded.'
     );
   });
@@ -488,8 +488,8 @@ describe('createInitialState', () => {
     });
 
     expect(initialState.discardCorruptObjects).toEqual(false);
-    expect(logger.warn).toBeCalledTimes(1);
-    expect(logger.warn).toBeCalledWith(
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
       'The flag `migrations.discardCorruptObjects` is defined but does not match the current kibana version; corrupt objects will NOT be discarded.'
     );
   });

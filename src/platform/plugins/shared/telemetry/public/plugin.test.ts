@@ -58,8 +58,8 @@ describe('TelemetryPlugin', () => {
             home,
           });
 
-          expect(home.welcomeScreen.registerTelemetryNoticeRenderer).not.toBeCalled();
-          expect(home.welcomeScreen.registerOnRendered).not.toBeCalled();
+          expect(home.welcomeScreen.registerTelemetryNoticeRenderer).not.toHaveBeenCalled();
+          expect(home.welcomeScreen.registerOnRendered).not.toHaveBeenCalled();
         });
       });
     });
@@ -117,14 +117,14 @@ describe('TelemetryPlugin', () => {
         .spyOn(screenshotMode, 'isScreenshotMode')
         .mockReturnValue(true);
       plugin.setup(coreMock.createSetup(), { screenshotMode, home });
-      expect(isScreenshotModeSpy).toBeCalledTimes(1);
+      expect(isScreenshotModeSpy).toHaveBeenCalledTimes(1);
 
       const coreStartMock = coreMock.createStart();
       coreStartMock.application = { ...coreStartMock.application, currentAppId$: of('some-app') };
       const optInSpy = jest.spyOn(coreStartMock.analytics, 'optIn');
       plugin.start(coreStartMock, { screenshotMode });
-      expect(isScreenshotModeSpy).toBeCalledTimes(2);
-      expect(optInSpy).toBeCalledTimes(1);
+      expect(isScreenshotModeSpy).toHaveBeenCalledTimes(2);
+      expect(optInSpy).toHaveBeenCalledTimes(1);
       expect(optInSpy).toHaveBeenCalledWith({ global: { enabled: false } });
     });
 
@@ -136,15 +136,15 @@ describe('TelemetryPlugin', () => {
         .spyOn(screenshotMode, 'isScreenshotMode')
         .mockReturnValue(false);
       plugin.setup(coreMock.createSetup(), { screenshotMode, home });
-      expect(isScreenshotModeSpy).toBeCalledTimes(1);
+      expect(isScreenshotModeSpy).toHaveBeenCalledTimes(1);
 
       const coreStartMock = coreMock.createStart();
       coreStartMock.application = { ...coreStartMock.application, currentAppId$: of('some-app') };
       isSyntheticsMonitorMock.mockReturnValueOnce(true);
       const optInSpy = jest.spyOn(coreStartMock.analytics, 'optIn');
       plugin.start(coreStartMock, { screenshotMode });
-      expect(isScreenshotModeSpy).toBeCalledTimes(2);
-      expect(optInSpy).toBeCalledTimes(1);
+      expect(isScreenshotModeSpy).toHaveBeenCalledTimes(2);
+      expect(optInSpy).toHaveBeenCalledTimes(1);
       expect(optInSpy).toHaveBeenCalledWith({ global: { enabled: false } });
     });
   });

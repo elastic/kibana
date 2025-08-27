@@ -258,7 +258,7 @@ describe('SyntheticsService', () => {
 
       expect(axios).not.toHaveBeenCalled();
 
-      expect(serverMock.logger.error).not.toBeCalledWith(
+      expect(serverMock.logger.error).not.toHaveBeenCalledWith(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
     });
@@ -279,7 +279,7 @@ describe('SyntheticsService', () => {
 
       await service.pushConfigs();
 
-      expect(serverMock.logger.error).toBeCalledWith(
+      expect(serverMock.logger.error).toHaveBeenCalledWith(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
     });

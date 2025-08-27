@@ -87,7 +87,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {
           secrets: {
             routingKey: 'test',
@@ -132,7 +132,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {
           secrets: {
             routingKey: 'test',
@@ -174,7 +174,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {},
         isValid: false,
       });
@@ -208,7 +208,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {},
         isValid: false,
       });

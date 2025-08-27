@@ -162,7 +162,7 @@ describe('SLOs Welcome Page', () => {
         createNewSloButton?.click();
 
         await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(paths.sloCreate);
+          expect(mockNavigate).toHaveBeenCalledWith(paths.sloCreate);
         });
       });
     });
@@ -182,7 +182,7 @@ describe('SLOs Welcome Page', () => {
       it('should navigate to the SLO List page', async () => {
         render(<SlosWelcomePage />);
         await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(paths.slos);
+          expect(mockNavigate).toHaveBeenCalledWith(paths.slos);
         });
       });
     });

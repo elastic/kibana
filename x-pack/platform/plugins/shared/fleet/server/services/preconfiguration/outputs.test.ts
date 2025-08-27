@@ -326,9 +326,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured ES output with secrets that does not exist', async () => {
@@ -350,9 +350,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured ES output with ca_trusted_fingerprint that does not exist', async () => {
@@ -370,8 +370,8 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.create).toBeCalledWith(
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -379,8 +379,8 @@ describe('Outputs preconfiguration', () => {
         }),
         expect.anything()
       );
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured ES output with default hosts if the output does not exist and hosts is not set', async () => {
@@ -396,7 +396,7 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
       expect(mockedOutputService.create.mock.calls[0][2].hosts).toEqual(['http://default-es:9200']);
     });
 
@@ -415,9 +415,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured logstash output with secrets that does not exist', async () => {
@@ -438,8 +438,8 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.create).toBeCalledWith(
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -451,8 +451,8 @@ describe('Outputs preconfiguration', () => {
         }),
         expect.anything()
       );
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create preconfigured kafka output that does not exist', async () => {
@@ -469,9 +469,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured kafka output with secrets that does not exist', async () => {
@@ -493,9 +493,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured remote ES output that does not exist', async () => {
@@ -521,9 +521,9 @@ describe('Outputs preconfiguration', () => {
         } as PreconfiguredOutput,
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured remote ES output with secrets that does not exist', async () => {
@@ -545,9 +545,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
   });
 
@@ -578,9 +578,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(mockedOutputService.update).toBeCalledWith(
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'existing-es-output-1',
@@ -589,7 +589,7 @@ describe('Outputs preconfiguration', () => {
         }),
         { fromPreconfiguration: true, secretHashes: expect.anything() }
       );
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured ES output exists and changed', async () => {
@@ -606,9 +606,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured output exists and changed to is_internal: true', async () => {
@@ -626,9 +626,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured ES output with secrets exists and changed to is_internal: true', async () => {
@@ -647,9 +647,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if a preconfigured logstash ouput exists and has changed', async () => {
@@ -670,9 +670,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if a preconfigured logstash output with secrets exists and has changed', async () => {
@@ -693,9 +693,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured kafka output exists and changed', async () => {
@@ -712,9 +712,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update ouput if a preconfigured kafka with secrets exists and has changed', async () => {
@@ -736,9 +736,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured remote ES output exists and changed', async () => {
@@ -756,9 +756,9 @@ describe('Outputs preconfiguration', () => {
         } as PreconfiguredOutput,
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update ouput if a preconfigured remote ES with secrets exists and has changed', async () => {
@@ -778,9 +778,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if a preconfigured logstash output with plain value secrets exists and did not change', async () => {
@@ -802,9 +802,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if a preconfigured logstash output with secrets exists and hash algorithm changed', async () => {
@@ -827,9 +827,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should not update output if a preconfigured logstash output with secrets exists and hash algorithm did not changed', async () => {
@@ -852,9 +852,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should update output if a preconfigured kafka output with plain value secrets exists and did not change', async () => {
@@ -877,9 +877,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if a preconfigured remote ES output with plain value secrets exists and did not change', async () => {
@@ -899,9 +899,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     // Output should not update
@@ -920,9 +920,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should not update output if preconfigured logstash output exists and did not change', async () => {
@@ -943,9 +943,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should not update output if preconfigured kafka output exists and did not change', async () => {
@@ -966,9 +966,9 @@ describe('Outputs preconfiguration', () => {
         } as PreconfiguredOutput,
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should not update output if preconfigured remote ES output exists and did not change', async () => {
@@ -988,9 +988,9 @@ describe('Outputs preconfiguration', () => {
         } as PreconfiguredOutput,
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should not update output if a preconfigured logstash output with secrets exists and did not change', async () => {
@@ -1012,9 +1012,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should not update output if a preconfigured kafka output with secrets exists and did not change', async () => {
@@ -1035,9 +1035,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should not update output if a preconfigured remote ES output with secrets exists and did not change', async () => {
@@ -1059,9 +1059,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     const SCENARIOS: Array<{ name: string; data: PreconfiguredOutput }> = [
@@ -1095,8 +1095,8 @@ describe('Outputs preconfiguration', () => {
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         await createOrUpdatePreconfiguredOutputs(soClient, esClient, [data]);
 
-        expect(mockedOutputService.create).not.toBeCalled();
-        expect(mockedOutputService.update).not.toBeCalled();
+        expect(mockedOutputService.create).not.toHaveBeenCalled();
+        expect(mockedOutputService.update).not.toHaveBeenCalled();
       });
     });
 
@@ -1133,7 +1133,7 @@ describe('Outputs preconfiguration', () => {
           },
         ]);
 
-        expect(mockedOutputService.delete).not.toBeCalled();
+        expect(mockedOutputService.delete).not.toHaveBeenCalled();
       });
 
       it('should delete deleted preconfigured output', async () => {
@@ -1159,8 +1159,8 @@ describe('Outputs preconfiguration', () => {
           },
         ]);
 
-        expect(mockedOutputService.delete).toBeCalled();
-        expect(mockedOutputService.delete).toBeCalledTimes(1);
+        expect(mockedOutputService.delete).toHaveBeenCalled();
+        expect(mockedOutputService.delete).toHaveBeenCalledTimes(1);
         expect(mockedOutputService.delete.mock.calls[0][1]).toEqual('output2');
       });
 
@@ -1178,9 +1178,9 @@ describe('Outputs preconfiguration', () => {
         });
         await cleanPreconfiguredOutputs(soClient, esClient, []);
 
-        expect(mockedOutputService.delete).not.toBeCalled();
-        expect(mockedOutputService.update).toBeCalledTimes(2);
-        expect(mockedOutputService.update).toBeCalledWith(
+        expect(mockedOutputService.delete).not.toHaveBeenCalled();
+        expect(mockedOutputService.update).toHaveBeenCalledTimes(2);
+        expect(mockedOutputService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'output1',
@@ -1189,7 +1189,7 @@ describe('Outputs preconfiguration', () => {
           }),
           { fromPreconfiguration: true }
         );
-        expect(mockedOutputService.update).toBeCalledWith(
+        expect(mockedOutputService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'output2',

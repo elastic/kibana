@@ -181,8 +181,11 @@ describe('EndpointMetadataService', () => {
       // @ts-expect-error runtime_mappings is not typed
       unitedIndexQuery.runtime_mappings.status.script.source = expect.any(String);
 
-      expect(esClient.search).toBeCalledWith(unitedIndexQuery);
-      expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), agentPolicyIds);
+      expect(esClient.search).toHaveBeenCalledWith(unitedIndexQuery);
+      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(
+        expect.anything(),
+        agentPolicyIds
+      );
       expect(metadataListResponse).toEqual({
         data: [
           {

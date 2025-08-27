@@ -409,8 +409,8 @@ test: invalid manifest
         { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
       ]);
 
-      expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledTimes(1);
-      expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledWith(
+      expect(jest.mocked(appContextService.getLogger().warn)).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(appContextService.getLogger().warn)).toHaveBeenCalledWith(
         'Installed package invalidpackage 0.0.1 is not a valid package anymore'
       );
     });
@@ -1160,7 +1160,7 @@ owner: elastic`,
           pkgName: 'nginx',
           pkgVersion: '1.0.0',
         })
-      ).rejects.toThrowError(PackageNotFoundError);
+      ).rejects.toThrow(PackageNotFoundError);
     });
 
     it('should do nothing if no excluded data streams', async () => {
@@ -1309,7 +1309,7 @@ owner: elastic`,
             pkgName: 'my-package',
             pkgVersion: '1.0.0',
           })
-        ).rejects.toThrowError(PackageNotFoundError);
+        ).rejects.toThrow(PackageNotFoundError);
       });
 
       it('sets the latestVersion to installed version when an installed package is not available in the registry', async () => {

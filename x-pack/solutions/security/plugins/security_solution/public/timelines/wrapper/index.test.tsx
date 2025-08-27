@@ -67,7 +67,7 @@ describe('TimelineWrapper', () => {
 
     await userEvent.click(getByTestId('timeline-bottom-bar-title-button'));
 
-    expect(mockDispatch).toBeCalledWith(
+    expect(mockDispatch).toHaveBeenCalledWith(
       timelineActions.showTimeline({ id: TimelineId.test, show: true })
     );
   });
@@ -81,7 +81,7 @@ describe('TimelineWrapper', () => {
 
     await userEvent.keyboard('{Escape}');
 
-    expect(mockDispatch).toBeCalledWith(
+    expect(mockDispatch).toHaveBeenCalledWith(
       timelineActions.showTimeline({ id: TimelineId.test, show: false })
     );
   });

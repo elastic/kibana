@@ -76,7 +76,7 @@ describe('Handlers', () => {
 
       await getAvailableVersionsHandler(ctx, httpServerMock.createKibanaRequest(), response);
 
-      expect(response.ok).toBeCalled();
+      expect(response.ok).toHaveBeenCalled();
       expect(response.ok.mock.calls[0][0]?.body).toEqual({
         items: ['8.1.0', '8.0.0', '7.17.0'],
       });

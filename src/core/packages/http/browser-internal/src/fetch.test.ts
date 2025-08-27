@@ -937,7 +937,7 @@ describe('Fetch', () => {
         fetchInstance.fetch('/my/path', {
           rawResponse: true,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Invalid fetch arguments, rawResponse = true is only supported when asResponse = true'
       );
     });

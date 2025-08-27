@@ -20,6 +20,6 @@ describe('create data view', () => {
       counterName: 'POST /path',
       usageCollection,
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 });
