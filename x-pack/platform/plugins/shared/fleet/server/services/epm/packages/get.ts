@@ -87,6 +87,7 @@ import {
 import {
   shouldIncludePackageWithDatastreamTypes,
   filterOutExcludedDataStreamTypes,
+  shouldIncludePolicyTemplateWithDatastreamTypes,
 } from './exclude_datastreams_helper';
 
 export { getFile } from '../registry';
@@ -564,6 +565,7 @@ export async function getPackageInfo({
       'Package is not compatible with the current project data stream types'
     );
   }
+
   const updated = {
     ...packageInfo,
     ...additions,
@@ -592,6 +594,16 @@ function getFilteredDataStreamsAndPolicyTemplates(packageInfo: ArchivePackage | 
       (acc: RegistryPolicyTemplate[], policyTemplate: RegistryPolicyTemplate) => {
         const policyTemplateIntegrationTemplate =
           policyTemplate as RegistryPolicyIntegrationTemplate;
+
+        const shouldIncludePolicyTemplate = shouldIncludePolicyTemplateWithDatastreamTypes(
+          packageInfo,
+          policyTemplate,
+          excludeDataStreamTypes
+        );
+        if (!shouldIncludePolicyTemplate) {
+          return acc;
+        }
+
         if (policyTemplateIntegrationTemplate.inputs) {
           const filteredInputs = policyTemplateIntegrationTemplate.inputs.filter((input: any) => {
             const shouldInclude = !excludeDataStreamTypes.some((excludedType) =>

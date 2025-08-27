@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { RegistryPolicyIntegrationTemplate } from '../../../../common/types';
+import type { RegistryPolicyTemplate } from '../../../../common';
 import type { Installable, RegistrySearchResult } from '../../../types';
 
 export function shouldIncludePackageWithDatastreamTypes(
@@ -18,6 +20,30 @@ export function shouldIncludePackageWithDatastreamTypes(
     });
 
   return shouldInclude;
+}
+
+export function shouldIncludePolicyTemplateWithDatastreamTypes(
+  pkg: Installable<any>,
+  policyTemplate: RegistryPolicyTemplate,
+  excludeDataStreamTypes: string[] = []
+) {
+  const policyTemplateIntegrationTemplate = policyTemplate as RegistryPolicyIntegrationTemplate;
+  if (
+    !policyTemplateIntegrationTemplate.data_streams ||
+    policyTemplateIntegrationTemplate.data_streams.length === 0
+  ) {
+    return true;
+  }
+
+  return policyTemplateIntegrationTemplate.data_streams?.some((dataStream: any) => {
+    const pkgDataStream = pkg.data_streams?.find((ds: any) =>
+      ds.dataset.includes(`.${dataStream}`)
+    );
+    if (!pkgDataStream) {
+      return true;
+    }
+    return !excludeDataStreamTypes.includes(pkgDataStream.type);
+  });
 }
 
 /**
@@ -40,21 +66,11 @@ export function filterOutExcludedDataStreamTypes<T extends RegistrySearchResult>
 
         // filter out excluded policy templates
         const filteredPolicyTemplates = pkg.policy_templates?.filter((policyTemplate: any) => {
-          if (!policyTemplate.data_streams || policyTemplate.data_streams.length === 0) {
-            return true;
-          }
-
-          return policyTemplate.data_streams?.some((dataStream: any) => {
-            const pkgDataStream = pkg.data_streams?.find((ds: any) =>
-              ds.dataset.includes(`.${dataStream}`)
-            );
-            if (!pkgDataStream) {
-              return true;
-            }
-            return !excludeDataStreamTypes.includes(pkgDataStream.type);
-          });
-
-          return true;
+          return shouldIncludePolicyTemplateWithDatastreamTypes(
+            pkg,
+            policyTemplate,
+            excludeDataStreamTypes
+          );
         });
 
         acc.push({
