@@ -105,7 +105,6 @@ GET kibana_sample_data_semantic/_search
 }
 
 # 'bool' and 'must' are used in query context. 'exists' is used in the filter context.
-# The response includes only documents with a semantic relevance score of 0.7 or higher.
 # Results are limited to a size of 2 and sorted by _score.
 
 # Tip: Adding a 'text' field type to the index allows further filtering with options such as match and regexp.
@@ -126,7 +125,7 @@ GET kibana_sample_data_semantic/_search
   }
 }
 
-# The response includes only documents with a semantic relevance score of 1.0 or higher.
+# The response includes only documents with a semantic relevance score of 15.0 or higher.
 
 # -----------------------------------------------
 # Step 6: Try out other query options
@@ -136,6 +135,16 @@ GET kibana_sample_data_semantic/_search
 # https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl
 
 # Try out various query options in the Playground to quickly iterate on your search experience
+
+# -----------------------------------------------
+# Step 7: Delete your index (optional)
+# -----------------------------------------------
+# Delete the index to clean up or start from scratch.
+# Warning: Deleting an index permanently deletes its documents, shards, and metadata.
+
+DELETE /kibana_sample_data_semantic
+
+# The response includes a confirmation that the index was deleted.
 
 # -----------------------------------------------
 # Conclusion

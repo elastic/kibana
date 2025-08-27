@@ -64,11 +64,13 @@ POST /_query
   """
 }
 
+# The response includes 'columns' and 'values' to represent the column headers and the rows included in the result set.
 # By default, ES|QL uses OR logic between search terms, so it matches documents that contain any of the specified words.
 
 # -----------------------------------------------
 # Step 4: Show specific fields in results
 # -----------------------------------------------
+# You can specify the exact fields to include in your results using the KEEP command
 
 POST /_query
 {
@@ -190,7 +192,7 @@ POST /_query
 {
   "query": """
     FROM kibana_sample_data_esql
-    | WHERE rating >= 4.5
+    | WHERE rating >= 4.8
     | KEEP title, author, rating, tags
     | SORT rating DESC
     | LIMIT 1000
@@ -234,12 +236,14 @@ POST /_query
 # -----------------------------------------------
 # Step 14: Use query string for complex patterns
 # -----------------------------------------------
+# The QSTR function enables powerful search patterns using a compact query language.
+# It's ideal for when you need wildcards, fuzzy matching, and boolean logic in a single expression
 
 POST /_query
 {
   "query": """
     FROM kibana_sample_data_esql
-    | WHERE QSTR(description, "fluffy AND pancak* OR (creamy -vegan)")
+    | WHERE QSTR("(fluff* AND pancak*) OR (creamy -vegan)", {"default_field": "description"})
     | KEEP title, description
     | LIMIT 1000
   """
@@ -269,9 +273,20 @@ POST /_query
 }
 
 # The response includes documents scored and filtered by custom logic.
+# Notice how EVAL expressions will append new columns to the result set.
 
 # Visit the "Discover" page in Kibana to experiment with ES|QL queries against your own data!
 # Easily ingest data from many sources: https://www.elastic.co/docs/solutions/search/ingest-for-search
+
+# -----------------------------------------------
+# Step 16: Delete your index (optional)
+# -----------------------------------------------
+# Delete the index to clean up or start from scratch.
+# Warning: Deleting an index permanently deletes its documents, shards, and metadata.
+
+DELETE /kibana_sample_data_esql
+
+# The response includes a confirmation that the index was deleted.
 
 # -----------------------------------------------
 # Conclusion
