@@ -27,6 +27,7 @@ export interface DocLinks {
   readonly settings: string;
   readonly elasticStackGetStarted: string;
   readonly apiReference: string;
+  readonly serverlessReleaseNotes: string;
   readonly upgrade: {
     readonly upgradingStackOnPrem: string;
     readonly upgradingStackOnCloud: string;
