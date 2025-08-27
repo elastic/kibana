@@ -22,6 +22,7 @@ export interface DiscoverServerPluginStartDeps {
 }
 
 export interface LocatorServiceScopedClient {
+  columnsFromEsqlLocator: ColumnsFromLocatorFn;
   columnsFromLocator: ColumnsFromLocatorFn;
   searchSourceFromLocator: SearchSourceFromLocatorFn;
   titleFromLocator: TitleFromLocatorFn;

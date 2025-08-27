@@ -21,6 +21,10 @@ export const createLocatorServiceMock = (): DiscoverServerPluginLocatorService =
     .fn<Promise<string[]>, [DiscoverAppLocatorParams]>()
     .mockResolvedValue(mockFields);
 
+  const columnsFromEsqlLocatorMock = jest
+    .fn<Promise<string[] | undefined>, [DiscoverAppLocatorParams]>()
+    .mockResolvedValue(mockFields);
+
   const searchSourceFromLocatorMock = jest
     .fn<Promise<SearchSource>, [DiscoverAppLocatorParams]>()
     .mockResolvedValue(createSearchSourceMock({ fields: mockFields }));
@@ -43,6 +47,7 @@ export const createLocatorServiceMock = (): DiscoverServerPluginLocatorService =
       .mockImplementation(() => {
         return Promise.resolve({
           columnsFromLocator: columnsFromLocatorMock,
+          columnsFromEsqlLocator: columnsFromEsqlLocatorMock,
           searchSourceFromLocator: searchSourceFromLocatorMock,
           titleFromLocator: titleFromLocatorMock,
           queryFromLocator: queryFromLocatorMock,

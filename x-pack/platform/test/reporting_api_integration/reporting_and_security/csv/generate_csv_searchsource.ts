@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
         const fromTime = '2019-06-20T00:00:00.000Z';
         const toTime = '2019-06-24T00:00:00.000Z';
 
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvDeprecated(
           createTestCsvJobParams({
             browserTimezone: 'UTC',
             columns: [
@@ -175,7 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Helper function
       async function generateCsvReportWithUnmapped(fields: string[]) {
-        const { text } = await reportingAPI.generateCsv({
+        const { text } = await reportingAPI.generateCsvDeprecated({
           title: 'CSV Report',
           browserTimezone: 'UTC',
           objectType: 'search',
@@ -237,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Exports CSV with almost all fields when using fieldsFromSource', async () => {
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvDeprecated(
           createTestCsvJobParams({
             title: 'fieldsFromSource CSV Report',
             searchSource: {
@@ -343,7 +343,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Exports CSV with all fields when using defaults', async () => {
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvDeprecated(
           createTestCsvJobParams({
             title: 'All Fields CSV Report',
             searchSource: {
@@ -401,7 +401,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('With filters and timebased data, default to UTC', async () => {
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvDeprecated(
           createTestCsvJobParams({
             browserTimezone: undefined,
             title: 'Default Timezone CSV Report',
@@ -441,7 +441,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('With filters and timebased data, non-default timezone', async () => {
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvDeprecated(
           createTestCsvJobParams({
             title: 'CSV Report of Non-Default Timezone',
             browserTimezone: 'America/Phoenix',
@@ -493,7 +493,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Formatted date_nanos data, UTC timezone', async () => {
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvDeprecated(
           createTestCsvJobParams({
             title: 'Date_Nanos CSV Report',
             searchSource: {
@@ -515,7 +515,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Formatted date_nanos data, custom timezone (New York)', async () => {
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvDeprecated(
           createTestCsvJobParams({
             browserTimezone: 'America/New_York',
             title: 'Date_Nanos New York Timezone CSV Report',
@@ -554,7 +554,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Handle _id and _index columns', async () => {
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvDeprecated(
           createTestCsvJobParams({
             title: 'Handled _id and _index columns CSV Report',
             searchSource: {
@@ -575,7 +575,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('With filters and non-timebased data', async () => {
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvDeprecated(
           createTestCsvJobParams({
             title: 'Filters and Non-Timebased Data CSV Report',
             searchSource: {
@@ -617,7 +617,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('passes through the value without mutation', async () => {
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvDeprecated(
           createTestCsvJobParams({
             title: 'A Big Integer for _id CSV Report',
             searchSource: {
@@ -693,7 +693,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // NOTE: this test requires having the test server run with `xpack.reporting.csv.maxSizeBytes=6000`
       it('Searches large amount of data, stops at Max Size Reached', async () => {
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvDeprecated(
           createTestCsvJobParams({
             title: 'Large Data and Max Size Reached CSV Report',
             searchSource: {

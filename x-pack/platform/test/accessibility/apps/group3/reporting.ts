@@ -17,6 +17,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Reporting Accessibility', () => {
+    const createDataAnalystRole = async () => {
+      await security.role.create('data_analyst', {
+        elasticsearch: {
+          indices: [
+            {
+              names: ['ecommerce'],
+              privileges: ['read', 'view_index_metadata'],
+            },
+          ],
+        },
+        kibana: [],
+      });
+    };
+
     const createReportingUser = async () => {
       await security.user.create(reporting.REPORTING_USER_USERNAME, {
         password: reporting.REPORTING_USER_PASSWORD,
@@ -31,6 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await reporting.initEcommerce();
+      await createDataAnalystRole();
       await createReportingUser();
       await reporting.loginReportingUser();
     });
@@ -42,18 +57,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     beforeEach(async () => {
       // Add one report
-      const { body } = await reporting.generateCsv(
+      const { body } = await reporting.generateCsvV2(
         {
-          title: 'CSV Report',
           browserTimezone: 'UTC',
+          locatorParams: [
+            {
+              id: 'DISCOVER_APP_LOCATOR',
+              params: {
+                columns: [],
+                dataViewId: '5193f870-d861-11e9-a311-0fa548c5f953',
+                filters: [],
+                interval: 'auto',
+                query: { language: 'kuery', query: 'shoes AND Asia' },
+                refreshInterval: { pause: true, value: 60000 },
+                sort: [['order_date', 'desc']],
+                timeRange: { from: '2019-07-03T23:59:58.158Z', to: '2019-07-04T00:00:01.752Z' },
+              },
+              version: '9.2.0',
+            },
+          ],
           objectType: 'search',
-          version: '7.15.0',
-          searchSource: {
-            version: true,
-            query: { query: '', language: 'kuery' },
-            index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            fields: ['*'],
-          },
+          title: 'Untitled Discover session',
+          version: '9.2.0',
         },
         reporting.REPORTING_USER_USERNAME,
         reporting.REPORTING_USER_PASSWORD

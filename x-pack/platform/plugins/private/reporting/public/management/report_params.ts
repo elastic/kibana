@@ -9,8 +9,8 @@ import rison from '@kbn/rison';
 import {
   getPdfReportParams,
   getPngReportParams,
-} from '@kbn/reporting-public/share/share_context_menu/register_pdf_png_modal_reporting';
-import { getCsvReportParams } from '@kbn/reporting-public/share/share_context_menu/register_csv_modal_reporting';
+  getCsvReportParams,
+} from '@kbn/reporting-public/share';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ReportTypeId } from '../types';
 

@@ -33,7 +33,7 @@ const defaultSavedSearch: SavedObject<SavedSearchAttributes> = {
     title: '[Logs] Visits',
     description: '',
     columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
-    sort: [['test', '134']] as unknown as [],
+    sort: [['test', 'asc']],
     kibanaSavedObjectMeta: {
       searchSourceJSON:
         '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
@@ -44,7 +44,7 @@ const defaultSavedSearch: SavedObject<SavedSearchAttributes> = {
         label: 'Tab 1',
         attributes: {
           columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
-          sort: [['test', '134']],
+          sort: [['test', 'asc']],
           kibanaSavedObjectMeta: {
             searchSourceJSON:
               '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
@@ -76,10 +76,14 @@ beforeAll(async () => {
   uiSettingsClient = coreMock.createStart().uiSettings.asScopedToClient(soClient);
   searchSourceStart = await dataStartMock.search.searchSource.asScoped(request);
 
+  const mockDataViewsService = dataStartMock.indexPatterns.dataViewsServiceFactory();
+  mockDataViewsService.get = jest.fn().mockResolvedValue(mockDataView);
+
   mockServices = {
     searchSourceStart,
     savedObjects: soClient,
     uiSettings: uiSettingsClient,
+    dataViewsService: mockDataViewsService,
   };
 
   const soClientGet = soClient.get;
@@ -197,7 +201,7 @@ test('with saved search containing ["_source"]', async () => {
           label: 'Tab 1',
           attributes: {
             columns: ['_source'],
-            sort: [['test', '134']],
+            sort: [['test', 'asc']],
             kibanaSavedObjectMeta: {
               searchSourceJSON:
                 '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
@@ -210,5 +214,7 @@ test('with saved search containing ["_source"]', async () => {
 
   const provider = searchSourceFromLocatorFactory(mockServices);
   const searchSource = await provider(mockPayload[0].params);
-  expect(searchSource.getSerializedFields().fields).toEqual(['*']);
+  expect(searchSource.getSerializedFields().fields).toEqual([
+    { field: '*', include_unmapped: true },
+  ]);
 });

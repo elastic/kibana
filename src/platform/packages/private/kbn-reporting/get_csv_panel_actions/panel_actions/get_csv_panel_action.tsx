@@ -228,24 +228,16 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       absoluteTime: true,
     });
 
-    if (this.isEsqlMode(savedSearch)) {
-      return this.executeGenerate({
-        title,
-        searchModeParams: {
-          isEsqlMode: true,
-          locatorParams: [
-            {
-              id: DISCOVER_APP_LOCATOR,
-              params: this.getDiscoverLocatorParamsForEsqlCSV(embeddable, searchSource, columns),
-            } as LocatorParams,
-          ],
-        },
-      });
-    }
-
     return this.executeGenerate({
       title,
-      searchModeParams: { isEsqlMode: false, searchSource, columns },
+      searchModeParams: {
+        locatorParams: [
+          {
+            id: DISCOVER_APP_LOCATOR,
+            params: this.getDiscoverLocatorParamsForEsqlCSV(embeddable, searchSource, columns),
+          } as LocatorParams,
+        ],
+      },
     });
   };
 }
