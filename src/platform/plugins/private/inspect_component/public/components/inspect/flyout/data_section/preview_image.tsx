@@ -29,13 +29,13 @@ const PREVIEW_BADGE_LABEL = i18n.translate(
 );
 
 interface Props {
-  domElement: HTMLElement | null;
+  element: HTMLElement | null;
 }
 
 /**
- * The PreviewImage component is responsible for rendering a preview of a user-creted component associated with target DOM element.
+ * The PreviewImage component is responsible for display a preview of a user-creted component associated with the targeteted HTML element.
  */
-export const PreviewImage = ({ domElement }: Props) => {
+export const PreviewImage = ({ element }: Props) => {
   const [screenshot, setScreenshot] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -58,7 +58,7 @@ export const PreviewImage = ({ domElement }: Props) => {
   `;
 
   useEffect(() => {
-    const generateScreenshot = async (element: HTMLElement) => {
+    const generateScreenshot = async () => {
       try {
         const canvas = await domtoimage.toCanvas(element);
         setScreenshot(canvas.toDataURL('image/png'));
@@ -69,14 +69,15 @@ export const PreviewImage = ({ domElement }: Props) => {
       }
     };
 
-    if (domElement) {
-      generateScreenshot(domElement);
+    if (element) {
+      generateScreenshot();
     }
-  }, [domElement]);
+  }, [element]);
 
-  if (!domElement) {
+  if (!element) {
     return null;
   }
+
   return (
     <>
       <EuiSkeletonRectangle

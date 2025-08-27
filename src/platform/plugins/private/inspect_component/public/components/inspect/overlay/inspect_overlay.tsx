@@ -8,12 +8,13 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import type { CSSProperties, Dispatch, SetStateAction } from 'react';
+
 import { css } from '@emotion/css';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { ReactFiberNodeWithDomElement, SourceComponent } from '../../../lib/fiber/types';
+import type { CSSProperties, Dispatch, SetStateAction } from 'react';
+import type { ReactFiberNodeWithHtmlElement, SourceComponent } from '../../../lib/fiber/types';
 import { findFirstFiberWithDebugSource } from '../../../lib/fiber/find_first_fiber_with_debug_source';
 import { handleEventPropagation } from '../../../lib/dom/handle_event_propagation';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
@@ -30,21 +31,18 @@ interface Props {
 }
 
 /**
- * The InspectOverlay component is responsible for rendering an overlay on the entire viewport
- * when the user is in "inspect" mode. It highlights elements as the user hovers over them and
- * captures click events to inspect the clicked element.
- * It uses pointer events to track mouse movements and clicks, and it prevents these events
- * from propagating to underlying elements. With the exception of hovering.
+ * The InspectOverlay component is responsible for rendering an overlay over the entire viewport
+ * when inspect mode is enabled. It highlights HTML elements as they get hovered over.
  */
 export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties>({});
   const [sourceComponent, setSourceComponent] = useState<SourceComponent | null>(null);
-  const [targetFiberNodeWithDomElement, setTargetFiberNodeWithDomElement] =
-    useState<ReactFiberNodeWithDomElement | null>(null);
+  const [targetFiberNodeWithElement, setTargetFiberNodeWithElement] =
+    useState<ReactFiberNodeWithHtmlElement | null>(null);
 
   /**
-   * pointer-events: none is required for {@link stopEventsOnInspectedElement} to work properly.
+   * pointer-events: none is required for {@link handleEventPropagation} to work properly.
    */
   const overlayCss = useMemo(
     () => css`
@@ -71,7 +69,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       return;
     }
 
-    setTargetFiberNodeWithDomElement(fiberNode);
+    setTargetFiberNodeWithElement(fiberNode);
 
     const sourceComponentResult = findSourceComponent(fiberNode);
 
@@ -96,7 +94,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       const componentData = await getInspectedElementData({
         target,
         httpService: core.http,
-        targetFiberNodeWithDomElement,
+        targetFiberNodeWithHtmlElement: targetFiberNodeWithElement,
         sourceComponent,
       });
 
@@ -120,7 +118,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       setFlyoutOverlayRef(flyout);
       setIsInspecting(false);
     },
-    [core, sourceComponent, targetFiberNodeWithDomElement, setIsInspecting, setFlyoutOverlayRef]
+    [core, sourceComponent, targetFiberNodeWithElement, setIsInspecting, setFlyoutOverlayRef]
   );
 
   useEffect(() => {
@@ -136,19 +134,19 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
      * pointer-events: none on overlay has a drawback of rendering the appropriate cursor for each component.
      * This is a workaround which forces the crosshair cursor when inspecting.
      */
-    const forceCrossHairCursor = document.createElement('style');
-    forceCrossHairCursor.textContent = `
+    const forceCrosshairCursor = document.createElement('style');
+    forceCrosshairCursor.textContent = `
       body * {
         cursor: crosshair !important;
       }
       `;
 
-    document.head.appendChild(forceCrossHairCursor);
+    document.head.appendChild(forceCrosshairCursor);
     document.addEventListener('pointerdown', handleMouseEvent, true);
     document.addEventListener('click', handleMouseEvent, true);
 
     return () => {
-      document.head.removeChild(forceCrossHairCursor);
+      document.head.removeChild(forceCrosshairCursor);
       document.removeEventListener('pointerdown', handleMouseEvent, true);
       document.removeEventListener('click', handleMouseEvent, true);
     };

@@ -30,8 +30,7 @@ interface Props {
 }
 
 /**
- * The entry point for the plugin.
- * Renders the inspect button which toggles the inspect mode.
+ * The entry point for the plugin. Toggles inspect mode.
  */
 export const InspectButton = ({ core }: Props) => {
   const [isInspecting, setIsInspecting] = useState(false);
@@ -50,7 +49,7 @@ export const InspectButton = ({ core }: Props) => {
     }
   };
 
-  const handleTogglingInspectModeClick = () => {
+  const handleTogglingInspectMode = () => {
     if (flyoutOverlayRef) {
       flyoutOverlayRef.close();
       setFlyoutOverlayRef(undefined);
@@ -59,8 +58,8 @@ export const InspectButton = ({ core }: Props) => {
   };
 
   /**
-   * This is needed to prevent components like EmbeddableConsole from closing
-   * when toggling on inspect mode by clicking on the InspectButton.
+   * Prevent components from losing focus when toggling on inspect mode via InspectButton.
+   * If a component loses focus, it might unmount itself.
    */
   const preventTargetFromLosingFocus = (event: MouseEvent) => {
     event.preventDefault();
@@ -71,7 +70,7 @@ export const InspectButton = ({ core }: Props) => {
       <EuiWindowEvent event="keydown" handler={handleKeydown} />
       <EuiToolTip content={isInspecting ? '' : TOOLTIP_CONTENT} position="bottom">
         <EuiHeaderSectionItemButton
-          onClick={handleTogglingInspectModeClick}
+          onClick={handleTogglingInspectMode}
           onMouseDown={preventTargetFromLosingFocus}
           iconType="inspect"
           isSelected={isInspecting}

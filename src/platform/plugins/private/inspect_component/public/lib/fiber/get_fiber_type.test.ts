@@ -11,7 +11,7 @@ import { getFiberType } from './get_fiber_type';
 import type { ReactFiberNode } from './types';
 
 describe('getFiberType', () => {
-  it('should return the type string when fiber.type is a string', () => {
+  it('should return the type string when type is a string', () => {
     const fiber = {
       type: 'div',
     } as ReactFiberNode;
@@ -19,7 +19,7 @@ describe('getFiberType', () => {
     expect(getFiberType(fiber)).toBe('div');
   });
 
-  it('should return the type.name when fiber.type.name is a string', () => {
+  it('should return the type.name when type.name is a string', () => {
     const fiber = {
       type: {
         name: 'FunctionalComponent',
@@ -29,7 +29,7 @@ describe('getFiberType', () => {
     expect(getFiberType(fiber)).toBe('FunctionalComponent');
   });
 
-  it('should return the type.displayName when fiber.type.displayName is a string', () => {
+  it('should return the type.displayName when type.displayName is a string', () => {
     const fiber = {
       type: {
         displayName: 'StyledComponent',
@@ -39,7 +39,7 @@ describe('getFiberType', () => {
     expect(getFiberType(fiber)).toBe('StyledComponent');
   });
 
-  it('should return the elementType when fiber.elementType is a string', () => {
+  it('should return the elementType when elementType is a string', () => {
     const fiber = {
       elementType: 'span',
     } as ReactFiberNode;

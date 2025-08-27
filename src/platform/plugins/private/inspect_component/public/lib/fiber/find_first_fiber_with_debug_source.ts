@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DebugSource, ReactFiberNode, ReactFiberNodeWithDomElement } from './types';
-import { getFiberFromDomElement } from './get_fiber_from_dom_element';
+import type { DebugSource, ReactFiberNode, ReactFiberNodeWithHtmlElement } from './types';
+import { getFiberFromHtmlElement } from './get_fiber_from_html_element';
 
 const hasDebugSource = (
   fiber: ReactFiberNode
@@ -17,26 +17,26 @@ const hasDebugSource = (
 };
 
 /**
- * Finds the first React fiber node associated with the given DOM element (or its ancestors)
+ * Finds the first React fiber node associated with the given HTML element (or its ancestors)
  * that has a debug source attached to it. It traverses up the DOM tree and for each element,
  * it checks the associated React fiber node and its ancestors for a debug source.
- * @param {HTMLElement} domElement The DOM element.
- * @return {ReactFiberNodeWithDomElement | null} The first fiber node with debug source and its associated DOM element, or null if none found.
+ * @param {HTMLElement} element The HTML element.
+ * @return {ReactFiberNodeWithHtmlElement | null} The first fiber node with debug source and its associated HTML element, or null if none found.
  */
 export const findFirstFiberWithDebugSource = (
-  domElement: HTMLElement
-): ReactFiberNodeWithDomElement | null => {
-  let current: HTMLElement | null = domElement;
+  element: HTMLElement
+): ReactFiberNodeWithHtmlElement | null => {
+  let current: HTMLElement | null = element;
 
   while (current) {
-    const fiber = getFiberFromDomElement(current);
+    const fiber = getFiberFromHtmlElement(current);
     if (fiber) {
       let fiberCursor: ReactFiberNode | null | undefined = fiber;
       while (fiberCursor) {
         if (hasDebugSource(fiberCursor)) {
           return {
             ...fiberCursor,
-            domElement: current,
+            element: current,
           };
         }
 

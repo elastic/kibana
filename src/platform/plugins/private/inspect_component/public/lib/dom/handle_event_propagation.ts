@@ -8,7 +8,7 @@
  */
 
 /**
- * Parameters for {@link handleEventPropagation}
+ * Options for {@link handleEventPropagation}
  */
 interface HandleEventPropagationOptions {
   /** The mouse event to handle. */

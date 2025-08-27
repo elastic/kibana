@@ -3,7 +3,7 @@
   "id": "@kbn/inspect-component-plugin",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
-  "description": "A plugin which lets you inspect React components in devlopment environment",
+  "description": "A plugin which lets you inspect React components in devlopment environment.",
   "visibility": "private",
   "plugin": {
     "id": "inspectComponent",

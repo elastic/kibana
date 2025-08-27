@@ -10,10 +10,9 @@
 import { INSPECT_OVERLAY_ID } from '../constants';
 
 /**
- * Get the topmost DOM element at the given pointer event's coordinates, ignoring inspect overlay and non-inspectable
- * elements.
+ * Get the topmost HTML element at the given pointer event's coordinates.
  * @param {MouseEvent} event The mouse event containing the coordinates.
- * @return {HTMLElement | null} The topmost inspectable DOM element at the event's coordinates, or undefined if none found.
+ * @return {HTMLElement | null} The topmost inspectable HTML element at the event's coordinates, or null if none found.
  */
 export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
   const elements = document.elementsFromPoint(event.clientX, event.clientY);

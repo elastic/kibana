@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEuiMainComponent, isIgnoredComponent } from '../utils';
+import { isEuiMainComponent, isExcludedComponent } from '../utils';
 import { getFiberType } from './get_fiber_type';
 import type { ReactFiberNode } from './types';
 
 /**
- * Find the first EUI component in the fiber node's owner chain.
- * @param {ReactFiberNode} fiberNode The Fiber node.
+ * Find the first EUI component in the Fiber's node owner chain.
+ * @param {ReactFiberNode} fiber The Fiber node.
  * @return {string | null} The EUI component name, or null if none is found.
  */
-export const findFirstEuiComponent = (fiberNode: ReactFiberNode) => {
-  let fiberCursor: ReactFiberNode | null | undefined = fiberNode;
+export const findFirstEuiComponent = (fiber: ReactFiberNode) => {
+  let fiberCursor: ReactFiberNode | null | undefined = fiber;
 
   while (fiberCursor) {
     const type = getFiberType(fiberCursor);
-    if (type && isEuiMainComponent(type) && !isIgnoredComponent(type)) {
+    if (type && isEuiMainComponent(type) && !isExcludedComponent(type)) {
       return type;
     }
     fiberCursor = fiberCursor._debugOwner;

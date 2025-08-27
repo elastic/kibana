@@ -9,7 +9,7 @@
 
 import { findFirstEuiComponent } from './find_first_eui_component';
 import { getFiberType } from './get_fiber_type';
-import { isEuiMainComponent, isIgnoredComponent } from '../utils';
+import { isEuiMainComponent, isExcludedComponent } from '../utils';
 import type { ReactFiberNode } from './types';
 
 jest.mock('./get_fiber_type');
@@ -17,7 +17,9 @@ jest.mock('../utils');
 
 const mockGetFiberType = getFiberType as jest.MockedFunction<typeof getFiberType>;
 const mockIsEuiMainComponent = isEuiMainComponent as jest.MockedFunction<typeof isEuiMainComponent>;
-const mockIsIgnoredComponent = isIgnoredComponent as jest.MockedFunction<typeof isIgnoredComponent>;
+const mockIsExcludedComponent = isExcludedComponent as jest.MockedFunction<
+  typeof isExcludedComponent
+>;
 
 describe('findFirstEuiComponent', () => {
   beforeEach(() => {
@@ -42,7 +44,7 @@ describe('findFirstEuiComponent', () => {
     return: undefined,
   });
 
-  it('should return null when no fiber type is found', () => {
+  it('should return null when no Fiber type is found', () => {
     const fiberNode = createMockFiberNode('TestComponent');
     mockGetFiberType.mockReturnValue(null);
 
@@ -56,7 +58,7 @@ describe('findFirstEuiComponent', () => {
     const fiberNode = createMockFiberNode('TestComponent');
     mockGetFiberType.mockReturnValue('TestComponent');
     mockIsEuiMainComponent.mockReturnValue(false);
-    mockIsIgnoredComponent.mockReturnValue(false);
+    mockIsExcludedComponent.mockReturnValue(false);
 
     const result = findFirstEuiComponent(fiberNode);
 
@@ -65,32 +67,32 @@ describe('findFirstEuiComponent', () => {
     expect(mockIsEuiMainComponent).toHaveBeenCalledWith('TestComponent');
   });
 
-  it('should return null when EUI component is ignored', () => {
+  it('should return null when EUI component is skipped', () => {
     const fiberNode = createMockFiberNode('EuiButton');
     mockGetFiberType.mockReturnValue('EuiButton');
     mockIsEuiMainComponent.mockReturnValue(true);
-    mockIsIgnoredComponent.mockReturnValue(true);
+    mockIsExcludedComponent.mockReturnValue(true);
 
     const result = findFirstEuiComponent(fiberNode);
 
     expect(result).toBeNull();
     expect(mockGetFiberType).toHaveBeenCalledWith(fiberNode);
     expect(mockIsEuiMainComponent).toHaveBeenCalledWith('EuiButton');
-    expect(mockIsIgnoredComponent).toHaveBeenCalledWith('EuiButton');
+    expect(mockIsExcludedComponent).toHaveBeenCalledWith('EuiButton');
   });
 
-  it('should return EUI component when found in current fiber node', () => {
+  it('should return EUI component when found in current Fiber node', () => {
     const fiberNode = createMockFiberNode('EuiButton');
     mockGetFiberType.mockReturnValue('EuiButton');
     mockIsEuiMainComponent.mockReturnValue(true);
-    mockIsIgnoredComponent.mockReturnValue(false);
+    mockIsExcludedComponent.mockReturnValue(false);
 
     const result = findFirstEuiComponent(fiberNode);
 
     expect(result).toBe('EuiButton');
     expect(mockGetFiberType).toHaveBeenCalledWith(fiberNode);
     expect(mockIsEuiMainComponent).toHaveBeenCalledWith('EuiButton');
-    expect(mockIsIgnoredComponent).toHaveBeenCalledWith('EuiButton');
+    expect(mockIsExcludedComponent).toHaveBeenCalledWith('EuiButton');
   });
 
   it('should traverse debug owner chain to find EUI component', () => {
@@ -108,7 +110,7 @@ describe('findFirstEuiComponent', () => {
       .mockReturnValueOnce(false)
       .mockReturnValueOnce(true);
 
-    mockIsIgnoredComponent.mockReturnValue(false);
+    mockIsExcludedComponent.mockReturnValue(false);
 
     const result = findFirstEuiComponent(rootFiber);
 
@@ -128,7 +130,7 @@ describe('findFirstEuiComponent', () => {
 
     mockIsEuiMainComponent.mockReturnValueOnce(false).mockReturnValueOnce(true);
 
-    mockIsIgnoredComponent.mockReturnValue(false);
+    mockIsExcludedComponent.mockReturnValue(false);
 
     const result = findFirstEuiComponent(rootFiber);
 
@@ -140,7 +142,7 @@ describe('findFirstEuiComponent', () => {
     const fiberNode = createMockFiberNode('TestComponent', null);
     mockGetFiberType.mockReturnValue('TestComponent');
     mockIsEuiMainComponent.mockReturnValue(false);
-    mockIsIgnoredComponent.mockReturnValue(false);
+    mockIsExcludedComponent.mockReturnValue(false);
 
     const result = findFirstEuiComponent(fiberNode);
 
@@ -152,7 +154,7 @@ describe('findFirstEuiComponent', () => {
     const fiberNode = createMockFiberNode('TestComponent', undefined);
     mockGetFiberType.mockReturnValue('TestComponent');
     mockIsEuiMainComponent.mockReturnValue(false);
-    mockIsIgnoredComponent.mockReturnValue(false);
+    mockIsExcludedComponent.mockReturnValue(false);
 
     const result = findFirstEuiComponent(fiberNode);
 
@@ -174,7 +176,7 @@ describe('findFirstEuiComponent', () => {
       .mockReturnValueOnce(false)
       .mockReturnValueOnce(false)
       .mockReturnValueOnce(true);
-    mockIsIgnoredComponent.mockReturnValue(false);
+    mockIsExcludedComponent.mockReturnValue(false);
 
     const result = findFirstEuiComponent(userComponentFiber);
 

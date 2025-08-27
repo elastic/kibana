@@ -8,10 +8,10 @@
  */
 
 import { findFirstFiberWithDebugSource } from './find_first_fiber_with_debug_source';
-import { getFiberFromDomElement } from './get_fiber_from_dom_element';
+import { getFiberFromHtmlElement } from './get_fiber_from_html_element';
 import type { DebugSource, ReactFiberNode } from './types';
 
-jest.mock('./get_fiber_from_dom_element');
+jest.mock('./get_fiber_from_html_element');
 
 describe('findFirstFiberWithDebugSource', () => {
   let mockElement: HTMLElement;
@@ -26,48 +26,48 @@ describe('findFirstFiberWithDebugSource', () => {
       _debugOwner: undefined,
     } as ReactFiberNode;
 
-    (getFiberFromDomElement as jest.Mock).mockReset();
+    (getFiberFromHtmlElement as jest.Mock).mockReset();
   });
 
-  it('should return null when no fiber is found', () => {
-    (getFiberFromDomElement as jest.Mock).mockReturnValue(undefined);
+  it('should return null when no Fiber is found', () => {
+    (getFiberFromHtmlElement as jest.Mock).mockReturnValue(undefined);
 
     const result = findFirstFiberWithDebugSource(mockElement);
 
     expect(result).toBeNull();
-    expect(getFiberFromDomElement).toHaveBeenCalledWith(mockElement);
+    expect(getFiberFromHtmlElement).toHaveBeenCalledWith(mockElement);
   });
 
-  it('should return fiber with debug source and dom element from the direct fiber', () => {
+  it('should return Fiber with debug source and HTML element from the direct Fiber', () => {
     mockFiber._debugSource = mockDebugSource;
-    (getFiberFromDomElement as jest.Mock).mockReturnValue(mockFiber);
+    (getFiberFromHtmlElement as jest.Mock).mockReturnValue(mockFiber);
 
     const result = findFirstFiberWithDebugSource(mockElement);
 
     expect(result).toEqual({
       ...mockFiber,
-      domElement: mockElement,
+      element: mockElement,
     });
   });
 
-  it('should traverse up the fiber owner chain to find debug source', () => {
+  it('should traverse up the Fiber owner chain to find debug source', () => {
     const ownerFiber: ReactFiberNode = {
       _debugSource: mockDebugSource,
       _debugOwner: undefined,
     } as ReactFiberNode;
 
     mockFiber._debugOwner = ownerFiber;
-    (getFiberFromDomElement as jest.Mock).mockReturnValue(mockFiber);
+    (getFiberFromHtmlElement as jest.Mock).mockReturnValue(mockFiber);
 
     const result = findFirstFiberWithDebugSource(mockElement);
 
     expect(result).toEqual({
       ...ownerFiber,
-      domElement: mockElement,
+      element: mockElement,
     });
   });
 
-  it('should traverse up the DOM tree if no fiber or debug source is found', () => {
+  it('should traverse up the DOM tree if no Fiber or debug source is found', () => {
     const parentElement = document.createElement('div');
     const grandParentElement = document.createElement('div');
 
@@ -86,7 +86,7 @@ describe('findFirstFiberWithDebugSource', () => {
       _debugOwner: undefined,
     } as ReactFiberNode;
 
-    (getFiberFromDomElement as jest.Mock)
+    (getFiberFromHtmlElement as jest.Mock)
       .mockReturnValueOnce(undefined)
       .mockReturnValueOnce(undefined)
       .mockReturnValueOnce(grandParentFiber);
@@ -95,11 +95,11 @@ describe('findFirstFiberWithDebugSource', () => {
 
     expect(result).toEqual({
       ...grandParentFiber,
-      domElement: grandParentElement,
+      element: grandParentElement,
     });
-    expect(getFiberFromDomElement).toHaveBeenNthCalledWith(1, mockElement);
-    expect(getFiberFromDomElement).toHaveBeenNthCalledWith(2, parentElement);
-    expect(getFiberFromDomElement).toHaveBeenNthCalledWith(3, grandParentElement);
+    expect(getFiberFromHtmlElement).toHaveBeenNthCalledWith(1, mockElement);
+    expect(getFiberFromHtmlElement).toHaveBeenNthCalledWith(2, parentElement);
+    expect(getFiberFromHtmlElement).toHaveBeenNthCalledWith(3, grandParentElement);
   });
 
   it('should return null when traversing the DOM tree finds no debug source', () => {
@@ -113,7 +113,7 @@ describe('findFirstFiberWithDebugSource', () => {
       writable: true,
     });
 
-    (getFiberFromDomElement as jest.Mock)
+    (getFiberFromHtmlElement as jest.Mock)
       .mockReturnValueOnce(undefined)
       .mockReturnValueOnce(undefined);
 

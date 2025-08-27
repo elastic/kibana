@@ -14,7 +14,7 @@ import { EuiDocsLink } from './eui_docs_link';
 import type { EuiData } from '../../../../lib/fiber/types';
 
 describe('EuiDocsLink', () => {
-  it('should render link when euiData is provided', () => {
+  it('should render', () => {
     const mockEuiData: EuiData = {
       componentName: 'EuiButton',
       docsLink: 'https://eui.elastic.co/docs/components/button',
@@ -22,15 +22,8 @@ describe('EuiDocsLink', () => {
 
     renderWithI18n(<EuiDocsLink euiData={mockEuiData} />);
 
-    const link = screen.getByRole('link');
+    const link = screen.getByTestId('euiDocsLink');
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', 'https://eui.elastic.co/docs/components/button');
-  });
-
-  it('should render "N/A" when euiData is not provided', () => {
-    renderWithI18n(<EuiDocsLink />);
-
-    expect(screen.getByText('N/A')).toBeInTheDocument();
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 });

@@ -10,12 +10,12 @@
 import type { ReactFiberNode } from './types';
 
 /**
- * Get the React Fiber node associated with a DOM element.
- * @param {HTMLElement | null} domElement - The DOM element to get the fiber from.
+ * Get the React Fiber node associated with a HTML element.
+ * @param {HTMLElement | null} element - The HTML element to get the Fiber from.
  * @returns {ReactFiberNode | null} The corresponding React Fiber node, or null if not found.
  */
-export const getFiberFromDomElement = (domElement: HTMLElement | null): ReactFiberNode | null => {
-  if (!domElement) return null;
-  const fiberKey = Object.keys(domElement).find((key) => key.startsWith('__reactFiber$'));
-  return fiberKey ? (domElement as any)[fiberKey] : undefined;
+export const getFiberFromHtmlElement = (element: HTMLElement | null): ReactFiberNode | null => {
+  if (!element) return null;
+  const fiberKey = Object.keys(element).find((key) => key.startsWith('__reactFiber$'));
+  return fiberKey ? (element as any)[fiberKey] : null;
 };

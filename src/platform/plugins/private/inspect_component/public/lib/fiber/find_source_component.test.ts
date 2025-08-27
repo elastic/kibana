@@ -9,7 +9,7 @@
 
 import { findSourceComponent } from './find_source_component';
 import { getFiberType } from './get_fiber_type';
-import type { ReactFiberNode, ReactFiberNodeWithDomElement } from './types';
+import type { ReactFiberNode, ReactFiberNodeWithHtmlElement } from './types';
 
 jest.mock('./get_fiber_type');
 
@@ -28,9 +28,9 @@ describe('findSourceComponent', () => {
 
   const createMockFiberNode = (
     type: string,
-    domElement: HTMLElement,
+    element: HTMLElement,
     debugOwner?: ReactFiberNode | null
-  ): ReactFiberNodeWithDomElement => ({
+  ): ReactFiberNodeWithHtmlElement => ({
     elementType: type,
     type,
     _debugSource: {
@@ -39,11 +39,11 @@ describe('findSourceComponent', () => {
       columnNumber: 5,
     },
     _debugOwner: debugOwner,
-    stateNode: domElement,
+    stateNode: element,
     child: undefined,
     sibling: undefined,
     return: undefined,
-    domElement,
+    element,
   });
 
   it('should return null when no components are found', () => {
@@ -72,7 +72,7 @@ describe('findSourceComponent', () => {
 
     expect(result).toEqual({
       type: 'TestComponent',
-      domElement: mockElement,
+      element: mockElement,
     });
   });
 
@@ -86,7 +86,7 @@ describe('findSourceComponent', () => {
 
     expect(result).toEqual({
       type: 'ParentComponent',
-      domElement: mockElement,
+      element: mockElement,
     });
   });
 
@@ -100,7 +100,7 @@ describe('findSourceComponent', () => {
 
     expect(result).toEqual({
       type: 'UserComponent',
-      domElement: mockElement,
+      element: mockElement,
     });
   });
 
@@ -114,7 +114,7 @@ describe('findSourceComponent', () => {
 
     expect(result).toEqual({
       type: 'UserComponent',
-      domElement: mockElement,
+      element: mockElement,
     });
   });
 
@@ -132,7 +132,7 @@ describe('findSourceComponent', () => {
 
     expect(result).toEqual({
       type: 'UserComponent',
-      domElement: mockElement,
+      element: mockElement,
     });
   });
 });

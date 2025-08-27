@@ -24,7 +24,7 @@ export const DataSection = ({ componentData }: Props) => {
 
   return (
     <>
-      <PreviewImage domElement={sourceComponent.domElement} />
+      <PreviewImage element={sourceComponent.element} />
       <ComponentTitle sourceComponentType={sourceComponent.type} />
       <CodeownersList codeowners={codeowners} />
       <IconType iconType={iconType} />

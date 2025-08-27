@@ -11,7 +11,7 @@ import { getInspectedElementData } from './get_inspected_element_data';
 import { fetchComponentData } from '../api/fetch_component_data';
 import { getIconType } from './dom/get_icon_type';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import type { ReactFiberNodeWithDomElement } from './fiber/types';
+import type { ReactFiberNodeWithHtmlElement } from './fiber/types';
 
 jest.mock('../api/fetch_component_data');
 jest.mock('./dom/get_icon_type');
@@ -22,10 +22,10 @@ describe('getInspectedElementData', () => {
   const mockTarget = document.createElement('div');
   const mockSourceComponent = {
     type: 'EuiButton',
-    domElement: document.createElement('button'),
+    element: document.createElement('button'),
   };
 
-  const mockTargetFiberNodeWithDomElement: ReactFiberNodeWithDomElement = {
+  const mockTargetFiberNodeWithHtmlElement: ReactFiberNodeWithHtmlElement = {
     elementType: 'button',
     type: 'EuiButton',
     _debugSource: {
@@ -38,7 +38,7 @@ describe('getInspectedElementData', () => {
     child: undefined,
     sibling: undefined,
     return: undefined,
-    domElement: mockTarget,
+    element: mockTarget,
   };
 
   const mockResponse = {
@@ -56,12 +56,12 @@ describe('getInspectedElementData', () => {
     jest.clearAllMocks();
   });
 
-  it('should return null if targetFiberNodeWithDomElement is null', async () => {
+  it('should return null if targetFiberNodeWithHtmlElement is null', async () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       target: mockTarget,
       sourceComponent: mockSourceComponent,
-      targetFiberNodeWithDomElement: null,
+      targetFiberNodeWithHtmlElement: null,
     });
 
     expect(result).toBeNull();
@@ -72,7 +72,7 @@ describe('getInspectedElementData', () => {
       httpService: mockHttpService,
       target: mockTarget,
       sourceComponent: null,
-      targetFiberNodeWithDomElement: mockTargetFiberNodeWithDomElement,
+      targetFiberNodeWithHtmlElement: mockTargetFiberNodeWithHtmlElement,
     });
 
     expect(result).toBeNull();
@@ -85,12 +85,12 @@ describe('getInspectedElementData', () => {
       httpService: mockHttpService,
       target: mockTarget,
       sourceComponent: mockSourceComponent,
-      targetFiberNodeWithDomElement: mockTargetFiberNodeWithDomElement,
+      targetFiberNodeWithHtmlElement: mockTargetFiberNodeWithHtmlElement,
     });
 
     expect(fetchComponentData).toHaveBeenCalledWith({
       httpService: mockHttpService,
-      fileName: mockTargetFiberNodeWithDomElement._debugSource.fileName,
+      fileName: mockTargetFiberNodeWithHtmlElement._debugSource.fileName,
     });
     expect(result).toBeNull();
   });
@@ -103,17 +103,17 @@ describe('getInspectedElementData', () => {
       httpService: mockHttpService,
       target: mockTarget,
       sourceComponent: mockSourceComponent,
-      targetFiberNodeWithDomElement: mockTargetFiberNodeWithDomElement,
+      targetFiberNodeWithHtmlElement: mockTargetFiberNodeWithHtmlElement,
     });
 
     expect(fetchComponentData).toHaveBeenCalledWith({
       httpService: mockHttpService,
-      fileName: mockTargetFiberNodeWithDomElement._debugSource.fileName,
+      fileName: mockTargetFiberNodeWithHtmlElement._debugSource.fileName,
     });
     expect(getIconType).toHaveBeenCalledWith(mockTarget);
 
     expect(result).toEqual({
-      ...mockTargetFiberNodeWithDomElement,
+      ...mockTargetFiberNodeWithHtmlElement,
       ...mockResponse,
       iconType: 'copy',
       euiData: mockEuiDocs,

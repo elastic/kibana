@@ -18,10 +18,8 @@ interface Props {
 }
 
 /**
- * The InspectHighlight component is responsible for rendering a highlight box around the currently
- * inspected element, along with a badge displaying the React component path.
- * It takes the current position and dimensions of the highlight box as props, and it adjusts the
- * position of the badge to ensure it remains fully visible within the viewport.
+ * The InspectHighlight component is responsible for displaying a highlight box around the currently
+ * inspected HTML element, along with a badge displaying the associated React component name.
  */
 export const InspectHighlight = ({ currentPosition, path }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -62,23 +60,21 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
 
     /**
      * Horizontal adjustment.
-     * If the badge would overflow the viewport on the right, we shift it to the left so it's fully visible.
+     * If the badge would overflow the viewport on the right, it will get shifted to the left.
      */
     if (isFixed) {
-      // For fixed positioning, check if badge extends beyond viewport
       const badgeRight = containerRect.left + badgeRect.width;
       setBadgeOffsetX(
         badgeRight > viewportWidth ? viewportWidth - containerRect.left - badgeRect.width : 0
       );
     } else {
-      // Original logic for absolute positioning
       const availableRight = viewportWidth - containerRect.left;
       setBadgeOffsetX(badgeRect.width > availableRight ? availableRight - badgeRect.width : 0);
     }
 
     /**
      * Vertical adjustment.
-     * If the badge would overflow the viewport on the bottom, we flip it above the highlight.
+     * If the badge would overflow the viewport on the bottom, it will get fliped above the highlight.
      */
     if (isFixed) {
       // For fixed positioning, the container is already positioned at the exact element location
@@ -95,7 +91,6 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
         setBadgeOffsetY(containerHeight);
       }
     } else {
-      // Original logic for absolute positioning
       const availableBottom = viewportHeight - (containerRect.top + highlightHeight);
       if (badgeRect.height > availableBottom) {
         setBadgeOffsetY(-badgeRect.height);

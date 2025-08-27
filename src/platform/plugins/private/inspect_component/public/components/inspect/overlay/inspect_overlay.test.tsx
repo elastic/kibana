@@ -59,7 +59,7 @@ describe('InspectOverlay', () => {
     (getElementFromPoint as jest.Mock).mockReturnValue(fakeTarget);
     (findSourceComponent as jest.Mock).mockReturnValue({
       path: 'fakePath',
-      sourceComponent: { type: 'FakeComponent', domElement: document.createElement('div') },
+      sourceComponent: { type: 'FakeComponent', element: document.createElement('div') },
     });
 
     renderWithI18n(

@@ -23,7 +23,7 @@ export interface DebugSource {
 
 /**
  * The subset of React Fiber node properties we care about, extended
- * for DOM traversal and fiber tree navigation.
+ * for DOM traversal and Fiber tree navigation.
  */
 export interface ReactFiberNode {
   /** The type of the React element represented by this Fiber node. */
@@ -34,7 +34,7 @@ export interface ReactFiberNode {
   _debugSource?: DebugSource;
   /** The Fiber node that created this node. */
   _debugOwner?: ReactFiberNode | null;
-  /** The actual DOM element for host components, or component instance for class components. */
+  /** The actual HTML element for host components, or component instance for class components. */
   stateNode?: HTMLElement | null;
   /** First child Fiber node. */
   child?: ReactFiberNode | null;
@@ -44,21 +44,21 @@ export interface ReactFiberNode {
   return?: ReactFiberNode | null;
 }
 
-export interface ReactFiberNodeWithDomElement extends ReactFiberNode {
+export interface ReactFiberNodeWithHtmlElement extends ReactFiberNode {
   /** Metadata about the source file where this Fiber was created. */
   _debugSource: DebugSource;
-  /** DOM element with the fiber node. */
-  domElement: HTMLElement;
+  /** HTML element associated with the Fiber node. */
+  element: HTMLElement;
 }
 
 /**
- * The name of the top-level React component where the path starts and the associated DOM element.
+ * The name of the top-level React component and the associated HTML element.
  */
 export interface SourceComponent {
   /** The component name. */
   type: string;
-  /** The DOM element associated with the source component. */
-  domElement: HTMLElement | null;
+  /** The HTML element associated with the source component. */
+  element: HTMLElement | null;
 }
 
 /**

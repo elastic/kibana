@@ -17,7 +17,7 @@ describe('DataSection', () => {
   it('should render correctly', () => {
     renderWithI18n(<DataSection componentData={mockComponentData} />);
 
-    const title = screen.getByText('MyComponent');
+    const title = screen.getByText('CapybaraWrapper');
     expect(title).toBeInTheDocument();
   });
 });

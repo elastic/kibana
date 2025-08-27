@@ -13,10 +13,10 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { PreviewImage } from './preview_image';
 
 describe('PreviewImage', () => {
-  const mockDomElement = document.createElement('div');
+  const mockElement = document.createElement('div');
 
   it('should render correctly', () => {
-    renderWithI18n(<PreviewImage domElement={mockDomElement} />);
+    renderWithI18n(<PreviewImage element={mockElement} />);
 
     const previewImage = screen.getByTestId('inspectFlyoutPreviewImage');
 

@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiData } from '../../../../lib/fiber/types';
 
 interface Props {
-  euiData?: EuiData;
+  euiData: EuiData;
 }
 
 export const EuiDocsLink = ({ euiData }: Props) => {
@@ -28,22 +28,13 @@ export const EuiDocsLink = ({ euiData }: Props) => {
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
       <EuiText css={boldTextCss} size="s">
         <FormattedMessage
-          id="kbnInspectComponent.inspectFlyout.dataSectioneuiDocsLabel"
+          id="kbnInspectComponent.inspectFlyout.dataSection.euiDocsLabel"
           defaultMessage="EUI Docs:"
         />
       </EuiText>
-      {euiData ? (
-        <EuiLink href={euiData.docsLink} target="_blank" external>
-          {euiData.componentName}
-        </EuiLink>
-      ) : (
-        <EuiText size="s">
-          <FormattedMessage
-            id="kbnInspectComponent.inspectFlyout.dataSection.noDocsFound"
-            defaultMessage="N/A"
-          />
-        </EuiText>
-      )}
+      <EuiLink href={euiData.docsLink} target="_blank" external data-test-subj="euiDocsLink">
+        {euiData.componentName}
+      </EuiLink>
     </EuiFlexGroup>
   );
 };

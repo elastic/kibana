@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEui, isHtmlTag, isIgnoredComponent } from '../utils';
-import type { ReactFiberNode, ReactFiberNodeWithDomElement, SourceComponent } from './types';
+import { isEui, isHtmlTag, isExcludedComponent } from '../utils';
+import type { ReactFiberNode, ReactFiberNodeWithHtmlElement, SourceComponent } from './types';
 import { getFiberType } from './get_fiber_type';
 
 /**
  * Find the source component from target Fiber node.
- * @param {ReactFiberNodeWithDomElement} fiberNode The Fiber node.
+ * @param {ReactFiberNodeWithHtmlElement} fiberNode The Fiber node.
  * @return {SourceComponent | null} The source component, or null if it cannot be determined.
  */
 export const findSourceComponent = (
-  fiberNode: ReactFiberNodeWithDomElement
+  fiberNode: ReactFiberNodeWithHtmlElement
 ): SourceComponent | null => {
-  let current: HTMLElement | null = fiberNode.domElement;
+  let current: HTMLElement | null = fiberNode.element;
   let sourceComponent: SourceComponent | null = null;
 
   while (current && !sourceComponent) {
@@ -28,8 +28,8 @@ export const findSourceComponent = (
     while (fiberCursor && !sourceComponent) {
       const type = getFiberType(fiberCursor);
       if (type) {
-        if (!isHtmlTag(type) && !isEui(type) && !isIgnoredComponent(type)) {
-          sourceComponent = { domElement: current, type };
+        if (!isHtmlTag(type) && !isEui(type) && !isExcludedComponent(type)) {
+          sourceComponent = { element: current, type };
           break;
         }
       }

@@ -28,7 +28,7 @@ export const getComponentDataBodySchema = schema.object({
 export type GetComponentDataRequestBody = TypeOf<typeof getComponentDataBodySchema>;
 
 /**
- * Parameters for {@link getComponentData}.
+ * Options for {@link getComponentData}.
  */
 interface GetComponentDataOptions {
   req: KibanaRequest<unknown, unknown, GetComponentDataRequestBody>;

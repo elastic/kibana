@@ -9,7 +9,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import { findFirstEuiComponent } from './fiber/find_first_eui_component';
-import type { EuiData, ReactFiberNodeWithDomElement, SourceComponent } from './fiber/types';
+import type { EuiData, ReactFiberNodeWithHtmlElement, SourceComponent } from './fiber/types';
 import { EUI_COMPONENTS_DOCS_MAP, EUI_DOCS_BASE } from './constants';
 import { getIconType } from './dom/get_icon_type';
 import type { InspectComponentResponse } from '../api/fetch_component_data';
@@ -18,54 +18,54 @@ import { fetchComponentData } from '../api/fetch_component_data';
 /**
  * Represents information about a component.
  */
-export interface ComponentData extends ReactFiberNodeWithDomElement, InspectComponentResponse {
+export interface ComponentData extends ReactFiberNodeWithHtmlElement, InspectComponentResponse {
   /** List of all teams who are codeowners for specified file. */
   codeowners: string[];
   /** Represents information about an EUI component. */
   euiData: EuiData;
   /** The EUI icon type for the icon inside this component. */
   iconType: string | null;
-  /** The name of the top-level React component where the path starts and the associated DOM element. */
+  /** The name of the top-level React component and the associated HTML element. */
   sourceComponent: SourceComponent;
 }
 
 /**
- * Parameters for {@link getInspectedElementData}.
+ * Options for {@link getInspectedElementData}.
  */
 export interface GetInspectedElementDataOptions {
   /** Target element */
   target: HTMLElement;
   /** Kibana HTTP service. */
   httpService: HttpStart;
-  /** The name of the top-level React component where the path starts and the associated DOM element. */
+  /** The name of the top-level React component and the associated HTML element. */
   sourceComponent: SourceComponent | null;
   /** The React Fiber node associated with the target element and the element itself. */
-  targetFiberNodeWithDomElement: ReactFiberNodeWithDomElement | null;
+  targetFiberNodeWithHtmlElement: ReactFiberNodeWithHtmlElement | null;
 }
 
 /**
  * Combines data from React Fiber, fetchComponentData, and EUI documentation
- * to return detailed information about the inspected DOM element.
+ * to return detailed information about the inspected HTML element.
  * @async
  * @param {GetInspectedElementDataOptions} options
  * @param {HttpStart} options.httpService HTTP service for making API requests.
- * @param {HTMLElement} options.target The inspected DOM element.
- * @param {string | null} options.sourceComponent The name of the top-level React component where the path starts and the associated DOM element.
- * @param {ReactFiberNodeWithDomElement | null} options.targetFiberNodeWithDomElement The React Fiber node associated with the target element and the element itself.
+ * @param {HTMLElement} options.target The inspected HTML element.
+ * @param {string | null} options.sourceComponent The name of the top-level React component and the associated HTML element.
+ * @param {ReactFiberNodeWithHtmlElement | null} options.targetFiberNodeWithHtmlElement The React Fiber node associated with the target element and the element itself.
  * @returns {Promise<ComponentData | null>} Resolves with the component data if found, otherwise null.
  */
 export const getInspectedElementData = async ({
   httpService,
   target,
   sourceComponent,
-  targetFiberNodeWithDomElement,
+  targetFiberNodeWithHtmlElement,
 }: GetInspectedElementDataOptions): Promise<ComponentData | null> => {
-  if (!targetFiberNodeWithDomElement || !sourceComponent) {
+  if (!targetFiberNodeWithHtmlElement || !sourceComponent) {
     return null;
   }
   const response = await fetchComponentData({
     httpService,
-    fileName: targetFiberNodeWithDomElement._debugSource.fileName,
+    fileName: targetFiberNodeWithHtmlElement._debugSource.fileName,
   });
 
   if (!response) {
@@ -75,7 +75,7 @@ export const getInspectedElementData = async ({
   const { baseFileName, codeowners, relativePath } = response;
 
   const iconType = getIconType(target);
-  const euiComponentType = findFirstEuiComponent(targetFiberNodeWithDomElement);
+  const euiComponentType = findFirstEuiComponent(targetFiberNodeWithHtmlElement);
   const euiData = {
     componentName: euiComponentType || 'N/A',
     docsLink: euiComponentType
@@ -84,7 +84,7 @@ export const getInspectedElementData = async ({
   };
 
   const componentData: ComponentData = {
-    ...targetFiberNodeWithDomElement,
+    ...targetFiberNodeWithHtmlElement,
     baseFileName,
     codeowners,
     euiData,

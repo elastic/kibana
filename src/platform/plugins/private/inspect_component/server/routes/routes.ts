@@ -11,7 +11,7 @@ import type { HttpServiceSetup, Logger } from '@kbn/core/server';
 import { getComponentData, getComponentDataBodySchema } from './component_data/get_component_data';
 
 /**
- * Parameters for {@link registerInspectComponentRoutes}.
+ * Options for {@link registerInspectComponentRoutes}.
  */
 interface InspectComponentRoutesOptions {
   /** The HTTP service setup contract. */
