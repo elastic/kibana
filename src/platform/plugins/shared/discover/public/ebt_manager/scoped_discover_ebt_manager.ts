@@ -15,7 +15,7 @@ import {
   CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
   FIELD_USAGE_EVENT_NAME,
   FIELD_USAGE_EVENT_TYPE,
-  FIELD_USAGE_FIELD_NAMES,
+  FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
 } from './discover_ebt_manager_registrations';
 import { ContextualProfileLevel } from '../context_awareness';
@@ -38,7 +38,7 @@ enum FieldUsageEventName {
 }
 interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
-  [FIELD_USAGE_FIELD_NAMES]?: string[];
+  [FIELD_USAGE_FIELD_NAME]?: string;
   [FIELD_USAGE_FILTER_OPERATION]?: FilterOperation;
 }
 
@@ -83,12 +83,12 @@ export class ScopedDiscoverEBTManager {
 
   private async trackFieldUsageEvent({
     eventName,
-    fieldNames,
+    fieldName,
     filterOperation,
     fieldsMetadata,
   }: {
     eventName: FieldUsageEventName;
-    fieldNames: string[];
+    fieldName: string;
     filterOperation?: FilterOperation;
     fieldsMetadata: FieldsMetadataPublicStart | undefined;
   }) {
@@ -103,16 +103,15 @@ export class ScopedDiscoverEBTManager {
     if (fieldsMetadata) {
       const fields = await this.getFieldsFromMetadata({
         fieldsMetadata,
-        fieldNames,
+        fieldNames: [fieldName],
       });
-      console.log({ fieldNames });
+      console.log({ fieldName });
 
-      // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
-      const categorizedFields = fieldNames.map((fieldName) =>
-        fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
-      );
-
-      eventData[FIELD_USAGE_FIELD_NAMES] = categorizedFields;
+      if (fields[fieldName]?.short) {
+        eventData[FIELD_USAGE_FIELD_NAME] = fieldName;
+      } else {
+        eventData[FIELD_USAGE_FIELD_NAME] = NON_ECS_FIELD;
+      }
     }
 
     if (filterOperation) {
@@ -131,7 +130,7 @@ export class ScopedDiscoverEBTManager {
   }) {
     await this.trackFieldUsageEvent({
       eventName: FieldUsageEventName.dataTableSelection,
-      fieldNames: [fieldName],
+      fieldName,
       fieldsMetadata,
     });
   }
@@ -145,7 +144,7 @@ export class ScopedDiscoverEBTManager {
   }) {
     await this.trackFieldUsageEvent({
       eventName: FieldUsageEventName.dataTableRemoval,
-      fieldNames: [fieldName],
+      fieldName,
       fieldsMetadata,
     });
   }
@@ -161,7 +160,7 @@ export class ScopedDiscoverEBTManager {
   }) {
     await this.trackFieldUsageEvent({
       eventName: FieldUsageEventName.filterAddition,
-      fieldNames: [fieldName],
+      fieldName,
       fieldsMetadata,
       filterOperation,
     });
@@ -174,11 +173,7 @@ export class ScopedDiscoverEBTManager {
     fieldNames: string[];
     fieldsMetadata: FieldsMetadataPublicStart | undefined;
   }) {
-    await this.trackFieldUsageEvent({
-      eventName: FieldUsageEventName.updateQuery,
-      fieldNames,
-      fieldsMetadata,
-    });
+    console.log({ fieldNames });
   }
 
   public trackContextualProfileResolvedEvent({

@@ -17,7 +17,7 @@ import type { DiscoverEBTContextProps } from './types';
  */
 export const FIELD_USAGE_EVENT_TYPE = 'discover_field_usage';
 export const FIELD_USAGE_EVENT_NAME = 'eventName';
-export const FIELD_USAGE_FIELD_NAMES = 'fieldNames';
+export const FIELD_USAGE_FIELD_NAME = 'fieldName';
 export const FIELD_USAGE_FILTER_OPERATION = 'filterOperation';
 
 /**
@@ -65,18 +65,11 @@ export const registerDiscoverEBTManagerAnalytics = (
             'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval',
         },
       },
-      [FIELD_USAGE_FIELD_NAMES]: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: {
-            description:
-              "Field name if it is part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
-          },
-        },
+      [FIELD_USAGE_FIELD_NAME]: {
+        type: 'keyword',
         _meta: {
           description:
-            "Field names if they are part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
+            "Field name if it is part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
           optional: true,
         },
       },
