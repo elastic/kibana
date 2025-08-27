@@ -33,6 +33,7 @@ import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
 import { getMonitorByServiceName } from './cases/suggestion';
 import type { SyntheticsSuggestion } from '../common/types';
+import { locators } from '../common/locators';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -50,7 +51,9 @@ export class Plugin implements PluginType {
 
   public setup(core: CoreSetup, plugins: SyntheticsPluginsSetupDependencies) {
     const config = this.initContext.config.get<UptimeConfig>();
-
+    locators.forEach((locator) => {
+      plugins.share.url.locators.create(locator);
+    });
     const { ruleDataService } = plugins.ruleRegistry;
 
     const ruleDataClient = ruleDataService.initializeIndex({
@@ -78,6 +81,7 @@ export class Plugin implements PluginType {
       share: plugins.share,
       alerting: plugins.alerting,
       cases: plugins.cases,
+      locator: plugins.locator,
     } as unknown as SyntheticsServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);
@@ -102,7 +106,7 @@ export class Plugin implements PluginType {
 
     core.getStartServices().then(([coreStart]) => {
       plugins.cases.attachmentFramework.registerSuggestion<SyntheticsSuggestion>(
-        getMonitorByServiceName(coreStart, this.logger)
+        getMonitorByServiceName(coreStart, this.logger, plugins.share.url.locators)
       );
     });
 

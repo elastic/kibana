@@ -37,6 +37,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CasesServerSetup, CasesServerStart } from '@kbn/cases-plugin/server';
+import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import type { TelemetryEventsSender } from './telemetry/sender';
 import type { UptimeConfig } from './config';
 import type { SyntheticsEsClient } from './lib';
@@ -77,6 +78,7 @@ export interface SyntheticsPluginsSetupDependencies {
   telemetry: TelemetryPluginSetup;
   share: SharePluginSetup;
   cases: CasesServerSetup;
+  locator: LocatorClient;
 }
 
 export interface SyntheticsPluginsStartDependencies {

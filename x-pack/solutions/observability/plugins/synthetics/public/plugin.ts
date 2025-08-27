@@ -75,7 +75,7 @@ import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embed
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
-import { locators } from './apps/locators';
+import { locators } from '../common/locators';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
 import {
   SYNTHETICS_MONITORS_EMBEDDABLE,

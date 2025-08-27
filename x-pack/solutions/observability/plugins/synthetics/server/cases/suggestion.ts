@@ -10,6 +10,8 @@ import { type SuggestionContext, type SuggestionHandlerResponse } from '@kbn/cas
 import type { SuggestionType } from '@kbn/cases-plugin/server';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AttachmentItem } from '@kbn/cases-plugin/common/types/domain/suggestion/v1';
+import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
+import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
 import { syntheticsMonitorSavedObjectType } from '../../common/types/saved_objects';
 import type {
   EncryptedSyntheticsMonitorAttributes,
@@ -20,7 +22,8 @@ import type { SyntheticsAggregationsResponse } from './types';
 
 export function getMonitorByServiceName(
   coreStart: CoreStart,
-  logger: Logger
+  logger: Logger,
+  locatorClient?: LocatorClient
 ): SuggestionType<SyntheticsSuggestion> {
   return {
     id: 'syntheticMonitorByServiceName',
@@ -44,6 +47,7 @@ export function getMonitorByServiceName(
             return { suggestions: [] };
           }
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+          const locator = locatorClient?.get(syntheticsMonitorDetailLocatorID);
           const results = await scopedClusterClient.asCurrentUser.search({
             index: 'synthetics-*',
             query: {
@@ -165,6 +169,11 @@ export function getMonitorByServiceName(
           );
 
           const suggestions = monitorsOverviewMetaData.map((monitor) => {
+            const url = locator?.getRedirectUrl({
+              configId: monitor.configId,
+              locationId: monitor.locationId,
+              spaceId: (monitor.spaces ?? [])[0],
+            });
             const item: AttachmentItem<SyntheticsSuggestion> = {
               description: `Synthetic ${monitor.name} is ${
                 monitor.status
@@ -179,10 +188,11 @@ export function getMonitorByServiceName(
                 persistableStateAttachmentState: {
                   type: 'synthetics_history',
                   url: {
-                    pathAndQuery: '<SOME_PATH_AND_QUERY>',
+                    pathAndQuery: url ?? '#',
                     label: monitor.name,
                     actionLabel: i18n.translate('xpack.synthetics.addToCase.caseAttachmentLabel', {
-                      defaultMessage: 'Go to Synthetics history',
+                      defaultMessage: 'Go to Synthetics monitor overview of {monitorName}',
+                      values: { monitorName: monitor.name },
                     }),
                     iconType: 'metricbeatApp',
                   },
@@ -192,6 +202,11 @@ export function getMonitorByServiceName(
             return {
               id: `synthetics-monitors-suggestion-${monitor.monitorQueryId}-${monitor.locationId}`,
               componentId: 'synthetics',
+              description: i18n.translate('xpack.synthetics.addToCase.caseAttachmentDescription', {
+                defaultMessage:
+                  'The synthetics monitor {monitorName} might be related to this case with service {serviceName}',
+                values: { monitorName: monitor.name, serviceName: serviceNames.join(', ') },
+              }),
               data: [item],
             };
           });
