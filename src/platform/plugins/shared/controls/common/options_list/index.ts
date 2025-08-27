@@ -14,7 +14,7 @@ export type { OptionsListSortingType } from './suggestions_sorting';
 export type {
   OptionsListControlState,
   OptionsListESQLControlState,
-  OptionsListDataControlState,
+  OptionsListDSLControlState,
   OptionsListDisplaySettings,
   OptionsListFailureResponse,
   OptionsListRequest,

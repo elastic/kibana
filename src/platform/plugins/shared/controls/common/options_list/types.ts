@@ -39,10 +39,10 @@ type OptionsListBaseControlState = OptionsListDisplaySettings & {
   singleSelect?: boolean;
   exclude?: boolean;
 };
-export type OptionsListDataControlState = DefaultDataControlState & OptionsListBaseControlState;
+export type OptionsListDSLControlState = DefaultDataControlState & OptionsListBaseControlState;
 export type OptionsListESQLControlState = ESQLControlState & OptionsListBaseControlState;
 
-export type OptionsListControlState = OptionsListDataControlState | OptionsListESQLControlState;
+export type OptionsListControlState = OptionsListDSLControlState | OptionsListESQLControlState;
 
 export const isOptionsListESQLControlState = (
   state: OptionsListControlState
@@ -132,7 +132,7 @@ export const isOptionsListESQLRequest = (request: unknown): request is OptionsLi
  */
 export interface OptionsListDSLRequestBody
   extends Omit<OptionsListRequestBase, 'filters' | 'fieldSpec'>,
-    Pick<OptionsListDataControlState, 'fieldName'> {
+    Pick<OptionsListDSLControlState, 'fieldName'> {
   filters?: Array<{ bool: BoolQuery }>;
   fieldSpec?: FieldSpec;
 }
