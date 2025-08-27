@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Export static types that don't depend on generated files
+// Export core types derived from generated file
 export type {
   TSemconvFields,
   SemconvFieldName,
-  OtelFieldDefinition,
-  OtelFieldsCollection,
 } from './types';
 
 // Export generated data (will be available after build)
@@ -26,7 +24,6 @@ export { cli } from './cli';
 export type {
   ResolvedSemconvYaml,
   YamlGroup,
-  SemconvFieldDefinitions,
   ProcessingResult,
   ProcessingOptions,
 } from './types/semconv_types';

@@ -6,7 +6,7 @@
  */
 
 import type { Capabilities, Logger } from '@kbn/core/server';
-import type { FieldName, FieldMetadata, AnyFieldName, IntegrationFieldName } from '../../../common';
+import type { FieldName, FieldMetadata } from '../../../common';
 import { FieldsMetadataDictionary } from '../../../common';
 import type { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import type { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
@@ -46,21 +46,21 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     this.logger.debug(`Retrieving field metadata for: ${fieldName}`);
 
     // 1. Try resolving from metadata-fields static metadata (highest priority)
-    let field = this.metadataFieldsRepository.getByName(fieldName as AnyFieldName);
+    let field = this.metadataFieldsRepository.getByName(fieldName);
 
     // 2. Try resolving from ECS static metadata (authoritative schema)
     if (!field) {
-      field = this.ecsFieldsRepository.getByName(fieldName as AnyFieldName);
+      field = this.ecsFieldsRepository.getByName(fieldName);
     }
 
     // 3. Try resolving from OpenTelemetry semantic conventions (fallback)
     if (!field) {
-      field = this.otelFieldsRepository.getByName(fieldName as AnyFieldName);
+      field = this.otelFieldsRepository.getByName(fieldName);
     }
 
     // 4. Try searching for the field in the Elastic Package Registry (integration-specific)
     if (!field && this.hasFleetPermissions(this.capabilities)) {
-      field = await this.integrationFieldsRepository.getByName(fieldName as IntegrationFieldName, {
+      field = await this.integrationFieldsRepository.getByName(fieldName, {
         integration,
         dataset,
       });

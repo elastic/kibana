@@ -14,9 +14,9 @@ import type {
   ResolvedSemconvYaml,
   YamlGroup,
   SemconvStructuredFieldDefinitions,
-  SemconvFieldMetadata,
   ProcessingResult,
   ProcessingOptions,
+  FieldMetadataStructure,
 } from '../types';
 
 /**
@@ -147,7 +147,7 @@ function processRegistryGroups(
           const cleanBrief =
             options.cleanBriefText !== false ? cleanBriefText(attribute.brief) : attribute.brief;
 
-          const fieldMetadata: SemconvFieldMetadata = {
+          const fieldMetadata: FieldMetadataStructure = {
             name: attribute.name,
             description: cleanBrief,
             type: mapOtelTypeToEsType(attribute.type),
@@ -195,7 +195,7 @@ function processMetricGroups(
       // "metric.go.memory.used" -> "metrics.go.memory.used"
       const kibanaFieldName = group.id.replace(/^metric\./, 'metrics.');
 
-      const fieldMetadata: SemconvFieldMetadata = {
+      const fieldMetadata: FieldMetadataStructure = {
         name: kibanaFieldName, // Use Kibana field name (e.g., "metrics.go.memory.used")
         description: cleanBrief,
         type: 'double', // Metrics are always numeric values
@@ -216,7 +216,7 @@ function processMetricGroups(
           const cleanBrief =
             options.cleanBriefText !== false ? cleanBriefText(attribute.brief) : attribute.brief;
 
-          const fieldMetadata: SemconvFieldMetadata = {
+          const fieldMetadata: FieldMetadataStructure = {
             name: attribute.name,
             description: cleanBrief,
             type: mapOtelTypeToEsType(attribute.type),

@@ -12,12 +12,10 @@ export type {
   YamlGroup,
   ResolvedSemconvYaml,
   SemconvFieldMetadata,
-  SemconvFieldDefinitions,
   SemconvStructuredFieldDefinitions,
   ProcessingResult,
   ProcessingOptions,
   TSemconvFields,
   SemconvFieldName,
-  OtelFieldDefinition,
-  OtelFieldsCollection,
+  FieldMetadataStructure,
 } from './semconv_types';

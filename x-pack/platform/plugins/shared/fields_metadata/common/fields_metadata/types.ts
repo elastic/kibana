@@ -7,7 +7,7 @@
 
 import type { EcsFlat } from '@elastic/ecs';
 import * as rt from 'io-ts';
-import type { TSemconvFields } from '@kbn/otel-semantic-conventions';
+import type { TSemconvFields, SemconvFieldName } from '@kbn/otel-semantic-conventions';
 import type { MetadataFields } from '../metadata_fields';
 
 export const fieldSourceRT = rt.keyof({
@@ -153,8 +153,9 @@ export type TMetadataFields = typeof MetadataFields;
 export type MetadataFieldName = keyof TMetadataFields;
 export type TEcsFields = typeof EcsFlat;
 export type EcsFieldName = keyof TEcsFields;
+
 export type TOtelFields = TSemconvFields;
-export type OtelFieldName = keyof TOtelFields;
+export type OtelFieldName = SemconvFieldName;
 export type IntegrationFieldName = AnyFieldName;
 
 export type FieldName = MetadataFieldName | EcsFieldName | OtelFieldName | IntegrationFieldName;

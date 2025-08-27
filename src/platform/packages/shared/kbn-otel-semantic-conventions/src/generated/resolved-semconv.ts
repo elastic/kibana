@@ -7,17 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// This file is auto-generated. Do not edit manually.
-// Generated on: 2025-08-27T12:46:31.634Z
-// Sources: resolved-semconv.yaml + hardcoded OTLP mappings
-// Registry groups: 132
-// Metric groups: 347
-// Hardcoded fields: 34
-// Total fields: 997
-
-import type { TSemconvFields } from '../types';
-
-export const semconvFlat: TSemconvFields = {
+/**
+ * OpenTelemetry semantic conventions field definitions.
+ *
+ * This file is auto-generated. Do not edit manually.
+ * Generated on: 2025-08-27T19:57:01.748Z
+ * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
+ * Registry groups: 132
+ * Metric groups: 347
+ * Hardcoded fields: 34
+ * Total fields: 997
+ *
+ * @internal
+ *
+ * WARNING: This object contains 997+ field definitions (~50KB+ minified).
+ * Direct import will significantly increase client bundle size.
+ *
+ * RECOMMENDED USAGE:
+ * - Server-side: Import directly for field metadata services
+ * - Client-side: Use fields_metadata API endpoints instead of direct import
+ * - Build tools: Ensure this is not included in client-side bundles
+ *
+ * The fields_metadata package provides optimized APIs to prevent
+ * bundle size explosions. Use those APIs instead of importing this directly.
+ */
+export const semconvFlat = {
   '@timestamp': {
     name: '@timestamp',
     description: 'Time when the event occurred. UNIX Epoch time in nanoseconds.',
@@ -5903,4 +5917,4 @@ export const semconvFlat: TSemconvFields = {
     description: 'Number of messages that were delivered to the application.',
     type: 'double',
   },
-};
+} as const;

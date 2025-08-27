@@ -346,7 +346,7 @@ describe('OtelFieldsRepository', () => {
     });
 
     describe('find method with prefixes', () => {
-      it('should strip prefixes and return fields with stripped names as keys', () => {
+      it('should strip prefixes internally but return fields with original requested names as keys', () => {
         const fieldsDict = otelFieldsRepository.find({
           fieldNames: [
             'resource.attributes.cloud.account.id',
@@ -359,16 +359,16 @@ describe('OtelFieldsRepository', () => {
 
         expect(Object.keys(fields)).toHaveLength(4);
 
-        // Check that keys are the stripped field names
-        expect(fields['cloud.account.id']).toBeDefined();
-        expect(fields['service.name']).toBeDefined();
-        expect(fields['http.request.method']).toBeDefined();
+        // Check that keys are the original requested field names
+        expect(fields['resource.attributes.cloud.account.id']).toBeDefined();
+        expect(fields['scope.attributes.service.name']).toBeDefined();
+        expect(fields['attributes.http.request.method']).toBeDefined();
         expect(fields['cloud.provider']).toBeDefined();
 
-        // Verify field contents
-        expect(fields['cloud.account.id'].name).toBe('cloud.account.id');
-        expect(fields['service.name'].name).toBe('service.name');
-        expect(fields['http.request.method'].name).toBe('http.request.method');
+        // Verify field contents show the actual resolved field names
+        expect(fields['resource.attributes.cloud.account.id'].name).toBe('cloud.account.id');
+        expect(fields['scope.attributes.service.name'].name).toBe('service.name');
+        expect(fields['attributes.http.request.method'].name).toBe('http.request.method');
         expect(fields['cloud.provider'].name).toBe('cloud.provider');
       });
 
@@ -383,12 +383,12 @@ describe('OtelFieldsRepository', () => {
         const fields = fieldsDict.getFields();
 
         expect(Object.keys(fields)).toHaveLength(2);
-        expect(fields['cloud.account.id']).toBeDefined();
-        expect(fields['service.name']).toBeDefined();
-        expect(fields['non.existing.field']).toBeUndefined();
+        expect(fields['resource.attributes.cloud.account.id']).toBeDefined();
+        expect(fields['attributes.service.name']).toBeDefined();
+        expect(fields['scope.attributes.non.existing.field']).toBeUndefined();
       });
 
-      it('should deduplicate fields when different prefixes resolve to same field', () => {
+      it('should return separate entries for different prefixed requests of the same field', () => {
         const fieldsDict = otelFieldsRepository.find({
           fieldNames: [
             'resource.attributes.service.name',
@@ -399,9 +399,17 @@ describe('OtelFieldsRepository', () => {
         });
         const fields = fieldsDict.getFields();
 
-        // Should only have one entry for service.name
-        expect(Object.keys(fields)).toHaveLength(1);
+        // Should have separate entries for each requested field name
+        expect(Object.keys(fields)).toHaveLength(4);
+        expect(fields['resource.attributes.service.name']).toBeDefined();
+        expect(fields['scope.attributes.service.name']).toBeDefined();
+        expect(fields['attributes.service.name']).toBeDefined();
         expect(fields['service.name']).toBeDefined();
+        
+        // All should resolve to the same underlying field
+        expect(fields['resource.attributes.service.name'].name).toBe('service.name');
+        expect(fields['scope.attributes.service.name'].name).toBe('service.name');
+        expect(fields['attributes.service.name'].name).toBe('service.name');
         expect(fields['service.name'].name).toBe('service.name');
       });
 
@@ -416,9 +424,9 @@ describe('OtelFieldsRepository', () => {
         const fields = fieldsDict.getFields();
 
         expect(Object.keys(fields)).toHaveLength(3);
-        expect(fields['http.request.method']).toBeDefined();
-        expect(fields['cloud.account.id']).toBeDefined();
-        expect(fields['system.cpu.utilization']).toBeDefined();
+        expect(fields['resource.attributes.http.request.method']).toBeDefined();
+        expect(fields['scope.attributes.cloud.account.id']).toBeDefined();
+        expect(fields['attributes.system.cpu.utilization']).toBeDefined();
       });
 
       it('should return empty results when all prefixed fields are non-existing', () => {

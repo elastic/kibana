@@ -7,6 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { semconvFlat } from '../generated/resolved-semconv';
+
+// ===== CORE TYPES FROM GENERATED FILE (SOURCE OF TRUTH) =====
+
+/**
+ * Type derived from the generated semconvFlat constant
+ * This is the source of truth for all OTel field types
+ */
+export type TSemconvFields = typeof semconvFlat;
+
+/**
+ * Type-safe field names derived from the generated constant
+ */
+export type SemconvFieldName = keyof TSemconvFields;
+
+/**
+ * Individual field metadata structure (inferred from generated data)
+ */
+export type SemconvFieldMetadata = TSemconvFields[SemconvFieldName];
+
+/**
+ * Interface for field metadata structure used during generation
+ * This defines the shape of individual field entries
+ */
+export interface FieldMetadataStructure {
+  name: string;
+  description: string;
+  type: string;
+  example?: string;
+}
+
+// ===== YAML PROCESSING TYPES (FOR GENERATION ONLY) =====
+
 /**
  * Interface representing a single attribute in a YAML group
  */
@@ -50,28 +83,10 @@ export interface ResolvedSemconvYaml {
 }
 
 /**
- * Interface representing a single semantic convention field metadata
+ * Type for collections of field definitions (used during generation)
+ * Note: This uses a generic structure since it's used before the file is generated
  */
-export interface SemconvFieldMetadata {
-  name: string;
-  description: string;
-  type: string;
-  example?: string;
-}
-
-/**
- * Interface representing the flattened field definitions (legacy - for backward compatibility)
- */
-export interface SemconvFieldDefinitions {
-  [fieldName: string]: string; // fieldName -> description
-}
-
-/**
- * Interface representing the structured field definitions
- */
-export interface SemconvStructuredFieldDefinitions {
-  [fieldName: string]: SemconvFieldMetadata;
-}
+export type SemconvStructuredFieldDefinitions = Record<string, FieldMetadataStructure>;
 
 /**
  * Processing result interface
@@ -99,29 +114,3 @@ export interface ProcessingOptions {
   validateOutput?: boolean;
 }
 
-// Public API type aliases for external consumption
-// These provide stable interfaces that don't depend on generated files
-
-/**
- * Public type for OpenTelemetry semantic convention fields
- * Alias for SemconvStructuredFieldDefinitions to provide stable public API
- */
-export type TSemconvFields = SemconvStructuredFieldDefinitions;
-
-/**
- * Public type for OpenTelemetry field names
- * Provides type-safe field name access
- */
-export type SemconvFieldName = keyof TSemconvFields;
-
-/**
- * Public alias for field definition structure
- * Provides a more descriptive name for external consumers
- */
-export type OtelFieldDefinition = SemconvFieldMetadata;
-
-/**
- * Public alias for field collection structure
- * Provides a more descriptive name for external consumers
- */
-export type OtelFieldsCollection = SemconvStructuredFieldDefinitions;

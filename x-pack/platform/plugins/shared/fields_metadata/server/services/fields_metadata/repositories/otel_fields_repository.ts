@@ -25,7 +25,7 @@ function convertSemconvToFieldMetadata(
       name: fieldData.name,
       description: fieldData.description,
       type: fieldData.type,
-      ...(fieldData.example && { example: fieldData.example }),
+      ...('example' in fieldData && { example: fieldData.example }),
     };
   }
 
@@ -87,9 +87,7 @@ export class OtelFieldsRepository {
       const field = this.getByName(fieldName);
 
       if (field) {
-        // Use the stripped field name as the key for consistency
-        const strippedFieldName = stripOtelPrefixes(fieldName as string);
-        fieldsMetadata[strippedFieldName as OtelFieldName] = field;
+        fieldsMetadata[fieldName] = field;
       }
 
       return fieldsMetadata;

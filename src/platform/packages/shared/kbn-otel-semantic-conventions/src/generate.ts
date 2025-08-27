@@ -55,17 +55,31 @@ function generateTypeScriptFile(result: any, outputPath: string, log: ToolingLog
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// This file is auto-generated. Do not edit manually.
-// Generated on: ${timestamp}
-// Sources: resolved-semconv.yaml + hardcoded OTLP mappings
-// Registry groups: ${stats.registryGroups}
-// Metric groups: ${stats.metricGroups}
-// Hardcoded fields: ${stats.hardcodedFields}
-// Total fields: ${stats.totalFields}
-
-import type { TSemconvFields } from '../types';
-
-export const semconvFlat: TSemconvFields = ${fieldsString};
+/**
+ * OpenTelemetry semantic conventions field definitions.
+ *
+ * This file is auto-generated. Do not edit manually.
+ * Generated on: ${timestamp}
+ * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
+ * Registry groups: ${stats.registryGroups}
+ * Metric groups: ${stats.metricGroups}
+ * Hardcoded fields: ${stats.hardcodedFields}
+ * Total fields: ${stats.totalFields}
+ *
+ * @internal
+ *
+ * WARNING: This object contains ${stats.totalFields}+ field definitions (~50KB+ minified).
+ * Direct import will significantly increase client bundle size.
+ *
+ * RECOMMENDED USAGE:
+ * - Server-side: Import directly for field metadata services
+ * - Client-side: Use fields_metadata API endpoints instead of direct import
+ * - Build tools: Ensure this is not included in client-side bundles
+ *
+ * The fields_metadata package provides optimized APIs to prevent
+ * bundle size explosions. Use those APIs instead of importing this directly.
+ */
+export const semconvFlat = ${fieldsString} as const;
 `;
 
   const outputDir = path.dirname(outputPath);
