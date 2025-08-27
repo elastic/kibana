@@ -9,15 +9,27 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
-import type { EuiDataGridCellPopoverElementProps, EuiThemeFontSize } from '@elastic/eui';
-import { EuiSpacer, EuiText, useEuiFontSize, useResizeObserver } from '@elastic/eui';
+import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
+import { EuiSpacer, useResizeObserver } from '@elastic/eui';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
-import { css } from '@emotion/react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { FieldRow } from '../../doc_viewer_table/field_row';
 import { TableGrid } from '../../doc_viewer_table/table_grid';
+import { FormattedValue } from './components/formatted_value';
+import { NamePopoverContent } from './components/name_popover_content';
+import { ValuePopoverContent } from './components/value_popover_content';
+
+const DEFAULT_INITIAL_PAGE_SIZE = 25;
+
+export type FieldConfigValue = string | number | undefined;
+
+export interface FieldConfiguration {
+  title: string;
+  formatter?: (value: FieldConfigValue, formattedValue: string) => React.ReactNode;
+  description?: string;
+}
 
 export interface TableFieldConfiguration {
   name: string;
@@ -25,63 +37,6 @@ export interface TableFieldConfiguration {
   description?: string;
   valueCellContent?: React.ReactNode;
 }
-
-function renderNamePopover(
-  fieldName: string,
-  fieldConfig: TableFieldConfiguration,
-  cellActions: React.ReactNode
-) {
-  return (
-    <>
-      <EuiText size="s" className="eui-textTruncate">
-        {fieldName}
-      </EuiText>
-      {fieldConfig?.description && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="xs" className="eui-textTruncate">
-            {fieldConfig.description}
-          </EuiText>
-        </>
-      )}
-      {cellActions}
-    </>
-  );
-}
-
-function renderValuePopover(
-  fieldConfig: TableFieldConfiguration,
-  cellActions: React.ReactNode,
-  fontSize: EuiThemeFontSize['fontSize']
-) {
-  return (
-    <>
-      <EuiText
-        css={
-          fontSize
-            ? css`
-                * {
-                  font-size: ${fontSize} !important;
-                }
-              `
-            : undefined
-        }
-      >
-        {fieldConfig?.valueCellContent}
-      </EuiText>
-      {cellActions}
-    </>
-  );
-}
-
-const FormattedValue = ({ value }: { value: string }) => (
-  <EuiText
-    className="eui-textTruncate"
-    size="xs"
-    // Value returned from formatFieldValue is always sanitized
-    dangerouslySetInnerHTML={{ __html: value }}
-  />
-);
 
 export interface ContentFrameworkTableProps
   extends Pick<
@@ -98,16 +53,6 @@ export interface ContentFrameworkTableProps
   fieldNames: string[];
   fieldConfigurations?: Record<string, FieldConfiguration>;
   title: string;
-}
-
-const DEFAULT_INITIAL_PAGE_SIZE = 25;
-
-export type FieldConfigValue = string | number | undefined;
-
-export interface FieldConfiguration {
-  title: string;
-  formatter?: (value: FieldConfigValue, formattedValue: string) => React.ReactNode;
-  description?: string;
 }
 
 export function ContentFrameworkTable({
@@ -140,7 +85,6 @@ export function ContentFrameworkTable({
   );
 
   const isEsqlMode = Array.isArray(textBasedHits);
-  const { fontSize: smallFontSize } = useEuiFontSize('s');
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
 
   useWindowSize(); // trigger re-render on window resize to recalculate the grid container height
@@ -224,11 +168,17 @@ export function ContentFrameworkTable({
       const fieldConfig = fields[fieldName];
       if (!fieldConfig) return null;
       if (columnId === 'name') {
-        return renderNamePopover(fieldName, fieldConfig, cellActions);
+        return (
+          <NamePopoverContent
+            fieldName={fieldName}
+            fieldConfig={fieldConfig}
+            cellActions={cellActions}
+          />
+        );
       }
-      return renderValuePopover(fieldConfig, cellActions, smallFontSize);
+      return <ValuePopoverContent fieldConfig={fieldConfig} cellActions={cellActions} />;
     },
-    [rows, fields, smallFontSize]
+    [rows, fields]
   );
 
   if (Object.keys(hit.flattened).length === 0) {
