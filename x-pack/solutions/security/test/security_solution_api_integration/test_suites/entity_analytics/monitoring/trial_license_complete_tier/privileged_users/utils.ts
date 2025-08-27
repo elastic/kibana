@@ -77,7 +77,7 @@ export const PrivMonUtils = (
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .expect((res) => {
+      .expect((res: { status: number }) => {
         return res.status === 200 || res.status === 409;
       });
   };
