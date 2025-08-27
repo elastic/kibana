@@ -164,6 +164,7 @@ export class WorkflowsExecutionEnginePlugin
         id: generateUuid(),
         spaceId: context.spaceId,
         workflowId: workflow.id,
+        isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         context,
         status: ExecutionStatus.PENDING,
@@ -257,9 +258,6 @@ async function createContainer(
   });
 
   const contextManager = new WorkflowContextManager({
-    spaceId: workflowExecution.spaceId,
-    workflow: workflowExecution.workflowDefinition,
-    event: workflowExecution.context.event,
     workflowExecutionGraph,
     workflowExecutionRuntime: workflowRuntime,
   });
