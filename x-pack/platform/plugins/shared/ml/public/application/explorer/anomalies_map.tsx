@@ -21,6 +21,7 @@ import type { EMSFileSourceDescriptor, VectorLayerDescriptor } from '@kbn/maps-p
 import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import {
   FIELD_ORIGIN,
+  LAYER_STYLE_TYPE,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
@@ -29,7 +30,6 @@ import {
 import type { EMSTermJoinConfig, TableSourceDescriptor } from '@kbn/maps-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
-import type { LAYER_STYLE_TYPE } from '@kbn/maps-plugin/common/constants';
 import { useMlKibana } from '../contexts/kibana';
 
 const MAX_ENTITY_VALUES = 3;
@@ -101,7 +101,7 @@ export const getChoroplethAnomaliesLayer = (
       id: layerId,
     } as EMSFileSourceDescriptor,
     style: {
-      type: 'VECTOR' as LAYER_STYLE_TYPE.VECTOR,
+      type: LAYER_STYLE_TYPE.VECTOR,
       // @ts-ignore missing style properties. Remove once 'VectorLayerDescriptor' type is updated
       properties: {
         icon: { type: STYLE_TYPE.STATIC, options: { value: 'marker' } },
