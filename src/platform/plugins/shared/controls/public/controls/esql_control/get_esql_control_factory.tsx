@@ -123,7 +123,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         sort: undefined,
         runPastTimeout: false,
         invalidSelections: new Set<OptionsListSelection>(),
-        fieldName: initialState.variableName,
       };
       // Generate a state manager for all the props this control isn't expected to use, so the getters and setters are available
       const componentStaticStateManager = initializeStateManager<OptionsListESQLUnusedState>(
@@ -134,6 +133,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       const componentApi: OptionsListComponentApi = {
         ...api,
         ...selections.internalApi,
+        displayName$: new BehaviorSubject(initialState.variableName),
         uuid,
         makeSelection(key?: string) {
           if (key) selections.internalApi.setSelectedOptions([key]);

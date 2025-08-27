@@ -11,6 +11,7 @@ import type { Subject } from 'rxjs';
 
 import type { PublishesTitle, PublishingSubject } from '@kbn/presentation-publishing';
 import type { SubjectsOf, SettersOf } from '@kbn/presentation-publishing/state_manager/types';
+import type { ESQLControlVariable, EsqlControlType } from '@kbn/esql-types';
 import type {
   OptionsListControlState,
   OptionsListDisplaySettings,
@@ -20,11 +21,13 @@ import type {
 } from '../../../../common/options_list';
 import type { DataControlApi, PublishesField } from '../types';
 import type { SelectionsState } from './selections_manager';
-import type { DefaultDataControlState } from '../../../../common';
 import type { TemporaryState } from './temporay_state_manager';
 import type { EditorState } from './editor_state_manager';
 
 export type OptionsListControlApi = DataControlApi & {
+  esqlQuery$: PublishingSubject<string | undefined>;
+  esqlVariable$: PublishingSubject<ESQLControlVariable | undefined>;
+  esqlControlType$: PublishingSubject<EsqlControlType | undefined>;
   setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
 };
 
@@ -40,14 +43,16 @@ interface PublishesOptions {
   invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
   totalCardinality$: PublishingSubject<number>;
 }
-export type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
-  SelectionsState &
-  EditorState &
-  TemporaryState & { sort: OptionsListSortingType | undefined };
 
-type PublishesOptionsListState = SubjectsOf<OptionsListState>;
-type OptionsListStateSetters = Partial<SettersOf<OptionsListState>> &
-  SettersOf<Pick<OptionsListState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
+export type OptionsListManagedState = SelectionsState &
+  EditorState &
+  TemporaryState & {
+    sort: OptionsListSortingType | undefined;
+  };
+
+type PublishesOptionsListState = SubjectsOf<OptionsListManagedState>;
+type OptionsListStateSetters = Partial<SettersOf<OptionsListManagedState>> &
+  SettersOf<Pick<OptionsListManagedState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
 
 export type OptionsListComponentApi = PublishesField &
   PublishesOptions &
@@ -64,4 +69,5 @@ export type OptionsListComponentApi = PublishesField &
     parentApi: {
       allowExpensiveQueries$: PublishingSubject<boolean>;
     };
+    displayName$: PublishingSubject<string>;
   };

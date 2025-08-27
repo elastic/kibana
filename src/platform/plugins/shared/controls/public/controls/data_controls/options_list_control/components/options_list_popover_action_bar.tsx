@@ -84,7 +84,7 @@ export const OptionsListPopoverActionBar = ({
     selectedOptions = [],
     totalCardinality,
     field,
-    fieldName,
+    displayName,
     allowExpensiveQueries,
     availableOptions = [],
     dataLoading,
@@ -95,7 +95,7 @@ export const OptionsListPopoverActionBar = ({
     componentApi.selectedOptions$,
     componentApi.totalCardinality$,
     componentApi.field$,
-    componentApi.fieldName$,
+    componentApi.displayName$,
     componentApi.parentApi.allowExpensiveQueries$,
     componentApi.availableOptions$,
     componentApi.dataLoading$,
@@ -167,7 +167,7 @@ export const OptionsListPopoverActionBar = ({
             placeholder={OptionsListStrings.popover.getSearchPlaceholder(
               allowExpensiveQueries ? defaultSearchTechnique : 'exact'
             )}
-            aria-label={OptionsListStrings.popover.getSearchAriaLabel(fieldName)}
+            aria-label={OptionsListStrings.popover.getSearchAriaLabel(displayName)}
           />
         </EuiFormRow>
       )}
