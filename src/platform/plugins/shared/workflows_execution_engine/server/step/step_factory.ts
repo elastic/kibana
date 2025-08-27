@@ -12,18 +12,19 @@ import type { WorkflowContextManager } from '../workflow_context_manager/workflo
 import type { StepImplementation } from './step_base';
 // Import schema and inferred types
 import type { ConnectorExecutor } from '../connector_executor';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
+import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
+import { HttpStepImpl } from './http_step';
 import {
   EnterConditionBranchNodeImpl,
   EnterIfNodeImpl,
-  ExitIfNodeImpl,
   ExitConditionBranchNodeImpl,
+  ExitIfNodeImpl,
 } from './if_step';
-import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
-import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WaitStepImpl } from './wait_step/wait_step';
-import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -84,6 +85,13 @@ export class StepFactory {
           step as any,
           this.contextManager,
           this.connectorExecutor,
+          this.workflowRuntime,
+          this.workflowLogger
+        );
+      case 'http':
+        return new HttpStepImpl(
+          step as any,
+          this.contextManager,
           this.workflowRuntime,
           this.workflowLogger
         );

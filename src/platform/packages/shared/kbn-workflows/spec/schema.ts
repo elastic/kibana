@@ -94,6 +94,21 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
+export const HttpStepSchema = BaseStepSchema.extend({
+  type: z.literal('http'),
+  with: z.object({
+    url: z.string().min(1),
+    method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH']).optional().default('GET'),
+    headers: z
+      .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+      .optional()
+      .default({}),
+    body: z.any().optional(),
+    timeout: z.number().int().min(1).optional().default(30000),
+  }),
+});
+export type HttpStep = z.infer<typeof HttpStepSchema>;
+
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
   foreach: z.string(),
@@ -243,6 +258,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    HttpStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,
