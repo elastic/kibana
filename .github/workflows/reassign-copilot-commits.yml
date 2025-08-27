@@ -72,8 +72,31 @@ jobs:
           echo "COPILOT_FOUND=$FOUND" >> $GITHUB_ENV
           echo "found=$FOUND" >> $GITHUB_OUTPUT
 
-      - name: Fail if Copilot is author
+      - name: Squash and re-author commits as niros1@gmail.com
         if: steps.check_copilot.outputs.found == '1'
+        env:
+          GIT_AUTHOR_NAME: niros1
+          GIT_AUTHOR_EMAIL: niros1@gmail.com
+          GIT_COMMITTER_NAME: niros1
+          GIT_COMMITTER_EMAIL: niros1@gmail.com
         run: |
-          echo "❌ Copilot is the author of one or more commits in this PR. Please rebase and change the commit author to yourself before merging."
+          set -e
+          echo "⚠️ Copilot is the author of one or more commits. Attempting to squash and re-author all commits as niros1@gmail.com."
+          # Get the base branch (assume PR is up to date with base)
+          BASE_BRANCH=$(gh pr view $PR_NUMBER --json baseRefName -q '.baseRefName')
+          echo "Base branch: $BASE_BRANCH"
+          # Find merge base
+          MERGE_BASE=$(git merge-base origin/$BASE_BRANCH HEAD)
+          echo "Merge base: $MERGE_BASE"
+          # Squash all commits since merge base
+          git reset --soft $MERGE_BASE
+          git commit -a -m "Squashed all commits and re-authored as niros1@gmail.com"
+          # Force push to current branch
+          git push --force-with-lease
+          echo "✅ All commits squashed and re-authored as niros1@gmail.com."
+
+      - name: Fail if Copilot is author and squash failed or not permitted
+        if: steps.check_copilot.outputs.found == '1' && (failure() || cancelled())
+        run: |
+          echo "❌ Copilot is the author of one or more commits in this PR. Please rebase and change the commit author to yourself before merging. If this is a fork or protected branch, you must do this locally."
           exit 1
