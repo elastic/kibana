@@ -8,15 +8,187 @@
  */
 
 // This file is auto-generated. Do not edit manually.
-// Generated on: 2025-08-21T15:19:33.230Z
-// Source: resolved-semconv.yaml
+// Generated on: 2025-08-27T12:46:31.634Z
+// Sources: resolved-semconv.yaml + hardcoded OTLP mappings
 // Registry groups: 132
 // Metric groups: 347
-// Total fields: 963
+// Hardcoded fields: 34
+// Total fields: 997
 
 import type { TSemconvFields } from '../types';
 
 export const semconvFlat: TSemconvFields = {
+  '@timestamp': {
+    name: '@timestamp',
+    description: 'Time when the event occurred. UNIX Epoch time in nanoseconds.',
+    type: 'date_nanos',
+  },
+  observed_timestamp: {
+    name: 'observed_timestamp',
+    description: 'Time when the event was observed by the collection system.',
+    type: 'date_nanos',
+  },
+  severity_number: {
+    name: 'severity_number',
+    description: 'Numerical value of the severity.',
+    type: 'long',
+  },
+  severity_text: {
+    name: 'severity_text',
+    description: 'The severity text (also known as log level).',
+    type: 'keyword',
+  },
+  'body.text': {
+    name: 'body.text',
+    description: 'A value containing the body of the log record (text format).',
+    type: 'match_only_text',
+  },
+  'body.structured': {
+    name: 'body.structured',
+    description: 'A value containing the body of the log record (structured format).',
+    type: 'flattened',
+  },
+  dropped_attributes_count: {
+    name: 'dropped_attributes_count',
+    description: 'Number of attributes that were discarded due to limits.',
+    type: 'long',
+  },
+  trace_id: {
+    name: 'trace_id',
+    description: 'A unique identifier for a trace.',
+    type: 'keyword',
+  },
+  span_id: {
+    name: 'span_id',
+    description: 'A unique identifier for a span within a trace.',
+    type: 'keyword',
+  },
+  event_name: {
+    name: 'event_name',
+    description: 'A unique identifier of event category/type.',
+    type: 'keyword',
+  },
+  'scope.name': {
+    name: 'scope.name',
+    description: 'The name of the instrumentation scope that produced the span.',
+    type: 'keyword',
+  },
+  'scope.version': {
+    name: 'scope.version',
+    description: 'The version of the instrumentation scope.',
+    type: 'keyword',
+  },
+  'scope.dropped_attributes_count': {
+    name: 'scope.dropped_attributes_count',
+    description: 'Number of scope attributes that were discarded due to limits.',
+    type: 'long',
+  },
+  'scope.schema_url': {
+    name: 'scope.schema_url',
+    description: 'The Schema URL for the scope.',
+    type: 'keyword',
+  },
+  'resource.dropped_attributes_count': {
+    name: 'resource.dropped_attributes_count',
+    description: 'Number of resource attributes that were discarded due to limits.',
+    type: 'long',
+  },
+  'resource.schema_url': {
+    name: 'resource.schema_url',
+    description: 'The Schema URL for the resource.',
+    type: 'keyword',
+  },
+  start_timestamp: {
+    name: 'start_timestamp',
+    description: 'StartTimeUnixNano is the time when the cumulative metric was reset.',
+    type: 'date_nanos',
+  },
+  unit: {
+    name: 'unit',
+    description: 'Unit in which the metric value is reported.',
+    type: 'keyword',
+  },
+  trace_state: {
+    name: 'trace_state',
+    description:
+      'Tracestate represents tracing-system specific context in a list of key value pairs.',
+    type: 'keyword',
+  },
+  parent_span_id: {
+    name: 'parent_span_id',
+    description: "The span_id of this span's parent span.",
+    type: 'keyword',
+  },
+  name: {
+    name: 'name',
+    description: "A description of the span's operation.",
+    type: 'keyword',
+  },
+  kind: {
+    name: 'kind',
+    description: 'Distinguishes between spans generated in a particular context.',
+    type: 'keyword',
+  },
+  duration: {
+    name: 'duration',
+    description: 'Duration of the span in nanoseconds (end_time - start_time).',
+    type: 'long',
+  },
+  dropped_events_count: {
+    name: 'dropped_events_count',
+    description: 'Number of events that were discarded due to limits.',
+    type: 'long',
+  },
+  links: {
+    name: 'links',
+    description: 'Links to other spans.',
+    type: 'object',
+  },
+  'links.trace_id': {
+    name: 'links.trace_id',
+    description: "A unique identifier of the linked span's trace.",
+    type: 'keyword',
+  },
+  'links.span_id': {
+    name: 'links.span_id',
+    description: 'A unique identifier for the linked span.',
+    type: 'keyword',
+  },
+  'links.trace_state': {
+    name: 'links.trace_state',
+    description: 'Tracestate of the linked span.',
+    type: 'keyword',
+  },
+  'links.attributes': {
+    name: 'links.attributes',
+    description: 'Additional link attributes.',
+    type: 'object',
+  },
+  'links.dropped_attributes_count': {
+    name: 'links.dropped_attributes_count',
+    description: 'Number of link attributes that were discarded due to limits.',
+    type: 'long',
+  },
+  dropped_links_count: {
+    name: 'dropped_links_count',
+    description: 'Number of links that were discarded due to limits.',
+    type: 'long',
+  },
+  status: {
+    name: 'status',
+    description: 'An optional final status for the span.',
+    type: 'object',
+  },
+  'status.message': {
+    name: 'status.message',
+    description: 'A developer-facing human readable error message.',
+    type: 'keyword',
+  },
+  'status.code': {
+    name: 'status.code',
+    description: 'The status code.',
+    type: 'keyword',
+  },
   'webengine.name': {
     name: 'webengine.name',
     description: 'The name of the web engine.',

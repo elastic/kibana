@@ -40,6 +40,8 @@ interface FindOptions {
   fieldNames?: OtelFieldName[];
 }
 
+const OTEL_PREFIXES_TO_STRIP = ['resource.attributes.', 'scope.attributes.', 'attributes.'];
+
 /**
  * Strip common OpenTelemetry prefixes from field names to match the actual field names
  * in the semantic conventions dictionary.
@@ -51,19 +53,10 @@ interface FindOptions {
  * - "cloud.account.id" -> "cloud.account.id" (no change)
  */
 function stripOtelPrefixes(fieldName: string): string {
-  // Strip "resource.attributes." prefix
-  if (fieldName.startsWith('resource.attributes.')) {
-    return fieldName.substring('resource.attributes.'.length);
-  }
-
-  // Strip "scope.attributes." prefix
-  if (fieldName.startsWith('scope.attributes.')) {
-    return fieldName.substring('scope.attributes.'.length);
-  }
-
-  // Strip "attributes." prefix
-  if (fieldName.startsWith('attributes.')) {
-    return fieldName.substring('attributes.'.length);
+  for (const prefix of OTEL_PREFIXES_TO_STRIP) {
+    if (fieldName.startsWith(prefix)) {
+      return fieldName.substring(prefix.length);
+    }
   }
 
   // Return original field name if no prefixes match
@@ -91,13 +84,10 @@ export class OtelFieldsRepository {
     }
 
     const fields = fieldNames.reduce((fieldsMetadata, fieldName) => {
-      // Strip OTel prefixes before looking up the field
-      const strippedFieldName = stripOtelPrefixes(fieldName as string);
-      const field = this.otelFields[strippedFieldName as OtelFieldName];
+      const field = this.getByName(fieldName);
 
       if (field) {
-        // Use the stripped field name as the key in the result
-        fieldsMetadata[strippedFieldName as OtelFieldName] = field;
+        fieldsMetadata[fieldName] = field;
       }
 
       return fieldsMetadata;

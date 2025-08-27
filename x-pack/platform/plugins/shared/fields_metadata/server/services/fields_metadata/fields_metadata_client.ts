@@ -53,17 +53,17 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
       field = this.ecsFieldsRepository.getByName(fieldName as AnyFieldName);
     }
 
-    // 3. Try searching for the field in the Elastic Package Registry (integration-specific)
+    // 3. Try resolving from OpenTelemetry semantic conventions (fallback)
+    if (!field) {
+      field = this.otelFieldsRepository.getByName(fieldName as AnyFieldName);
+    }
+
+    // 4. Try searching for the field in the Elastic Package Registry (integration-specific)
     if (!field && this.hasFleetPermissions(this.capabilities)) {
       field = await this.integrationFieldsRepository.getByName(fieldName as IntegrationFieldName, {
         integration,
         dataset,
       });
-    }
-
-    // 4. Try resolving from OpenTelemetry semantic conventions (fallback)
-    if (!field) {
-      field = this.otelFieldsRepository.getByName(fieldName as AnyFieldName);
     }
 
     return field;
