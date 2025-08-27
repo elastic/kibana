@@ -51,6 +51,18 @@ export interface AgentDefinition {
    */
   description: string;
   /**
+   * Optional labels used to organize or filter agents
+   */
+  labels?: string[];
+  /**
+   * Optional color used to represent the agent in the UI
+   */
+  avatar_color?: string;
+  /**
+   * Optional symbol used to represent the agent in the UI
+   */
+  avatar_symbol?: string;
+  /**
    * Configuration associated with this agent
    */
   configuration: AgentConfiguration;
