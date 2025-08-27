@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Subscription } from 'rxjs';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesPauseFetch, fetch$ } from '@kbn/presentation-publishing';
 import type { Query } from '@kbn/es-query';
@@ -13,7 +14,6 @@ import { getSearchService } from '../kibana_services';
 import type { MapStore } from '../reducers/store';
 import type { MapApi } from './types';
 import { setMapSettings, setQuery, setPauseSyncData } from '../actions';
-import { Subscription } from 'rxjs';
 
 function getIsRestore(searchSessionId?: string) {
   if (!searchSessionId) {
@@ -39,7 +39,6 @@ export function initializeFetch({
   let prevIsRestore: boolean | undefined;
 
   const fetchSubscription = fetch$(api).subscribe((fetchContext: FetchContext) => {
-    console.log('fetchContext', fetchContext);
     // New search session id causes all layers from elasticsearch to refetch data.
     // Dashboard provides a new search session id anytime filters change.
     // Thus, filtering embeddable container by map extent causes a new search session id any time the map is moved.
@@ -83,11 +82,8 @@ export function initializeFetch({
 
   let isPausedSubscription: Subscription | undefined;
   if (apiPublishesPauseFetch(api)) {
-    isPausedSubscription = api.isFetchPaused$.subscribe(isFetchPaused => {
-      console.log('isFetchPaused', isFetchPaused);
-      store.dispatch<any>(
-        setPauseSyncData(isFetchPaused)
-      );
+    isPausedSubscription = api.isFetchPaused$.subscribe((isFetchPaused) => {
+      store.dispatch<any>(setPauseSyncData(isFetchPaused));
     });
   }
 
