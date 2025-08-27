@@ -2518,23 +2518,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG",
-        "type": "string",
-        "tags": [],
-        "label": "ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG",
-        "description": [
-          "\nThis feature flag enables the Attack discoveries alerts feature.\n\nIt may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:\n```\nfeature_flags.overrides:\n  securitySolution.attackDiscoveryAlertsEnabled: true\n```"
-        ],
-        "signature": [
-          "\"securitySolution.attackDiscoveryAlertsEnabled\""
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ATTACK_DISCOVERY_BULK",
         "type": "string",
         "tags": [],
@@ -2640,21 +2623,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.ATTACK_DISCOVERY_SCHEDULES",
-        "type": "string",
-        "tags": [],
-        "label": "ATTACK_DISCOVERY_SCHEDULES",
-        "description": [],
-        "signature": [
-          "\"/internal/elastic_assistant/attack_discovery/schedules\""
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID",
         "type": "string",
         "tags": [],
@@ -2722,21 +2690,6 @@
         "description": [],
         "signature": [
           "\"siem\""
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG",
-        "type": "string",
-        "tags": [],
-        "label": "ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG",
-        "description": [],
-        "signature": [
-          "\"securitySolution.assistantAttackDiscoverySchedulingEnabled\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
