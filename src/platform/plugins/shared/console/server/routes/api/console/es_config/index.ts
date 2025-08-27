@@ -32,7 +32,8 @@ export const registerEsConfigRoute = ({ router, services, proxy }: RouteDependen
       if (cloudUrl) {
         const body: EsConfigApiResponse = {
           host: cloudUrl,
-          allHosts: hosts, // Use actual proxy hosts, not cloudUrl
+          // Use actual proxy hosts, not cloudUrl
+          allHosts: hosts,
         };
 
         return res.ok({ body });
