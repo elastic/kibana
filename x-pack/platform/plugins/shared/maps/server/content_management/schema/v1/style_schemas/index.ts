@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export type * from './schema/v1/style_schemas';
-export type * from './schema/v1/source_schemas';
-
-export { MapsStorage } from './maps_storage';
+export type * from './types';
+export type * from './vector_style_schemas';
