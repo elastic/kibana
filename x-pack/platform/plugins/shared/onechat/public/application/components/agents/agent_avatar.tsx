@@ -8,12 +8,12 @@
 import React from 'react';
 
 import { EuiAvatar } from '@elastic/eui';
-import type { EuiAvatarSize } from '@elastic/eui/src/components/avatar/avatar';
+import type { EuiAvatarProps } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/onechat-common';
 
 interface AgentAvatarProps {
   agent: Pick<AgentDefinition, 'name' | 'avatar_symbol' | 'avatar_color'>;
-  size: EuiAvatarSize;
+  size: EuiAvatarProps['size'];
 }
 
 export const AgentAvatar: React.FC<AgentAvatarProps> = ({ size, agent }) => {

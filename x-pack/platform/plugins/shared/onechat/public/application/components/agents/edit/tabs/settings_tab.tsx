@@ -68,7 +68,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               <EuiTitle size="xs">
                 <h2 id="system-references-section-title">
                   {i18n.translate('xpack.onechat.agents.form.settings.systemReferencesTitle', {
-                    defaultMessage: 'System References',
+                    defaultMessage: 'System references',
                   })}
                 </h2>
               </EuiTitle>
@@ -123,7 +123,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             >
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
                 {i18n.translate('xpack.onechat.agents.form.settings.systemReferencesLearnMore', {
-                  defaultMessage: 'Documentation -  Agent basics',
+                  defaultMessage: 'Documentation - Agent basics',
                 })}
                 <EuiIcon type="popout" />
               </EuiFlexGroup>
@@ -188,7 +188,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   onChange={onChange}
                   value={value ?? ''}
                   readOnly={isFormDisabled}
-                  aria-labelledby={i18n.translate(
+                  aria-label={i18n.translate(
                     'xpack.onechat.agents.form.customInstructionsEditorLabel',
                     {
                       defaultMessage: 'Custom Instructions Editor',
@@ -307,7 +307,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     {i18n.translate(
                       'xpack.onechat.agents.form.settings.presentationNameDescriptionLabel',
                       {
-                        defaultMessage: 'Display name & description',
+                        defaultMessage: 'Display name and description',
                       }
                     )}
                   </span>
@@ -325,7 +325,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 <EuiTitle size="xxs">
                   <span>
                     {i18n.translate('xpack.onechat.agents.form.settings.presentationAvatarLabel', {
-                      defaultMessage: 'Avatar color & symbol',
+                      defaultMessage: 'Avatar color and symbol',
                     })}
                   </span>
                 </EuiTitle>

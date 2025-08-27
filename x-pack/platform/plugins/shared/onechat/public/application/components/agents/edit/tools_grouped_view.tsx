@@ -22,23 +22,12 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ToolDefinition, ToolType, ToolSelection } from '@kbn/onechat-common';
-import { ToolType as ToolTypeEnum } from '@kbn/onechat-common';
 import type { ToolSelectionRelevantFields } from '@kbn/onechat-common';
 import { labels } from '../../../utils/i18n';
 import { OnechatToolTags } from '../../tools/tags/tool_tags';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { isToolSelected, isAllToolsSelectedForType } from '../../../utils/tool_selection_utils';
-
-const toolTypeDisplays = {
-  [ToolTypeEnum.esql]: {
-    label: labels.tools.esqlLabel,
-    icon: 'code',
-  },
-  [ToolTypeEnum.builtin]: {
-    label: labels.tools.builtinLabel,
-    icon: 'logoElastic',
-  },
-};
+import { toolTypeDisplays } from '../../../utils/constants';
 
 interface ToolsGroupedViewProps {
   toolsByType: Partial<Record<ToolType, ToolDefinition[]>>;

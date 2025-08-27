@@ -11,20 +11,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiSearchBar } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
 import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
-import { ToolType as ToolTypeEnum } from '@kbn/onechat-common';
 import { labels } from '../../../utils/i18n';
 import { ToolFilterOption } from '../../tools/table/tools_table_filter_option';
-
-const toolTypeDisplays = {
-  [ToolTypeEnum.esql]: {
-    label: labels.tools.esqlLabel,
-    icon: 'code',
-  },
-  [ToolTypeEnum.builtin]: {
-    label: labels.tools.builtinLabel,
-    icon: 'logoElastic',
-  },
-};
+import { toolTypeDisplays } from '../../../utils/constants';
 
 interface ToolsSearchControlsProps {
   displayTools: ToolDefinition[];

@@ -170,7 +170,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
               configuration: schema.maybe(
                 schema.object({
                   instructions: schema.maybe(schema.string()),
-                  tools: TOOL_SELECTION_SCHEMA,
+                  tools: schema.maybe(TOOL_SELECTION_SCHEMA),
                 })
               ),
             }),
