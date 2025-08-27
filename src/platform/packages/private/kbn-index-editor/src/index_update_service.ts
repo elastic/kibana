@@ -259,7 +259,7 @@ export class IndexUpdateService {
       query.sort(firstSort, ...restSort);
     }
 
-    return query.print();
+    return query.print('basic');
   }
 
   // Accumulate actions in a buffer
