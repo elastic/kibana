@@ -9,7 +9,13 @@ import moment from 'moment';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { CreateMonitoringEntitySource } from '../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/constants';
+import {
+  INTEGRATION_TYPES,
+  defaultMonitoringUsersIndex,
+  getMatcherFor,
+  getStreamPatternFor,
+  integrationsSourceIndex,
+} from '../../../../../common/entity_analytics/privilege_monitoring/constants';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { InitMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import type { PrivilegeMonitoringDataClient } from './data_client';
@@ -108,6 +114,27 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
     return descriptor;
   };
 
+  interface Descriptor {
+    id: string;
+    name: string;
+  }
+
+  const createIntegrationSources = async (
+    monitoringIndexSourceClient: MonitoringEntitySourceDescriptorClient
+  ): Promise<Descriptor[]> => {
+    return Promise.all(
+      INTEGRATION_TYPES.map((integrationName) =>
+        monitoringIndexSourceClient.create({
+          type: 'entity_analytics_integration',
+          managed: true,
+          indexPattern: getStreamPatternFor(integrationName, deps.namespace),
+          name: integrationsSourceIndex(deps.namespace, integrationName),
+          matchers: getMatcherFor(integrationName), // TODO: update this
+        })
+      )
+    );
+  };
+
   const createOrUpdateDefaultDataSource = async (
     monitoringIndexSourceClient: MonitoringEntitySourceDescriptorClient
   ) => {
@@ -148,11 +175,17 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
       dataClient.log('info', 'Creating default index source for privilege monitoring.');
 
       try {
-        const indexSourceDescriptor = monitoringIndexSourceClient.create(defaultIndexSource);
+        const [indexSourceDescriptor, integrationSourceDescriptors] = await Promise.all([
+          monitoringIndexSourceClient.create(defaultIndexSource),
+          createIntegrationSources(monitoringIndexSourceClient),
+        ]);
 
         dataClient.log(
           'debug',
-          `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
+          `Created sources for privilege monitoring: ${JSON.stringify([
+            indexSourceDescriptor,
+            ...integrationSourceDescriptors,
+          ])}`
         );
       } catch (e) {
         dataClient.log(
