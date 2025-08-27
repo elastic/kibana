@@ -11,7 +11,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { EuiDocsLink } from './eui_docs_link';
-import type { EuiData } from '../../../../lib/eui/get_eui_component_docs_data';
+import type { EuiData } from '../../../../lib/fiber/types';
 
 describe('EuiDocsLink', () => {
   it('should render link when euiData is provided', () => {

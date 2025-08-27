@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { isEui, isHtmlTag, isIgnoredComponent } from '../utils';
+import type { ReactFiberNode, ReactFiberNodeWithDomElement, SourceComponent } from './types';
+import { getFiberType } from './get_fiber_type';
+
+/**
+ * Find the source component from target Fiber node.
+ * @param {ReactFiberNodeWithDomElement} fiberNode The Fiber node.
+ * @return {SourceComponent | null} The source component, or null if it cannot be determined.
+ */
+export const findSourceComponent = (
+  fiberNode: ReactFiberNodeWithDomElement
+): SourceComponent | null => {
+  let current: HTMLElement | null = fiberNode.domElement;
+  let sourceComponent: SourceComponent | null = null;
+
+  while (current && !sourceComponent) {
+    let fiberCursor: ReactFiberNode | null | undefined = fiberNode;
+
+    while (fiberCursor && !sourceComponent) {
+      const type = getFiberType(fiberCursor);
+      if (type) {
+        if (!isHtmlTag(type) && !isEui(type) && !isIgnoredComponent(type)) {
+          sourceComponent = { domElement: current, type };
+          break;
+        }
+      }
+      fiberCursor = fiberCursor._debugOwner;
+    }
+
+    current = current.parentElement;
+  }
+  return sourceComponent;
+};

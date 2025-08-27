@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { findReactComponentPathAndSourceComponent } from './find_react_component_path_and_source_component';
+import { findSourceComponent } from './find_source_component';
 import { getFiberType } from './get_fiber_type';
 import type { ReactFiberNode, ReactFiberNodeWithDomElement } from './types';
 
@@ -15,7 +15,7 @@ jest.mock('./get_fiber_type');
 
 const mockGetFiberType = getFiberType as jest.MockedFunction<typeof getFiberType>;
 
-describe('findReactComponentPathAndSourceComponent', () => {
+describe('findSourceComponent', () => {
   let mockElement: HTMLElement;
   let mockParentElement: HTMLElement;
 
@@ -50,16 +50,16 @@ describe('findReactComponentPathAndSourceComponent', () => {
     const fiberNode = createMockFiberNode('div', mockElement);
     mockGetFiberType.mockReturnValue(null);
 
-    const result = findReactComponentPathAndSourceComponent(fiberNode);
+    const result = findSourceComponent(fiberNode);
 
     expect(result).toBeNull();
   });
 
-  it('should return null when path is empty', () => {
+  it('should return null when only HTML tags are found', () => {
     const fiberNode = createMockFiberNode('div', mockElement);
     mockGetFiberType.mockReturnValue('div');
 
-    const result = findReactComponentPathAndSourceComponent(fiberNode);
+    const result = findSourceComponent(fiberNode);
 
     expect(result).toBeNull();
   });
@@ -68,69 +68,57 @@ describe('findReactComponentPathAndSourceComponent', () => {
     const fiberNode = createMockFiberNode('TestComponent', mockElement);
     mockGetFiberType.mockReturnValue('TestComponent');
 
-    const result = findReactComponentPathAndSourceComponent(fiberNode);
+    const result = findSourceComponent(fiberNode);
 
     expect(result).toEqual({
-      path: 'TestComponent',
-      sourceComponent: {
-        type: 'TestComponent',
-        domElement: mockElement,
-      },
+      type: 'TestComponent',
+      domElement: mockElement,
     });
   });
 
-  it('should construct component path with multiple components', () => {
+  it('should find first user-defined component with multiple components', () => {
     const parentFiber = createMockFiberNode('ParentComponent', mockParentElement);
     const childFiber = createMockFiberNode('EuiButton', mockElement, parentFiber);
 
     mockGetFiberType.mockReturnValueOnce('EuiButton').mockReturnValueOnce('ParentComponent');
 
-    const result = findReactComponentPathAndSourceComponent(childFiber);
+    const result = findSourceComponent(childFiber);
 
     expect(result).toEqual({
-      path: 'ParentComponent : EuiButton',
-      sourceComponent: {
-        type: 'ParentComponent',
-        domElement: mockElement,
-      },
+      type: 'ParentComponent',
+      domElement: mockElement,
     });
   });
 
-  it('should ignore EUI components in path when not main components', () => {
+  it('should find first user-defined component ignoring EUI components', () => {
     const userFiber = createMockFiberNode('UserComponent', mockElement);
     const euiFiber = createMockFiberNode('EuiFlexItem', mockElement, userFiber);
 
     mockGetFiberType.mockReturnValueOnce('EuiFlexItem').mockReturnValueOnce('UserComponent');
 
-    const result = findReactComponentPathAndSourceComponent(euiFiber);
+    const result = findSourceComponent(euiFiber);
 
     expect(result).toEqual({
-      path: 'UserComponent : EuiFlexItem',
-      sourceComponent: {
-        type: 'UserComponent',
-        domElement: mockElement,
-      },
+      type: 'UserComponent',
+      domElement: mockElement,
     });
   });
 
-  it('should include EUI main components in path', () => {
+  it('should find first user-defined component with EUI button', () => {
     const userFiber = createMockFiberNode('UserComponent', mockElement);
     const euiButtonFiber = createMockFiberNode('EuiButton', mockElement, userFiber);
 
     mockGetFiberType.mockReturnValueOnce('EuiButton').mockReturnValueOnce('UserComponent');
 
-    const result = findReactComponentPathAndSourceComponent(euiButtonFiber);
+    const result = findSourceComponent(euiButtonFiber);
 
     expect(result).toEqual({
-      path: 'UserComponent : EuiButton',
-      sourceComponent: {
-        type: 'UserComponent',
-        domElement: mockElement,
-      },
+      type: 'UserComponent',
+      domElement: mockElement,
     });
   });
 
-  it('should filter HTML tags to first and last positions only', () => {
+  it('should find first user-defined component ignoring HTML tags', () => {
     const userFiber = createMockFiberNode('UserComponent', mockElement);
     const divFiber = createMockFiberNode('div', mockElement, userFiber);
     const buttonFiber = createMockFiberNode('button', mockElement, divFiber);
@@ -140,14 +128,11 @@ describe('findReactComponentPathAndSourceComponent', () => {
       .mockReturnValueOnce('div')
       .mockReturnValueOnce('UserComponent');
 
-    const result = findReactComponentPathAndSourceComponent(buttonFiber);
+    const result = findSourceComponent(buttonFiber);
 
     expect(result).toEqual({
-      path: 'UserComponent : div > button',
-      sourceComponent: {
-        type: 'UserComponent',
-        domElement: mockElement,
-      },
+      type: 'UserComponent',
+      domElement: mockElement,
     });
   });
 });

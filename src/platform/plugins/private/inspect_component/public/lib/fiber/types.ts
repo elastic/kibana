@@ -60,3 +60,13 @@ export interface SourceComponent {
   /** The DOM element associated with the source component. */
   domElement: HTMLElement | null;
 }
+
+/**
+ * Represents information about an EUI component.
+ */
+export interface EuiData {
+  /** The React component name of this EUI component. */
+  componentName: string;
+  /** Link to the EUI documentation for this EUI component. */
+  docsLink: string;
+}

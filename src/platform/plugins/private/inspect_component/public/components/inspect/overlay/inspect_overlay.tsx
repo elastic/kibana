@@ -13,12 +13,13 @@ import { css } from '@emotion/css';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { findFirstNonIgnoredComponent } from '../../../lib/fiber/find_first_non_ignored_component';
 import type { ReactFiberNodeWithDomElement, SourceComponent } from '../../../lib/fiber/types';
 import { findFirstFiberWithDebugSource } from '../../../lib/fiber/find_first_fiber_with_debug_source';
 import { handleEventPropagation } from '../../../lib/dom/handle_event_propagation';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
-import { findReactComponentPathAndSourceComponent } from '../../../lib/fiber/find_react_component_path_and_source_component';
+import { findSourceComponent } from '../../../lib/fiber/find_source_component';
 import { InspectFlyout, flyoutOptions } from '../flyout/inspect_flyout';
 import { INSPECT_OVERLAY_ID } from '../../../lib/constants';
 import { InspectHighlight } from './inspect_highlight';
@@ -74,16 +75,21 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
 
     setTargetFiberNodeWithDomElement(fiberNode);
 
-    const pathInfo = findReactComponentPathAndSourceComponent(fiberNode);
+    const sourceComponentResult = findSourceComponent(fiberNode);
 
-    if (!pathInfo) {
-      setComponentPath(null);
-      setSourceComponent(null);
-      return;
-    }
+    setSourceComponent(sourceComponentResult);
 
-    setComponentPath(pathInfo?.path);
-    setSourceComponent(pathInfo?.sourceComponent);
+    const firstFiberNodeType = findFirstNonIgnoredComponent(fiberNode);
+
+    setComponentPath(
+      sourceComponentResult?.type &&
+        firstFiberNodeType &&
+        sourceComponentResult.type !== firstFiberNodeType
+        ? `${sourceComponentResult.type}: ${firstFiberNodeType}`
+        : sourceComponentResult?.type
+        ? sourceComponentResult.type
+        : null
+    );
 
     setHighlightPosition({
       width: `${width}px`,

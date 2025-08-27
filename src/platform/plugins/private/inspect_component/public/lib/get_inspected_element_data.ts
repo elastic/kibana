@@ -8,10 +8,9 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { ReactFiberNodeWithDomElement, SourceComponent } from './fiber/types';
-import { EUI_DOCS_BASE } from './constants';
-import type { EuiData } from './eui/get_eui_component_docs_data';
-import { getEuiComponentDocsData } from './eui/get_eui_component_docs_data';
+import { findFirstEuiComponent } from './fiber/find_first_eui_component';
+import type { EuiData, ReactFiberNodeWithDomElement, SourceComponent } from './fiber/types';
+import { EUI_COMPONENTS_DOCS_MAP, EUI_DOCS_BASE } from './constants';
 import { getIconType } from './dom/get_icon_type';
 import type { InspectComponentResponse } from '../api/fetch_component_data';
 import { fetchComponentData } from '../api/fetch_component_data';
@@ -82,10 +81,12 @@ export const getInspectedElementData = async ({
   const { baseFileName, codeowners, relativePath } = response;
 
   const iconType = getIconType(target);
-  const euiDocs = getEuiComponentDocsData(componentPath);
+  const euiComponentType = findFirstEuiComponent(targetFiberNodeWithDomElement);
   const euiData = {
-    componentName: euiDocs?.componentName || 'N/A',
-    docsLink: euiDocs?.docsLink || `${EUI_DOCS_BASE}/components`,
+    componentName: euiComponentType || 'N/A',
+    docsLink: euiComponentType
+      ? `${EUI_DOCS_BASE}${EUI_COMPONENTS_DOCS_MAP.get(euiComponentType)}`
+      : `${EUI_DOCS_BASE}/components`,
   };
 
   const componentData: ComponentData = {

@@ -13,7 +13,7 @@ import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { InspectOverlay } from './inspect_overlay';
 import { coreMock } from '@kbn/core/public/mocks';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
-import { findReactComponentPathAndSourceComponent } from '../../../lib/fiber/find_react_component_path_and_source_component';
+import { findSourceComponent } from '../../../lib/fiber/find_source_component';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
 import type { CoreStart } from '@kbn/core/public';
 
@@ -21,8 +21,8 @@ jest.mock('../../../lib/dom/get_element_from_point', () => ({
   getElementFromPoint: jest.fn(),
 }));
 
-jest.mock('../../../lib/fiber/find_react_component_path_and_source_component', () => ({
-  findReactComponentPathAndSourceComponent: jest.fn(),
+jest.mock('../../../lib/fiber/find_source_component', () => ({
+  findSourceComponent: jest.fn(),
 }));
 
 jest.mock('../../../lib/get_inspected_element_data', () => ({
@@ -57,7 +57,7 @@ describe('InspectOverlay', () => {
       () => ({ top: 10, left: 10, width: 100, height: 50 } as DOMRect)
     );
     (getElementFromPoint as jest.Mock).mockReturnValue(fakeTarget);
-    (findReactComponentPathAndSourceComponent as jest.Mock).mockReturnValue({
+    (findSourceComponent as jest.Mock).mockReturnValue({
       path: 'fakePath',
       sourceComponent: { type: 'FakeComponent', domElement: document.createElement('div') },
     });

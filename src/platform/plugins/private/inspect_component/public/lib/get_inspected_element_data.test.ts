@@ -10,14 +10,11 @@
 import { getInspectedElementData } from './get_inspected_element_data';
 import { fetchComponentData } from '../api/fetch_component_data';
 import { getIconType } from './dom/get_icon_type';
-import { getEuiComponentDocsData } from './eui/get_eui_component_docs_data';
-import { EUI_DOCS_BASE } from './constants';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { ReactFiberNodeWithDomElement } from './fiber/types';
 
 jest.mock('../api/fetch_component_data');
 jest.mock('./dom/get_icon_type');
-jest.mock('./eui/get_eui_component_docs_data');
 
 describe('getInspectedElementData', () => {
   const mockHttpService = httpServiceMock.createStartContract();
@@ -53,7 +50,7 @@ describe('getInspectedElementData', () => {
 
   const mockEuiDocs = {
     componentName: 'EuiButton',
-    docsLink: 'https://elastic.github.io/eui/#/components/button',
+    docsLink: 'https://eui.elastic.co/docs/components/navigation/buttons/button',
   };
 
   beforeEach(() => {
@@ -102,43 +99,9 @@ describe('getInspectedElementData', () => {
     expect(result).toBeNull();
   });
 
-  it('should return component data with default EUI data when no EUI docs found', async () => {
-    (fetchComponentData as jest.Mock).mockResolvedValue(mockResponse);
-    (getIconType as jest.Mock).mockReturnValue('copy');
-    (getEuiComponentDocsData as jest.Mock).mockReturnValue(undefined);
-
-    const result = await getInspectedElementData({
-      httpService: mockHttpService,
-      target: mockTarget,
-      componentPath: mockComponentPath,
-      sourceComponent: mockSourceComponent,
-      targetFiberNodeWithDomElement: mockTargetFiberNodeWithDomElement,
-    });
-
-    expect(fetchComponentData).toHaveBeenCalledWith({
-      httpService: mockHttpService,
-      fileName: mockTargetFiberNodeWithDomElement._debugSource.fileName,
-    });
-    expect(getIconType).toHaveBeenCalledWith(mockTarget);
-    expect(getEuiComponentDocsData).toHaveBeenCalledWith(mockComponentPath);
-
-    expect(result).toEqual({
-      ...mockTargetFiberNodeWithDomElement,
-      ...mockResponse,
-      iconType: 'copy',
-      euiData: {
-        componentName: 'N/A',
-        docsLink: `${EUI_DOCS_BASE}/components`,
-      },
-      sourceComponent: mockSourceComponent,
-      componentPath: mockComponentPath,
-    });
-  });
-
   it('should return complete component data when all sources return data', async () => {
     (fetchComponentData as jest.Mock).mockResolvedValue(mockResponse);
     (getIconType as jest.Mock).mockReturnValue('copy');
-    (getEuiComponentDocsData as jest.Mock).mockReturnValue(mockEuiDocs);
 
     const result = await getInspectedElementData({
       httpService: mockHttpService,
@@ -153,7 +116,6 @@ describe('getInspectedElementData', () => {
       fileName: mockTargetFiberNodeWithDomElement._debugSource.fileName,
     });
     expect(getIconType).toHaveBeenCalledWith(mockTarget);
-    expect(getEuiComponentDocsData).toHaveBeenCalledWith(mockComponentPath);
 
     expect(result).toEqual({
       ...mockTargetFiberNodeWithDomElement,
