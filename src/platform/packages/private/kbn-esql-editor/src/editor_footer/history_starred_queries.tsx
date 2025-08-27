@@ -481,6 +481,7 @@ export function HistoryAndStarredQueriesTabs({
   >();
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [starredSearchQuery, setStarredSearchQuery] = useState('');
 
   useEffect(() => {
     const initializeService = async () => {
@@ -518,6 +519,16 @@ export function HistoryAndStarredQueriesTabs({
       item.queryString.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery]);
+
+  // Filter starred queries based on search query
+  const filteredStarredQueries = useMemo(() => {
+    if (!starredSearchQuery.trim()) {
+      return starredQueries;
+    }
+    return starredQueries.filter((item) =>
+      item.queryString.toLowerCase().includes(starredSearchQuery.toLowerCase())
+    );
+  }, [starredSearchQuery, starredQueries]);
 
   const { euiTheme } = useEuiTheme();
   const tabs = useMemo(() => {
@@ -564,7 +575,7 @@ export function HistoryAndStarredQueriesTabs({
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={containerWidth}
             height={height}
-            listItems={starredQueries}
+            listItems={filteredStarredQueries}
             dataTestSubj="ESQLEditor-starredQueries"
             tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
               defaultMessage: 'Starred queries table',
@@ -577,12 +588,13 @@ export function HistoryAndStarredQueriesTabs({
     ]);
   }, [
     containerCSS,
+    onUpdateAndSubmit,
     containerWidth,
     height,
-    onUpdateAndSubmit,
     filteredHistoryItems,
-    starredQueries,
     starredQueriesService,
+    starredQueries?.length,
+    filteredStarredQueries,
   ]);
 
   const [selectedTabId, setSelectedTabId] = useRestorableState(
@@ -642,6 +654,22 @@ export function HistoryAndStarredQueriesTabs({
                 />
               </EuiFlexItem>
             )}
+            {selectedTabId === 'starred-queries-tab' && (
+              <EuiFlexItem grow={false}>
+                <EuiFieldSearch
+                  placeholder={i18n.translate('esqlEditor.starred.searchPlaceholder', {
+                    defaultMessage: 'Search starred queries',
+                  })}
+                  compressed
+                  value={starredSearchQuery}
+                  onChange={(e) => setStarredSearchQuery(e.target.value)}
+                  data-test-subj="ESQLEditor-starred-search"
+                  css={css`
+                    width: 400px;
+                  `}
+                />
+              </EuiFlexItem>
+            )}
             <EuiText
               size="xs"
               color="subdued"
@@ -662,14 +690,19 @@ export function HistoryAndStarredQueriesTabs({
                         },
                       });
                     })()
-                  : i18n.translate('esqlEditor.history.starredItemslimit', {
-                      defaultMessage:
-                        'Showing {starredItemsCount} queries (max {starredItemsLimit})',
-                      values: {
-                        starredItemsLimit: ESQL_STARRED_QUERIES_LIMIT,
-                        starredItemsCount: starredQueries.length ?? 0,
-                      },
-                    })}
+                  : (() => {
+                      const displayCount = starredSearchQuery.trim()
+                        ? filteredStarredQueries.length
+                        : starredQueries.length;
+                      return i18n.translate('esqlEditor.history.starredItemslimit', {
+                        defaultMessage:
+                          'Showing {starredItemsCount} queries (max {starredItemsLimit})',
+                        values: {
+                          starredItemsLimit: ESQL_STARRED_QUERIES_LIMIT,
+                          starredItemsCount: displayCount ?? 0,
+                        },
+                      });
+                    })()}
               </p>
             </EuiText>
           </EuiFlexGroup>
