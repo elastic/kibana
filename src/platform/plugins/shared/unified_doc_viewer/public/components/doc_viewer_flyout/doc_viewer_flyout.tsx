@@ -43,6 +43,7 @@ export interface UnifiedDocViewerFlyoutProps {
   flyoutActions?: React.ReactNode;
   flyoutType?: 'push' | 'overlay';
   flyoutWidthLocalStorageKey?: string;
+  banner?: React.ReactNode;
   FlyoutCustomBody?: ComponentType<{
     actions: Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'>;
     doc: DataTableRecord;
@@ -85,6 +86,7 @@ export function UnifiedDocViewerFlyout({
   flyoutDefaultWidth,
   flyoutType,
   flyoutWidthLocalStorageKey,
+  banner,
   FlyoutCustomBody,
   services,
   docViewsRegistry,
@@ -323,7 +325,7 @@ export function UnifiedDocViewerFlyout({
             </>
           )}
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
+        <EuiFlyoutBody banner={banner}>{bodyContent}</EuiFlyoutBody>
       </EuiFlyoutResizable>
     </EuiPortal>
   );

@@ -1,0 +1,76 @@
+# Mock Data Setup for Span Overview Cue Testing
+
+Adds mock trace data that will enable the cues to appear.
+
+## Usage
+1. Open Kibana Dev Tools
+2. Copy and paste the requests below
+3. Execute them to create test data
+4. Create a data view with both name and index pattern set to `traces-*`
+4. Navigate to Discover to test the span overview cue
+
+## Test Data Description
+[Brief description of what the mock data contains]
+
+## Requests
+Copy and paste this entire block into Dev Tools.
+Run the commands in the order they appear. 
+Don't forget to create the `traces-*` data view.
+
+PUT _index_template/traces-apm-mock-template
+{
+  "index_patterns": ["traces-apm.*"],
+  "data_stream": {},                 // <-- required for data streams
+  "priority": 200,
+  "template": {
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+
+        "processor": { "properties": { "event": { "type": "keyword" } } },
+
+        "trace": { "properties": { "id": { "type": "keyword" } } },
+        "transaction": { "properties": { "id": { "type": "keyword" } } },
+
+        "span": {
+          "properties": {
+            "id": { "type": "keyword" },
+            "name": { "type": "keyword" },
+            "type": { "type": "keyword" },
+            "duration": { "properties": { "us": { "type": "long" } } }
+          }
+        },
+
+        "parent": { "properties": { "id": { "type": "keyword" } } },
+
+        "service": {
+          "properties": {
+            "name": { "type": "keyword" },
+            "environment": { "type": "keyword" }
+          }
+        },
+
+        "data_stream": {
+          "properties": {
+            "type":      { "type": "constant_keyword", "value": "traces" },
+            "dataset":   { "type": "keyword" },
+            "namespace": { "type": "keyword" }
+          }
+        }
+      }
+    }
+  }
+}
+
+# Create a traces data stream (name under "traces-apm.*")
+PUT _data_stream/traces-apm.mock-default
+
+# Index the same mock spans into the data stream
+POST _bulk
+{"create":{"_index":"traces-apm.mock-default"}}
+{"@timestamp":"2025-08-25T17:06:53.500Z","processor":{"event":"span"},"trace":{"id":"demo-trace-1"},"transaction":{"id":"txn-1"},"span":{"id":"span-root","name":"GET /checkout","type":"request","duration":{"us":350000}},"service":{"name":"web-frontend","environment":"dev"}}
+{"create":{"_index":"traces-apm.mock-default"}}
+{"@timestamp":"2025-08-25T17:06:53.550Z","processor":{"event":"span"},"trace":{"id":"demo-trace-1"},"transaction":{"id":"txn-1"},"span":{"id":"span-db","name":"SELECT cart","type":"db","duration":{"us":120000}},"parent":{"id":"span-root"},"service":{"name":"web-frontend","environment":"dev"}}
+{"create":{"_index":"traces-apm.mock-default"}}
+{"@timestamp":"2025-08-25T17:06:53.600Z","processor":{"event":"span"},"trace":{"id":"demo-trace-1"},"transaction":{"id":"txn-1"},"span":{"id":"span-ext","name":"POST /payments","type":"external","duration":{"us":90000}},"parent":{"id":"span-root"},"service":{"name":"web-frontend","environment":"dev"}}
+

@@ -45,16 +45,20 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useSpanOverviewProbe } from './use_span_overview_probe';
 import { SPAN_OVERVIEW_CUE_FEATURE_FLAG_KEY } from '../../../../constants';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 const STORAGE_KEY = 'obs_traces_modal_dismissed';
 
 interface SpanOverviewCueProps {
   className?: string;
+  document?: DataTableRecord; // Optional document to evaluate instead of probing
+  variant?: 'full' | 'compact'; // Controls the content shown in the callout
+  hideFullCallout?: boolean; // Controls whether to hide the full callout (compact still shows)
 }
 
-export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) => {
+export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className, document, variant = 'full', hideFullCallout = false }) => {
   const services = useDiscoverServices();
-  const { hasSpanData, isLoading } = useSpanOverviewProbe();
+  const { hasSpanData: probeHasSpanData, isLoading } = useSpanOverviewProbe();
   const [isDismissed, setIsDismissed] = useState(false);
   const [showTourModal, setShowTourModal] = useState(false);
   const [selectedHighlight, setSelectedHighlight] = useState(0);
@@ -63,6 +67,31 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
   // Demo toggles for demonstration purposes
   const [demoCanManageSpaces, setDemoCanManageSpaces] = useState(true);
   const [demoIsTrial, setDemoIsTrial] = useState(false);
+  const [demoHideFullCallout, setDemoHideFullCallout] = useState(true);
+
+  // Check if passed document is a span document
+  const documentHasSpanData = useMemo(() => {
+    if (!document) return false;
+    
+    const source = document.raw._source;
+    const fields = document.raw.fields;
+    
+    // Check for required span fields
+    const hasProcessorEvent = source?.processor?.event === 'span' || fields?.['processor.event']?.[0] === 'span';
+    const hasTimestamp = source?.['@timestamp'] || fields?.['@timestamp']?.[0];
+    const hasTraceId = source?.trace?.id || fields?.['trace.id']?.[0];
+    const hasSpanId = source?.span?.id || fields?.['span.id']?.[0];
+    const hasSpanDuration = source?.span?.duration?.us || fields?.['span.duration.us']?.[0];
+    
+    // Check for traces data stream
+    const hasTracesDataStream = fields?.['data_stream.type']?.[0] === 'traces';
+    const isTracesIndex = document.raw._index?.match(/^(\.ds-)?traces-/);
+    
+    return hasProcessorEvent && hasTimestamp && hasTraceId && hasSpanId && hasSpanDuration && hasTracesDataStream && isTracesIndex;
+  }, [document]);
+
+  // Use probe result if no document passed, otherwise use document evaluation
+  const hasSpanData = document ? documentHasSpanData : probeHasSpanData;
 
   // Get current Discover state for navigation
   const dataViewId = useAppStateSelector((state) => state.dataSource?.dataViewId);
@@ -225,105 +254,114 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
   // - Still loading
   // - User dismissed the cue
   // - User cannot manage spaces
+  // - Full callout is hidden (for demo purposes)
   const shouldRenderCallout =
     isFeatureEnabled &&
     solutionType !== 'oblt' &&
     hasSpanData &&
     !isLoading &&
     !isDismissed &&
-    canManageSpaces;
+    canManageSpaces &&
+    !(demoHideFullCallout && variant === 'full');
 
   return (
     <>
       {/* Only render the callout in Classic view */}
       {shouldRenderCallout && (
-        // <EuiCallOut
-        //   iconType="apmApp"
-        //   title="Trace data detected."
-        //   color="primary"
-        //   className={className}
-        //   onDismiss={handleDismiss}
-        // >
-        //   <p>{getCalloutMessage()}</p>
-        //   <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
-        //     <EuiFlexItem grow={false}>
-        //       <EuiButton
-        //         onClick={handleSwitchToObservability}
-        //         data-test-subj="obsSpanCueSwitchBtn"
-        //         size="s"
-        //         fill
-        //       >
-        //         Try Observability
-        //       </EuiButton>
-        //     </EuiFlexItem>
-        //     <EuiFlexItem grow={false}>
-        //       <EuiLink
-        //         href="https://www.elastic.co/docs/solutions/observability/apm/get-started"
-        //         target="_blank"
-        //         onClick={handleInfoLinkClick}
-        //         data-test-subj="obsSpanCueInfoLink"
-        //       >
-        //         Why am I seeing this?
-        //       </EuiLink>
-        //     </EuiFlexItem>
-        //   </EuiFlexGroup>
-        // </EuiCallOut>
-        <EuiCallOut
-          size="s"
-          color="success"
-          // onDismiss={handleDismiss}
-          title={
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon color="success" type="apmApp" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <span>
-                      <strong>Trace data detected</strong>. {getCalloutMessage()}
-                    </span>
-                  </EuiFlexItem>
-                  {/* <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={handleSwitchToObservability}
-                      data-test-subj="obsSpanCueSwitchBtn"
-                      size="s"
-                      color="success"
-                    >
-                      Try Observability
-                    </EuiButton>
-                  </EuiFlexItem> */}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      color="success"
-                      onClick={handleDismiss}
-                      aria-label="Dismiss"
-                      size="s"
-                    >
-                      Mabye later
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={handleSwitchToObservability}
-                      data-test-subj="obsSpanCueSwitchBtn"
-                      size="s"
-                      color="success"
-                      fill
-                    >
-                      Try Observability
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        />
+        variant === 'compact' ? (
+          // Compact variant for flyout banner
+          <EuiCallOut
+            size="s"
+            color="success"
+            title={
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon color="success" type="apmApp" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <span>
+                        <strong>Trace data detected</strong>
+                      </span>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        color="success"
+                        iconType="cross"
+                        onClick={handleDismiss}
+                        aria-label="Dismiss"
+                        size="s"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        onClick={handleSwitchToObservability}
+                        data-test-subj="obsSpanCueSwitchBtn"
+                        size="s"
+                        color="success"
+                        fill
+                      >
+                        Try Observability
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          />
+        ) : (
+          // Full variant for main Discover view
+          <EuiCallOut
+            size="s"
+            color="success"
+            title={
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon color="success" type="apmApp" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <span>
+                        <strong>Trace data detected</strong>. {getCalloutMessage()}
+                      </span>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        color="success"
+                        onClick={handleDismiss}
+                        aria-label="Dismiss"
+                        size="s"
+                      >
+                        Maybe later
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        onClick={handleSwitchToObservability}
+                        data-test-subj="obsSpanCueSwitchBtn"
+                        size="s"
+                        color="success"
+                        fill
+                      >
+                        Try Observability
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          />
+        )
       )}
 
       {/* Tour Modal - render regardless of solution type */}
@@ -455,12 +493,23 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
           borderRadius: '24px',
           padding: '12px 16px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          minWidth: '240px',
         }}
       >
-        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+        <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="center" responsive={false}>
+          {variant === 'full' && (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label="Hide full"
+                checked={demoHideFullCallout}
+                onChange={(e) => setDemoHideFullCallout(e.target.checked)}
+                compressed
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiSwitch
-              label="Can manage spaces"
+              label="Can manage"
               checked={demoCanManageSpaces}
               onChange={(e) => setDemoCanManageSpaces(e.target.checked)}
               compressed
@@ -468,7 +517,7 @@ export const SpanOverviewCue: React.FC<SpanOverviewCueProps> = ({ className }) =
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSwitch
-              label="Trial mode"
+              label="Is trial"
               checked={demoIsTrial}
               onChange={(e) => setDemoIsTrial(e.target.checked)}
               compressed
