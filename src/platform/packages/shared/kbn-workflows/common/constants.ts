@@ -11,3 +11,4 @@
  * UI Setting ID for enabling / disabling the workflows management UI
  */
 export const WORKFLOWS_UI_SETTING_ID = 'workflows:ui:enabled';
+export const WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID = 'workflows:ui:visualEditor:enabled';

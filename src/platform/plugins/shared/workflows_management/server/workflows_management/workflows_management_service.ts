@@ -18,6 +18,7 @@ import type {
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowStepExecution,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -27,11 +28,8 @@ import type {
 } from '@kbn/workflows';
 import type { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
 import { EsWorkflowSchema } from '@kbn/workflows/types/v1';
-import type {
-  AggregationsAggregationContainer,
-  SearchRequest,
-} from '@elastic/elasticsearch/lib/api/types';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import type { estypes } from '@elastic/elasticsearch';
 import { parseDocument } from 'yaml';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
@@ -48,7 +46,13 @@ import {
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
 import { SimpleWorkflowLogger } from './lib/workflow_logger';
-import type { GetWorkflowsParams } from './workflows_management_api';
+import type {
+  GetExecutionLogsParams,
+  GetStepExecutionParams,
+  GetStepLogsParams,
+  GetWorkflowsParams,
+} from './workflows_management_api';
+import { searchStepExecutions } from './lib/search_step_executions';
 
 const SO_ATTRIBUTES_PREFIX = `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes`;
 const WORKFLOW_EXECUTION_STATUS_STATS_BUCKET = 50;
@@ -235,6 +239,28 @@ export class WorkflowsService {
         total: response.total,
       },
     };
+  }
+
+  public async getStepExecution(
+    params: GetStepExecutionParams,
+    spaceId: string
+  ): Promise<EsWorkflowStepExecution | null> {
+    if (!this.esClient) {
+      throw new Error('Elasticsearch client not initialized');
+    }
+    const stepExecutions = await searchStepExecutions({
+      esClient: this.esClient,
+      logger: this.logger,
+      stepsExecutionIndex: this.stepsExecutionIndex,
+      workflowExecutionId: params.executionId,
+      additionalQuery: {
+        match: {
+          stepId: params.stepId,
+        },
+      },
+      spaceId,
+    });
+    return stepExecutions[0] ?? null;
   }
 
   public async getWorkflowExecution(
@@ -541,7 +567,10 @@ export class WorkflowsService {
   }
 
   // Direct log search methods - query ES logs index directly
-  private async searchWorkflowLogs(query: any): Promise<LogSearchResult> {
+  private async searchWorkflowLogs(
+    query: estypes.QueryDslQueryContainer,
+    sortOrder: estypes.SortOrder = 'desc'
+  ): Promise<LogSearchResult> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
@@ -550,7 +579,7 @@ export class WorkflowsService {
       const response = await this.esClient.search({
         index: this.workflowExecutionLogsIndex,
         query,
-        sort: [{ '@timestamp': { order: 'desc' } }],
+        sort: [{ '@timestamp': { order: sortOrder } }],
         size: 1000,
       });
 
@@ -573,65 +602,73 @@ export class WorkflowsService {
     }
   }
 
-  public async getExecutionLogs(executionId: string, spaceId: string): Promise<LogSearchResult> {
+  public async getExecutionLogs(
+    params: GetExecutionLogsParams,
+    spaceId: string
+  ): Promise<LogSearchResult> {
     const query = {
       bool: {
         must: [
           {
             match: {
-              'workflow.execution_id': executionId,
+              'workflow.execution_id': params.executionId,
+            },
+          },
+          {
+            bool: {
+              should: [
+                { term: { spaceId } },
+                // Backward compatibility for objects without spaceId
+                { bool: { must_not: { exists: { field: 'spaceId' } } } },
+              ],
+              minimum_should_match: 1,
             },
           },
         ],
       },
     };
 
-    return this.searchWorkflowLogs(query);
+    return this.searchWorkflowLogs(query, params.sortOrder);
   }
 
-  public async getStepLogs(executionId: string, stepId: string): Promise<LogSearchResult> {
+  public async getStepLogs(params: GetStepLogsParams, spaceId: string): Promise<LogSearchResult> {
     const query = {
       bool: {
         must: [
           {
             match: {
-              'workflow.execution_id': executionId,
+              'workflow.execution_id': params.executionId,
             },
           },
           {
             match: {
-              'workflow.step_id': stepId,
+              'workflow.step_id.keyword': params.stepId,
+            },
+          },
+          {
+            bool: {
+              should: [
+                { term: { spaceId } },
+                // Backward compatibility for objects without spaceId
+                { bool: { must_not: { exists: { field: 'spaceId' } } } },
+              ],
+              minimum_should_match: 1,
             },
           },
         ],
       },
     };
 
-    return this.searchWorkflowLogs(query);
+    return this.searchWorkflowLogs(query, params.sortOrder);
   }
 
-  public async getWorkflowLogs(workflowId: string): Promise<LogSearchResult> {
-    const query = {
-      bool: {
-        must: [
-          {
-            term: {
-              'workflow.id': workflowId,
-            },
-          },
-        ],
-      },
-    };
-
-    return this.searchWorkflowLogs(query);
-  }
-
-  public async getWorkflowStats(): Promise<WorkflowStatsDto | null> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+  public async getWorkflowStats(spaceId: string): Promise<WorkflowStatsDto | null> {
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
     try {
       const [workflowStatusStats, workflowExecutionStatusStats] = await Promise.all([
         this.getWorkflowStatusStats(savedObjectsClient),
-        this.getWorkflowExecutionStatusStats(),
+        this.getWorkflowExecutionStatusStats(spaceId),
       ]);
 
       return {
@@ -649,8 +686,9 @@ export class WorkflowsService {
     }
   }
 
-  public async getWorkflowAggs(fields: string[]): Promise<WorkflowAggsDto | null> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+  public async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto | null> {
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
     try {
       const aggs = fields.reduce<Record<string, object>>((acc, field) => {
         acc[field] = {
@@ -705,7 +743,7 @@ export class WorkflowsService {
   }
 
   private async getWorkflowStatusStats(savedObjectsClient: SavedObjectsClientContract) {
-    const aggs: Record<string, AggregationsAggregationContainer> = {
+    const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
       by_enabled: {
         terms: {
           field: 'workflow.attributes.enabled',
@@ -736,20 +774,27 @@ export class WorkflowsService {
     );
   }
 
-  private async getWorkflowExecutionStatusStats() {
+  private async getWorkflowExecutionStatusStats(spaceId: string) {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
 
-    const query: SearchRequest = {
+    const query: estypes.SearchRequest = {
       index: this.workflowsExecutionIndex,
       size: 0, // no hits, just aggregations
       query: {
-        range: {
-          startedAt: {
-            gte: 'now-30d/d',
-            lt: 'now+1d/d',
-          },
+        bool: {
+          filter: [
+            { term: { spaceId } },
+            {
+              range: {
+                startedAt: {
+                  gte: 'now-30d/d',
+                  lt: 'now+1d/d',
+                },
+              },
+            },
+          ],
         },
       },
       aggs: {
