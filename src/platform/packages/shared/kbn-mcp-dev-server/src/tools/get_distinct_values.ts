@@ -8,34 +8,46 @@
  */
 
 import { z } from '@kbn/zod';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ToolDefinition } from '../types';
 import { client } from './code_search';
 
 const getDistinctValuesInputSchema = z.object({
   field: z
-    .enum(['type', 'language', 'kind'])
+    .enum(['type', 'language', 'kind', 'filePath', 'imports'])
     .describe(
-      "The field for which to retrieve distinct values. Can be 'type', 'language', or 'kind'."
+      "The field for which to retrieve distinct values. Can be 'type', 'language', 'kind', 'filePath', or 'imports'."
     ),
+  kql: z.string().optional().describe('An optional KQL filter to apply before aggregating.'),
 });
 
 async function getDistinctValuesHandler(input: z.infer<typeof getDistinctValuesInputSchema>) {
-  const { field } = input;
+  const { field, kql } = input;
+
+  let query;
+  if (kql) {
+    const ast = fromKueryExpression(kql);
+    query = toElasticsearchQuery(ast);
+  }
 
   const response = await client.search({
     index: process.env.ELASTICSEARCH_INDEX || 'kibana-code-search',
     size: 0,
+    query,
     aggs: {
       distinct_values: {
         terms: {
           field,
-          size: 100, // Assuming we won't have more than 100 distinct values for these fields
+          size: 1000, // Increased size to better handle filePath and imports
         },
       },
     },
   });
 
-  const buckets = response.aggregations?.distinct_values.buckets || [];
+  const buckets =
+    (response.aggregations?.distinct_values as estypes.AggregationsTermsAggregateBase<any>)
+      ?.buckets || [];
   const values = buckets.map((bucket: any) => bucket.key);
 
   return {
@@ -51,7 +63,7 @@ async function getDistinctValuesHandler(input: z.infer<typeof getDistinctValuesI
 export const getDistinctValuesTool: ToolDefinition<typeof getDistinctValuesInputSchema> = {
   name: 'get_distinct_values',
   description:
-    "Retrieves all unique values for a specified field ('type', 'language', or 'kind') from the code search index.",
+    'Retrieves all unique values for a specified field from the code search index. Can be filtered with an optional KQL query.',
   inputSchema: getDistinctValuesInputSchema,
   handler: getDistinctValuesHandler,
 };

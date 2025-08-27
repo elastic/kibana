@@ -24,10 +24,11 @@ describe('codeSearchTool', () => {
     });
     (client.search as jest.Mock) = mockSearch;
 
-    await codeSearchTool.handler({ query: 'test query' });
+    await codeSearchTool.handler({ query: 'test query', size: 10, page: 1 });
     expect(mockSearch).toHaveBeenCalledWith({
       index: 'kibana-code-search',
       size: 10,
+      from: 0,
       _source: [
         'filePath',
         'content',
@@ -43,10 +44,16 @@ describe('codeSearchTool', () => {
         'type',
       ],
       query: {
-        sparse_vector: {
-          field: 'content_embedding',
-          inference_id: '.elser_model_2',
-          query: 'test query',
+        bool: {
+          must: [
+            {
+              sparse_vector: {
+                field: 'content_embedding',
+                inference_id: '.elser_model_2',
+                query: 'test query',
+              },
+            },
+          ],
         },
       },
     });
@@ -60,10 +67,16 @@ describe('codeSearchTool', () => {
     });
     (client.search as jest.Mock) = mockSearch;
 
-    await codeSearchTool.handler({ query: 'test query', kql: 'language:typescript' });
+    await codeSearchTool.handler({
+      query: 'test query',
+      kql: 'language:typescript',
+      size: 20,
+      page: 2,
+    });
     expect(mockSearch).toHaveBeenCalledWith({
       index: 'kibana-code-search',
-      size: 10,
+      size: 20,
+      from: 20,
       _source: [
         'filePath',
         'content',
