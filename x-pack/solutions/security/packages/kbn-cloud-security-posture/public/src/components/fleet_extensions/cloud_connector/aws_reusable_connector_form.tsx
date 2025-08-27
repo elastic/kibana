@@ -18,7 +18,7 @@ import {
 import { AwsInputVarFields } from '../aws_credentials_form/aws_input_var_fields';
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 
-export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
+export const AWSReusableConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
   input,
   newPolicy,
   packageInfo,
@@ -44,8 +44,8 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
   return (
     <>
       <EuiAccordion
-        id="cloudFormationAccordianInstructions"
-        data-test-subj={''}
+        id="cloudFormationAccordianInstructionsReusable"
+        data-test-subj="cloudFormationAccordianInstructionsReusable"
         buttonContent={<EuiLink>{'Steps to generate IAM role credentials'}</EuiLink>}
         paddingSize="l"
       >
@@ -53,7 +53,7 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
       </EuiAccordion>
       <EuiSpacer size="l" />
       <EuiButton
-        data-test-subj="launchCloudFormationAgentlessButton"
+        data-test-subj="launchCloudFormationReusableButton"
         target="_blank"
         iconSide="left"
         iconType="launch"

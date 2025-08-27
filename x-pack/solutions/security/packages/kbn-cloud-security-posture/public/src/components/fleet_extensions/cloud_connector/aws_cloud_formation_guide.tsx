@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface CloudFormationCloudCredentialsGuideProps {
@@ -16,33 +16,8 @@ export interface CloudFormationCloudCredentialsGuideProps {
 export const CloudFormationCloudCredentialsGuide: React.FC<
   CloudFormationCloudCredentialsGuideProps
 > = ({ isOrganization = false }) => {
-  const CLOUD_FORMATION_EXTERNAL_DOC_URL =
-    'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html';
-
   return (
     <div>
-      <EuiText size="s" color="subdued">
-        <FormattedMessage
-          id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.description.cloudConnectors"
-          defaultMessage="To enable Cloud Asset Discovery, you launch an AWS CloudFormation stack that automatically creates an IAM role in your account. This role includes the necessary permissions and embeds a unique External ID—generated during onboarding—into its trust policy. The resulting Role ARN and External ID are then used by Cloud Asset Discovery to securely assume the role and access your AWS resources. Roles do not have standard long-term credentials such as passwords or access keys. {learnMore}."
-          values={{
-            learnMore: (
-              <EuiLink
-                href={CLOUD_FORMATION_EXTERNAL_DOC_URL}
-                target="_blank"
-                rel="noopener nofollow noreferrer"
-                data-test-subj="externalLink"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.learnMoreLinkText"
-                  defaultMessage="Learn more about CloudFormation"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
-      <EuiSpacer size="l" />
       <EuiText size="s" color="subdued">
         <ol>
           {isOrganization ? (

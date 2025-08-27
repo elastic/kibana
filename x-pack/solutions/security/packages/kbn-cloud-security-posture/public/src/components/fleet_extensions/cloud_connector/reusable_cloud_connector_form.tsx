@@ -7,9 +7,9 @@
 
 import React from 'react';
 import type { CloudConnectorFormProps } from './types';
-import { AWSCloudConnectorForm } from './aws_cloud_connector_form';
+import { AWSReusableConnectorForm } from './aws_reusable_connector_form';
 
-export const CloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
+export const ReusableCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   input,
   newPolicy,
   packageInfo,
@@ -26,7 +26,7 @@ export const CloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   switch (provider) {
     case 'aws':
       return (
-        <AWSCloudConnectorForm
+        <AWSReusableConnectorForm
           templateName={templateName}
           input={input}
           newPolicy={newPolicy}
@@ -35,11 +35,12 @@ export const CloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           isEditPage={isEditPage}
           cloud={cloud}
           cloudProvider={provider}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
         />
       );
     case 'gcp':
     case 'azure':
-      // TODO: Implement GCP and Azure cloud connector forms
+      // TODO: Implement GCP and Azure reusable cloud connector forms
       return null;
     default:
       return null;
