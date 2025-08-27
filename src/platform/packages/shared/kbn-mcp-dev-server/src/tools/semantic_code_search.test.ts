@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { codeSearchTool } from './code_search';
+import { semanticCodeSearchTool } from './semantic_code_search';
 import { client } from '../utils/elasticsearch';
 
 jest.mock('../utils/elasticsearch', () => ({
@@ -16,7 +16,7 @@ jest.mock('../utils/elasticsearch', () => ({
   },
 }));
 
-describe('codeSearchTool', () => {
+describe('semanticCodeSearchTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -29,7 +29,7 @@ describe('codeSearchTool', () => {
     });
     (client.search as jest.Mock) = mockSearch;
 
-    await codeSearchTool.handler({ query: 'test query', size: 10, page: 1 });
+    await semanticCodeSearchTool.handler({ query: 'test query', size: 10, page: 1 });
     expect(mockSearch).toHaveBeenCalledWith({
       index: 'kibana-code-search',
       size: 10,
@@ -73,7 +73,7 @@ describe('codeSearchTool', () => {
     });
     (client.search as jest.Mock) = mockSearch;
 
-    await codeSearchTool.handler({
+    await semanticCodeSearchTool.handler({
       query: 'test query',
       kql: 'language:typescript',
       size: 20,

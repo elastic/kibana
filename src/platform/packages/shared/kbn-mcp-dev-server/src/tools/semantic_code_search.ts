@@ -42,14 +42,14 @@ interface CodeChunk {
   type: string;
 }
 
-const codeSearchInputSchema = z.object({
+const semanticCodeSearchInputSchema = z.object({
   query: z.string().optional().describe('The semantic query string to search for.'),
   kql: z.string().optional().describe('The KQL filter to apply to the search.'),
-  size: z.number().optional().default(20).describe('The number of results to return.'),
+  size: z.number().optional().default(50).describe('The number of results to return.'),
   page: z.number().optional().default(1).describe('The page of results to return.'),
 });
 
-async function codeSearchHandler(input: z.infer<typeof codeSearchInputSchema>) {
+async function semanticCodeSearchHandler(input: z.infer<typeof semanticCodeSearchInputSchema>) {
   const { query: queryString, kql, size, page } = input;
   const mustClauses: estypes.QueryDslQueryContainer[] = [];
 
@@ -123,7 +123,17 @@ async function codeSearchHandler(input: z.infer<typeof codeSearchInputSchema>) {
 }
 
 const description = `
-Performs a semantic search of the Kibana codebase using a unified Elasticsearch index. This tool is ideal for a "chain of investigation" approach to exploring the codebase.
+The primary tool for starting a "chain of investigation." Use this for broad, semantic exploration when you don't know the exact file or symbol names.
+
+**Best for:**
+*   **Initial Discovery:** Answering questions like, "Where is the logic for SLO SLIs?" or "How are API keys handled?"
+*   **Finding Entry Points:** Use broad, conceptual queries (e.g., "SLI registration", "user authentication flow") to find the most relevant files and symbols.
+*   **Narrowing the Search:** Once you have initial results, you can refine your search with more specific terms (e.g., "IndicatorType enum") or KQL filters.
+
+**Workflow:**
+1.  Start with a broad, semantic query to understand the landscape.
+2.  Analyze the results to identify key files, functions, classes, or types.
+3.  Once you have identified a specific, concrete symbol, **switch to \`symbol_analysis\`** for a precise analysis of its connections.
 
 Either a \`query\` for semantic search or a \`kql\` filter is required. If both are provided, they are combined with a must clause (AND operator) in Elasticsearch. You can control the number of results with \`size\` and paginate through them using \`page\`.
 
@@ -140,6 +150,16 @@ You can use the following fields in your KQL queries:
 - **created_at** (date): The timestamp when the document was created.
 - **updated_at** (date): The timestamp when the document was last updated.
 
+### IMPORTANT QUERY TIPS
+- CRITICAL: ALWAYS use semantic search terms. If the user asks "Show me how to add an SLI to the SLO Plugin", use "add SLI to SLO plugin" for the query.
+- CRITICAL: ALWAYS base your queries on the user's prompt, you will have a higher success rate by doing this.
+- CRITICAL: ALWAYS follow the "chain of investigation" method
+- CRITICAL: NEVER try to answer questions without using semantic search first.
+- CRITICAL: NEVER double quite a \`kql\` wildcard query. Double quotes are used for EXACT MATCHES
+- CRITICAL: ALWAYS show "I'm going to use \`semantic_code_search\` with the \`query: "<insert-semantic-search-here>"\` and \`kql: "<kql-query-here>"\` so the user can see what terms you're using to search
+- If you are unsure what explicit values to use for \`kind\` use the \`get_distinct_values\` to get a complete list of the keywords
+- If you are trying to match the exact name of a symbol, use the \`content\` field in a kql query like this: \`content: "<symbol-name-here>"\`
+
 ### Example: Semantic Search with a KQL Filter
 
 To find all functions related to "rendering a table", you could use:
@@ -147,7 +167,7 @@ To find all functions related to "rendering a table", you could use:
 
   {
     "query": "render a table",
-    "kql": "type: \"function\""
+    "kql": "kind: \"function_declaration\""
   }
 
 
@@ -157,7 +177,7 @@ To find all TypeScript classes, omitting the semantic query, you could use:
 
 
   {
-    "kql": "language: \"typescript\" and type: \"class\"",
+    "kql": "language: \"typescript\" and kind: \"class_declaration\"",
     "size": 5
   }
 
@@ -169,15 +189,15 @@ To get the second page of 50 results for files importing the React library, you 
 
   {
     "query": "state management",
-    "kql": "imports: *from 'react'",
+    "kql": "imports: *from 'react'*",
     "size": 50,
     "page": 2
   }
 `;
 
-export const codeSearchTool: ToolDefinition<typeof codeSearchInputSchema> = {
-  name: 'code_search',
+export const semanticCodeSearchTool: ToolDefinition<typeof semanticCodeSearchInputSchema> = {
+  name: 'semantic_code_search',
   description,
-  inputSchema: codeSearchInputSchema,
-  handler: codeSearchHandler,
+  inputSchema: semanticCodeSearchInputSchema,
+  handler: semanticCodeSearchHandler,
 };
