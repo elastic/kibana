@@ -17,7 +17,6 @@
  */
 
 import { z } from '@kbn/zod';
-import type { estypes } from '@elastic/elasticsearch';
 import type { ToolDefinition } from '../types';
 import { client } from '../utils/elasticsearch';
 
@@ -31,10 +30,24 @@ interface FileUsageData {
   isMarkdown: boolean;
 }
 
+interface FileUsageAggResults {
+  files: {
+    buckets: Array<{
+      key: string;
+      kinds: {
+        buckets: Array<{ key: string }>;
+      };
+      languages: {
+        buckets: Array<{ key: string }>;
+      };
+    }>;
+  };
+}
+
 async function findUsagesHandler(input: z.infer<typeof findUsagesInputSchema>) {
   const { symbol } = input;
 
-  const response = await client.search({
+  const response = await client.search<unknown, FileUsageAggResults>({
     index: process.env.ELASTICSEARCH_INDEX || 'kibana-code-search',
     size: 0,
     query: {
@@ -60,8 +73,7 @@ async function findUsagesHandler(input: z.infer<typeof findUsagesInputSchema>) {
     },
   });
 
-  const buckets =
-    (response.aggregations?.files as estypes.AggregationsTermsAggregateBase<any>)?.buckets || [];
+  const buckets = response.aggregations?.files?.buckets || [];
   let report = `### Usage Report for "${symbol}"\n\n`;
 
   if (buckets.length === 0) {
@@ -69,10 +81,10 @@ async function findUsagesHandler(input: z.infer<typeof findUsagesInputSchema>) {
     return { content: [{ type: 'text', text: report } as const] };
   }
 
-  const filesData: FileUsageData[] = buckets.map((bucket: any) => ({
+  const filesData: FileUsageData[] = buckets.map((bucket) => ({
     filePath: bucket.key,
-    kinds: new Set(bucket.kinds.buckets.map((k: any) => k.key)),
-    isMarkdown: bucket.languages.buckets.some((l: any) => l.key === 'markdown'),
+    kinds: new Set(bucket.kinds.buckets.map((k) => k.key)),
+    isMarkdown: bucket.languages.buckets.some((l) => l.key === 'markdown'),
   }));
 
   const categories: Record<string, FileUsageData[]> = {

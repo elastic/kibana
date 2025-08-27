@@ -9,7 +9,6 @@
 
 import { z } from '@kbn/zod';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { estypes } from '@elastic/elasticsearch';
 import type { ToolDefinition } from '../types';
 import { client } from '../utils/elasticsearch';
 
@@ -22,6 +21,12 @@ const getDistinctValuesInputSchema = z.object({
   kql: z.string().optional().describe('An optional KQL filter to apply before aggregating.'),
 });
 
+interface GetDistinctValuesAggResults {
+  distinct_values: {
+    buckets: Array<{ key: string }>;
+  };
+}
+
 async function getDistinctValuesHandler(input: z.infer<typeof getDistinctValuesInputSchema>) {
   const { field, kql } = input;
 
@@ -31,7 +36,7 @@ async function getDistinctValuesHandler(input: z.infer<typeof getDistinctValuesI
     query = toElasticsearchQuery(ast);
   }
 
-  const response = await client.search({
+  const response = await client.search<unknown, GetDistinctValuesAggResults>({
     index: process.env.ELASTICSEARCH_INDEX || 'kibana-code-search',
     size: 0,
     query,
@@ -45,10 +50,8 @@ async function getDistinctValuesHandler(input: z.infer<typeof getDistinctValuesI
     },
   });
 
-  const buckets =
-    (response.aggregations?.distinct_values as estypes.AggregationsTermsAggregateBase<any>)
-      ?.buckets || [];
-  const values = buckets.map((bucket: any) => bucket.key);
+  const buckets = response.aggregations?.distinct_values?.buckets || [];
+  const values = buckets.map((bucket) => bucket.key);
 
   return {
     content: [
