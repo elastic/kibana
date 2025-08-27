@@ -12,8 +12,8 @@ import type {
   AggregationsStringTermsBucket,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { CreateDashboardsInput } from '../../../../../common/siem_migrations/dashboards/types';
 import { MigrationTaskStatusEnum } from '../../../../../common/siem_migrations/model/common.gen';
-import type { SplunkOriginalDashboardExport } from '../../../../../common/siem_migrations/model/vendor/dashboards/splunk.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import {
@@ -27,42 +27,26 @@ const BULK_MAX_SIZE = 500 as const;
 
 export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataBaseClient {
   /** Indexes an array of dashboards to be processed as a part of single migration */
-  async create(
-    migrationId: string,
-    originalDashboards: SplunkOriginalDashboardExport[]
-  ): Promise<void> {
+  async create(migrationId: string, dashboardsInput: CreateDashboardsInput[]): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let originalDashboardsMaxBatch: SplunkOriginalDashboardExport[];
+    let originalDashboardsMaxBatch: CreateDashboardsInput[];
     const createdAt = new Date().toISOString();
-    while ((originalDashboardsMaxBatch = originalDashboards.splice(0, BULK_MAX_SIZE)).length) {
+    const dashboardsToBeAdded = structuredClone(dashboardsInput);
+    while ((originalDashboardsMaxBatch = dashboardsToBeAdded.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
         .bulk<DashboardMigrationDashboard>({
           refresh: 'wait_for',
-          operations: originalDashboardsMaxBatch.flatMap(({ result: { ...originalDashboard } }) => [
+          operations: originalDashboardsMaxBatch.flatMap((dashboardInput) => [
             { create: { _index: index } },
             {
-              migration_id: migrationId,
               '@timestamp': createdAt,
               status: SiemMigrationStatus.PENDING,
               created_by: profileId,
               updated_by: profileId,
               updated_at: createdAt,
-              original_dashboard: {
-                id: originalDashboard.id,
-                title: originalDashboard.label ?? originalDashboard.title,
-                description: originalDashboard.description ?? '',
-                data: originalDashboard?.['eai:data'],
-                format: 'xml',
-                vendor: 'splunk',
-                last_updated: originalDashboard.updated,
-                splunk_properties: {
-                  app: originalDashboard['eai:acl.app'],
-                  owner: originalDashboard['eai:acl.owner'],
-                  sharing: originalDashboard['eai:acl.sharing'],
-                },
-              },
+              ...dashboardInput,
             },
           ]),
         })
