@@ -33,7 +33,10 @@ export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => (
 });
 
 const mockUser1 = authenticatedUser;
-
+const userAsUser = {
+  id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+  name: 'elastic',
+};
 const getEsConversationMock = (): EsConversationSchema => {
   return {
     summary: {
@@ -48,19 +51,13 @@ const getEsConversationMock = (): EsConversationSchema => {
     },
     namespace: 'default',
     created_at: '2025-08-19T10:49:52.884Z',
-    created_by: {
-      id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-      name: 'elastic',
-    },
+    created_by: userAsUser,
     messages: [
       {
         '@timestamp': '2025-08-19T10:49:53.799Z',
         role: 'user',
         content: 'Hello there, how many opened alerts do I have?',
-        user: {
-          id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-          name: 'elastic',
-        },
+        user: userAsUser,
       },
       {
         metadata: {
@@ -84,12 +81,7 @@ const getEsConversationMock = (): EsConversationSchema => {
     replacements: [],
     title: 'Viewing the Number of Open Alerts in Elastic Security',
     category: 'assistant',
-    users: [
-      {
-        name: 'elastic',
-        id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-      },
-    ],
+    users: [userAsUser],
     id: 'a565baa8-5566-47b2-ab69-807248b2fc46',
   };
 };
@@ -184,12 +176,7 @@ describe('updateConversation', () => {
     expect(updatedList).toEqual({
       timestamp: '2025-08-19T10:49:52.884Z',
       createdAt: '2025-08-19T10:49:52.884Z',
-      users: [
-        {
-          id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-          name: 'elastic',
-        },
-      ],
+      users: [userAsUser],
       title: 'Viewing the Number of Open Alerts in Elastic Security',
       category: 'assistant',
       summary: {
@@ -205,6 +192,7 @@ describe('updateConversation', () => {
           timestamp: '2025-08-19T10:49:53.799Z',
           content: 'Hello there, how many opened alerts do I have?',
           role: 'user',
+          user: userAsUser,
         },
         {
           timestamp: '2025-08-19T10:49:57.398Z',
@@ -228,6 +216,7 @@ describe('updateConversation', () => {
       replacements: {},
       namespace: 'default',
       id: 'a565baa8-5566-47b2-ab69-807248b2fc46',
+      createdBy: userAsUser,
     });
   });
 
