@@ -95,7 +95,14 @@ module.exports = {
 
   // The test environment that will be used for testing
   testEnvironment: 'jest-environment-jsdom',
-
+  testEnvironmentOptions: {
+    // New in Jest 30, incompatible with certain dependencies
+    // https://jestjs.io/blog/2025/06/04/jest-30#globals-cleanup-between-test-files
+    // TypeError: Value of "this" must be of type WritableStreamDefaultWriter
+    //   at Reflect.get (<anonymous>)
+    //   at protectProperties (node_modules/jest-util/build/index.js:456:34)
+    globalsCleanup: 'off',
+  },
   // The glob patterns Jest uses to detect test files
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
 
