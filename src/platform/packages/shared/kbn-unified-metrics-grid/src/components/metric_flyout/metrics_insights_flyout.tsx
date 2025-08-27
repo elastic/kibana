@@ -18,11 +18,14 @@ import {
   useEuiTheme,
   EuiButtonEmpty,
   EuiFlyoutFooter,
+  isDOMNode,
+  keys,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { MetricField } from '../../types';
 import { MetricFlyoutContent } from './metric_flyout_content';
+import { useFlyoutA11y } from '../../hooks/use_flyout_a11y';
 
 interface MetricInsightsFlyoutProps {
   metric: MetricField;
@@ -45,6 +48,42 @@ export const MetricInsightsFlyout = ({
     'metricInsightsFlyout:flyoutWidth',
     defaultWidth
   );
+  const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
+
+  const onKeyDown = useCallback(
+    (ev: React.KeyboardEvent) => {
+      if (ev.target instanceof HTMLElement && ev.target.closest('.euiDataGrid__content')) {
+        // ignore events triggered from the data grid
+        return;
+      }
+
+      if (isDOMNode(ev.target) && ev.currentTarget.contains(ev.target) && ev.key === keys.ESCAPE) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        onClose();
+      }
+
+      if (ev.target instanceof HTMLInputElement) {
+        // ignore events triggered from the search input
+        return;
+      }
+
+      const isTabButton = (ev.target as HTMLElement).getAttribute('role') === 'tab';
+      if (isTabButton) {
+        // ignore events triggered when the tab buttons are focused
+        return;
+      }
+
+      const isResizableButton =
+        (ev.target as HTMLElement).getAttribute('data-test-subj') === 'euiResizableButton';
+      if (isResizableButton) {
+        // ignore events triggered when the resizable button is focused
+        return;
+      }
+    },
+    [onClose]
+  );
+
   if (!isOpen) return null;
 
   const minWidth = euiTheme.base * 24;
@@ -55,9 +94,10 @@ export const MetricInsightsFlyout = ({
       onClose={onClose}
       type="push"
       size={flyoutWidth}
+      onKeyDown={onKeyDown}
       pushMinBreakpoint="xl"
       data-test-subj="metricViewerFlyout"
-      ownFocus={true}
+      ownFocus
       minWidth={minWidth}
       maxWidth={maxWidth}
       onResize={setFlyoutWidth}
@@ -65,9 +105,9 @@ export const MetricInsightsFlyout = ({
         maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
       }}
       paddingSize="m"
-      // TODO Add accessibility props
-      // {...a11yProps}
+      {...a11yProps}
     >
+      {screenReaderDescription}
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
