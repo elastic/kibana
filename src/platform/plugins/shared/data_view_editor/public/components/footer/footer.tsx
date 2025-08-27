@@ -34,7 +34,7 @@ interface FooterProps {
   allowAdHoc: boolean;
   canSave: boolean;
   isManaged: boolean;
-  isDuplicatingManaged: boolean;
+  isDuplicating: boolean;
 }
 
 const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
@@ -78,12 +78,12 @@ export const Footer = ({
   canSave,
   onDuplicate,
   isManaged,
-  isDuplicatingManaged,
+  isDuplicating,
 }: FooterProps) => {
   const isEditingAdHoc = hasEditData && !isPersisted;
 
   const isEditing = (canSave || isEditingAdHoc) && !isManaged;
-  const showDuplicateButton = (canSave || isEditingAdHoc) && isManaged && onDuplicate;
+  const showDuplicateButton = (canSave || isEditingAdHoc) && onDuplicate;
 
   const submitPersisted = () => {
     onSubmit(false);
@@ -138,7 +138,7 @@ export const Footer = ({
                     (submittingType === SubmittingType.savingAsAdHoc && isEditingAdHoc)
                   }
                 >
-                  {hasEditData && !isDuplicatingManaged
+                  {hasEditData && !isDuplicating
                     ? isPersisted
                       ? editButtonLabel
                       : editUnpersistedButtonLabel

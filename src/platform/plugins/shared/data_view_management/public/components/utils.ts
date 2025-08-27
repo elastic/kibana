@@ -80,7 +80,7 @@ export const getTags = (
   const tags = [];
   if (indexPattern.managed) {
     tags.push({
-      key: DataViewType.MANAGED,
+      key: 'managed',
       name: managedDataViewTagName,
       'data-test-subj': 'managed-tag',
     });

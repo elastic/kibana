@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiSkeletonRectangle,
   EuiSkeletonTitle,
+  EuiCallOut,
   type UseEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
@@ -72,7 +73,7 @@ export interface Props {
   showManagementLink?: boolean;
   allowAdHoc: boolean;
   dataViewEditorService: DataViewEditorService;
-  isDuplicatingManaged: boolean;
+  isDuplicating: boolean;
   onDuplicate?: () => void;
   getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
@@ -95,7 +96,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   getDataViewHelpText,
   dataViewEditorService,
   onDuplicate,
-  isDuplicatingManaged,
+  isDuplicating,
 }: Props) => {
   const styles = useMemoCss(componentStyles);
   const isMobile = useIsWithinBreakpoints(['s', 'xs']);
@@ -106,10 +107,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const canSave = dataViews.getCanSaveSync();
   const isManaged = !!editData?.managed;
-  // Edit form is populated and disabled if the current data view is managed
-  // and the data view is not being duplicated
-  const isFormDisabled = isManaged && !isDuplicatingManaged;
-  const isEditingExisting = editData && !isManaged && !isDuplicatingManaged;
+  // onDuplicate is only provided when editing an existing data view
+  // if onDuplicate is undefined we are duplicating a new data view
+  const isEditingExisting = editData && !isDuplicating;
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
@@ -122,8 +122,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
       ...(editData
         ? {
             title: editData.getIndexPattern(),
-            id: isDuplicatingManaged ? undefined : editData.id,
-            name: isDuplicatingManaged ? undefined : editData.name,
+            id: isDuplicating ? undefined : editData.id,
+            name: isDuplicating ? undefined : editData.name,
             allowHidden: editData.getAllowHidden(),
             ...(editData.timeFieldName === noTimeFieldValue
               ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
@@ -193,13 +193,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
 
   const namesNotAllowed = useMemo(() => {
-    // When duplicating a managed data view, add the existing name
+    // When duplicating a data view, add the existing name
     // to the not allowed names list
-    if (isDuplicatingManaged && editData) {
+    if (isDuplicating && editData) {
       return [editData.name, ...(existingDataViewNames || [])];
     }
     return existingDataViewNames || [];
-  }, [existingDataViewNames, isDuplicatingManaged, editData]);
+  }, [existingDataViewNames, isDuplicating, editData]);
 
   useDebounce(
     () => {
@@ -309,7 +309,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       canSave={canSave}
       isManaged={isManaged}
       onDuplicate={onDuplicate}
-      isDuplicatingManaged={isDuplicatingManaged}
+      isDuplicating={isDuplicating}
     />
   );
 
@@ -319,10 +319,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
         <FlyoutPanels.Content>
           <EuiTitle data-test-subj="flyoutTitle">
             <h2 id="dataViewEditorFlyoutTitle">
-              {editData && !isDuplicatingManaged ? editorTitleEditMode : editorTitle}
+              {isEditingExisting ? editorTitleEditMode : editorTitle}
             </h2>
           </EuiTitle>
-          {showManagementLink && !isDuplicatingManaged && editData && editData.id && (
+          {showManagementLink && isEditingExisting && editData && editData.id && (
             <EuiLink
               href={application.getUrlForApp('management', {
                 path: `/kibana/dataViews/dataView/${editData.id}`,
@@ -332,6 +332,18 @@ const IndexPatternEditorFlyoutContentComponent = ({
                 defaultMessage: 'Manage settings and view field details',
               })}
             </EuiLink>
+          )}
+          {isManaged && (
+            <EuiCallOut
+              title={i18n.translate('indexPatternEditor.managedDataViewCalloutMessage', {
+                defaultMessage:
+                  'Managed data views cannot be edited. Duplicate the data view in order to make changes.',
+              })}
+              color="warning"
+              iconType="warning"
+              size="s"
+              style={{ marginTop: '10px' }}
+            />
           )}
           <Form
             form={form}
@@ -346,7 +358,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             <EuiSpacer size="l" />
             <EuiFlexGroup>
               <EuiFlexItem>
-                <NameField namesNotAllowed={namesNotAllowed} disabled={isFormDisabled} />
+                <NameField namesNotAllowed={namesNotAllowed} disabled={isManaged} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
@@ -360,7 +372,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                     dataViewEditorService.indexPatternValidationProvider
                   }
                   titleHelpText={titleHelpText}
-                  disabled={isFormDisabled}
+                  disabled={isManaged}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -371,13 +383,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
                   options$={dataViewEditorService.timestampFieldOptions$}
                   isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
                   matchedIndices$={dataViewEditorService.matchedIndices$}
-                  disabled={isFormDisabled}
+                  disabled={isManaged}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
             <AdvancedParamsContent
               disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
-              disableId={isFormDisabled}
+              disableId={isManaged}
               onAllowHiddenChange={() => {
                 form.getFields().title.validate();
               }}
