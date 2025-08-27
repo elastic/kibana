@@ -45,16 +45,16 @@ function getMaterializedBabelOptions({ cwd, rootDir }) {
 
   let optionsJson = '{}';
   try {
-    const partial = babel.loadPartialConfig({
+    const complete = babel.loadOptions({
       ...baseConfig,
       cwd: normalizedCwd,
       root: normalizedRoot,
       filename: path.join(normalizedRoot, DUMMY_FILENAME),
     });
 
-    // partial can be null if file is ignored; ensure we stringify options safely
-    const options = (partial && partial.options) || baseConfig || {};
-    optionsJson = JSON.stringify(options);
+    optionsJson = JSON.stringify(complete);
+
+    console.log(optionsJson);
   } catch (_e) {
     // Fall back to stringifying base config if materialization fails
     try {

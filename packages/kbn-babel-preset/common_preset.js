@@ -7,13 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const removePropTypes = [
+  require.resolve('babel-plugin-transform-react-remove-prop-types'),
+  {
+    mode: 'remove',
+    removeImport: true,
+  },
+];
+
 module.exports = () => ({
+  env: {
+    test: {
+      plugins: [removePropTypes],
+    },
+    production: {
+      plugins: [removePropTypes],
+    },
+  },
   presets: [
     // plugins always run before presets, but in this case we need the
     // @babel/preset-typescript preset to run first so we have to move
     // our explicit plugin configs to a sub-preset
     {
       plugins: [
+        [
+          require.resolve('@emotion/babel-plugin'),
+          {
+            sourceMap: false,
+            autoLabel: 'never',
+            labelFormat: '',
+            cssPropOptimization: true,
+          },
+        ],
         require.resolve('babel-plugin-add-module-exports'),
 
         // The class properties proposal was merged with the private fields proposal
@@ -49,8 +74,7 @@ module.exports = () => ({
       ],
     },
 
-    require.resolve('@babel/preset-react'),
-
+    [require.resolve('@babel/preset-react'), { runtime: 'automatic', development: false }],
     [
       require.resolve('@babel/preset-typescript'),
       {
