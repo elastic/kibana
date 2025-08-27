@@ -195,7 +195,6 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
               data-test-subj="knowledgeBaseBulkImportFlyoutSaveButton"
               fill
               isLoading={isLoading}
-              disabled={files.length === 0 || isLoading}
               onClick={handleSubmitNewEntryClick}
             >
               {i18n.translate(
