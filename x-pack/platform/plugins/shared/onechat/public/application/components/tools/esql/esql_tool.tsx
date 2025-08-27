@@ -67,11 +67,11 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
   const { euiTheme } = useEuiTheme();
   const { navigateToOnechatUrl } = useNavigation();
   const form = useEsqlToolForm();
-  const { reset, formState } = form;
+  const { reset, formState, watch } = form;
   const { errors, isDirty } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
 
-  const [currentToolId, setCurrentToolId] = useState<string | undefined>(tool?.id);
+  const currentToolId = watch('name');
 
   const handleClear = useCallback(() => {
     reset();
@@ -95,7 +95,6 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
         keepDefaultValues: true,
         keepDirty: true,
       });
-      setCurrentToolId(tool.id);
     }
   }, [tool, reset]);
 
@@ -121,14 +120,12 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
       fill
       onClick={async () => {
         const formData = form.getValues();
-        let savedTool;
         if (mode === OnechatEsqlToolFormMode.Edit) {
-          savedTool = await saveTool(transformEsqlFormDataForUpdate(formData));
+          await saveTool(transformEsqlFormDataForUpdate(formData));
         } else {
-          savedTool = await saveTool(transformEsqlFormDataForCreate(formData));
+          await saveTool(transformEsqlFormDataForCreate(formData));
         }
-        if (savedTool?.id) {
-          setCurrentToolId(savedTool.id);
+        if (currentToolId) {
           setShowTestFlyout(true);
         }
       }}
@@ -184,6 +181,9 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
                   toolId={currentToolId}
                   onClose={() => {
                     setShowTestFlyout(false);
+                    if (mode === OnechatEsqlToolFormMode.Create) {
+                      navigateToOnechatUrl(appPaths.tools.list);
+                    }
                   }}
                 />
               )}

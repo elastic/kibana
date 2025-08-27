@@ -20,6 +20,7 @@ import {
   EuiTitle,
   EuiCodeBlock,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
 import type { ToolDefinition } from '@kbn/onechat-common';
@@ -27,8 +28,6 @@ import { i18n } from '@kbn/i18n';
 import { useExecuteTool } from '../../../hooks/tools/use_execute_tools';
 import type { ExecuteToolResponse } from '../../../../../common/http_api/tools';
 import { useTool } from '../../../hooks/tools/use_tools';
-import { useNavigation } from '../../../hooks/use_navigation';
-import { appPaths } from '../../../utils/app_paths';
 
 interface OnechatTestToolFlyout {
   isOpen: boolean;
@@ -65,21 +64,17 @@ const getParameters = (tool: ToolDefinition | undefined): Array<ToolParameter> =
 
 export const OnechatTestFlyout: React.FC<OnechatTestToolFlyout> = ({ toolId, onClose }) => {
   const [response, setResponse] = useState<string>('{}');
-  const { navigateToOnechatUrl } = useNavigation();
 
-  const { tool } = useTool({ toolId });
-
-  const handleClose = () => {
-    navigateToOnechatUrl(appPaths.tools.list);
-  };
-
-  const form = useForm({
+  const form = useForm<Record<string, any>>({
     mode: 'onChange',
   });
+
   const {
     handleSubmit,
     formState: { errors },
   } = form;
+
+  const { tool } = useTool({ toolId });
 
   const { executeTool, isLoading: isExecuting } = useExecuteTool({
     onSuccess: (data: ExecuteToolResponse) => {
@@ -111,7 +106,7 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyout> = ({ toolId, onC
   };
 
   return (
-    <EuiFlyout onClose={handleClose} aria-labelledby="flyoutTitle">
+    <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
@@ -128,7 +123,13 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyout> = ({ toolId, onC
       <EuiFlyoutBody>
         <FormProvider {...form}>
           <EuiFlexGroup gutterSize="l" responsive={false}>
-            <EuiFlexItem grow={false} style={{ minWidth: '200px', maxWidth: '300px' }}>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                min-width: 200px;
+                max-width: 300px;
+              `}
+            >
               <EuiTitle size="s">
                 <h5>
                   {i18n.translate('xpack.onechat.tools.testTool.inputsTitle', {
@@ -203,7 +204,10 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyout> = ({ toolId, onC
                 fontSize="s"
                 paddingSize="m"
                 isCopyable={true}
-                style={{ height: '75vh', overflow: 'auto' }}
+                css={css`
+                  height: 75vh;
+                  overflow: auto;
+                `}
               >
                 {response}
               </EuiCodeBlock>
