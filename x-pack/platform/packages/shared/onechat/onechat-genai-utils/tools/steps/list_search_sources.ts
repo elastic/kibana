@@ -30,7 +30,9 @@ export interface IndexSearchSource {
 export type EsSearchSource = DataStreamSearchSource | AliasSearchSource | IndexSearchSource;
 
 export interface ListSourcesResponse {
-  sources: EsSearchSource[];
+  indices: IndexSearchSource[];
+  aliases: AliasSearchSource[];
+  data_streams: DataStreamSearchSource[];
   warnings?: string[];
 }
 
@@ -135,16 +137,16 @@ export const listSearchSources = async ({
 
     return {
       warnings,
-      sources: [
-        ...take(dataStreamSources, perTypeLimit),
-        ...take(aliasSources, perTypeLimit),
-        ...take(indexSources, perTypeLimit),
-      ],
+      data_streams: take(dataStreamSources, perTypeLimit),
+      aliases: take(aliasSources, perTypeLimit),
+      indices: take(indexSources, perTypeLimit),
     };
   } catch (e) {
     if (isNotFoundError(e)) {
       return {
-        sources: [],
+        data_streams: [],
+        aliases: [],
+        indices: [],
         warnings: ['No sources found.'],
       };
     }

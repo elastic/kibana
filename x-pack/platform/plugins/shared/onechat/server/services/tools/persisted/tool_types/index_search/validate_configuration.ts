@@ -17,12 +17,16 @@ export const validateConfig = async ({
   config: IndexSearchToolConfig;
   esClient: ElasticsearchClient;
 }) => {
-  const { sources } = await listSearchSources({
+  const {
+    indices,
+    aliases,
+    data_streams: dataStreams,
+  } = await listSearchSources({
     pattern: config.pattern,
     esClient,
   });
 
-  if (sources.length === 0) {
+  if (indices.length === 0 && aliases.length === 0 && dataStreams.length === 0) {
     throw createBadRequestError(`No sources found for pattern '${config.pattern}'`);
   }
 };
