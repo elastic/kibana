@@ -450,7 +450,6 @@ describe('Helpers', () => {
         'detection',
         true
       );
-      console.log(result);
       expect(result).toEqual([isOperator, existsOperator]);
     });
 
