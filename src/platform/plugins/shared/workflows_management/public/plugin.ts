@@ -12,13 +12,21 @@ import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { getWorkflowsConnectorType } from './connectors/workflows';
 import type {
-  AppPluginStartDependencies,
   WorkflowsPluginSetup,
   WorkflowsPluginSetupDependencies,
   WorkflowsPluginStart,
+  WorkflowsPluginStartDependencies,
 } from './types';
 
-export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
+export class WorkflowsPlugin
+  implements
+    Plugin<
+      WorkflowsPluginSetup,
+      WorkflowsPluginStart,
+      WorkflowsPluginSetupDependencies,
+      WorkflowsPluginStartDependencies
+    >
+{
   public setup(core: CoreSetup, plugins: WorkflowsPluginSetupDependencies): WorkflowsPluginSetup {
     // Register workflows connector UI component
     plugins.triggersActionsUi.actionTypeRegistry.register(getWorkflowsConnectorType());
@@ -40,7 +48,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           // Get start services as specified in kibana.json
           const [coreStart, depsStart] = await core.getStartServices();
           // Render the application
-          return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+          return renderApp(coreStart, depsStart as WorkflowsPluginStartDependencies, params);
         },
       });
     }
