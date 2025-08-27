@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { untilPluginStartServicesReady } from '../../services/kibana_services';
-import { registerControlPanelType } from '../../actions/control_panel_actions';
-
 export function registerESQLControl() {
   // registerControlPanelType(ESQL_CONTROL, async () => {
   //   const [{ getESQLControlFactory }] = await Promise.all([

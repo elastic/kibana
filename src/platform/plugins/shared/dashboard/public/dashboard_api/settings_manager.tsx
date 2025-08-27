@@ -55,6 +55,12 @@ export function initializeSettingsManager(initialState?: DashboardState) {
   function setUseMargins(useMargins: boolean) {
     if (useMargins !== useMargins$.value) useMargins$.next(useMargins);
   }
+  const autoApplyFilters$ = new BehaviorSubject<boolean>(
+    initialState?.autoApplyFilters ?? DEFAULT_DASHBOARD_STATE.autoApplyFilters
+  );
+  function setAutoApplyFilters(autoApplyFilters: boolean) {
+    if (autoApplyFilters !== autoApplyFilters$.value) autoApplyFilters$.next(autoApplyFilters);
+  }
 
   function getSettings(): DashboardSettings {
     const titleState = titleManager.getLatestState();
@@ -68,6 +74,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
       tags: tags$.value,
       timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
       useMargins: useMargins$.value,
+      autoApplyFilters: autoApplyFilters$.value ?? DEFAULT_DASHBOARD_STATE.autoApplyFilters,
     };
   }
 
@@ -78,6 +85,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     setTags(settings.tags);
     setTimeRestore(settings.timeRestore);
     setUseMargins(settings.useMargins);
+    setAutoApplyFilters(settings.autoApplyFilters);
     titleManager.api.setHideTitle(settings.hidePanelTitles);
     titleManager.api.setDescription(settings.description);
     titleManager.api.setTitle(settings.title);
@@ -92,6 +100,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     syncTooltips: 'referenceEquality',
     timeRestore: 'referenceEquality',
     useMargins: 'referenceEquality',
+    autoApplyFilters: 'referenceEquality',
     tags: 'deepEquality',
   };
 
@@ -104,6 +113,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
         syncCursor$,
         syncTooltips$,
         useMargins$,
+        autoApplyFilters$,
       },
       setSettings,
       setTags,
@@ -118,6 +128,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
           tags$,
           timeRestore$,
           useMargins$,
+          autoApplyFilters$,
 
           titleManager.anyStateChange$,
         ]).pipe(

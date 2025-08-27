@@ -8,7 +8,7 @@
  */
 
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { untilPluginStartServicesReady } from '../../../services/kibana_services';
 
 export function registerOptionsListControl(embeddable: EmbeddableSetup) {

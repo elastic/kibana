@@ -7,6 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  first,
+  map,
+  skip,
+  tap,
+  type Observable,
+} from 'rxjs';
+
 import type { Reference } from '@kbn/content-management-utils';
 import type { HasLastSavedChildState } from '@kbn/presentation-containers';
 import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
@@ -16,13 +28,13 @@ import type {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { apiHasSerializableState } from '@kbn/presentation-publishing';
-import { omit } from 'lodash';
-import { combineLatest, debounceTime, map, tap, BehaviorSubject, type Observable } from 'rxjs';
+
 import type { DashboardState } from '../../common';
 import {
   getDashboardBackupService,
   type DashboardBackupState,
 } from '../services/dashboard_backup_service';
+import type { initializeFiltersManager } from './filters_manager';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
@@ -31,6 +43,7 @@ const DEBOUNCE_TIME = 100;
 
 export function initializeUnsavedChangesManager({
   layoutManager,
+  filtersManager,
   savedObjectId$,
   lastSavedState,
   settingsManager,
@@ -44,6 +57,7 @@ export function initializeUnsavedChangesManager({
   getReferences: (id: string) => Reference[];
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   layoutManager: ReturnType<typeof initializeLayoutManager>;
+  filtersManager: ReturnType<typeof initializeFiltersManager>;
   viewMode$: PublishingSubject<ViewMode>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
@@ -134,6 +148,13 @@ export function initializeUnsavedChangesManager({
         layoutManager.internalApi.reset();
         unifiedSearchManager.internalApi.reset(savedState);
         settingsManager.internalApi.reset(savedState);
+
+        // when auto-apply is `false`, wait for children to update their filters, then publish
+        if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
+          filtersManager.api.unpublishedChildFilters$.pipe(skip(1), first()).subscribe(() => {
+            filtersManager.api.publishFilters();
+          });
+        }
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>

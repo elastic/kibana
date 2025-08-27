@@ -18,6 +18,7 @@ import type {
   PublishesTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
+import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import type { DefaultDataControlState } from '../../../common';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
@@ -27,7 +28,8 @@ export interface PublishesField {
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
-export type DataControlApi = HasEditCapabilities &
+export type DataControlApi = StateManager<DefaultDataControlState>['api'] &
+  HasEditCapabilities &
   PublishesDataViews &
   PublishesBlockingError &
   PublishesField &

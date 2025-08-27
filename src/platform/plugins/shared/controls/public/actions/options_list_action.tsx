@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { OptionsListControlState } from '../../common/options_list';
+import type { OptionsListControlState } from '../../common/options_list';
 import { OptionsListEditorOptions } from '../controls/data_controls/options_list_control/components/options_list_editor_options';
-import { OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
+import type { OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
 import { dataViewsService } from '../services/kibana_services';
 import { OPTIONS_LIST_ACTION } from './constants';
-import { ControlTypeAction } from './control_panel_actions';
+import type { ControlTypeAction } from './control_panel_actions';
 
 export const createOptionsListControlAction = (): ControlTypeAction<OptionsListControlState> => {
   const isFieldCompatible = (field: DataViewField) => {

@@ -122,6 +122,10 @@ export const OptionsListStrings = {
         defaultMessage:
           'Wait to display results until the list is complete. This setting is useful for large data sets, but the results might take longer to populate.',
       }),
+    getUseGlobalFiltersTitle: () =>
+      i18n.translate('controls.optionsList.editor.useGlobalFilters', {
+        defaultMessage: 'Use global filters',
+      }),
   },
   popover: {
     getAriaLabel: (fieldName: string) =>

@@ -61,6 +61,8 @@ export const getSerializedState = ({
     syncCursor,
     syncTooltips,
     hidePanelTitles,
+    autoApplyFilters,
+
     controlGroupInput,
   } = dashboardState;
 
@@ -83,6 +85,7 @@ export const getSerializedState = ({
     syncCursor,
     syncTooltips,
     hidePanelTitles,
+    autoApplyFilters,
   };
 
   /**

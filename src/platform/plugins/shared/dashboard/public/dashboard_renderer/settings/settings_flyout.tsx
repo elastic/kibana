@@ -260,6 +260,31 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               data-test-subj="dashboardPanelTitlesCheckbox"
             />
           </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('dashboard.embeddableApi.flyout.formRow.controls', {
+              defaultMessage: 'Control panels',
+            })}
+          >
+            <>
+              <EuiFormRow>
+                <EuiSwitch
+                  label={i18n.translate(
+                    'dashboard.embeddableApi.lyout.form.autoApplyFiltersSwitchLabel',
+                    {
+                      defaultMessage: 'Auto apply filters',
+                    }
+                  )}
+                  checked={localSettings.autoApplyFilters}
+                  onChange={(event) => {
+                    updateDashboardSetting({ autoApplyFilters: event.target.checked });
+                  }}
+                  data-test-subj="dashboardAutoApplyFiltersCheckbox"
+                />
+              </EuiFormRow>
+            </>
+          </EuiFormRow>
+
           <EuiFormRow
             label={i18n.translate(
               'dashboard.embeddableApi.showSettings.flyout.formRow.syncAcrossPanelsLabel',

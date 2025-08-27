@@ -70,21 +70,6 @@ export function initializeLayoutManager(
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
   const children$ = new BehaviorSubject<DashboardChildren>({});
-  const untilAllChildrenAreAvailable = () =>
-    new Promise<void>((resolve) => {
-      const expectedChildCount = initialPanels.length;
-      if (Object.keys(children$.value).length === expectedChildCount) {
-        resolve();
-        return;
-      }
-      const subscription = children$.subscribe((children) => {
-        if (Object.keys(children).length === expectedChildCount) {
-          subscription?.unsubscribe();
-          resolve();
-        }
-      });
-    });
-
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
     getReferences
@@ -116,8 +101,20 @@ export function initializeLayoutManager(
     }
   );
 
-  let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
+  /** Observable that publishes `true` when all children APIs are available */
+  const childrenLoading$ = combineLatest([children$, layout$]).pipe(
+    map(([children, layout]) => {
+      // filter out panels that are in collapsed sections, since the APIs will never be available
+      const expectedChildCount = Object.values(layout.panels).filter((panel) => {
+        return panel.gridData.sectionId ? !isSectionCollapsed(panel.gridData.sectionId) : true;
+      }).length;
+      const currentChildCount = Object.keys(children).length;
+      return expectedChildCount !== currentChildCount;
+    }),
+    distinctUntilChanged()
+  );
 
+  let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
   let lastSavedLayout = initialLayout;
   let lastSavedChildState = initialChildState;
   const resetLayout = () => {
@@ -382,9 +379,9 @@ export function initializeLayoutManager(
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       layout$,
       gridLayout$,
+      childrenLoading$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
-      untilAllChildrenAreAvailable,
       startComparing$: (
         lastSavedState$: BehaviorSubject<DashboardState>
       ): Observable<{ panels?: DashboardState['panels'] }> => {

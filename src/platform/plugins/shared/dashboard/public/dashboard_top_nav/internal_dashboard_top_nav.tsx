@@ -9,6 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
+import deepEqual from 'fast-deep-equal';
 
 import type { EuiBreadcrumb, EuiToolTipProps, UseEuiTheme } from '@elastic/eui';
 import {
@@ -95,6 +96,8 @@ export function InternalDashboardTopNav({
     query,
     title,
     viewMode,
+    publishedChildFilters,
+    unpublishedChildFilters,
   ] = useBatchedPublishingSubjects(
     dashboardApi.dataViews$,
     dashboardApi.focusedPanelId$,
@@ -103,8 +106,14 @@ export function InternalDashboardTopNav({
     dashboardApi.savedObjectId$,
     dashboardApi.query$,
     dashboardApi.title$,
-    dashboardApi.viewMode$
+    dashboardApi.viewMode$,
+    dashboardApi.publishedChildFilters$,
+    dashboardApi.unpublishedChildFilters$
   );
+
+  const hasUnpublishedFilters = useMemo(() => {
+    return !deepEqual(publishedChildFilters ?? [], unpublishedChildFilters ?? []);
+  }, [publishedChildFilters, unpublishedChildFilters]);
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -384,8 +393,10 @@ export function InternalDashboardTopNav({
           if (isUpdate === false) {
             dashboardApi.forceRefresh();
           }
+          dashboardApi.publishFilters();
         }}
         onSavedQueryIdChange={setSavedQueryId}
+        hasDirtyState={hasUnpublishedFilters}
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />

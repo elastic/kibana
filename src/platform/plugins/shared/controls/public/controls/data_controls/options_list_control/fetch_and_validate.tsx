@@ -31,7 +31,7 @@ export function fetchAndValidate$({
 }: {
   api: Pick<
     OptionsListControlApi,
-    'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi' | 'uuid'
+    'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi' | 'uuid' | 'useGlobalFilters$'
   > &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
@@ -50,6 +50,7 @@ export function fetchAndValidate$({
     api.dataViews$,
     api.field$,
     fetch$(api),
+    api.useGlobalFilters$,
     api.debouncedSearchString,
     sort$,
     searchTechnique$,
@@ -69,7 +70,7 @@ export function fetchAndValidate$({
     withLatestFrom(requestSize$, runPastTimeout$, selectedOptions$),
     switchMap(
       async ([
-        [dataViews, field, fetchContext, searchString, sort, searchTechnique],
+        [dataViews, field, fetchContext, useGlobalFilters, searchString, sort, searchTechnique],
         requestSize,
         runPastTimeout,
         selectedOptions,
@@ -85,6 +86,11 @@ export function fetchAndValidate$({
 
         /** Fetch the suggestions list + perform validation */
         api.loadingSuggestions$.next(true);
+        if (!useGlobalFilters) {
+          fetchContext.filters = fetchContext.filters?.filter(
+            (currentFilter) => Boolean(currentFilter.meta.controlledBy) // filters without `controlledBy` are coming from unified search
+          );
+        }
 
         const request = {
           sort,

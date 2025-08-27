@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '@kbn/es-query';
-import { PublishingSubject } from '../../publishing_subject';
+import type { Filter } from '@kbn/es-query';
+import type { PublishingSubject } from '../../publishing_subject';
 
 export interface AppliesFilters {
+  filtersLoading$: PublishingSubject<boolean>;
   appliedFilters$: PublishingSubject<Filter[] | undefined>;
 }
 
