@@ -520,7 +520,7 @@ export class AlertsService implements IAlertsService {
           },
         });
       } catch (error) {
-        console.log('There was an error creating MW indices:', error);
+        this.options.logger.error('There was an error creating MW indices:', error);
       }
     }
   }

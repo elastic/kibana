@@ -699,16 +699,8 @@ export class AlertsClient<
   }
 
   private async getMaintenanceWindowScopedQueryAlerts({
-    ruleId,
-    spaceId,
-    executionUuid,
     activeAlertsToIndex,
   }: GetMaintenanceWindowScopedQueryAlertsParams): Promise<ScopedQueryAlerts> {
-    if (!ruleId || !spaceId || !executionUuid) {
-      throw new Error(
-        `Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.`
-      );
-    }
     const esClient = await this.options.elasticsearchClientPromise;
 
     const {
@@ -727,7 +719,7 @@ export class AlertsClient<
     hits.forEach((hit) => {
       const fields = hit.fields ?? {};
       Object.keys(fields).forEach((key) => {
-        const match = key.match(/(\d+)/); // looks for one or more digits
+        const match = key.match(/(\d+)/);
         const index = match ? parseInt(match[0], 10) : null;
         if (index != null) {
           const alert = activeAlertsToIndex[index];
@@ -782,6 +774,7 @@ export class AlertsClient<
   }
 
   private async updatePersistedAlertsWithMaintenanceWindowIds(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     activeAlertsToIndex?: any[]
   ): Promise<AlertsAffectedByMaintenanceWindows> {
     // check if there are any alerts
@@ -796,10 +789,7 @@ export class AlertsClient<
     }
 
     const alertsByMaintenanceWindowIds = await this.getMaintenanceWindowScopedQueryAlerts({
-      ruleId: this.options.rule.id,
-      spaceId: this.options.rule.spaceId,
-      executionUuid: this.options.rule.executionId,
-      activeAlertsToIndex: activeAlertsToIndex,
+      activeAlertsToIndex,
     });
 
     const alertsAffectedByScopedQuery: string[] = [];
@@ -813,9 +803,6 @@ export class AlertsClient<
         const newMaintenanceWindowIds = [
           // Keep existing Ids
           ...newAlert.getMaintenanceWindowIds(),
-          // Add the ids that don't have scoped queries
-          // ...maintenanceWindowsWithoutScopedQueryIds,
-          // Add the scoped query id
           ...maintenanceWindowIds,
         ];
 
@@ -834,7 +821,7 @@ export class AlertsClient<
       // Update alerts with new maintenance window IDs, await not needed
       this.updateAlertMaintenanceWindowIds(uniqueAlertsId).catch(() => {
         this.options.logger.debug(
-          `Failed to update new alerts with scoped query maintenance window Ids by updateByQuery ${this.ruleInfoMessage}.`,
+          `Failed to update new alerts with maintenance window Ids by updateByQuery ${this.ruleInfoMessage}.`,
           this.logTags
         );
       });

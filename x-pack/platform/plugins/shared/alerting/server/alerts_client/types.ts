@@ -210,10 +210,8 @@ export type GetSummarizedAlertsParams = {
 );
 
 export interface GetMaintenanceWindowScopedQueryAlertsParams {
-  ruleId: string;
-  spaceId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   activeAlertsToIndex: any[];
-  executionUuid: string;
 }
 
 export type UpdateAlertsMaintenanceWindowIdByScopedQueryParams =

@@ -39,7 +39,7 @@ export async function createMaintenanceWindow(
   }
 
   let scopedQueryWithGeneratedValue = scopedQuery;
-  let query: { bool: BoolQuery } | undefined = undefined;
+  let query: { bool: BoolQuery } | undefined;
 
   try {
     if (scopedQuery) {
@@ -98,6 +98,7 @@ export async function createMaintenanceWindow(
     const dateQuery = events.map((event) => ({ range: { '@timestamp': event } }));
     await esClient.index({
       index: '.alerts-mw-queries',
+      id,
       document: {
         query: {
           bool: {

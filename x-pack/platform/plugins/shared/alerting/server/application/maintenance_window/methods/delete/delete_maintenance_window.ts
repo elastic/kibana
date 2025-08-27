@@ -27,7 +27,7 @@ async function deleteWithOCC(
   context: MaintenanceWindowClientContext,
   params: DeleteMaintenanceWindowParams
 ): Promise<{}> {
-  const { savedObjectsClient, logger } = context;
+  const { savedObjectsClient, logger, esClient } = context;
   const { id } = params;
 
   try {
@@ -37,6 +37,10 @@ async function deleteWithOCC(
   }
 
   try {
+    await esClient.delete({
+      index: '.alerts-mw-queries',
+      id,
+    });
     return await deleteMaintenanceWindowSo({ id, savedObjectsClient });
   } catch (e) {
     const errorMessage = `Failed to delete maintenance window by id: ${id}, Error: ${e}`;

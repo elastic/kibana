@@ -55,7 +55,7 @@ async function archiveWithOCC(
     throw Boom.badRequest(`Error validating archive params - ${error.message}`);
   }
 
-  const { savedObjectsClient, getModificationMetadata, logger } = context;
+  const { savedObjectsClient, getModificationMetadata, logger, esClient } = context;
   const { id, archive: shouldArchive } = params;
 
   const modificationMetadata = await getModificationMetadata();
@@ -96,6 +96,11 @@ async function archiveWithOCC(
       savedObjectsUpdateOptions: {
         version,
       },
+    });
+
+    await esClient.delete({
+      index: '.alerts-mw-queries',
+      id,
     });
 
     return transformMaintenanceWindowAttributesToMaintenanceWindow({
