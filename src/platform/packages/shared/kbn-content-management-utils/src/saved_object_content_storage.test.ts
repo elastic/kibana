@@ -8,7 +8,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { MockedLogger, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 
 import { SOContentStorage } from './saved_object_content_storage';
 import type { ContentManagementCrudTypes } from './types';
