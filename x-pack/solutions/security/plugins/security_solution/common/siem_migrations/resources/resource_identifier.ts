@@ -5,10 +5,7 @@
  * 2.0.
  */
 // TODO: move resource related types to migration.gen.ts
-import type {
-  RuleMigrationResourceData,
-  RuleMigrationResourceBase,
-} from '../model/rule_migration.gen';
+import type { SiemMigrationResourceData, SiemMigrationResourceBase } from '../model/common.gen';
 import type { VendorResourceIdentifier } from './types';
 import { splResourceIdentifier } from './splunk';
 import type { ItemDocument, OriginalItem, SiemMigrationVendor } from '../types';
@@ -29,9 +26,9 @@ export abstract class ResourceIdentifier<I> {
     this.identifier = identifiers[this.vendor];
   }
 
-  public abstract fromOriginal(item?: OriginalItem<I>): RuleMigrationResourceBase[];
+  public abstract fromOriginal(item?: OriginalItem<I>): SiemMigrationResourceBase[];
 
-  public fromOriginals(item: OriginalItem<I>[]): RuleMigrationResourceBase[] {
+  public fromOriginals(item: OriginalItem<I>[]): SiemMigrationResourceBase[] {
     const lookups = new Set<string>();
     const macros = new Set<string>();
     item.forEach((rule) => {
@@ -45,19 +42,19 @@ export abstract class ResourceIdentifier<I> {
       });
     });
     return [
-      ...Array.from(macros).map<RuleMigrationResourceBase>((name) => ({ type: 'macro', name })),
-      ...Array.from(lookups).map<RuleMigrationResourceBase>((name) => ({ type: 'lookup', name })),
+      ...Array.from(macros).map<SiemMigrationResourceBase>((name) => ({ type: 'macro', name })),
+      ...Array.from(lookups).map<SiemMigrationResourceBase>((name) => ({ type: 'lookup', name })),
     ];
   }
 
-  public fromResource(resource: RuleMigrationResourceData): RuleMigrationResourceBase[] {
+  public fromResource(resource: SiemMigrationResourceData): SiemMigrationResourceBase[] {
     if (resource.type === 'macro' && resource.content) {
       return this.identifier(resource.content);
     }
     return [];
   }
 
-  public fromResources(resources: RuleMigrationResourceData[]): RuleMigrationResourceBase[] {
+  public fromResources(resources: SiemMigrationResourceData[]): SiemMigrationResourceBase[] {
     const lookups = new Set<string>();
     const macros = new Set<string>();
     resources.forEach((resource) => {
@@ -70,8 +67,8 @@ export abstract class ResourceIdentifier<I> {
       });
     });
     return [
-      ...Array.from(macros).map<RuleMigrationResourceBase>((name) => ({ type: 'macro', name })),
-      ...Array.from(lookups).map<RuleMigrationResourceBase>((name) => ({ type: 'lookup', name })),
+      ...Array.from(macros).map<SiemMigrationResourceBase>((name) => ({ type: 'macro', name })),
+      ...Array.from(lookups).map<SiemMigrationResourceBase>((name) => ({ type: 'lookup', name })),
     ];
   }
 }

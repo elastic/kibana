@@ -201,3 +201,70 @@ export const MigrationTaskStats = z.object({
    */
   last_execution: MigrationLastExecution.optional(),
 });
+
+/**
+ * The type of the resource
+ */
+export type SiemMigrationResourceType = z.infer<typeof SiemMigrationResourceType>;
+export const SiemMigrationResourceType = z.enum(['macro', 'lookup']);
+export type SiemMigrationResourceTypeEnum = typeof SiemMigrationResourceType.enum;
+export const SiemMigrationResourceTypeEnum = SiemMigrationResourceType.enum;
+
+/**
+ * A resource of a migration
+ */
+export type SiemMigrationResourceBase = z.infer<typeof SiemMigrationResourceBase>;
+export const SiemMigrationResourceBase = z.object({
+  type: SiemMigrationResourceType,
+  /**
+   * The name of the resource
+   */
+  name: NonEmptyString,
+});
+
+export type SiemMigrationResourceContent = z.infer<typeof SiemMigrationResourceContent>;
+export const SiemMigrationResourceContent = z.object({
+  /**
+   * The resource content value. Can be an empty string.
+   */
+  content: z.string(),
+  /**
+   * The resource arbitrary metadata.
+   */
+  metadata: z.object({}).optional(),
+});
+
+/**
+ * The rule migration resource data.
+ */
+export type SiemMigrationResourceData = z.infer<typeof SiemMigrationResourceData>;
+export const SiemMigrationResourceData = SiemMigrationResourceBase.merge(
+  SiemMigrationResourceContent
+);
+
+/**
+ * The rule migration resource document object.
+ */
+export type SiemMigrationResource = z.infer<typeof SiemMigrationResource>;
+export const SiemMigrationResource = SiemMigrationResourceBase.merge(
+  SiemMigrationResourceContent.partial()
+).merge(
+  z.object({
+    /**
+     * The rule resource migration id
+     */
+    id: NonEmptyString,
+    /**
+     * The migration id
+     */
+    migration_id: NonEmptyString,
+    /**
+     * The moment of the last update
+     */
+    updated_at: z.string().optional(),
+    /**
+     * The user who last updated the resource
+     */
+    updated_by: z.string().optional(),
+  })
+);

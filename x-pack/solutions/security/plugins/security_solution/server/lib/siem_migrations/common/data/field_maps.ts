@@ -7,8 +7,7 @@
 
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/data-stream-adapter';
 
-// TODO: Extract RuleMigrationResource -> MigrationResource schema to the generic migration.schema
-import type { RuleMigrationResource } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SiemMigrationResource } from '../../../../../common/siem_migrations/model/common.gen';
 import type { MigrationDocument } from '../types';
 
 export const migrationsFieldMaps: FieldMap<
@@ -20,7 +19,7 @@ export const migrationsFieldMaps: FieldMap<
 };
 
 export const migrationResourcesFieldMap: FieldMap<
-  SchemaFieldMapKeys<Omit<RuleMigrationResource, 'id'>>
+  SchemaFieldMapKeys<Omit<SiemMigrationResource, 'id'>>
 > = {
   migration_id: { type: 'keyword', required: true },
   type: { type: 'keyword', required: true },

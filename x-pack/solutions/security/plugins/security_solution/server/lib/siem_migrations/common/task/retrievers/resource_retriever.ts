@@ -7,19 +7,20 @@
 
 import type { ResourceIdentifierConstructor } from '../../../../../../common/siem_migrations/resources/resource_identifier';
 import type { OriginalItem } from '../../../../../../common/siem_migrations/types';
-// TODO: move resource related types to migration.gen.ts
 import type {
-  RuleMigrationResource as MigrationResource,
-  RuleMigrationResourceType as MigrationResourceType,
-} from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+  SiemMigrationResource,
+  SiemMigrationResourceType,
+} from '../../../../../../common/siem_migrations/model/common.gen';
 import type { SiemMigrationsDataResourcesClient } from '../../data/siem_migrations_data_resources_client';
 import type { ItemDocument } from '../../types';
 
-export interface MigrationDefinedResource extends MigrationResource {
+export interface MigrationDefinedResource extends SiemMigrationResource {
   content: string; // ensures content exists
 }
 export type MigrationResourcesData = Pick<MigrationDefinedResource, 'name' | 'content' | 'type'>;
-export type MigrationResources = Partial<Record<MigrationResourceType, MigrationResourcesData[]>>;
+export type MigrationResources = Partial<
+  Record<SiemMigrationResourceType, MigrationResourcesData[]>
+>;
 interface ExistingResources {
   macro: Record<string, MigrationDefinedResource>;
   lookup: Record<string, MigrationDefinedResource>;

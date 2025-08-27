@@ -12,7 +12,7 @@
  * At the time of writing, this tool can be used to test it: https://devina.io/redos-checker
  */
 // TODO: move resource related types to migration.gen.ts
-import type { RuleMigrationResourceBase } from '../../model/rule_migration.gen';
+import type { SiemMigrationResourceBase } from '../../model/common.gen';
 import type { VendorResourceIdentifier } from '../types';
 
 const lookupRegex = /\b(?:lookup)\s+([\w-]+)\b/g; // Captures only the lookup name
@@ -22,7 +22,7 @@ export const splResourceIdentifier: VendorResourceIdentifier = (input) => {
   // sanitize the query to avoid mismatching macro and lookup names inside comments or literal strings
   const sanitizedInput = sanitizeInput(input);
 
-  const resources: RuleMigrationResourceBase[] = [];
+  const resources: SiemMigrationResourceBase[] = [];
   let macroMatch;
   while ((macroMatch = macrosRegex.exec(sanitizedInput)) !== null) {
     const macroName = macroMatch[1] as string;

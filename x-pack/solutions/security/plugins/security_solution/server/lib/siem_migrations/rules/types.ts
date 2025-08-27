@@ -7,12 +7,14 @@
 
 import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { MigrationTranslationResult } from '../../../../common/siem_migrations/model/common.gen';
+import type {
+  MigrationTranslationResult,
+  SiemMigrationResource,
+} from '../../../../common/siem_migrations/model/common.gen';
 import type {
   RuleMigration,
   RuleMigrationRule,
   UpdateRuleMigrationRule,
-  RuleMigrationResource,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_client';
 import type { Stored } from '../types';
@@ -24,7 +26,7 @@ import type {
 
 export type StoredRuleMigration = Stored<RuleMigration>;
 export type StoredRuleMigrationRule = Stored<RuleMigrationRule>;
-export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
+export type StoredRuleMigrationResource = Stored<SiemMigrationResource>;
 
 export interface RuleMigrationIntegration {
   id: string;

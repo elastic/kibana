@@ -5,13 +5,10 @@
  * 2.0.
  */
 // TODO: move resource related types to migration.gen.ts
-import type {
-  RuleMigrationResourceBase,
-  RuleMigrationResourceData,
-} from '../model/rule_migration.gen';
+import type { SiemMigrationResourceBase, SiemMigrationResourceData } from '../model/common.gen';
 
-export type VendorResourceIdentifier = (input: string) => RuleMigrationResourceBase[];
+export type VendorResourceIdentifier = (input: string) => SiemMigrationResourceBase[];
 
 export interface ResourceIdentifiers {
-  fromResource: (resource: RuleMigrationResourceData) => RuleMigrationResourceBase[];
+  fromResource: (resource: SiemMigrationResourceData) => SiemMigrationResourceBase[];
 }

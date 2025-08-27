@@ -4,16 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// TODO: move resource related types to migration.gen.ts
-import type {
-  OriginalRule,
-  RuleMigrationResourceBase,
-  RuleMigrationRule,
-} from '../../model/rule_migration.gen';
+import type { OriginalRule, RuleMigrationRule } from '../../model/rule_migration.gen';
+import type { SiemMigrationResourceBase } from '../../model/common.gen';
 import { ResourceIdentifier } from '../../resources/resource_identifier';
 
 export class RuleResourceIdentifier extends ResourceIdentifier<RuleMigrationRule> {
-  public fromOriginal(originalRule: OriginalRule): RuleMigrationResourceBase[] {
+  public fromOriginal(originalRule: OriginalRule): SiemMigrationResourceBase[] {
     return this.identifier(originalRule.query);
   }
 }
