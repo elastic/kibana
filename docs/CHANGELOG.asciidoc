@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.3>>
 * <<release-notes-8.19.2>>
 * <<release-notes-8.19.1>>
 * <<release-notes-8.19.0>>
@@ -105,6 +106,31 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.3]]
+== {kib} 8.19.3
+
+The 8.19.3 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.3]]
+=== Fixes
+Alerting::
+* Fixes an issue that prevents reports from showing in the Reporting UI when they're created in a non-default {kib} space ({kibana-pull}230876[#230876]).
+Canvas::
+* Fixes a rendering issue that affected progress elements in Canvas ({kibana-pull}232432[#232432]).
+Dashboards and Visualizations::
+* Ensures passing of the `allowLeadingWildcards` advanced setting for ES|QL charts in Lens ({kibana-pull}232609[#232609]).
+* Removes the list of `availableOptions` from the ES|QL `VALUES_FROM_QUERY` saved object ({kibana-pull}231690[#231690]).
+* Fixes older color mapping configuration in Lens ({kibana-pull}231563[#231563]).
+* Fixes lost references when returning to unsaved dashboards with reference panels ({kibana-pull}231517[#231517]).
+* Fixes screen reader-only header in the Dashboards list ({kibana-pull}230470[#230470]).
+Discover::
+* Disables sorting for JSON-like fields in ES|QL mode ({kibana-pull}231289[#231289]).
+Elastic Security solution::
+For the Elastic Security 8.19.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes an issue where the `unusedUrlsCLeanupTask` run interval did not update correctly when changed ({kibana-pull}231883[#231883]).
 
 [[release-notes-8.19.2]]
 == {kib} 8.19.2
