@@ -27,7 +27,7 @@ import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
-import { ViewInDiscoverButton } from '../../../../../../shared/links/discover_links/view_in_discover_button';
+import { ViewSpanInDiscoverLink } from '../../../../../../shared/links/discover_links/view_span_in_discover_link';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
@@ -145,9 +145,8 @@ export function SpanFlyout({
             </EuiFlexItem>
             {span && (
               <EuiFlexItem grow={false}>
-                <ViewInDiscoverButton
-                  dataTestSubj="spanFlyoutViewInDiscoverButton"
-                  mode="span"
+                <ViewSpanInDiscoverLink
+                  dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
                   spanId={spanId}
                 />
               </EuiFlexItem>

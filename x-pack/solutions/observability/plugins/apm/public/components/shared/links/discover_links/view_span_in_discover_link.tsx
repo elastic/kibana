@@ -4,44 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getEsQlQuery } from './get_esql_query';
 
-export function ViewInDiscoverButton({ dataTestSubj }: { dataTestSubj: string }) {
+export function ViewSpanInDiscoverLink({
+  dataTestSubj,
+  spanId,
+}: {
+  dataTestSubj: string;
+  spanId?: string;
+}) {
   const { share } = useApmPluginContext();
-  const { serviceName } = useApmServiceContext();
   const { services } = useKibana<ApmPluginStartDeps>();
 
-  const { query: queryParams } = useAnyOfApmParams(
+  const {
+    query: { rangeFrom, rangeTo, kuery },
+  } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
     '/dependencies/operation',
     '/traces/explorer/waterfall'
   );
-
-  const { rangeFrom, rangeTo, kuery, environment } = queryParams;
-
-  // we need to check if those fields exist before accessing them,
-  // since not all routes include them
-  const transactionName =
-    'transactionName' in queryParams ? queryParams.transactionName : undefined;
-  const transactionType =
-    'transactionType' in queryParams ? queryParams.transactionType : undefined;
-  const spanName = 'spanName' in queryParams ? queryParams.spanName : undefined;
-  const sampleRangeFrom =
-    'sampleRangeFrom' in queryParams ? queryParams.sampleRangeFrom : undefined;
-  const sampleRangeTo = 'sampleRangeTo' in queryParams ? queryParams.sampleRangeTo : undefined;
-  const dependencyName = 'dependencyName' in queryParams ? queryParams.dependencyName : undefined;
 
   const { data = { apmIndexSettings: [] } } = useFetcher(
     (_, signal) => services.apmSourcesAccess.getApmIndexSettings({ signal }),
@@ -49,19 +47,12 @@ export function ViewInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
   );
 
   const params = {
-    serviceName,
     kuery,
-    environment,
-    transactionName,
-    transactionType,
-    sampleRangeFrom,
-    sampleRangeTo,
-    dependencyName,
-    spanName,
+    spanId,
   };
 
   const esqlQuery = getEsQlQuery({
-    mode: 'waterfall',
+    mode: 'span',
     params,
     apmIndexSettings: data.apmIndexSettings,
   });
@@ -77,17 +68,16 @@ export function ViewInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
   });
 
   return (
-    <EuiButtonEmpty
-      aria-label={i18n.translate('xpack.apm.waterfallWithSummary.viewInDiscoverButton.ariaLabel', {
-        defaultMessage: 'View in Discover',
+    <EuiLink
+      aria-label={i18n.translate('xpack.apm.viewSpanInDiscoverLink.ariaLabel', {
+        defaultMessage: 'View span in Discover',
       })}
       data-test-subj={dataTestSubj}
-      iconType="discoverApp"
       href={discoverHref}
     >
-      {i18n.translate('xpack.apm.waterfallWithSummary.viewInDiscoverButton.label', {
-        defaultMessage: 'View in Discover',
+      {i18n.translate('xpack.apm.viewSpanInDiscoverLink.label', {
+        defaultMessage: 'View span in Discover',
       })}
-    </EuiButtonEmpty>
+    </EuiLink>
   );
 }

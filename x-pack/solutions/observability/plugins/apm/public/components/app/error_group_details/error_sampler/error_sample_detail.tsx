@@ -52,7 +52,7 @@ import { SampleSummary } from './sample_summary';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { buildUrl } from '../../../../utils/build_url';
-import { ViewInDiscoverButton } from '../../../shared/links/discover_links/view_in_discover_button';
+import { ViewErrorInDiscoverButton } from '../../../shared/links/discover_links/view_error_in_discover_button';
 
 const TransactionLinkName = styled.div`
   margin-left: ${({ theme }) => theme.euiTheme.size.s};
@@ -197,7 +197,7 @@ export function ErrorSampleDetails({
           <ErrorUiActionsContextMenu items={externalContextMenuItems.value} />
         ) : undefined}
         <EuiFlexItem grow={false}>
-          <ViewInDiscoverButton dataTestSubj="errorSampleViewInDiscoverButton" mode="error" />
+          <ViewErrorInDiscoverButton dataTestSubj="errorGroupDetailsViewErrorInDiscoverButton" />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
