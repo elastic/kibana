@@ -73,8 +73,6 @@ export const suggestUsersRoute = (router: ElasticAssistantPluginRouter, logger: 
               },
             },
           });
-          console.log('searchTerm ==>', searchTerm);
-          console.log('result ==>', JSON.stringify(result, null, 2));
 
           return response.ok({
             body: result,
