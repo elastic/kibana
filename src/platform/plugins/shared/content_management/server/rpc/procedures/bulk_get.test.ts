@@ -140,8 +140,10 @@ describe('RPC -> bulkGet()', () => {
             {
               contentTypeId: '123',
               result: {
-                item: {
-                  any: 'object',
+                id: '123',
+                type: 'foo',
+                data: {
+                  title: 'title',
                 },
                 meta: {
                   foo: 'bar',
@@ -203,10 +205,14 @@ describe('RPC -> bulkGet()', () => {
       const expected = {
         hits: [
           {
-            item: 'Item1',
+            id: '1',
+            type: 'foo',
+            data: 'Item1',
           },
           {
-            item: 'Item2',
+            id: '2',
+            type: 'foo',
+            data: 'Item2',
           },
         ],
       };

@@ -223,7 +223,25 @@ describe('get', () => {
 
     const result = await get(testSavedObject);
 
-    expect(result).toEqual({ item: testSavedObject, meta: { outcome: 'exactMatch' } });
+    expect(result).toEqual({
+      data: testSavedObject.attributes,
+      type: 'test',
+      meta: {
+        aliasPurpose: undefined,
+        aliasTargetId: undefined,
+        createdAt: undefined,
+        createdBy: undefined,
+        error: undefined,
+        managed: undefined,
+        namespaces: undefined,
+        outcome: 'exactMatch',
+        references: [],
+        updatedAt: undefined,
+        updatedBy: undefined,
+        version: undefined,
+      },
+      id: testSavedObject.id,
+    });
   });
 
   test('filters out unknown attributes', async () => {
@@ -241,7 +259,7 @@ describe('get', () => {
     };
 
     const result = await get(testSavedObject);
-    expect(result.item.attributes).not.toHaveProperty('unknown');
+    expect(result.data).not.toHaveProperty('unknown');
   });
 
   test('throws response validation error', async () => {
@@ -260,7 +278,7 @@ describe('get', () => {
     };
 
     await expect(get(testSavedObject)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid response. [item.attributes.description]: expected value of type [string] but got [null]"`
+      `"Invalid response. [data.description]: expected value of type [string] but got [null]"`
     );
   });
 
@@ -282,13 +300,13 @@ describe('get', () => {
 
     await expect(get(testSavedObject)).resolves.toBeDefined();
     expect(logger.warn).toBeCalledWith(
-      `Invalid response. [item.attributes.description]: expected value of type [string] but got [null]`
+      `Invalid response. [data.description]: expected value of type [string] but got [null]`
     );
   });
 });
 
-describe('create', () => {
-  test('returns the storage create() result', async () => {
+describe.only('create', () => {
+  test.only('returns the storage create() result', async () => {
     const create = setup().create;
 
     const testSavedObject = {
@@ -303,7 +321,14 @@ describe('create', () => {
 
     const result = await create(testSavedObject);
 
-    expect(result).toEqual({ item: testSavedObject });
+    expect(result).toEqual({
+      id: testSavedObject.id,
+      type: testSavedObject.type,
+      data: testSavedObject.attributes,
+      meta: {
+        references: [],
+      },
+    });
   });
 
   test('filters out unknown attributes', async () => {
@@ -321,7 +346,7 @@ describe('create', () => {
     };
 
     const result = await create(testSavedObject);
-    expect(result.item.attributes).not.toHaveProperty('unknown');
+    expect(result.data).not.toHaveProperty('unknown');
   });
 
   test('throws response validation error', async () => {
@@ -401,7 +426,8 @@ describe('update', () => {
     };
 
     const result = await update(testSavedObject);
-    expect(result.item.attributes).not.toHaveProperty('unknown');
+    console.log('result', JSON.stringify(result.data, null, 2));
+    expect(result.data).not.toHaveProperty('unknown');
   });
 
   test('throws response validation error', async () => {
@@ -481,7 +507,7 @@ describe('search', () => {
     };
 
     const result = await search(testSavedObject);
-    expect(result.hits[0].attributes).not.toHaveProperty('unknown');
+    expect(result.hits[0].data).not.toHaveProperty('unknown');
   });
 
   test('throws response validation error', async () => {

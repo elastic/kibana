@@ -121,8 +121,10 @@ describe('RPC -> get()', () => {
         {
           contentTypeId: 'foo',
           result: {
-            item: {
-              any: 'object',
+            id: 'foo',
+            type: 'foo',
+            data: {
+              title: 'title',
             },
             meta: {
               foo: 'bar',
@@ -167,7 +169,9 @@ describe('RPC -> get()', () => {
       const { ctx, storage } = setup();
 
       const expected = {
-        item: 'GetResult',
+        id: '1234',
+        type: 'foo',
+        data: { title: 'title' },
       };
       storage.get.mockResolvedValueOnce(expected);
 
