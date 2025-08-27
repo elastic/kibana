@@ -53,13 +53,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          COPILOT_EMAILS="github-actions[bot]@users.noreply.github.com\ncopilot-bot@users.noreply.github.com\ncopilot@github.com\n198982749+Copilot@users.noreply.github.com"
+          COPILOT_EMAILS="github-actions[bot]@users.noreply.github.com copilot-bot@users.noreply.github.com copilot@github.com 198982749+Copilot@users.noreply.github.com"
           FOUND=0
           for COMMIT in $(cat commits.txt); do
             echo "Checking commit: $COMMIT"
             AUTHOR_EMAIL=$(git show -s --format='%ae' $COMMIT)
             echo "Author email: $AUTHOR_EMAIL"
-            IFS=$'\n'
+            
             for EMAIL in $COPILOT_EMAILS; do
               echo "Checking against Copilot email: $EMAIL"
               if [ "$AUTHOR_EMAIL" = "$EMAIL" ]; then
@@ -67,7 +67,7 @@ jobs:
                 break
               fi
             done
-            unset IFS
+            
           done
           echo "COPILOT_FOUND=$FOUND" >> $GITHUB_ENV
           echo "found=$FOUND" >> $GITHUB_OUTPUT
