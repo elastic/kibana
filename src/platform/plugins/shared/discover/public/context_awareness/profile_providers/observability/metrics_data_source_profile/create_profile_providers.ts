@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './chart';
-export { checkChartAvailability } from './utils/check_chart_availability';
-export { ChartSectionTemplate, type ChartSectionTemplateProps } from './chart_section_template';
-export {
-  ToolbarSelector,
-  type ToolbarSelectorProps,
-  type SelectableEntry,
-} from './toolbar_selector';
+import type { ProfileProviderServices } from '../../profile_provider_services';
+import { createMetricsDataSourceProfileProvider } from './profile';
+
+export const createObservabilityMetricsDataSourceProfileProviders = (
+  providerServices: ProfileProviderServices
+) => {
+  const metricsDataSourceProfileProvider = createMetricsDataSourceProfileProvider(providerServices);
+
+  return [metricsDataSourceProfileProvider];
+};

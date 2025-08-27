@@ -1284,6 +1284,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_document_profile @elastic/obs-ux-infra_services-team
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_data_source_profile @elastic/obs-ux-infra_services-team
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/metrics_data_source_profile @elastic/obs-ux-infra_services-team
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/observability_root_profile @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 
 # Platform Docs
