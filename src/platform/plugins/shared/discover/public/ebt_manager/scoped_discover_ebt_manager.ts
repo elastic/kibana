@@ -199,16 +199,18 @@ export class ScopedDiscoverEBTManager {
     };
 
     if (fieldsMetadata) {
-      const fields = await this.getFieldsFromMetadata({
-        fieldsMetadata,
-        fieldNames,
-      });
       console.log({ fieldNames });
 
-      // exclude full text search from ECS check
-      if (fieldNames.includes(FREE_TEXT)) {
+      // Handle full text search vs field-specific queries
+      if (fieldNames.length === 1 && fieldNames[0] === FREE_TEXT) {
         eventData[FIELD_USAGE_IN_QUERY_FIELD_NAMES] = [FREE_TEXT];
       } else {
+        // Process actual field names
+        const fields = await this.getFieldsFromMetadata({
+          fieldsMetadata,
+          fieldNames,
+        });
+
         // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
         const categorizedFields = fieldNames.map((fieldName) =>
           fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
@@ -259,10 +261,6 @@ export class ScopedDiscoverEBTManager {
     const extractedFieldNames = [...new Set(getQueryColumnsFromESQLQuery(query.esql))];
 
     const fieldNames = extractedFieldNames.length === 0 ? [FREE_TEXT] : extractedFieldNames;
-
-    if (fieldNames.length === 0) {
-      return;
-    }
 
     await this.trackFieldUsageInQueryEvent({
       eventName: FieldUsageInQueryEventName.esqlQueryUpdate,
