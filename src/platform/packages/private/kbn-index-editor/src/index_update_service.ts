@@ -38,9 +38,9 @@ import {
   exhaustMap,
 } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { SortOrder } from '@kbn/unified-data-table';
+import { esql } from '@kbn/esql-ast';
 import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
 import { isPlaceholderColumn } from './utils';
 import type { IndexEditorError } from './types';
@@ -211,10 +211,16 @@ export class IndexUpdateService {
   ]).pipe(
     skipWhile(([indexCreated, indexName]) => !indexCreated || !indexName),
     map(([indexCreated, indexName, qstr, sortOrder]) => {
-      return this._buildESQLQuery({ indexName, qstr, includeMetadata: true, sortOrder });
+      return this._buildESQLQuery({
+        indexName: indexName!,
+        qstr,
+        includeMetadata: true,
+        sortOrder,
+      });
     })
   );
 
+  // ESQL query used to build the link to Discover, it does not include metadata fields
   public readonly esqlDiscoverQuery$: Observable<string | undefined> = combineLatest([
     this._indexName$,
     this._qstr$,
@@ -233,73 +239,27 @@ export class IndexUpdateService {
     includeMetadata,
     sortOrder,
   }: {
-    indexName: string | null;
+    indexName: string;
     qstr: string | null;
     includeMetadata: boolean;
     sortOrder?: SortOrder[];
   }): string {
-    // FROM
-    const fromCmd = Builder.command({
-      name: 'from',
-      args: [Builder.expression.source.node(indexName!)],
-    });
+    const query = includeMetadata
+      ? esql`FROM ${indexName} METADATA _id, _source`
+      : esql`FROM ${indexName}`;
 
-    // METADATA _id
-    if (includeMetadata) {
-      fromCmd.args.push(
-        Builder.option({
-          name: 'metadata',
-          args: [
-            Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
-            Builder.expression.column({
-              args: [Builder.identifier({ name: '_source' })],
-            }),
-          ],
-        })
-      );
+    if (qstr) {
+      query.pipe`WHERE qstr(${qstr})`;
     }
 
-    // WHERE qstr("message: …")
-    const whereCmd = Builder.command({
-      name: 'where',
-      args: [Builder.expression.func.call('qstr', [Builder.expression.literal.string(qstr ?? '')])],
-    });
+    query.pipe`LIMIT ${DOCS_PER_FETCH}`;
 
-    // LIMIT 10
-    const limitCmd = Builder.command({
-      name: 'limit',
-      args: [Builder.expression.literal.integer(DOCS_PER_FETCH)],
-    });
-
-    // SORT
-    let sortCmd;
-    if (sortOrder && sortOrder.length > 0) {
-      sortCmd = Builder.command({
-        name: 'sort',
-        args: sortOrder.map(([field, direction]) =>
-          Builder.expression.order(
-            Builder.expression.column({
-              args: [Builder.identifier({ name: field })],
-            }),
-            {
-              order: direction as ESQLOrderExpression['order'],
-              nulls: '',
-            }
-          )
-        ),
-      });
+    if (Array.isArray(sortOrder) && sortOrder.length > 0) {
+      const [firstSort, ...restSort] = sortOrder as Array<[string, ESQLOrderExpression['order']]>;
+      query.sort(firstSort, ...restSort);
     }
 
-    // Combine the commands into a query node
-    const queryExpression = Builder.expression.query([
-      fromCmd,
-      ...(qstr ? [whereCmd] : []),
-      limitCmd,
-      ...(sortCmd ? [sortCmd] : []),
-    ]);
-    const queryText: string = BasicPrettyPrinter.print(queryExpression);
-
-    return queryText;
+    return query.print();
   }
 
   // Accumulate actions in a buffer
