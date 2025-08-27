@@ -80,8 +80,12 @@ export const getValueInputPopover =
           }
         }
         if (event.key === 'Escape') {
+          event.preventDefault();
           setInputValue(cellValue);
           setError(null);
+          requestAnimationFrame(() => {
+            dataTableRef?.current?.closeCellPopover();
+          });
         }
       },
       [cellValue, colIndex, error, rowIndex]
