@@ -11,7 +11,7 @@ import { COMPONENT_PATH_IGNORED_TYPES, EUI_COMPONENTS_DOCS_MAP, HTML_TAGS } from
 
 export const isEui = (type: string) => type.startsWith('Eui');
 
-export const isHtmlTag = (type: string) => HTML_TAGS.includes(type.toLowerCase());
+export const isHtmlTag = (type: string) => HTML_TAGS.includes(type);
 
 export const isIgnoredComponent = (type: string) =>
   COMPONENT_PATH_IGNORED_TYPES.some((t) => type.includes(t));
