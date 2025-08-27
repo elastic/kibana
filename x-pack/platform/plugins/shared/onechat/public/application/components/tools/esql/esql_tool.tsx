@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
@@ -71,7 +70,8 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
   const { reset, formState } = form;
   const { errors, isDirty } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
-  const [testToolData, setTestToolData] = useState<OnechatEsqlToolFormData>(form.getValues());
+
+  const [currentToolId, setCurrentToolId] = useState<string | undefined>(tool?.id);
 
   const handleClear = useCallback(() => {
     reset();
@@ -95,6 +95,7 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
         keepDefaultValues: true,
         keepDirty: true,
       });
+      setCurrentToolId(tool.id);
     }
   }, [tool, reset]);
 
@@ -120,13 +121,16 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
       fill
       onClick={async () => {
         const formData = form.getValues();
+        let savedTool;
         if (mode === OnechatEsqlToolFormMode.Edit) {
-          await saveTool(transformEsqlFormDataForUpdate(formData));
+          savedTool = await saveTool(transformEsqlFormDataForUpdate(formData));
         } else {
-          await saveTool(transformEsqlFormDataForCreate(formData));
+          savedTool = await saveTool(transformEsqlFormDataForCreate(formData));
         }
-        setTestToolData(formData);
-        setShowTestFlyout(true);
+        if (savedTool?.id) {
+          setCurrentToolId(savedTool.id);
+          setShowTestFlyout(true);
+        }
       }}
       disabled={Object.keys(errors).length > 0 || isSubmitting}
       isLoading={isSubmitting}
@@ -141,8 +145,6 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
     <EuiButton
       fill
       onClick={() => {
-        const formData = form.getValues();
-        setTestToolData(formData);
         setShowTestFlyout(true);
       }}
       disabled={Object.keys(errors).length > 0}
@@ -175,30 +177,14 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
           ) : (
             <>
               <OnechatEsqlToolForm mode={mode} formId={esqlToolFormId} saveTool={handleSave} />
-              {showTestFlyout && (
+              {showTestFlyout && currentToolId && (
                 <OnechatTestFlyout
                   isOpen={showTestFlyout}
                   isLoading={isLoading}
-                  tool={
-                    testToolData
-                      ? {
-                          id: testToolData.name,
-                          type: ToolType.esql,
-                          description: testToolData.description,
-                          tags: testToolData.tags,
-                          configuration: {
-                            query: testToolData.esql,
-                            params: Object.fromEntries(
-                              testToolData.params.map((param: any) => [
-                                param.name,
-                                { type: param.type, description: param.description },
-                              ])
-                            ),
-                          },
-                        }
-                      : tool
-                  }
-                  onClose={() => setShowTestFlyout(false)}
+                  toolId={currentToolId}
+                  onClose={() => {
+                    setShowTestFlyout(false);
+                  }}
                 />
               )}
             </>
