@@ -40,8 +40,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
   controlType: string,
   typeDisplayName: string,
   state: DefaultDataControlState,
-  getEditorState: () => EditorState,
-  setEditorState: (state: Partial<EditorState>) => void, // TODO: Remove this
   parentApi: unknown,
   willHaveInitialFilter?: boolean,
   getInitialFilter?: (dataView: DataView) => Filter | undefined
@@ -154,13 +152,12 @@ export const initializeDataControlManager = async <EditorState extends object = 
     });
 
   const onEdit = async () => {
-    const initialState: DefaultDataControlState & EditorState = {
+    const initialState: DefaultDataControlState = {
       ...dataControlStateManager.getLatestState(),
-      ...getEditorState(),
     };
 
     // open the editor to get the new state
-    openDataControlEditor<DefaultDataControlState & EditorState>({
+    openDataControlEditor<DefaultDataControlState>({
       initialState: {
         ...initialState,
       },

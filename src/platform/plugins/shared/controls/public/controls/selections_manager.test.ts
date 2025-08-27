@@ -10,7 +10,7 @@
 import type { Filter } from '@kbn/es-query';
 import { BehaviorSubject, skip } from 'rxjs';
 import { initSelectionsManager } from './selections_manager';
-import type { ControlGroupApi } from './types';
+import type { ControlGroupApi } from '../control_group/types';
 
 describe('selections manager', () => {
   const control1Api = {

@@ -14,7 +14,7 @@ import type { Filter } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import type { PublishesFilters, PublishesTimeslice } from '@kbn/presentation-publishing';
 import { apiPublishesFilters, apiPublishesTimeslice } from '@kbn/presentation-publishing';
-import type { ControlGroupApi } from './types';
+import type { ControlGroupApi } from '../control_group/types';
 
 export function initSelectionsManager(
   controlGroupApi: Pick<ControlGroupApi, 'autoApplySelections$' | 'children$' | 'untilInitialized'>
