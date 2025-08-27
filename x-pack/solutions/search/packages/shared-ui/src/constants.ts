@@ -11,4 +11,3 @@ export const ELASTIC_LLM_COST_TOUR_SKIP_KEY = 'search_elastic_llm_cost_info_skip
 
 // Feature Flags
 export const SEARCH_HOMEPAGE_INGESTION_CTA_FEATURE_FLAG = 'searchSolution.homepage.ingestionCTA';
-export const SEARCH_TUTORIALS_FEATURE_FLAG_ID = 'search_onboarding:searchTutorialsEnabled';

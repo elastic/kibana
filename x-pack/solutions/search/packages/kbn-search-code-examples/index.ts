@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './src/api-quickstarts';
+export * from './src/api-tutorials';
