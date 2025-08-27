@@ -31,7 +31,7 @@ import type {
 } from './types';
 
 export const NON_ECS_FIELD = '<non-ecs>';
-export const FREE_TEXT = 'FREE_TEXT';
+export const FREE_TEXT = '__FREE_TEXT__';
 
 type FilterOperation = '+' | '-' | '_exists_';
 
