@@ -8,7 +8,7 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import type { OptionsListRequestBody } from '../../../common/options_list/types';
+import type { OptionsListDSLRequestBody } from '../../../common/options_list/types';
 import { getAllSuggestionsAggregationBuilder } from './options_list_all_suggestions';
 import { getExactMatchAggregationBuilder } from './options_list_exact_match';
 import { getSearchSuggestionsAggregationBuilder } from './options_list_search_suggestions';
@@ -32,21 +32,21 @@ describe('options list suggestion queries', () => {
   });
 
   test('returns generic fetch all aggregation when no search string is provided', () => {
-    const optionsListRequestBodyMock: OptionsListRequestBody = {
+    const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
       size: 10,
       fieldName: '@timestamp',
       allowExpensiveQueries: true,
       sort: { by: '_key', direction: 'desc' },
       fieldSpec: { type: 'date' } as unknown as FieldSpec,
     };
-    getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+    getSuggestionAggregationBuilder(OptionsListDSLRequestBodyMock);
     expect(getAllSuggestionsAggregationBuilder).toBeCalled();
     expect(getExactMatchAggregationBuilder).not.toBeCalled();
     expect(getSearchSuggestionsAggregationBuilder).not.toBeCalled();
   });
 
   test('returns generic exact match search query when search technique is `exact`', () => {
-    const optionsListRequestBodyMock: OptionsListRequestBody = {
+    const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
       size: 10,
       fieldName: 'bytes',
       allowExpensiveQueries: true,
@@ -55,14 +55,14 @@ describe('options list suggestion queries', () => {
       sort: { by: '_key', direction: 'asc' },
       fieldSpec: { type: 'number' } as unknown as FieldSpec,
     };
-    getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+    getSuggestionAggregationBuilder(OptionsListDSLRequestBodyMock);
     expect(getAllSuggestionsAggregationBuilder).not.toBeCalled();
     expect(getExactMatchAggregationBuilder).toBeCalled();
     expect(getSearchSuggestionsAggregationBuilder).not.toBeCalled();
   });
 
   test('returns generic exact match search query when allowExpensiveQueries is `false`', () => {
-    const optionsListRequestBodyMock: OptionsListRequestBody = {
+    const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
       size: 10,
       fieldName: 'bytes',
       allowExpensiveQueries: false,
@@ -71,14 +71,14 @@ describe('options list suggestion queries', () => {
       sort: { by: '_key', direction: 'asc' },
       fieldSpec: { type: 'number' } as unknown as FieldSpec,
     };
-    getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+    getSuggestionAggregationBuilder(OptionsListDSLRequestBodyMock);
     expect(getAllSuggestionsAggregationBuilder).not.toBeCalled();
     expect(getExactMatchAggregationBuilder).toBeCalled();
     expect(getSearchSuggestionsAggregationBuilder).not.toBeCalled();
   });
 
   test('returns type-specific search query only when absolutely necessary', () => {
-    const optionsListRequestBodyMock: OptionsListRequestBody = {
+    const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
       size: 10,
       fieldName: 'bytes',
       allowExpensiveQueries: true,
@@ -87,7 +87,7 @@ describe('options list suggestion queries', () => {
       sort: { by: '_key', direction: 'asc' },
       fieldSpec: { type: 'keyword' } as unknown as FieldSpec,
     };
-    getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+    getSuggestionAggregationBuilder(OptionsListDSLRequestBodyMock);
     expect(getAllSuggestionsAggregationBuilder).not.toBeCalled();
     expect(getExactMatchAggregationBuilder).not.toBeCalled();
     expect(getSearchSuggestionsAggregationBuilder).toBeCalled();

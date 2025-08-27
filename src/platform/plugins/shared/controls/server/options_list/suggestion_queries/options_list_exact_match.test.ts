@@ -8,13 +8,13 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import type { OptionsListRequestBody } from '../../../common/options_list/types';
+import type { OptionsListDSLRequestBody } from '../../../common/options_list/types';
 import { getExactMatchAggregationBuilder } from './options_list_exact_match';
 
 describe('options list exact match search query', () => {
   describe('suggestion aggregation', () => {
     test('string (keyword, text+keyword) field', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'testField',
         allowExpensiveQueries: true,
@@ -22,7 +22,7 @@ describe('options list exact match search query', () => {
         fieldSpec: { type: 'string' } as unknown as FieldSpec,
       };
       const aggregationBuilder = getExactMatchAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
+      const aggregation = aggregationBuilder.buildAggregation(OptionsListDSLRequestBodyMock);
       expect(aggregation).toMatchObject({
         suggestions: {
           filter: {
@@ -46,7 +46,7 @@ describe('options list exact match search query', () => {
     });
 
     test('nested string (keyword, text+keyword) field', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'testField',
         allowExpensiveQueries: true,
@@ -57,7 +57,7 @@ describe('options list exact match search query', () => {
         } as unknown as FieldSpec,
       };
       const aggregationBuilder = getExactMatchAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
+      const aggregation = aggregationBuilder.buildAggregation(OptionsListDSLRequestBodyMock);
 
       expect(aggregation).toMatchObject({
         nestedSuggestions: {
@@ -89,7 +89,7 @@ describe('options list exact match search query', () => {
     });
 
     test('numeric field', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'bytes',
         allowExpensiveQueries: true,
@@ -97,7 +97,7 @@ describe('options list exact match search query', () => {
         fieldSpec: { type: 'number' } as unknown as FieldSpec,
       };
       const aggregationBuilder = getExactMatchAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
+      const aggregation = aggregationBuilder.buildAggregation(OptionsListDSLRequestBodyMock);
       expect(aggregation).toMatchObject({
         suggestions: {
           filter: {
@@ -123,7 +123,7 @@ describe('options list exact match search query', () => {
 
   describe('parsing', () => {
     test('parses keyword result', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         searchString: 'cool',
         allowExpensiveQueries: true,
@@ -155,7 +155,7 @@ describe('options list exact match search query', () => {
         },
       };
       expect(
-        aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock)
+        aggregationBuilder.parse(searchResponseMock, OptionsListDSLRequestBodyMock)
       ).toMatchObject({
         suggestions: [{ docCount: 5, value: 'cool1' }],
         totalCardinality: 1,
@@ -164,7 +164,7 @@ describe('options list exact match search query', () => {
   });
 
   test('parses numeric field result', () => {
-    const optionsListRequestBodyMock: OptionsListRequestBody = {
+    const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
       size: 10,
       fieldName: 'bytes',
       allowExpensiveQueries: true,
@@ -196,7 +196,9 @@ describe('options list exact match search query', () => {
         },
       },
     };
-    expect(aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock)).toMatchObject({
+    expect(
+      aggregationBuilder.parse(searchResponseMock, OptionsListDSLRequestBodyMock)
+    ).toMatchObject({
       suggestions: [{ docCount: 5, value: 12345 }],
       totalCardinality: 1,
     });

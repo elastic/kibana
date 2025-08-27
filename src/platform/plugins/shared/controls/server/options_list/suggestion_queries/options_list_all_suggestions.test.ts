@@ -8,13 +8,13 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import type { OptionsListRequestBody } from '../../../common/options_list/types';
+import type { OptionsListDSLRequestBody } from '../../../common/options_list/types';
 import { getAllSuggestionsAggregationBuilder } from './options_list_all_suggestions';
 
 describe('options list fetch all suggestions query', () => {
   describe('suggestion aggregation', () => {
     test('number field', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'bytes',
         allowExpensiveQueries: true,
@@ -27,7 +27,7 @@ describe('options list fetch all suggestions query', () => {
         },
       };
       const aggregationBuilder = getAllSuggestionsAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
+      const aggregation = aggregationBuilder.buildAggregation(OptionsListDSLRequestBodyMock);
 
       expect(aggregation).toMatchObject({
         suggestions: {
@@ -49,7 +49,7 @@ describe('options list fetch all suggestions query', () => {
     });
 
     test('nested string (keyword, text+keyword) field', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'testField',
         allowExpensiveQueries: true,
@@ -59,7 +59,7 @@ describe('options list fetch all suggestions query', () => {
         } as unknown as FieldSpec,
       };
       const aggregationBuilder = getAllSuggestionsAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
+      const aggregation = aggregationBuilder.buildAggregation(OptionsListDSLRequestBodyMock);
 
       expect(aggregation).toMatchObject({
         nestedSuggestions: {
@@ -90,7 +90,7 @@ describe('options list fetch all suggestions query', () => {
 
   describe('suggestion parsing', () => {
     test('test parsing for number field', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'bytes',
         allowExpensiveQueries: true,
@@ -131,7 +131,7 @@ describe('options list fetch all suggestions query', () => {
         },
       };
 
-      const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
+      const parsed = aggregationBuilder.parse(searchResponseMock, OptionsListDSLRequestBodyMock);
       expect(parsed).toMatchObject({
         suggestions: [
           { value: 1, docCount: 5 },
@@ -143,7 +143,7 @@ describe('options list fetch all suggestions query', () => {
     });
 
     test('test parsing for boolean field', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'cancelled',
         allowExpensiveQueries: true,
@@ -183,7 +183,7 @@ describe('options list fetch all suggestions query', () => {
         },
       };
 
-      const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
+      const parsed = aggregationBuilder.parse(searchResponseMock, OptionsListDSLRequestBodyMock);
       expect(parsed).toMatchObject({
         suggestions: [
           { value: 'false', docCount: 54 },
@@ -194,7 +194,7 @@ describe('options list fetch all suggestions query', () => {
     });
 
     test('test parsing for date field', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: '@timestamp',
         allowExpensiveQueries: true,
@@ -235,7 +235,7 @@ describe('options list fetch all suggestions query', () => {
         },
       };
 
-      const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
+      const parsed = aggregationBuilder.parse(searchResponseMock, OptionsListDSLRequestBodyMock);
       expect(parsed).toMatchObject({
         suggestions: [
           { value: 1707810859000, docCount: 5 },

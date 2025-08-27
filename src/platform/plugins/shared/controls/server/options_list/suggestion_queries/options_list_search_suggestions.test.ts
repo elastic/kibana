@@ -10,7 +10,7 @@
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import type { OptionsListRequestBody } from '../../../common/options_list/types';
+import type { OptionsListDSLRequestBody } from '../../../common/options_list/types';
 import * as ExactMatch from './options_list_exact_match';
 import { getSearchSuggestionsAggregationBuilder } from './options_list_search_suggestions';
 
@@ -39,20 +39,20 @@ describe('options list type-specific search queries', () => {
   describe('suggestion aggregation', () => {
     test('for unsupported field types, return exact match search instead', () => {
       const exactMatchSpy = jest.spyOn(ExactMatch, 'getExactMatchAggregationBuilder');
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'success',
         allowExpensiveQueries: true,
         sort: { by: '_key', direction: 'desc' },
         fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
       };
-      getSearchSuggestionsAggregationBuilder(optionsListRequestBodyMock);
+      getSearchSuggestionsAggregationBuilder(OptionsListDSLRequestBodyMock);
       expect(exactMatchSpy).toBeCalled();
     });
 
     describe('string (keyword, text+keyword, or nested) field', () => {
       test('test keyword field, with a search string', () => {
-        const optionsListRequestBodyMock: OptionsListRequestBody = {
+        const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
           size: 10,
           searchString: 'cooool',
           allowExpensiveQueries: true,
@@ -61,9 +61,9 @@ describe('options list type-specific search queries', () => {
           fieldSpec: { type: 'string' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-          optionsListRequestBodyMock
+          OptionsListDSLRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+        expect(suggestionAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
             "filteredSuggestions": Object {
@@ -98,7 +98,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('test keyword field, with wildcard search and basic search string', () => {
-        const optionsListRequestBodyMock: OptionsListRequestBody = {
+        const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
           size: 10,
           searchString: 'c',
           searchTechnique: 'wildcard',
@@ -108,9 +108,9 @@ describe('options list type-specific search queries', () => {
           fieldSpec: { type: 'string' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-          optionsListRequestBodyMock
+          OptionsListDSLRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+        expect(suggestionAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
             "filteredSuggestions": Object {
@@ -145,7 +145,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('test keyword field, with wildcard search and search string that needs to be escaped', () => {
-        const optionsListRequestBodyMock: OptionsListRequestBody = {
+        const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
           size: 10,
           searchString: '.c?o&o[l*',
           searchTechnique: 'wildcard',
@@ -155,9 +155,9 @@ describe('options list type-specific search queries', () => {
           fieldSpec: { type: 'string' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-          optionsListRequestBodyMock
+          OptionsListDSLRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+        expect(suggestionAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
             "filteredSuggestions": Object {
@@ -192,7 +192,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('test nested field, with a search string', () => {
-        const optionsListRequestBodyMock: OptionsListRequestBody = {
+        const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
           size: 10,
           searchString: 'cooool',
           allowExpensiveQueries: true,
@@ -204,9 +204,9 @@ describe('options list type-specific search queries', () => {
           } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-          optionsListRequestBodyMock
+          OptionsListDSLRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+        expect(suggestionAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
             "nestedSuggestions": Object {
@@ -250,7 +250,7 @@ describe('options list type-specific search queries', () => {
 
     describe('IP field', () => {
       test('handles an invalid search', () => {
-        const optionsListRequestBodyMock: OptionsListRequestBody = {
+        const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
           size: 10,
           fieldName: 'clientip',
           allowExpensiveQueries: true,
@@ -259,13 +259,13 @@ describe('options list type-specific search queries', () => {
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-          optionsListRequestBodyMock
+          OptionsListDSLRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)).toEqual({});
+        expect(suggestionAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock)).toEqual({});
       });
 
       test('full IPv4 in the search string, creates IP range aggregation with CIDR mask', () => {
-        const optionsListRequestBodyMock: OptionsListRequestBody = {
+        const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
           size: 10,
           fieldName: 'clientip',
           allowExpensiveQueries: true,
@@ -274,9 +274,9 @@ describe('options list type-specific search queries', () => {
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-          optionsListRequestBodyMock
+          OptionsListDSLRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+        expect(suggestionAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
             "suggestions": Object {
@@ -313,7 +313,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('full IPv6 in the search string, creates IP range aggregation with CIDR mask', () => {
-        const optionsListRequestBodyMock: OptionsListRequestBody = {
+        const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
           size: 10,
           fieldName: 'clientip',
           allowExpensiveQueries: true,
@@ -322,9 +322,9 @@ describe('options list type-specific search queries', () => {
           searchString: 'f688:fb50:6433:bba2:604:f2c:194a:d3c5',
         };
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-          optionsListRequestBodyMock
+          OptionsListDSLRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+        expect(suggestionAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
             "suggestions": Object {
@@ -361,7 +361,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('partial IPv4 in the search string, creates IP range aggregation with min and max', () => {
-        const optionsListRequestBodyMock: OptionsListRequestBody = {
+        const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
           size: 10,
           fieldName: 'clientip',
           searchString: '41.77',
@@ -369,9 +369,9 @@ describe('options list type-specific search queries', () => {
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-          optionsListRequestBodyMock
+          OptionsListDSLRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+        expect(suggestionAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
             "suggestions": Object {
@@ -409,7 +409,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('partial IPv46 in the search string, creates IP range aggregation with min and max', () => {
-        const optionsListRequestBodyMock: OptionsListRequestBody = {
+        const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
           size: 10,
           fieldName: 'clientip',
           searchString: 'cdb6:',
@@ -418,9 +418,9 @@ describe('options list type-specific search queries', () => {
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-          optionsListRequestBodyMock
+          OptionsListDSLRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+        expect(suggestionAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
             "suggestions": Object {
@@ -460,7 +460,7 @@ describe('options list type-specific search queries', () => {
 
     describe('numeric field', () => {
       test('handles an invalid search', () => {
-        const optionsListRequestBodyMock: OptionsListRequestBody = {
+        const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
           size: 10,
           fieldName: 'bytes',
           allowExpensiveQueries: true,
@@ -469,9 +469,9 @@ describe('options list type-specific search queries', () => {
           fieldSpec: { type: 'number' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-          optionsListRequestBodyMock
+          OptionsListDSLRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)).toEqual({});
+        expect(suggestionAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock)).toEqual({});
       });
 
       // for tests related to searching numeric fields, refer to './options_list_exact_match.test.ts`
@@ -480,7 +480,7 @@ describe('options list type-specific search queries', () => {
 
   describe('suggestion parsing', () => {
     test('parses string (keyword, text+keyword) result', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         searchString: 'cool',
         allowExpensiveQueries: true,
@@ -488,7 +488,7 @@ describe('options list type-specific search queries', () => {
         fieldSpec: { type: 'string' } as unknown as FieldSpec,
       };
       const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-        optionsListRequestBodyMock
+        OptionsListDSLRequestBodyMock
       );
       rawSearchResponseMock.aggregations = {
         filteredSuggestions: {
@@ -504,7 +504,7 @@ describe('options list type-specific search queries', () => {
           },
         },
       };
-      expect(suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock))
+      expect(suggestionAggBuilder.parse(rawSearchResponseMock, OptionsListDSLRequestBodyMock))
         .toMatchInlineSnapshot(`
         Object {
           "suggestions": Array [
@@ -527,7 +527,7 @@ describe('options list type-specific search queries', () => {
     });
 
     test('parses string nested result', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         searchString: 'co',
         fieldName: 'coolNestedField',
@@ -538,7 +538,7 @@ describe('options list type-specific search queries', () => {
         } as unknown as FieldSpec,
       };
       const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-        optionsListRequestBodyMock
+        OptionsListDSLRequestBodyMock
       );
       rawSearchResponseMock.aggregations = {
         nestedSuggestions: {
@@ -556,7 +556,7 @@ describe('options list type-specific search queries', () => {
           },
         },
       };
-      expect(suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock))
+      expect(suggestionAggBuilder.parse(rawSearchResponseMock, OptionsListDSLRequestBodyMock))
         .toMatchInlineSnapshot(`
         Object {
           "suggestions": Array [
@@ -579,7 +579,7 @@ describe('options list type-specific search queries', () => {
     });
 
     test('parses mixed IPv4 and IPv6 result', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         searchString: '21',
         fieldName: 'clientip',
@@ -587,7 +587,7 @@ describe('options list type-specific search queries', () => {
         fieldSpec: { type: 'ip' } as unknown as FieldSpec,
       };
       const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-        optionsListRequestBodyMock
+        OptionsListDSLRequestBodyMock
       );
       rawSearchResponseMock.aggregations = {
         suggestions: {
@@ -636,7 +636,7 @@ describe('options list type-specific search queries', () => {
 
       const parsed = suggestionAggBuilder.parse(
         rawSearchResponseMock,
-        optionsListRequestBodyMock
+        OptionsListDSLRequestBodyMock
       ).suggestions;
 
       expect(parsed).toMatchInlineSnapshot(`

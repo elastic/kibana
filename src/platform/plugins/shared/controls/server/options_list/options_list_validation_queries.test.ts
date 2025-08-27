@@ -10,7 +10,7 @@
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import type { OptionsListRequestBody } from '../../common/options_list/types';
+import type { OptionsListDSLRequestBody } from '../../common/options_list/types';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
 
 describe('options list queries', () => {
@@ -38,25 +38,25 @@ describe('options list queries', () => {
   describe('validation aggregation', () => {
     test('returns empty aggregation when not given selections', () => {
       const validationAggBuilder = getValidationAggregationBuilder();
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
         allowExpensiveQueries: true,
       };
       expect(
-        validationAggBuilder.buildAggregation(optionsListRequestBodyMock)
+        validationAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock)
       ).toMatchInlineSnapshot(`Object {}`);
     });
 
     test('creates validation aggregation when given selections', () => {
       const validationAggBuilder = getValidationAggregationBuilder();
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
         allowExpensiveQueries: true,
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
-      expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
+      expect(validationAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock))
         .toMatchInlineSnapshot(`
         Object {
           "validation": Object {
@@ -86,7 +86,7 @@ describe('options list queries', () => {
 
     test('creates validation aggregation for nested fields when given selections', () => {
       const validationAggBuilder = getValidationAggregationBuilder();
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
+      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
         fieldSpec: {
@@ -96,7 +96,7 @@ describe('options list queries', () => {
         allowExpensiveQueries: true,
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
-      expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
+      expect(validationAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock))
         .toMatchInlineSnapshot(`
         Object {
           "nestedValidation": Object {

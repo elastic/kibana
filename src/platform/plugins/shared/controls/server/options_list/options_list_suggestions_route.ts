@@ -15,7 +15,10 @@ import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/s
 import type { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
+import type {
+  OptionsListDSLRequestBody,
+  OptionsListResponse,
+} from '../../common/options_list/types';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
 import { getSuggestionAggregationBuilder } from './suggestion_queries';
 
@@ -76,7 +79,7 @@ export const setupOptionsListSuggestionsRoute = (
       },
       async (context, request, response) => {
         try {
-          const suggestionRequest: OptionsListRequestBody = request.body;
+          const suggestionRequest: OptionsListDSLRequestBody = request.body;
           const { index } = request.params;
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
@@ -100,7 +103,7 @@ export const setupOptionsListSuggestionsRoute = (
     request,
     index,
   }: {
-    request: OptionsListRequestBody;
+    request: OptionsListDSLRequestBody;
     abortedEvent$: Observable<void>;
     esClient: ElasticsearchClient;
     index: string;

@@ -86,16 +86,20 @@ export type OptionsListResponse = OptionsListSuccessResponse | OptionsListFailur
 /**
  * The Options list request type taken in by the public Options List service.
  */
-type OptionsListRequestBase = Omit<
-  OptionsListRequestBody,
-  'filters' | 'fieldName' | 'fieldSpec'
-> & {
+interface OptionsListRequestBase
+  extends Pick<OptionsListControlState, 'searchTechnique' | 'sort' | 'selectedOptions'> {
+  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
+  allowExpensiveQueries: boolean;
+  runPastTimeout?: boolean;
+  searchString?: string;
+  size: number;
+  ignoreValidations?: boolean;
   timeRange?: TimeRange;
   dataView?: DataView;
   filters?: Filter[];
   field?: FieldSpec;
   query?: Query | AggregateQuery;
-};
+}
 
 export type OptionsListDSLRequest = OptionsListRequestBase &
   Required<Pick<OptionsListRequestBase, 'dataView' | 'field'>>;
@@ -125,19 +129,10 @@ export const isOptionsListESQLRequest = (request: unknown): request is OptionsLi
 
 /**
  * The Options list request body is sent to the serverside Options List route and is used to create the ES query.
- * This request is only used for DSL options lists, not ES|QL
  */
-export interface OptionsListRequestBody
-  extends Pick<
-    OptionsListDataControlState,
-    'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
-  > {
-  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
-  allowExpensiveQueries: boolean;
-  ignoreValidations?: boolean;
+export interface OptionsListDSLRequestBody
+  extends Omit<OptionsListRequestBase, 'filters' | 'fieldSpec'>,
+    Pick<OptionsListDataControlState, 'fieldName'> {
   filters?: Array<{ bool: BoolQuery }>;
-  runPastTimeout?: boolean;
-  searchString?: string;
   fieldSpec?: FieldSpec;
-  size: number;
 }

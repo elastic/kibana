@@ -14,7 +14,7 @@ import { getIpRangeQuery } from '../../../common/options_list/ip_search';
 import { isValidSearch } from '../../../common/options_list/is_valid_search';
 import { getDefaultSearchTechnique } from '../../../common/options_list/suggestions_searching';
 import type {
-  OptionsListRequestBody,
+  OptionsListDSLRequestBody,
   OptionsListSuggestions,
 } from '../../../common/options_list/types';
 import type { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
@@ -28,7 +28,7 @@ import {
 /**
  * Type-specific search suggestion aggregations. These queries are highly impacted by the field type.
  */
-export const getSearchSuggestionsAggregationBuilder = (request: OptionsListRequestBody) => {
+export const getSearchSuggestionsAggregationBuilder = (request: OptionsListDSLRequestBody) => {
   const { fieldSpec } = request;
 
   // note that date and boolean fields are non-searchable, so type-specific search aggs are not necessary;
@@ -60,7 +60,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
       fieldSpec,
       sort,
       size,
-    }: OptionsListRequestBody) => {
+    }: OptionsListDSLRequestBody) => {
       const hasSearchString = searchString && searchString.length > 0;
       if (!hasSearchString || fieldSpec?.type === 'date') {
         // we can assume that this is only ever called with a search string, and date fields are not
@@ -136,7 +136,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
    * the "IP" query / parser should be used when the options list is built on a field of type IP.
    */
   ip: {
-    buildAggregation: ({ fieldName, searchString, sort, size }: OptionsListRequestBody) => {
+    buildAggregation: ({ fieldName, searchString, sort, size }: OptionsListDSLRequestBody) => {
       const filteredSuggestions = {
         terms: {
           size,
