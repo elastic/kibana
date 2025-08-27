@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IndexSearchToolConfig } from '@kbn/onechat-common/tools';
 import { createBadRequestError } from '@kbn/onechat-common';
+import { listSearchSources } from '@kbn/onechat-genai-utils';
 
 export const validateConfig = async ({
   config,
@@ -16,7 +17,12 @@ export const validateConfig = async ({
   config: IndexSearchToolConfig;
   esClient: ElasticsearchClient;
 }) => {
-  // TODO
+  const { sources } = await listSearchSources({
+    pattern: config.pattern,
+    esClient,
+  });
 
-  throw createBadRequestError('validateConfig - testing');
+  if (sources.length === 0) {
+    throw createBadRequestError(`No sources found for pattern '${config.pattern}'`);
+  }
 };
