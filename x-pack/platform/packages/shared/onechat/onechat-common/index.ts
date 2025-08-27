@@ -13,6 +13,7 @@ export {
   builtInToolIdPrefix,
   builtinToolIds,
   builtinTags,
+  defaultAgentToolIds,
   isReservedToolId,
   isBuiltInToolId,
   type ByIdsToolSelection,
@@ -30,6 +31,14 @@ export {
   type EsqlToolDefinitionWithSchema,
   EsqlToolFieldType,
   idRegexp,
+  activeToolsCountWarningThreshold,
+  ToolResultType,
+  type ToolResult,
+  type ErrorResult,
+  type QueryResult,
+  type ResourceResult,
+  type TabularDataResult,
+  type OtherResult,
 } from './tools';
 export {
   OnechatErrorCode,
@@ -61,7 +70,6 @@ export { type UserIdAndName } from './base/users';
 export {
   oneChatDefaultAgentId,
   AgentType,
-  AgentMode,
   type AgentDescriptor,
   type AgentDefinition,
   type AgentConfiguration,

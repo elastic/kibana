@@ -6,25 +6,21 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import type { ServerSentEventBase } from '@kbn/sse-utils';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
+  SignificantEventsGenerateResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import moment from 'moment';
-import type { Observable } from 'rxjs';
-import { from as fromRxjs, map } from 'rxjs';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { from as fromRxjs, map, mergeMap } from 'rxjs';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
 } from '../../../../common/constants';
-import {
-  generateSignificantEventDefinitions,
-  type GeneratedSignificantEventQuery,
-} from '../../../lib/significant_events/generate_significant_events';
+import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { SecurityError } from '../../../lib/streams/errors/security_error';
@@ -218,37 +214,38 @@ const generateSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<
-    Observable<ServerSentEventBase<'generated_queries', { query: GeneratedSignificantEventQuery }>>
-  > => {
+  }): Promise<SignificantEventsGenerateResponse> => {
     const { streamsClient, scopedClusterClient, licensing, inferenceClient } =
       await getScopedClients({ request });
     await assertLicenseAndPricingTier(server, licensing);
     await streamsClient.ensureStream(params.path.name);
 
-    const generatedSignificantEventDefinitions = await generateSignificantEventDefinitions(
-      {
-        name: params.path.name,
-        connectorId: params.query.connectorId,
-        currentDate: params.query.currentDate,
-        shortLookback: params.query.shortLookback,
-        longLookback: params.query.longLookback,
-      },
-      {
-        inferenceClient,
-        esClient: createTracedEsClient({
-          client: scopedClusterClient.asCurrentUser,
-          logger,
-          plugin: 'streams',
-        }),
-        logger,
-      }
-    );
+    const definition = await streamsClient.getStream(params.path.name);
 
-    return fromRxjs(generatedSignificantEventDefinitions).pipe(
+    return fromRxjs(
+      generateSignificantEventDefinitions(
+        {
+          definition,
+          connectorId: params.query.connectorId,
+          currentDate: params.query.currentDate,
+          shortLookback: params.query.shortLookback,
+          longLookback: params.query.longLookback,
+        },
+        {
+          inferenceClient,
+          esClient: createTracedEsClient({
+            client: scopedClusterClient.asCurrentUser,
+            logger,
+            plugin: 'streams',
+          }),
+          logger,
+        }
+      )
+    ).pipe(
+      mergeMap((queries) => fromRxjs(queries)),
       map((query) => ({
         query,
-        type: 'generated_queries',
+        type: 'generated_query' as const,
       }))
     );
   },

@@ -185,6 +185,7 @@ export const configSchema = schema.object({
     monitoring: schema.object({
       privileges: schema.object({
         users: schema.object({
+          maxPrivilegedUsersAllowed: schema.number({ defaultValue: 10000 }),
           csvUpload: schema.object({
             errorRetries: schema.number({ defaultValue: 1 }),
             maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
