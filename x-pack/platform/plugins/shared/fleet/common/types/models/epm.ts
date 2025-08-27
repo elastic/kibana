@@ -246,6 +246,7 @@ export enum RegistryPolicyTemplateKeys {
   screenshots = 'screenshots',
   deployment_modes = 'deployment_modes',
   configuration_links = 'configuration_links',
+  fips_compatible = 'fips_compatible',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -256,6 +257,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
   [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
   [RegistryPolicyTemplateKeys.configuration_links]?: ConfigurationLink[];
+  [RegistryPolicyTemplateKeys.fips_compatible]?: boolean | undefined;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;

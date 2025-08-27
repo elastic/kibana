@@ -77,6 +77,11 @@ import { packageHasAtLeastOneSecret } from '../utils';
 import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
 
 import {
+  agentPoliciesWithFipsAgents,
+  checkFipsCompatibleIntegration,
+} from '../../../../hooks/use_check_fips';
+
+import {
   AddIntegrationFlyoutConfigureHeader,
   CreatePackagePolicySinglePageLayout,
   PostInstallAddAgentModal,
@@ -164,6 +169,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }, [packageInfoData]);
 
   const [agentCount, setAgentCount] = useState<number>(0);
+  const [hasFipsAgents, setHasFipsAgents] = useState<boolean>(false);
 
   const [integrationToEnable, setIntegrationToEnable] = useState<string | undefined>(integration);
   const integrationInfo = useMemo(() => {
@@ -173,6 +179,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         )
       : undefined;
   }, [integrationToEnable, packageInfo?.policy_templates]);
+
+  const fipsCompatible = useMemo(() => {
+    return checkFipsCompatibleIntegration(packageInfo, pkgName);
+  }, [packageInfo, pkgName]);
 
   const showSecretsDisabledCallout =
     !fleetStatus.isSecretsStorageEnabled &&
@@ -285,7 +295,17 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     if (isFleetEnabled && agentPolicyIds.length > 0) {
       getAgentCount();
     }
-  }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled]);
+  }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled, agentPolicies]);
+
+  useEffect(() => {
+    const checkFipsAgents = async () => {
+      const fipsAgents = await agentPoliciesWithFipsAgents(agentPolicyIds);
+      setHasFipsAgents(fipsAgents);
+    };
+    if (agentPolicyIds.length > 0) {
+      checkFipsAgents();
+    }
+  }, [agentPolicies, agentPolicyIds]);
 
   useEffect(() => {
     if (
@@ -591,6 +611,27 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <EuiSpacer size="xl" />
         </>
       ) : null}
+      {hasFipsAgents && !fipsCompatible && (
+        <>
+          <EuiCallOut
+            size="m"
+            color="warning"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutTitle"
+                defaultMessage="This integration is not FIPS compatible"
+              />
+            }
+          >
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
+              defaultMessage="Installing it on the selected policy might cause the agent to not work properly."
+            />
+          </EuiCallOut>
+
+          <EuiSpacer size="m" />
+        </>
+      )}
       {showSecretsDisabledCallout && (
         <>
           <EuiCallOut
