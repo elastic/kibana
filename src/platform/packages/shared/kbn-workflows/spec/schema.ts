@@ -60,14 +60,19 @@ export const TriggerSchema = z.discriminatedUnion('type', [
 /* --- Steps --- */
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
-  delay: z.number().min(0),
+  delay: z
+    .string()
+    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
+    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
 });
+export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
 export const WorkflowOnFailureSchema = z.object({
   retry: WorkflowRetrySchema,
-  'fallback-step': z.string().min(1),
+  'fallback-step': z.string().min(1).optional(),
   continue: z.boolean().optional(),
 });
+export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
 
 // Base step schema, with recursive steps property
 export const BaseStepSchema = z.object({
@@ -265,11 +270,32 @@ export const WorkflowSchema = z.object({
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 
-export const WorkflowContextSchema = z.object({
+export const WorkflowExecutionContextSchema = z.object({
+  id: z.string(),
+  isTestRun: z.boolean(),
+  startedAt: z.date(),
+});
+export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
+
+export const WorkflowDataContextSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  enabled: z.boolean(),
   spaceId: z.string(),
-  workflowRunId: z.string(),
+});
+export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
+
+export const WorkflowContextSchema = z.object({
   event: z.any().optional(),
+  execution: WorkflowExecutionContextSchema,
+  workflow: WorkflowDataContextSchema,
   consts: z.record(z.string(), z.any()).optional(),
+  now: z.date().optional(),
+});
+
+export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
+
+export const StepContextSchema = WorkflowContextSchema.extend({
   steps: z.record(
     z.string(),
     z.object({
@@ -285,7 +311,5 @@ export const WorkflowContextSchema = z.object({
       total: z.number().int(),
     })
     .optional(),
-  now: z.date().optional(),
 });
-
-export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
+export type StepContext = z.infer<typeof StepContextSchema>;
