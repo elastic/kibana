@@ -70,21 +70,6 @@ export function initializeLayoutManager(
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
   const children$ = new BehaviorSubject<DashboardChildren>({});
-  const untilAllChildrenAreAvailable = () =>
-    new Promise<void>((resolve) => {
-      const expectedChildCount = initialPanels.length;
-      if (Object.keys(children$.value).length === expectedChildCount) {
-        resolve();
-        return;
-      }
-      const subscription = children$.subscribe((children) => {
-        if (Object.keys(children).length === expectedChildCount) {
-          subscription?.unsubscribe();
-          resolve();
-        }
-      });
-    });
-
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
     getReferences
@@ -114,6 +99,15 @@ export function initializeLayoutManager(
     ([layout, panelResizeSettings]) => {
       gridLayout$.next(transformDashboardLayoutToGridLayout(layout, panelResizeSettings));
     }
+  );
+
+  const childrenLoading$: Observable<boolean> = combineLatest([children$, layout$]).pipe(
+    map(([children, layout]) => {
+      const expectedChildCount = Object.keys(layout.panels).length; // TODO: this should be VISIBLE panel count
+      const currentChildCount = Object.keys(children).length;
+      return expectedChildCount !== currentChildCount;
+    }),
+    distinctUntilChanged()
   );
 
   let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
@@ -382,9 +376,9 @@ export function initializeLayoutManager(
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       layout$,
       gridLayout$,
+      childrenLoading$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
-      untilAllChildrenAreAvailable,
       startComparing$: (
         lastSavedState$: BehaviorSubject<DashboardState>
       ): Observable<{ panels?: DashboardState['panels'] }> => {

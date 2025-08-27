@@ -37,18 +37,27 @@ export const initializeFiltersManager = (
   layoutManager: ReturnType<typeof initializeLayoutManager>,
   settingsManager: ReturnType<typeof initializeSettingsManager>
 ) => {
-  // wait until all child APIs are loaded.
-  // await layoutManager.internalApi.untilAllChildrenAreAvailable();
   const publishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
 
-  const childFiltersLoading$ = combineCompatibleChildrenApis<AppliesFilters, boolean>(
-    { children$: layoutManager.api.children$ },
-    'filtersLoading$',
-    apiAppliesFilters,
-    true,
-    (values) => values.some((loading) => loading)
-  ).pipe(distinctUntilChanged());
+  const childFiltersLoading$ = layoutManager.internalApi.childrenLoading$
+    .pipe(
+      combineLatestWith(
+        combineCompatibleChildrenApis<AppliesFilters, boolean>(
+          { children$: layoutManager.api.children$ },
+          'filtersLoading$',
+          apiAppliesFilters,
+          false,
+          (values) => {
+            return values.some((loading) => loading);
+          }
+        )
+      )
+    )
+    .pipe(
+      map(([childrenLoading, filtersLoading]) => childrenLoading || filtersLoading),
+      distinctUntilChanged()
+    );
 
   const childFilters$ = combineCompatibleChildrenApis<AppliesFilters, Filter[] | undefined>(
     { children$: layoutManager.api.children$ },
@@ -65,6 +74,7 @@ export const initializeFiltersManager = (
 
   const filterManagerSubscription = combineLatest([childFiltersLoading$, childFilters$])
     .pipe(
+      skip(1),
       debounceTime(0),
       filter(([loading, allChildFilters]) => !loading)
     )
