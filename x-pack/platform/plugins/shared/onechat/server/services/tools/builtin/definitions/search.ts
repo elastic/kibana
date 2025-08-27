@@ -43,7 +43,7 @@ export const searchTool = (): BuiltinToolDefinition<typeof searchSchema> => {
                    know about the index and fields you want to search on, e.g. if the user explicitly specified it.
     `,
     schema: searchSchema,
-    handler: async ({ query: nlQuery, index }, { esClient, modelProvider }) => {
+    handler: async ({ query: nlQuery, index = '*' }, { esClient, modelProvider }) => {
       const results = await runSearchTool({
         nlQuery,
         index,

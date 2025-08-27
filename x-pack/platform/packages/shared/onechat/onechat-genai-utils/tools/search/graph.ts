@@ -13,10 +13,10 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ToolResult } from '@kbn/onechat-common/tools';
-import { isNotFoundError } from '@kbn/es-errors';
 import { indexExplorer } from '../index_explorer';
 import { createNaturalLanguageSearchTool, createRelevanceSearchTool } from './inner_tools';
 import { getSearchPrompt } from './prompts';
+import type { SearchTarget } from './types';
 
 const StateAnnotation = Annotation.Root({
   // inputs
@@ -24,7 +24,7 @@ const StateAnnotation = Annotation.Root({
   index: Annotation<string | undefined>(),
   // inner
   indexIsValid: Annotation<boolean>(),
-  selectedIndex: Annotation<string>(),
+  searchTarget: Annotation<SearchTarget>(),
   messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
@@ -54,54 +54,25 @@ export const createSearchToolGraph = ({
   const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
 
   const selectAndValidateIndex = async (state: StateType) => {
-    if (state.index) {
-      let exists = false;
-      try {
-        const response = await esClient.indices.resolveIndex({
-          name: state.index,
-          allow_no_indices: true,
-        });
-        exists =
-          response.indices.length > 0 ||
-          response.aliases.length > 0 ||
-          response.data_streams.length > 0;
-      } catch (e) {
-        if (isNotFoundError(e)) {
-          exists = false;
-        }
-      }
+    const explorerRes = await indexExplorer({
+      nlQuery: state.nlQuery,
+      indexPattern: state.index ?? '*',
+      esClient,
+      model,
+      limit: 1,
+    });
 
-      if (exists) {
-        return {
-          selectedIndex: state.index,
-          indexIsValid: true,
-        };
-      } else {
-        return {
-          indexIsValid: false,
-          error: `No index, alias or data streams found for '${state.index}'`,
-        };
-      }
+    if (explorerRes.resources.length > 0) {
+      const selectedResource = explorerRes.resources[0];
+      return {
+        indexIsValid: true,
+        searchTarget: { type: selectedResource.type, name: selectedResource.name },
+      };
     } else {
-      const explorerRes = await indexExplorer({
-        nlQuery: state.nlQuery,
-        indexPattern: '*',
-        esClient,
-        model,
-        limit: 1,
-      });
-
-      if (explorerRes.indices.length > 0) {
-        return {
-          indexIsValid: true,
-          selectedIndex: explorerRes.indices[0].indexName,
-        };
-      } else {
-        return {
-          indexIsValid: false,
-          error: `Could not figure out which index to use`,
-        };
-      }
+      return {
+        indexIsValid: false,
+        error: `Could not figure out which index to use`,
+      };
     }
   };
 
@@ -115,7 +86,7 @@ export const createSearchToolGraph = ({
 
   const callSearchAgent = async (state: StateType) => {
     const response = await searchModel.invoke(
-      getSearchPrompt({ nlQuery: state.nlQuery, index: state.selectedIndex })
+      getSearchPrompt({ nlQuery: state.nlQuery, searchTarget: state.searchTarget })
     );
     return {
       messages: [response],
@@ -160,7 +131,7 @@ export const createSearchToolGraph = ({
 
 const extractToolResults = (message: BaseMessage): ToolResult[] => {
   if (!isToolMessage(message) || !message.artifact || !Array.isArray(message.artifact.results)) {
-    throw new Error('No artifact attached to tool message');
+    throw new Error(`No artifact attached to tool message. Content was ${message.content}`);
   }
 
   return message.artifact.results as ToolResult[];

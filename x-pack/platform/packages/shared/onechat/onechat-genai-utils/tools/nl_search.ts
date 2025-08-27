@@ -31,7 +31,7 @@ export const naturalLanguageSearch = async ({
 }: {
   nlQuery: string;
   context?: string;
-  index?: string;
+  index: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<NaturalLanguageSearchResponse> => {

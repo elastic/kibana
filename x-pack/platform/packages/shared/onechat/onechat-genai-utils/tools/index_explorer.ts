@@ -6,24 +6,84 @@
  */
 
 import { z } from '@kbn/zod';
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ListIndexBasicInfo } from './steps/list_indices';
-import { listIndices } from './steps/list_indices';
-import { getIndexMappings } from './steps/get_mappings';
-import type { MappingField } from './utils/mappings';
-import { cleanupMapping, flattenMappings } from './utils/mappings';
+import type {
+  AliasSearchSource,
+  IndexSearchSource,
+  DataStreamSearchSource,
+  EsSearchSource,
+} from './steps/list_search_sources';
+import { listSearchSources } from './steps/list_search_sources';
+import { getIndexMappings, getDatastreamMappings } from './steps/get_mappings';
+import { flattenMappings } from './utils/mappings';
 
-export interface RelevantIndex {
-  indexName: string;
-  mappings: MappingTypeMapping;
+export interface RelevantResource {
+  type: 'index' | 'alias' | 'data_stream';
+  name: string;
   reason: string;
 }
 
 export interface IndexExplorerResponse {
-  indices: RelevantIndex[];
+  resources: RelevantResource[];
 }
+
+interface ResourceDescriptor {
+  type: 'index' | 'alias' | 'data_stream';
+  name: string;
+  description?: string;
+  fields: string[];
+}
+
+const createIndexSummaries = async ({
+  indices,
+  esClient,
+}: {
+  indices: IndexSearchSource[];
+  esClient: ElasticsearchClient;
+}): Promise<ResourceDescriptor[]> => {
+  const allMappings = await getIndexMappings({
+    indices: indices.map((index) => index.name),
+    cleanup: true,
+    esClient,
+  });
+
+  return indices.map<ResourceDescriptor>(({ name: indexName }) => {
+    const indexMappings = allMappings[indexName];
+    const flattened = flattenMappings({ mappings: indexMappings.mappings });
+    return {
+      type: 'index',
+      name: indexName,
+      description: indexMappings?.mappings._meta?.description,
+      fields: flattened.map((field) => field.path),
+    };
+  });
+};
+
+const createDatastreamSummaries = async ({
+  datastreams,
+  esClient,
+}: {
+  datastreams: DataStreamSearchSource[];
+  esClient: ElasticsearchClient;
+}): Promise<ResourceDescriptor[]> => {
+  const allMappings = await getDatastreamMappings({
+    datastreams: datastreams.map((stream) => stream.name),
+    cleanup: true,
+    esClient,
+  });
+
+  return datastreams.map<ResourceDescriptor>(({ name }) => {
+    const mappings = allMappings[name];
+    const flattened = flattenMappings({ mappings: mappings.mappings });
+    return {
+      type: 'data_stream',
+      name,
+      description: mappings?.mappings._meta?.description,
+      fields: flattened.map((field) => field.path),
+    };
+  });
+};
 
 export const indexExplorer = async ({
   nlQuery,
@@ -38,88 +98,108 @@ export const indexExplorer = async ({
   esClient: ElasticsearchClient;
   model: ScopedModel;
 }): Promise<IndexExplorerResponse> => {
-  const allIndices = await listIndices({
+  console.log('indexExplorer - start', indexPattern, nlQuery);
+
+  const sources = await listSearchSources({
     pattern: indexPattern,
-    showDetails: false,
     esClient,
   });
 
-  const allMappings = await getIndexMappings({
-    indices: allIndices.map((index) => index.index),
-    esClient,
-  });
+  const hasIndices = sources.indices.length > 0;
+  const hasAliases = sources.aliases.length > 0;
+  const hasDataStreams = sources.data_streams.length > 0;
 
-  const cleanedMappings: Record<string, MappingTypeMapping> = {};
-  for (const [indexName, mapping] of Object.entries(allMappings)) {
-    cleanedMappings[indexName] = cleanupMapping(mapping.mappings);
+  console.log(
+    'indexExplorer - list resources',
+    sources.indices.length,
+    sources.aliases.length,
+    sources.data_streams.length
+  );
+
+  if (!hasAliases && !hasIndices && !hasDataStreams) {
+    return { resources: [] };
   }
 
-  const flattenedMappings: Record<string, MappingField[]> = {};
-  for (const [indexName, mapping] of Object.entries(allMappings)) {
-    flattenedMappings[indexName] = flattenMappings({ mappings: mapping.mappings });
+  // TODO: if only one, return it.
+
+  const resources: ResourceDescriptor[] = [];
+  if (hasIndices) {
+    const indexDescriptors = await createIndexSummaries({ indices: sources.indices, esClient });
+    resources.push(...indexDescriptors);
   }
+  if (hasDataStreams) {
+    const dsDescriptors = await createDatastreamSummaries({
+      datastreams: sources.data_streams,
+      esClient,
+    });
+    resources.push(...dsDescriptors);
+  }
+  // TODO: aliases
+
+  // console.log('*** resource descriptors');
+  // console.log(JSON.stringify(resources, null, 2));
+
+  // TODO: FIX
 
   const selectedIndices = await selectIndices({
-    indices: allIndices,
-    mappings: cleanedMappings,
-    fields: flattenedMappings,
+    resources,
     nlQuery,
     model,
     limit,
   });
 
-  const relevantIndices: RelevantIndex[] = selectedIndices.map<RelevantIndex>(
-    ({ indexName, reason }) => {
+  console.log('**** selected indices', selectedIndices);
+
+  const relevantResources: RelevantResource[] = selectedIndices.map<RelevantResource>(
+    ({ name, type, reason }) => {
       return {
-        indexName,
+        name,
+        type,
         reason,
-        mappings: cleanedMappings[indexName],
       };
     }
   );
 
-  return { indices: relevantIndices };
+  return { resources: relevantResources };
 };
 
-export interface SelectedIndex {
-  indexName: string;
+export interface SelectedResource {
+  type: 'index' | 'alias' | 'data_stream';
+  name: string;
   reason: string;
 }
 
 export const createIndexSelectorPrompt = ({
-  indices,
-  mappings,
-  fields,
+  resources,
   nlQuery,
   limit = 1,
 }: {
-  indices: ListIndexBasicInfo[];
-  mappings: Record<string, MappingTypeMapping>;
-  fields: Record<string, MappingField[]>;
+  resources: ResourceDescriptor[];
   nlQuery: string;
   limit?: number;
 }): string => {
-  /*
-  Will result in blocks like:
-  --------
-  - my_index: A description of this index
+  // TODO: better formatting
 
-  - other_index: Fields: foo, foo.bar, baz
-  --------
-   */
-  const indicesAndDescriptions = indices
-    .map((index) => {
-      const indexMapping = mappings[index.index];
-      const fieldPaths: string[] = fields[index.index].map((mappingField) => {
-        return mappingField.path;
-      });
-      const description = indexMapping?._meta?.description || `Fields: ${fieldPaths.join(', ')}`;
-      return `- ${index.index}: ${description}`;
+  const indicesAndDescriptions = resources
+    .map((resource) => {
+      if (resource.type === 'index') {
+        // TODO
+        return `- Index: ${resource.name} - description: ${resource.description}`;
+      }
+      if (resource.type === 'alias') {
+        // TODO
+      }
+      if (resource.type === 'data_stream') {
+        // TODO
+        return `- DataStream: ${resource.name} - description: ${resource.description}`;
+      }
+      return '';
     })
     .join('\n\n');
 
   return `You are an AI assistant for the Elasticsearch company.
-       based on a natural language query from the user, your task is to select up to ${limit} most relevant indices from a list of indices.
+       based on a natural language query from the user, your task is to select up to ${limit} most relevant targets
+       to perform that search, from a list of indices, aliases and datastreams.
 
        *The natural language query is:* ${nlQuery}
 
@@ -127,46 +207,41 @@ export const createIndexSelectorPrompt = ({
        ${indicesAndDescriptions}
 
        Based on the natural language query and the index descriptions, please return the most relevant indices with your reasoning.
-       Remember, you should select at maximum ${limit} indices.
+       Remember, you should select at maximum ${limit} targets.
        `;
 };
 
 const selectIndices = async ({
-  indices,
-  mappings,
-  fields,
+  resources,
   nlQuery,
   model,
   limit = 1,
 }: {
-  indices: ListIndexBasicInfo[];
-  mappings: Record<string, MappingTypeMapping>;
-  fields: Record<string, MappingField[]>;
+  resources: ResourceDescriptor[];
   nlQuery: string;
   model: ScopedModel;
   limit?: number;
-}): Promise<SelectedIndex[]> => {
+}): Promise<SelectedResource[]> => {
   const { chatModel } = model;
   const indexSelectorModel = chatModel.withStructuredOutput(
     z.object({
-      indices: z.array(
+      targets: z.array(
         z.object({
-          indexName: z.string().describe('name of the index'),
-          reason: z.string().describe('brief explanation of why this index could be relevant'),
+          reason: z.string().describe('brief explanation of why this resource could be relevant'),
+          type: z.enum(['index', 'alias', 'data_stream']).describe('the type of the resource'),
+          name: z.string().describe('name of the index, alias or data stream'),
         })
       ),
     })
   );
 
   const promptContent = createIndexSelectorPrompt({
-    indices,
-    mappings,
-    fields,
+    resources,
     nlQuery,
     limit,
   });
 
-  const { indices: selectedIndices } = await indexSelectorModel.invoke(promptContent);
+  const { targets } = await indexSelectorModel.invoke(promptContent);
 
-  return selectedIndices;
+  return targets;
 };

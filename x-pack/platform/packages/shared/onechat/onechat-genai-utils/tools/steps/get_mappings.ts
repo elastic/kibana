@@ -15,6 +15,9 @@ export interface GetIndexMappingEntry {
 
 export type GetIndexMappingsResult = Record<string, GetIndexMappingEntry>;
 
+/**
+ * Returns the mappings for each of the given indices.
+ */
 export const getIndexMappings = async ({
   indices,
   cleanup = true,
@@ -34,4 +37,47 @@ export const getIndexMappings = async ({
     };
     return res;
   }, {} as GetIndexMappingsResult);
+};
+
+export interface GetDataStreamMappingEntry {
+  mappings: MappingTypeMapping;
+}
+
+export type GetDataStreamMappingsResults = Record<string, GetDataStreamMappingEntry>;
+
+interface GetDataStreamMappingsResItem {
+  name: string;
+  effective_mappings: {
+    _doc: MappingTypeMapping;
+  };
+}
+
+interface GetDataStreamMappingsRes {
+  data_streams: GetDataStreamMappingsResItem[];
+}
+
+/**
+ * Returns the mappings for each of the given datastreams.
+ */
+export const getDatastreamMappings = async ({
+  datastreams,
+  cleanup = true,
+  esClient,
+}: {
+  datastreams: string[];
+  cleanup?: boolean;
+  esClient: ElasticsearchClient;
+}): Promise<GetDataStreamMappingsResults> => {
+  const response = await esClient.transport.request<GetDataStreamMappingsRes>({
+    path: `/_data_stream/${datastreams.join(',')}/_mappings`,
+    method: 'GET',
+  });
+
+  return response.data_streams.reduce((res, datastream) => {
+    const mappings = datastream.effective_mappings._doc;
+    res[datastream.name] = {
+      mappings: cleanup ? cleanupMapping(mappings) : mappings,
+    };
+    return res;
+  }, {} as GetDataStreamMappingsResults);
 };

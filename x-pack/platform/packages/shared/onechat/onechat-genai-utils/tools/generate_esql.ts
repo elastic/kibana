@@ -12,8 +12,8 @@ import { isChatCompletionMessageEvent, isChatCompletionEvent } from '@kbn/infere
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import { indexExplorer } from './index_explorer';
-import { getIndexMappings } from './steps/get_mappings';
 import { extractEsqlQueries } from './utils/esql';
+import { getResourceMappings } from './steps/get_resource_mappings';
 
 export interface GenerateEsqlResponse {
   answer: string;
@@ -29,32 +29,45 @@ export const generateEsql = async ({
 }: {
   nlQuery: string;
   context?: string;
-  index?: string;
+  index?: string; // TODO rename to context
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<GenerateEsqlResponse> => {
   let selectedIndex: string | undefined;
   let mappings: MappingTypeMapping;
 
+  console.log('**** generate esql', index, nlQuery);
+  // TODO: resolve resource mappings regardless of type.
+
   if (index) {
     selectedIndex = index;
-    const indexMappings = await getIndexMappings({
-      indices: [index],
+    const targetMapping = await getResourceMappings({
+      resourceName: index,
       esClient,
     });
-    mappings = indexMappings[index].mappings;
+    mappings = targetMapping.mappings;
   } else {
     const {
-      indices: [firstIndex],
+      resources: [selectedResource],
     } = await indexExplorer({
       nlQuery,
       esClient,
       limit: 1,
       model,
     });
-    selectedIndex = firstIndex.indexName;
-    mappings = firstIndex.mappings;
+
+    // TODO: pass the target type too.
+    const targetMapping = await getResourceMappings({
+      resourceName: selectedResource.name,
+      esClient,
+    });
+    mappings = targetMapping.mappings;
   }
+
+  console.log(
+    '**** generate esql - mappings',
+    JSON.stringify(mappings, undefined, 2).substring(0, 100)
+  );
 
   const esqlEvents$ = naturalLanguageToEsql({
     // @ts-expect-error using a scoped inference client
