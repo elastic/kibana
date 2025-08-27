@@ -23,9 +23,10 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   EuiText,
   EuiBadge,
-  EuiBasicTable,
-  type HorizontalAlignment,
   EuiButtonEmpty,
+  EuiDataGrid,
+  EuiPanel,
+  type HorizontalAlignment,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -34,7 +35,12 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useAppStateSelector } from '../../../main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../../main/state_management/discover_state';
 import { fetchEsql } from '../../../main/data_fetching/fetch_esql';
-import { constructCascadeQuery, type CascadeQueryArgs, getESQLStatsQueryMeta } from './util';
+import {
+  constructCascadeQuery,
+  type CascadeQueryArgs,
+  getESQLStatsQueryMeta,
+  type ESQLStatsQueryMeta,
+} from './util';
 import { getPatternCellRenderer } from '../../../../context_awareness/profile_providers/common/patterns/pattern_cell_renderer';
 
 export { getESQLStatsQueryMeta } from './util';
@@ -49,6 +55,49 @@ interface ESQLDataCascadeProps {
   onGroupClose: () => void;
   stateContainer: DiscoverStateContainer;
 }
+
+const ESQLDataCascadeLeafCell = React.memo(
+  ({ cellData, queryMeta }: { cellData: DataTableRecord[]; queryMeta: ESQLStatsQueryMeta }) => {
+    const [visibleColumns, setVisibleColumns] = React.useState(
+      queryMeta.groupByFields.map((group) => group.field)
+    );
+
+    return (
+      <EuiDataGrid
+        aria-label={`Data grid for ESQL data cascade`}
+        rowCount={cellData?.length ?? 0}
+        columnVisibility={{
+          visibleColumns,
+          setVisibleColumns,
+        }}
+        columns={[
+          ...queryMeta.groupByFields.map((group, index, groupArray) => ({
+            id: group.field,
+            field: group.field,
+            name: group.field.replace(/_/g, ' '),
+            ...(index === groupArray.length - 1 ? { align: 'right' as HorizontalAlignment } : {}),
+          })),
+        ]}
+        renderCellValue={({ rowIndex, columnId, setCellProps }) => {
+          const gridCellData = (cellData ?? [])[rowIndex];
+          return <EuiText>{gridCellData.flattened[columnId] as string}</EuiText>;
+        }}
+        pagination={{
+          pageIndex: 0,
+          pageSize: 10,
+          onChangePage: (page) => {
+            // eslint-disable-next-line no-console -- added for debugging
+            console.log('page changed:: %o \n', page);
+          },
+          onChangeItemsPerPage: (pageSize) => {
+            // eslint-disable-next-line no-console -- added for debugging
+            console.log('items per page changed:: %o \n', pageSize);
+          },
+        }}
+      />
+    );
+  }
+);
 
 export const ESQLDataCascade = ({
   initialData,
@@ -235,27 +284,14 @@ export const ESQLDataCascade = ({
           <DataCascadeRowCell onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}>
             {({ data: cellData }) => {
               return (
-                <EuiBasicTable
-                  columns={[
-                    ...queryMeta.groupByFields.map((group, index, groupArray) => ({
-                      field: group.field,
-                      name: group.field.replace(/_/g, ' '),
-                      ...(index === groupArray.length - 1
-                        ? { align: 'right' as HorizontalAlignment }
-                        : {}),
-                    })),
-                  ]}
-                  items={(cellData ?? []).map((datum) => ({
-                    id: datum.id,
-                    ...queryMeta.groupByFields.reduce(
-                      (acc, group) => ({
-                        ...acc,
-                        [group.field]: datum.flattened[group.field] as string,
-                      }),
-                      {} as Record<string, string>
-                    ),
-                  }))}
-                />
+                <EuiPanel
+                  css={{
+                    height: '100%',
+                    maxHeight: 400, // this value should be adjusted based on the device viewport
+                  }}
+                >
+                  <ESQLDataCascadeLeafCell cellData={cellData!} queryMeta={queryMeta} />
+                </EuiPanel>
               );
             }}
           </DataCascadeRowCell>
