@@ -15,12 +15,12 @@ For general guidelines, read [Kibana Testing Guide](https://www.elastic.co/guide
 ### Tests
 
 1. Unit Tests (Jest) - located in sibling files to the source code
-1. [API Integration Tests](../../../../test/api_integration/apis/cloud_security_posture/config.ts)
-1. [Telemetry Integration Tests](../../../../test/cloud_security_posture_api/config.ts)
-1. [End-to-End Tests](../../../../test/cloud_security_posture_functional/config.ts)
-1. [Serverless API Integration tests](../../../../test_serverless/api_integration/test_suites/security/config.ts)
-1. [Serverless End-to-End Tests](../../../../test_serverless/functional/test_suites/security/config.ts)
-1. [Cypress End-to-End Tests](../../../../test/security_solution_cypress/cypress/e2e/cloud_security_posture)
+1. [API Integration Tests](../../test/api_integration/apis/cloud_security_posture/config.ts)
+1. [Telemetry Integration Tests](../../test/cloud_security_posture_api/config.ts)
+1. [End-to-End Tests](../../test/cloud_security_posture_functional/config.ts)
+1. [Serverless API Integration tests](../../test/serverless/api_integration/configs/config.ts)
+1. [Serverless End-to-End Tests](../../test/serverless/functional/configs/config.ts)
+1. [Cypress End-to-End Tests](../../test/security_solution_cypress/cypress/e2e/cloud_security_posture)
 
 ### Tools
 
