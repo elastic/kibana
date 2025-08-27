@@ -16,7 +16,7 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
-import { getInitialESQLQuery, getQueryColumnsFromESQLQuery } from '@kbn/esql-utils';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import {
   isOfAggregateQueryType,
@@ -532,8 +532,6 @@ export function getDiscoverStateContainer({
   };
 
   const trackQueryFieldUsage = (query: Query | AggregateQuery | undefined) => {
-    console.log({ query });
-
     if (!query) {
       return;
     }
@@ -541,28 +539,13 @@ export function getDiscoverStateContainer({
     const { fieldsMetadata } = services;
 
     if (isOfAggregateQueryType(query)) {
-      const fieldNames = [...new Set(getQueryColumnsFromESQLQuery(query.esql))];
-
-      if (fieldNames.length === 0) {
-        return;
-      }
-
       scopedEbtManager.trackSubmittingESQLQuery({
-        fieldNames,
+        query,
         fieldsMetadata,
       });
-    } else if (isOfQueryType(query) && typeof query.query === 'string') {
-      if (query.query === '') {
-        return;
-      }
-
-      const fieldNames = [...new Set(getKqlFieldNamesFromExpression(query.query))];
-
-      if (fieldNames.length === 0) {
-        return;
-      }
+    } else if (isOfQueryType(query)) {
       scopedEbtManager.trackSubmittingKQLQuery({
-        fieldNames,
+        query,
         fieldsMetadata,
       });
     }

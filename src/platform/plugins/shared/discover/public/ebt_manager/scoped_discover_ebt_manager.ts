@@ -9,6 +9,8 @@
 
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
+import { getKqlFieldNamesFromExpression, type AggregateQuery, type Query } from '@kbn/es-query';
+import { getQueryColumnsFromESQLQuery } from '@kbn/esql-utils';
 import {
   CONTEXTUAL_PROFILE_ID,
   CONTEXTUAL_PROFILE_LEVEL,
@@ -202,6 +204,7 @@ export class ScopedDiscoverEBTManager {
       });
       console.log({ fieldNames });
 
+      // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
       const categorizedFields = fieldNames.map((fieldName) =>
         fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
       );
@@ -214,12 +217,21 @@ export class ScopedDiscoverEBTManager {
   }
 
   public async trackSubmittingKQLQuery({
-    fieldNames,
+    query,
     fieldsMetadata,
   }: {
-    fieldNames: string[];
+    query: Query;
     fieldsMetadata: FieldsMetadataPublicStart | undefined;
   }) {
+    if (typeof query.query !== 'string' || query.query === '') {
+      return;
+    }
+
+    const fieldNames = [...new Set(getKqlFieldNamesFromExpression(query.query))];
+
+    if (fieldNames.length === 0) {
+      return;
+    }
     await this.trackFieldUsageInQueryEvent({
       eventName: FieldUsageInQueryEventName.kqlQueryUpdate,
       fieldNames,
@@ -228,12 +240,18 @@ export class ScopedDiscoverEBTManager {
   }
 
   public async trackSubmittingESQLQuery({
-    fieldNames,
+    query,
     fieldsMetadata,
   }: {
-    fieldNames: string[];
+    query: AggregateQuery;
     fieldsMetadata: FieldsMetadataPublicStart | undefined;
   }) {
+    const fieldNames = [...new Set(getQueryColumnsFromESQLQuery(query.esql))];
+
+    if (fieldNames.length === 0) {
+      return;
+    }
+
     await this.trackFieldUsageInQueryEvent({
       eventName: FieldUsageInQueryEventName.esqlQueryUpdate,
       fieldNames,
