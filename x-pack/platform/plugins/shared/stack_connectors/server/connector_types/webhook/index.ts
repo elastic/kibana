@@ -24,7 +24,10 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import {
+  combineHeadersWithBasicAuthHeader,
+  mergeConfigHeadersWithSecretHeaders,
+} from '@kbn/actions-plugin/server/lib';
 
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { SSLCertType } from '../../../common/auth/constants';
@@ -143,16 +146,6 @@ function validateConnectorTypeConfig(
   }
 }
 
-export function mergeConfigHeadersWithSecretHeaders(
-  configHeaders?: Record<string, string> | null,
-  secretHeaders?: Record<string, string> | null
-): Record<string, string> {
-  return {
-    ...(configHeaders ?? {}),
-    ...(secretHeaders ?? {}),
-  };
-}
-
 // action executor
 export async function executor(
   execOptions: WebhookConnectorTypeExecutorOptions
@@ -174,7 +167,12 @@ export async function executor(
 
   const axiosInstance = axios.create();
 
+  console.log('headers: ', headers);
+  console.log('secretHeaders: ', secrets.secretHeaders);
+
   const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
+
+  console.log('mergedHeaders: ', mergedHeaders);
 
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,

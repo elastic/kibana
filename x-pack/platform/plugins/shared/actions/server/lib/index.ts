@@ -37,6 +37,10 @@ export {
 } from './action_execution_source';
 export { parseDate } from './parse_date';
 export type { RelatedSavedObjects } from './related_saved_objects';
-export { getBasicAuthHeader, combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
+export {
+  getBasicAuthHeader,
+  combineHeadersWithBasicAuthHeader,
+  mergeConfigHeadersWithSecretHeaders,
+} from './get_basic_auth_header';
 export { tryCatch } from './try_catch';
 export type { TelemetryMetadata } from './token_tracking/gen_ai_token_tracking';
