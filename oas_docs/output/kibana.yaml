@@ -14635,9 +14635,19 @@ paths:
                 type: object
                 properties:
                   success:
-                    description: Indicates if the scheduling was successful
+                    description: Indicates the scheduling was successful
                     type: boolean
           description: Successful response
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    description: Error message indicating the engine is already running
+                    type: string
+          description: Conflict - Monitoring engine is already running
       summary: Schedule the Privilege Monitoring Engine
       tags:
         - Security Entity Analytics API
