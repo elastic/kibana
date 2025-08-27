@@ -143,7 +143,7 @@ If a new fixture depends on a fixture with a `test` scope, it must also be `test
 
 #### Global Hooks and Test Utilities
 
-The `global_hooks` directory contains setup and teardown logic that applies globally across test executions. It is a crutual feature for parallel tests, as it is required to ingest Elasticsearch data before any test runs. The `test` directory provides test-specific utilities, while `types` contains TypeScript type definitions. The `utils` directory includes various utility functions for test execution.
+The `global_hooks` directory contains setup and teardown logic that applies globally across test executions. It is a crucial feature for parallel tests, as it is required to ingest Elasticsearch data before any test runs. The `test` directory provides test-specific utilities, while `types` contains TypeScript type definitions. The `utils` directory includes various utility functions for test execution.
 
 #### Page Objects
 
