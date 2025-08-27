@@ -32,7 +32,7 @@ export const appendConversationMessages = async ({
     ...messages,
   ]);
 
-  const maxRetries = 3;
+  const maxRetries = 10;
   let attempt = 0;
   let response;
   while (attempt < maxRetries) {

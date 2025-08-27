@@ -142,7 +142,23 @@ export const useChatSend = ({
 
       const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
       if (convo.title === '') {
-        convo.title = (await getConversation(convo.id))?.title ?? '';
+        // Retry getConversation up to 5 times if title is empty
+        let retryCount = 0;
+        const maxRetries = 5;
+        while (retryCount < maxRetries) {
+          const conversation = await getConversation(convo.id);
+          convo.title = conversation?.title ?? '';
+
+          if (convo.title !== '') {
+            break; // Title found, exit retry loop
+          }
+
+          retryCount++;
+          if (retryCount < maxRetries) {
+            // Wait 1 second before next retry
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+        }
       }
       setCurrentConversation({
         ...convo,
