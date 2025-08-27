@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, useEuiTheme, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  useEuiTheme,
+  EuiText,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+} from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
 
@@ -13,6 +21,7 @@ export function Card({
   isDisabled,
   isSelected,
   title,
+  titleTooltipContent,
   kpiValue,
   footer,
   onClick,
@@ -20,6 +29,7 @@ export function Card({
   isDisabled?: boolean;
   isSelected?: boolean;
   title: string;
+  titleTooltipContent?: React.ReactNode;
   kpiValue: string;
   footer: React.ReactNode;
   onClick?: () => void;
@@ -39,7 +49,18 @@ export function Card({
 
   const content = (
     <>
-      <EuiText textAlign="left">{title}</EuiText>
+      <EuiText textAlign="left">
+        {titleTooltipContent ? (
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>{title}</EuiFlexItem>
+            <EuiFlexItem>
+              <EuiIconTip css={{ minWidth: '300px' }} content={titleTooltipContent} size="m" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          title
+        )}
+      </EuiText>
       <EuiSpacer size="xs" />
       <EuiText textAlign="left" data-test-subj={`datasetQualityDetailsSummaryKpiValue-${title}`}>
         <h2>{kpiValue}</h2>
