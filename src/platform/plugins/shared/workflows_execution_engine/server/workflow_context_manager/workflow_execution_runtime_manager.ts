@@ -156,6 +156,7 @@ export class WorkflowExecutionRuntimeManager {
       return undefined;
     }
     return {
+      input: latestStepExecution.input || {},
       output: latestStepExecution.output || {},
       error: latestStepExecution.error,
     };
@@ -176,6 +177,7 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionState.upsertStep({
       id: latestStepExecution.id,
       stepId: currentStep.id,
+      input: result.input,
       output: result.output,
       error: result.error,
     });
@@ -268,6 +270,7 @@ export class WorkflowExecutionRuntimeManager {
           executionTimeMs,
           error: startedStepExecution.error,
           output: startedStepExecution.output,
+          input: startedStepExecution.input,
         } as Partial<EsWorkflowStepExecution>;
 
         this.workflowExecutionState.upsertStep(stepExecutionUpdate);
@@ -600,6 +603,7 @@ export class WorkflowExecutionRuntimeManager {
     const node = this.workflowExecutionGraph.node(stepId) as any;
     const stepName = node?.name || stepId;
     this.workflowLogger?.logInfo(`Step '${stepName}' started`, {
+      workflow: { step_id: stepId },
       event: { action: 'step-start', category: ['workflow', 'step'] },
       tags: ['workflow', 'step', 'start'],
     });
@@ -610,6 +614,7 @@ export class WorkflowExecutionRuntimeManager {
     const stepName = node?.name || step.stepId;
     const isSuccess = step?.status === ExecutionStatus.COMPLETED;
     this.workflowLogger?.logInfo(`Step '${stepName}' ${isSuccess ? 'completed' : 'failed'}`, {
+      workflow: { step_id: step.stepId },
       event: {
         action: 'step-complete',
         category: ['workflow', 'step'],
