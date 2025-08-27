@@ -60,7 +60,10 @@ export const TriggerSchema = z.discriminatedUnion('type', [
 /* --- Steps --- */
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
-  delay: z.string().min(0).optional(), // e.g., '5s', '1m', '2h' (default: no delay)
+  delay: z
+    .string()
+    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
+    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
 });
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 

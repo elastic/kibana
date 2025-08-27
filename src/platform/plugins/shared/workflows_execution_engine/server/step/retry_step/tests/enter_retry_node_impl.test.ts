@@ -113,7 +113,7 @@ describe('EnterRetryNodeImpl', () => {
 
     describe('when attempts exceed max limit', () => {
       beforeEach(() => {
-        workflowRuntime.getStepState = jest.fn().mockReturnValue({ attempt: 4 });
+        workflowRuntime.getStepState = jest.fn().mockReturnValue({ attempt: 3 });
         workflowRuntime.failStep = jest.fn();
         workflowRuntime.setWorkflowError = jest.fn();
       });

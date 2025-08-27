@@ -58,6 +58,10 @@ const EXECUTION_STATUS_MAP = {
     icon: 'checkInCircleFilled',
     color: 'grey',
   },
+  [ExecutionStatus.WAITING]: {
+    icon: 'inputOutput',
+    color: 'warning',
+  },
   [ExecutionStatus.WAITING_FOR_INPUT]: {
     icon: 'inputOutput',
     color: 'warning',
