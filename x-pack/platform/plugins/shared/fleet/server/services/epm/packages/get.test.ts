@@ -1451,27 +1451,9 @@ owner: elastic`,
           } as RegistryPackage,
         });
 
-        // Mock groupPathsByService to return the expected structure
-        const mockGroupedAssets = {
-          kibana: undefined,
-          elasticsearch: {
-            knowledge_base: [
-              {
-                service: 'elasticsearch',
-                type: 'knowledge_base',
-                file: 'knowledge.md',
-                pkgkey: 'my-package-1.0.0',
-              },
-              {
-                service: 'elasticsearch',
-                type: 'knowledge_base',
-                file: 'troubleshooting.md',
-                pkgkey: 'my-package-1.0.0',
-              },
-            ],
-          },
-        } as any;
-        MockRegistry.groupPathsByService.mockReturnValue(mockGroupedAssets);
+        // Use the real groupPathsByService function instead of mocking it
+        const realRegistry = jest.requireActual('../registry');
+        MockRegistry.groupPathsByService.mockImplementation(realRegistry.groupPathsByService);
 
         const result = await getPackageInfo({
           savedObjectsClient: soClient,
@@ -1479,7 +1461,7 @@ owner: elastic`,
           pkgVersion: '1.0.0',
         });
 
-        // Verify that groupPathsByService was called with paths including knowledge base
+        // Verify that groupPathsByService was called with paths including transformed knowledge base assets
         expect(MockRegistry.groupPathsByService).toHaveBeenCalledWith(
           expect.arrayContaining([
             'my-package-1.0.0/manifest.yml',
@@ -1496,12 +1478,16 @@ owner: elastic`,
             type: 'knowledge_base',
             file: 'knowledge.md',
             pkgkey: 'my-package-1.0.0',
+            dataset: undefined,
+            path: 'my-package-1.0.0/elasticsearch/knowledge_base/knowledge.md',
           },
           {
             service: 'elasticsearch',
             type: 'knowledge_base',
             file: 'troubleshooting.md',
             pkgkey: 'my-package-1.0.0',
+            dataset: undefined,
+            path: 'my-package-1.0.0/elasticsearch/knowledge_base/troubleshooting.md',
           },
         ]);
       });
@@ -1528,14 +1514,19 @@ owner: elastic`,
           } as RegistryPackage,
         });
 
-        await getPackageInfo({
+        // Use the real groupPathsByService function instead of mocking it
+        const realRegistry = jest.requireActual('../registry');
+        MockRegistry.groupPathsByService.mockImplementation(realRegistry.groupPathsByService);
+
+        const result = await getPackageInfo({
           savedObjectsClient: soClient,
           pkgName: 'my-package',
           pkgVersion: '1.0.0',
         });
 
-        // Verify that groupPathsByService was called with original paths only (no knowledge base paths added)
+        // Verify that groupPathsByService was called with original paths only (no knowledge base paths added), and the KB to be undefined
         expect(MockRegistry.groupPathsByService).toHaveBeenCalledWith(mockPaths);
+        expect(result.assets.elasticsearch?.knowledge_base).toBeUndefined();
       });
     });
   });
