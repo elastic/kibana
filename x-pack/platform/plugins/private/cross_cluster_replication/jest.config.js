@@ -15,4 +15,5 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/plugins/private/cross_cluster_replication/{common,public,server}/**/*.{js,ts,tsx}',
   ],
+  noStackTrace: true,
 };

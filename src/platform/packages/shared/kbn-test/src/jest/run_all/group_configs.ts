@@ -8,7 +8,7 @@
  */
 import Path from 'path';
 import type { Config } from '@jest/types';
-import { groupBy, omit, uniq } from 'lodash';
+import { groupBy, uniq } from 'lodash';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createConfigHash } from './create_config_hash';
