@@ -119,8 +119,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/230988
-    describe.skip('User instruction management', () => {
+    describe('User instruction management', () => {
       async function openUserInstructionFlyout() {
         await testSubjects.click(ui.pages.kbManagementTab.editUserInstructionButton);
         await testSubjects.exists(ui.pages.kbManagementTab.saveEntryButton);
@@ -172,7 +171,12 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await openUserInstructionFlyout();
         const instruction = 'Always respond in a formal tone';
         await setUserInstructionContent(instruction);
-        await testSubjects.click(ui.pages.kbManagementTab.saveEntryButton);
+        await retry.waitFor('save button to be enabled after typing instruction', async () => {
+          const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
+          return await saveButton.isEnabled();
+        });
+        const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
+        saveButton.click();
 
         // Re-open to verify content was saved
         await openUserInstructionFlyout();
@@ -185,7 +189,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await openUserInstructionFlyout();
         const originalInstruction = 'Original instruction';
         await setUserInstructionContent(originalInstruction);
-        await testSubjects.click(ui.pages.kbManagementTab.saveEntryButton);
+        await retry.waitFor('save button to be enabled after typing instruction', async () => {
+          const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
+          return await saveButton.isEnabled();
+        });
+
+        const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
+        saveButton.click();
 
         // Make changes but cancel
         await openUserInstructionFlyout();
