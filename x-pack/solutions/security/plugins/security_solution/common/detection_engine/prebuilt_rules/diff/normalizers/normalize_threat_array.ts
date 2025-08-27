@@ -6,14 +6,13 @@
  */
 
 import type {
-  RuleResponse,
   ThreatArray,
   ThreatSubtechnique,
   ThreatTechnique,
-} from '../../../api/detection_engine/model/rule_schema';
+} from '../../../../api/detection_engine/model/rule_schema';
 
-export const extractThreatArray = (rule: RuleResponse): ThreatArray =>
-  rule.threat?.map((threat) => {
+export const normalizeThreatArray = (threatArray: ThreatArray): ThreatArray =>
+  threatArray.map((threat) => {
     if (threat.technique && threat.technique.length) {
       return {
         ...threat,
@@ -26,7 +25,7 @@ export const extractThreatArray = (rule: RuleResponse): ThreatArray =>
       tactic: { ...threat.tactic, reference: normalizeThreatReference(threat.tactic.reference) },
       technique: undefined,
     }; // If `technique` is an empty array, remove the field from the `threat` object
-  }) ?? [];
+  });
 
 const trimTechniqueArray = (techniqueArray: ThreatTechnique[]): ThreatTechnique[] => {
   return techniqueArray.map((technique) => ({

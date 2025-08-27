@@ -6,7 +6,7 @@
  */
 
 import { FilterStateStore, type Filter } from '@kbn/es-query';
-import { KqlQueryType } from '../../../api/detection_engine';
+import { KqlQueryType } from '../../../../api/detection_engine';
 import {
   extractRuleEqlQuery,
   extractRuleEsqlQuery,

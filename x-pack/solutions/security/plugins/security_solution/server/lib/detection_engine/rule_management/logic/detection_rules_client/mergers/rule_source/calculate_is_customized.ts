@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { calculateTwoWayRuleFieldsDiff } from '../../../../../prebuilt_rules/logic/diff/calculation/calculate_two_way_rule_fields_diff';
 import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
 import { MissingVersion } from '../../../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
@@ -61,6 +62,20 @@ export function calculateIsCustomized({
  * @returns true if all rule fields are equal, false otherwise
  */
 function areRulesEqual(ruleA: RuleResponse, ruleB: RuleResponse) {
+  const twoWayFieldDiff = calculateTwoWayRuleFieldsDiff({ baseRule: ruleA, currentRule: ruleB });
+
+  console.log(twoWayFieldDiff);
+
+  const customizedFields = [];
+
+  for (const [key, value] of Object.entries(twoWayFieldDiff)) {
+    if (!value.is_equal) {
+      customizedFields.push(key);
+    }
+  }
+
+  console.log(customizedFields);
+
   const fieldsDiff = calculateRuleFieldsDiff({
     base_version: MissingVersion,
     current_version: convertRuleToDiffable(ruleA),

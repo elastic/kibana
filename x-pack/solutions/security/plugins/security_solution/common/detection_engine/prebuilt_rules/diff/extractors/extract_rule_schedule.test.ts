@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../api/detection_engine';
+import type { RuleResponse } from '../../../../api/detection_engine';
 import { extractRuleSchedule } from './extract_rule_schedule';
 
 describe('extractRuleSchedule', () => {
