@@ -192,9 +192,12 @@ your-plugin/
 │       │   ├── parallel.playwright.config.ts
 │       │   └── parallel_tests/               # Your UI test specs, that are run in parallel
 │       │   └── tests/                        # Your UI test specs, that are run sequentially
-│       └── api/
-│           ├── playwright.config.ts
-│           └── tests/                        # Your API test specs, that are run sequentially
+│       ├── api/
+│       │   ├── playwright.config.ts
+│       │   └── tests/                        # Your API test specs, that are run sequentially
+│       └── common/                           # For shared code across UI and API tests
+│           ├── constants.ts
+│           └── fixtures/                        
 ```
 
 #### UI Tests
