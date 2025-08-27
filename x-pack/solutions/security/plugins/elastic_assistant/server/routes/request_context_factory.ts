@@ -91,11 +91,9 @@ export class RequestContextFactory implements IRequestContextFactory {
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
     const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
-
     return {
       core: coreContext,
-      // TODO: Use core's UserProfileService, which does not yet support suggest method
-      userProfiles: startPlugins.security.userProfiles,
+      userProfile: coreStart.userProfile,
       actions: startPlugins.actions,
       auditLogger: coreStart.security.audit?.asScoped(request),
       logger: this.logger,

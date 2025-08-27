@@ -30,7 +30,7 @@ describe('Suggest users route', () => {
       },
     } as AuthenticatedUser;
 
-    (context.elasticAssistant.userProfiles.suggest as jest.Mock).mockResolvedValue(
+    (context.elasticAssistant.userProfile.suggest as jest.Mock).mockResolvedValue(
       Promise.resolve(getSuggestUsersResponseMock())
     );
     context.elasticAssistant.getCurrentUser.mockResolvedValueOnce({
@@ -56,7 +56,7 @@ describe('Suggest users route', () => {
     });
 
     test('catches error if search throws error', async () => {
-      (context.elasticAssistant.userProfiles.suggest as jest.Mock).mockRejectedValueOnce(
+      (context.elasticAssistant.userProfile.suggest as jest.Mock).mockRejectedValueOnce(
         new Error('Test error')
       );
       const response = await server.inject(

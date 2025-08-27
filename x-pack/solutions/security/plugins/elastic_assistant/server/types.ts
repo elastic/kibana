@@ -21,6 +21,7 @@ import type {
   Logger,
   AuditLogger,
   SavedObjectsClientContract,
+  UserProfileServiceStart,
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -174,7 +175,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;
-  userProfiles: SecurityPluginStart['userProfiles'];
+  userProfile: UserProfileServiceStart;
 }
 /**
  * @internal

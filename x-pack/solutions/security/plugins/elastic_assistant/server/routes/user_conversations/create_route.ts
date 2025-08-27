@@ -69,6 +69,11 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
           if (createdConversation.title.startsWith('[Duplicate]')) {
             const telemetry = ctx.elasticAssistant.telemetry;
             const firstUserMessage = createdConversation.messages?.find((m) => m.role === 'user');
+            // if the user duplicates a conversation that they did not own
+            // and duplicates it again, we will still find them to be the owner since
+            // the messages will still be of the original owner.
+            // I think that's fine? We don't have another way to tell since
+            // no createdBy is sent to the create api
             const isSourceConversationOwner =
               firstUserMessage?.user?.name === checkResponse.currentUser?.username ||
               firstUserMessage?.user?.id === checkResponse.currentUser?.profile_uid;
