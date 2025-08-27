@@ -23,6 +23,7 @@ import {
   percentileRanksOperationSchema,
   staticOperationDefinitionSchema,
   uniqueCountMetricOperationSchema,
+  sumMetricOperationSchema,
 } from '../metric_ops';
 import { coloringTypeSchema } from '../color';
 import { datasetSchema } from '../dataset';
@@ -184,17 +185,23 @@ export const metricStateSchema = schema.allOf([
      */
     metric: schema.oneOf([
       // oneOf allows only 12 items
+      // so break down metrics based on the type: field-based, reference-based, formula-like
       schema.oneOf([
         schema.allOf([metricStatePrimaryMetricOptionsSchema, countMetricOperationSchema]),
         schema.allOf([metricStatePrimaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
         schema.allOf([metricStatePrimaryMetricOptionsSchema, metricOperationSchema]),
+        schema.allOf([metricStatePrimaryMetricOptionsSchema, sumMetricOperationSchema]),
         schema.allOf([metricStatePrimaryMetricOptionsSchema, lastValueOperationSchema]),
         schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileOperationSchema]),
         schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema]),
+      ]),
+      schema.oneOf([
         schema.allOf([metricStatePrimaryMetricOptionsSchema, differencesOperationSchema]),
         schema.allOf([metricStatePrimaryMetricOptionsSchema, movingAverageOperationSchema]),
         schema.allOf([metricStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema]),
         schema.allOf([metricStatePrimaryMetricOptionsSchema, counterRateOperationSchema]),
+      ]),
+      schema.oneOf([
         schema.allOf([metricStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema]),
         schema.allOf([metricStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
       ]),
@@ -204,19 +211,26 @@ export const metricStateSchema = schema.allOf([
      */
     secondary_metric: schema.maybe(
       schema.oneOf([
+        // oneOf allows only 12 items
+        // so break down metrics based on the type: field-based, reference-based, formula-like
         schema.oneOf([
+          schema.allOf([metricStateSecondaryMetricOptionsSchema, countMetricOperationSchema]),
           schema.allOf([metricStateSecondaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
           schema.allOf([metricStateSecondaryMetricOptionsSchema, metricOperationSchema]),
+          schema.allOf([metricStateSecondaryMetricOptionsSchema, sumMetricOperationSchema]),
           schema.allOf([metricStateSecondaryMetricOptionsSchema, lastValueOperationSchema]),
           schema.allOf([metricStateSecondaryMetricOptionsSchema, percentileOperationSchema]),
           schema.allOf([metricStateSecondaryMetricOptionsSchema, percentileRanksOperationSchema]),
+        ]),
+        schema.oneOf([
           schema.allOf([metricStateSecondaryMetricOptionsSchema, differencesOperationSchema]),
           schema.allOf([metricStateSecondaryMetricOptionsSchema, movingAverageOperationSchema]),
           schema.allOf([metricStateSecondaryMetricOptionsSchema, cumulativeSumOperationSchema]),
           schema.allOf([metricStateSecondaryMetricOptionsSchema, counterRateOperationSchema]),
+        ]),
+        schema.oneOf([
           schema.allOf([metricStateSecondaryMetricOptionsSchema, staticOperationDefinitionSchema]),
           schema.allOf([metricStateSecondaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, countMetricOperationSchema]),
         ]),
       ])
     ),

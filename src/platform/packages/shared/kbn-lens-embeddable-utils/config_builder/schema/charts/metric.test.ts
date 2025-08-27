@@ -63,7 +63,7 @@ describe('Metric Schema', () => {
       const input = {
         ...baseMetricConfig,
         metric: {
-          operation: 'avg' as const,
+          operation: 'average' as const,
           field: 'temperature',
           color: {
             type: 'dynamic' as const,
