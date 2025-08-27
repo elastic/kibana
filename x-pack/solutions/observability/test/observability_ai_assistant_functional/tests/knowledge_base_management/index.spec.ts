@@ -270,7 +270,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       afterEach(async () => {
         await clearKnowledgeBase(es);
         await browser.refresh();
-        fs.unlinkSync(tempFilePath);
+        if (fs.existsSync(tempFilePath)) {
+          fs.unlinkSync(tempFilePath);
+        }
       });
 
       after(async () => {
@@ -288,14 +290,32 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         expect(await saveButton.isEnabled()).to.be(false);
 
         await retry.try(async () => {
-          await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
+          // Upload the file via browser.execute to avoid flakiness
+          await browser.execute(
+            (selector, fileContent) => {
+              const inputEl = document.querySelector<HTMLInputElement>(selector)!;
 
+              const dataTransfer = new DataTransfer();
+              const file = new File([fileContent], 'bulk_import.ndjson', {
+                type: 'application/x-ndjson',
+              });
+              dataTransfer.items.add(file);
+              inputEl.files = dataTransfer.files;
+
+              const event = new Event('change', { bubbles: true });
+              inputEl.dispatchEvent(event);
+            },
+            '[data-test-subj="knowledgeBaseBulkImportFilePicker"]',
+            entries.map((entry) => JSON.stringify(entry)).join('\n')
+          );
+
+          // Verify the UI shows the uploaded file
           const filePicker = await testSubjects.find(ui.pages.kbManagementTab.bulkImportFilePicker);
           const fileNameElement = await filePicker.findByXpath(
             'following-sibling::div//span[contains(@class,"euiFilePicker__promptText")]'
           );
           const fileNameText = await fileNameElement.getVisibleText();
-          log.debug('PickerText: ', fileNameText);
+          log.debug('pickerText: ', fileNameText);
           if (!fileNameText.includes('bulk_import.ndjson')) {
             throw new Error(`UI has not acknowledged the uploaded file yet: ${fileNameText}`);
           }
