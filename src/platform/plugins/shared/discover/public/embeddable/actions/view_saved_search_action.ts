@@ -11,10 +11,10 @@ import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { ACTION_VIEW_SAVED_SEARCH } from '@kbn/discover-utils';
 import type { DiscoverAppLocator } from '../../../common';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 import { compatibilityCheck } from './view_saved_search_compatibility_check';
-import { ACTION_VIEW_SAVED_SEARCH } from '../constants';
 
 export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
   public id = ACTION_VIEW_SAVED_SEARCH;

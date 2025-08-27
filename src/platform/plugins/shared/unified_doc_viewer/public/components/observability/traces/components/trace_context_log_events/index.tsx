@@ -33,7 +33,6 @@ export interface TraceContextLogEventsProps {
 export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEventsProps) {
   const { data: dataService, discoverShared, embeddable } = getUnifiedDocViewerServices();
 
-  console.log('discoverShared', discoverShared);
   const { indexes } = useDataSourcesContext();
 
   const { from: start, to: end } = dataService.query.timefilter.timefilter.getTime();
@@ -69,8 +68,6 @@ export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEvents
   if (!LogEvents) {
     return null;
   }
-
-  console.log('LogEvents', 'exists');
 
   return (
     <ContentFrameworkSection

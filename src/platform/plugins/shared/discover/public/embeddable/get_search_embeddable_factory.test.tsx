@@ -23,7 +23,7 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { createDataViewDataSource } from '../../common/data_sources';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
-import type { SearchEmbeddableApi, SearchEmbeddableRuntimeState } from './types';
+import type { SearchEmbeddableApi, SearchEmbeddableRuntimeState } from '@kbn/discover-utils';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 
 jest.mock('./utils/serialization_utils', () => ({}));

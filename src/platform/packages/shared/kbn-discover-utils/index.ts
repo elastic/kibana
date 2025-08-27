@@ -79,5 +79,6 @@ export type {
 } from './src';
 
 export * from './src/types';
+export * from './src/components/embeddable';
 
 export * from './src/data_types/logs/constants';

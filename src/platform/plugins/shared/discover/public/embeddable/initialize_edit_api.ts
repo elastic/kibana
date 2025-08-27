@@ -17,8 +17,8 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiHasAppContext } from '@kbn/presentation-publishing';
+import type { PublishesSavedSearch } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../build_services';
-import type { PublishesSavedSearch } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 
 type SavedSearchPartialApi = PublishesSavedSearch &

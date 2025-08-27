@@ -20,8 +20,8 @@ import {
   getInheritedViewMode,
 } from '@kbn/presentation-publishing';
 
-import type { PublishesSavedSearch } from '../types';
-import { apiPublishesSavedSearch } from '../types';
+import type { PublishesSavedSearch } from '@kbn/discover-utils';
+import { apiPublishesSavedSearch } from '@kbn/discover-utils';
 
 type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
 
