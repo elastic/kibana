@@ -7,12 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { Config } from '@jest/types';
+import { isEmpty, omitBy } from 'lodash';
 import objectHash from 'object-hash';
 
 export function createConfigHash(obj: Config.InitialOptions): string {
   // Create a stable key excluding fields we are allowed to merge or normalize
-  const { roots, rootDir, ...rest } = obj;
-  return objectHash({
-    rest,
-  });
+  const {
+    roots,
+    rootDir,
+    bail,
+    maxWorkers,
+    maxConcurrency,
+    workerThreads,
+    workerIdleMemoryLimit,
+    testTimeout,
+    passWithNoTests,
+    onlyFailures,
+    onlyChanged,
+    reporters,
+    ...rest
+  } = obj;
+
+  return objectHash(omitBy(rest, isEmpty));
 }

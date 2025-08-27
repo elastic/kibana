@@ -40,12 +40,8 @@ var UNIT_TEST_GROUPS = [
     patterns: ['x-pack/solutions/security/**/jest.config.js'],
   },
   {
-    name: 'Onechat',
-    patterns: ['x-pack/solutions/chat/**/jest.config.js'],
-  },
-  {
-    name: 'Search',
-    patterns: ['x-pack/solutions/search/**/jest.config.js'],
+    name: 'Onechat & Search',
+    patterns: ['x-pack/solutions/{chat,search}/**/jest.config.js'],
   },
 ];
 

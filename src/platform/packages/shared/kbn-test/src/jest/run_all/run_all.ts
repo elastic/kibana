@@ -168,6 +168,22 @@ export function runJestAll() {
         log,
       });
 
+      const runDataDir = Path.join(dataDir, objectHash(flags));
+
+      await Fs.promises.mkdir(runDataDir, { recursive: true });
+
+      const projectsPath = Path.join(runDataDir, 'projects.json');
+
+      await Fs.promises.writeFile(
+        projectsPath,
+        JSON.stringify({
+          projects: [fullConfigs.map((config, index) => configsToRun[index])],
+        }),
+        'utf-8'
+      );
+
+      log.info(`Projects to run: ${projectsPath}`);
+
       // Collect failures across all configs to report at the end
       const allFailures: Array<{
         configPath: string;
@@ -186,6 +202,7 @@ export function runJestAll() {
         const setupFilesAfterEnv = [
           ...(jestConfig.projectConfig.setupFilesAfterEnv ?? []),
           retriesFile,
+          require.resolve('../setup/disable_console_logs'),
         ];
 
         // Include targetPaths in the hash so runs with different path filters
@@ -209,9 +226,13 @@ export function runJestAll() {
 
         await Fs.promises.writeFile(
           initialRunConfigFilepath,
-          JSON.stringify({
-            ...initialRunConfig,
-          }),
+          JSON.stringify(
+            {
+              ...initialRunConfig,
+            },
+            null,
+            2
+          ),
           'utf8'
         );
 
@@ -220,7 +241,8 @@ export function runJestAll() {
           process.env.JEST_CONFIG_PATH = initialRunConfigFilepath;
         }
 
-        log.info(`Running Jest with retries for ${initialRunConfigFilepath}...`);
+        // Include progress counter for configs
+        log.info(`[${i + 1}/${fullConfigs.length}] Running Jest: ${initialRunConfigFilepath}`);
 
         log.debug(`Outfile should be ${initialRunResultsPath}`);
 
@@ -266,76 +288,115 @@ export function runJestAll() {
           process.exit(1);
         }
 
-        log.warning('First attempt failed, retrying failed test files only...');
+        log.warning('First attempt failed; starting scoped retries for failed test files...');
 
-        log.info(`Running Jest retry for failed files using ${initialRunConfigFilepath}...`);
+        // Helper to derive failed files from aggregated results
+        const getFailedFiles = (agg: SlimAggregatedResult) =>
+          agg.testResults.filter((tr) => tr.numFailingTests > 0).map((tr) => tr.testFilePath);
 
-        // Derive failed test files from the initial aggregated results
-        const failedFiles = initialRunResults.testResults.testResults
-          .filter((tr) => tr.numFailingTests > 0)
-          .map((tr) => tr.testFilePath);
+        // Stateful retry loop: run up to 3 more attempts, narrowing roots to applicable ones
+        const maxRetries = 3;
+        let attempt = 1; // retry attempt counter (initial run is attempt 0)
+        let prevResults = initialRunResults.testResults as SlimAggregatedResult;
+        let prevPassed = countPassedAssertions(prevResults);
 
-        if (failedFiles.length === 0) {
-          log.info('No failed files detected in initial run; skipping retry run.');
-          continue;
-        }
+        while (prevResults.numFailedTests > 0 && attempt <= maxRetries) {
+          const failedFiles = getFailedFiles(prevResults);
 
-        const secondRunResultsPath = Path.join(dir, `second_results.json`);
-
-        // Build retry flags: start from passthrough, remove --maxWorkers (not compatible with --runInBand)
-        // and ensure --runInBand appears exactly once.
-        let retryFlags = removeFlagWithValue(passthroughJestFlags, '--maxWorkers');
-        retryFlags = retryFlags.filter((f) => f !== '--runInBand');
-        retryFlags = ['--runInBand', ...retryFlags];
-
-        // Build a temporary retry config that limits roots to those containing the failed files
-        let retryConfigPath = initialRunConfigFilepath;
-        const originalRoots = (initialRunConfig.roots || []) as string[];
-        if (originalRoots.length > 0) {
-          const baseRootDir = initialRunConfig.rootDir
-            ? Path.resolve(String(initialRunConfig.rootDir))
-            : REPO_ROOT;
-          const normalizedRoots = originalRoots.map((r) => {
-            const replaced = r.includes('<rootDir>') ? r.replace(/<rootDir>/g, baseRootDir) : r;
-            return Path.isAbsolute(replaced)
-              ? Path.resolve(replaced)
-              : Path.resolve(baseRootDir, replaced);
-          });
-          const selectedRoots = new Set<string>();
-          for (const f of failedFiles) {
-            const abs = Path.resolve(f);
-            const containing = normalizedRoots
-              .filter((r) => abs.startsWith(r + Path.sep) || abs === r)
-              .sort((a, b) => b.length - a.length)[0];
-            if (containing) selectedRoots.add(containing);
+          if (failedFiles.length === 0) {
+            log.info('No failed files detected from previous run; stopping retries.');
+            break;
           }
 
-          const rootsForRetry =
-            selectedRoots.size > 0 ? Array.from(selectedRoots) : normalizedRoots;
-          const retryRunConfig = {
-            ...initialRunConfig,
-            roots: rootsForRetry,
-          } as Config.InitialOptions;
+          log.info(
+            `Retry attempt ${attempt}/${maxRetries} for ${initialRunConfigFilepath} with ${failedFiles.length} failed file(s)`
+          );
 
-          retryConfigPath = Path.join(dir, `jest.config.retry.json`);
-          await Fs.promises.writeFile(retryConfigPath, JSON.stringify(retryRunConfig), 'utf8');
+          // Build a temporary retry config that limits roots to those containing the failed files
+          let retryConfigPath = initialRunConfigFilepath;
+          const originalRoots = (initialRunConfig.roots || []) as string[];
+          if (originalRoots.length > 0) {
+            const baseRootDir = initialRunConfig.rootDir
+              ? Path.resolve(String(initialRunConfig.rootDir))
+              : REPO_ROOT;
+            const normalizedRoots = originalRoots.map((r) => {
+              const replaced = r.includes('<rootDir>') ? r.replace(/<rootDir>/g, baseRootDir) : r;
+              return Path.isAbsolute(replaced)
+                ? Path.resolve(replaced)
+                : Path.resolve(baseRootDir, replaced);
+            });
+            const selectedRoots = new Set<string>();
+            for (const f of failedFiles) {
+              const abs = Path.resolve(f);
+              const containing = normalizedRoots
+                .filter((r) => abs.startsWith(r + Path.sep) || abs === r)
+                .sort((a, b) => b.length - a.length)[0];
+              if (containing) selectedRoots.add(containing);
+            }
+
+            const rootsForRetry =
+              selectedRoots.size > 0 ? Array.from(selectedRoots) : normalizedRoots;
+            const retryRunConfig = {
+              ...initialRunConfig,
+              roots: rootsForRetry,
+            } as Config.InitialOptions;
+
+            retryConfigPath = Path.join(dir, `jest.config.retry.${attempt}.json`);
+            await Fs.promises.writeFile(
+              retryConfigPath,
+              JSON.stringify(retryRunConfig, null, 2),
+              'utf8'
+            );
+          }
+
+          // Use the same flags as the initial run (no forced in-band, no maxWorkers tweaks)
+          const retryFlags = [...passthroughJestFlags];
+
+          const retryResultsPath = Path.join(dir, `retry_${attempt}_results.json`);
+          const retryResult = await runJestWithConfig({
+            configPath: retryConfigPath,
+            dataDir: dir,
+            log,
+            jestFlags: [
+              ...retryFlags,
+              // Re-run exactly the failed files from the previous run
+              ...failedFiles,
+            ],
+            resultsPath: retryResultsPath,
+          });
+
+          const agg = retryResult.testResults as SlimAggregatedResult;
+          if (agg.numFailedTests === 0) {
+            log.success('All tests passed after retry');
+            prevResults = agg;
+            break;
+          }
+
+          // Only retry again if fewer tests passed than the previous run
+          const currPassed = countPassedAssertions(agg);
+          if (currPassed < prevPassed && attempt < maxRetries) {
+            log.warning(
+              `Retry attempt ${attempt} passed fewer tests (${currPassed}) than previous (${prevPassed}); retrying again...`
+            );
+            prevPassed = currPassed;
+            prevResults = agg;
+            attempt++;
+            continue;
+          }
+
+          // Stop retrying; either pass count didn't decrease or max attempts reached
+          if (currPassed >= prevPassed) {
+            log.info(
+              `Retry attempt ${attempt} did not reduce passed tests count (${currPassed} >= ${prevPassed}); stopping further retries.`
+            );
+          }
+          prevResults = agg;
+          break;
         }
 
-        const secondRunResult = await runJestWithConfig({
-          configPath: retryConfigPath,
-          dataDir: dir,
-          log,
-          jestFlags: [
-            ...retryFlags,
-            // Re-run exactly the failed files from the initial run
-            ...failedFiles,
-          ],
-          resultsPath: secondRunResultsPath,
-        });
-
-        if (secondRunResult.testResults.numFailedTests) {
+        if (prevResults.numFailedTests) {
           // Collect failing details for this config and continue with next config
-          const aggregated = secondRunResult.testResults as SlimAggregatedResult;
+          const aggregated = prevResults as SlimAggregatedResult;
           const failedFilesForConfig = aggregated.testResults
             .filter((tr) => tr.numFailingTests > 0)
             .map((tr) => ({
@@ -431,18 +492,17 @@ function buildJestCliFlags(argv: Record<string, unknown>): string[] {
 /**
  * Remove a flag that takes a value, e.g. ['--maxWorkers','4'] → removed both.
  */
-function removeFlagWithValue(flags: string[], flagName: string): string[] {
-  const out: string[] = [];
-  for (let i = 0; i < flags.length; i++) {
-    const tok = flags[i];
-    if (tok === flagName) {
-      // skip this and the next token if it exists (assumed to be the value)
-      i += 1;
-      continue;
+// Count the number of passed assertions from a SlimAggregatedResult
+function countPassedAssertions(agg: SlimAggregatedResult): number {
+  let passed = 0;
+  for (const tr of agg.testResults) {
+    for (const ar of tr.testResults || []) {
+      if (ar.status === 'passed') {
+        passed++;
+      }
     }
-    out.push(tok);
   }
-  return out;
+  return passed;
 }
 
 /**
