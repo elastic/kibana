@@ -11,7 +11,7 @@ import type { SavedObject } from '@kbn/core/server';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { AlertingAuthorizationEntity, ReadOperations } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { getMappedParams } from '../../../../rules_client/common/mapped_params_utils';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -183,7 +183,8 @@ async function updateWithOCC<Params extends RuleParams = never>(
     await context.authorization.ensureAuthorized({
       ruleTypeId: alertTypeId,
       consumer,
-      operation: WriteOperations.Update,
+      operation: ReadOperations.Get,
+      // operation: WriteOperations.Update,
       entity: AlertingAuthorizationEntity.Rule,
     });
   } catch (error) {

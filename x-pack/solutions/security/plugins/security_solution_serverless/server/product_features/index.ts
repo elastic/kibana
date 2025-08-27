@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import { getRulesProductFeaturesConfigurator } from '@kbn/security-solution-ess/server/product_features/rules_product_features_config';
 import { getCasesProductFeaturesConfigurator } from './cases_product_features_config';
 import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
 import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
@@ -46,6 +47,7 @@ export const registerProductFeatures = (
     timeline: getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys),
     notes: getNotesProductFeaturesConfigurator(enabledProductFeatureKeys),
     siemMigrations: getSiemMigrationsProductFeaturesConfigurator(enabledProductFeatureKeys),
+    rules: getRulesProductFeaturesConfigurator(enabledProductFeatureKeys),
   });
 
   // enable rule actions based on the enabled product features

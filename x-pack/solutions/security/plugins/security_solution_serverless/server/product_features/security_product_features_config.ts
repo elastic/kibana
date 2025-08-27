@@ -17,7 +17,7 @@ import {
   ProductFeatureSecurityKey,
   SecuritySubFeatureId,
 } from '@kbn/security-solution-features/keys';
-import { SECURITY_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
+import { SECURITY_FEATURE_ID_V4 } from '@kbn/security-solution-features/constants';
 import { APP_ID } from '@kbn/security-solution-plugin/common';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
@@ -62,7 +62,7 @@ const securityProductFeaturesConfig: Record<
 
     baseFeatureConfigModifier: (baseFeatureConfig) => {
       if (
-        !['siem', 'siemV2'].includes(baseFeatureConfig.id) ||
+        !['siem', 'siemV2', 'siemV3'].includes(baseFeatureConfig.id) ||
         !baseFeatureConfig.privileges?.all.replacedBy ||
         !('default' in baseFeatureConfig.privileges.all.replacedBy)
       ) {
@@ -83,9 +83,9 @@ const securityProductFeaturesConfig: Record<
 
               default: baseFeatureConfig.privileges.all.replacedBy.default.map(
                 (privilegesPreference) => {
-                  if (privilegesPreference.feature === SECURITY_FEATURE_ID_V3) {
+                  if (privilegesPreference.feature === SECURITY_FEATURE_ID_V4) {
                     return {
-                      feature: SECURITY_FEATURE_ID_V3,
+                      feature: SECURITY_FEATURE_ID_V4,
                       privileges: [
                         // Enabling sub-features toggle to show that Global Artifact Management is now provided to the user.
                         'minimal_all',

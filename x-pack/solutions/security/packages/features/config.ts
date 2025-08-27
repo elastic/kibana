@@ -12,5 +12,6 @@ export { attackDiscoveryDefaultProductFeaturesConfig } from './src/attack_discov
 export { timelineDefaultProductFeaturesConfig } from './src/timeline/product_feature_config';
 export { notesDefaultProductFeaturesConfig } from './src/notes/product_feature_config';
 export { siemMigrationsDefaultProductFeaturesConfig } from './src/siem_migrations/product_feature_config';
-
+export { exceptionsDefaultProductFeaturesConfig } from './src/exceptions/product_feature_config';
 export { createEnabledProductFeaturesConfigMap } from './src/helpers';
+export { rulesDefaultProductFeaturesConfig } from './src/rules/product_feature_config';

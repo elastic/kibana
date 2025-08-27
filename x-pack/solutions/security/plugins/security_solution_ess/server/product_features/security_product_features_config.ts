@@ -17,7 +17,14 @@ import {
   securityDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
-import { SECURITY_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
+import {
+  ProductFeaturesPrivilegeId,
+  ProductFeaturesPrivileges,
+} from '@kbn/security-solution-features/privileges';
+import {
+  SECURITY_FEATURE_ID_V3,
+  SECURITY_FEATURE_ID_V4,
+} from '@kbn/security-solution-features/constants';
 import { APP_ID } from '@kbn/security-solution-plugin/common';
 
 export const getSecurityProductFeaturesConfigurator =
@@ -85,9 +92,9 @@ const securityProductFeaturesConfig: Record<
             replacedBy: {
               default: baseFeatureConfig.privileges.all.replacedBy.default.map(
                 (privilegesPreference) => {
-                  if (privilegesPreference.feature === SECURITY_FEATURE_ID_V3) {
+                  if (privilegesPreference.feature === SECURITY_FEATURE_ID_V4) {
                     return {
-                      feature: SECURITY_FEATURE_ID_V3,
+                      feature: SECURITY_FEATURE_ID_V4,
                       privileges: [
                         // Enabling sub-features toggle to show that Global Artifact Management is now provided to the user.
                         'minimal_all',
@@ -106,9 +113,9 @@ const securityProductFeaturesConfig: Record<
 
               minimal: baseFeatureConfig.privileges.all.replacedBy.minimal.map(
                 (privilegesPreference) => {
-                  if (privilegesPreference.feature === SECURITY_FEATURE_ID_V3) {
+                  if (privilegesPreference.feature === SECURITY_FEATURE_ID_V4) {
                     return {
-                      feature: SECURITY_FEATURE_ID_V3,
+                      feature: SECURITY_FEATURE_ID_V4,
                       privileges: [
                         'minimal_all',
 

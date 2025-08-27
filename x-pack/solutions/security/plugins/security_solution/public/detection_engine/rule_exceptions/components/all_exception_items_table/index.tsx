@@ -30,7 +30,6 @@ import {
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
-import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsViewerSearchBar } from './search_bar';
 import type { ExceptionListItemIdentifiers } from '../../utils/types';
@@ -45,6 +44,7 @@ import { AddExceptionFlyout } from '../add_exception_flyout';
 import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../rule_management/logic/types';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const StyledText = styled(EuiText)`
   font-style: italic;
@@ -95,9 +95,13 @@ const ExceptionsViewerComponent = ({
   isViewReadOnly,
   onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
-  const { services } = useKibana();
+  const {
+    services: { http },
+  } = useKibana();
   const toasts = useToasts();
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+  const {
+    exceptionsPrivileges: { read: readExceptions, crud: crudExceptions },
+  } = useUserPrivileges();
   const exceptionListsToQuery = useMemo(
     () =>
       rule != null && rule.exceptions_list != null
@@ -277,7 +281,7 @@ const ExceptionsViewerComponent = ({
         data,
       } = await fetchExceptionListsItemsByListIds({
         filter: exceptionListFilter,
-        http: services.http,
+        http,
         listIds: exceptionListsToQuery.map((list) => list.list_id),
         namespaceTypes,
         search: options?.search,
@@ -300,7 +304,7 @@ const ExceptionsViewerComponent = ({
       pagination.pageIndex,
       pagination.pageSize,
       exceptionListsToQuery,
-      services.http,
+      http,
       exceptionListFilter,
       namespaceTypes,
     ]
@@ -315,14 +319,14 @@ const ExceptionsViewerComponent = ({
 
     const { total } = await fetchExceptionListsItemsByListIds({
       filter: undefined,
-      http: services.http,
+      http,
       listIds: exceptionListsToQuery.map((list) => list.list_id),
       namespaceTypes,
       pagination: {},
       signal: abortCtrl.signal,
     });
     return total;
-  }, [exceptionListsToQuery, namespaceTypes, services.http]);
+  }, [exceptionListsToQuery, namespaceTypes, http]);
 
   const handleGetExceptionListItems = useCallback(
     async (options?: GetExceptionItemProps) => {
@@ -432,7 +436,7 @@ const ExceptionsViewerComponent = ({
         setViewerState('deleting');
 
         await deleteExceptionListItemById({
-          http: services.http,
+          http,
           id: itemId,
           namespaceType,
           signal: abortCtrl.signal,
@@ -452,13 +456,13 @@ const ExceptionsViewerComponent = ({
         });
       }
     },
-    [handleGetExceptionListItems, services.http, setViewerState, toasts]
+    [handleGetExceptionListItems, http, setViewerState, toasts]
   );
 
   // User privileges checks
   useEffect((): void => {
-    setReadOnly(isViewReadOnly || !canUserCRUD || !hasIndexWrite);
-  }, [setReadOnly, isViewReadOnly, canUserCRUD, hasIndexWrite]);
+    setReadOnly(readExceptions && (isViewReadOnly || !crudExceptions));
+  }, [setReadOnly, isViewReadOnly, readExceptions, crudExceptions]);
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {
