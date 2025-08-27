@@ -31,6 +31,7 @@ describe('CasesConnectorRunParamsSchema', () => {
           "host.name",
         ],
         "internallyManagedAlerts": null,
+        "isGeneratedByAssistant": null,
         "maximumCasesToOpen": 5,
         "owner": "cases",
         "reopenClosedCases": false,
@@ -340,6 +341,12 @@ describe('CasesConnectorRunParamsSchema', () => {
       expect(CasesConnectorRunParamsSchema.validate(getParams()).internallyManagedAlerts).toBe(
         null
       );
+    });
+  });
+
+  describe('isGeneratedByAssistant', () => {
+    it('defaults the isGeneratedByAssistant to null', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams()).isGeneratedByAssistant).toBe(null);
     });
   });
 });

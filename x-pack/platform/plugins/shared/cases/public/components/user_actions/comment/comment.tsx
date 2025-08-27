@@ -179,6 +179,7 @@ const getCreateCommentUserAction = ({
         attachment,
         outlined: attachment.id === selectedOutlineCommentId,
         isEdit: manageMarkdownEditIds.includes(attachment.id),
+        isGeneratedByAssistant: userAction.isGeneratedByAssistant ?? false,
         commentRefs,
         isLoading: loadingCommentIds.includes(attachment.id),
         caseId: caseData.id,

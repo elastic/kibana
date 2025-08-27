@@ -159,6 +159,7 @@ describe('getCasesConnectorType', () => {
               "groupedAlerts": null,
               "groupingBy": Array [],
               "internallyManagedAlerts": false,
+              "isGeneratedByAssistant": false,
               "maximumCasesToOpen": 5,
               "owner": "cases",
               "reopenClosedCases": false,
@@ -206,6 +207,7 @@ describe('getCasesConnectorType', () => {
               "groupedAlerts": null,
               "groupingBy": Array [],
               "internallyManagedAlerts": false,
+              "isGeneratedByAssistant": false,
               "maximumCasesToOpen": 5,
               "owner": "cases",
               "reopenClosedCases": false,
@@ -251,6 +253,7 @@ describe('getCasesConnectorType', () => {
               "groupedAlerts": null,
               "groupingBy": Array [],
               "internallyManagedAlerts": false,
+              "isGeneratedByAssistant": false,
               "maximumCasesToOpen": 5,
               "owner": "cases",
               "reopenClosedCases": false,
@@ -374,6 +377,22 @@ describe('getCasesConnectorType', () => {
         }
       });
 
+      it('correctly returns `isGeneratedByAssistant` as `false` if rule type is not attack discovery', () => {
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
+
+        for (const consumer of [AlertConsumers.SIEM]) {
+          const connectorParams = adapter.buildActionParams({
+            // @ts-expect-error: not all fields are needed
+            alerts,
+            rule: { ...rule, consumer },
+            params: getParams(),
+            spaceId: 'default',
+          });
+
+          expect(connectorParams.subActionParams.isGeneratedByAssistant).toBe(false);
+        }
+      });
+
       it('correctly returns `groupedAlerts` as `null` if rule type is not attack discovery', () => {
         const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
@@ -442,6 +461,20 @@ describe('getCasesConnectorType', () => {
         expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(true);
       });
 
+      it('returns `isGeneratedByAssistant` set to `true`', () => {
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
+
+        const connectorParams = adapter.buildActionParams({
+          // @ts-expect-error: not all fields are needed
+          alerts: alertsMock,
+          rule: attackDiscoveryRule,
+          params: getParams(),
+          spaceId: 'default',
+        });
+
+        expect(connectorParams.subActionParams.isGeneratedByAssistant).toBe(true);
+      });
+
       it('returns `maximumCasesToOpen` set to `ATTACK_DISCOVERY_MAX_OPEN_CASES`', () => {
         const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
@@ -506,6 +539,7 @@ describe('getCasesConnectorType', () => {
           },
         ]);
         expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(true);
+        expect(connectorParams.subActionParams.isGeneratedByAssistant).toBe(true);
       });
 
       it('correctly returns `groupedAlerts` as empty array in case there are no alerts', () => {
@@ -526,6 +560,7 @@ describe('getCasesConnectorType', () => {
 
         expect(connectorParams.subActionParams.groupedAlerts).toEqual([]);
         expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(true);
+        expect(connectorParams.subActionParams.isGeneratedByAssistant).toBe(true);
       });
 
       it('correctly fallsback to general flow if alerts count is above the limit', () => {
@@ -551,6 +586,7 @@ describe('getCasesConnectorType', () => {
 
         expect(connectorParams.subActionParams.groupedAlerts).toBeNull();
         expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(false);
+        expect(connectorParams.subActionParams.isGeneratedByAssistant).toBe(false);
         expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(DEFAULT_MAX_OPEN_CASES);
         expect(mockLogger.error).toBeCalledWith(
           'Could not setup grouped Attack Discovery alerts, because of error: Error: Circuit breaker: Attack discovery alerts grouping would create more than the maximum number of allowed cases 20.'
@@ -570,6 +606,7 @@ describe('getCasesConnectorType', () => {
 
         expect(connectorParams.subActionParams.groupedAlerts).toBeNull();
         expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(false);
+        expect(connectorParams.subActionParams.isGeneratedByAssistant).toBe(false);
         expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(DEFAULT_MAX_OPEN_CASES);
         expect(mockLogger.error).toBeCalledWith(
           'Could not setup grouped Attack Discovery alerts, because of error: Error: [0.kibana.alert.attack_discovery.alert_ids]: expected value of type [array] but got [undefined]'
