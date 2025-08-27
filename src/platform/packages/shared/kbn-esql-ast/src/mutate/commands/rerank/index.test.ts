@@ -10,16 +10,13 @@
 import { BasicPrettyPrinter } from '../../../pretty_print';
 import * as commands from '..';
 import { EsqlQuery } from '../../../query';
+import type { ESQLAstItem, ESQLCommandOption, ESQLMap } from '../../../types';
 
-/**
- * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
- * get back to it after 9.1 release.
- */
-describe.skip('commands.rerank', () => {
+describe('commands.rerank', () => {
   describe('.list()', () => {
     it('lists the only "RERANK" commands', () => {
       const src =
-        'FROM index | LIMIT 1 | RERANK "star wars" ON title, overview=SUBSTRING(overview, 0, 100), actors WITH rerankerInferenceId | LIMIT 2';
+        'FROM index | LIMIT 1 | RERANK "star wars" ON title, overview=SUBSTRING(overview, 0, 100), actors WITH  { "inference_id": "model_id" } | LIMIT 2';
       const query = EsqlQuery.fromSrc(src);
 
       const nodes = [...commands.rerank.list(query.ast)];
@@ -35,22 +32,24 @@ describe.skip('commands.rerank', () => {
 
   describe('.setQuery()', () => {
     it('can change query', () => {
-      const src = 'FROM index | LIMIT 1 | RERANK "star wars" ON field WITH id | LIMIT 2';
+      const src =
+        'FROM index | RERANK "star wars" ON field WITH { "inference_id": "model_id" } | LIMIT 2';
       const query = EsqlQuery.fromSrc(src);
 
       const cmd = [...commands.rerank.list(query.ast)][0];
       commands.rerank.setQuery(cmd, 'new query');
 
       expect(BasicPrettyPrinter.expression(cmd.query)).toBe('"new query"');
-      expect(query.print()).toBe(
-        'FROM index | LIMIT 1 | RERANK "new query" ON field WITH id | LIMIT 2'
+      expect(query.print({ wrap: Infinity })).toBe(
+        'FROM index | RERANK "new query" ON field WITH {"inference_id": "model_id"} | LIMIT 2'
       );
     });
   });
 
   describe('.setFields()', () => {
     it('can change query', () => {
-      const src = 'FROM index | LIMIT 1 | RERANK "star wars" ON field WITH id | LIMIT 2';
+      const src =
+        'FROM index | RERANK "star wars" ON field WITH { "inference_id": "model_id" } | LIMIT 2';
       const query = EsqlQuery.fromSrc(src);
 
       const cmd = [...commands.rerank.list(query.ast)][0];
@@ -61,23 +60,33 @@ describe.skip('commands.rerank', () => {
         'b',
         '@timestamp',
       ]);
-      expect(query.print()).toBe(
-        'FROM index | LIMIT 1 | RERANK "star wars" ON a, b, @timestamp WITH id | LIMIT 2'
+      expect(query.print({ wrap: Infinity })).toBe(
+        'FROM index | RERANK "star wars" ON a, b, @timestamp WITH {"inference_id": "model_id"} | LIMIT 2'
       );
     });
   });
 
-  describe('.setInferenceId()', () => {
-    it('can change query', () => {
-      const src = 'FROM index | LIMIT 1 | RERANK "star wars" ON field WITH id | LIMIT 2';
+  describe('.setWithParameter()', () => {
+    it('can add and update a new parameter to WITH map', () => {
+      const src =
+        'FROM index | RERANK "star wars" ON field WITH { "inference_id": "model_id" } | LIMIT 2';
       const query = EsqlQuery.fromSrc(src);
 
       const cmd = [...commands.rerank.list(query.ast)][0];
-      commands.rerank.setInferenceId(cmd, 'new_id');
+      commands.rerank.setWithParameter(cmd, 'scoreColumn', 'first_rank_score'); // create
+      commands.rerank.setWithParameter(cmd, 'scoreColumn', 'rank_score'); // update
 
-      expect(BasicPrettyPrinter.expression(cmd.inferenceId)).toBe('new_id');
-      expect(query.print()).toBe(
-        'FROM index | LIMIT 1 | RERANK "star wars" ON field WITH new_id | LIMIT 2'
+      const isWithOption = (arg: ESQLAstItem): arg is ESQLCommandOption =>
+        !!arg && !Array.isArray(arg) && arg.type === 'option' && arg.name === 'with';
+
+      const map = cmd.args.find(isWithOption)!.args[0] as ESQLMap;
+      const scoreColumnEntry = map?.entries?.find(
+        (entry) => entry.key.valueUnquoted === 'scoreColumn'
+      );
+
+      expect(BasicPrettyPrinter.expression(scoreColumnEntry!.value)).toBe('"rank_score"');
+      expect(query.print({ wrap: Infinity })).toBe(
+        'FROM index | RERANK "star wars" ON field WITH {"inference_id": "model_id", "scoreColumn": "rank_score"} | LIMIT 2'
       );
     });
   });
