@@ -119,7 +119,6 @@ export class ScopedDiscoverEBTManager {
         fieldsMetadata,
         fieldNames: [fieldName],
       });
-      console.log({ fieldName });
 
       // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
       if (fields[fieldName]?.short) {
@@ -132,7 +131,7 @@ export class ScopedDiscoverEBTManager {
     if (filterOperation) {
       eventData[FIELD_USAGE_FILTER_OPERATION] = filterOperation;
     }
-    console.log({ FIELD_USAGE_EVENT_TYPE, eventData });
+
     this.reportEvent(FIELD_USAGE_EVENT_TYPE, eventData);
   }
 
@@ -194,33 +193,30 @@ export class ScopedDiscoverEBTManager {
       return;
     }
 
+    const isOnlyFullTextSearch = fieldNames.length === 1 && fieldNames[0] === FREE_TEXT;
+
     const eventData: FieldUsageInQueryEventData = {
       [FIELD_USAGE_EVENT_NAME]: eventName,
     };
 
-    if (fieldsMetadata) {
-      console.log({ fieldNames });
+    // Handle full text search vs field-specific queries
+    if (isOnlyFullTextSearch) {
+      eventData[FIELD_USAGE_IN_QUERY_FIELD_NAMES] = [FREE_TEXT];
+    } else if (fieldsMetadata) {
+      // Process actual field names
+      const fields = await this.getFieldsFromMetadata({
+        fieldsMetadata,
+        fieldNames,
+      });
 
-      // Handle full text search vs field-specific queries
-      if (fieldNames.length === 1 && fieldNames[0] === FREE_TEXT) {
-        eventData[FIELD_USAGE_IN_QUERY_FIELD_NAMES] = [FREE_TEXT];
-      } else {
-        // Process actual field names
-        const fields = await this.getFieldsFromMetadata({
-          fieldsMetadata,
-          fieldNames,
-        });
+      // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
+      const categorizedFields = fieldNames.map((fieldName) =>
+        fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
+      );
 
-        // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
-        const categorizedFields = fieldNames.map((fieldName) =>
-          fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
-        );
-
-        eventData[FIELD_USAGE_IN_QUERY_FIELD_NAMES] = categorizedFields;
-      }
+      eventData[FIELD_USAGE_IN_QUERY_FIELD_NAMES] = categorizedFields;
     }
 
-    console.log({ FIELD_USAGE_EVENT_TYPE, eventData });
     this.reportEvent(FIELD_USAGE_IN_QUERY_EVENT_TYPE, eventData);
   }
 
