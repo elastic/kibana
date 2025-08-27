@@ -19,13 +19,7 @@ import {
   ChatCompleteMetadata,
   ChatCompleteOptions,
   ChatCompleteAPI,
-} from '@kbn/inference-common';
-import {
-  withoutTokenCountEvents,
-  isChatCompletionMessageEvent,
-  MessageRole,
-  OutputEventType,
-  ToolChoiceType,
+  OutputEventType
 } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
