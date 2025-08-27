@@ -405,7 +405,7 @@ describe('OtelFieldsRepository', () => {
         expect(fields['scope.attributes.service.name']).toBeDefined();
         expect(fields['attributes.service.name']).toBeDefined();
         expect(fields['service.name']).toBeDefined();
-        
+
         // All should resolve to the same underlying field
         expect(fields['resource.attributes.service.name'].name).toBe('service.name');
         expect(fields['scope.attributes.service.name'].name).toBe('service.name');

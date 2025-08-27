@@ -113,4 +113,3 @@ export interface ProcessingOptions {
   cleanBriefText?: boolean;
   validateOutput?: boolean;
 }
-

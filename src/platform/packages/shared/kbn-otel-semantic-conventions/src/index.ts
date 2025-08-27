@@ -8,10 +8,7 @@
  */
 
 // Export core types derived from generated file
-export type {
-  TSemconvFields,
-  SemconvFieldName,
-} from './types';
+export type { TSemconvFields, SemconvFieldName } from './types';
 
 // Export generated data (will be available after build)
 export { semconvFlat } from './generated/resolved-semconv';
