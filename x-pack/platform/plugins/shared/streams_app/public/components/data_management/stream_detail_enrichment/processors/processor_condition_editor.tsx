@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { useController } from 'react-hook-form';
-import { ConditionEditor } from '../../condition_editor';
 import type { ProcessorFormState } from '../types';
+import { ProcessorConditionEditorWrapper } from '../../condition_editor';
 
 export const ProcessorConditionEditor = () => {
   const { field } = useController<ProcessorFormState, 'where'>({ name: 'where' });
@@ -18,9 +18,6 @@ export const ProcessorConditionEditor = () => {
   }
 
   return (
-    <ConditionEditor
-      where={field.value}
-      onConditionChange={(params) => field.onChange(params.where)}
-    />
+    <ProcessorConditionEditorWrapper condition={field.value} onConditionChange={field.onChange} />
   );
 };

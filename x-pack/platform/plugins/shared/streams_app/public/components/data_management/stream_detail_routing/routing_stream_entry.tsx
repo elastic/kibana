@@ -90,7 +90,7 @@ export function RoutingStreamEntry({
             <EuiIcon type="grabOmnidirectional" />
           </EuiPanel>
         </EuiFlexItem>
-        {!isRoutingEnabled(routingRule.status!) && (
+        {!isRoutingEnabled(routingRule.status) && (
           <EuiBadge color="hollow">
             {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
               defaultMessage: 'Disabled',
@@ -135,9 +135,10 @@ export function RoutingStreamEntry({
       {isEditing && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <RoutingConditionEditor
-            where={routingRule.where}
+            condition={routingRule.where}
             status={routingRule.status}
-            onConditionChange={({ where, status }) => onChange({ where, status })}
+            onConditionChange={(cond) => onChange({ where: cond })}
+            onStatusChange={(status) => onChange({ status })}
           />
           <EditRoutingRuleControls
             relatedStreams={availableStreams.filter(

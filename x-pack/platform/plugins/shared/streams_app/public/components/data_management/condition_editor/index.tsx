@@ -35,17 +35,14 @@ import type { RoutingDefinition, RoutingStatus } from '@kbn/streams-schema';
 import { isRoutingEnabled } from '@kbn/streams-schema';
 import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 
-export type RoutingConditionEditorProps = ConditionEditorProps;
+type RoutingConditionChangeParams = Omit<RoutingDefinition, 'destination'>;
+
+export type RoutingConditionEditorProps = ConditionEditorProps & {
+  onStatusChange: (params: RoutingConditionChangeParams['status']) => void;
+};
 
 export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
-  const isEnabled = isRoutingEnabled(props.status!);
-
-  const handleStatusChange = (newStatus: RoutingStatus) => {
-    props.onConditionChange({
-      where: props.where,
-      status: newStatus,
-    });
-  };
+  const isEnabled = isRoutingEnabled(props.status);
 
   return (
     <EuiForm fullWidth>
@@ -70,14 +67,18 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
           })}
           compressed
           checked={isEnabled}
-          onChange={(event) => {
-            handleStatusChange(event.target.checked ? 'enabled' : 'disabled');
-          }}
+          onChange={(event) => props.onStatusChange(event.target.checked ? 'enabled' : 'disabled')}
         />
       </EuiFormRow>
       <ConditionEditor {...props} />
     </EuiForm>
   );
+}
+
+export type ProcessorConditionEditorProps = Omit<ConditionEditorProps, 'status'>;
+
+export function ProcessorConditionEditorWrapper(props: ProcessorConditionEditorProps) {
+  return <ConditionEditor status="enabled" {...props} />;
 }
 
 const operatorMap = {
@@ -102,26 +103,25 @@ const operatorOptions: EuiSelectOption[] = Object.entries(operatorMap).map(([val
   text,
 }));
 
-type RoutingConditionChangeParams = Omit<RoutingDefinition, 'destination'>;
-
-export interface ConditionEditorProps extends RoutingConditionChangeParams {
-  onConditionChange: (params: RoutingConditionChangeParams) => void;
+interface ConditionEditorProps {
+  condition: Condition;
+  status: RoutingStatus;
+  onConditionChange: (condition: Condition) => void;
 }
 
 export function ConditionEditor(props: ConditionEditorProps) {
-  const isInvalidCondition = !isCondition(props.where);
+  const { status, onConditionChange } = props;
 
-  const condition = alwaysToEmptyEquals(props.where);
+  const isInvalidCondition = !isCondition(props.condition);
+
+  const condition = alwaysToEmptyEquals(props.condition);
 
   const isFilterCondition = isPlainObject(condition) && isFilterConditionObject(condition);
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
 
   const handleConditionChange = (updatedCondition: Condition) => {
-    props.onConditionChange({
-      where: emptyEqualsToAlways(updatedCondition),
-      status: props.status,
-    });
+    onConditionChange(emptyEqualsToAlways(updatedCondition));
   };
 
   return (
@@ -138,7 +138,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
           compressed
           checked={usingSyntaxEditor}
           onChange={toggleSyntaxEditor}
-          disabled={props.status === 'disabled'}
+          disabled={status === 'disabled'}
         />
       }
       isInvalid={isInvalidCondition}
@@ -164,12 +164,12 @@ export function ConditionEditor(props: ConditionEditorProps) {
             }
           }}
           options={{
-            readOnly: props.status === 'disabled',
+            readOnly: status === 'disabled',
           }}
         />
       ) : isFilterCondition ? (
         <FilterForm
-          disabled={props.status === 'disabled'}
+          disabled={status === 'disabled'}
           condition={condition}
           onConditionChange={handleConditionChange}
         />
