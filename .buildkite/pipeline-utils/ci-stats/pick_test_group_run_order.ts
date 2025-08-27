@@ -480,7 +480,7 @@ export async function pickTestGroupRunOrder() {
     timeout_in_minutes: 120,
     key: 'jest',
     agents: {
-      ...expandAgentQueue('n2-standard-16'),
+      ...expandAgentQueue('n2-16-spot'),
     },
     env: {
       SCOUT_TARGET_TYPE: 'local',
