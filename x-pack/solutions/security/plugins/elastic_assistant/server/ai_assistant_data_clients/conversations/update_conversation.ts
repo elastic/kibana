@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import type {
   ConversationResponse,
   Reader,
   ConversationUpdateProps,
   Provider,
   MessageRole,
-  ConversationSummary,
   UUID,
   ContentReferences,
 } from '@kbn/elastic-assistant-common';
-import { getConversation } from './get_conversation';
 import { getUpdateScript } from './helpers';
-import type { EsReplacementSchema } from './types';
+import type { EsConversationSchema, EsReplacementSchema } from './types';
+import type { DocumentsDataWriter } from '../../lib/data_stream/documents_data_writer';
+import { transformESToConversations } from './transforms';
 
 export interface UpdateConversationSchema {
   id: UUID;
@@ -45,91 +45,50 @@ export interface UpdateConversationSchema {
     provider?: Provider;
     model?: string;
   };
-  summary?: ConversationSummary;
+  summary?: {
+    '@timestamp': string;
+    semantic_content?: string;
+    summarized_message_ids?: UUID[];
+  };
   exclude_from_last_conversation_storage?: boolean;
   replacements?: EsReplacementSchema[];
   updated_at?: string;
 }
 
 export interface UpdateConversationParams {
-  esClient: ElasticsearchClient;
+  conversationUpdateProps: ConversationUpdateProps;
+  dataWriter: DocumentsDataWriter;
   logger: Logger;
   user?: AuthenticatedUser;
-  conversationIndex: string;
-  conversationUpdateProps: ConversationUpdateProps;
-  isPatch?: boolean;
 }
 
 export const updateConversation = async ({
-  esClient,
-  logger,
-  conversationIndex,
   conversationUpdateProps,
-  isPatch,
+  dataWriter,
+  logger,
   user,
 }: UpdateConversationParams): Promise<ConversationResponse | null> => {
   const updatedAt = new Date().toISOString();
   const params = transformToUpdateScheme(updatedAt, conversationUpdateProps);
 
-  const maxRetries = 3;
-  let attempt = 0;
-  let response;
-  while (attempt < maxRetries) {
-    try {
-      response = await esClient.updateByQuery({
-        conflicts: 'proceed',
-        index: conversationIndex,
-        query: {
-          ids: {
-            values: [params.id],
-          },
-        },
-        refresh: true,
-        script: getUpdateScript({ conversation: params, isPatch }).script,
-      });
-      if (
-        (response?.updated && response?.updated > 0) ||
-        (response?.failures && response?.failures.length > 0)
-      ) {
-        break;
-      }
-      if (
-        response?.version_conflicts &&
-        response?.version_conflicts > 0 &&
-        response?.updated === 0
-      ) {
-        attempt++;
-        if (attempt < maxRetries) {
-          logger.warn(
-            `Version conflict detected, retrying updateConversation (attempt ${
-              attempt + 1
-            }) for conversation ID: ${params.id}`
-          );
-          await new Promise((resolve) => setTimeout(resolve, 100 * attempt));
-        }
-      } else {
-        break;
-      }
-    } catch (err) {
-      logger.warn(`Error updating conversation: ${err} by ID: ${params.id}`);
-      throw err;
-    }
-  }
+  const { errors, docs_updated: docsUpdated } = await dataWriter.bulk({
+    documentsToUpdate: [params],
+    getUpdateScript: (document: UpdateConversationSchema) =>
+      getUpdateScript({ conversation: document }),
+    authenticatedUser: user,
+  });
 
-  if (response && response?.failures && response?.failures.length > 0) {
+  if (errors && errors.length > 0) {
     logger.warn(
-      `Error updating conversation: ${response?.failures.map((f) => f.id)} by ID: ${params.id}`
+      `Error updating conversation: ${errors.map((err) => err.message)} by ID: ${params.id}`
     );
     return null;
   }
 
-  const updatedConversation = await getConversation({
-    esClient,
-    conversationIndex,
-    id: params.id,
-    logger,
-    user,
-  });
+  const updatedConversation = transformESToConversations(
+    docsUpdated as EsConversationSchema[]
+  )?.[0];
+
   return updatedConversation;
 };
 
@@ -142,6 +101,7 @@ export const transformToUpdateScheme = (
     messages,
     replacements,
     id,
+    summary,
   }: ConversationUpdateProps
 ): UpdateConversationSchema => {
   return {
@@ -198,6 +158,15 @@ export const transformToUpdateScheme = (
                 }
               : {}),
           })),
+        }
+      : {}),
+    ...(summary
+      ? {
+          summary: {
+            '@timestamp': updatedAt,
+            semantic_content: summary.semanticContent,
+            summarized_message_ids: summary.summarizedMessageIds,
+          },
         }
       : {}),
   };
