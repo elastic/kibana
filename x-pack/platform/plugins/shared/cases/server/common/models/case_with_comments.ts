@@ -248,7 +248,7 @@ export class CaseCommentModel {
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
-      const attachmentsWithoutDuplicateAlerts = await this.filterDuplicatedAlerts([
+      const attachmentsWithoutDuplicateAlerts = await this.filterDuplicatedEvents([
         { ...commentReq, id },
       ]);
 
@@ -290,7 +290,7 @@ export class CaseCommentModel {
     }
   }
 
-  private async filterDuplicatedAlerts(
+  private async filterDuplicatedEvents(
     attachments: CommentRequestWithId
   ): Promise<CommentRequestWithId> {
     /**
@@ -299,7 +299,7 @@ export class CaseCommentModel {
     const removeItemsByPosition = (items: string[], positionsToRemove: number[]): string[] =>
       items.filter((_, itemIndex) => !positionsToRemove.some((position) => position === itemIndex));
 
-    const dedupedAlertAttachments: CommentRequestWithId = [];
+    const dedupedAttachments: CommentRequestWithId = [];
     const idsAlreadySeen = new Set();
     const alertsAttachedToCase = await this.params.services.attachmentService.getter.getAllAlertIds(
       {
@@ -333,20 +333,19 @@ export class CaseCommentModel {
           alertIdsNotAlreadyAttachedToCase.length > 0 &&
           alertIdsNotAlreadyAttachedToCase.length === alertIndicesNotAlreadyAttachedToCase.length
         ) {
-          dedupedAlertAttachments.push({
+          dedupedAttachments.push({
             ...attachment,
             alertId: alertIdsNotAlreadyAttachedToCase,
             index: alertIndicesNotAlreadyAttachedToCase,
           });
-
-          return;
         }
+        return;
       }
 
       if (isCommentRequestTypeEvent(attachment)) {
         const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
 
-        dedupedAlertAttachments.push({
+        dedupedAttachments.push({
           ...attachment,
           eventId: ids,
           index: indices,
@@ -355,10 +354,10 @@ export class CaseCommentModel {
         return;
       }
 
-      dedupedAlertAttachments.push(attachment);
+      dedupedAttachments.push(attachment);
     });
 
-    return dedupedAlertAttachments;
+    return dedupedAttachments;
   }
 
   private getAlertAttachments(attachments: AttachmentRequest[]): AlertAttachmentPayload[] {
@@ -522,7 +521,7 @@ export class CaseCommentModel {
     try {
       await this.validateCreateCommentRequest(attachments);
 
-      const attachmentWithoutDuplicateAlerts = await this.filterDuplicatedAlerts(attachments);
+      const attachmentWithoutDuplicateAlerts = await this.filterDuplicatedEvents(attachments);
 
       if (attachmentWithoutDuplicateAlerts.length === 0) {
         return this;
