@@ -6,10 +6,9 @@
  */
 import { consoleTutorials } from '@kbn/search-code-examples';
 import { TryInConsoleButton } from '@kbn/try-in-console';
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../hooks/use_kibana';
 
 interface TutorialMetadata {
@@ -29,7 +28,7 @@ export const ConsoleTutorialsGroup = () => {
       title: 'Search Basics',
       telemetryId: 'console_tutorials_search_basics',
       i18nID: 'xpack.searchHomepage.consoleTutorials.basicsDescription',
-      description: 'Learn how to create an index and execute your first search.',
+      description: 'Learn how to create an index, add documents, and basic search techniques.',
       request: consoleTutorials.basics,
       duration: 3,
     },
@@ -37,7 +36,8 @@ export const ConsoleTutorialsGroup = () => {
       title: 'Semantic Search',
       telemetryId: 'console_tutorials_semantic_search',
       i18nID: 'xpack.searchHomepage.consoleTutorials.semanticDescription',
-      description: 'Make search understand context and meaning.',
+      description:
+        'Learn semantic search techniques to understand intent and deliver more accurate, relevant results.',
       request: consoleTutorials.semanticSearch,
       duration: 3,
     },
@@ -45,14 +45,15 @@ export const ConsoleTutorialsGroup = () => {
       title: 'ES|QL',
       telemetryId: 'console_tutorials_esql',
       i18nID: 'xpack.searchHomepage.consoleTutorials.esqlDescription',
-      description: 'Query your data with familiar SQL-like syntax.',
+      description:
+        "Learn how to use Elastic's piped query language to simplify data investigations.",
       request: consoleTutorials.esql,
       duration: 4,
     },
   ];
 
   return (
-    <EuiFlexGroup gutterSize="xl" direction={'column'} justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="s" direction={'column'} justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
           <span>
@@ -67,32 +68,30 @@ export const ConsoleTutorialsGroup = () => {
           {tutorials.map((tutorial, index) => (
             <EuiFlexItem key={index} grow={false} style={{ minWidth: 300, maxWidth: 300 }}>
               <EuiCard
-                paddingSize="l"
+                paddingSize="xs"
                 display="plain"
                 title={tutorial.title}
                 titleSize="xs"
                 description={i18n.translate(tutorial.i18nID, {
                   defaultMessage: tutorial.description,
                 })}
-                betaBadgeProps={{
-                  label: `${tutorial.duration} min`,
-                  tooltipContent: (
-                    <FormattedMessage
-                      id="xpack.searchHomepage.consoleTutorials.durationTooltip"
-                      defaultMessage="Estimated time to complete tutorial is {duration} minutes"
-                      values={{ duration: tutorial.duration }}
-                    />
-                  ),
-                }}
+                textAlign="left"
               >
-                <TryInConsoleButton
-                  request={tutorial.request}
-                  application={application}
-                  consolePlugin={consolePlugin}
-                  sharePlugin={share}
-                  content="Run in Console"
-                  telemetryId={tutorial.telemetryId}
-                />
+                <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center" wrap>
+                  <EuiFlexItem grow={false}>
+                    <TryInConsoleButton
+                      request={tutorial.request}
+                      application={application}
+                      consolePlugin={consolePlugin}
+                      sharePlugin={share}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow" iconType="clock">
+                      {tutorial.duration} min
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiCard>
             </EuiFlexItem>
           ))}
