@@ -6,4 +6,4 @@
  */
 
 export { createLogEventsRenderer } from './create_log_events_renderer';
-export * from './types';
+export type * from './types';
