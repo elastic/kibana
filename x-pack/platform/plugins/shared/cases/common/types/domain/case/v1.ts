@@ -51,6 +51,7 @@ export const CaseSeverityRt = rt.union([
 
 export const CaseSettingsRt = rt.strict({
   syncAlerts: rt.boolean,
+  extractObservables: rt.boolean,
 });
 
 const CaseBaseFields = {

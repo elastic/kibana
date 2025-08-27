@@ -45,7 +45,7 @@ export const createQueryWithMarkup =
       return hasText(node) && childrenDontHaveText;
     });
 
-interface FormTestComponentProps {
+export interface FormTestComponentProps {
   formDefaultValue?: Record<string, unknown>;
   onSubmit?: jest.Mock;
   schema?: FormSchema<Record<string, unknown>>;
@@ -60,7 +60,6 @@ export const FormTestComponent: FC<PropsWithChildren<FormTestComponentProps>> = 
   schema,
 }) => {
   const { form } = useForm({ onSubmit, defaultValue: formDefaultValue, schema });
-
   return (
     <Form form={form}>
       {children}

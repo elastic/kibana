@@ -6,9 +6,10 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { AttachmentType, getObservablesFromEcsData } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { Ecs as ElasticEcs } from '@elastic/ecs';
 import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
@@ -83,20 +84,27 @@ export const useAddToCaseActions = ({
   }, [onMenuItemClick, onCaseSuccess]);
 
   const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal(selectCaseArgs);
-
+  const observables = useMemo(
+    () => (ecsData ? getObservablesFromEcsData(ecsData as unknown as ElasticEcs) : undefined), // TODO: fix this type cast
+    [ecsData]
+  );
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
     createCaseFlyout.open({
       attachments: caseAttachments,
+      observables,
     });
-  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
+  }, [onMenuItemClick, createCaseFlyout, caseAttachments, observables]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    selectCaseModal.open({ getAttachments: () => caseAttachments });
-  }, [caseAttachments, onMenuItemClick, selectCaseModal]);
+    selectCaseModal.open({
+      getAttachments: () => caseAttachments,
+      getObservables: observables ? () => observables : undefined,
+    });
+  }, [caseAttachments, onMenuItemClick, observables, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
     if (

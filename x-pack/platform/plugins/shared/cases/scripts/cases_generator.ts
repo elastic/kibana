@@ -123,6 +123,7 @@ const createCase = (counter: number, owner: string, reqId: string): CasePostRequ
   },
   settings: {
     syncAlerts: false,
+    extractObservables: true,
   },
   owner: owner ?? 'cases',
   customFields: [],

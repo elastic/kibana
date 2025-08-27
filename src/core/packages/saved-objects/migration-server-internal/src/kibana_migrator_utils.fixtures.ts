@@ -1708,6 +1708,9 @@ export const INDEX_MAP_BEFORE_SPLIT: IndexMap = {
               syncAlerts: {
                 type: 'boolean',
               },
+              extractObservables: {
+                type: 'boolean',
+              },
             },
           },
           severity: {

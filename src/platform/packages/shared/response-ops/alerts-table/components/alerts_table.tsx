@@ -621,7 +621,12 @@ const AlertsTableContent = typedForwardRef(
             <CasesContext
               owner={casesConfiguration?.owner ?? []}
               permissions={casesPermissions}
-              features={{ alerts: { sync: casesConfiguration?.syncAlerts ?? false } }}
+              features={{
+                alerts: {
+                  sync: casesConfiguration?.syncAlerts ?? false,
+                  extractObservables: casesConfiguration?.extractObservables ?? false,
+                },
+              }}
             >
               <AlertsDataGrid {...dataGridProps} />
             </CasesContext>

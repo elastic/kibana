@@ -125,7 +125,7 @@ export const getPayload = (
       type === UserActionTypes.create_case && { status: CaseStatuses.open }),
     ...(type === UserActionTypes.create_case && isEmpty(payload.owner) && { owner }),
     ...(type === UserActionTypes.create_case &&
-      isEmpty(payload.settings) && { settings: { syncAlerts: true } }),
+      isEmpty(payload.settings) && { settings: { syncAlerts: true, extractObservables: true } }),
   };
 };
 

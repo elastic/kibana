@@ -68,3 +68,5 @@ export { createUICapabilities, type CasesUiCapabilities } from './utils/capabili
 export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';
 export type { SingleCaseMetricsResponse, CasesMetricsResponse } from './types/api';
+
+export { getObservablesFromEcsData } from './observables/utils';

@@ -74,7 +74,12 @@ describe('use cases add to existing case modal hook', () => {
           basePath: '/jest',
           dispatch,
           features: {
-            alerts: { sync: true, enabled: true, isExperimental: false },
+            alerts: {
+              sync: true,
+              enabled: true,
+              isExperimental: false,
+              extractObservables: true,
+            },
             metrics: [],
             observables: { enabled: true },
           },

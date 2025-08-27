@@ -78,7 +78,7 @@ describe('utils', () => {
         category: 'categorty',
         severity: CaseSeverity.HIGH as const,
         description: 'Cool description',
-        settings: { syncAlerts: false },
+        settings: { syncAlerts: false, extractObservables: true },
         customFields: [{ key: 'key', type: CustomFieldTypes.TEXT as const, value: 'text' }],
       };
 
@@ -149,6 +149,7 @@ describe('utils', () => {
       fields: { incidentTypes: null, severityCode: null },
       customFields: {},
       syncAlerts: false,
+      extractObservables: true,
     };
     const serializedFormData = {
       title: 'title',
@@ -287,6 +288,7 @@ describe('utils', () => {
           description: 'description',
           settings: {
             syncAlerts: false,
+            extractObservables: true,
           },
           tags: [],
           connector: {
@@ -325,6 +327,7 @@ describe('utils', () => {
           description: 'description',
           settings: {
             syncAlerts: false,
+            extractObservables: true,
           },
           tags: [],
           connector: {

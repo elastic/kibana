@@ -29,6 +29,9 @@ import { TemplateSelector } from './templates';
 import { getInitialCaseValue } from './utils';
 import { CaseFormFields } from '../case_form_fields';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
+import { Observables } from '../case_form_fields/observables';
+import type { ObservablePost } from '../../../common/types/api';
+import { ObservablesToggle } from '../case_form_fields/observables_toggle';
 
 export interface CreateCaseFormFieldsProps {
   configuration: CasesConfigurationUI;
@@ -36,6 +39,9 @@ export interface CreateCaseFormFieldsProps {
   isLoading: boolean;
   withSteps: boolean;
   draftStorageKey: string;
+  observables: ObservablePost[];
+  selectedObservables: ObservablePost[];
+  setObservables: (observables: ObservablePost[]) => void;
 }
 
 const transformTemplateCaseFieldsToCaseFormFields = (
@@ -64,9 +70,25 @@ const transformTemplateCaseFieldsToCaseFormFields = (
 const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ configuration, connectors, isLoading, withSteps, draftStorageKey }) => {
+  ({
+    configuration,
+    connectors,
+    isLoading,
+    withSteps,
+    draftStorageKey,
+    observables,
+    selectedObservables,
+    setObservables,
+  }) => {
     const { reset, updateFieldValues, isSubmitting, setFieldValue } = useFormContext();
-    const { isSyncAlertsEnabled, connectorsAuthorized } = useCasesFeatures();
+    const {
+      isSyncAlertsEnabled,
+      isExtractObservablesEnabled,
+      observablesAuthorized,
+      isObservablesFeatureEnabled,
+   , connectorsAuthorized } = useCasesFeatures();
+    const canExtractObservables =
+      observablesAuthorized && isExtractObservablesEnabled && isObservablesFeatureEnabled;
     const configurationOwner = configuration.owner;
 
     /**
@@ -136,13 +158,35 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       }),
       [configuration.customFields, draftStorageKey, isSubmitting]
     );
-
+    const showThirdStep = isSyncAlertsEnabled || canExtractObservables;
     const thirdStep = useMemo(
       () => ({
         title: i18n.STEP_THREE_TITLE,
-        children: <SyncAlertsToggle isLoading={isSubmitting} />,
+        children: (
+          <>
+            {isSyncAlertsEnabled && <SyncAlertsToggle isLoading={isSubmitting} />}
+            {canExtractObservables && (
+              <>
+                <ObservablesToggle isLoading={isSubmitting} />
+                <Observables
+                  isLoading={isSubmitting}
+                  observables={observables}
+                  selectedObservables={selectedObservables}
+                  setObservables={setObservables}
+                />
+              </>
+            )}
+          </>
+        ),
       }),
-      [isSubmitting]
+      [
+        isSubmitting,
+        isSyncAlertsEnabled,
+        canExtractObservables,
+        observables,
+        setObservables,
+        selectedObservables,
+      ]
     );
 
     const fourthStep = useMemo(
@@ -164,10 +208,10 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       () => [
         firstStep,
         secondStep,
-        ...(isSyncAlertsEnabled ? [thirdStep] : []),
+        ...(showThirdStep ? [thirdStep] : []),
         ...(connectorsAuthorized ? [fourthStep] : []),
       ],
-      [firstStep, secondStep, isSyncAlertsEnabled, thirdStep, connectorsAuthorized, fourthStep]
+      [firstStep, secondStep, showThirdStep, thirdStep, connectorsAuthorized, fourthStep]
     );
 
     return (
@@ -210,7 +254,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
                 </EuiFlexItem>
                 <EuiFlexItem>{secondStep.children}</EuiFlexItem>
               </EuiFlexGroup>
-              {isSyncAlertsEnabled && (
+              {showThirdStep && (
                 <EuiFlexGroup direction="column">
                   <EuiFlexItem>
                     <EuiTitle size="s">
