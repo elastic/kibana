@@ -540,22 +540,6 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.EsWorkflowExecution.executionGraph",
-            "type": "Any",
-            "tags": [],
-            "label": "executionGraph",
-            "description": [
-              "Serialized graphlib.Graph"
-            ],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/workflows",
             "id": "def-common.EsWorkflowExecution.currentNodeId",
             "type": "string",
             "tags": [],
@@ -563,6 +547,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.stack",
+            "type": "Array",
+            "tags": [],
+            "label": "stack",
+            "description": [],
+            "signature": [
+              "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -813,6 +811,17 @@
             "type": "number",
             "tags": [],
             "label": "topologicalIndex",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowStepExecution.executionIndex",
+            "type": "number",
+            "tags": [],
+            "label": "executionIndex",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -1331,46 +1340,6 @@
             "description": [],
             "signature": [
               "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.WorkflowExecutionEngineModel",
-        "type": "Interface",
-        "tags": [],
-        "label": "WorkflowExecutionEngineModel",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/workflows",
-            "scope": "common",
-            "docId": "kibKbnWorkflowsPluginApi",
-            "section": "def-common.WorkflowExecutionEngineModel",
-            "text": "WorkflowExecutionEngineModel"
-          },
-          " extends Pick<{ id: string; name: string; tags: string[]; enabled: boolean; createdBy: string; createdAt: Date; definition: { version: \"1\"; name: string; enabled: boolean; steps: ({ type: \"foreach\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"if\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[] | undefined; } | { type: \"wait\"; name: string; with: { duration: string; }; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"parallel\"; name: string; branches: { name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"merge\"; name: string; sources: string[]; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: string; name: string; timeout?: number | undefined; with?: Record<string, any> | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; 'connector-id'?: string | undefined; })[]; triggers: ({ type: \"alert\"; enabled: boolean; with?: { rule_id: string; } | { rule_name: string; } | undefined; } | { type: \"scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; } | { type: \"manual\"; enabled: boolean; })[]; tags?: string[] | undefined; description?: string | undefined; settings?: { timezone?: string | undefined; retry?: { 'max-attempts'?: number | undefined; 'timeout-seconds'?: number | undefined; } | undefined; templating?: { engine: \"mustache\" | \"nunjucks\"; } | undefined; } | undefined; inputs?: ({ type: \"string\"; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; } | { type: \"number\"; name: string; description?: string | undefined; default?: number | undefined; required?: boolean | undefined; } | { type: \"boolean\"; name: string; description?: string | undefined; default?: boolean | undefined; required?: boolean | undefined; } | { type: \"choice\"; options: string[]; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; })[] | undefined; consts?: Record<string, string | number | boolean | any[] | Record<string, any> | {}> | undefined; }; yaml: string; lastUpdatedAt: Date; lastUpdatedBy: string; deleted_at: Date | null; description?: string | undefined; }, \"id\" | \"name\" | \"enabled\" | \"definition\">"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/workflows",
-            "id": "def-common.WorkflowExecutionEngineModel.executionGraph",
-            "type": "Any",
-            "tags": [],
-            "label": "executionGraph",
-            "description": [
-              "Serialized graphlib.Graph"
-            ],
-            "signature": [
-              "any"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -2173,9 +2142,24 @@
         "label": "WorkflowContext",
         "description": [],
         "signature": [
-          "{ spaceId: string; steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { item?: any; } | undefined; }"
+          "{ spaceId: string; steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: any[]; item?: any; } | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.WorkflowExecutionEngineModel",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowExecutionEngineModel",
+        "description": [],
+        "signature": [
+          "{ id: string; name: string; enabled: boolean; definition: { version: \"1\"; name: string; enabled: boolean; steps: ({ type: \"foreach\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"if\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[] | undefined; } | { type: \"wait\"; name: string; with: { duration: string; }; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"parallel\"; name: string; branches: { name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"merge\"; name: string; sources: string[]; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: string; name: string; timeout?: number | undefined; with?: Record<string, any> | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; 'connector-id'?: string | undefined; })[]; triggers: ({ type: \"alert\"; enabled: boolean; with?: { rule_id: string; } | { rule_name: string; } | undefined; } | { type: \"scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; } | { type: \"manual\"; enabled: boolean; })[]; tags?: string[] | undefined; description?: string | undefined; settings?: { timezone?: string | undefined; retry?: { 'max-attempts'?: number | undefined; 'timeout-seconds'?: number | undefined; } | undefined; templating?: { engine: \"mustache\" | \"nunjucks\"; } | undefined; } | undefined; inputs?: ({ type: \"string\"; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; } | { type: \"number\"; name: string; description?: string | undefined; default?: number | undefined; required?: boolean | undefined; } | { type: \"boolean\"; name: string; description?: string | undefined; default?: boolean | undefined; required?: boolean | undefined; } | { type: \"choice\"; options: string[]; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; })[] | undefined; consts?: Record<string, string | number | boolean | any[] | Record<string, any> | {}> | undefined; }; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2545,7 +2529,7 @@
         "label": "WorkflowContextSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ spaceId: Zod.ZodString; workflowRunId: Zod.ZodString; event: Zod.ZodOptional<Zod.ZodAny>; consts: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; steps: Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<{ output: Zod.ZodOptional<Zod.ZodAny>; error: Zod.ZodOptional<Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { error?: any; output?: any; }, { error?: any; output?: any; }>>; foreach: Zod.ZodOptional<Zod.ZodObject<{ item: Zod.ZodAny; }, \"strip\", Zod.ZodTypeAny, { item?: any; }, { item?: any; }>>; now: Zod.ZodOptional<Zod.ZodDate>; }, \"strip\", Zod.ZodTypeAny, { spaceId: string; steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { item?: any; } | undefined; }, { spaceId: string; steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { item?: any; } | undefined; }>"
+          "Zod.ZodObject<{ spaceId: Zod.ZodString; workflowRunId: Zod.ZodString; event: Zod.ZodOptional<Zod.ZodAny>; consts: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; steps: Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<{ output: Zod.ZodOptional<Zod.ZodAny>; error: Zod.ZodOptional<Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { error?: any; output?: any; }, { error?: any; output?: any; }>>; foreach: Zod.ZodOptional<Zod.ZodObject<{ items: Zod.ZodArray<Zod.ZodAny, \"many\">; index: Zod.ZodNumber; item: Zod.ZodAny; total: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { index: number; total: number; items: any[]; item?: any; }, { index: number; total: number; items: any[]; item?: any; }>>; now: Zod.ZodOptional<Zod.ZodDate>; }, \"strip\", Zod.ZodTypeAny, { spaceId: string; steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: any[]; item?: any; } | undefined; }, { spaceId: string; steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: any[]; item?: any; } | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,

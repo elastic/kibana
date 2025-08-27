@@ -1400,6 +1400,18 @@
                 "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts"
               },
               {
+                "plugin": "productIntercept",
+                "path": "x-pack/platform/plugins/private/product_intercept/public/telemetry/event_reporter.test.ts"
+              },
+              {
+                "plugin": "productIntercept",
+                "path": "x-pack/platform/plugins/private/product_intercept/public/telemetry/event_reporter.test.ts"
+              },
+              {
+                "plugin": "productIntercept",
+                "path": "x-pack/platform/plugins/private/product_intercept/public/telemetry/event_reporter.test.ts"
+              },
+              {
                 "plugin": "data",
                 "path": "src/platform/plugins/shared/data/public/search/search_interceptor/search_interceptor.test.ts"
               },
