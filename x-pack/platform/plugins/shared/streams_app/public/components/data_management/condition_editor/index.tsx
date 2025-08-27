@@ -153,22 +153,6 @@ export function ConditionEditor(props: ConditionEditorProps) {
       }
     >
       {usingSyntaxEditor ? (
-        <CodeEditor
-          dataTestSubj="streamsAppConditionEditorCodeEditor"
-          height={200}
-          languageId="json"
-          value={JSON.stringify(condition, null, 2)}
-          onChange={(value) => {
-            try {
-              handleConditionChange(JSON.parse(value));
-            } catch (error: unknown) {
-              // do nothing
-            }
-          }}
-          options={{
-            readOnly: status === 'disabled',
-          }}
-        />
         <div ref={containerRef} style={{ width: '100%', height: 200, overflow: 'hidden' }}>
           <CodeEditor
             dataTestSubj="streamsAppConditionEditorCodeEditor"
@@ -185,8 +169,8 @@ export function ConditionEditor(props: ConditionEditorProps) {
             editorDidMount={setupResizeChecker}
             editorWillUnmount={destroyResizeChecker}
             options={{
-            readOnly: status === 'disabled',
-          }}
+              readOnly: status === 'disabled',
+            }}
           />
         </div>
       ) : isFilterCondition ? (
