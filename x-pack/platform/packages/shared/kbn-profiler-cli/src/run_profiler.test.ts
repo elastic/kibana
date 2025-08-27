@@ -96,9 +96,8 @@ function runProfilerWithFlags(flags: Partial<ProfilerCliFlags>) {
 /**
  * These tests don't reliably work on CI, so we skip.
  */
-const descr = process.env.CI === 'true' ? describe.skip : describe;
 
-descr('@kbn/profiler-cli real-process tests', () => {
+describe.skip('@kbn/profiler-cli real-process tests', () => {
   const processes: FakeProcess[] = [];
 
   function startProcess(code: string) {

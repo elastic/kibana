@@ -480,18 +480,10 @@ export async function pickTestGroupRunOrder() {
     timeout_in_minutes: 120,
     key: 'jest',
     agents: {
-      ...expandAgentQueue('n2-4-spot'),
+      ...expandAgentQueue('n2-standard-16'),
     },
     env: {
       SCOUT_TARGET_TYPE: 'local',
-    },
-    retry: {
-      automatic: [
-        { exit_status: '-1', limit: 3 },
-        ...(JEST_CONFIGS_RETRY_COUNT > 0
-          ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-          : []),
-      ],
     },
   };
 
