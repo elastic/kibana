@@ -218,7 +218,7 @@ export function setupSavedObjects(
     name: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: false,
-    namespaceType: 'multiple-isolated',
+    namespaceType: 'agnostic',
     mappings: ruleTemplateMappings,
     modelVersions: ruleTemplateModelVersions,
   });
