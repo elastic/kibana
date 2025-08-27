@@ -541,7 +541,7 @@ export function getDiscoverStateContainer({
     const { fieldsMetadata } = services;
 
     if (isOfAggregateQueryType(query)) {
-      const fieldNames = getQueryColumnsFromESQLQuery(query.esql);
+      const fieldNames = [...new Set(getQueryColumnsFromESQLQuery(query.esql))];
 
       if (fieldNames.length === 0) {
         return;
@@ -556,7 +556,7 @@ export function getDiscoverStateContainer({
         return;
       }
 
-      const fieldNames = getKqlFieldNamesFromExpression(query.query);
+      const fieldNames = [...new Set(getKqlFieldNamesFromExpression(query.query))];
 
       if (fieldNames.length === 0) {
         return;
