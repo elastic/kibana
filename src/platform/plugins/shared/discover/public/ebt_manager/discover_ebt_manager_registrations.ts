@@ -100,7 +100,8 @@ export const registerDiscoverEBTManagerAnalytics = (
         items: {
           type: 'keyword',
           _meta: {
-            description: 'List of field names that are used in the query',
+            description:
+              "List of field names if they are part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
           },
         },
       },
