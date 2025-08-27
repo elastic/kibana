@@ -31,7 +31,7 @@ import { getInstalledPackages } from '../services/epm/packages';
 import { getPrereleaseFromSettings } from '../services/epm/packages/get_prerelease_setting';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
-export const VERSION = '1.0.2';
+export const VERSION = '1.0.3';
 const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '10m';
@@ -293,20 +293,12 @@ export class AutoInstallContentPackagesTask {
     esClient: ElasticsearchClient,
     datasetsOfInstalledContentPackages: string[]
   ): Promise<string[]> {
-    const whereClause =
-      datasetsOfInstalledContentPackages.length > 0
-        ? `| WHERE data_stream.dataset NOT IN (${datasetsOfInstalledContentPackages
-            .map((dataset) => `"${dataset}"`)
-            .join(',')})`
-        : '';
-    const query = `FROM logs-*,metrics-*,traces-* 
-      | KEEP @timestamp, data_stream.dataset 
-      | WHERE @timestamp > NOW() - 15 minutes 
-      | STATS COUNT(*) BY data_stream.dataset ${whereClause}`;
-    const response = await esClient.esql.query({ query });
-    this.logger.info(`[AutoInstallContentPackagesTask] ESQL query took: ${response.took}ms`);
-
-    const datasetsWithData: string[] = response.values.map((value: any[]) => value[1]);
+    const body = await esClient.indices.getDataStream({
+      name: 'logs-*,metrics-*,traces-* ',
+    });
+    const datasetsWithData: string[] = body.data_streams
+      .map((dataStream: any) => dataStream.name.split('-')[1])
+      .filter((dataset) => !datasetsOfInstalledContentPackages.includes(dataset));
     this.logger.info(
       `[AutoInstallContentPackagesTask] Found datasets with data: ${datasetsWithData.join(', ')}`
     );

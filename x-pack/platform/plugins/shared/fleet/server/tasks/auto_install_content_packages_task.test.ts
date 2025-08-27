@@ -122,14 +122,19 @@ describe('AutoInstallContentPackagesTask', () => {
     beforeEach(async () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
-      esClient.esql.query.mockResolvedValue({
-        took: 100,
-        values: [
-          [1, 'system.cpu'],
-          [2, 'system.memory'],
-          [3, 'system.test'],
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          {
+            name: 'logs-system.cpu-default',
+          } as any,
+          {
+            name: 'logs-system.memory-default',
+          } as any,
+          {
+            name: 'logs-system.test-default',
+          } as any,
         ],
-      } as any);
+      });
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAutoInstallContentPackages: true } as any);
@@ -172,12 +177,6 @@ describe('AutoInstallContentPackagesTask', () => {
         automaticInstall: true,
       });
       expect(packageClientMock.installPackage).toHaveBeenCalledTimes(2);
-      expect(esClient.esql.query).toHaveBeenCalledWith({
-        query: `FROM logs-*,metrics-*,traces-* 
-      | KEEP @timestamp, data_stream.dataset 
-      | WHERE @timestamp > NOW() - 15 minutes 
-      | STATS COUNT(*) BY data_stream.dataset `,
-      });
     });
 
     it('should install content packages and filter out installed datasets', async () => {
@@ -199,12 +198,6 @@ describe('AutoInstallContentPackagesTask', () => {
         automaticInstall: true,
       });
       expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
-      expect(esClient.esql.query).toHaveBeenCalledWith({
-        query: `FROM logs-*,metrics-*,traces-* 
-      | KEEP @timestamp, data_stream.dataset 
-      | WHERE @timestamp > NOW() - 15 minutes 
-      | STATS COUNT(*) BY data_stream.dataset | WHERE data_stream.dataset NOT IN ("system.test")`,
-      });
     });
 
     it('should not call registry if cached', async () => {
@@ -256,7 +249,7 @@ describe('AutoInstallContentPackagesTask', () => {
       await runTask();
 
       expect(packageClientMock.installPackage).not.toHaveBeenCalled();
-      expect(esClient.esql.query).not.toHaveBeenCalled();
+      expect(esClient.indices.getDataStream).not.toHaveBeenCalled();
     });
   });
 });
