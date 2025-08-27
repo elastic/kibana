@@ -475,6 +475,33 @@ owner:
       'Name input_only and version 0.2.0 do not match top-level directory input_only-0.1.0'
     );
   });
+
+  it('should parse package successfully with discovery field', async () => {
+    const packageInfo: ArchivePackage = await _generatePackageInfoFromPaths(
+      [
+        'x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/good_content/0.1.0/docs/README.md',
+        'x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/good_content/0.1.0/manifest.yml',
+      ],
+      'x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/good_content/0.1.0'
+    );
+
+    expect(packageInfo).toEqual(
+      expect.objectContaining({
+        discovery: {
+          fields: [
+            {
+              name: 'process.pid',
+            },
+          ],
+          datasets: [
+            {
+              name: 'good_content.dataset',
+            },
+          ],
+        },
+      })
+    );
+  });
 });
 
 describe('parseAndVerifyDataStreams', () => {
