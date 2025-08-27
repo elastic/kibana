@@ -39,6 +39,9 @@ export function runJestAll() {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const defaultJestConfig = require('./run_jest_all.config') as Config.InitialOptions;
 
+      // Effective retryFiles flag: honor --noRetryFiles if provided via argv
+      const effectiveRetryFiles = flags.retryFiles ?? true;
+
       let list: string[] = [];
 
       if (flags.config) {
@@ -69,7 +72,18 @@ export function runJestAll() {
         ...Object.fromEntries(
           Object.entries(originalArgv).filter(
             ([key]) =>
-              !['group', 'config', 'c', 'isolate'].includes(key) && key !== '_' && key !== '$0'
+              ![
+                'group',
+                'config',
+                'c',
+                'isolate',
+                'retryFiles',
+                'no-retryFiles',
+                'noRetryFiles',
+                'testRetries',
+              ].includes(key) &&
+              key !== '_' &&
+              key !== '$0'
           )
         ),
       };
@@ -157,7 +171,14 @@ export function runJestAll() {
 
       log.info(`Running ${configsToRun.length} configs`);
 
-      const retriesFile = await writeRetriesFile({ dataDir, retries: 3, log });
+      // Determine test-level retry count from flag (defaults to 3)
+      // Flags are typed as unknown; coerce to number with fallback
+      const testRetriesValue = Number(flags.testRetries ?? 3);
+      const retriesFile = await writeRetriesFile({
+        dataDir,
+        retries: Number.isFinite(testRetriesValue) ? testRetriesValue : 3,
+        log,
+      });
 
       const jestArgv = yargs.options(yargsOptions).parse();
 
@@ -167,7 +188,6 @@ export function runJestAll() {
         dataDir,
         log,
       });
-
       const runDataDir = Path.join(dataDir, objectHash(flags));
 
       await Fs.promises.mkdir(runDataDir, { recursive: true });
@@ -286,6 +306,28 @@ export function runJestAll() {
           });
 
           process.exit(1);
+        }
+
+        if (!effectiveRetryFiles) {
+          log.info('File-level retries disabled via flag; skipping retry loop.');
+          const aggregated = initialRunResults.testResults as SlimAggregatedResult;
+          if (aggregated.numFailedTests) {
+            const failedFilesForConfig = aggregated.testResults
+              .filter((tr) => tr.numFailingTests > 0)
+              .map((tr) => ({
+                path: tr.testFilePath,
+                failedTests: (tr.testResults || [])
+                  .filter((ar) => ar.status === 'failed')
+                  .map((ar) => ar.fullName || ar.title || '(unnamed)'),
+                failureMessage: tr.failureMessage,
+              }));
+
+            allFailures.push({
+              configPath: initialRunConfigFilepath,
+              failedFiles: failedFilesForConfig,
+            });
+          }
+          continue;
         }
 
         log.warning('First attempt failed; starting scoped retries for failed test files...');
@@ -439,14 +481,17 @@ export function runJestAll() {
     },
     {
       flags: {
-        boolean: ['group', 'isolate'],
+        boolean: ['group', 'isolate', 'retryFiles'],
         string: ['config'],
+        number: ['testRetries'],
         alias: {
           c: 'config',
         },
         allowUnexpected: true,
         default: {
           group: true,
+          retryFiles: true,
+          testRetries: 3,
         },
       } as const,
     }

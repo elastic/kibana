@@ -75,7 +75,8 @@ if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
 fi
 
 if [[ "$TEST_TYPE" == "unit" ]]; then
-  cmd=$cmd"\" node ./scripts/jest_all ${selection_args[*]} $parallelism --coverage=false --passWithNoTests"
+  # Disable file-level retries for CI unit runs; jest_all will respect --noRetryFiles
+  cmd=$cmd"\" node ./scripts/jest_all ${selection_args[*]} $parallelism --coverage=false --passWithNoTests --no-retryFiles"
 else
   cmd=$cmd"\" node ./scripts/jest ${selection_args[*]} $parallelism --coverage=false --passWithNoTests"
 fi

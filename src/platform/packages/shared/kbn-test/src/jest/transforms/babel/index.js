@@ -53,8 +53,6 @@ function getMaterializedBabelOptions({ cwd, rootDir }) {
     });
 
     optionsJson = JSON.stringify(complete);
-
-    console.log(optionsJson);
   } catch (_e) {
     // Fall back to stringifying base config if materialization fails
     try {
