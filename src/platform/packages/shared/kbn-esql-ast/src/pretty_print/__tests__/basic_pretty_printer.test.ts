@@ -909,4 +909,64 @@ describe('single line expression', () => {
   });
 });
 
-it.todo('test for NOT unary expression');
+describe('unary operator precedence and grouping', () => {
+  test('NOT should not parenthesize literals', () => {
+    assertReprint('ROW NOT a');
+  });
+
+  test('NOT should not parenthesize literals unnecessarily', () => {
+    assertReprint('ROW NOT (a)', 'ROW NOT a');
+  });
+
+  test('NOT should parenthesize OR expressions', () => {
+    assertReprint('ROW NOT (a OR b)');
+  });
+
+  test('NOT should parenthesize AND expressions', () => {
+    assertReprint('ROW NOT (a AND b)');
+  });
+
+  test('NOT should not parenthesize expressions with higher precedence', () => {
+    assertReprint('ROW NOT (a > b)', 'ROW NOT a > b');
+  });
+
+  test('NOT should parenthesize OR expressions on the right side', () => {
+    assertReprint('ROW NOT a OR NOT (a == b OR b == c)');
+  });
+
+  test('unary minus should parenthesize addition', () => {
+    assertReprint('ROW -(a + b)');
+  });
+
+  test('unary minus should parenthesize subtraction', () => {
+    assertReprint('ROW -(a - b)');
+  });
+
+  test('unary minus should not parenthesize addition of negative number', () => {
+    assertReprint('ROW -a + -b');
+  });
+
+  test('unary minus should not parenthesize subtraction of negative number', () => {
+    assertReprint('ROW -a - -b');
+  });
+
+  test('unary minus should not parenthesize multiplication', () => {
+    assertReprint('ROW -a * b');
+  });
+
+  test('should not unnecessarily parenthesize multiplication', () => {
+    assertReprint('ROW a * b', 'ROW a * b');
+  });
+
+  test('should parenthesize addition in multiplication', () => {
+    assertReprint('ROW (a + b) * c');
+  });
+
+  test('should not parenthesize multiplication in addition', () => {
+    assertReprint('ROW a + b * c');
+  });
+
+  test('should parenthesize multiplication of addition', () => {
+    assertReprint('ROW (a + b) * (c + d)');
+  });
+});
