@@ -57,11 +57,7 @@ export const isOptionsListESQLControlState = (
  * ----------------------------------------------------------------
  */
 
-export type OptionsListSuggestions = Array<{
-  value: OptionsListSelection;
-  docCount?: number;
-  key?: string; // For static values, this allows the value text to be changed and updated in the UI automatically
-}>;
+export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCount?: number }>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
@@ -129,10 +125,11 @@ export const isOptionsListESQLRequest = (request: unknown): request is OptionsLi
 
 /**
  * The Options list request body is sent to the serverside Options List route and is used to create the ES query.
+ * This request is only used for DSL options lists, not ES|QL
  */
 export interface OptionsListRequestBody
   extends Pick<
-    OptionsListControlState,
+    OptionsListDataControlState,
     'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
   > {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
