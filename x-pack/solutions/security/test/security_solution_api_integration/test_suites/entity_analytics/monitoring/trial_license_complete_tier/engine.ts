@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
   const waitForPrivMonUsersToBeSynced = async (expectedLength = 1) => {
-    let lastSeenLength = 0;
+    let lastSeenLength = -1;
 
     return retry.waitForWithTimeout('users to be synced', 90000, async () => {
       const res = await api.listPrivMonUsers({ query: {} });
@@ -358,6 +358,7 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await createUserIndex(indexName);
         await enablePrivmonSetting(kibanaServer);
+        await privMonUtils.initPrivMonEngine();
       });
 
       afterEach(async () => {
@@ -370,7 +371,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should sync plain index', async () => {
-        // Bulk insert documents
         const uniqueUsernames = [
           'Luke Skywalker',
           'Leia Organa',
@@ -388,11 +388,11 @@ export default ({ getService }: FtrProviderContext) => {
         const uniqueUserOps = uniqueUsernames.flatMap(nameToOp);
         const repeatedUserOps = Array.from({ length: 150 }).flatMap(() => nameToOp('C-3PO'));
 
-        const bulkBody = [...uniqueUserOps, ...repeatedUserOps];
-        await es.bulk({ index: indexName, body: bulkBody, refresh: true });
-
-        // Call init to trigger the sync
-        await privMonUtils.initPrivMonEngine();
+        await es.bulk({
+          index: indexName,
+          body: [...uniqueUserOps, ...repeatedUserOps],
+          refresh: true,
+        });
 
         // register entity source
         const response = await api.createEntitySource({ body: entitySource });
@@ -402,6 +402,7 @@ export default ({ getService }: FtrProviderContext) => {
         const sources = await api.listEntitySources({ query: {} });
         const names = sources.body.map((s: any) => s.name);
         expect(names).toContain('StarWars');
+        await privMonUtils.scheduleMonitoringEngineNow();
         await privMonUtils.waitForSyncTaskRun();
         await waitForPrivMonUsersToBeSynced(uniqueUsernames.length);
         // Check if the users are indexed
