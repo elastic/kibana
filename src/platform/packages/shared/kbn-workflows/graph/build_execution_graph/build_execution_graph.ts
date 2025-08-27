@@ -30,6 +30,10 @@ import type {
   ExitRetryNode,
   EnterContinueNode,
   ExitContinueNode,
+  EnterOnFailureZoneNode,
+  ExitOnFailureZoneNode,
+  EnterPathNode,
+  ExitPathNode,
 } from '../../types/execution';
 
 /**
@@ -47,6 +51,13 @@ interface ContinueStep extends BaseStep {
   name: string;
   type: 'continue';
   steps: BaseStep[];
+}
+
+interface FallbackStep extends BaseStep {
+  name: string;
+  type: 'fall-back';
+  normalPathSteps: BaseStep[];
+  fallbackPathSteps: BaseStep[];
 }
 
 function getNodeId(node: BaseStep): string {
@@ -193,6 +204,89 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
   return exitConditionNode;
 }
 
+export function visitFallbackStep(
+  graph: graphlib.Graph,
+  previousStep: any,
+  currentStep: FallbackStep
+): any {
+  const enterFallbackNodeId = getNodeId(currentStep);
+  const exitFallbackNodeId = `exitCondition(${enterFallbackNodeId})`;
+  const trueSteps: BaseStep[] = currentStep.normalPathSteps || [];
+  const falseSteps: BaseStep[] = currentStep.fallbackPathSteps || [];
+  const enterNormalPathNodeId = `normalPath_${enterFallbackNodeId}`;
+  const exitNormalPathNodeId = `exit_${enterNormalPathNodeId}`;
+  const enterFallbackPathNodeId = `fallbackPath_${enterFallbackNodeId}`;
+  const exitFallbackPathNodeId = `exit_${enterFallbackPathNodeId}`;
+
+  const enterFallbackNode: EnterOnFailureZoneNode = {
+    id: enterFallbackNodeId,
+    exitNodeId: exitFallbackNodeId,
+    type: 'enter-on-failure-zone',
+    enterNormalPathNodeId,
+    exitNormalPathNodeId,
+    enterFallbackPathNodeId,
+    exitFallbackPathNodeId,
+  };
+  const exitFallbackNode: ExitOnFailureZoneNode = {
+    type: 'exit-on-failure-zone',
+    id: exitFallbackNodeId,
+    enterNodeId: enterFallbackNodeId,
+  };
+  const enterNormalPathNode: EnterPathNode = {
+    id: enterFallbackNode.enterNormalPathNodeId,
+    type: 'enter-normal-path',
+    enterNodeId: enterFallbackNode.enterNormalPathNodeId,
+  };
+
+  graph.setNode(enterNormalPathNode.id, enterNormalPathNode);
+  graph.setEdge(enterFallbackNodeId, enterNormalPathNode.id);
+  let thenPreviousStep: any = enterNormalPathNode;
+  trueSteps.forEach(
+    (ifTrueCurrentStep: any) =>
+      (thenPreviousStep = visitAbstractStep(graph, thenPreviousStep, ifTrueCurrentStep))
+  );
+  const exitNormalPathNode: ExitPathNode = {
+    id: enterFallbackNode.exitNormalPathNodeId,
+    type: 'exit-normal-path',
+    enterNodeId: enterFallbackNode.enterNormalPathNodeId,
+  };
+  graph.setNode(exitNormalPathNode.id, exitNormalPathNode);
+  graph.setEdge(getNodeId(thenPreviousStep), exitNormalPathNode.id);
+  graph.setEdge(exitNormalPathNode.id, exitFallbackNode.id);
+
+  if (falseSteps?.length > 0) {
+    const enterFallbackPathNode: EnterPathNode = {
+      id: enterFallbackNode.enterFallbackPathNodeId,
+      type: 'enter-failure-path',
+      enterNodeId: enterFallbackNode.exitFallbackPathNodeId,
+    };
+    graph.setNode(enterFallbackPathNode.id, enterFallbackPathNode);
+    graph.setEdge(enterFallbackNodeId, enterFallbackPathNode.id);
+    let elsePreviousStep: any = enterFallbackPathNode;
+    falseSteps.forEach(
+      (ifFalseCurrentStep: any) =>
+        (elsePreviousStep = visitAbstractStep(graph, elsePreviousStep, ifFalseCurrentStep))
+    );
+    const exitFallbackPathNode: ExitPathNode = {
+      id: enterFallbackNode.exitFallbackPathNodeId,
+      type: 'exit-failure-path',
+      enterNodeId: enterFallbackNode.enterFallbackPathNodeId,
+    };
+    graph.setNode(exitFallbackPathNode.id, exitFallbackPathNode);
+    graph.setEdge(getNodeId(elsePreviousStep), exitFallbackPathNode.id);
+    graph.setEdge(exitFallbackPathNode.id, exitFallbackNode.id);
+  }
+
+  graph.setNode(exitFallbackNode.id, exitFallbackNode);
+  graph.setNode(enterFallbackNodeId, enterFallbackNode);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), enterFallbackNodeId);
+  }
+
+  return exitFallbackNode;
+}
+
 function visitRetryStep(graph: graphlib.Graph, previousStep: any, currentStep: RetryStep): any {
   const enterRetryNodeId = getNodeId(currentStep);
   const retryNestedSteps: BaseStep[] = currentStep.steps || [];
@@ -316,7 +410,7 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
    * The order affects what context will be available in the step if/foreach/etc operation.
    */
 
-  if ((currentStep as BaseStep)?.['on-failure']?.continue) {
+  if ((currentStep as any)?.['on-failure']?.continue) {
     // Wrap the current step in a continue step
     // and remove the continue from the current step's on-failure to avoid infinite nesting
     // The continue logic will be handled by the outer continue step
@@ -328,13 +422,30 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
       steps: [
         handleStepLevelOperations({
           ...currentStep,
-          'on-failure': omit(currentStep['on-failure'], ['continue']) as any,
-        }),
+          'on-failure': omit((currentStep as any)['on-failure'], ['continue']) as any,
+        } as any),
       ],
     } as ContinueStep;
   }
 
-  if ((currentStep as BaseStep)?.['on-failure']?.retry) {
+  if ((currentStep as any)?.['on-failure']?.['fallback-step']) {
+    // Wrap the current step in a fallback step
+    // and remove the fallback-step from the current step's on-failure to avoid infinite nesting
+    return {
+      name: `fallback_${getNodeId(currentStep)}`,
+      type: 'fall-back',
+      normalPathSteps: [
+        handleStepLevelOperations({
+          ...currentStep,
+          'on-failure': omit((currentStep as any)['on-failure'], ['fallback-step']) as any,
+        } as any),
+      ],
+      fallbackPathSteps:
+        [(currentStep as any)?.['on-failure']?.['fallback-step'] as BaseStep] || [],
+    } as FallbackStep;
+  }
+
+  if ((currentStep as any)?.['on-failure']?.retry) {
     // Wrap the current step in a retry step
     // and remove the retry from the current step's on-failure to avoid infinite nesting
     // The retry logic will be handled by the outer retry step
@@ -346,10 +457,10 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
       steps: [
         handleStepLevelOperations({
           ...currentStep,
-          'on-failure': omit(currentStep['on-failure'], ['retry']) as any,
-        }),
+          'on-failure': omit((currentStep as any)['on-failure'], ['retry']) as any,
+        } as any),
       ],
-      retry: (currentStep as BaseStep)['on-failure']?.retry,
+      retry: (currentStep as any)['on-failure']?.retry,
     } as RetryStep;
   }
 

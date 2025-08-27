@@ -62,4 +62,8 @@ export type {
   AtomicGraphNode,
   WaitGraphNodeSchema,
   WaitGraphNode,
+  EnterOnFailureZoneNode,
+  ExitOnFailureZoneNode,
+  EnterPathNode,
+  ExitPathNode,
 } from './execution';
