@@ -181,8 +181,8 @@ export class SiemMigrationTaskRunner<
     }
   }
 
-  /* Prepares the invokable task with raw input and output. */
-  async prepareTaskInvoke(input: P, config: RunnableConfig<C>) {
+  /** Executes the task with raw input and config, and returns the output promise. */
+  async executeTask(input: P, config: RunnableConfig<C>) {
     assert(this.task, 'Migration task is not defined');
     return this.task(input, config);
   }
@@ -194,7 +194,7 @@ export class SiemMigrationTaskRunner<
   ): Promise<Invoke<I>> => {
     const input = await this.prepareTaskInput(migrationItem);
     return async () => {
-      const output = await this.prepareTaskInvoke(input, config);
+      const output = await this.executeTask(input, config);
       return this.processTaskOutput(migrationItem, output);
     };
   };

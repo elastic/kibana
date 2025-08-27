@@ -32,9 +32,7 @@ export type SiemMigrationEvaluatorConstructor<
   C extends object = {},
   O extends object = {}
 > = new (
-  taskRunner: SiemMigrationTaskRunner<M, I, P, C, O>,
-  dependencies: SiemMigrationsClientDependencies,
-  logger: Logger
+  ...params: ConstructorParameters<typeof SiemMigrationsBaseEvaluator>
 ) => SiemMigrationsBaseEvaluator<M, I, P, C, O>;
 
 export abstract class SiemMigrationsBaseEvaluator<
@@ -86,10 +84,10 @@ export abstract class SiemMigrationsBaseEvaluator<
 
     // create the migration task after setup
     const evaluators = this.getEvaluators();
-    const migrateItemTask = (params: P) =>
-      this.taskRunner.prepareTaskInvoke(params, invocationConfig ?? {});
+    const executeMigrationTask = (params: P) =>
+      this.taskRunner.executeTask(params, invocationConfig ?? {});
 
-    evaluate(migrateItemTask, {
+    evaluate(executeMigrationTask, {
       data: langsmithOptions.dataset,
       experimentPrefix: connector.name,
       evaluators,

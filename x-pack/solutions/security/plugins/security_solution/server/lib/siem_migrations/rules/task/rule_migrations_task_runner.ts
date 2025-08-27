@@ -112,8 +112,4 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
       comments: migrationOutput.comments,
     };
   }
-
-  getMigrateItemTask() {
-    return this.createMigrateItemTask();
-  }
 }
