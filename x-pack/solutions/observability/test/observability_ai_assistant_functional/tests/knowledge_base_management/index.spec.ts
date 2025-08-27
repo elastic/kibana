@@ -139,10 +139,18 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       async function setUserInstructionContent(content?: string) {
         const editor = await find.byCssSelector(`#${ui.pages.kbManagementTab.entryMarkdownEditor}`);
-        await editor.clearValue();
-        if (content) {
-          await editor.type(content);
-        }
+        await retry.try(async () => {
+          await editor.clearValue();
+          if (content) {
+            await editor.type(content);
+          }
+          const actualValue = await editor.getAttribute('value');
+          if (actualValue !== (content ?? '')) {
+            throw new Error(
+              `Expected editor value to be "${content ?? ''}" but found "${actualValue}"`
+            );
+          }
+        });
       }
 
       before(async () => {
