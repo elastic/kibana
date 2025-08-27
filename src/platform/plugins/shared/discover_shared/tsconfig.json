@@ -14,5 +14,6 @@
     "@kbn/discover-utils",
     "@kbn/core",
     "@kbn/unified-data-table",
+    "@kbn/es-query",
   ]
 }

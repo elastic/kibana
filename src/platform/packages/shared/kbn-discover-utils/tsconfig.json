@@ -27,12 +27,5 @@
     "@kbn/apm-sources-access-plugin",
     "@kbn/data-plugin",
     "@kbn/core-ui-settings-browser",
-    "@kbn/saved-search-plugin",
-    "@kbn/ui-actions-plugin",
-    "@kbn/embeddable-plugin",
-    "@kbn/inspector-plugin",
-    "@kbn/presentation-publishing",
-    "@kbn/unified-data-table",
-    "@kbn/embeddable-enhanced-plugin"
   ]
 }
