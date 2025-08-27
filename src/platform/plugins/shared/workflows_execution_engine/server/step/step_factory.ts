@@ -26,12 +26,6 @@ import {
   ExitIfNodeImpl,
 } from './if_step';
 import { WaitStepImpl } from './wait_step/wait_step';
-// Import specific step implementations
-// import { ForEachStepImpl } from './foreach-step'; // To be created
-// import { IfStepImpl } from './if-step'; // To be created
-// import { AtomicStepImpl } from './atomic-step'; // To be created
-// import { ParallelStepImpl } from './parallel-step'; // To be created
-// import { MergeStepImpl } from './merge-step'; // To be created
 
 export class StepFactory {
   constructor(
@@ -92,7 +86,7 @@ export class StepFactory {
         );
       case 'http':
         return new HttpStepImpl(
-          step as BaseStep,
+          step,
           this.contextManager,
           this.workflowRuntime,
           this.workflowLogger,
