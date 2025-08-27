@@ -8,12 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public/actions';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DefaultDataControlState } from '../../common';
 import type { CustomOptionsComponentProps } from '../controls/data_controls/types';
-import { DataViewField } from '@kbn/data-views-plugin/common';
 
 export type ControlTypeAction<State extends DefaultDataControlState = DefaultDataControlState> =
   Action<

@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import { untilPluginStartServicesReady } from '../../services/kibana_services';
-import { registerControlPanelType } from '../../actions/control_panel_actions';
-
 export function registerTimeSliderControl() {
   // registerControlPanelType(TIME_SLIDER_CONTROL, async () => {
   //   const [{ getTimesliderControlFactory }] = await Promise.all([
