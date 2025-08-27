@@ -25,6 +25,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_eve
 import { WaitStepImpl } from './wait_step/wait_step';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './retry_step';
+import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './continue_step';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -69,6 +70,10 @@ export class StepFactory {
         );
       case 'exit-retry':
         return new ExitRetryNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+      case 'enter-continue':
+        return new EnterContinueNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+      case 'exit-continue':
+        return new ExitContinueNodeImpl(this.workflowRuntime);
       case 'enter-if':
         return new EnterIfNodeImpl(
           step as any,
