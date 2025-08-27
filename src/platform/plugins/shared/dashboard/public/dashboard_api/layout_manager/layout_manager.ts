@@ -103,7 +103,9 @@ export function initializeLayoutManager(
 
   const childrenLoading$: Observable<boolean> = combineLatest([children$, layout$]).pipe(
     map(([children, layout]) => {
-      const expectedChildCount = Object.keys(layout.panels).length; // TODO: this should be VISIBLE panel count
+      const expectedChildCount = Object.values(layout.panels).filter((panel) => {
+        return panel.gridData.sectionId ? !isSectionCollapsed(panel.gridData.sectionId) : true;
+      }).length;
       const currentChildCount = Object.keys(children).length;
       return expectedChildCount !== currentChildCount;
     }),
