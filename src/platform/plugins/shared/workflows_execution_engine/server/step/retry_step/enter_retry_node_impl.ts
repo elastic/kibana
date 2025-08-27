@@ -64,7 +64,7 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
   private async initializeRetry(): Promise<void> {
     await this.workflowRuntime.startStep(this.node.id);
     await this.workflowRuntime.setStepState(this.node.id, {
-      attempt: 1,
+      attempt: 0,
     });
     this.workflowRuntime.goToNextStep();
   }
