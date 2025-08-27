@@ -8,7 +8,6 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
 import type { ScheduleMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/schedule_now.gen';
 import {
   API_VERSIONS,
@@ -20,6 +19,7 @@ import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setti
 import { createEngineStatusService } from '../engine/status_service';
 import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
 import { monitoringEntitySourceType } from '../saved_objects';
+import { isTaskAlreadyRunningError } from '../tasks/privilege_monitoring_task';
 
 export const scheduleNowMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -73,6 +73,16 @@ export const scheduleNowMonitoringEngineRoute = (
             },
           });
         } catch (e) {
+          if (isTaskAlreadyRunningError(e)) {
+            return siemResponse.error({
+              statusCode: 409,
+              body: {
+                message: 'Monitoring engine is already running',
+                full_error: JSON.stringify(e),
+              },
+            });
+          }
+
           const error = transformError(e);
           logger.error(`Error scheduling privilege monitoring engine: ${error.message}`);
           return siemResponse.error({
