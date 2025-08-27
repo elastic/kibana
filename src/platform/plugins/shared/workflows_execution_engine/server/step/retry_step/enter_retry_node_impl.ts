@@ -38,7 +38,7 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
   public async catchError(): Promise<void> {
     const retryState = this.workflowRuntime.getStepState(this.node.id)!;
 
-    if (retryState.attempt <= this.node.configuration['max-attempts']) {
+    if (retryState.attempt < this.node.configuration['max-attempts']) {
       // If the retry attempt is within the allowed limit, re-enter the retry step
       // Call setWorkflowError with undefined to exit catchError loop and continue execution
       this.workflowRuntime.goToStep(this.node.id);
@@ -64,7 +64,7 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
   private async initializeRetry(): Promise<void> {
     await this.workflowRuntime.startStep(this.node.id);
     await this.workflowRuntime.setStepState(this.node.id, {
-      attempt: 1,
+      attempt: 0,
     });
     this.workflowRuntime.goToNextStep();
   }

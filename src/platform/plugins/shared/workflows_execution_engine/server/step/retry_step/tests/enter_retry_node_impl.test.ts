@@ -62,9 +62,9 @@ describe('EnterRetryNodeImpl', () => {
         expect(workflowRuntime.startStep).toHaveBeenCalledWith(step.id);
       });
 
-      it('should set attempt to 1 in step state', async () => {
+      it('should set attempt to 0 in step state', async () => {
         await underTest.run();
-        expect(workflowRuntime.setStepState).toHaveBeenCalledWith(step.id, { attempt: 1 });
+        expect(workflowRuntime.setStepState).toHaveBeenCalledWith(step.id, { attempt: 0 });
       });
 
       it('should go to next step', async () => {
@@ -113,7 +113,7 @@ describe('EnterRetryNodeImpl', () => {
 
     describe('when attempts exceed max limit', () => {
       beforeEach(() => {
-        workflowRuntime.getStepState = jest.fn().mockReturnValue({ attempt: 4 });
+        workflowRuntime.getStepState = jest.fn().mockReturnValue({ attempt: 3 });
         workflowRuntime.failStep = jest.fn();
         workflowRuntime.setWorkflowError = jest.fn();
       });
