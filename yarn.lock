@@ -6020,6 +6020,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/extract-plugin-translations@link:packages/kbn-extract-plugin-translations":
+  version "0.0.0"
+  uid ""
+
 "@kbn/failed-test-reporter-cli@link:packages/kbn-failed-test-reporter-cli":
   version "0.0.0"
   uid ""
@@ -8561,10 +8565,6 @@
   uid ""
 
 "@kbn/wc-framework-types-server@link:x-pack/solutions/chat/packages/wc-framework-types-server":
-  version "0.0.0"
-  uid ""
-
-"@kbn/wc-genai-utils@link:x-pack/solutions/chat/packages/wc-genai-utils":
   version "0.0.0"
   uid ""
 

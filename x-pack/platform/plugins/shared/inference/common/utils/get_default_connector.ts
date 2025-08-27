@@ -8,13 +8,11 @@
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
-/**
- * Naive utility function to consistently return the "best" connector for workchat features.
- *
- * In practice, mostly useful for development, as for production there should always be a single connector
- */
-export const getDefaultConnector = ({ connectors }: { connectors: InferenceConnector[] }) => {
-  //
+export const getDefaultConnector = ({
+  connectors,
+}: {
+  connectors: InferenceConnector[];
+}): InferenceConnector => {
   const inferenceConnector = connectors.find(
     (connector) => connector.type === InferenceConnectorType.Inference
   );
