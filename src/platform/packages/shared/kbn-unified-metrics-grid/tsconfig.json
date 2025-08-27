@@ -11,7 +11,12 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/test-jest-helpers",
-    "@kbn/unified-histogram"
+    "@kbn/unified-histogram",
+    "@kbn/metrics-experience-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/esql-ast",
+    "@kbn/shared-ux-button-toolbar",
+    "@kbn/i18n",
+    "@kbn/i18n-react"
   ]
 }
