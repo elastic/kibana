@@ -40,6 +40,8 @@ jobs:
 
       - name: Get PR commits
         id: commits
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           COMMITS=$(gh pr view $PR_NUMBER --json commits -q '.commits[].oid')
           echo "COMMITS=$COMMITS" >> $GITHUB_ENV
@@ -47,6 +49,8 @@ jobs:
 
       - name: Check for Copilot as author
         id: check_copilot
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           COPILOT_EMAILS="github-actions[bot]@users.noreply.github.com\ncopilot-bot@users.noreply.github.com\ncopilot@github.com"
           FOUND=0
