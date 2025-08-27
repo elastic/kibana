@@ -27,7 +27,7 @@ export function ViewSpanInDiscoverLink({
   spanId,
 }: {
   dataTestSubj: string;
-  spanId?: string;
+  spanId: string;
 }) {
   const { share } = useApmPluginContext();
   const { services } = useKibana<ApmPluginStartDeps>();

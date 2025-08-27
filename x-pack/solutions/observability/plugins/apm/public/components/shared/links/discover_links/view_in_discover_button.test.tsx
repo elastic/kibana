@@ -258,7 +258,7 @@ describe('ViewInDiscoverButton', () => {
         to: 'now',
       },
       query: {
-        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE QSTR("user.id: \\"123\\" AND status_code: 200")`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE KQL("user.id: \\"123\\" AND status_code: 200")`,
       },
     });
   });
@@ -336,7 +336,7 @@ describe('ViewInDiscoverButton', () => {
         to: 'now',
       },
       query: {
-        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SERVICE_ENVIRONMENT} == "${query.environment}"\n  | WHERE ${TRANSACTION_NAME} == "${query.transactionName}"\n  | WHERE ${TRANSACTION_TYPE} == "${query.transactionType}"\n  | WHERE ${SPAN_DESTINATION_SERVICE_RESOURCE} == "${query.dependencyName}"\n  | WHERE ${TRANSACTION_DURATION} >= ${query.sampleRangeFrom} AND ${TRANSACTION_DURATION} <= ${query.sampleRangeTo}\n  | WHERE QSTR("error.message: \\"timeout\\"")`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SERVICE_ENVIRONMENT} == "${query.environment}"\n  | WHERE ${TRANSACTION_NAME} == "${query.transactionName}"\n  | WHERE ${TRANSACTION_TYPE} == "${query.transactionType}"\n  | WHERE ${SPAN_DESTINATION_SERVICE_RESOURCE} == "${query.dependencyName}"\n  | WHERE ${TRANSACTION_DURATION} >= ${query.sampleRangeFrom} AND ${TRANSACTION_DURATION} <= ${query.sampleRangeTo}\n  | WHERE KQL("error.message: \\"timeout\\"")`,
       },
     });
   });
