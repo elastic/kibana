@@ -16,6 +16,8 @@ import {
   EuiFlyoutResizable,
   useIsWithinMinBreakpoint,
   useEuiTheme,
+  EuiButtonEmpty,
+  EuiFlyoutFooter,
 } from '@elastic/eui';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -78,6 +80,11 @@ export const MetricInsightsFlyout = ({
       <EuiFlyoutBody>
         <MetricFlyoutContent metric={metric} esqlQuery={esqlQuery} />
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiButtonEmpty iconType="cross" onClick={onClose}>
+          Close
+        </EuiButtonEmpty>
+      </EuiFlyoutFooter>
     </EuiFlyoutResizable>
   );
 };
