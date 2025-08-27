@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { RuleResourceIdentifier } from './rule_resource_identifier';
+export { RuleResourceIdentifier } from './resource_identifier';

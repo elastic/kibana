@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DashboardResourceIdentifier } from './dashboard_resource_identifier';
+export { DashboardResourceIdentifier } from './resource_identifier';
