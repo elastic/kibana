@@ -254,7 +254,7 @@ describe('Starred and History queries components', () => {
       );
       expect(screen.getByTestId('ESQLEditor-queryHistory')).toBeInTheDocument();
       expect(screen.getByTestId('ESQLEditor-history-starred-queries-helpText')).toHaveTextContent(
-        'Showing last 20 queries'
+        'Showing 0 queries (0KB used)'
       );
     });
 
