@@ -6,8 +6,9 @@
  */
 
 import moment from 'moment';
-import type { ConcreteTaskInstance, RunContext, TaskInstance } from '../task';
+import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import { TaskStatus } from '../task';
+import type { BeforeRunContext } from './middleware';
 import { addMiddlewareToChain } from './middleware';
 
 interface BeforeSaveOpts {
@@ -60,7 +61,7 @@ const defaultBeforeSave = async (opts: BeforeSaveOpts) => {
   return opts;
 };
 
-const defaultBeforeRun = async (opts: RunContext) => {
+const defaultBeforeRun = async (opts: BeforeRunContext) => {
   return opts;
 };
 
@@ -118,7 +119,7 @@ describe('addMiddlewareToChain', () => {
   it('chains the beforeRun functions', async () => {
     const m1 = {
       beforeSave: defaultBeforeSave,
-      beforeRun: async (opts: RunContext) => {
+      beforeRun: async (opts: BeforeRunContext) => {
         return {
           ...opts,
           m1: true,
@@ -128,7 +129,7 @@ describe('addMiddlewareToChain', () => {
     };
     const m2 = {
       beforeSave: defaultBeforeSave,
-      beforeRun: async (opts: RunContext) => {
+      beforeRun: async (opts: BeforeRunContext) => {
         return {
           ...opts,
           m2: true,
@@ -138,7 +139,7 @@ describe('addMiddlewareToChain', () => {
     };
     const m3 = {
       beforeSave: defaultBeforeSave,
-      beforeRun: async (opts: RunContext) => {
+      beforeRun: async (opts: BeforeRunContext) => {
         return {
           ...opts,
           m3: true,

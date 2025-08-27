@@ -12,8 +12,8 @@ import type {
   RuleMigrationRule,
   RuleMigrationTranslationResult,
   UpdateRuleMigrationRule,
-  RuleMigrationResource,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SiemMigrationResource } from '../../../../common/siem_migrations/model/common.gen';
 import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_client';
 import type { Stored } from '../types';
 import type {
@@ -24,7 +24,7 @@ import type {
 export type StoredSiemMigration = Stored<RuleMigration>;
 
 export type StoredRuleMigration = Stored<RuleMigrationRule>;
-export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
+export type StoredRuleMigrationResource = Stored<SiemMigrationResource>;
 
 export interface RuleMigrationIntegration {
   id: string;
