@@ -21,31 +21,27 @@ export const getColumnInputRenderer = (
   columnName: string,
   indexUpdateService: IndexUpdateService
 ): ((props: CustomGridColumnProps) => EuiDataGridColumn) => {
-  const isPlaceholder = isPlaceholderColumn(columnName);
-
   return ({ column }) => ({
     ...column,
     display: <AddColumnHeader initialColumnName={columnName} containerId={column.id} />,
     actions: {
       showHide: false,
-      additional: !isPlaceholder
-        ? [
-            {
-              'data-test-subj': 'indexEditorindexEditorDeleteColumnButton',
-              label: (
-                <FormattedMessage
-                  id="indexEditor.flyout.grid.columnHeader.deleteAction"
-                  defaultMessage="Delete field and values"
-                />
-              ),
-              size: 'xs',
-              iconType: 'trash',
-              onClick: () => {
-                indexUpdateService.deleteColumn(columnName);
-              },
-            },
-          ]
-        : [],
+      additional: [
+        {
+          'data-test-subj': 'indexEditorindexEditorDeleteColumnButton',
+          label: (
+            <FormattedMessage
+              id="indexEditor.flyout.grid.columnHeader.deleteAction"
+              defaultMessage="Delete field and values"
+            />
+          ),
+          size: 'xs',
+          iconType: 'trash',
+          onClick: () => {
+            indexUpdateService.deleteColumn(columnName);
+          },
+        },
+      ],
     },
   });
 };
