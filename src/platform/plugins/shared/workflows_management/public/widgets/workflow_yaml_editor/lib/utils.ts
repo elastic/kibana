@@ -9,11 +9,7 @@
 
 import { monaco } from '@kbn/monaco';
 import type { Node } from 'yaml';
-import type {
-  WorkflowYAMLEditorDiffProps,
-  WorkflowYAMLEditorProps,
-  YamlValidationErrorSeverity,
-} from '../model/types';
+import type { YamlValidationErrorSeverity } from '../model/types';
 
 // Copied from monaco-editor/esm/vs/editor/editor.api.d.ts because we can't import with turbopack
 export enum MarkerSeverity {
@@ -34,12 +30,6 @@ export function getSeverityString(severity: MarkerSeverity): YamlValidationError
     default:
       return 'info';
   }
-}
-
-export function isDiffEditorProps(
-  props: WorkflowYAMLEditorProps
-): props is WorkflowYAMLEditorDiffProps {
-  return 'original' in props && 'modified' in props;
 }
 
 export function navigateToErrorPosition(

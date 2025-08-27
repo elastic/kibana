@@ -31,7 +31,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { StatusBadge, getExecutionStatusIcon } from '../../../shared/ui';
 import { useStepExecution } from '../model/use_step_execution';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { StepExecutionTimelineSteteful } from './step_execution_timeline_steteful';
+import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
 import { StepExecutionDataView } from './step_execution_data_view';
 
 interface WorkflowStepExecutionFlyoutProps {
@@ -115,7 +115,7 @@ export const WorkflowStepExecutionFlyout = ({
   };
 
   const renderTimeline = () => {
-    return <StepExecutionTimelineSteteful executionId={workflowExecutionId} stepId={stepId} />;
+    return <StepExecutionTimelineStateful executionId={workflowExecutionId} stepId={stepId} />;
   };
 
   return (

@@ -86,7 +86,7 @@ export const WorkflowYAMLEditor = ({
     ];
   }, [workflowJsonSchema]);
 
-  const yamlDocumentRef = useRef<YAML.Document | null>(null);
+  const [yamlDocument, setYamlDocument] = useState<YAML.Document | null>(null);
   const highlightStepDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const stepExecutionsDecorationCollectionRef =
@@ -113,9 +113,9 @@ export const WorkflowYAMLEditor = ({
       validateVariables(editorRef.current);
       try {
         const value = model.getValue();
-        yamlDocumentRef.current = YAML.parseDocument(value ?? '');
+        setYamlDocument(YAML.parseDocument(value ?? ''));
       } catch (error) {
-        yamlDocumentRef.current = null;
+        setYamlDocument(null);
       }
     }
   }, [validateVariables]);
@@ -150,14 +150,14 @@ export const WorkflowYAMLEditor = ({
   }, [changeSideEffects, isEditorMounted, workflowId]);
 
   useEffect(() => {
-    const model = editorRef.current?.getModel() as monaco.editor.ITextModel;
-    if (!isEditorMounted || !yamlDocumentRef.current || !highlightStep || !model) {
-      if (highlightStepDecorationCollectionRef.current) {
-        highlightStepDecorationCollectionRef.current.clear();
-      }
+    const model = editorRef.current?.getModel() ?? null;
+    if (highlightStepDecorationCollectionRef.current) {
+      highlightStepDecorationCollectionRef.current.clear();
+    }
+    if (!model || !isEditorMounted || !yamlDocument || !highlightStep) {
       return;
     }
-    const stepNode = getStepNode(yamlDocumentRef.current, highlightStep);
+    const stepNode = getStepNode(yamlDocument, highlightStep);
     if (!stepNode) {
       return;
     }
@@ -172,22 +172,23 @@ export const WorkflowYAMLEditor = ({
     highlightStepDecorationCollectionRef.current =
       editorRef.current?.createDecorationsCollection(getHighlightStepDecorations(model, range)) ??
       null;
-  }, [highlightStep, isEditorMounted]);
+  }, [highlightStep, isEditorMounted, yamlDocument]);
 
   useEffect(() => {
-    const model = editorRef.current?.getModel() as monaco.editor.ITextModel;
-    if (!isEditorMounted || !model || !stepExecutions || !yamlDocumentRef.current) {
-      if (stepExecutionsDecorationCollectionRef.current) {
-        stepExecutionsDecorationCollectionRef.current.clear();
-      }
+    const model = editorRef.current?.getModel() ?? null;
+    if (stepExecutionsDecorationCollectionRef.current) {
+      // clear existing decorations
+      stepExecutionsDecorationCollectionRef.current.clear();
+    }
+
+    if (!model || !yamlDocument || !stepExecutions || stepExecutions.length === 0) {
+      // no model or yamlDocument or sExecutions, skipping
       return;
     }
+
     const decorations = stepExecutions
       .map((stepExecution) => {
-        if (!yamlDocumentRef.current) {
-          return null;
-        }
-        const stepNode = getStepNode(yamlDocumentRef.current, stepExecution.stepId);
+        const stepNode = getStepNode(yamlDocument, stepExecution.stepId);
         if (!stepNode) {
           return null;
         }
@@ -211,6 +212,7 @@ export const WorkflowYAMLEditor = ({
         const bgClassName = `step-execution-${stepExecution.status} ${
           !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
         }`;
+        // TODO: handle steps with nested steps
         const decoration2: monaco.editor.IModelDeltaDecoration = {
           range: new monaco.Range(
             stepRange.startLineNumber,
@@ -228,12 +230,10 @@ export const WorkflowYAMLEditor = ({
       })
       .flat()
       .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
-    if (stepExecutionsDecorationCollectionRef.current) {
-      stepExecutionsDecorationCollectionRef.current.clear();
-    }
+
     stepExecutionsDecorationCollectionRef.current =
       editorRef.current?.createDecorationsCollection(decorations) ?? null;
-  }, [isEditorMounted, stepExecutions, highlightStep]);
+  }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument]);
 
   const completionProvider = useMemo(() => {
     return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
@@ -406,8 +406,11 @@ const componentStyles = {
       '.dimmed': {
         opacity: 0.5,
       },
-      '.step-execution-pending': {
+      '.step-execution-skipped': {
         backgroundColor: euiTheme.colors.backgroundBaseFormsControlDisabled,
+      },
+      '.step-execution-waiting_for_input': {
+        backgroundColor: euiTheme.colors.backgroundLightWarning,
       },
       '.step-execution-running': {
         backgroundColor: euiTheme.colors.backgroundLightPrimary,
@@ -417,6 +420,36 @@ const componentStyles = {
       },
       '.step-execution-failed': {
         backgroundColor: euiTheme.colors.backgroundLightDanger,
+      },
+      '.step-execution-skipped-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.backgroundFilledText,
+          borderRadius: '50%',
+        },
+      },
+      '.step-execution-waiting_for_input-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.backgroundFilledWarning,
+          borderRadius: '50%',
+        },
+      },
+      '.step-execution-running-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.backgroundFilledPrimary,
+          borderRadius: '50%',
+        },
       },
       '.step-execution-completed-glyph': {
         '&:before': {

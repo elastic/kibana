@@ -13,41 +13,11 @@ import { WorkflowExecutionList } from './workflow_execution_list';
 
 export default {
   component: WorkflowExecutionList,
-  title: 'WorkflowExecutionList',
+  title: 'Workflows Management/Workflow Execution List',
   decorators: [kibanaReactDecorator],
 };
 
-export const Empty = {
-  args: {
-    executions: {
-      results: [],
-      _pagination: {
-        offset: 0,
-        limit: 10,
-        total: 0,
-      },
-    },
-    selectedId: null,
-  },
-};
-
-export const Loading = {
-  args: {
-    isLoading: true,
-    error: null,
-    selectedId: null,
-  },
-};
-
-export const ErrorStory = {
-  args: {
-    isLoading: false,
-    error: new Error('Internal server error'),
-    selectedId: null,
-  },
-};
-
-export const WithExecutions = {
+export const Default = {
   args: {
     executions: {
       results: [
@@ -109,5 +79,35 @@ export const WithExecutions = {
     },
     onExecutionClick: () => {},
     selectedId: '2',
+  },
+};
+
+export const Empty = {
+  args: {
+    executions: {
+      results: [],
+      _pagination: {
+        offset: 0,
+        limit: 10,
+        total: 0,
+      },
+    },
+    selectedId: null,
+  },
+};
+
+export const Loading = {
+  args: {
+    isLoading: true,
+    error: null,
+    selectedId: null,
+  },
+};
+
+export const ErrorStory = {
+  args: {
+    isLoading: false,
+    error: new Error('Internal server error'),
+    selectedId: null,
   },
 };

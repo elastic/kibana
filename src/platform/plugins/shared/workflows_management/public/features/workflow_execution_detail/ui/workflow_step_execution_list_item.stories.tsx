@@ -13,7 +13,7 @@ import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import { WorkflowStepExecutionListItem } from './workflow_step_execution_list_item';
 
 const meta: Meta = {
-  title: 'WorkflowStepExecutionListItem',
+  title: 'Workflows Management/Step Execution List/List Item',
   component: WorkflowStepExecutionListItem,
   decorators: [kibanaReactDecorator],
 };
@@ -33,6 +33,7 @@ export const Default: Story = {
       workflowId: 'workflow-1',
       workflowRunId: 'workflow-run-1',
       topologicalIndex: 1,
+      executionIndex: 0,
       spaceId: 'default',
     },
   },
@@ -49,6 +50,7 @@ export const Running: Story = {
       workflowId: 'workflow-1',
       workflowRunId: 'workflow-run-1',
       topologicalIndex: 1,
+      executionIndex: 0,
       spaceId: 'default',
     },
   },
@@ -65,6 +67,7 @@ export const Failed: Story = {
       workflowId: 'workflow-1',
       workflowRunId: 'workflow-run-1',
       topologicalIndex: 1,
+      executionIndex: 0,
       spaceId: 'default',
     },
   },
