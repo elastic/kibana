@@ -1001,26 +1001,8 @@ export function defineRoutes(
             schema.oneOf([
               schema.object({
                 operation: schema.literal('set'),
-                field: schema.literal('exceptionsList'),
-                value: schema.arrayOf(
-                  schema.object({
-                    id: schema.string(),
-                    list_id: schema.string(),
-                    type: schema.oneOf([
-                      schema.literal('detection'),
-                      schema.literal('rule_default'),
-                      schema.literal('endpoint'),
-                      schema.literal('endpoint_trusted_apps'),
-                      schema.literal('endpoint_events'),
-                      schema.literal('endpoint_host_isolation_exceptions'),
-                      schema.literal('endpoint_blocklists'),
-                    ]),
-                    namespace_type: schema.oneOf([
-                      schema.literal('single'),
-                      schema.literal('agnostic'),
-                    ]),
-                  })
-                ),
+                field: schema.oneOf([schema.literal('exceptionsList')]),
+                value: schema.any(),
               }),
             ])
           ),

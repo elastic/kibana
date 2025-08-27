@@ -274,19 +274,6 @@ describe('bulkEditRuleParamsWithReadAuth()', () => {
       );
     });
 
-    test('should throw error if operation value is invalid', async () => {
-      await expect(
-        rulesClient.bulkEditRuleParamsWithReadAuth({
-          operations: [
-            // @ts-expect-error
-            { field: 'exceptionsList', operation: 'set', value: 'not a value' },
-          ],
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating bulkEditRuleParamsWithReadAuth options - [operations.0.value]: could not parse array value from json input"`
-      );
-    });
-
     test('should throw error if operation is incorrect for field', async () => {
       await expect(
         rulesClient.bulkEditRuleParamsWithReadAuth({

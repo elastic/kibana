@@ -400,6 +400,45 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
       expect(response.body.rules).toEqual([]);
     });
 
+    it('should handle bulk editing rules where exceptionLists value is invalid', async () => {
+      const ruleId = await createDetectionRule();
+
+      // update the rules
+      const response = await supertestWithoutAuth
+        .post(`${getUrlPrefix(spaceId)}/api/alerting_fixture/_bulk_edit_params`)
+        .set('kbn-xsrf', 'foo')
+        .auth(GlobalReadAtSpace1.user.username, GlobalReadAtSpace1.user.password)
+        .send({
+          ids: [ruleId],
+          operations: [
+            {
+              operation: 'set',
+              field: 'exceptionsList',
+              value: 'some invalid value',
+            },
+          ],
+        })
+        .expect(200);
+
+      expect(response.body.total).toEqual(1);
+      expect(response.body.errors.length).toEqual(1);
+      expect(response.body.errors[0].message).toEqual(
+        `params invalid: [
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "string",
+    "path": [
+      "exceptionsList"
+    ],
+    "message": "Expected array, received string"
+  }
+]`
+      );
+      expect(response.body.skipped).toEqual([]);
+      expect(response.body.rules).toEqual([]);
+    });
+
     it('should handle extracting exceptionsList references with actions', async () => {
       const { body: createdConnector } = await supertest
         .post(`${getUrlPrefix(spaceId)}/api/actions/connector`)

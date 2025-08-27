@@ -6,28 +6,13 @@
  */
 import { schema } from '@kbn/config-schema';
 
-const exceptionListSchema = schema.object({
-  id: schema.string(),
-  list_id: schema.string(),
-  type: schema.oneOf([
-    schema.literal('detection'),
-    schema.literal('rule_default'),
-    schema.literal('endpoint'),
-    schema.literal('endpoint_trusted_apps'),
-    schema.literal('endpoint_events'),
-    schema.literal('endpoint_host_isolation_exceptions'),
-    schema.literal('endpoint_blocklists'),
-  ]),
-  namespace_type: schema.oneOf([schema.literal('single'), schema.literal('agnostic')]),
-});
+const bulkEditExceptionListField = schema.literal('exceptionsList');
 
-const bulkEditExceptionListSchema = schema.object({
+export const bulkEditParamsOperationSchema = schema.object({
   operation: schema.literal('set'),
-  field: schema.literal('exceptionsList'),
-  value: schema.arrayOf(exceptionListSchema),
+  field: schema.oneOf([bulkEditExceptionListField]),
+  value: schema.any(),
 });
-
-export const bulkEditParamsOperationSchema = schema.oneOf([bulkEditExceptionListSchema]);
 
 export const bulkEditParamsOperationsSchema = schema.arrayOf(bulkEditParamsOperationSchema, {
   minSize: 1,
@@ -39,13 +24,13 @@ export const bulkEditRuleParamsOptionsSchema = schema.object({
   operations: bulkEditParamsOperationsSchema,
 });
 
-const bulkEditExceptionListEditSchema = schema.object({
-  operation: schema.literal('set'),
-  field: schema.literal('params.exceptionsList'),
-  value: schema.arrayOf(exceptionListSchema),
-});
+const bulkEditExceptionListParamField = schema.literal('params.exceptionsList');
 
-export const bulkEditRuleParamsOperationSchema = schema.oneOf([bulkEditExceptionListEditSchema]);
+export const bulkEditRuleParamsOperationSchema = schema.object({
+  operation: schema.literal('set'),
+  field: schema.oneOf([bulkEditExceptionListParamField]),
+  value: schema.any(),
+});
 
 export const bulkEditRuleParamsOperationsSchema = schema.arrayOf(
   bulkEditRuleParamsOperationSchema,
