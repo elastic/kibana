@@ -176,7 +176,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
           return await saveButton.isEnabled();
         });
         const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
-        saveButton.click();
+        await saveButton.click();
 
         // Re-open to verify content was saved
         await openUserInstructionFlyout();
@@ -195,7 +195,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         });
 
         const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
-        saveButton.click();
+        await saveButton.click();
 
         // Make changes but cancel
         await openUserInstructionFlyout();
