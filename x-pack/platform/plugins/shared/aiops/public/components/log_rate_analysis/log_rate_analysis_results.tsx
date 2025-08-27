@@ -359,8 +359,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
               <EuiToolTip
                 position="top"
                 content={i18n.translate('xpack.aiops.logRateAnalysis.optionsButtonTooltip', {
-                  defaultMessage:
-                    'Options to customize the analysis, such as filtering fields and grouping.',
+                  defaultMessage: 'Options to customize the analysis, such as filtering fields.',
                 })}
               >
                 <EuiButtonIcon
