@@ -3,8 +3,8 @@
 name: Reassign Copilot Commit
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -60,6 +60,7 @@ jobs:
             AUTHOR_EMAIL=$(git show -s --format='%ae' $COMMIT)
             echo "Author email: $AUTHOR_EMAIL"
             for EMAIL in $COPILOT_EMAILS; do
+              echo "Checking against Copilot email: $EMAIL"
               if [ "$AUTHOR_EMAIL" = "$EMAIL" ]; then
                 FOUND=1
                 break
