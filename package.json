@@ -1563,6 +1563,7 @@
     "@kbn/evals-suite-onechat": "link:x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat",
     "@kbn/evals-suite-streams": "link:x-pack/platform/packages/private/kbn-evals-suite-streams",
     "@kbn/expect": "link:src/platform/packages/shared/kbn-expect",
+    "@kbn/extract-plugin-translations": "link:packages/kbn-extract-plugin-translations",
     "@kbn/failed-test-reporter-cli": "link:packages/kbn-failed-test-reporter-cli",
     "@kbn/find-used-node-modules": "link:packages/kbn-find-used-node-modules",
     "@kbn/ftr-common-functional-services": "link:src/platform/packages/shared/kbn-ftr-common-functional-services",
