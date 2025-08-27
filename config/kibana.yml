@@ -136,10 +136,6 @@
 # Enables debug logging on the browser (dev console)
 #logging.browser.root:
 #  level: debug
-logging:
-  loggers:
-    - name: plugins.console
-      level: debug
 
 # =================== System: Other ===================
 # The path where Kibana stores persistent data not saved in Elasticsearch. Defaults to data
