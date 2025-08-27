@@ -245,7 +245,7 @@ describe('Knowledge Base End-to-End Integration Test', () => {
 
     // Verify that old version content is no longer available by getting it again and checking that every item is the new version
     const result = await getPackageKnowledgeBaseFromIndex(esClient, 'test-package');
-    expect(result.every((item) => item.version)).toBe('2.0.0');
+    expect(result.every((item) => item.version === '2.0.0')).toBe(true);
 
     // Verify that new version content is available
     const newVersionResult = await getPackageKnowledgeBase({
