@@ -73,14 +73,6 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
           const clientBottom = window.innerHeight;
           const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
 
-          console.log(
-            panelTop,
-            dashboardTop,
-            panelTop < dashboardTop,
-            panelBottom,
-            clientBottom,
-            panelBottom > clientBottom
-          );
           // only scroll if panel is not fully visible within the current viewport
           if (panelTop < dashboardTop || panelBottom > clientBottom) {
             panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
