@@ -64,7 +64,7 @@ export interface TableGridProps {
   onRemoveColumn?: (columnName: string) => void;
   columns?: string[];
   onFindSearchTermMatch: UseTableFiltersReturn['onFindSearchTermMatch'];
-  searchTerm: string;
+  searchTerm?: string;
   initialPageSize: number;
   onChangePageSize?: (newPageSize: number) => void;
   pinnedFields?: string[];
@@ -187,7 +187,7 @@ export function TableGrid({
     ({ rowIndex, columnId, isDetails }) => {
       return (
         <TableCell
-          searchTerm={searchTerm}
+          searchTerm={searchTerm || ''}
           rows={rows}
           rowIndex={rowIndex}
           columnId={columnId}

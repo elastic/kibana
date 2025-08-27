@@ -105,7 +105,6 @@ export const CustomRenderers: Story = {
     onRemoveColumn: () => {},
     columns: [GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE],
     onFindSearchTermMatch: (_row, _term) => null,
-    searchTerm: '',
     initialPageSize: 25,
     pinnedFields: [],
     hidePinColumn: false,
