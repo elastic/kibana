@@ -532,6 +532,8 @@ export function getDiscoverStateContainer({
   };
 
   const trackQueryFieldUsage = (query: Query | AggregateQuery | undefined) => {
+    console.log({ query });
+
     if (!query) {
       return;
     }
@@ -550,6 +552,10 @@ export function getDiscoverStateContainer({
         fieldsMetadata,
       });
     } else if (isOfQueryType(query) && typeof query.query === 'string') {
+      if (query.query === '') {
+        return;
+      }
+
       const fieldNames = getKqlFieldNamesFromExpression(query.query);
 
       if (fieldNames.length === 0) {
