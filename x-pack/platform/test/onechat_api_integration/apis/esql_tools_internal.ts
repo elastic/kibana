@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

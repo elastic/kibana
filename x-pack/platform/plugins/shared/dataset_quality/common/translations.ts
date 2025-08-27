@@ -46,7 +46,7 @@ export const flyoutCancelText = i18n.translate('xpack.datasetQuality.flyoutCance
 export const openInDiscoverText = i18n.translate(
   'xpack.datasetQuality.details.openInDiscoverText',
   {
-    defaultMessage: 'Open in Discover',
+    defaultMessage: 'View in Discover',
   }
 );
 
@@ -83,6 +83,13 @@ export const overviewTrendsDocsText = i18n.translate('xpack.datasetQuality.flyou
   defaultMessage: 'Document trends',
 });
 
+export const flyoutIssueDetailsTitle = i18n.translate(
+  'xpack.datasetQuality.flyoutIssueDetailsTitle',
+  {
+    defaultMessage: 'Issue details',
+  }
+);
+
 export const flyoutDegradedDocsTrendText = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedDocsViz',
   {
@@ -116,7 +123,7 @@ export const flyoutFailedDocsPercentageText = i18n.translate(
 export const flyoutDocsCountTotalText = i18n.translate(
   'xpack.datasetQuality.flyoutDocsCountTotal',
   {
-    defaultMessage: 'Docs count (total)',
+    defaultMessage: 'Documents',
   }
 );
 
@@ -170,7 +177,7 @@ export const summaryPanelQualityPoorText = i18n.translate(
 export const summaryPanelQualityDegradedText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityDegradedText',
   {
-    defaultMessage: 'Degraded',
+    defaultMessage: 'Warning',
   }
 );
 
@@ -251,7 +258,7 @@ Dataset Quality Details
 */
 
 export const overviewHeaderTitle = i18n.translate('xpack.datasetQuality.details.overviewTitle', {
-  defaultMessage: 'Overview',
+  defaultMessage: 'Summary',
 });
 
 export const overviewTitleTooltip = i18n.translate(
@@ -313,14 +320,21 @@ export const overviewPanelTitleDatasetQuality = i18n.translate(
 export const overviewPanelDatasetQualityIndicatorDegradedDocs = i18n.translate(
   'xpack.datasetQuality.details.overviewPanel.datasetQuality.degradedDocs',
   {
-    defaultMessage: 'Degraded docs',
+    defaultMessage: 'Degraded documents',
   }
 );
 
 export const overviewPanelDatasetQualityIndicatorFailedDocs = i18n.translate(
   'xpack.datasetQuality.details.overviewPanel.datasetQuality.failedDocs',
   {
-    defaultMessage: 'Failed docs',
+    defaultMessage: 'Failed documents',
+  }
+);
+
+export const overviewPanelDatasetQualityIndicatorNoFailureStore = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.datasetQuality.noFailureStore',
+  {
+    defaultMessage: 'No failure store',
   }
 );
 
@@ -370,7 +384,7 @@ export const overviewQualityIssueSectionTitleTooltip = i18n.translate(
 export const overviewQualityIssuesAccordionTechPreviewBadge = i18n.translate(
   'xpack.datasetQuality.details.overviewQualityIssuesAccordionTechPreviewBadge',
   {
-    defaultMessage: 'TECH PREVIEW',
+    defaultMessage: 'TECHNICAL PREVIEW',
   }
 );
 
@@ -461,7 +475,7 @@ export const degradedFieldCurrentFieldLimitColumnName = i18n.translate(
 export const degradedFieldMaximumCharacterLimitColumnName = i18n.translate(
   'xpack.datasetQuality.details.degradedField.maximumCharacterLimit',
   {
-    defaultMessage: 'Maximum character length',
+    defaultMessage: 'Max character length',
   }
 );
 
@@ -705,14 +719,14 @@ export const failedDocsErrorsColumnName = i18n.translate(
 export const readMore = i18n.translate(
   'xpack.datasetQuality.details.qualityIssue.flyout.message.readMore',
   {
-    defaultMessage: 'Read more',
+    defaultMessage: 'View more',
   }
 );
 
 export const readLess = i18n.translate(
   'xpack.datasetQuality.details.qualityIssue.flyout.message.readLess',
   {
-    defaultMessage: 'Read less',
+    defaultMessage: 'View less',
   }
 );
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ClusterPayloadEs } from '@kbn/remote-clusters-plugin/common/lib';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ClusterPayloadEs } from '@kbn/remote-clusters-plugin/common/lib';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const emptyPrompt = 'remoteClusterListEmptyPrompt';
 const createButton = 'remoteClusterEmptyPromptCreateButton';

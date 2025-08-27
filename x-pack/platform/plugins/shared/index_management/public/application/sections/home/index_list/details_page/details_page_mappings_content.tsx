@@ -28,14 +28,15 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ILicense } from '@kbn/licensing-types';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import {
   getStateWithCopyToFields,
   isSemanticTextField,
 } from '../../../../components/mappings_editor/lib/utils';
-import { Index } from '../../../../../../common';
+import type { Index } from '../../../../../../common';
 import { useDetailsPageMappingsModelManagement } from '../../../../../hooks/use_details_page_mappings_model_management';
 import { useAppContext } from '../../../../app_context';
 import { DocumentFields } from '../../../../components/mappings_editor/components';
@@ -44,7 +45,7 @@ import { FieldsList } from '../../../../components/mappings_editor/components/do
 import { SearchResult } from '../../../../components/mappings_editor/components/document_fields/search_fields';
 import { MultipleMappingsWarning } from '../../../../components/mappings_editor/components/multiple_mappings_warning';
 import { deNormalize, searchFields } from '../../../../components/mappings_editor/lib';
-import { MappingsEditorParsedMetadata } from '../../../../components/mappings_editor/mappings_editor';
+import type { MappingsEditorParsedMetadata } from '../../../../components/mappings_editor/mappings_editor';
 import {
   useDispatch,
   useMappingsState,
@@ -53,7 +54,7 @@ import {
   getFieldsFromState,
   getFieldsMatchingFilterFromState,
 } from '../../../../components/mappings_editor/lib';
-import { NormalizedFields, State } from '../../../../components/mappings_editor/types';
+import type { NormalizedFields, State } from '../../../../components/mappings_editor/types';
 import { MappingsFilter } from './details_page_filter_fields';
 
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';

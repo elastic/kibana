@@ -6,7 +6,8 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { getLeafFields, MappingField } from './get_leaf_fields';
+import type { MappingField } from './get_leaf_fields';
+import { getLeafFields } from './get_leaf_fields';
 
 describe('getLeafFields', () => {
   test('should return empty array when mappings has no properties', () => {

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { mergeCommandWithGeneratedCommandData } from './elastisearch_command_data_loader';
-import { CommandRegistry, ICommand, ICommandMethods, ICommandMetadata } from './registry';
-import { ItemKind } from './types';
+import type { ICommand, ICommandMethods, ICommandMetadata } from './registry';
+import { CommandRegistry } from './registry';
+import type { ItemKind } from './types';
 
 describe('CommandRegistry', () => {
   let registry: CommandRegistry;

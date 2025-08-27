@@ -6,15 +6,14 @@
  */
 
 import React, { type FC, useMemo, useCallback, useState } from 'react';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiHealth,
   EuiHighlight,
-  EuiComboBoxOptionOption,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiComboBoxProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Tag } from '../../../common/types';
@@ -122,7 +121,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
     // The extra whitespace is required to avoid the combobox to consider that the value
     // is selected when closing the dropdown
     return {
-      label: `${currentSearch} `,
+      label: currentSearch.length > 0 ? `${currentSearch} ` : '',
       color: '#FFFFFF',
       value: createOptionValue,
     };

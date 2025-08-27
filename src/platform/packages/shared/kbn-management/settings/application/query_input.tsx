@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFormErrorText, EuiSearchBar, EuiSearchBarProps, Query } from '@elastic/eui';
+import type { EuiSearchBarProps } from '@elastic/eui';
+import { EuiFormErrorText, EuiSearchBar, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getCategoryName } from '@kbn/management-settings-utilities';
 import React, { useState } from 'react';

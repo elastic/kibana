@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializer } from '@kbn/core/public';
-import {
-  CustomVisualizationsPublicPlugin,
-  CustomVisualizationsSetup,
-  CustomVisualizationsStart,
-} from './plugin';
+import type { PluginInitializer } from '@kbn/core/public';
+import type { CustomVisualizationsSetup, CustomVisualizationsStart } from './plugin';
+import { CustomVisualizationsPublicPlugin } from './plugin';
 
 export { CustomVisualizationsPublicPlugin as Plugin };
 

@@ -5,31 +5,33 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiAvatar,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiTitle,
-  useEuiShadow,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
   useEuiTheme,
+  useEuiShadow,
 } from '@elastic/eui';
-import { useKnowledgeBase } from '@kbn/ai-assistant';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { useKnowledgeBase } from '@kbn/ai-assistant';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
+import type { TabsRt } from '../config';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
-import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/use_observability_management_params';
-import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';
-import type { TabsRt } from '../config';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchConnectorTab } from './search_connector_tab';
+import { getSolutionSpecificLogos } from '../../helpers/get_solution_specific_logos';
+import { getSolutionSpecificLabels } from '../../helpers/get_solution_specific_labels';
+import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/use_observability_management_params';
+import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';
 
 export function SettingsPage() {
   const { setBreadcrumbs } = useAppContext();
@@ -37,11 +39,26 @@ export function SettingsPage() {
     services: {
       application: { navigateToApp, isAppRegistered, capabilities },
       serverless,
+      spaces,
+      cloud,
     },
   } = useKibana();
 
   const router = useObservabilityAIAssistantManagementRouter();
   const knowledgeBase = useKnowledgeBase();
+  const { euiTheme } = useEuiTheme();
+  const headerIconShadow = useEuiShadow('s');
+
+  const [currentSpaceSolution, setCurrentSpaceSolution] = useState<SolutionView>();
+
+  // Determine the current solution.
+  let currentSolution: SolutionView | undefined;
+  if (serverless) {
+    const projectType = cloud?.serverless?.projectType;
+    currentSolution = projectType === 'observability' ? 'oblt' : 'es';
+  } else {
+    currentSolution = currentSpaceSolution;
+  }
 
   const hasConnectorsAllPrivilege =
     capabilities.actions?.show === true &&
@@ -54,15 +71,28 @@ export function SettingsPage() {
   } = useObservabilityAIAssistantManagementRouterParams('/');
 
   useEffect(() => {
+    const getCurrentSpace = async () => {
+      if (spaces) {
+        const space = await spaces.getActiveSpace();
+        setCurrentSpaceSolution(space?.solution);
+      }
+    };
+
+    getCurrentSpace();
+  }, [spaces]);
+
+  const { breadcrumbText, title } = getSolutionSpecificLabels({
+    solution: currentSolution,
+    isServerless: !!serverless,
+  });
+
+  const logos = getSolutionSpecificLogos(currentSolution);
+
+  useEffect(() => {
     if (serverless) {
       serverless.setBreadcrumbs([
         {
-          text: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability',
-            {
-              defaultMessage: 'AI Assistant',
-            }
-          ),
+          text: breadcrumbText,
         },
       ]);
     } else {
@@ -77,16 +107,11 @@ export function SettingsPage() {
           },
         },
         {
-          text: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.breadcrumb.observability',
-            {
-              defaultMessage: 'Observability and Search',
-            }
-          ),
+          text: breadcrumbText,
         },
       ]);
     }
-  }, [navigateToApp, serverless, setBreadcrumbs]);
+  }, [breadcrumbText, navigateToApp, serverless, setBreadcrumbs]);
 
   const tabs: Array<{ id: TabsRt; name: string; content: JSX.Element; disabled?: boolean }> = [
     {
@@ -101,7 +126,7 @@ export function SettingsPage() {
       name: i18n.translate(
         'xpack.observabilityAiAssistantManagement.settingsPage.knowledgeBaseLabel',
         {
-          defaultMessage: 'Knowledge base',
+          defaultMessage: 'Knowledge Base',
         }
       ),
       content: <KnowledgeBaseTab />,
@@ -127,63 +152,32 @@ export function SettingsPage() {
     router.push('/', { path: '/', query: { tab: id } });
   };
 
-  const headerIconShadow = useEuiShadow('s');
-  const { euiTheme } = useEuiTheme();
-
   return (
     <div data-test-subj="aiAssistantSettingsPage">
-      <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiAvatar
-                    iconType="logoObservability"
-                    iconSize="m"
-                    color="plain"
-                    name={i18n.translate(
-                      'xpack.observabilityAiAssistantManagement.settingsPage.observabilityAvatarLabel',
-                      {
-                        defaultMessage: 'Observability AI',
-                      }
-                    )}
-                    css={css`
-                      ${headerIconShadow};
-                    `}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiAvatar
-                    iconType="logoEnterpriseSearch"
-                    iconSize="m"
-                    color="plain"
-                    name={i18n.translate(
-                      'xpack.observabilityAiAssistantManagement.settingsPage.searchAvatarLabel',
-                      {
-                        defaultMessage: 'Enterprise Search AI',
-                      }
-                    )}
-                    css={css`
-                      ${headerIconShadow};
-                      margin-right: ${euiTheme.size.m};
-                    `}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} direction="row">
+          {logos.map((logo) => (
+            <EuiFlexItem key={logo} grow={false}>
+              <EuiIcon
+                size="xl"
+                type={logo}
+                style={{
+                  backgroundColor: euiTheme.colors.backgroundBasePlain,
+                  borderRadius: '50%',
+                  padding: 6,
+                }}
+                css={css`
+                  ${headerIconShadow};
+                `}
+              />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="m">
-                <h2>
-                  <FormattedMessage
-                    id="xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel"
-                    defaultMessage="AI Assistant for Observability and Search"
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+          ))}
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h2>{title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         {hasConnectorsAllPrivilege ? (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -192,16 +186,18 @@ export function SettingsPage() {
               onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
               data-test-subj="genAiSettingsButton"
             >
-              <FormattedMessage
-                id="xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsButton"
-                defaultMessage="GenAI Settings"
-              />
+              {i18n.translate(
+                'xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsButton',
+                {
+                  defaultMessage: 'GenAI Settings',
+                }
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
       <EuiTabs data-test-subj="settingsPageTabs">
         {tabs

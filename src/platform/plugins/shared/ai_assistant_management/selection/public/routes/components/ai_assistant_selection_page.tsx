@@ -45,7 +45,7 @@ export function AiAssistantSelectionPage() {
     securityAIAssistantEnabled && aiAssistantManagementSelection && securityAIAssistantVisibility;
 
   const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
-  const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant;
+  const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant.home;
 
   useEffect(() => {
     setBreadcrumbs([
@@ -150,7 +150,13 @@ export function AiAssistantSelectionPage() {
             display="plain"
             hasBorder
             icon={
-              <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m">
+              <EuiFlexGroup
+                gutterSize="m"
+                alignItems="center"
+                responsive={false}
+                direction="row"
+                justifyContent="center"
+              >
                 <EuiFlexItem grow={false}>
                   <EuiIcon size="xxl" type="logoObservability" />
                 </EuiFlexItem>

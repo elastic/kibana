@@ -16,9 +16,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
+import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
 import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
-import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { useKibana } from '../../../hooks/use_kibana';
 
 const statusToButtonTextMap: Record<Exclude<InstallationStatus, 'error'> | 'loading', string> = {

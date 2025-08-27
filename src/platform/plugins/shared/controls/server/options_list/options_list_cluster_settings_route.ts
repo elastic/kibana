@@ -8,7 +8,7 @@
  */
 
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 
 export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
   const router = http.createRouter();

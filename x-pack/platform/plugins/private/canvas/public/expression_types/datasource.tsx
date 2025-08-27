@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useCallback, ReactPortal, useState, memo } from 'react';
+import type { ReactPortal } from 'react';
+import React, { useEffect, useRef, useCallback, useState, memo } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import usePrevious from 'react-use/lib/usePrevious';
 import deepEqual from 'react-fast-compare';
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { createPortal } from 'react-dom';
-import { BaseForm, BaseFormProps } from './base_form';
+import type { BaseFormProps } from './base_form';
+import { BaseForm } from './base_form';
 import { ExpressionFormHandlers } from '../../common/lib';
-import { ExpressionFunction } from '../../types';
-import { UpdatePropsRef } from '../../types/arguments';
+import type { ExpressionFunction } from '../../types';
+import type { UpdatePropsRef } from '../../types/arguments';
 
 const defaultTemplate = (domNode: HTMLElement) =>
   createPortal(

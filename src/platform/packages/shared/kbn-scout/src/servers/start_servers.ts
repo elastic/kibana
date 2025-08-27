@@ -9,14 +9,15 @@
 
 import dedent from 'dedent';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
-import { StartServerOptions } from './flags';
+import type { StartServerOptions } from './flags';
 import { loadServersConfig } from '../config';
 import { silence } from '../common';
+import { getPlaywrightGrepTag } from '../playwright/utils';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
@@ -24,6 +25,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
 
   await withProcRunner(log, async (procs) => {
     const config = await loadServersConfig(options.mode, log);
+    const pwGrepTag = getPlaywrightGrepTag(options.mode);
 
     const shutdownEs = await runElasticsearch({
       config,
@@ -52,7 +54,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       '\n\n' +
         dedent`
           Elasticsearch and Kibana are ready for functional testing.
-          Use 'npx playwright test --config <path_to_Playwright.config.ts> --project local' to run tests'
+          Use 'npx playwright test --project local --grep ${pwGrepTag} --config <path_to_Playwright.config.ts>' to run tests'
         ` +
         '\n\n'
     );

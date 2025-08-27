@@ -14,18 +14,18 @@ import {
   ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
 
-import {
+import type {
   AlertSummaryResponse,
   AlertSummaryBulkActionSkipResult,
   AlertSummaryBulkCrudActionResponse,
   AlertSummaryBulkCrudActionResults,
   BulkCrudActionSummary,
-  PerformAlertSummaryBulkActionRequestBody,
   PerformAlertSummaryBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas';
+import { PerformAlertSummaryBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { PROMPTS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import {
   getUpdateScript,
@@ -34,7 +34,7 @@ import {
   transformESToAlertSummary,
   transformESSearchToAlertSummary,
 } from '../../ai_assistant_data_clients/alert_summary/helpers';
-import {
+import type {
   EsAlertSummarySchema,
   UpdateAlertSummarySchema,
 } from '../../ai_assistant_data_clients/alert_summary/types';

@@ -8,9 +8,10 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLMap } from '../../types';
+import type { ESQLMap } from '../../types';
 import { Walker } from '../../walker';
-import { WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import type { WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import { WrappingPrettyPrinter } from '../wrapping_pretty_printer';
 
 const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   const { root } = parse(src);

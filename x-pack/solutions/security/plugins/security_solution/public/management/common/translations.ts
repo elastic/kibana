@@ -16,6 +16,11 @@ export const POLICIES_TAB = i18n.translate('xpack.securitySolution.policiesTab',
   defaultMessage: 'Policies',
 });
 
+export const ENDPOINT_EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.endpointExceptionsTab',
+  { defaultMessage: 'Endpoint exceptions' }
+);
+
 export const TRUSTED_APPS_TAB = i18n.translate('xpack.securitySolution.trustedAppsTab', {
   defaultMessage: 'Trusted applications',
 });
@@ -39,6 +44,13 @@ export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
     defaultMessage: 'Linux',
   }),
 };
+
+export const OPERATING_SYSTEM_WINDOWS_AND_MAC = i18n.translate(
+  'xpack.securitySolution.administration.os.windowsAndMac',
+  {
+    defaultMessage: 'Windows and Mac',
+  }
+);
 
 export const getLoadPoliciesError = (error: Error) => {
   return i18n.translate('xpack.securitySolution.exceptions.failedLoadPolicies', {
