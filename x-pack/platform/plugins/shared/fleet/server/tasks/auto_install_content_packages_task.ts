@@ -23,7 +23,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { DiscoveryDataset } from '../../common/types';
 
 import type { PackageClient } from '../services';
-import { appContextService } from '../services';
+import { appContextService, dataStreamService } from '../services';
 import * as Registry from '../services/epm/registry';
 
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS, SO_SEARCH_LIMIT } from '../constants';
@@ -31,7 +31,7 @@ import { getInstalledPackages } from '../services/epm/packages';
 import { getPrereleaseFromSettings } from '../services/epm/packages/get_prerelease_setting';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
-export const VERSION = '1.0.3';
+export const VERSION = '1.0.2';
 const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '10m';
@@ -293,10 +293,8 @@ export class AutoInstallContentPackagesTask {
     esClient: ElasticsearchClient,
     datasetsOfInstalledContentPackages: string[]
   ): Promise<string[]> {
-    const body = await esClient.indices.getDataStream({
-      name: 'logs-*,metrics-*,traces-* ',
-    });
-    const datasetsWithData: string[] = body.data_streams
+    const allFleetDataStreams = await dataStreamService.getAllFleetDataStreams(esClient);
+    const datasetsWithData: string[] = allFleetDataStreams
       .map((dataStream: any) => dataStream.name.split('-')[1])
       .filter((dataset) => !datasetsOfInstalledContentPackages.includes(dataset));
     this.logger.info(

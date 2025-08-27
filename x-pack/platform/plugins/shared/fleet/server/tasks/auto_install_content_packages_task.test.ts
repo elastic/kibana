@@ -19,7 +19,7 @@ import * as Registry from '../services/epm/registry';
 import { createAppContextStartContractMock, createMockPackageService } from '../mocks';
 
 import type { PackageClient } from '../services';
-import { appContextService } from '../services';
+import { appContextService, dataStreamService } from '../services';
 
 import { getInstalledPackages } from '../services/epm/packages';
 
@@ -122,19 +122,17 @@ describe('AutoInstallContentPackagesTask', () => {
     beforeEach(async () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
-      esClient.indices.getDataStream.mockResolvedValue({
-        data_streams: [
-          {
-            name: 'logs-system.cpu-default',
-          } as any,
-          {
-            name: 'logs-system.memory-default',
-          } as any,
-          {
-            name: 'logs-system.test-default',
-          } as any,
-        ],
-      });
+      (dataStreamService.getAllFleetDataStreams as jest.Mock).mockResolvedValue([
+        {
+          name: 'logs-system.cpu-default',
+        } as any,
+        {
+          name: 'logs-system.memory-default',
+        } as any,
+        {
+          name: 'logs-system.test-default',
+        } as any,
+      ]);
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAutoInstallContentPackages: true } as any);
@@ -249,7 +247,7 @@ describe('AutoInstallContentPackagesTask', () => {
       await runTask();
 
       expect(packageClientMock.installPackage).not.toHaveBeenCalled();
-      expect(esClient.indices.getDataStream).not.toHaveBeenCalled();
+      expect(dataStreamService.getAllFleetDataStreams).not.toHaveBeenCalled();
     });
   });
 });
