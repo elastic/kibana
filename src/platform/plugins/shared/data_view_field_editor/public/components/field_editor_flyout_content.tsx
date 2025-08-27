@@ -10,11 +10,11 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -39,8 +39,8 @@ const i18nTexts = {
   saveButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutSaveButtonLabel', {
     defaultMessage: 'Save',
   }),
-  disabledSaveButtonTooltip: i18n.translate(
-    'indexPatternFieldEditor.editor.flyoutDisabledSaveButtonTooltip',
+  disabledSaveCalloutMessage: i18n.translate(
+    'indexPatternFieldEditor.editor.flyoutDisabledSaveCalloutMessage',
     {
       defaultMessage:
         'Fields cannot be edited on managed data views. Duplicate the data view in order to make changes.',
@@ -251,12 +251,22 @@ const FieldEditorFlyoutContentComponent = ({
                   />
                 </p>
               </EuiText>
+              {dataView.managed && (
+                <EuiCallOut
+                  title={i18nTexts.disabledSaveCalloutMessage}
+                  color="warning"
+                  iconType="warning"
+                  size="s"
+                  style={{ marginTop: '10px' }}
+                />
+              )}
             </FlyoutPanels.Header>
 
             <FieldEditor
               field={fieldToEdit ?? fieldToCreate}
               onChange={setFormState}
               onFormModifiedChange={setIsFormModified}
+              isDisabled={dataView.managed}
             />
           </FlyoutPanels.Content>
 
@@ -275,18 +285,16 @@ const FieldEditorFlyoutContentComponent = ({
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={dataView.managed && i18nTexts.disabledSaveButtonTooltip}>
-                    <EuiButton
-                      color="primary"
-                      onClick={onClickSave}
-                      data-test-subj="fieldSaveButton"
-                      fill
-                      disabled={hasErrors || dataView.managed}
-                      isLoading={isSavingField || isSubmitting}
-                    >
-                      {i18nTexts.saveButtonLabel}
-                    </EuiButton>
-                  </EuiToolTip>
+                  <EuiButton
+                    color="primary"
+                    onClick={onClickSave}
+                    data-test-subj="fieldSaveButton"
+                    fill
+                    disabled={hasErrors || dataView.managed}
+                    isLoading={isSavingField || isSubmitting}
+                  >
+                    {i18nTexts.saveButtonLabel}
+                  </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </>

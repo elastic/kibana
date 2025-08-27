@@ -26,7 +26,7 @@ export const DataViewEditor = ({
   editData,
   allowAdHocDataView,
   onDuplicate,
-  isDuplicatingManaged,
+  isDuplicating,
   getDataViewHelpText,
 }: DataViewEditorPropsWithServices) => {
   const { Provider: KibanaReactContextProvider } =
@@ -48,7 +48,7 @@ export const DataViewEditor = ({
           editData={editData}
           allowAdHocDataView={allowAdHocDataView}
           onDuplicate={onDuplicate}
-          isDuplicatingManaged={isDuplicatingManaged}
+          isDuplicating={isDuplicating}
           getDataViewHelpText={getDataViewHelpText}
         />
       </EuiFlyout>
