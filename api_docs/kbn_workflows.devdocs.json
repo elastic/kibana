@@ -352,15 +352,7 @@
         "label": "transformWorkflowYamlJsontoEsWorkflow",
         "description": [],
         "signature": [
-          "(workflowDefinition: { version: \"1\"; name: string; enabled: boolean; steps: ({ type: \"foreach\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"if\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[] | undefined; } | { type: \"wait\"; name: string; with: { duration: string; }; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"parallel\"; name: string; branches: { name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"merge\"; name: string; sources: string[]; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: string; name: string; timeout?: number | undefined; with?: Record<string, any> | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; 'connector-id'?: string | undefined; })[]; triggers: ({ type: \"alert\"; enabled: boolean; with?: { rule_id: string; } | { rule_name: string; } | undefined; } | { type: \"scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; } | { type: \"manual\"; enabled: boolean; })[]; tags?: string[] | undefined; description?: string | undefined; settings?: { timezone?: string | undefined; retry?: { 'max-attempts'?: number | undefined; 'timeout-seconds'?: number | undefined; } | undefined; templating?: { engine: \"mustache\" | \"nunjucks\"; } | undefined; } | undefined; inputs?: ({ type: \"string\"; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; } | { type: \"number\"; name: string; description?: string | undefined; default?: number | undefined; required?: boolean | undefined; } | { type: \"boolean\"; name: string; description?: string | undefined; default?: boolean | undefined; required?: boolean | undefined; } | { type: \"choice\"; options: string[]; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; })[] | undefined; consts?: Record<string, string | number | boolean | any[] | Record<string, any> | {}> | undefined; }) => Omit<{ id: string; name: string; tags: string[]; createdBy: string; createdAt: Date; status: ",
-          {
-            "pluginId": "@kbn/workflows",
-            "scope": "common",
-            "docId": "kibKbnWorkflowsPluginApi",
-            "section": "def-common.WorkflowStatus",
-            "text": "WorkflowStatus"
-          },
-          "; definition: { version: \"1\"; name: string; enabled: boolean; steps: ({ type: \"foreach\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"if\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[] | undefined; } | { type: \"wait\"; name: string; with: { duration: string; }; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"parallel\"; name: string; branches: { name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"merge\"; name: string; sources: string[]; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: string; name: string; timeout?: number | undefined; with?: Record<string, any> | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; 'connector-id'?: string | undefined; })[]; triggers: ({ type: \"alert\"; enabled: boolean; with?: { rule_id: string; } | { rule_name: string; } | undefined; } | { type: \"scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; } | { type: \"manual\"; enabled: boolean; })[]; tags?: string[] | undefined; description?: string | undefined; settings?: { timezone?: string | undefined; retry?: { 'max-attempts'?: number | undefined; 'timeout-seconds'?: number | undefined; } | undefined; templating?: { engine: \"mustache\" | \"nunjucks\"; } | undefined; } | undefined; inputs?: ({ type: \"string\"; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; } | { type: \"number\"; name: string; description?: string | undefined; default?: number | undefined; required?: boolean | undefined; } | { type: \"boolean\"; name: string; description?: string | undefined; default?: boolean | undefined; required?: boolean | undefined; } | { type: \"choice\"; options: string[]; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; })[] | undefined; consts?: Record<string, string | number | boolean | any[] | Record<string, any> | {}> | undefined; }; yaml: string; lastUpdatedAt: Date; lastUpdatedBy: string; deleted_at: Date | null; description?: string | undefined; }, \"id\" | \"createdBy\" | \"createdAt\" | \"yaml\" | \"lastUpdatedAt\" | \"lastUpdatedBy\">"
+          "(workflowDefinition: { version: \"1\"; name: string; enabled: boolean; steps: ({ type: \"foreach\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"if\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[] | undefined; } | { type: \"wait\"; name: string; with: { duration: string; }; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"parallel\"; name: string; branches: { name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"merge\"; name: string; sources: string[]; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: string; name: string; timeout?: number | undefined; with?: Record<string, any> | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; 'connector-id'?: string | undefined; })[]; triggers: ({ type: \"alert\"; enabled: boolean; with?: { rule_id: string; } | { rule_name: string; } | undefined; } | { type: \"scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; } | { type: \"manual\"; enabled: boolean; })[]; tags?: string[] | undefined; description?: string | undefined; settings?: { timezone?: string | undefined; retry?: { 'max-attempts'?: number | undefined; 'timeout-seconds'?: number | undefined; } | undefined; templating?: { engine: \"mustache\" | \"nunjucks\"; } | undefined; } | undefined; inputs?: ({ type: \"string\"; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; } | { type: \"number\"; name: string; description?: string | undefined; default?: number | undefined; required?: boolean | undefined; } | { type: \"boolean\"; name: string; description?: string | undefined; default?: boolean | undefined; required?: boolean | undefined; } | { type: \"choice\"; options: string[]; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; })[] | undefined; consts?: Record<string, string | number | boolean | any[] | Record<string, any> | {}> | undefined; }) => Omit<{ id: string; name: string; tags: string[]; enabled: boolean; createdBy: string; createdAt: Date; definition: { version: \"1\"; name: string; enabled: boolean; steps: ({ type: \"foreach\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"if\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[] | undefined; } | { type: \"wait\"; name: string; with: { duration: string; }; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"parallel\"; name: string; branches: { name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"merge\"; name: string; sources: string[]; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: string; name: string; timeout?: number | undefined; with?: Record<string, any> | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; 'connector-id'?: string | undefined; })[]; triggers: ({ type: \"alert\"; enabled: boolean; with?: { rule_id: string; } | { rule_name: string; } | undefined; } | { type: \"scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; } | { type: \"manual\"; enabled: boolean; })[]; tags?: string[] | undefined; description?: string | undefined; settings?: { timezone?: string | undefined; retry?: { 'max-attempts'?: number | undefined; 'timeout-seconds'?: number | undefined; } | undefined; templating?: { engine: \"mustache\" | \"nunjucks\"; } | undefined; } | undefined; inputs?: ({ type: \"string\"; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; } | { type: \"number\"; name: string; description?: string | undefined; default?: number | undefined; required?: boolean | undefined; } | { type: \"boolean\"; name: string; description?: string | undefined; default?: boolean | undefined; required?: boolean | undefined; } | { type: \"choice\"; options: string[]; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; })[] | undefined; consts?: Record<string, string | number | boolean | any[] | Record<string, any> | {}> | undefined; }; yaml: string; lastUpdatedAt: Date; lastUpdatedBy: string; deleted_at: Date | null; description?: string | undefined; }, \"id\" | \"spaceId\" | \"createdBy\" | \"createdAt\" | \"yaml\" | \"lastUpdatedAt\" | \"lastUpdatedBy\">"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/utils.ts",
         "deprecated": false,
@@ -465,6 +457,17 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.EsWorkflowExecution.id",
@@ -690,6 +693,17 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowStepExecution.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.EsWorkflowStepExecution.id",
@@ -1083,20 +1097,11 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.WorkflowDetailDto.status",
-            "type": "Enum",
+            "id": "def-common.WorkflowDetailDto.enabled",
+            "type": "boolean",
             "tags": [],
-            "label": "status",
+            "label": "enabled",
             "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/workflows",
-                "scope": "common",
-                "docId": "kibKbnWorkflowsPluginApi",
-                "section": "def-common.WorkflowStatus",
-                "text": "WorkflowStatus"
-              }
-            ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1190,6 +1195,17 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowExecutionDto.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.WorkflowExecutionDto.id",
@@ -1338,15 +1354,7 @@
             "section": "def-common.WorkflowExecutionEngineModel",
             "text": "WorkflowExecutionEngineModel"
           },
-          " extends Pick<{ id: string; name: string; tags: string[]; createdBy: string; createdAt: Date; status: ",
-          {
-            "pluginId": "@kbn/workflows",
-            "scope": "common",
-            "docId": "kibKbnWorkflowsPluginApi",
-            "section": "def-common.WorkflowStatus",
-            "text": "WorkflowStatus"
-          },
-          "; definition: { version: \"1\"; name: string; enabled: boolean; steps: ({ type: \"foreach\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"if\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[] | undefined; } | { type: \"wait\"; name: string; with: { duration: string; }; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"parallel\"; name: string; branches: { name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"merge\"; name: string; sources: string[]; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: string; name: string; timeout?: number | undefined; with?: Record<string, any> | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; 'connector-id'?: string | undefined; })[]; triggers: ({ type: \"alert\"; enabled: boolean; with?: { rule_id: string; } | { rule_name: string; } | undefined; } | { type: \"scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; } | { type: \"manual\"; enabled: boolean; })[]; tags?: string[] | undefined; description?: string | undefined; settings?: { timezone?: string | undefined; retry?: { 'max-attempts'?: number | undefined; 'timeout-seconds'?: number | undefined; } | undefined; templating?: { engine: \"mustache\" | \"nunjucks\"; } | undefined; } | undefined; inputs?: ({ type: \"string\"; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; } | { type: \"number\"; name: string; description?: string | undefined; default?: number | undefined; required?: boolean | undefined; } | { type: \"boolean\"; name: string; description?: string | undefined; default?: boolean | undefined; required?: boolean | undefined; } | { type: \"choice\"; options: string[]; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; })[] | undefined; consts?: Record<string, string | number | boolean | any[] | Record<string, any> | {}> | undefined; }; yaml: string; lastUpdatedAt: Date; lastUpdatedBy: string; deleted_at: Date | null; description?: string | undefined; }, \"id\" | \"name\" | \"status\" | \"definition\">"
+          " extends Pick<{ id: string; name: string; tags: string[]; enabled: boolean; createdBy: string; createdAt: Date; definition: { version: \"1\"; name: string; enabled: boolean; steps: ({ type: \"foreach\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"if\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[] | undefined; } | { type: \"wait\"; name: string; with: { duration: string; }; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"parallel\"; name: string; branches: { name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"merge\"; name: string; sources: string[]; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: string; name: string; timeout?: number | undefined; with?: Record<string, any> | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; 'connector-id'?: string | undefined; })[]; triggers: ({ type: \"alert\"; enabled: boolean; with?: { rule_id: string; } | { rule_name: string; } | undefined; } | { type: \"scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; } | { type: \"manual\"; enabled: boolean; })[]; tags?: string[] | undefined; description?: string | undefined; settings?: { timezone?: string | undefined; retry?: { 'max-attempts'?: number | undefined; 'timeout-seconds'?: number | undefined; } | undefined; templating?: { engine: \"mustache\" | \"nunjucks\"; } | undefined; } | undefined; inputs?: ({ type: \"string\"; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; } | { type: \"number\"; name: string; description?: string | undefined; default?: number | undefined; required?: boolean | undefined; } | { type: \"boolean\"; name: string; description?: string | undefined; default?: boolean | undefined; required?: boolean | undefined; } | { type: \"choice\"; options: string[]; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; })[] | undefined; consts?: Record<string, string | number | boolean | any[] | Record<string, any> | {}> | undefined; }; yaml: string; lastUpdatedAt: Date; lastUpdatedBy: string; deleted_at: Date | null; description?: string | undefined; }, \"id\" | \"name\" | \"enabled\" | \"definition\">"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -1520,7 +1528,7 @@
             "label": "_pagination",
             "description": [],
             "signature": [
-              "{ offset: number; limit: number; total: number; next?: string | undefined; prev?: string | undefined; }"
+              "{ page: number; limit: number; total: number; next?: string | undefined; prev?: string | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -1540,6 +1548,17 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowExecutionLogModel.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.WorkflowExecutionLogModel.timestamp",
@@ -1595,7 +1614,7 @@
             "label": "_pagination",
             "description": [],
             "signature": [
-              "{ offset: number; limit: number; total: number; next?: string | undefined; prev?: string | undefined; }"
+              "{ page: number; limit: number; total: number; next?: string | undefined; prev?: string | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -1800,20 +1819,11 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.WorkflowListItemDto.status",
-            "type": "Enum",
+            "id": "def-common.WorkflowListItemDto.enabled",
+            "type": "boolean",
             "tags": [],
-            "label": "status",
+            "label": "enabled",
             "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/workflows",
-                "scope": "common",
-                "docId": "kibKbnWorkflowsPluginApi",
-                "section": "def-common.WorkflowStatus",
-                "text": "WorkflowStatus"
-              }
-            ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1892,18 +1902,6 @@
         "type": "Enum",
         "tags": [],
         "label": "ExecutionStatus",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.WorkflowStatus",
-        "type": "Enum",
-        "tags": [],
-        "label": "WorkflowStatus",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -2025,15 +2023,7 @@
         "label": "EsWorkflow",
         "description": [],
         "signature": [
-          "{ id: string; name: string; tags: string[]; createdBy: string; createdAt: Date; status: ",
-          {
-            "pluginId": "@kbn/workflows",
-            "scope": "common",
-            "docId": "kibKbnWorkflowsPluginApi",
-            "section": "def-common.WorkflowStatus",
-            "text": "WorkflowStatus"
-          },
-          "; definition: { version: \"1\"; name: string; enabled: boolean; steps: ({ type: \"foreach\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"if\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[] | undefined; } | { type: \"wait\"; name: string; with: { duration: string; }; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"parallel\"; name: string; branches: { name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"merge\"; name: string; sources: string[]; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: string; name: string; timeout?: number | undefined; with?: Record<string, any> | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; 'connector-id'?: string | undefined; })[]; triggers: ({ type: \"alert\"; enabled: boolean; with?: { rule_id: string; } | { rule_name: string; } | undefined; } | { type: \"scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; } | { type: \"manual\"; enabled: boolean; })[]; tags?: string[] | undefined; description?: string | undefined; settings?: { timezone?: string | undefined; retry?: { 'max-attempts'?: number | undefined; 'timeout-seconds'?: number | undefined; } | undefined; templating?: { engine: \"mustache\" | \"nunjucks\"; } | undefined; } | undefined; inputs?: ({ type: \"string\"; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; } | { type: \"number\"; name: string; description?: string | undefined; default?: number | undefined; required?: boolean | undefined; } | { type: \"boolean\"; name: string; description?: string | undefined; default?: boolean | undefined; required?: boolean | undefined; } | { type: \"choice\"; options: string[]; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; })[] | undefined; consts?: Record<string, string | number | boolean | any[] | Record<string, any> | {}> | undefined; }; yaml: string; lastUpdatedAt: Date; lastUpdatedBy: string; deleted_at: Date | null; description?: string | undefined; }"
+          "{ id: string; name: string; tags: string[]; enabled: boolean; createdBy: string; createdAt: Date; definition: { version: \"1\"; name: string; enabled: boolean; steps: ({ type: \"foreach\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"if\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[] | undefined; } | { type: \"wait\"; name: string; with: { duration: string; }; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"parallel\"; name: string; branches: { name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"merge\"; name: string; sources: string[]; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: string; name: string; timeout?: number | undefined; with?: Record<string, any> | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; 'connector-id'?: string | undefined; })[]; triggers: ({ type: \"alert\"; enabled: boolean; with?: { rule_id: string; } | { rule_name: string; } | undefined; } | { type: \"scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; } | { type: \"manual\"; enabled: boolean; })[]; tags?: string[] | undefined; description?: string | undefined; settings?: { timezone?: string | undefined; retry?: { 'max-attempts'?: number | undefined; 'timeout-seconds'?: number | undefined; } | undefined; templating?: { engine: \"mustache\" | \"nunjucks\"; } | undefined; } | undefined; inputs?: ({ type: \"string\"; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; } | { type: \"number\"; name: string; description?: string | undefined; default?: number | undefined; required?: boolean | undefined; } | { type: \"boolean\"; name: string; description?: string | undefined; default?: boolean | undefined; required?: boolean | undefined; } | { type: \"choice\"; options: string[]; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; })[] | undefined; consts?: Record<string, string | number | boolean | any[] | Record<string, any> | {}> | undefined; }; yaml: string; lastUpdatedAt: Date; lastUpdatedBy: string; deleted_at: Date | null; description?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -2183,7 +2173,7 @@
         "label": "WorkflowContext",
         "description": [],
         "signature": [
-          "{ steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { item?: any; } | undefined; }"
+          "{ spaceId: string; steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { item?: any; } | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -2198,7 +2188,7 @@
         "label": "WorkflowExecutionListItemDto",
         "description": [],
         "signature": [
-          "{ id: string; duration: number | null; status: ",
+          "{ id: string; spaceId: string; duration: number | null; status: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",
@@ -2444,6 +2434,21 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.SearchWorkflowCommandSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "SearchWorkflowCommandSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ triggerType: Zod.ZodOptional<Zod.ZodString>; limit: Zod.ZodDefault<Zod.ZodNumber>; page: Zod.ZodDefault<Zod.ZodNumber>; createdBy: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; enabled: Zod.ZodOptional<Zod.ZodArray<Zod.ZodBoolean, \"many\">>; query: Zod.ZodOptional<Zod.ZodString>; _full: Zod.ZodDefault<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { page: number; limit: number; _full: boolean; enabled?: boolean[] | undefined; createdBy?: string[] | undefined; query?: string | undefined; triggerType?: string | undefined; }, { page?: number | undefined; enabled?: boolean[] | undefined; createdBy?: string[] | undefined; query?: string | undefined; limit?: number | undefined; triggerType?: string | undefined; _full?: boolean | undefined; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.TemplatingOptionsSchema",
         "type": "Object",
         "tags": [],
@@ -2468,6 +2473,21 @@
           "Zod.ZodDiscriminatedUnion<\"type\", [Zod.ZodObject<{ type: Zod.ZodLiteral<\"alert\">; enabled: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodBoolean>>; with: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodObject<{ rule_id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { rule_id: string; }, { rule_id: string; }>, Zod.ZodObject<{ rule_name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { rule_name: string; }, { rule_name: string; }>]>>; }, \"strip\", Zod.ZodTypeAny, { type: \"alert\"; enabled: boolean; with?: { rule_id: string; } | { rule_name: string; } | undefined; }, { type: \"alert\"; enabled?: boolean | undefined; with?: { rule_id: string; } | { rule_name: string; } | undefined; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"scheduled\">; enabled: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodBoolean>>; with: Zod.ZodUnion<[Zod.ZodObject<{ every: Zod.ZodString; unit: Zod.ZodEnum<[\"second\", \"minute\", \"hour\", \"day\", \"week\", \"month\", \"year\"]>; }, \"strip\", Zod.ZodTypeAny, { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; }, { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; }>, Zod.ZodObject<{ cron: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { cron: string; }, { cron: string; }>]>; }, \"strip\", Zod.ZodTypeAny, { type: \"scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; }, { type: \"scheduled\"; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; enabled?: boolean | undefined; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"manual\">; enabled: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodBoolean>>; }, \"strip\", Zod.ZodTypeAny, { type: \"manual\"; enabled: boolean; }, { type: \"manual\"; enabled?: boolean | undefined; }>]>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.UpdateWorkflowCommandSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "UpdateWorkflowCommandSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ name: Zod.ZodString; description: Zod.ZodOptional<Zod.ZodString>; enabled: Zod.ZodBoolean; tags: Zod.ZodArray<Zod.ZodString, \"many\">; yaml: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; tags: string[]; enabled: boolean; yaml: string; description?: string | undefined; }, { name: string; tags: string[]; enabled: boolean; yaml: string; description?: string | undefined; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2525,7 +2545,7 @@
         "label": "WorkflowContextSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ workflowRunId: Zod.ZodString; event: Zod.ZodOptional<Zod.ZodAny>; consts: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; steps: Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<{ output: Zod.ZodOptional<Zod.ZodAny>; error: Zod.ZodOptional<Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { error?: any; output?: any; }, { error?: any; output?: any; }>>; foreach: Zod.ZodOptional<Zod.ZodObject<{ item: Zod.ZodAny; }, \"strip\", Zod.ZodTypeAny, { item?: any; }, { item?: any; }>>; now: Zod.ZodOptional<Zod.ZodDate>; }, \"strip\", Zod.ZodTypeAny, { steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { item?: any; } | undefined; }, { steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { item?: any; } | undefined; }>"
+          "Zod.ZodObject<{ spaceId: Zod.ZodString; workflowRunId: Zod.ZodString; event: Zod.ZodOptional<Zod.ZodAny>; consts: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; steps: Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<{ output: Zod.ZodOptional<Zod.ZodAny>; error: Zod.ZodOptional<Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { error?: any; output?: any; }, { error?: any; output?: any; }>>; foreach: Zod.ZodOptional<Zod.ZodObject<{ item: Zod.ZodAny; }, \"strip\", Zod.ZodTypeAny, { item?: any; }, { item?: any; }>>; now: Zod.ZodOptional<Zod.ZodDate>; }, \"strip\", Zod.ZodTypeAny, { spaceId: string; steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { item?: any; } | undefined; }, { spaceId: string; steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { item?: any; } | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,

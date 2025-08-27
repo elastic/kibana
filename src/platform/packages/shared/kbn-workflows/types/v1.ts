@@ -31,9 +31,8 @@ export interface EsWorkflowExecution {
   status: ExecutionStatus;
   context: Record<string, string>;
   workflowDefinition: WorkflowYaml;
-  /** Serialized graphlib.Graph */
-  executionGraph?: any;
   currentNodeId?: string; // The node currently being executed
+  stack: string[];
   createdAt: string;
   error: string | null;
   createdBy: string;
@@ -68,16 +67,10 @@ export interface EsWorkflowStepExecution {
   completedAt?: string;
   executionTimeMs?: number;
   topologicalIndex: number;
+  executionIndex: number;
   error?: string | null;
   output?: Record<string, any> | null;
   state?: Record<string, any>;
-}
-
-export enum WorkflowStatus {
-  DRAFT = 'draft',
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  DELETED = 'deleted',
 }
 
 export interface WorkflowExecutionHistoryModel {
@@ -115,7 +108,7 @@ export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecu
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
   _pagination: {
-    offset: number;
+    page: number;
     limit: number;
     total: number;
     next?: string;
@@ -129,7 +122,7 @@ export const EsWorkflowSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
-  status: z.nativeEnum(WorkflowStatus),
+  enabled: z.boolean(),
   tags: z.array(z.string()),
   createdAt: z.date(),
   createdBy: z.string(),
@@ -146,6 +139,24 @@ export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
 });
 
+export const UpdateWorkflowCommandSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  enabled: z.boolean(),
+  tags: z.array(z.string()),
+  yaml: z.string(),
+});
+
+export const SearchWorkflowCommandSchema = z.object({
+  triggerType: z.string().optional(),
+  limit: z.number().default(100),
+  page: z.number().default(0),
+  createdBy: z.array(z.string()).optional(),
+  enabled: z.array(z.boolean()).optional(),
+  query: z.string().optional(),
+  _full: z.boolean().default(false),
+});
+
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export interface UpdatedWorkflowResponseDto {
@@ -158,7 +169,7 @@ export interface WorkflowDetailDto {
   id: string;
   name: string;
   description?: string;
-  status: WorkflowStatus;
+  enabled: boolean;
   createdAt: Date;
   createdBy: string;
   lastUpdatedAt: Date;
@@ -171,7 +182,7 @@ export interface WorkflowListItemDto {
   id: string;
   name: string;
   description: string;
-  status: WorkflowStatus;
+  enabled: boolean;
   definition: WorkflowYaml;
   createdAt: Date;
   history: WorkflowExecutionHistoryModel[];
@@ -180,7 +191,7 @@ export interface WorkflowListItemDto {
 
 export interface WorkflowListDto {
   _pagination: {
-    offset: number;
+    page: number;
     limit: number;
     total: number;
     next?: string;
@@ -188,11 +199,10 @@ export interface WorkflowListDto {
   };
   results: WorkflowListItemDto[];
 }
-export interface WorkflowExecutionEngineModel
-  extends Pick<EsWorkflow, 'id' | 'name' | 'status' | 'definition'> {
-  /** Serialized graphlib.Graph */
-  executionGraph?: any;
-}
+export type WorkflowExecutionEngineModel = Pick<
+  EsWorkflow,
+  'id' | 'name' | 'enabled' | 'definition'
+>;
 
 export interface WorkflowListItemAction {
   isPrimary?: boolean;
@@ -202,4 +212,27 @@ export interface WorkflowListItemAction {
   icon: string;
   description: string;
   onClick: (item: WorkflowListItemDto) => void;
+}
+
+export interface WorkflowExecutionsHistoryStats {
+  date: string;
+  timestamp: string;
+  completed: number;
+  failed: number;
+  cancelled: number;
+}
+
+export interface WorkflowStatsDto {
+  workflows: {
+    enabled: number;
+    disabled: number;
+  };
+  executions: WorkflowExecutionsHistoryStats[];
+}
+
+export interface WorkflowAggsDto {
+  [key: string]: {
+    key: string;
+    label: string;
+  }[];
 }
