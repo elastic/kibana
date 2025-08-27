@@ -9,12 +9,14 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { estypes } from '@elastic/elasticsearch';
 
 interface SearchStepExecutionsParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   stepsExecutionIndex: string;
   workflowExecutionId: string;
+  additionalQuery?: estypes.QueryDslQueryContainer;
   spaceId: string;
 }
 
@@ -23,27 +25,35 @@ export const searchStepExecutions = async ({
   logger,
   stepsExecutionIndex,
   workflowExecutionId,
+  additionalQuery,
   spaceId,
 }: SearchStepExecutionsParams): Promise<EsWorkflowStepExecution[]> => {
   try {
     logger.info(`Searching workflows in index ${stepsExecutionIndex}`);
+
+    const mustQueries: estypes.QueryDslQueryContainer[] = [
+      { match: { workflowRunId: workflowExecutionId } },
+      {
+        bool: {
+          should: [
+            { term: { spaceId } },
+            // Backward compatibility for objects without spaceId
+            { bool: { must_not: { exists: { field: 'spaceId' } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
+
+    if (additionalQuery) {
+      mustQueries.push(additionalQuery);
+    }
+
     const response = await esClient.search<EsWorkflowStepExecution>({
       index: stepsExecutionIndex,
       query: {
         bool: {
-          must: [
-            { match: { workflowRunId: workflowExecutionId } },
-            {
-              bool: {
-                should: [
-                  { term: { spaceId } },
-                  // Backward compatibility for objects without spaceId
-                  { bool: { must_not: { exists: { field: 'spaceId' } } } },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+          must: mustQueries,
         },
       },
       sort: 'startedAt:desc',
