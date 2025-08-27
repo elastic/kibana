@@ -126,6 +126,11 @@ export function getMonitorByServiceName(
             monitor: Record<string, any>;
           }>(bulkGetRequests);
 
+          if (bulkGetRequests.length === 0) {
+            logger.debug(`No Synthetics SavedObjects found for the related tests runs`);
+            return { suggestions: [] };
+          }
+
           for (const savedObj of monitorsSavedObject.saved_objects) {
             if (!savedObj.error && savedObj.id) {
               savedObjectsAttrHash[savedObj.id] =
@@ -136,7 +141,7 @@ export function getMonitorByServiceName(
           const monitorsOverviewMetaData: Array<OverviewStatusMetaData> = monitors.map(
             (monitor) => {
               const source = monitor.latest_run.hits.hits[0]._source;
-              const relatedSavedObjectAttr: EncryptedSyntheticsMonitorAttributes | undefined =
+              const relatedSavedObjectAttr: EncryptedSyntheticsMonitorAttributes =
                 savedObjectsAttrHash[source.config_id];
               return {
                 monitorQueryId: source.monitor.id,
@@ -190,7 +195,6 @@ export function getMonitorByServiceName(
               data: [item],
             };
           });
-
           return { suggestions };
         },
       },
