@@ -142,7 +142,10 @@ export function WaterfallWithSummary<TSample extends {}>({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <ViewInDiscoverButton dataTestSubj="apmWaterfallViewInDiscoverButton" />
+                <ViewInDiscoverButton
+                  dataTestSubj="apmWaterfallViewInDiscoverButton"
+                  mode="waterfall"
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <TransactionActionMenu isLoading={isLoading} transaction={entryTransaction} />

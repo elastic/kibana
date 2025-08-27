@@ -27,10 +27,10 @@ import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { ViewInDiscoverButton } from '../../../../../../shared/links/discover_links/view_in_discover_button';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
-import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
 import { Summary } from '../../../../../../shared/summary';
@@ -145,12 +145,11 @@ export function SpanFlyout({
             </EuiFlexItem>
             {span && (
               <EuiFlexItem grow={false}>
-                <DiscoverSpanLink spanId={span.span.id}>
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                    { defaultMessage: 'View span in Discover' }
-                  )}
-                </DiscoverSpanLink>
+                <ViewInDiscoverButton
+                  dataTestSubj="spanFlyoutViewInDiscoverButton"
+                  mode="span"
+                  spanId={spanId}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
