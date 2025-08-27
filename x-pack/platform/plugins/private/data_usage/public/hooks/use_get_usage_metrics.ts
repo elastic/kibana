@@ -13,7 +13,7 @@ import { DATA_USAGE_METRICS_API_ROUTE } from '../../common';
 import type {
   UsageMetricsRequestBody,
   UsageMetricsResponseSchemaBody,
-} from '../../common/rest_types';
+} from '../../server/routes/internal/usage_metrics';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 interface ErrorType {
