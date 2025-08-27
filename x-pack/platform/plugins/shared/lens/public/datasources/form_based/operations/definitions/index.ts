@@ -294,7 +294,9 @@ interface BaseOperationDefinitionProps<
   paramEditor?: React.ComponentType<
     AR extends true ? ParamEditorProps<C, GenericIndexPatternColumn> : ParamEditorProps<C>
   >;
-  getAdvancedOptions?: (params: ParamEditorProps<C>) => AdvancedOption[] | undefined;
+  getAdvancedOptions?: (
+    params: ParamEditorProps<C> & { euiTheme: EuiThemeComputed }
+  ) => AdvancedOption[] | undefined;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
