@@ -17,7 +17,7 @@ import {
 import { dynamic } from '@kbn/shared-ux-utility';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '@kbn/ml-common-constants/jobs_list';
 import type { MlRoute } from '../router';
-import { PageLoader } from '../router';
+import { PageLoader } from '../page_loader';
 import { useRouteResolver } from '../use_resolver';
 import { type NavigateToApp, getStackManagementBreadcrumb } from '../breadcrumbs';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
