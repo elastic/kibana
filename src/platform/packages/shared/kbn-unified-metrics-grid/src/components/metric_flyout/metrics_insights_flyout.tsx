@@ -11,21 +11,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiSpacer,
-  EuiTitle,
-  EuiBadge,
-  EuiDescriptionList,
-  EuiIcon,
-  EuiCode,
-  EuiCodeBlock,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiFlyoutResizable,
+  useIsWithinMinBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { MetricField } from '../../types';
-import { categorizeDimensions } from '../../utils';
-import { DimensionBadges } from './dimension_badges';
+import { MetricFlyoutContent } from './metric_flyout_content';
 
 interface MetricInsightsFlyoutProps {
   metric: MetricField;
@@ -40,162 +35,49 @@ export const MetricInsightsFlyout = ({
   isOpen,
   onClose,
 }: MetricInsightsFlyoutProps) => {
+  const { euiTheme } = useEuiTheme();
+  const DEFAULT_WIDTH = euiTheme.base * 34;
+  const defaultWidth = DEFAULT_WIDTH; // Give enough room to search bar to not wrap
+  const isXlScreen = useIsWithinMinBreakpoint('xl');
+  const [flyoutWidth, setFlyoutWidth] = useLocalStorage(
+    'metricInsightsFlyout:flyoutWidth',
+    defaultWidth
+  );
   if (!isOpen) return null;
 
-  const { requiredDimensions, optionalDimensions } = categorizeDimensions(
-    metric.dimensions || [],
-    metric.name
-  );
+  const minWidth = euiTheme.base * 24;
+  const maxWidth = euiTheme.breakpoint.xl;
 
   return (
-    <EuiFlyout size="s" onClose={onClose} aria-labelledby="metric-flyout-title">
+    <EuiFlyoutResizable
+      onClose={onClose}
+      type="push"
+      size={flyoutWidth}
+      pushMinBreakpoint="xl"
+      data-test-subj="metricViewerFlyout"
+      ownFocus={true}
+      minWidth={minWidth}
+      maxWidth={maxWidth}
+      onResize={setFlyoutWidth}
+      css={{
+        maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
+      }}
+      paddingSize="m"
+      // TODO Add accessibility props
+      // {...a11yProps}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="sparkles" size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
             <EuiText size="m">
-              <strong>Metric insights</strong>
+              <strong>Metric</strong>
             </EuiText>
           </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-          <EuiFlexItem>
-            <EuiTitle size="s" id="metric-flyout-title">
-              <h2>{metric.name}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {metric.timeSeriesMetric && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color={metric.timeSeriesMetric === 'counter' ? 'success' : 'primary'}>
-                {metric.timeSeriesMetric.toUpperCase()}
-              </EuiBadge>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {/* Description */}
-        {metric.description && (
-          <>
-            <EuiText size="s">
-              <strong>Description</strong>
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiText size="s">{metric.description}</EuiText>
-            <EuiSpacer size="m" />
-          </>
-        )}
-
-        {/* OpenTelemetry semantic conventions */}
-        {metric.source === 'otel' && metric.stability && (
-          <>
-            <EuiText size="s">
-              <strong>OpenTelemetry Semantic Conventions</strong>
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiDescriptionList
-              type="column"
-              compressed
-              listItems={[
-                {
-                  title: <EuiText size="xs">Stability</EuiText>,
-                  description: (
-                    <EuiBadge
-                      color={
-                        metric.stability === 'stable'
-                          ? 'success'
-                          : metric.stability === 'experimental'
-                          ? 'warning'
-                          : 'default'
-                      }
-                      style={{ textTransform: 'capitalize' }}
-                    >
-                      {metric.stability}
-                    </EuiBadge>
-                  ),
-                },
-              ]}
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
-
-        <EuiText size="s">
-          <strong>ES|QL Query</strong>
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <EuiCodeBlock language="sql" fontSize="s" paddingSize="s" isCopyable>
-          {esqlQuery}
-        </EuiCodeBlock>
-        <EuiSpacer size="m" />
-
-        <div>
-          {/* Technical details */}
-          <EuiText size="s">
-            <strong>Technical Details</strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiDescriptionList
-            type="column"
-            compressed
-            listItems={[
-              {
-                title: <EuiText size="xs">Data stream</EuiText>,
-                description: <EuiCode>{metric.index}</EuiCode>,
-              },
-              {
-                title: <EuiText size="xs">Field type</EuiText>,
-                description: <EuiCode>{metric.type}</EuiCode>,
-              },
-              ...(metric.unit
-                ? [
-                    {
-                      title: <EuiText size="xs">Unit</EuiText>,
-                      description: <EuiCode>{metric.unit}</EuiCode>,
-                    },
-                  ]
-                : []),
-            ]}
-          />
-
-          {/* Dimensions categorized by type */}
-          {metric.dimensions && metric.dimensions.length > 0 && (
-            <>
-              <EuiSpacer size="s" />
-              {requiredDimensions.length > 0 && (
-                <>
-                  <EuiText size="s">
-                    <strong>Required dimensions</strong>
-                  </EuiText>
-                  <EuiSpacer size="xs" />
-                  <DimensionBadges
-                    dimensions={requiredDimensions}
-                    metricName={metric.name}
-                    maxDisplay={999}
-                  />
-                  {optionalDimensions.length > 0 && <EuiSpacer size="s" />}
-                </>
-              )}
-              {optionalDimensions.length > 0 && (
-                <>
-                  <EuiText size="s">
-                    <strong>Additional dimensions</strong>
-                  </EuiText>
-                  <EuiSpacer size="xs" />
-                  <DimensionBadges
-                    dimensions={optionalDimensions}
-                    metricName={metric.name}
-                    maxDisplay={999}
-                  />
-                </>
-              )}
-            </>
-          )}
-        </div>
+        <MetricFlyoutContent metric={metric} esqlQuery={esqlQuery} />
       </EuiFlyoutBody>
-    </EuiFlyout>
+    </EuiFlyoutResizable>
   );
 };
