@@ -151,7 +151,9 @@ export function ConditionEditor(props: ConditionEditorProps) {
             onChange={(value) => {
               try {
                 handleConditionChange(JSON.parse(value));
-              } catch (error: unknown) {}
+              } catch (error: unknown) {
+                // do nothing
+              }
             }}
             editorDidMount={setupResizeChecker}
             editorWillUnmount={destroyResizeChecker}
