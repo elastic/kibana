@@ -15,9 +15,12 @@ import type {
   XYDataLayerConfig,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
+import { Walker, Parser as esqlParser } from '@kbn/esql-ast';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import {
   addLayerColumn,
@@ -30,6 +33,7 @@ import type {
   BuildDependencies,
   LensAnnotationLayer,
   LensAttributes,
+  LensDataset,
   LensReferenceLineLayer,
   LensSeriesLayer,
   LensXYConfig,
@@ -42,7 +46,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     axisTitlesVisibilitySettings: {
       x: config.axisTitleVisibility?.showXAxisTitle ?? true,
       yLeft: config.axisTitleVisibility?.showYAxisTitle ?? true,
-      yRight: true,
+      yRight: config.axisTitleVisibility?.showBreakdownTitle ?? true,
     },
     legend: {
       isVisible: config.legend?.show ?? true,
@@ -61,7 +65,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     tickLabelsVisibilitySettings: {
       x: true,
       yLeft: true,
-      yRight: true,
+      yRight: false,
     },
     labelsOrientation: {
       x: 0,
@@ -136,27 +140,75 @@ function buildVisualizationState(config: LensXYConfig): XYState {
               : {}),
             accessors: layer.yAxis.map((_, index) => `${ACCESSOR}${i}_${index}`),
             seriesType: layer.seriesType || 'line',
+            yConfig: layer.yAxis.map((yAxis, index) => ({
+              forAccessor: `${ACCESSOR}${i}_${index}`,
+              color: yAxis.seriesColor,
+            })),
           } as XYDataLayerConfig;
       }
     }),
   };
 }
 
-function getValueColumns(layer: LensSeriesLayer, i: number) {
-  if (layer.breakdown && typeof layer.breakdown !== 'string') {
-    throw new Error('breakdown must be a field name when not using index source');
+function normalizeFieldName(fieldName: string): string {
+  return fieldName.replace(/\s+/g, '');
+}
+
+function createFieldMetaGetter(dataset: LensDataset, dataView?: DataView) {
+  if (!('esql' in dataset)) {
+    return undefined;
+  }
+
+  const columns = new Map<string, TextBasedLayerColumn>();
+  const ast = esqlParser.parse(dataset.esql);
+
+  const statsNodes = Walker.matchAll(ast.root, {
+    type: 'command',
+    name: 'stats',
+  });
+
+  Walker.walk(statsNodes, {
+    visitColumn: (ctx, parent) => {
+      const field = dataView?.getFieldByName(ctx.name);
+      if (!field || !parent) {
+        return;
+      }
+
+      columns.set(parent.text, {
+        columnId: ctx.name,
+        fieldName: ctx.name,
+        meta: {
+          type: field.type as DatatableColumnType,
+          esType: field.type,
+        },
+      });
+    },
+  });
+
+  return (fieldName: string) => columns.get(normalizeFieldName(fieldName));
+}
+
+function getValueColumns(
+  layer: LensSeriesLayer,
+  i: number,
+  dataset: LensDataset,
+  dataView?: DataView
+) {
+  if (layer.breakdown && typeof layer.breakdown !== 'string' && !Array.isArray(layer.breakdown)) {
+    throw new Error('`breakdown` must be a field name when not using index source');
   }
   if (typeof layer.xAxis !== 'string') {
-    throw new Error('xAxis must be a field name when not using index source');
+    throw new Error('`xAxis` must be a field name when not using index source');
   }
+
+  const getFieldMeta = createFieldMetaGetter(dataset, dataView);
+
   return [
-    ...(layer.breakdown
-      ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
-      : []),
-    getValueColumn(`x_${ACCESSOR}${i}`, layer.xAxis as string),
-    ...layer.yAxis.map((yAxis, index) => ({
-      ...getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number'),
-    })),
+    ...(layer.breakdown ? [getValueColumn(`y_${ACCESSOR}${i}`, layer.breakdown as string)] : []),
+    getValueColumn(`x_${ACCESSOR}${i}`, layer.xAxis, getFieldMeta?.(layer.xAxis)?.meta?.type),
+    ...layer.yAxis.map((yAxis, index) =>
+      getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number', true)
+    ),
   ];
 }
 

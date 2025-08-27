@@ -16,7 +16,7 @@
  * in an ESQL query pipeline.
  */
 
-export { from } from './src/commands/from';
+export { from, timeseries } from './src/commands/from';
 export { drop } from './src/commands/drop';
 export { evaluate } from './src/commands/eval';
 export { keep } from './src/commands/keep';
@@ -24,3 +24,5 @@ export { where } from './src/commands/where';
 export { stats } from './src/commands/stats';
 export { limit } from './src/commands/limit';
 export { sort, SortOrder } from './src/commands/sort';
+
+export type { QueryOperator } from './src/types';

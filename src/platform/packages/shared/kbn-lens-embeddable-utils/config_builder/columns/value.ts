@@ -13,11 +13,13 @@ import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 export function getValueColumn(
   id: string,
   fieldName?: string,
-  type?: DatatableColumnType
+  type?: DatatableColumnType,
+  isMetricsDimension?: boolean
 ): TextBasedLayerColumn {
   return {
     columnId: id,
     fieldName: fieldName || id,
     ...(type ? { meta: { type } } : {}),
+    inMetricDimension: isMetricsDimension,
   };
 }

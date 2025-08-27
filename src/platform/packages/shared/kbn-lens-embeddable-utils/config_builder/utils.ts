@@ -21,6 +21,7 @@ import type {
 } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+
 import type { DataViewsCommon } from './config_builder';
 import type {
   FormulaValueConfig,
@@ -171,23 +172,20 @@ function buildDatasourceStatesLayer(
     i: number,
     dataView: DataView
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
-  getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
+  getValueColumns: (
+    config: unknown,
+    i: number,
+    dataset: LensDataset,
+    dataView?: DataView
+  ) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
   function buildValueLayer(
     config: LensBaseLayer | LensBaseXYLayer
   ): TextBasedPersistedState['layers'][0] {
     const table = dataset as LensDatatableDataset;
-    const newLayer = {
+    const newLayer: TextBasedPersistedState['layers'][0] = {
       table,
-      columns: getValueColumns(layer, i),
-      allColumns: table.columns.map(
-        (column) =>
-          ({
-            fieldName: column.name,
-            columnId: column.id,
-            meta: column.meta,
-          } as TextBasedLayerColumn)
-      ),
+      columns: getValueColumns(layer, i, dataset, dataView),
       index: '',
       query: undefined,
     };
@@ -198,14 +196,13 @@ function buildDatasourceStatesLayer(
   function buildESQLLayer(
     config: LensBaseLayer | LensBaseXYLayer
   ): TextBasedPersistedState['layers'][0] {
-    const columns = getValueColumns(layer, i);
+    const columns = getValueColumns(layer, i, dataset, dataView);
 
-    const newLayer = {
+    const newLayer: TextBasedPersistedState['layers'][0] = {
       index: dataView!.id!,
       query: { esql: (dataset as LensESQLDataset).esql } as AggregateQuery,
       timeField: dataView!.timeFieldName,
       columns,
-      allColumns: columns,
     };
 
     return newLayer;
@@ -226,7 +223,12 @@ export const buildDatasourceStates = async (
     i: number,
     dataView: DataView
   ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
-  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[],
+  getValueColumns: (
+    config: any,
+    i: number,
+    dataset: LensDataset,
+    dataView?: DataView
+  ) => TextBasedLayerColumn[],
   dataViewsAPI: DataViewsCommon
 ) => {
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
