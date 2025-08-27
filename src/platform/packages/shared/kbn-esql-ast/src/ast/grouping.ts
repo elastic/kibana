@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isBinaryExpression } from './is';
+import { isBinaryExpression, isUnaryExpression } from './is';
 import type { ESQLAstNode } from '../types';
 
 /**
@@ -96,4 +96,43 @@ export const binaryExpressionGroup = (node: ESQLAstNode): BinaryExpressionGroup 
     return BinaryExpressionGroup.unknown;
   }
   return BinaryExpressionGroup.none;
+};
+
+/**
+ * The group name of a unary expression. Groups are ordered by precedence.
+ */
+export enum UnaryExpressionGroup {
+  /**
+   * No group, not a unary expression.
+   */
+  none = 0,
+
+  /**
+   * Unary expression, but its group is unknown.
+   */
+  unknown = 1,
+
+  /**
+   * Logical: `not`
+   */
+  not = 13,
+
+  /**
+   * Additive: `+`, `-`
+   */
+  additive = 50,
+}
+
+export const unaryExpressionGroup = (node: ESQLAstNode): UnaryExpressionGroup => {
+  if (isUnaryExpression(node)) {
+    switch (node.name.toUpperCase()) {
+      case 'NOT':
+        return UnaryExpressionGroup.not;
+      case '+':
+      case '-':
+        return UnaryExpressionGroup.additive;
+    }
+    return UnaryExpressionGroup.unknown;
+  }
+  return UnaryExpressionGroup.none;
 };
