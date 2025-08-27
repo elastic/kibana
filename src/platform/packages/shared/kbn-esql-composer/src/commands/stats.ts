@@ -17,7 +17,7 @@ import { append } from '../pipeline/append';
  * @param params The parameters to use in the `STATS` command.
  * @returns A `QueryPipeline` instance with the `STATS` command appended.
  */
-export function stats<TQuery extends string, TParams extends Params<TTQuery>>(
+export function stats<TQuery extends string, TParams extends Params<TQuery>>(
   body: TQuery,
   params?: TParams
 ) {
