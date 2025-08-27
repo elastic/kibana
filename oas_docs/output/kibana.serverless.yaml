@@ -11522,6 +11522,26 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/entity_analytics/monitoring/engine/schedule_now:
+    post:
+      operationId: ScheduleMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    description: Indicates if the scheduling was successful
+                    type: boolean
+          description: Successful response
+      summary: Schedule the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/entity_analytics/monitoring/privileges/health:
     get:
       operationId: PrivMonHealth
