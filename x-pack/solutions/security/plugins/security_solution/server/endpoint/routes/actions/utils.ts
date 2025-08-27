@@ -17,6 +17,20 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionsRequestBody,
+  ExecuteActionRequestBody,
+  SuspendProcessRequestBody,
+  KillProcessRequestBody,
+  ResponseActionGetFileRequestBody,
+  UploadActionApiRequestBody,
+  ScanActionRequestBody,
+  RunScriptActionRequestBody,
+  CancelActionRequestBody,
+} from '../../../../common/api/endpoint';
+import type { ActionDetails } from '../../../../common/endpoint/types';
+import type { ResponseActionsClient } from '../../services';
+import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 
 type CommandsWithFileAccess = Readonly<
   Record<ResponseActionsApiCommandNames, Readonly<Record<ResponseActionAgentType, boolean>>>
@@ -164,4 +178,65 @@ export const ensureUserHasAuthzToFilesForAction = async (
   if (!hasAuthzToCommand) {
     throw new EndpointAuthorizationError();
   }
+};
+
+/**
+ * Executes a response action using the appropriate client method based on the command type
+ */
+export const executeResponseAction = async (
+  command: ResponseActionsApiCommandNames,
+  requestBody: ResponseActionsRequestBody,
+  responseActionsClient: ResponseActionsClient
+): Promise<ActionDetails> => {
+  switch (command) {
+    case 'isolate':
+      return responseActionsClient.isolate(requestBody);
+    case 'unisolate':
+      return responseActionsClient.release(requestBody);
+    case 'running-processes':
+      return responseActionsClient.runningProcesses(requestBody);
+    case 'execute':
+      return responseActionsClient.execute(requestBody as ExecuteActionRequestBody);
+    case 'suspend-process':
+      return responseActionsClient.suspendProcess(requestBody as SuspendProcessRequestBody);
+    case 'kill-process':
+      return responseActionsClient.killProcess(requestBody as KillProcessRequestBody);
+    case 'get-file':
+      return responseActionsClient.getFile(requestBody as ResponseActionGetFileRequestBody);
+    case 'upload':
+      return responseActionsClient.upload(requestBody as UploadActionApiRequestBody);
+    case 'scan':
+      return responseActionsClient.scan(requestBody as ScanActionRequestBody);
+    case 'runscript':
+      return responseActionsClient.runscript(requestBody as RunScriptActionRequestBody);
+    case 'cancel':
+      return responseActionsClient.cancel(requestBody as CancelActionRequestBody);
+    default:
+      throw new CustomHttpRequestError(
+        `No handler found for response action command: [${command}]`,
+        501
+      );
+  }
+};
+
+/**
+ * Builds the standardized response object for response actions
+ */
+export const buildResponseActionResult = (
+  command: ResponseActionsApiCommandNames,
+  action: ActionDetails
+): { body: { action?: string; data: ActionDetails } } => {
+  const { action: actionId, ...data } = action;
+  const legacyResponseData = responseActionsWithLegacyActionProperty.includes(command)
+    ? {
+        action: actionId ?? data.id ?? '',
+      }
+    : {};
+
+  return {
+    body: {
+      ...legacyResponseData,
+      data,
+    },
+  };
 };

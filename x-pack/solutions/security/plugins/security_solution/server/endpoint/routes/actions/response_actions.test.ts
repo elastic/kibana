@@ -35,6 +35,7 @@ import {
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
+  CANCEL_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   ActionDetails,
@@ -64,7 +65,9 @@ import { getResponseActionsClient as _getResponseActionsClient } from '../../ser
 import type {
   ResponseActionsRequestBody,
   UploadActionApiRequestBody,
+  CancelActionRequestBody,
 } from '../../../../common/api/endpoint';
+import * as fetchActionUtils from '../../services/actions/utils/fetch_action_request_by_id';
 import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
 import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '../../../types';
 import { createHapiReadableStreamMock } from '../../services/actions/mocks';
@@ -1035,6 +1038,148 @@ describe('Response actions', () => {
         expect(getCaseIdsFromAttachmentAddService()).toEqual(
           expect.arrayContaining(['ONE', 'TWO', 'case-1', 'case-2'])
         );
+      });
+    });
+
+    describe('Cancel Action Authorization', () => {
+      let fetchActionByIdSpy: jest.SpyInstance;
+      let responseActionsClientMockInstance: jest.Mocked<any>;
+      const mockIsolateAction = {
+        EndpointActions: {
+          data: {
+            command: 'isolate',
+          },
+        },
+      };
+      const mockExecuteAction = {
+        EndpointActions: {
+          data: {
+            command: 'runscript',
+          },
+        },
+      };
+
+      beforeEach(() => {
+        fetchActionByIdSpy = jest
+          .spyOn(fetchActionUtils, 'fetchActionRequestById')
+          .mockResolvedValue(mockIsolateAction);
+
+        // Mock the response actions client
+        responseActionsClientMockInstance = {
+          cancel: jest.fn().mockResolvedValue({
+            id: 'mock-cancel-action-id',
+            agents: ['agent-id'],
+            command: 'cancel',
+            isCompleted: true,
+            isExpired: false,
+            wasSuccessful: true,
+            status: 'successful',
+            outputs: {},
+            agentState: {},
+            createdBy: 'test-user',
+            startedAt: '2023-05-01T12:00:00Z',
+            completedAt: '2023-05-01T12:01:00Z',
+            comment: '',
+            parameters: { id: 'test-action-id' },
+          }),
+        };
+
+        (getResponseActionsClientMock as jest.Mock).mockReturnValue(
+          responseActionsClientMockInstance
+        );
+      });
+
+      afterEach(() => {
+        fetchActionByIdSpy.mockRestore();
+        jest.clearAllMocks();
+      });
+
+      it('allows cancel action when user has baseline permissions for isolate command', async () => {
+        await callRoute(CANCEL_ROUTE, {
+          body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
+          authz: { canReadActionsLogManagement: true, canIsolateHost: true },
+          version: '2023-10-31',
+        });
+        expect(mockResponse.ok).toBeCalled();
+        expect(fetchActionByIdSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          'test-action-id'
+        );
+        expect(responseActionsClientMockInstance.cancel).toHaveBeenCalledWith({
+          parameters: { id: 'test-action-id' },
+        });
+      });
+
+      it('prohibits cancel action when user lacks baseline permissions', async () => {
+        await callRoute(CANCEL_ROUTE, {
+          body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
+          authz: { canReadActionsLogManagement: false },
+          version: '2023-10-31',
+        });
+        expect(mockResponse.forbidden).toBeCalled();
+      });
+
+      it('prohibits cancel action when user lacks command-specific permission for isolate', async () => {
+        await callRoute(CANCEL_ROUTE, {
+          body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
+          authz: { canReadActionsLogManagement: true, canIsolateHost: false },
+          version: '2023-10-31',
+        });
+        expect(mockResponse.forbidden).toBeCalled();
+      });
+
+      it('allows cancel action for runscript command when user has required permissions', async () => {
+        fetchActionByIdSpy.mockResolvedValue(mockExecuteAction);
+        await callRoute(CANCEL_ROUTE, {
+          body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
+          authz: { canReadActionsLogManagement: true, canWriteExecuteOperations: true },
+          version: '2023-10-31',
+        });
+        expect(mockResponse.ok).toBeCalled();
+        expect(responseActionsClientMockInstance.cancel).toHaveBeenCalledWith({
+          parameters: { id: 'test-action-id' },
+        });
+      });
+
+      it('prohibits cancel action for runscript command when user lacks execute permissions', async () => {
+        fetchActionByIdSpy.mockResolvedValue(mockExecuteAction);
+        await callRoute(CANCEL_ROUTE, {
+          body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
+          authz: { canReadActionsLogManagement: true, canWriteExecuteOperations: false },
+          version: '2023-10-31',
+        });
+        expect(mockResponse.forbidden).toBeCalled();
+      });
+
+      it('returns 404 when action to cancel is not found', async () => {
+        fetchActionByIdSpy.mockResolvedValue(null);
+        await callRoute(CANCEL_ROUTE, {
+          body: { parameters: { id: 'non-existent-action' } } as CancelActionRequestBody,
+          authz: { canReadActionsLogManagement: true },
+          version: '2023-10-31',
+        });
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          body: expect.objectContaining({
+            message: "Action with id 'non-existent-action' not found.",
+          }),
+          statusCode: 404,
+        });
+      });
+
+      it('returns 400 when action has missing command information', async () => {
+        fetchActionByIdSpy.mockResolvedValue({ EndpointActions: { data: {} } });
+        await callRoute(CANCEL_ROUTE, {
+          body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
+          authz: { canReadActionsLogManagement: true },
+          version: '2023-10-31',
+        });
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          body: expect.objectContaining({
+            message: "Unable to determine command type for action 'test-action-id'",
+          }),
+          statusCode: 400,
+        });
       });
     });
   });

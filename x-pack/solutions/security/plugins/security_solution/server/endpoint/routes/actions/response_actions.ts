@@ -12,25 +12,17 @@ import type {
 } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   EndpointActionGetFileSchema,
-  type ExecuteActionRequestBody,
   ExecuteActionRequestSchema,
   GetProcessesRouteRequestSchema,
   IsolateRouteRequestSchema,
-  type KillProcessRequestBody,
   KillProcessRouteRequestSchema,
-  type ResponseActionGetFileRequestBody,
   type ResponseActionsRequestBody,
-  type ScanActionRequestBody,
   ScanActionRequestSchema,
-  type SuspendProcessRequestBody,
   SuspendProcessRouteRequestSchema,
   UnisolateRouteRequestSchema,
-  type UploadActionApiRequestBody,
   UploadActionRequestSchema,
   RunScriptActionRequestSchema,
-  type RunScriptActionRequestBody,
   CancelActionRequestSchema,
-  type CancelActionRequestBody,
 } from '../../../../common/api/endpoint';
 
 import {
@@ -53,7 +45,6 @@ import type {
   EndpointActionDataParameterTypes,
   ActionDetails,
   ResponseActionRunScriptParameters,
-  ResponseActionCancelParameters,
 } from '../../../../common/endpoint/types';
 import type {
   SecuritySolutionPluginRouter,
@@ -66,7 +57,8 @@ import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ResponseActionsClient } from '../../services';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
-import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
+import { executeResponseAction, buildResponseActionResult } from './utils';
+import { validateCommandSpecificCancelPermissions } from './authz/cancel_authz';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -358,10 +350,16 @@ export function registerResponseActionRoutes(
           request: CancelActionRequestSchema,
         },
       },
+      // TODO: Refactor to use withEndpointAuthz pattern for architectural consistency
+      // Follow-up required within 1 sprint to align with established route patterns
       withEndpointAuthz(
-        { all: ['canWriteExecuteOperations'] },
+        { all: ['canReadActionsLogManagement'] },
         logger,
-        responseActionRequestHandler<ResponseActionCancelParameters>(endpointContext, 'cancel')
+        responseActionRequestHandler(endpointContext, 'cancel'),
+        // Additional command-specific authorization check
+        async (context, request) => {
+          await validateCommandSpecificCancelPermissions(context, request, endpointContext, logger);
+        }
       )
     );
 }
@@ -380,56 +378,46 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   return async (context, req, res) => {
     logger.debug(() => `response action [${command}]:\n${stringify(req.body)}`);
 
-    const experimentalFeatures = endpointContext.experimentalFeatures;
-
-    // Note:  because our API schemas are defined as module static variables (as opposed to a
-    //        `getter` function), we need to include this additional validation here, since
-    //        `agent_type` is included in the schema independent of the feature flag
-    if (isThirdPartyFeatureDisabled(req.body.agent_type, command, experimentalFeatures)) {
-      return errorHandler(
-        logger,
-        res,
-        new CustomHttpRequestError(`[request body.agent_type]: feature is disabled`, 400)
-      );
-    }
-
-    const coreContext = await context.core;
-    const user = coreContext.security.authc.getCurrentUser();
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
-    const casesClient = await endpointContext.service.getCasesClient(req);
-    const connectorActions = (await context.actions).getActionsClient();
-    const spaceId = (await context.securitySolution).getSpaceId();
-    const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
-      req.body.agent_type || 'endpoint',
-      {
-        esClient,
-        casesClient,
-        spaceId,
-        endpointService: endpointContext.service,
-        username: user?.username || 'unknown',
-        connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
-      }
-    );
-
     try {
-      const action: ActionDetails = await handleActionCreation(
+      const experimentalFeatures = endpointContext.experimentalFeatures;
+
+      // Note:  because our API schemas are defined as module static variables (as opposed to a
+      //        `getter` function), we need to include this additional validation here, since
+      //        `agent_type` is included in the schema independent of the feature flag
+      if (isThirdPartyFeatureDisabled(req.body.agent_type, command, experimentalFeatures)) {
+        return errorHandler(
+          logger,
+          res,
+          new CustomHttpRequestError(`[request body.agent_type]: feature is disabled`, 400)
+        );
+      }
+
+      const coreContext = await context.core;
+      const user = coreContext.security.authc.getCurrentUser();
+      const esClient = coreContext.elasticsearch.client.asInternalUser;
+      const casesClient = await endpointContext.service.getCasesClient(req);
+      const connectorActions = (await context.actions).getActionsClient();
+      const spaceId = (await context.securitySolution).getSpaceId();
+      const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
+        req.body.agent_type || 'endpoint',
+        {
+          esClient,
+          casesClient,
+          spaceId,
+          endpointService: endpointContext.service,
+          username: user?.username || 'unknown',
+          connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
+        }
+      );
+
+      const action: ActionDetails = await executeResponseAction(
         command,
         req.body,
         responseActionsClient
       );
-      const { action: actionId, ...data } = action;
-      const legacyResponseData = responseActionsWithLegacyActionProperty.includes(command)
-        ? {
-            action: actionId ?? data.id ?? '',
-          }
-        : {};
 
-      return res.ok({
-        body: {
-          ...legacyResponseData,
-          data,
-        },
-      });
+      const result = buildResponseActionResult(command, action);
+      return res.ok(result);
     } catch (err) {
       return errorHandler(logger, res, err);
     }
@@ -460,40 +448,4 @@ function isThirdPartyFeatureDisabled(
   }
 
   return false;
-}
-
-async function handleActionCreation(
-  command: ResponseActionsApiCommandNames,
-  body: ResponseActionsRequestBody,
-  responseActionsClient: ResponseActionsClient
-): Promise<ActionDetails> {
-  switch (command) {
-    case 'isolate':
-      return responseActionsClient.isolate(body);
-    case 'unisolate':
-      return responseActionsClient.release(body);
-    case 'running-processes':
-      return responseActionsClient.runningProcesses(body);
-    case 'execute':
-      return responseActionsClient.execute(body as ExecuteActionRequestBody);
-    case 'suspend-process':
-      return responseActionsClient.suspendProcess(body as SuspendProcessRequestBody);
-    case 'kill-process':
-      return responseActionsClient.killProcess(body as KillProcessRequestBody);
-    case 'get-file':
-      return responseActionsClient.getFile(body as ResponseActionGetFileRequestBody);
-    case 'upload':
-      return responseActionsClient.upload(body as UploadActionApiRequestBody);
-    case 'scan':
-      return responseActionsClient.scan(body as ScanActionRequestBody);
-    case 'runscript':
-      return responseActionsClient.runscript(body as RunScriptActionRequestBody);
-    case 'cancel':
-      return responseActionsClient.cancel(body as CancelActionRequestBody);
-    default:
-      throw new CustomHttpRequestError(
-        `No handler found for response action command: [${command}]`,
-        501
-      );
-  }
 }
