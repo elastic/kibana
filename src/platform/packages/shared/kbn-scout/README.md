@@ -243,7 +243,7 @@ import { apiTest as test, expect } from '@kbn/scout';
 ```ts
 import { apiTest, expect } from '@kbn/scout';
 
-apiTest('POST api/painless_lab/execute is disabled', async ({ kbnClient, log }) => {
+apiTest('POST api/painless_lab/execute is disabled', async ({ apiClient, log }) => {
   const response = await apiClient.post('api/painless_lab/execute', {
     headers: {
       ...COMMON_HEADERS,
