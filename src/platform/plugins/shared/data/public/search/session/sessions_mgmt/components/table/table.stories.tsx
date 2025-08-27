@@ -280,8 +280,8 @@ export const NoFiltersAndRefreshButton = {
   ),
 };
 
-export const FilteredSessions = {
-  name: 'Filtered sessions',
+export const PreFilteredSessions = {
+  name: 'PreFiltered sessions',
   argTypes: {
     appId: {
       options: ['discover', 'dashboard'],

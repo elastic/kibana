@@ -155,7 +155,7 @@ export function SearchSessionsMgmtTable({
     const _filters = [];
 
     const hasAppColumn = columns.some((column) => 'field' in column && column.field === 'appId');
-    if (hasAppColumn) _filters.push(getAppFilter(tableData));
+    if (hasAppColumn && !appId) _filters.push(getAppFilter(tableData));
 
     const hasStatusColumn = columns.some(
       (column) => 'field' in column && column.field === 'status'
@@ -163,7 +163,7 @@ export function SearchSessionsMgmtTable({
     if (hasStatusColumn) _filters.push(getStatusFilter(tableData));
 
     return _filters;
-  }, [columns, tableData]);
+  }, [columns, tableData, appId]);
 
   // table config: search / filters
   const search: EuiSearchBarProps = {
