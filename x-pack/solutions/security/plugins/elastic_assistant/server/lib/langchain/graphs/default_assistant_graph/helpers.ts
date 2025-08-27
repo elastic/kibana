@@ -117,6 +117,9 @@ export const streamGraph = async ({
     version: 'v2',
     streamMode: ['values', 'debug'],
     recursionLimit: inputs?.isOssModel ? 50 : 25,
+    configurable: {
+      thread_id: inputs.conversationId,
+    },
   });
 
   const pushStreamUpdate = async () => {

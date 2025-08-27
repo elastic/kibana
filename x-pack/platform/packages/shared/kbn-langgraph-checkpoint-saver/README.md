@@ -31,14 +31,14 @@ const client = new Client({ node: process.env.ELASTICSEARCH_URL });
 await client.indices.create({
     index: ElasticSearchSaver.defaultCheckpointIndex,
     mappings: {
-        properties: ElasticSearchSaver.checkpointIndexMapping,
+        properties: ElasticSearchSaver.checkpointFieldMap,
     },
 });
 
 await client.indices.create({
     index: ElasticSearchSaver.defaultCheckpointWritesIndex,
     mappings: {
-        properties: ElasticSearchSaver.checkpointWritesIndexMapping,
+        properties: ElasticSearchSaver.checkpointWritesFieldMap,
     },
 });
 
