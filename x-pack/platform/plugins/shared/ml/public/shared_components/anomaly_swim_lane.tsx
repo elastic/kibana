@@ -39,8 +39,9 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
       swimlaneType,
       refreshConfig,
       viewBy,
+      timeRange,
     };
-  }, [jobIds, refreshConfig, swimlaneType, viewBy]);
+  }, [jobIds, refreshConfig, swimlaneType, viewBy, timeRange]);
 
   useEffect(
     function syncState() {
