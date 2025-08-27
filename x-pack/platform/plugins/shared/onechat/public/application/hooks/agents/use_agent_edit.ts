@@ -11,7 +11,7 @@ import {
   ToolType,
   type AgentDefinition,
   type ToolSelection,
-  allToolsSelectionWildcard,
+  defaultAgentToolIds,
 } from '@kbn/onechat-common';
 import { useOnechatServices } from '../use_onechat_service';
 import { useOnechatAgentById } from './use_agent_by_id';
@@ -23,7 +23,7 @@ export type AgentEditState = Omit<AgentDefinition, 'type'>;
 const defaultToolSelection: ToolSelection[] = [
   {
     type: ToolType.builtin,
-    tool_ids: [allToolsSelectionWildcard],
+    tool_ids: [...defaultAgentToolIds],
   },
 ];
 
@@ -31,6 +31,9 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
+  labels: [],
+  avatar_color: '',
+  avatar_symbol: '',
   configuration: {
     instructions: '',
     tools: defaultToolSelection,
@@ -50,7 +53,11 @@ export function useAgentEdit({
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
 
-  const { tools, isLoading: toolsLoading, error: toolsError } = useToolsService();
+  const {
+    tools,
+    isLoading: toolsLoading,
+    error: toolsError,
+  } = useToolsService({ includeSystemTools: true });
 
   const { agent, isLoading: agentLoading, error: agentError } = useOnechatAgentById(agentId || '');
 
@@ -73,8 +80,6 @@ export function useAgentEdit({
       return agentService.update(agentId, data);
     },
     onSuccess: (result) => {
-      // Invalidate specific agent and agent profiles list
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId!) });
       queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
       onSaveSuccess(result);
     },

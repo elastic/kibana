@@ -99,6 +99,7 @@ export function getStateDefaults({
   if (savedSearch?.hideChart !== undefined) {
     defaultState.hideChart = savedSearch.hideChart;
   }
+
   if (savedSearch?.rowHeight !== undefined) {
     defaultState.rowHeight = savedSearch.rowHeight;
   }
