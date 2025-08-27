@@ -54,9 +54,11 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
   }
 
   public async start(core: CoreStart, deps: StartDeps) {
-    deps.dashboard.registerDashboardPanelPlacementSetting(FILTER_DEBUGGER_EMBEDDABLE_ID, () => ({
-      width: 48,
-      height: 12,
+    deps.dashboard.registerDashboardPanelSettings(FILTER_DEBUGGER_EMBEDDABLE_ID, () => ({
+      placementSettings: {
+        width: 48,
+        height: 12,
+      },
     }));
   }
 
