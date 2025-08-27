@@ -24,10 +24,12 @@ export const getShareAppMenuItem = ({
   discoverParams,
   services,
   stateContainer,
+  hasIntegrations,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
+  hasIntegrations: boolean;
 }): AppMenuActionPrimary[] => {
   if (!services.share) {
     return [];
@@ -170,7 +172,7 @@ export const getShareAppMenuItem = ({
     },
   ];
 
-  if (Boolean(services.share?.availableIntegrations('search', 'export')?.length)) {
+  if (hasIntegrations) {
     menuItems.unshift({
       id: AppMenuActionId.export,
       type: AppMenuActionType.primary,
