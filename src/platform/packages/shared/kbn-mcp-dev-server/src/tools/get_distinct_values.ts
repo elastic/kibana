@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ToolDefinition } from '../types';
-import { client } from './code_search';
+import { client } from '../utils/elasticsearch';
 
 const getDistinctValuesInputSchema = z.object({
   field: z

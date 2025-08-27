@@ -19,7 +19,7 @@
 import { z } from '@kbn/zod';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ToolDefinition } from '../types';
-import { client } from './code_search';
+import { client } from '../utils/elasticsearch';
 
 const findUsagesInputSchema = z.object({
   symbol: z.string().describe('The symbol to find usages for.'),

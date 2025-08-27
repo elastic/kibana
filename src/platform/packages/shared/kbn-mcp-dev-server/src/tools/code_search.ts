@@ -7,20 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License"
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { z } from '@kbn/zod';
-import type { ClientOptions, estypes } from '@elastic/elasticsearch';
-import { Client } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { ToolDefinition } from '../types';
+import { client } from '../utils/elasticsearch';
 
 const {
-  ELASTICSEARCH_USERNAME = 'elastic',
-  ELASTICSEARCH_PASSWORD = 'changeme',
-  ELASTICSEARCH_ENDPOINT = 'http://localhost:9200',
   ELASTICSEARCH_INDEX = 'kibana-code-search',
   ELASTICSEARCH_INFERENCE_ID = '.elser_model_2',
-  ELASTICSEARCH_API_KEY,
-  ELASTICSEARCH_CLOUD_ID,
 } = process.env;
 
 interface CodeChunk {
@@ -44,25 +48,6 @@ const codeSearchInputSchema = z.object({
   size: z.number().optional().default(20).describe('The number of results to return.'),
   page: z.number().optional().default(1).describe('The page of results to return.'),
 });
-
-const clientOptions: ClientOptions = {};
-
-if (ELASTICSEARCH_CLOUD_ID) {
-  clientOptions.cloud = { id: ELASTICSEARCH_CLOUD_ID };
-} else if (ELASTICSEARCH_ENDPOINT) {
-  clientOptions.node = ELASTICSEARCH_ENDPOINT;
-}
-
-if (ELASTICSEARCH_API_KEY) {
-  clientOptions.auth = { apiKey: ELASTICSEARCH_API_KEY };
-} else if (ELASTICSEARCH_PASSWORD && ELASTICSEARCH_PASSWORD) {
-  clientOptions.auth = {
-    username: ELASTICSEARCH_USERNAME,
-    password: ELASTICSEARCH_PASSWORD,
-  };
-}
-
-export const client = new Client(clientOptions);
 
 async function codeSearchHandler(input: z.infer<typeof codeSearchInputSchema>) {
   const { query: queryString, kql, size, page } = input;

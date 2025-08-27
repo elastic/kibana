@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { codeSearchTool, client } from './code_search';
+import { codeSearchTool } from './code_search';
+import { client } from '../utils/elasticsearch';
 
-jest.mock('@elastic/elasticsearch');
+jest.mock('../utils/elasticsearch', () => ({
+  client: {
+    search: jest.fn(),
+  },
+}));
 
 describe('codeSearchTool', () => {
   beforeEach(() => {
@@ -42,6 +47,7 @@ describe('codeSearchTool', () => {
         'created_at',
         'updated_at',
         'type',
+        'imports',
       ],
       query: {
         bool: {
@@ -90,6 +96,7 @@ describe('codeSearchTool', () => {
         'created_at',
         'updated_at',
         'type',
+        'imports',
       ],
       query: {
         bool: {
