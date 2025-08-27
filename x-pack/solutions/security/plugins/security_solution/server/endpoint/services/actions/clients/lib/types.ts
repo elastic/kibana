@@ -38,8 +38,6 @@ import type {
   RunScriptActionRequestBody,
   ScanActionRequestBody,
   SuspendProcessRequestBody,
-  RunScriptActionRequestBody,
-  BaseActionRequestBody,
   CancelActionRequestBody,
   UnisolationRouteRequestBody,
   UploadActionApiRequestBody,

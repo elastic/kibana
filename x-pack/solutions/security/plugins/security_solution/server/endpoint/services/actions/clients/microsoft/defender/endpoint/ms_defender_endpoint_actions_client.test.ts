@@ -1377,6 +1377,121 @@ describe('MS Defender response actions client', () => {
         );
       });
     });
+
+    describe('for Cancel actions with Cancelled status', () => {
+      let msMachineActionsApiResponse: MicrosoftDefenderEndpointGetActionsResponse;
+
+      beforeEach(() => {
+        const generator = new EndpointActionGenerator('seed');
+
+        // Set up a cancel action request
+        const actionRequestsSearchResponse = generator.toEsSearchResponse([
+          generator.generateActionEsHit<
+            { id: string },
+            {},
+            MicrosoftDefenderEndpointActionRequestCommonMeta
+          >({
+            EndpointActions: {
+              action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+              data: { command: 'cancel', parameters: { id: 'target-action-id' } },
+            },
+            agent: { id: 'agent-uuid-1' },
+            meta: { machineActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e' },
+          }),
+        ]);
+
+        applyEsClientSearchMock({
+          esClientMock: clientConstructorOptionsMock.esClient,
+          index: ENDPOINT_ACTIONS_INDEX,
+          response: jest
+            .fn(() => generator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
+          pitUsage: true,
+        });
+
+        // Set up the MS API response
+        msMachineActionsApiResponse = microsoftDefenderMock.createGetActionsApiResponse(
+          microsoftDefenderMock.createMachineAction({
+            id: '5382f7ea-7557-4ab7-9782-d50480024a4e',
+            status: 'Cancelled',
+          })
+        );
+
+        responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+          connectorActionsMock,
+          MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+          msMachineActionsApiResponse
+        );
+      });
+
+      it('should generate success response for cancel action with Cancelled status', async () => {
+        const expectedResult: LogsEndpointActionResponse = {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+            completed_at: expect.any(String),
+            data: { command: 'cancel' },
+            input_type: 'microsoft_defender_endpoint',
+            started_at: expect.any(String),
+          },
+          agent: { id: 'agent-uuid-1' },
+          error: undefined, // Cancel action should succeed, no error
+          meta: undefined,
+        };
+
+        await msClientMock.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(expectedResult);
+      });
+
+      it('should generate failure response for non-cancel action with Cancelled status', async () => {
+        // Update the action to be an isolate action (not a cancel action)
+        const generator = new EndpointActionGenerator('seed');
+        const actionRequestsSearchResponse = generator.toEsSearchResponse([
+          generator.generateActionEsHit<
+            undefined,
+            {},
+            MicrosoftDefenderEndpointActionRequestCommonMeta
+          >({
+            EndpointActions: {
+              action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+              data: { command: 'isolate' },
+            },
+            agent: { id: 'agent-uuid-1' },
+            meta: { machineActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e' },
+          }),
+        ]);
+
+        applyEsClientSearchMock({
+          esClientMock: clientConstructorOptionsMock.esClient,
+          index: ENDPOINT_ACTIONS_INDEX,
+          response: jest
+            .fn(() => generator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
+          pitUsage: true,
+        });
+
+        const expectedResult: LogsEndpointActionResponse = {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+            completed_at: expect.any(String),
+            data: { command: 'isolate' },
+            input_type: 'microsoft_defender_endpoint',
+            started_at: expect.any(String),
+          },
+          agent: { id: 'agent-uuid-1' },
+          error: {
+            message: expect.any(String), // Isolate action that was cancelled should fail
+          },
+          meta: undefined,
+        };
+
+        await msClientMock.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(expectedResult);
+      });
+    });
   });
 
   describe('and space awareness is enabled', () => {

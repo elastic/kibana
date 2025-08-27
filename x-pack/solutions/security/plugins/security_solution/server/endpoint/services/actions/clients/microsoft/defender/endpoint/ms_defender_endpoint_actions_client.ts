@@ -661,6 +661,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                 >
               )
             );
+            break;
           case 'runscript':
             addResponsesToQueueIfAny(
               await this.checkPendingActions(
@@ -744,7 +745,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
         if (!isPending) {
           const pendingActionRequests = actionsByMachineId[machineAction.id] ?? [];
-
           for (const actionRequest of pendingActionRequests) {
             let additionalData = {};
             // In order to not copy paste most of the logic, I decided to add this additional check here to support `runscript` action and it's result that comes back as a link to download the file
@@ -757,6 +757,18 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                 },
               };
             }
+
+            // Special handling for cancelled actions:
+            // Cancel actions that successfully cancel something should show as success
+            // Actions that were cancelled by another action should show as failed
+            let finalIsError = isError;
+            if (
+              machineAction.status === 'Cancelled' &&
+              actionRequest.EndpointActions.data.command === 'cancel'
+            ) {
+              finalIsError = false; // Cancel action succeeded
+            }
+
             completedResponses.push(
               this.buildActionResponseEsDoc({
                 actionId: actionRequest.EndpointActions.action_id,
@@ -764,7 +776,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                   ? actionRequest.agent.id[0]
                   : actionRequest.agent.id,
                 data: { command: actionRequest.EndpointActions.data.command },
-                error: isError
+                error: finalIsError
                   ? {
                       message: commandErrors || message,
                     }
@@ -808,9 +820,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
       case 'Cancelled':
         isPending = false;
-
-        // TODO: Cancel action is a normal action - I think we should show it as succeeded if everything is fine, and not error.
-        isError = false;
+        isError = true;
         message = `Response action was canceled by [${
           // TODO does requestor make more sense?
           machineAction.requestor

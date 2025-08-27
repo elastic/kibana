@@ -6,9 +6,17 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import type { CustomScript } from '../../../../../server/endpoint/services';
-import type { ActionListApiResponse, ActionDetails } from '../../../../../common/endpoint/types';
+import type {
+  ActionListApiResponse,
+  ActionDetails,
+  ResponseActionScript,
+} from '../../../../../common/endpoint/types';
 import type { BaseSelectorState } from './types';
+
+/**
+ * Type representing a pending action item for cancellation
+ */
+export type PendingActionItem = ActionDetails;
 
 /**
  * Generic handler for option selection in selectable components
@@ -65,10 +73,10 @@ export const createKeyDownHandler = (event: React.KeyboardEvent<HTMLInputElement
  * Transform custom scripts data to selectable options
  */
 export const transformCustomScriptsToOptions = (
-  data: CustomScript[],
+  data: ResponseActionScript[],
   selectedValue?: string
-): EuiSelectableOption<Partial<{ description: CustomScript['description'] }>>[] => {
-  return data.map((script: CustomScript) => {
+): EuiSelectableOption<Partial<{ description: ResponseActionScript['description'] }>>[] => {
+  return data.map((script: ResponseActionScript) => {
     const isChecked = script.name === selectedValue;
     return {
       label: script.name,

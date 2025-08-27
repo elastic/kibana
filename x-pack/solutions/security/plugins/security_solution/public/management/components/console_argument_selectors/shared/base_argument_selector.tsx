@@ -87,18 +87,20 @@ const BaseArgumentSelectorComponent = <
     (option: EuiSelectableOption<TOption>) => {
       const hasDescription = 'description' in option && option.description;
       const testId = testIdPrefix ? `${testIdPrefix}-` : '';
+      const descriptionText = hasDescription ? String(option.description) : '';
+      
       return (
         <div data-test-subj={`${testId}script`}>
           <EuiText size="s" css={SHARED_TRUNCATION_STYLE}>
             <strong data-test-subj={`${option.label}-label`}>{option.label}</strong>
           </EuiText>
-          {hasDescription && (
-            <EuiToolTip position="right" content={String(option.description)}>
+          {hasDescription ? (
+            <EuiToolTip position="right" content={descriptionText}>
               <EuiText data-test-subj={`${option.label}-description`} color="subdued" size="s">
-                <small css={SHARED_TRUNCATION_STYLE}>{String(option.description)}</small>
+                <small css={SHARED_TRUNCATION_STYLE}>{descriptionText}</small>
               </EuiText>
             </EuiToolTip>
-          )}
+          ) : null}
         </div>
       );
     },
