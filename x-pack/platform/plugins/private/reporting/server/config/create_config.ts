@@ -33,6 +33,11 @@ export function createConfig(
     );
     encryptionKey = crypto.randomBytes(16).toString('hex');
   }
+  if (encryptionKey.length < 32) {
+    logger.warn(
+      'The xpack.reporting.encryptionKey config is shorter than the recommended minimum length of 32 characters. For enhanced security, please update the encryption key to be at least 32 characters long.'
+    );
+  }
 
   const hashedEncryptionKey = crypto.createHash('sha3-256').update(encryptionKey).digest('base64');
   logger.info(`Hashed 'xpack.reporting.encryptionKey' for this instance: ${hashedEncryptionKey}`);
