@@ -15,7 +15,7 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
   const { readConfigFile } = ftrConfigProviderContext;
 
   const svlBaseConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-serverless/shared/config.base')
+    require.resolve('@kbn/test-suites-xpack-platform/serverless/shared/config.base')
   );
 
   return generateConfig({

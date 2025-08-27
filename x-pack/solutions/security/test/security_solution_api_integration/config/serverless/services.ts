@@ -6,7 +6,7 @@
  */
 
 import { BsearchSecureService } from '@kbn/test-suites-serverless/shared/services/bsearch_secure';
-import { services as serverlessServices } from '@kbn/test-suites-serverless/api_integration/services';
+import { services as serverlessServices } from '@kbn/test-suites-xpack-platform/serverless/api_integration/services';
 import { KibanaEBTServerProvider } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
 import { SpacesServiceProvider } from '../../../common/services/spaces';
 import { SecuritySolutionServerlessUtils } from '../services/security_solution_serverless_utils';

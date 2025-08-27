@@ -17,7 +17,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/test-suites-serverless",
     "@kbn/expect",
     "@kbn/security-solution-plugin",
     "@kbn/repo-info",

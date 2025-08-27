@@ -8,7 +8,7 @@
 import TestAgent from 'supertest/lib/agent';
 import type { IEsSearchResponse } from '@kbn/search-types';
 
-import type { BsearchSecureService } from '@kbn/test-suites-serverless/shared/services/bsearch_secure';
+import type { BsearchSecureService } from '@kbn/test-suites-xpack-platform/serverless/shared/services/bsearch_secure';
 import type { BsearchService, SendOptions } from '@kbn/ftr-common-functional-services';
 
 export interface SecuritySolutionServerlessBsearch extends Omit<BsearchSecureService, 'send'> {

@@ -6,17 +6,16 @@
   },
   "include": [
     "**/*",
-    "../../../typings/**/*",
-    "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
+    "../../../../../typings/**/*",
+    "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
     { "path": "../security_solution_endpoint/tsconfig.json" },
-    "@kbn/test-suites-serverless",
-    { "path": "../../test_serverless/api_integration/**/*" },
-    { "path": "../../test_serverless/shared/**/*" },
+    { "path": "../../../../platform/test/serverless/api_integration/**/*" },
+    { "path": "../../../../platform/test/serverless/shared/**/*" },
     { "path": "../../api_integration/services/**/*" },
     "@kbn/dev-utils",
     "@kbn/test",

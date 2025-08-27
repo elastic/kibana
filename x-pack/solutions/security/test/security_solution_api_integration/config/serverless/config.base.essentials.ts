@@ -26,7 +26,7 @@ export interface CreateTestConfigOptions {
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(
-      require.resolve('@kbn/test-suites-serverless/shared/config.base')
+      require.resolve('@kbn/test-suites-xpack-platform/serverless/shared/config.base')
     );
     return {
       ...svlSharedConfig.getAll(),

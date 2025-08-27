@@ -6,7 +6,7 @@
  */
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { SvlCommonApiServiceProvider } from '@kbn/test-suites-serverless/shared/services/svl_common_api';
+import { SvlCommonApiServiceProvider } from '@kbn/test-suites-xpack-platform/serverless/shared/services/svl_common_api';
 import { IngestManagerProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ingest_manager';
 import { services as xPackFunctionalServices } from '../../functional/services';
 import { EndpointTelemetryTestResourcesProvider } from './endpoint_telemetry';
