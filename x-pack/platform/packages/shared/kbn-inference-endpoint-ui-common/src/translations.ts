@@ -216,3 +216,10 @@ export const CONTEXT_WINDOW_VALIDATION_MESSAGE = i18n.translate(
     defaultMessage: 'Context window length must be an integer.',
   }
 );
+
+export const CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.contextWindowLengthTaskTypeValidationMessage',
+  {
+    defaultMessage: 'Context window length is only applicable for chat completion tasks.',
+  }
+);

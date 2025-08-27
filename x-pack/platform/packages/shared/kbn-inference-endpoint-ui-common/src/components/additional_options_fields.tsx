@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 
 import {
   EuiFieldNumber,
+  EuiFormControlLayout,
   EuiFormRow,
   EuiSpacer,
   EuiTitle,
@@ -97,29 +98,55 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                   }),
                   isBlocking: true,
                 },
+                {
+                  validator: ({ value, path }) => {
+                    if (value && selectedTaskType !== CHAT_COMPLETION_TASK_TYPE) {
+                      return {
+                        code: 'ERR_FIELD_MISSING',
+                        path,
+                        message: LABELS.CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE,
+                      };
+                    }
+                  },
+                  isBlocking: true,
+                },
               ],
             }}
           >
             {(field) => {
               const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
+              // This ensures the check happens when task type changes, as well.
+              const taskTypeError =
+                config.contextWindowLength && selectedTaskType !== CHAT_COMPLETION_TASK_TYPE
+                  ? LABELS.CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE
+                  : undefined;
               return (
                 <EuiFormRow
                   id="contextWindowLength"
                   fullWidth
-                  isInvalid={isInvalid}
-                  error={errorMessage}
+                  isInvalid={isInvalid || Boolean(taskTypeError)}
+                  error={errorMessage || taskTypeError}
+                  data-test-subj={'configuration-formrow-contextWidnowLength'}
                 >
-                  <EuiFieldNumber
-                    min={0}
+                  <EuiFormControlLayout
                     fullWidth
-                    data-test-subj={'contextWindowLengthNumber'}
-                    value={config.contextWindowLength ?? ''}
-                    isInvalid={isInvalid}
-                    onChange={(e) => {
-                      setFieldValue('config.contextWindowLength', e.target.value);
+                    clear={{
+                      onClick: (e) => {
+                        setFieldValue('config.contextWindowLength', '');
+                      },
                     }}
-                  />
+                  >
+                    <EuiFieldNumber
+                      min={0}
+                      fullWidth
+                      data-test-subj={'contextWindowLengthNumber'}
+                      value={config.contextWindowLength ?? ''}
+                      isInvalid={isInvalid || Boolean(taskTypeError)}
+                      onChange={(e) => {
+                        setFieldValue('config.contextWindowLength', e.target.value);
+                      }}
+                    />
+                  </EuiFormControlLayout>
                 </EuiFormRow>
               );
             }}
