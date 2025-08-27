@@ -61,6 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(createEntitySourceResponse.status).toBe(200);
 
+      await privMonUtils.scheduleMonitoringEngineNowIgnoreConflict();
       await privMonUtils.waitForSyncTaskRun();
 
       const users = (await api.listPrivMonUsers({ query: {} })).body as ListPrivMonUsersResponse;
