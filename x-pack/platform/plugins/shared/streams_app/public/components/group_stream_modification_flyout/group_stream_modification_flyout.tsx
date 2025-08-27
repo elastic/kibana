@@ -12,7 +12,6 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
-  EuiSelect,
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
@@ -21,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { Streams } from '@kbn/streams-schema';
-import type { GroupStreamRelationshipType } from '@kbn/streams-schema/src/models/group';
 import React from 'react';
 
 export function GroupStreamModificationFlyout({
@@ -41,9 +39,10 @@ export function GroupStreamModificationFlyout({
   const [formData, setFormData] = React.useState({
     name: existingStream?.name ?? '',
     description: existingStream?.description ?? '',
-    owner: existingStream?.group.owner ?? '',
-    tier: existingStream?.group.tier.toString() ?? '1',
-    ...splitRelationships(existingStream),
+    members:
+      existingStream?.group.members.map((member) => ({
+        label: member,
+      })) ?? [],
   });
 
   const [selectedTags, setSelectedTags] = React.useState<Array<{ label: string }>>(
@@ -70,73 +69,12 @@ export function GroupStreamModificationFlyout({
     setTagsInvalid(false);
   };
 
-  const [selectedRunbookLinks, setSelectedRunbookLinks] = React.useState<Array<{ label: string }>>(
-    existingStream?.group.runbook_links.map((link) => ({ label: link })) ?? []
-  );
-  const [selectedDocLinks, setSelectedDocLinks] = React.useState<Array<{ label: string }>>(
-    existingStream?.group.documentation_links.map((link) => ({ label: link })) ?? []
-  );
-  const [selectedRepoLinks, setSelectedRepoLinks] = React.useState<Array<{ label: string }>>(
-    existingStream?.group.repository_links.map((link) => ({ label: link })) ?? []
-  );
-
-  const onCreateRunbookOption = (searchValue: string) => {
-    const newOption = { label: searchValue };
-    setSelectedRunbookLinks([...selectedRunbookLinks, newOption]);
-  };
-
-  const onRunbookComboChange = (options: Array<{ label: string }>) => {
-    setSelectedRunbookLinks(options);
-  };
-
-  const onCreateDocOption = (searchValue: string) => {
-    const newOption = { label: searchValue };
-    setSelectedDocLinks([...selectedDocLinks, newOption]);
-  };
-
-  const onDocComboChange = (options: Array<{ label: string }>) => {
-    setSelectedDocLinks(options);
-  };
-
-  const onCreateRepoOption = (searchValue: string) => {
-    const newOption = { label: searchValue };
-    setSelectedRepoLinks([...selectedRepoLinks, newOption]);
-  };
-
-  const onRepoComboChange = (options: Array<{ label: string }>) => {
-    setSelectedRepoLinks(options);
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   async function modifyGroupStream() {
-    const tags = selectedTags.map((opt) => opt.label);
-    const runbookLinks = selectedRunbookLinks.map((opt) => opt.label);
-    const documentationLinks = selectedDocLinks.map((opt) => opt.label);
-    const repositoryLinks = selectedRepoLinks.map((opt) => opt.label);
-
-    const parent = formData.parent.map((r) => ({
-      name: r.label as string,
-      type: 'parent' as const,
-    }));
-    const child = formData.child.map((r) => ({
-      name: r.label as string,
-      type: 'child' as const,
-    }));
-    const dependency = formData.dependency.map((r) => ({
-      name: r.label as string,
-      type: 'dependency' as const,
-    }));
-    const related = formData.related.map((r) => ({
-      name: r.label as string,
-      type: 'related' as const,
-    }));
-    const relationships = [...parent, ...child, ...dependency, ...related];
-
     let streamBaseData: any = {};
-
     if (existingStream) {
       streamBaseData = await client.fetch('GET /api/streams/{name} 2023-10-31', {
         params: {
@@ -157,16 +95,8 @@ export function GroupStreamModificationFlyout({
             stream: {
               description: formData.description,
               group: {
-                owner: formData.owner,
-                tier: parseInt(
-                  formData.tier,
-                  10
-                ) as Streams.GroupStream.Definition['group']['tier'],
-                tags,
-                runbook_links: runbookLinks,
-                documentation_links: documentationLinks,
-                repository_links: repositoryLinks,
-                relationships,
+                tags: selectedTags.map((opt) => opt.label),
+                members: formData.members.map((opt) => opt.label),
               },
             },
           },
@@ -244,30 +174,7 @@ export function GroupStreamModificationFlyout({
             onChange={handleInputChange}
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.groupStreamModificationFlyout.ownerLabel', {
-            defaultMessage: 'Owner',
-          })}
-        >
-          <EuiFieldText name="owner" value={formData.owner} onChange={handleInputChange} />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.groupStreamModificationFlyout.tierLabel', {
-            defaultMessage: 'Tier',
-          })}
-        >
-          <EuiSelect
-            name="tier"
-            value={formData.tier}
-            onChange={handleInputChange}
-            options={[
-              { value: '1', text: '1' },
-              { value: '2', text: '2' },
-              { value: '3', text: '3' },
-              { value: '4', text: '4' },
-            ]}
-          />
-        </EuiFormRow>
+
         <EuiFormRow
           label={i18n.translate('xpack.streams.groupStreamModificationFlyout.tagsLabel', {
             defaultMessage: 'Tags',
@@ -299,167 +206,26 @@ export function GroupStreamModificationFlyout({
             isInvalid={tagsInvalid}
           />
         </EuiFormRow>
+
         <EuiFormRow
-          label={i18n.translate('xpack.streams.groupStreamModificationFlyout.runbookLinksLabel', {
-            defaultMessage: 'Runbook links',
+          label={i18n.translate('xpack.streams.groupStreamModificationFlyout.membersLabel', {
+            defaultMessage: 'Members',
           })}
-          helpText={i18n.translate(
-            'xpack.streams.groupStreamModificationFlyout.runbookLinksHelpText',
-            {
-              defaultMessage: 'Enter runbook links',
-            }
-          )}
-        >
-          <EuiComboBox
-            noSuggestions
-            placeholder={i18n.translate(
-              'xpack.streams.groupStreamModificationFlyout.runbookLinksPlaceholder',
-              {
-                defaultMessage: 'Add runbook links',
-              }
-            )}
-            selectedOptions={selectedRunbookLinks}
-            onCreateOption={onCreateRunbookOption}
-            onChange={onRunbookComboChange}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.streams.groupStreamModificationFlyout.documentationLinksLabel',
-            {
-              defaultMessage: 'Documentation links',
-            }
-          )}
-          helpText={i18n.translate(
-            'xpack.streams.groupStreamModificationFlyout.documentationLinksHelpText',
-            {
-              defaultMessage: 'Enter documentation links',
-            }
-          )}
-        >
-          <EuiComboBox
-            noSuggestions
-            placeholder={i18n.translate(
-              'xpack.streams.groupStreamModificationFlyout.documentationLinksPlaceholder',
-              {
-                defaultMessage: 'Add documentation links',
-              }
-            )}
-            selectedOptions={selectedDocLinks}
-            onCreateOption={onCreateDocOption}
-            onChange={onDocComboChange}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.streams.groupStreamModificationFlyout.repositoryLinksLabel',
-            {
-              defaultMessage: 'Repository links',
-            }
-          )}
-          helpText={i18n.translate(
-            'xpack.streams.groupStreamModificationFlyout.repositoryLinksHelpText',
-            {
-              defaultMessage: 'Enter repository links',
-            }
-          )}
-        >
-          <EuiComboBox
-            noSuggestions
-            placeholder={i18n.translate(
-              'xpack.streams.groupStreamModificationFlyout.repositoryLinksPlaceholder',
-              {
-                defaultMessage: 'Add repository links',
-              }
-            )}
-            selectedOptions={selectedRepoLinks}
-            onCreateOption={onCreateRepoOption}
-            onChange={onRepoComboChange}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.streams.groupStreamModificationFlyout.parentRelationshipLabel',
-            {
-              defaultMessage: 'Parent',
-            }
-          )}
-        >
-          <EuiComboBox
-            placeholder={i18n.translate(
-              'xpack.streams.groupStreamModificationFlyout.parentRelationshipPlaceholder',
-              {
-                defaultMessage: 'Select parent',
-              }
-            )}
-            options={streamsOptions}
-            singleSelection={true}
-            selectedOptions={formData.parent}
-            onChange={(options) => {
-              setFormData({ ...formData, parent: options });
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.streams.groupStreamModificationFlyout.childrenRelationshipsLabel',
-            {
-              defaultMessage: 'Children',
-            }
-          )}
-        >
-          <EuiComboBox
-            placeholder={i18n.translate(
-              'xpack.streams.groupStreamModificationFlyout.childrenRelationshipsPlaceholder',
-              {
-                defaultMessage: 'Select children',
-              }
-            )}
-            options={streamsOptions}
-            selectedOptions={formData.child}
-            onChange={(options) => {
-              setFormData({ ...formData, child: options });
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.streams.groupStreamModificationFlyout.dependencyRelationshipsLabel',
-            {
-              defaultMessage: 'Dependencies',
-            }
-          )}
-        >
-          <EuiComboBox
-            placeholder={i18n.translate(
-              'xpack.streams.groupStreamModificationFlyout.dependencyRelationshipsPlaceholder',
-              {
-                defaultMessage: 'Select dependencies',
-              }
-            )}
-            options={streamsOptions}
-            selectedOptions={formData.dependency}
-            onChange={(options) => {
-              setFormData({ ...formData, dependency: options });
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.groupStreamModificationFlyout.relationshipsLabel', {
-            defaultMessage: 'Other relationships',
+          helpText={i18n.translate('xpack.streams.groupStreamModificationFlyout.membersHelpText', {
+            defaultMessage: 'Select the members of this Group stream',
           })}
         >
           <EuiComboBox
             placeholder={i18n.translate(
-              'xpack.streams.groupStreamModificationFlyout.relationshipsPlaceholder',
+              'xpack.streams.groupStreamModificationFlyout.membersPlaceholder',
               {
-                defaultMessage: 'Select related streams',
+                defaultMessage: 'Select members',
               }
             )}
             options={streamsOptions}
-            selectedOptions={formData.related}
+            selectedOptions={formData.members}
             onChange={(options) => {
-              setFormData({ ...formData, related: options });
+              setFormData({ ...formData, members: options });
             }}
           />
         </EuiFormRow>
@@ -476,23 +242,4 @@ export function GroupStreamModificationFlyout({
       </EuiModalBody>
     </>
   );
-}
-
-function splitRelationships(existingStream?: Streams.GroupStream.Definition) {
-  if (!existingStream) return { parent: [], child: [], dependency: [], related: [] };
-
-  const { parent, child, dependency, related } = existingStream.group.relationships.reduce(
-    (acc, current) => {
-      acc[current.type].push({ label: current.name });
-      return acc;
-    },
-    {
-      parent: [],
-      child: [],
-      dependency: [],
-      related: [],
-    } as { [key in GroupStreamRelationshipType]: Array<{ label: string }> }
-  );
-
-  return { parent, child, dependency, related };
 }

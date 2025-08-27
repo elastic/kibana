@@ -4,7 +4,6 @@
     "outDir": "target/types"
   },
   "include": [
-    "../../../../../typings/**/*",
     "common/**/*",
     "public/**/*",
     "typings/**/*",

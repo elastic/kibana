@@ -57,10 +57,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
       return { cascadingChanges: [], changeStatus: 'deleted' };
     }
 
-    if (
-      !this.isDeleted() &&
-      this._definition.group.relationships.map((relationship) => relationship.name).includes(target)
-    ) {
+    if (!this.isDeleted() && this._definition.group.members.includes(target)) {
       // We need to run validation to check that all related streams still exist
       return { cascadingChanges: [], changeStatus: 'upserted' };
     }
@@ -109,36 +106,29 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
       }
     }
 
-    // validate relationships
-    const selfReference = this._definition.group.relationships.find(
-      (relationship) => relationship.name === this.name
-    );
+    // validate members
+    const selfReference = this._definition.group.members.includes(this.name);
     if (selfReference) {
       return {
         isValid: false,
-        errors: [new Error(`Group stream ${this.name} cannot have a relationship to itself`)],
+        errors: [new Error(`Group stream ${this.name} cannot have itself as a member`)],
       };
     }
 
-    for (const relationship of this._definition.group.relationships) {
-      const relatedStream = desiredState.get(relationship.name);
+    for (const member of this._definition.group.members) {
+      const relatedStream = desiredState.get(member);
       if (!relatedStream || relatedStream.isDeleted()) {
         return {
           isValid: false,
           errors: [
-            new Error(
-              `Group stream${this.name} has a relationship to ${relationship.name} which was not found`
-            ),
+            new Error(`Group stream ${this.name} has ${member} as a member which was not found`),
           ],
         };
       }
     }
 
-    const relationshipNames = this._definition.group.relationships.map(
-      (relationship) => relationship.name
-    );
-    const duplicates = relationshipNames.filter(
-      (name, index) => relationshipNames.indexOf(name) !== index
+    const duplicates = this._definition.group.members.filter(
+      (name, index) => this._definition.group.members.indexOf(name) !== index
     );
 
     if (duplicates.length !== 0) {
@@ -146,21 +136,11 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
         isValid: false,
         errors: [
           new Error(
-            `Group stream ${this.name} cannot reference the same stream twice: ${duplicates.join(
-              ','
-            )}`
+            `Group stream ${
+              this.name
+            } cannot have the same member mentioned more than once: ${duplicates.join(',')}`
           ),
         ],
-      };
-    }
-
-    const parentRelationships = this._definition.group.relationships.filter(
-      (relationship) => relationship.type === 'parent'
-    );
-    if (parentRelationships.length > 1) {
-      return {
-        isValid: false,
-        errors: [new Error(`Group stream ${this.name} cannot have more than one parent`)],
       };
     }
 
@@ -179,11 +159,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
           Streams.GroupStream.Definition.is(stream.definition) &&
           !stream.isDeleted()
       )
-      .filter((stream) =>
-        stream.definition.group.relationships
-          .map((relatedStream) => relatedStream.name)
-          .includes(this.name)
-      );
+      .filter((stream) => stream.definition.group.members.includes(this.name));
 
     if (dependentGroupStreams.length !== 0) {
       return {

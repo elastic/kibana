@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -43,7 +42,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 stream: {
                   description: 'A Group stream',
-                  group: createGroupStreamDefinition(['logs']),
+                  group: {
+                    tags: [],
+                    members: ['logs'],
+                  },
                 },
                 dashboards: [],
                 queries: [],
@@ -59,7 +61,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               path: { name: 'test-group' },
               body: {
-                group: createGroupStreamDefinition(['logs']),
+                group: {
+                  tags: [],
+                  members: ['logs'],
+                },
               },
             },
           })
@@ -90,7 +95,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    group: createGroupStreamDefinition(['logs']),
+                    group: {
+                      tags: [],
+                      members: ['logs'],
+                    },
                   },
                   dashboards: [],
                   queries: [],
@@ -113,7 +121,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               name: 'test-group',
               description: 'A Group stream',
-              group: createGroupStreamDefinition(['logs']),
+              group: {
+                tags: [],
+                members: ['logs'],
+              },
             },
             dashboards: [],
             queries: [],
@@ -128,7 +139,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    group: createGroupStreamDefinition(['logs.test']),
+                    group: {
+                      tags: [],
+                      members: ['logs.test'],
+                    },
                   },
                   dashboards: [],
                   queries: [],
@@ -149,7 +163,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               name: 'test-group',
               description: 'A Group stream',
-              group: createGroupStreamDefinition(['logs.test']),
+              group: {
+                tags: [],
+                members: ['logs.test'],
+              },
             },
             dashboards: [],
             queries: [],
@@ -176,7 +193,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    group: createGroupStreamDefinition(['logs', 'logs.test']),
+                    group: {
+                      tags: [],
+                      members: ['logs', 'logs.test'],
+                    },
                   },
                   dashboards: [],
                   queries: [],
@@ -192,7 +212,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    group: createGroupStreamDefinition(['test-group']),
+                    group: {
+                      tags: [],
+                      members: ['test-group'],
+                    },
                   },
                   dashboards: [],
                   queries: [],
@@ -234,7 +257,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    group: createGroupStreamDefinition(['test-group']),
+                    group: {
+                      tags: [],
+                      members: ['test-group'],
+                    },
                   },
                   dashboards: [],
                   queries: [],
@@ -252,7 +278,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    group: createGroupStreamDefinition(['non-existent-stream']),
+                    group: {
+                      tags: [],
+                      members: ['non-existent-stream'],
+                    },
                   },
                   dashboards: [],
                   queries: [],
@@ -263,42 +292,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('cannot create a Group stream with duplicated relationships', async () => {
-          await apiClient
-            .fetch('PUT /api/streams/{name} 2023-10-31', {
-              params: {
-                path: { name: 'test-group' },
-                body: {
-                  stream: {
-                    description: 'A Group stream',
-                    group: createGroupStreamDefinition(['logs', 'logs']),
-                  },
-                  dashboards: [],
-                  queries: [],
-                },
-              },
-            })
-            .expect(400);
-        });
-
-        it('cannot create a Group stream with duplicated relationships', async () => {
-          await apiClient
-            .fetch('PUT /api/streams/{name} 2023-10-31', {
-              params: {
-                path: { name: 'test-group' },
-                body: {
-                  stream: {
-                    description: 'A Group stream',
-                    group: createGroupStreamDefinition(['logs', 'logs']),
-                  },
-                  dashboards: [],
-                  queries: [],
-                },
-              },
-            })
-            .expect(400);
-        });
-
-        it('cannot create a Group stream with multiple parents', async () => {
           await apiClient
             .fetch('PUT /api/streams/{name} 2023-10-31', {
               params: {
@@ -307,11 +300,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
-                      ...createGroupStreamDefinition([]),
-                      relationships: [
-                        { name: 'logs', type: 'parent' },
-                        { name: 'logs.test', type: 'parent' },
-                      ],
+                      tags: [],
+                      members: ['logs', 'logs'],
                     },
                   },
                   dashboards: [],
@@ -334,7 +324,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    group: createGroupStreamDefinition(['logs']),
+                    group: {
+                      tags: [],
+                      members: ['logs'],
+                    },
                   },
                   dashboards: [],
                   queries: [],
@@ -352,7 +345,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    group: createGroupStreamDefinition(['logs']),
+                    group: {
+                      tags: [],
+                      members: ['logs'],
+                    },
                   },
                   dashboards: [],
                   queries: [],
@@ -370,7 +366,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               params: {
                 path: { name: 'test-group' },
                 body: {
-                  group: createGroupStreamDefinition(['logs.test2']),
+                  group: {
+                    tags: [],
+                    members: ['logs.test2'],
+                  },
                 },
               },
             })
@@ -387,7 +386,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             .expect(200);
 
           expect(response.body).to.eql({
-            group: createGroupStreamDefinition(['logs.test2']),
+            group: {
+              tags: [],
+              members: ['logs.test2'],
+            },
           });
         });
       });
@@ -400,19 +402,4 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
   });
-}
-
-function createGroupStreamDefinition(children: string[]) {
-  return {
-    owner: 'test_user',
-    tier: 1,
-    tags: [],
-    relationships: children.map((name) => ({
-      name,
-      type: 'child',
-    })),
-    documentation_links: [],
-    repository_links: [],
-    runbook_links: [],
-  } as Streams.GroupStream.Definition['group'];
 }

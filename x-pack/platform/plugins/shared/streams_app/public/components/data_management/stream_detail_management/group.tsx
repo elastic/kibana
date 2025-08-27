@@ -11,11 +11,11 @@ import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import { Wrapper } from './wrapper';
-import { StreamDetailRelationshipsView } from '../../streams_graph/stream_detail_relationships_view';
+import { StreamDetailReferencesView } from '../../stream_detail_references_view/stream_detail_references_view';
 import { LinkedDashboardsView } from './linked_dashboards_view';
 import { GroupStreamDetailView } from './group_stream_detail_view';
 
-const groupStreamManagementSubTabs = ['overview', 'dashboards', 'relationships'] as const;
+const groupStreamManagementSubTabs = ['overview', 'dashboards', 'references'] as const;
 
 type GroupStreamManagementSubTab = (typeof groupStreamManagementSubTabs)[number];
 
@@ -51,10 +51,10 @@ export function GroupStreamDetailManagement({
         defaultMessage: 'Overview',
       }),
     },
-    relationships: {
-      content: <StreamDetailRelationshipsView definition={definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.relationshipsTab', {
-        defaultMessage: 'Relationships',
+    references: {
+      content: <StreamDetailReferencesView definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.referencesTab', {
+        defaultMessage: 'References',
       }),
     },
     dashboards: {

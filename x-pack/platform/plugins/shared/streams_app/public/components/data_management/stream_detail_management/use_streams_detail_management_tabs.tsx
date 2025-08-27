@@ -10,7 +10,7 @@ import React from 'react';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { StreamDetailSignificantEventsView } from '../../stream_detail_significant_events_view';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
-import { StreamDetailRelationshipsView } from '../../streams_graph/stream_detail_relationships_view';
+import { StreamDetailReferencesView } from '../../stream_detail_references_view/stream_detail_references_view';
 
 export function useStreamsDetailManagementTabs({
   definition,
@@ -36,10 +36,10 @@ export function useStreamsDetailManagementTabs({
     },
     ...(groupStreams?.enabled
       ? {
-          relationships: {
-            content: <StreamDetailRelationshipsView definition={definition} />,
-            label: i18n.translate('xpack.streams.streamDetailView.relationshipsTab', {
-              defaultMessage: 'Relationships',
+          references: {
+            content: <StreamDetailReferencesView definition={definition} />,
+            label: i18n.translate('xpack.streams.streamDetailView.referencesTab', {
+              defaultMessage: 'References',
             }),
           },
         }

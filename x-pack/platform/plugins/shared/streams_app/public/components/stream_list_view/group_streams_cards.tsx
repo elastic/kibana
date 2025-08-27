@@ -70,16 +70,14 @@ function GroupStreamCard({
       <EuiText size="xs">
         <p>{stream.description}</p>
         <p>
-          {i18n.translate('xpack.streams.groupStreamCard.ownerLabel', {
-            defaultMessage: 'Owner: {owner}',
-            values: { owner: stream.group.owner },
-          })}
-        </p>
-        <p>
-          {i18n.translate('xpack.streams.groupStreamCard.tierLabel', {
-            defaultMessage: 'Tier: {tier}',
-            values: { tier: stream.group.tier },
-          })}
+          {stream.group.members.length > 0
+            ? i18n.translate('xpack.streams.groupStreamCard.membersLabel', {
+                defaultMessage: '{count, plural, one {# member} other {# members}}',
+                values: { count: stream.group.members.length },
+              })
+            : i18n.translate('xpack.streams.groupStreamCard.noMembersLabel', {
+                defaultMessage: 'No members',
+              })}
         </p>
       </EuiText>
       <EuiSpacer size="m" />
