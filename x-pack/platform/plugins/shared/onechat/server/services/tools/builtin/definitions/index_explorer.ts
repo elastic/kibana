@@ -12,7 +12,9 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const indexExplorerSchema = z.object({
-  query: z.string().describe('A natural language query to infer which indices to use.'),
+  query: z
+    .string()
+    .describe('A natural language query to infer which indices, aliases or datastreams to use.'),
   limit: z
     .number()
     .optional()
@@ -26,7 +28,7 @@ const indexExplorerSchema = z.object({
 export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
   return {
     id: builtinToolIds.indexExplorer,
-    description: `List relevant indices and corresponding mappings based on a natural language query.
+    description: `List relevant indices, aliases and datastreams based on a natural language query.
 
                   The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
                   This should *only* be used if you know what you're doing (e.g. if the user explicitly specified a pattern).
@@ -34,8 +36,8 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
 
                   *Example:*
                   User: "Show me my latest alerts"
-                  You: call tool 'indexExplorer' with { query: 'indices containing alerts' }
-                  Tool result: [{ indexName: '.alerts', mappings: {...} }]
+                  You: call tool 'index_explorer' with { query: 'indices containing user alerts' }
+                  Tool result: [{ indexName: '.alerts' }]
                   `,
     schema: indexExplorerSchema,
     handler: async (
