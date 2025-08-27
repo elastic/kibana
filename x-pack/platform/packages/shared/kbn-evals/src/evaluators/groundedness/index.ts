@@ -13,18 +13,6 @@ import { LlmGroundednessEvaluationPrompt } from './prompt';
 import { calculateGroundednessScore } from './scoring';
 import type { GroundednessAnalysis } from './types';
 
-// Type guard to check if output has the expected structure (keeping the original for compatibility)
-function hasMessagesAndSteps(output: unknown): output is { messages: unknown[]; steps: unknown[] } {
-  return (
-    typeof output === 'object' &&
-    output !== null &&
-    'messages' in output &&
-    'steps' in output &&
-    Array.isArray((output as any).messages) &&
-    Array.isArray((output as any).steps)
-  );
-}
-
 export function createGroundednessAnalysisEvaluator({
   inferenceClient,
   log,
@@ -35,19 +23,17 @@ export function createGroundednessAnalysisEvaluator({
   return {
     evaluate: async ({ input, output }) => {
       async function runGroundednessAnalysis(): Promise<GroundednessAnalysis> {
-        // Validate that output has the expected structure
-        if (!hasMessagesAndSteps(output)) {
-          throw new Error(
-            'Invalid output format: expected object with "messages" and "steps" arrays'
-          );
-        }
+        const userQuery = (input as any)?.question;
+        const messages = (output as any)?.messages ?? [];
+        const latestMessage = messages[messages.length - 1]?.message;
+        const steps = (output as any)?.steps ?? [];
 
         const response = await inferenceClient.prompt({
           prompt: LlmGroundednessEvaluationPrompt,
           input: {
-            user_query: JSON.stringify(input),
-            agent_response: JSON.stringify(output.messages),
-            tool_call_history: JSON.stringify(output.steps),
+            user_query: `${userQuery}`,
+            agent_response: `${latestMessage}`,
+            tool_call_history: JSON.stringify(steps),
           },
         });
 

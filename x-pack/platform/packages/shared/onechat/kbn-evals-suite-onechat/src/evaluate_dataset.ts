@@ -66,25 +66,23 @@ export function createEvaluateDataset({
             messages: [{ message: input.question }],
           });
 
-          // Running correctness evaluator as part of the task since quantitative correctness evaluators need its output
-          const correctnessResult = await evaluators.correctnessAnalysis().evaluate({
-            input,
-            expected: output,
-            output: response,
-            metadata,
-          });
-          const correctnessAnalysis = correctnessResult.metadata;
-
-          let groundednessAnalysis = null;
-          if (!response.errors?.length) {
-            const groundednessResult = await evaluators.groundednessAnalysis().evaluate({
+          // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
+          const [correctnessResult, groundednessResult] = await Promise.all([
+            evaluators.correctnessAnalysis().evaluate({
               input,
               expected: output,
               output: response,
               metadata,
-            });
-            groundednessAnalysis = groundednessResult.metadata;
-          }
+            }),
+            evaluators.groundednessAnalysis().evaluate({
+              input,
+              expected: output,
+              output: response,
+              metadata,
+            }),
+          ]);
+          const correctnessAnalysis = correctnessResult.metadata;
+          const groundednessAnalysis = groundednessResult.metadata;
 
           return {
             errors: response.errors,
@@ -94,10 +92,7 @@ export function createEvaluateDataset({
           };
         },
       },
-      [
-        ...createQuantitativeCorrectnessEvaluators(),
-        createQuantitativeGroundednessEvaluator(),
-      ]
+      [...createQuantitativeCorrectnessEvaluators(), createQuantitativeGroundednessEvaluator()]
     );
   };
 }

@@ -39,16 +39,6 @@ export const LlmGroundednessEvaluationPrompt = createPrompt({
         schema: {
           type: 'object',
           properties: {
-            summary_verdict: {
-              type: 'string',
-              description: 'Overall groundedness assessment of the response.',
-              enum: [
-                'GROUNDED',
-                'GROUNDED_WITH_DISCLOSURE',
-                'MINOR_HALLUCINATIONS',
-                'MAJOR_HALLUCINATIONS',
-              ],
-            },
             analysis: {
               type: 'array',
               items: {
@@ -116,6 +106,16 @@ export const LlmGroundednessEvaluationPrompt = createPrompt({
                 ],
               },
               description: 'Detailed analysis of each claim in the agent response.',
+            },
+            summary_verdict: {
+              type: 'string',
+              description: 'Overall groundedness assessment of the response.',
+              enum: [
+                'GROUNDED',
+                'GROUNDED_WITH_DISCLOSURE',
+                'MINOR_HALLUCINATIONS',
+                'MAJOR_HALLUCINATIONS',
+              ],
             },
           },
           required: ['summary_verdict', 'analysis'],

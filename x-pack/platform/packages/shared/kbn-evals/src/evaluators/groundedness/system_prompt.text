@@ -46,7 +46,6 @@ Your final output MUST be a single, valid JSON object. Do not include any text o
 [JSON STRUCTURE]
 ```json
 {
-  "summary_verdict": "GROUNDED | GROUNDED_WITH_DISCLOSURE | MINOR_HALLUCINATIONS | MAJOR_HALLUCINATIONS",
   "analysis": [
     {
       "claim": "The specific claim extracted from the agent's response.",
@@ -59,7 +58,8 @@ Your final output MUST be a single, valid JSON object. Do not include any text o
         "evidence_snippet": "A direct snippet from the tool 'result' or null."
       },
       "explanation": "A brief explanation of the verdict reasoning."
-    }
+    },
+    "summary_verdict": "GROUNDED | GROUNDED_WITH_DISCLOSURE | MINOR_HALLUCINATIONS | MAJOR_HALLUCINATIONS"
   ]
 }
 ```
@@ -80,7 +80,6 @@ EXAMPLE 1:
 [OUTPUT]:
 ```json
 {
-  "summary_verdict": "MAJOR_HALLUCINATIONS",
   "analysis": [
     {
       "claim": "Our policy for Canadian employees provides up to 18 months of job-protected parental leave.",
@@ -114,7 +113,8 @@ EXAMPLE 1:
       "evidence": null,
       "explanation": "This claim is an opinionated statement and is not found anywhere in the provided policy document excerpt."
     }
-  ]
+  ],
+  "summary_verdict": "MAJOR_HALLUCINATIONS"
 }
 ```
 
@@ -139,7 +139,6 @@ As a general IT tip, restarting your laptop can sometimes help with connection i
 [OUTPUT]:
 ```json
 {
-  "summary_verdict": "MAJOR_HALLUCINATIONS",
   "analysis": [
     {
       "claim": "Open the GlobalProtect application on your laptop.",
@@ -185,6 +184,7 @@ As a general IT tip, restarting your laptop can sometimes help with connection i
       "evidence": null,
       "explanation": "The agent makes it clear this is external advice and not part of the official source."
     }
-  ]
+  ],
+  "summary_verdict": "MAJOR_HALLUCINATIONS"
 }
 ```
