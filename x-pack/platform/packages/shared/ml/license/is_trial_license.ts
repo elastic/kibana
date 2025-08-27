@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { TRIAL_LICENSE } from './constants';
 
