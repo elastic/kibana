@@ -17,6 +17,7 @@
     "@kbn/esql-ast",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/i18n",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/chart-icons"
   ]
 }
