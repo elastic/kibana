@@ -46,7 +46,7 @@ describe('RuleResourceRetriever', () => {
 
   it('returns an empty object if no matching resources are found', async () => {
     // Mock the resource identifier to return no resources
-    mockResourceIdentifier.fromOriginal.mockReturnValue([]);
+    mockResourceIdentifier.fromOriginal.mockResolvedValue([]);
     await retriever.initialize(); // Pretend initialize has been called
 
     const result = await retriever.getResources(migration);

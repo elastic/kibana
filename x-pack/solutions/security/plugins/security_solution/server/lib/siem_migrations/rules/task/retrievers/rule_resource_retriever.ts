@@ -62,7 +62,7 @@ export class RuleResourceRetriever {
     }
 
     const resourceIdentifier = new RuleResourceIdentifier(originalRule.vendor);
-    const resourcesIdentifiedFromRule = resourceIdentifier.fromOriginal(originalRule);
+    const resourcesIdentifiedFromRule = await resourceIdentifier.fromOriginal(originalRule);
 
     const macrosFound = new Map<string, RuleMigrationDefinedResource>();
     const lookupsFound = new Map<string, RuleMigrationDefinedResource>();
