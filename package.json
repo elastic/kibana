@@ -1982,7 +1982,7 @@
     "tape": "^5.9.0",
     "terser": "^5.40.0",
     "terser-webpack-plugin": "^5.3.14",
-    "tough-cookie": "^5.1.2",
+    "tough-cookie": "^6.0.0",
     "trace": "^3.2.0",
     "tree-kill": "^1.2.2",
     "ts-morph": "^15.1.0",
