@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DependenciesByOwner, identifyDependencyOwnership } from './dependency_ownership';
+import type { DependenciesByOwner } from './dependency_ownership';
+import { identifyDependencyOwnership } from './dependency_ownership';
 import { parseConfig } from './parse_config';
 import { ruleFilter } from './rule';
 
@@ -31,6 +32,12 @@ describe('identifyDependencyOwnership', () => {
         enabled: true,
       },
       {
+        groupName: 'resolved-libs',
+        reviewers: ['team:resolved'],
+        matchPackageNames: ['some-resolved-lib'],
+        enabled: true,
+      },
+      {
         groupName: 'disabled-libs',
         reviewers: ['team:disabled-team'],
         matchPackageNames: ['disabled-package'],
@@ -39,6 +46,7 @@ describe('identifyDependencyOwnership', () => {
     ].filter(ruleFilter),
     packageDependencies: ['lodash', 'react', 'disabled-package'],
     packageDevDependencies: ['jest', '@testing-library/react'],
+    packageResolutions: ['**/some-resolved-lib'],
   };
 
   beforeEach(() => {
@@ -111,11 +119,13 @@ describe('identifyDependencyOwnership', () => {
         '@elastic/elastic': ['lodash', 'react'],
         '@elastic/infra': ['lodash', 'react'],
         '@elastic/ui': [],
+        '@elastic/resolved': [],
       },
       devDependenciesByOwner: {
         '@elastic/elastic': [],
         '@elastic/infra': [],
         '@elastic/ui': ['@testing-library/react'],
+        '@elastic/resolved': [],
       },
       uncoveredProdDependencies: ['disabled-package'],
       uncoveredDevDependencies: ['jest'],
