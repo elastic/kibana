@@ -30,5 +30,6 @@
     "@kbn/spaces-plugin",
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
+    "@kbn/test-suites-serverless",
   ]
 }
