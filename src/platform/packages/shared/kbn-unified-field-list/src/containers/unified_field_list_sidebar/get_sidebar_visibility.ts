@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 
 export interface SidebarVisibility {
   isCollapsed$: BehaviorSubject<boolean>;
-  toggle: (isCollapsed: boolean, shouldPersist?: boolean) => void;
+  toggle: (isCollapsed: boolean) => void;
   initialValue: boolean;
 }
 
