@@ -67,7 +67,7 @@ export interface IDataStreamDetailsClient {
   setNewFieldLimit(params: UpdateFieldLimitParams): Promise<UpdateFieldLimitResponse>;
   rolloverDataStream(params: { dataStream: string }): Promise<DataStreamRolloverResponse>;
   updateFailureStore(params: UpdateFailureStoreParams): Promise<UpdateFailureStoreResponse>;
-  getNonAggregatableDataset(
+  getNonAggregatableDatasets(
     params: GetDataStreamNonAggregatableParams
   ): Promise<NonAggregatableDatasets>;
 }

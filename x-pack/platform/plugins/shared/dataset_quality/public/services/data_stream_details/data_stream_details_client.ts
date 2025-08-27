@@ -345,7 +345,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
     )(response);
   }
 
-  public async getNonAggregatableDataset(
+  public async getNonAggregatableDatasets(
     params: GetDataStreamNonAggregatableParams
   ): Promise<NonAggregatableDatasets> {
     const response = await this.http
@@ -354,13 +354,13 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
         { query: { start: params.start, end: params.end } }
       )
       .catch((error) => {
-        throw new DatasetQualityError(`Failed to fetch non-aggregatable dataset: ${error}`, error);
+        throw new DatasetQualityError(`Failed to fetch non-aggregatable datasets: ${error}`, error);
       });
 
     return decodeOrThrow(
       getNonAggregatableDatasetsRt,
       (message: string) =>
-        new DatasetQualityError(`Failed to decode non-aggregatable dataset response: ${message}`)
+        new DatasetQualityError(`Failed to decode non-aggregatable datasets response: ${message}`)
     )(response);
   }
 }

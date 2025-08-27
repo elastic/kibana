@@ -850,7 +850,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
       checkDatasetIsAggregatable: (context) => {
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
-        return dataStreamDetailsClient.getNonAggregatableDataset({
+        return dataStreamDetailsClient.getNonAggregatableDatasets({
           start,
           end,
           dataStream: context.dataStream,
