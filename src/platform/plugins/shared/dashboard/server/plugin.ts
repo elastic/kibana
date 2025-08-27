@@ -141,16 +141,13 @@ export class DashboardPlugin
         requiresPageReload: true,
         category: ['Dashboard'],
         value: false,
-        name: i18n.translate('presentationUtil.labs.enableDeferBelowFoldProjectName', {
+        name: i18n.translate('dashboard.labs.enableDeferBelowFoldProjectName', {
           defaultMessage: 'Defer loading panels below "the fold"',
         }),
-        description: i18n.translate(
-          'presentationUtil.labs.enableDeferBelowFoldProjectDescription',
-          {
-            defaultMessage:
-              'Any panels below "the fold"-- the area hidden beyond the bottom of the window, accessed by scrolling-- will not be loaded immediately, but only when they enter the viewport',
-          }
-        ),
+        description: i18n.translate('dashboard.labs.enableDeferBelowFoldProjectDescription', {
+          defaultMessage:
+            'Any panels below "the fold"-- the area hidden beyond the bottom of the window, accessed by scrolling-- will not be loaded immediately, but only when they enter the viewport',
+        }),
       },
     };
     core.uiSettings.register(dashboardUiSettings);
