@@ -171,7 +171,7 @@ describe('delete()', () => {
   test('attempts to soft delete gaps', async () => {
     await rulesClient.delete({ id: '1' });
     expect(softDeleteGapsMock).toHaveBeenCalledWith({
-      ruleId: '1',
+      ruleIds: ['1'],
       logger: rulesClientParams.logger,
       eventLogClient,
       eventLogger: rulesClientParams.eventLogger,
