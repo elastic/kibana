@@ -29,6 +29,5 @@ export const mockComponentData: ComponentData = {
   },
   elementType: null,
   type: 'MyComponent',
-  componentPath: 'MyComponent > EuiButton > div',
   domElement: document.createElement('div'),
 };

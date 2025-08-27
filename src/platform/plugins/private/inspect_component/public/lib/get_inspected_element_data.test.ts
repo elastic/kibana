@@ -20,7 +20,6 @@ describe('getInspectedElementData', () => {
   const mockHttpService = httpServiceMock.createStartContract();
 
   const mockTarget = document.createElement('div');
-  const mockComponentPath = 'EuiButton/EuiButtonDisplay';
   const mockSourceComponent = {
     type: 'EuiButton',
     domElement: document.createElement('button'),
@@ -61,7 +60,6 @@ describe('getInspectedElementData', () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       target: mockTarget,
-      componentPath: mockComponentPath,
       sourceComponent: mockSourceComponent,
       targetFiberNodeWithDomElement: null,
     });
@@ -73,7 +71,6 @@ describe('getInspectedElementData', () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       target: mockTarget,
-      componentPath: mockComponentPath,
       sourceComponent: null,
       targetFiberNodeWithDomElement: mockTargetFiberNodeWithDomElement,
     });
@@ -87,7 +84,6 @@ describe('getInspectedElementData', () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       target: mockTarget,
-      componentPath: mockComponentPath,
       sourceComponent: mockSourceComponent,
       targetFiberNodeWithDomElement: mockTargetFiberNodeWithDomElement,
     });
@@ -106,7 +102,6 @@ describe('getInspectedElementData', () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       target: mockTarget,
-      componentPath: mockComponentPath,
       sourceComponent: mockSourceComponent,
       targetFiberNodeWithDomElement: mockTargetFiberNodeWithDomElement,
     });
@@ -123,7 +118,6 @@ describe('getInspectedElementData', () => {
       iconType: 'copy',
       euiData: mockEuiDocs,
       sourceComponent: mockSourceComponent,
-      componentPath: mockComponentPath,
     });
   });
 });

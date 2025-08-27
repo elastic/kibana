@@ -82,7 +82,7 @@ export const InspectFlyout = ({ componentData, target }: Props) => {
         <EuiPortal>
           <InspectHighlight
             currentPosition={highlightPosition}
-            path={componentData.componentPath}
+            path={componentData?.sourceComponent?.type || null}
           />
         </EuiPortal>
       )}

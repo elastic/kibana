@@ -37,14 +37,22 @@ describe('InspectFlyout', () => {
   it('should set initial highlight position based on target', () => {
     renderWithI18n(<InspectFlyout componentData={mockComponentData} target={target} />);
 
-    const highlight = screen.getByTestId('inspectHighlightBox');
-    expect(highlight).toBeInTheDocument();
+    // For fixed positioning, check the container element that has the actual positioning
+    const container = screen.getByTestId('inspectHighlightContainer');
+    expect(container).toBeInTheDocument();
 
-    const style = window.getComputedStyle(highlight);
-    expect(style.top).toBe('10px');
-    expect(style.left).toBe('20px');
-    expect(style.width).toBe('100px');
-    expect(style.height).toBe('50px');
+    const containerStyle = window.getComputedStyle(container);
+    expect(containerStyle.top).toBe('10px');
+    expect(containerStyle.left).toBe('20px');
+    expect(containerStyle.width).toBe('100px');
+    expect(containerStyle.height).toBe('50px');
+    expect(containerStyle.position).toBe('fixed');
+
+    // The highlight box should fill the container
+    const highlight = screen.getByTestId('inspectHighlightBox');
+    const highlightStyle = window.getComputedStyle(highlight);
+    expect(highlightStyle.top).toBe('0px');
+    expect(highlightStyle.left).toBe('0px');
   });
 
   it('should update highlight position on window resize', async () => {
@@ -60,12 +68,19 @@ describe('InspectFlyout', () => {
 
     fireEvent(window, new Event('resize'));
 
-    const highlight = await screen.findByTestId('inspectHighlightBox');
+    // For fixed positioning, check the container element that has the actual positioning
+    const container = await screen.findByTestId('inspectHighlightContainer');
+    const containerStyle = window.getComputedStyle(container);
+    expect(containerStyle.top).toBe('50px');
+    expect(containerStyle.left).toBe('60px');
+    expect(containerStyle.width).toBe('200px');
+    expect(containerStyle.height).toBe('100px');
+    expect(containerStyle.position).toBe('fixed');
 
-    const style = window.getComputedStyle(highlight);
-    expect(style.top).toBe('50px');
-    expect(style.left).toBe('60px');
-    expect(style.width).toBe('200px');
-    expect(style.height).toBe('100px');
+    // The highlight box should still fill the container
+    const highlight = screen.getByTestId('inspectHighlightBox');
+    const highlightStyle = window.getComputedStyle(highlight);
+    expect(highlightStyle.top).toBe('0px');
+    expect(highlightStyle.left).toBe('0px');
   });
 });

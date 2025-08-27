@@ -27,8 +27,6 @@ export interface ComponentData extends ReactFiberNodeWithDomElement, InspectComp
   iconType: string | null;
   /** The name of the top-level React component where the path starts and the associated DOM element. */
   sourceComponent: SourceComponent;
-  /** The component path in the format "SourceComponent : ParentComponent > ChildComponent". */
-  componentPath: string | null;
 }
 
 /**
@@ -39,8 +37,6 @@ export interface GetInspectedElementDataOptions {
   target: HTMLElement;
   /** Kibana HTTP service. */
   httpService: HttpStart;
-  /** The component path from the React Fiber node. */
-  componentPath: string | null;
   /** The name of the top-level React component where the path starts and the associated DOM element. */
   sourceComponent: SourceComponent | null;
   /** The React Fiber node associated with the target element and the element itself. */
@@ -54,7 +50,6 @@ export interface GetInspectedElementDataOptions {
  * @param {GetInspectedElementDataOptions} options
  * @param {HttpStart} options.httpService HTTP service for making API requests.
  * @param {HTMLElement} options.target The inspected DOM element.
- * @param {string | null} options.componentPath he component path in the format "SourceComponent : ParentComponent > ChildComponent".
  * @param {string | null} options.sourceComponent The name of the top-level React component where the path starts and the associated DOM element.
  * @param {ReactFiberNodeWithDomElement | null} options.targetFiberNodeWithDomElement The React Fiber node associated with the target element and the element itself.
  * @returns {Promise<ComponentData | null>} Resolves with the component data if found, otherwise null.
@@ -62,7 +57,6 @@ export interface GetInspectedElementDataOptions {
 export const getInspectedElementData = async ({
   httpService,
   target,
-  componentPath,
   sourceComponent,
   targetFiberNodeWithDomElement,
 }: GetInspectedElementDataOptions): Promise<ComponentData | null> => {
@@ -97,7 +91,6 @@ export const getInspectedElementData = async ({
     iconType,
     relativePath,
     sourceComponent,
-    componentPath,
   };
 
   return componentData;

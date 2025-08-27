@@ -13,7 +13,6 @@ import { css } from '@emotion/css';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { findFirstNonIgnoredComponent } from '../../../lib/fiber/find_first_non_ignored_component';
 import type { ReactFiberNodeWithDomElement, SourceComponent } from '../../../lib/fiber/types';
 import { findFirstFiberWithDebugSource } from '../../../lib/fiber/find_first_fiber_with_debug_source';
 import { handleEventPropagation } from '../../../lib/dom/handle_event_propagation';
@@ -40,7 +39,6 @@ interface Props {
 export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties>({});
-  const [componentPath, setComponentPath] = useState<string | null>(null);
   const [sourceComponent, setSourceComponent] = useState<SourceComponent | null>(null);
   const [targetFiberNodeWithDomElement, setTargetFiberNodeWithDomElement] =
     useState<ReactFiberNodeWithDomElement | null>(null);
@@ -79,18 +77,6 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
 
     setSourceComponent(sourceComponentResult);
 
-    const firstFiberNodeType = findFirstNonIgnoredComponent(fiberNode);
-
-    setComponentPath(
-      sourceComponentResult?.type &&
-        firstFiberNodeType &&
-        sourceComponentResult.type !== firstFiberNodeType
-        ? `${sourceComponentResult.type}: ${firstFiberNodeType}`
-        : sourceComponentResult?.type
-        ? sourceComponentResult.type
-        : null
-    );
-
     setHighlightPosition({
       width: `${width}px`,
       height: `${height}px`,
@@ -111,7 +97,6 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
         target,
         httpService: core.http,
         targetFiberNodeWithDomElement,
-        componentPath,
         sourceComponent,
       });
 
@@ -135,14 +120,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       setFlyoutOverlayRef(flyout);
       setIsInspecting(false);
     },
-    [
-      core,
-      componentPath,
-      sourceComponent,
-      targetFiberNodeWithDomElement,
-      setIsInspecting,
-      setFlyoutOverlayRef,
-    ]
+    [core, sourceComponent, targetFiberNodeWithDomElement, setIsInspecting, setFlyoutOverlayRef]
   );
 
   useEffect(() => {
@@ -180,10 +158,13 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
     () => (
       <div className={overlayCss} id={INSPECT_OVERLAY_ID} data-test-subj="inspectOverlayContainer">
         <EuiWindowEvent event="pointermove" handler={handlePointerMove} />
-        <InspectHighlight currentPosition={highlightPosition} path={componentPath} />
+        <InspectHighlight
+          currentPosition={highlightPosition}
+          path={sourceComponent?.type || null}
+        />
       </div>
     ),
-    [overlayCss, highlightPosition, componentPath, handlePointerMove]
+    [overlayCss, highlightPosition, sourceComponent?.type, handlePointerMove]
   );
 
   return <EuiPortal>{overlayContent}</EuiPortal>;

@@ -29,12 +29,13 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
-  const [badgeOffsetX, setBadgeOffsetX] = useState(0);
   const [badgeOffsetY, setBadgeOffsetY] = useState(0);
+  const isFixed = currentPosition.position === 'fixed';
 
   const containerCss = css({
-    position: 'absolute',
+    position: currentPosition.position || 'absolute',
     transform,
+    ...(isFixed ? rest : {}),
     pointerEvents: 'none',
   });
 
@@ -43,7 +44,7 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
     backgroundColor: transparentize(euiTheme.colors.primary, 0.3),
     border: `2px solid ${euiTheme.colors.primary}`,
     pointerEvents: 'none',
-    ...rest,
+    ...(isFixed ? { top: 0, left: 0, right: 0, bottom: 0 } : rest),
   });
 
   /** This handles repositoning of the hihglight badge so it's always fully visible. */
@@ -52,37 +53,43 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
 
     const badgeRect = badgeRef.current.getBoundingClientRect();
     const containerRect = containerRef.current.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
     const highlightHeight =
       typeof rest.height === 'number' ? rest.height : parseInt((rest.height as string) || '0', 10);
 
     /**
-     * Horizontal adjustment.
-     * If the badge would overflow the viewport on the right, we shift it to the left so it's fully visible.
-     */
-    const availableRight = viewportWidth - containerRect.left;
-    setBadgeOffsetX(badgeRect.width > availableRight ? availableRight - badgeRect.width : 0);
-
-    /**
      * Vertical adjustment.
      * If the badge would overflow the viewport on the bottom, we flip it above the highlight.
      */
-    const availableBottom = viewportHeight - (containerRect.top + highlightHeight);
-    if (badgeRect.height > availableBottom) {
-      /** Flip above highlight if the badge would be below the viewport. */
-      setBadgeOffsetY(-badgeRect.height);
+    if (isFixed) {
+      // For fixed positioning, the container is already positioned at the exact element location
+      // Badge should be positioned relative to the container (which is the highlight itself)
+      const containerBottom = containerRect.bottom;
+      const badgeWouldBeAt = containerBottom + badgeRect.height;
+
+      if (badgeWouldBeAt > viewportHeight) {
+        // Flip above highlight - position at negative badge height
+        setBadgeOffsetY(-badgeRect.height);
+      } else {
+        // Place badge below highlight - position at the height of the highlight box
+        const containerHeight = containerRect.height;
+        setBadgeOffsetY(containerHeight);
+      }
     } else {
-      /** Default, place badge below highlight. */
-      setBadgeOffsetY(highlightHeight);
+      // Original logic for absolute positioning
+      const availableBottom = viewportHeight - (containerRect.top + highlightHeight);
+      if (badgeRect.height > availableBottom) {
+        setBadgeOffsetY(-badgeRect.height);
+      } else {
+        setBadgeOffsetY(highlightHeight);
+      }
     }
-  }, [path, rest.left, rest.top, rest.width, rest.height]);
+  }, [path, rest.left, rest.top, rest.width, rest.height, currentPosition.position, isFixed]);
 
   const badgeCss = css({
     position: 'absolute',
     top: badgeOffsetY,
-    left: badgeOffsetX,
     whiteSpace: 'nowrap',
   });
 
