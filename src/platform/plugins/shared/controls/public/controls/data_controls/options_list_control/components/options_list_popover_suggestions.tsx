@@ -45,7 +45,7 @@ export const OptionsListPopoverSuggestions = ({
     existsSelected,
     searchTechnique,
     selectedOptions,
-    fieldName,
+    displayName,
     invalidSelections,
     availableOptions,
     totalCardinality,
@@ -58,7 +58,7 @@ export const OptionsListPopoverSuggestions = ({
     componentApi.existsSelected$,
     componentApi.searchTechnique$,
     componentApi.selectedOptions$,
-    componentApi.fieldName$,
+    componentApi.displayName$,
     componentApi.invalidSelections$,
     componentApi.availableOptions$,
     componentApi.totalCardinality$,
@@ -198,7 +198,7 @@ export const OptionsListPopoverSuggestions = ({
           renderOption={(option) => renderOption(option, searchString)}
           listProps={{ onFocusBadge: false }}
           aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
-            fieldName,
+            displayName,
             selectableOptions.length
           )}
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
