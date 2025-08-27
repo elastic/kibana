@@ -8,26 +8,29 @@
  */
 
 import React from 'react';
+import type { EuiFlexGridProps, IconType } from '@elastic/eui';
 import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiLoadingChart,
   EuiFlexGroup,
-  EuiText,
   useEuiTheme,
   euiScrollBarStyles,
+  EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { css } from '@emotion/react';
+import { IconChartBarStacked } from '@kbn/chart-icons';
+import { i18n } from '@kbn/i18n';
 import { MetricChart } from './metric_chart';
 
 type MetricsGridProps = {
   timeRange: { from?: string; to?: string };
   loading: boolean;
-  searchTerm: string;
   filters?: Array<{ field: string; value: string }>;
   dimensions: string[];
-  displayDensity?: 'normal' | 'compact' | 'row';
+  columns: EuiFlexGridProps['columns'];
 } & (
   | {
       pivotOn: 'metric';
@@ -43,26 +46,13 @@ export const MetricsGrid = ({
   fields,
   timeRange,
   loading,
-  searchTerm,
   dimensions,
   pivotOn,
   filters = [],
-  displayDensity = 'normal',
+  columns,
 }: MetricsGridProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
-  // Determine number of columns based on display density
-  const getColumns = () => {
-    switch (displayDensity) {
-      case 'compact':
-        return 4;
-      case 'row':
-        return 1;
-      case 'normal':
-      default:
-        return 3;
-    }
-  };
 
   if (loading) {
     return (
@@ -76,15 +66,43 @@ export const MetricsGrid = ({
 
   if (pivotOn === 'metric' && fields.length === 0) {
     return (
-      <EuiText textAlign="center" color="subdued">
-        No metrics found matching &quot;{searchTerm}&quot;
-      </EuiText>
+      <div
+        css={css`
+          width: 100%;
+          height: 100%;
+        `}
+      >
+        <EuiFlexGroup
+          direction="column"
+          alignItems="center"
+          justifyContent="spaceAround"
+          css={css`
+            height: 100%;
+          `}
+          gutterSize="s"
+        >
+          <EuiFlexItem
+            css={css`
+              justify-content: end;
+            `}
+          >
+            <EuiIcon type={IconChartBarStacked as IconType} size="l" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="xs">
+              {i18n.translate('metricsExperience.grid.noData', {
+                defaultMessage: 'No results found',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     );
   }
 
   return (
     <EuiFlexGrid
-      columns={getColumns()}
+      columns={columns}
       gutterSize="s"
       css={css`
         overflow: auto;
@@ -94,19 +112,19 @@ export const MetricsGrid = ({
     >
       {pivotOn === 'metric'
         ? fields.map((field, index) => (
-            <EuiFlexItem key={`${field.name}-${displayDensity}`}>
+            <EuiFlexItem key={field.name}>
               <MetricChart
                 metric={field}
                 timeRange={timeRange}
                 dimensions={dimensions}
                 filters={filters}
                 colorIndex={index}
-                displayDensity={displayDensity}
+                size={columns === 2 || columns === 4 ? 's' : 'm'}
               />
             </EuiFlexItem>
           ))
         : dimensions.map((dimension, index) => (
-            <EuiFlexItem key={`${dimension}-${displayDensity}`}>
+            <EuiFlexItem key={dimension}>
               <MetricChart
                 metric={fields}
                 timeRange={timeRange}
@@ -114,7 +132,7 @@ export const MetricsGrid = ({
                 dimensions={[dimension]}
                 filters={filters}
                 colorIndex={index}
-                displayDensity={displayDensity}
+                size={columns === 2 || columns === 4 ? 's' : 'm'}
               />
             </EuiFlexItem>
           ))}

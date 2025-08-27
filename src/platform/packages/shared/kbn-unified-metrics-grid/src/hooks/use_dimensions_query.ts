@@ -16,21 +16,19 @@ export const useDimensionsQuery = (params: {
   from?: string;
   to?: string;
 }) => {
-  const { callApi } = useMetricsExperience();
+  const { client } = useMetricsExperience();
 
   return useQuery({
     queryKey: ['dimensionValues', params],
     queryFn: async ({ signal }) => {
       const { dimensions, ...rest } = params;
-      const response = await callApi('GET /internal/metrics_experience/dimensions', {
-        params: {
-          query: {
-            dimensions: JSON.stringify(dimensions),
-            ...rest,
-          },
+      const response = await client.getDimensions(
+        {
+          dimensions: JSON.stringify(dimensions),
+          ...rest,
         },
-        signal,
-      });
+        signal
+      );
 
       return response?.values || [];
     },

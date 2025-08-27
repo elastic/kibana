@@ -13,7 +13,6 @@ import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { useMetricDataQuery } from '../../hooks';
 import { ChartContent } from './chart_content';
 import { ChartHeader } from './chart_header';
-import { createESQLQuery } from '../../common/utils/esql/create_esql_query';
 
 interface MetricChartProps {
   metric: MetricField;
@@ -21,7 +20,7 @@ interface MetricChartProps {
   byDimension?: string;
   dimensions: string[];
   colorIndex?: number;
-  displayDensity?: 'normal' | 'compact' | 'row';
+  size?: 'm' | 's';
   filters?: Array<{ field: string; value: string }>;
 }
 
@@ -31,22 +30,10 @@ export const MetricChart = ({
   byDimension,
   dimensions = [],
   colorIndex,
-  displayDensity = 'normal',
+  size = 'm',
   filters = [],
 }: MetricChartProps) => {
   const isSupported = metric.type !== 'unsigned_long' && metric.type !== 'histogram';
-
-  // Generate ESQL query using the same logic as the hook
-  const esqlQuery = useMemo(() => {
-    if (!isSupported) return '';
-    return createESQLQuery({
-      metricName: metric.name,
-      instrument: metric.instrument,
-      index: metric.index,
-      dimensions,
-      filters,
-    });
-  }, [isSupported, metric.name, metric.instrument, metric.index, dimensions, filters]);
 
   const {
     data: queryData,
@@ -66,13 +53,7 @@ export const MetricChart = ({
 
   return (
     <EuiPanel grow={false} hasBorder={true} style={{ width: '100%', minWidth: 0 }}>
-      <ChartHeader
-        title={metric.name}
-        byDimension={byDimension}
-        esqlQuery={esqlQuery}
-        metric={metric}
-        displayDensity={displayDensity}
-      />
+      <ChartHeader title={metric.name} byDimension={byDimension} metric={metric} size={size} />
       <EuiSpacer size="m" />
       <ChartContent
         isLoading={isLoading}
@@ -85,7 +66,7 @@ export const MetricChart = ({
         chartType={metric.display}
         timeRange={timeRange}
         colorIndex={colorIndex}
-        displayDensity={displayDensity}
+        size={size}
       />
     </EuiPanel>
   );

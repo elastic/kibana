@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricsExperienceRepositoryClient } from '@kbn/metrics-experience-plugin/public';
+import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 
 export interface MetricsExperienceService {
-  callApi: MetricsExperienceRepositoryClient;
+  client: MetricsExperienceClient;
 }

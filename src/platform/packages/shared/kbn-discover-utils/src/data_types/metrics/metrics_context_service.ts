@@ -9,11 +9,11 @@
 
 import type {
   MetricsExperiencePluginStart,
-  MetricsExperienceRepositoryClient,
+  MetricsExperienceClient,
 } from '@kbn/metrics-experience-plugin/public';
 
 export interface MetricsContextService {
-  getMetricsExperienceClient(): MetricsExperienceRepositoryClient | undefined;
+  getMetricsExperienceClient(): MetricsExperienceClient | undefined;
 }
 
 export interface MetricsContextServiceDeps {
@@ -30,6 +30,6 @@ export const createMetricsContextService = async ({
   }
 
   return {
-    getMetricsExperienceClient: () => metricsExperience.metricsExperienceRepositoryClient,
+    getMetricsExperienceClient: () => metricsExperience.metricsExperienceClient,
   };
 };

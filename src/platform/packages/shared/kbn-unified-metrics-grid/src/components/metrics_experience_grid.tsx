@@ -13,17 +13,16 @@ import { ChartSectionTemplate } from '@kbn/unified-histogram';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { EuiFlexGridProps } from '@elastic/eui';
 import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import {
   setCurrentPage,
   selectCurrentPage,
-  selectDisplayDensity,
-  selectSearchTerm,
-  selectDimensions,
   selectValueFilters,
   setDimensions,
   setValueFilters,
+  selectDimensions,
 } from '../store/slices';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
@@ -41,16 +40,21 @@ export const MetricsExperienceGrid = ({
   // Get grid-specific state from Redux store
   const dispatch = useAppDispatch();
   const currentPage = useAppSelector(selectCurrentPage);
-  const displayDensity = useAppSelector(selectDisplayDensity);
-  const searchTerm = useAppSelector(selectSearchTerm);
   const dimensions = useAppSelector(selectDimensions);
   const valueFilters = useAppSelector(selectValueFilters);
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
 
+  const timeRange = useMemo(() => getTimeRange(), [getTimeRange]);
+
   const { data: fields = [], isLoading: loading } = useMetricFieldsQuery({
     index: indexPattern,
-    ...getTimeRange(),
+    ...timeRange,
   });
+
+  const columns = useMemo<EuiFlexGridProps['columns']>(
+    () => (Array.isArray(fields) ? Math.min(fields.length, 4) : 1) as EuiFlexGridProps['columns'],
+    [fields]
+  );
 
   const onDimensionsChange = useCallback(
     (nextDimensions: string[]) => {
@@ -79,7 +83,7 @@ export const MetricsExperienceGrid = ({
     [dispatch]
   );
 
-  const pageSize = displayDensity === 'compact' ? 20 : 15;
+  const pageSize = columns === 4 ? 20 : 15;
   const actions: IconButtonGroupProps['buttons'] = [
     {
       iconType: 'search',
@@ -116,14 +120,14 @@ export const MetricsExperienceGrid = ({
           onChange={onValuesChange}
           disabled={dimensions.length === 0}
           indices={[indexPattern]}
-          timeRange={getTimeRange()}
+          timeRange={timeRange}
         />
       ) : null,
     ],
     [
       dimensions,
       fields,
-      getTimeRange,
+      timeRange,
       indexPattern,
       onDimensionsChange,
       onValuesChange,
@@ -148,18 +152,14 @@ export const MetricsExperienceGrid = ({
       .filter((filter) => filter.field !== '');
   }, [valueFilters]);
 
-  // Filter fields based on search term, dimensions, and data availability
   const filteredFields = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-
     return fields.filter(
       (field) =>
         !field.noData &&
-        field.name.toLowerCase().includes(term) &&
         (dimensions.length === 0 ||
           dimensions.every((sel) => field.dimensions.some((d) => d.name === sel)))
     );
-  }, [fields, searchTerm, dimensions]);
+  }, [fields, dimensions]);
 
   // Calculate pagination
   const totalPages = useMemo(
@@ -198,13 +198,12 @@ export const MetricsExperienceGrid = ({
       >
         <MetricsGrid
           fields={currentFields}
-          timeRange={getTimeRange()}
+          timeRange={timeRange}
           loading={loading}
-          searchTerm={searchTerm}
           filters={filters}
           dimensions={dimensions}
           pivotOn="metric"
-          displayDensity={displayDensity}
+          columns={columns}
         />
 
         <Pagination

@@ -10,12 +10,12 @@
 import React from 'react';
 import { UnifiedHistogramMetricsExperienceGrid } from '@kbn/unified-metrics-grid';
 import type { ChartSectionConfiguration } from '@kbn/unified-histogram';
-import type { MetricsExperienceRepositoryClient } from '@kbn/metrics-experience-plugin/public';
+import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const createChartSection =
   (
-    metricsExperienceClient?: MetricsExperienceRepositoryClient
+    metricsExperienceClient?: MetricsExperienceClient
   ): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   (prev: () => ChartSectionConfiguration) =>
   () => {

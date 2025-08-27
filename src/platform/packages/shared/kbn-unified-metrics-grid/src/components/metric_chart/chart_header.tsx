@@ -23,37 +23,30 @@ import React, { useState } from 'react';
 interface ChartHeaderProps {
   title: string;
   byDimension?: string;
-  esqlQuery: string;
   metric: MetricField;
-  displayDensity?: 'normal' | 'compact' | 'row';
+  size?: 'm' | 's';
 }
 
-export const ChartHeader = ({
-  title,
-  byDimension,
-  esqlQuery,
-  metric,
-  displayDensity = 'normal',
-}: ChartHeaderProps) => {
+export const ChartHeader = ({ title, byDimension, metric, size = 'm' }: ChartHeaderProps) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   // Get title sizes based on display density
   const getTitleSize = () => {
-    if (displayDensity === 'compact') {
+    if (size === 's') {
       return 'xxs';
     }
     return 'xs';
   };
 
   const getSubtitleSize = () => {
-    if (displayDensity === 'compact') {
+    if (size === 's') {
       return 'xxs';
     }
     return 'xs';
   };
 
   const getDescriptionSize = () => {
-    if (displayDensity === 'compact') {
+    if (size === 's') {
       return 'xs';
     }
     return 's';

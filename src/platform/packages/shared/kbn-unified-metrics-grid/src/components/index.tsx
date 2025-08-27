@@ -11,7 +11,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import type { MetricsExperienceRepositoryClient } from '@kbn/metrics-experience-plugin/public';
+import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { store } from '../store';
 import { MetricsExperienceProvider } from '../context/metrics_experience_provider';
@@ -28,14 +28,14 @@ const queryClient = new QueryClient({
 });
 
 export const UnifiedMetricsExperienceGrid = (
-  props: ChartSectionProps & { client?: MetricsExperienceRepositoryClient }
+  props: ChartSectionProps & { client?: MetricsExperienceClient }
 ) => {
   if (!props.client) {
     return null;
   }
 
   return (
-    <MetricsExperienceProvider value={{ callApi: props.client }}>
+    <MetricsExperienceProvider value={{ client: props.client }}>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
           <MetricsExperienceGrid {...props} />

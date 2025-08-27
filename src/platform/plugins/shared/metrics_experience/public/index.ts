@@ -9,7 +9,7 @@
 
 import { MetricsExperiencePlugin } from './plugin';
 export type {
-  MetricsExperienceRepositoryClient,
+  MetricsExperienceClient,
   MetricsExperiencePluginSetup,
   MetricsExperiencePluginStart,
 } from './types';

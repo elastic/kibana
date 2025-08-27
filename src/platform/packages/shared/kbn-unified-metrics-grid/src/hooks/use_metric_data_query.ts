@@ -14,7 +14,7 @@
 
 import dateMath from '@elastic/datemath';
 import { useQuery } from '@tanstack/react-query';
-import type { MetricsExperienceRepositoryClient } from '@kbn/metrics-experience-plugin/public';
+import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { createESQLQuery } from '../common/utils/esql/create_esql_query';
 import { useMetricsExperience } from './use_metrics_experience';
 
@@ -36,11 +36,11 @@ interface UseMetricDataParams {
   index?: string;
   dimensions?: string[];
   filters?: Array<{ field: string; value: string }>;
-  callApi: MetricsExperienceRepositoryClient;
+  client: MetricsExperienceClient;
 }
 
 const fetchMetricData = async ({
-  callApi,
+  client,
   metricName,
   esqlQuery,
   timeRange,
@@ -68,15 +68,11 @@ const fetchMetricData = async ({
       filters,
     });
 
-  const response = await callApi('POST /internal/metrics_experience/data', {
-    params: {
-      body: {
-        from: fromDate.toISOString(),
-        to: toDate.toISOString(),
-        esql,
-        filters: filters || [], // Include filters array
-      },
-    },
+  const response = await client.postData({
+    from: fromDate.toISOString(),
+    to: toDate.toISOString(),
+    esql,
+    filters: filters || [], // Include filters array
   });
 
   return {
@@ -95,8 +91,8 @@ export const useMetricDataQuery = ({
   index,
   dimensions,
   filters,
-}: Omit<UseMetricDataParams, 'callApi'>) => {
-  const { callApi } = useMetricsExperience();
+}: Omit<UseMetricDataParams, 'client'>) => {
+  const { client } = useMetricsExperience();
 
   return useQuery({
     queryKey: [
@@ -112,7 +108,7 @@ export const useMetricDataQuery = ({
     ],
     queryFn: () =>
       fetchMetricData({
-        callApi,
+        client,
         metricName,
         esqlQuery,
         timeRange,
