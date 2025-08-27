@@ -1439,7 +1439,7 @@ const componentStyles = {
         backgroundColor: euiTheme.colors.backgroundBaseWarning,
       },
       '.unifiedDataTable__cell--expanded': {
-        backgroundColor: euiTheme.colors.highlight,
+        backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
       },
       '.euiDataGrid__content': {
         background: 'transparent',
