@@ -756,6 +756,7 @@ endpoint_operations_analyst:
         - feature_siemV3.endpoint_list_all
         - feature_siemV3.global_artifact_management_all
         - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
         - feature_siemV3.event_filters_all
         - feature_siemV3.host_isolation_exceptions_all
         - feature_siemV3.blocklist_all
