@@ -37,3 +37,4 @@ export const TABS_STATE_URL_KEY = '_t';
  * Product feature IDs
  */
 export const TRACES_PRODUCT_FEATURE_ID = 'discover:traces';
+export const METRICS_EXPERIENCE_PRODUCT_FEATURE_ID = 'discover:metrics-experience';

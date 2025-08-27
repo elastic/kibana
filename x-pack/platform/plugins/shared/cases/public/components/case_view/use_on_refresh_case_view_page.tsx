@@ -21,6 +21,7 @@ import { casesQueriesKeys } from '../../containers/constants';
 export const useRefreshCaseViewPage = () => {
   const queryClient = useQueryClient();
   return useCallback(() => {
+    queryClient.invalidateQueries(casesQueriesKeys.alerts);
     queryClient.invalidateQueries(casesQueriesKeys.caseView());
     queryClient.invalidateQueries(casesQueriesKeys.tags());
     queryClient.invalidateQueries(casesQueriesKeys.categories());
