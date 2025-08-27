@@ -16,11 +16,16 @@ import {
   type EuiDataGridProps,
   useResizeObserver,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHighlight,
 } from '@elastic/eui';
 import { FieldIcon } from '@kbn/field-utils';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TableFieldValue } from '@kbn/unified-doc-viewer-plugin/public/components/doc_viewer_table/table_cell_value';
+import { kibanaFlatten } from '../../lib/kibana_flattern';
 
 const MIN_NAME_COLUMN_WIDTH = 120;
 const MAX_NAME_COLUMN_WIDTH = 300;
@@ -38,7 +43,7 @@ const inferFieldType = (value: unknown): string => {
     if (!isNaN(Date.parse(value)) && /\d{4}-\d{2}-\d{2}/.test(value)) {
       return 'date';
     }
-    return 'keyword';
+    return 'string';
   }
 
   if (typeof value === 'number') {
@@ -53,7 +58,7 @@ const inferFieldType = (value: unknown): string => {
     return 'object';
   }
 
-  return 'keyword';
+  return 'string';
 };
 
 const componentStyles = {
@@ -201,24 +206,8 @@ export function JSONDataTable({
   // Create DataTableRecord from JSON - each field becomes a row
   const dataTableRecords = useMemo((): DataTableRecord[] => {
     // Flatten nested objects for better display
-    const flattenObject = (obj: Record<string, unknown>, prefix = ''): Record<string, unknown> => {
-      const flattened: Record<string, unknown> = {};
 
-      Object.keys(obj).forEach((key) => {
-        const value = obj[key];
-        const newKey = prefix ? `${prefix}.${key}` : key;
-
-        if (value && typeof value === 'object' && !Array.isArray(value)) {
-          Object.assign(flattened, flattenObject(value as Record<string, unknown>, newKey));
-        } else {
-          flattened[newKey] = value;
-        }
-      });
-
-      return flattened;
-    };
-
-    const flattened = flattenObject(jsonObject);
+    const flattened = kibanaFlatten(jsonObject);
 
     // Filter fields if columns prop is provided
     const fieldsToShow = columns
@@ -260,7 +249,7 @@ export function JSONDataTable({
   const gridColumns: EuiDataGridProps['columns'] = useMemo(
     () => [
       {
-        id: 'field',
+        id: 'name',
         displayAsText: 'Field',
         initialWidth: Math.min(
           Math.max(Math.round(containerWidth * 0.3), MIN_NAME_COLUMN_WIDTH),
@@ -283,20 +272,21 @@ export function JSONDataTable({
       const row = dataTableRecords[rowIndex];
       if (!row) return null;
 
-      if (columnId === 'field') {
+      if (columnId === 'name') {
         const fieldName = row.flattened.field as string;
         const fieldType = row.flattened.fieldType as string;
 
-        return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <FieldIcon type={fieldType} size="s" />
-            <span>{fieldName}</span>
-          </div>
-        );
+        return <FieldName fieldName={fieldName} fieldType={fieldType} />;
       }
 
       if (columnId === 'value') {
-        return <span>{row.flattened.value as string}</span>;
+        return (
+          <TableFieldValue
+            formattedValue={row.flattened.value as string}
+            field={row.flattened.field as string}
+            rawValue={row.flattened.value}
+          />
+        );
       }
 
       return null;
@@ -332,26 +322,62 @@ export function JSONDataTable({
         aria-label={title || 'JSON Data Table'}
         columns={gridColumns}
         columnVisibility={{
-          visibleColumns: ['field', 'value'],
+          visibleColumns: ['name', 'value'],
           setVisibleColumns: () => {},
         }}
         rowCount={dataTableRecords.length}
         renderCellValue={renderCellValue}
         toolbarVisibility={false}
-        pagination={{
-          pageIndex: 0,
-          pageSize: Math.min(dataTableRecords.length, 10),
-          pageSizeOptions: [10, 25, 50],
-          onChangeItemsPerPage: () => {},
-          onChangePage: () => {},
-        }}
         sorting={{ columns: [], onSort: () => {} }}
+        rowHeightsOptions={{ defaultHeight: 'auto' }}
         gridStyle={{
           header: 'underline',
-          border: 'none',
+          border: 'horizontal',
           fontSize: 's',
+          stripes: true,
         }}
       />
     </div>
+  );
+}
+
+interface FieldNameProps {
+  fieldName: string;
+  fieldType: string;
+  highlight?: string;
+}
+
+export function FieldName({ fieldName, fieldType, highlight = '' }: FieldNameProps) {
+  const fieldDisplayName = fieldName;
+
+  return (
+    <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          gutterSize="s"
+          responsive={false}
+          alignItems="center"
+          direction="row"
+          wrap={false}
+          className="kbnDocViewer__fieldName_icon"
+        >
+          <EuiFlexItem grow={false}>
+            <FieldIcon type={fieldType} size="s" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
+          <EuiFlexItem
+            className="kbnDocViewer__fieldName eui-textBreakAll"
+            grow={false}
+            data-test-subj={`tableDocViewRow-${fieldName}-name`}
+          >
+            <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

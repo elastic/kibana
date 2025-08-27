@@ -20,10 +20,9 @@
       "security",
       "triggersActionsUi",
       "spaces",
-      "embeddable"
+      "embeddable",
+      "unifiedDocViewer"
     ],
-    "optionalPlugins": [
-      "alerting"
-    ]
+    "optionalPlugins": ["alerting"]
   }
 }

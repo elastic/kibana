@@ -76,8 +76,14 @@ export function JSONDataView({
       {/* TODO: add filters and search without too much services dependencies */}
       <EuiFlexItem grow={false}>
         {/* <TableFilters {...tableFiltersProps} allFields={allFields} /> */}
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false} css={{ justifySelf: 'flex-end', marginLeft: 'auto' }}>
+        <EuiFlexGroup responsive={false}>
+          <EuiFlexItem
+            grow={false}
+            css={{
+              justifySelf: 'flex-end',
+              marginLeft: 'auto',
+            }}
+          >
             <EuiButtonGroup
               isIconOnly
               buttonSize="compressed"

@@ -95,7 +95,6 @@ export const JsonCodeEditorCommon = ({
       enableFindAction={enableFindAction}
       fitToContent={{
         minLines: 3,
-        maxLines: 30,
       }}
     />
   );
