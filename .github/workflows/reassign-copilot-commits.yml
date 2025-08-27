@@ -79,6 +79,7 @@ jobs:
           GIT_AUTHOR_EMAIL: niros1@gmail.com
           GIT_COMMITTER_NAME: niros1
           GIT_COMMITTER_EMAIL: niros1@gmail.com
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           set -e
           echo "⚠️ Copilot is the author of one or more commits. Attempting to squash and re-author all commits as niros1@gmail.com."
