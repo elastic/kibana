@@ -165,7 +165,10 @@ describe(
         cy.get('[data-test-subj~="sideNavPanel-id-securityGroup:assets"]');
 
         for (const page of allPages) {
-          cy.get(page.selector);
+          if (page.selector !== Selectors.TRUSTED_DEVICES) {
+            // Skip Trusted Devices for now — soc_manager does not yet have the required privilege in controller (MKI would fail otherwise).
+            cy.get(page.selector);
+          }
         }
       });
     });
