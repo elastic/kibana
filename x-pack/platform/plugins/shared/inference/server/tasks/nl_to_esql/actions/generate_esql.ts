@@ -15,7 +15,6 @@ import {
   Message,
   MessageRole,
   OutputCompleteEvent,
-  OutputEventType,
   ChatCompleteMetadata,
   ChatCompleteOptions,
   ChatCompleteAPI,
