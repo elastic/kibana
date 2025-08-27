@@ -11,6 +11,17 @@ import type { EsqlResponse } from './steps/execute_esql';
 import { executeEsql } from './steps/execute_esql';
 import { generateEsql } from './generate_esql';
 
+export interface NaturalLanguageSearchResponse {
+  /**
+   * The ES|QL query which was generated based on the provided NL query, index and context
+   */
+  generatedQuery: string;
+  /**
+   * The ES|QL data which was returned by executing the query.
+   */
+  esqlData: EsqlResponse;
+}
+
 export const naturalLanguageSearch = async ({
   nlQuery,
   context,
@@ -23,8 +34,8 @@ export const naturalLanguageSearch = async ({
   index?: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
-}): Promise<EsqlResponse> => {
-  const generateResponse = await generateEsql({
+}): Promise<NaturalLanguageSearchResponse> => {
+  const queryGenResponse = await generateEsql({
     nlQuery,
     context,
     index,
@@ -32,12 +43,17 @@ export const naturalLanguageSearch = async ({
     esClient,
   });
 
-  if (generateResponse.queries.length < 1) {
+  if (queryGenResponse.queries.length < 1) {
     throw new Error(`No esql queries were generated for query=${nlQuery}`);
   }
 
-  return executeEsql({
-    query: generateResponse.queries[0], // TODO: handle multiple queries
+  const esqlData = await executeEsql({
+    query: queryGenResponse.queries[0], // TODO: handle multiple queries
     esClient,
   });
+
+  return {
+    generatedQuery: queryGenResponse.queries[0],
+    esqlData,
+  };
 };

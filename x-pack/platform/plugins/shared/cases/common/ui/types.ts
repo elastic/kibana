@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type {
   CREATE_CASES_CAPABILITY,
@@ -47,6 +48,8 @@ import type {
   CasesMetricsResponse,
   SingleCaseMetricsResponse,
   CasesSimilarResponse,
+  CaseSummaryResponse,
+  InferenceConnectorsResponse,
 } from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
@@ -72,6 +75,9 @@ export interface CasesUiConfigType {
   };
   stack: {
     enabled: boolean;
+  };
+  unsafe?: {
+    enableCaseSummary: boolean;
   };
 }
 
@@ -184,6 +190,9 @@ export interface FilterOptions extends SystemFilterOptions {
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
 export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFeature.MTTR>;
+
+export type CaseSummary = CaseSummaryResponse;
+export type InferenceConnectors = InferenceConnectorsResponse;
 
 /**
  * If you add a new value here and you want to support it on the URL
@@ -343,3 +352,11 @@ export interface CasesCapabilities {
   [CASES_REOPEN_CAPABILITY]: boolean;
   [ASSIGN_CASE_CAPABILITY]: boolean;
 }
+
+export type CaseViewAlertsTableProps = Pick<
+  AlertsTableProps,
+  'id' | 'ruleTypeIds' | 'consumers' | 'query' | 'showAlertStatusWithFlapping' | 'onLoaded'
+> & {
+  services?: AlertsTableProps['services'];
+  caseData: CaseUI;
+};

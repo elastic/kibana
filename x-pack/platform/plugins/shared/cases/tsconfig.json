@@ -95,13 +95,18 @@
     "@kbn/dev-utils",
     "@kbn/tooling-log",
     "@kbn/page-attachment-schema",
-    "@kbn/licensing-types",
-    "@kbn/data-views-plugin",
-    "@kbn/unified-data-table",
+    "@kbn/cases-ai",
     "@kbn/cell-actions",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/data-views-plugin",
     "@kbn/discover-utils",
-    "@kbn/unified-doc-viewer-plugin",
-    "@kbn/core-notifications-browser-mocks"
+    "@kbn/inference-common",
+    "@kbn/inference-plugin",
+    "@kbn/licensing-types",
+    "@kbn/unified-data-table",
+    "@kbn/unified-doc-viewer-plugin"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
