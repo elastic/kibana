@@ -10,7 +10,14 @@
 import type { Params } from '../types';
 import { append } from '../pipeline/append';
 
-export function stats<TQuery extends string, TParams extends Params<TQuery>>(
+/**
+ * Appends a `STATS` command to the ESQL composer pipeline.
+ *
+ * @param body The body of the `STATS` command.
+ * @param params The parameters to use in the `STATS` command.
+ * @returns A `QueryPipeline` instance with the `STATS` command appended.
+ */
+export function stats<TQuery extends string, TParams extends Params<TTQuery>>(
   body: TQuery,
   params?: TParams
 ) {
