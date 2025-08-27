@@ -35,69 +35,10 @@ describe('helpers', () => {
   });
 
   describe('getUpdateScript', () => {
-    it('should not return script for bulk updates', () => {
+    it('should always return a doc for bulk updates', () => {
       const updateConversation = getUpdateConversationMock();
-      const updateScript = getUpdateScript({
-        conversation: updateConversation,
-        isBulkUpdate: true,
-      });
+      const updateScript = getUpdateScript({ conversation: updateConversation });
       expect(updateScript).toEqual({ doc: updateConversation });
-    });
-
-    it('should return painless update script with `assignEmpty` set to `false` for patch updates', () => {
-      const updateConversation = getUpdateConversationMock();
-      const updateScript = getUpdateScript({
-        conversation: updateConversation,
-        isBulkUpdate: false,
-        isPatch: true,
-      });
-      expect(updateScript).toEqual({
-        script: {
-          source: expect.anything(),
-          lang: 'painless',
-          params: {
-            ...updateConversation,
-            assignEmpty: false,
-          },
-        },
-      });
-    });
-
-    it('should return painless update script with `assignEmpty` set to `false` if `isPatch` is `undefined`', () => {
-      const updateConversation = getUpdateConversationMock();
-      const updateScript = getUpdateScript({
-        conversation: updateConversation,
-        isBulkUpdate: false,
-      });
-      expect(updateScript).toEqual({
-        script: {
-          source: expect.anything(),
-          lang: 'painless',
-          params: {
-            ...updateConversation,
-            assignEmpty: false,
-          },
-        },
-      });
-    });
-
-    it('should return painless update script with `assignEmpty` set to `true` for non-patch updates', () => {
-      const updateConversation = getUpdateConversationMock();
-      const updateScript = getUpdateScript({
-        conversation: updateConversation,
-        isBulkUpdate: false,
-        isPatch: false,
-      });
-      expect(updateScript).toEqual({
-        script: {
-          source: expect.anything(),
-          lang: 'painless',
-          params: {
-            ...updateConversation,
-            assignEmpty: true,
-          },
-        },
-      });
     });
   });
 });
