@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiSwitch, EuiText } from '@elastic/eui';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   AVG_ID,
@@ -24,7 +24,7 @@ import {
   SUM_NAME,
 } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import type { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
+import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
