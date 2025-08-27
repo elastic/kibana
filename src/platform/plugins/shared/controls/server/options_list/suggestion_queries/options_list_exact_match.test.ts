@@ -14,7 +14,7 @@ import { getExactMatchAggregationBuilder } from './options_list_exact_match';
 describe('options list exact match search query', () => {
   describe('suggestion aggregation', () => {
     test('string (keyword, text+keyword) field', () => {
-      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'testField',
         allowExpensiveQueries: true,
@@ -22,7 +22,7 @@ describe('options list exact match search query', () => {
         fieldSpec: { type: 'string' } as unknown as FieldSpec,
       };
       const aggregationBuilder = getExactMatchAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(OptionsListDSLRequestBodyMock);
+      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
       expect(aggregation).toMatchObject({
         suggestions: {
           filter: {
@@ -46,7 +46,7 @@ describe('options list exact match search query', () => {
     });
 
     test('nested string (keyword, text+keyword) field', () => {
-      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'testField',
         allowExpensiveQueries: true,
@@ -57,7 +57,7 @@ describe('options list exact match search query', () => {
         } as unknown as FieldSpec,
       };
       const aggregationBuilder = getExactMatchAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(OptionsListDSLRequestBodyMock);
+      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
 
       expect(aggregation).toMatchObject({
         nestedSuggestions: {
@@ -89,7 +89,7 @@ describe('options list exact match search query', () => {
     });
 
     test('numeric field', () => {
-      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'bytes',
         allowExpensiveQueries: true,
@@ -97,7 +97,7 @@ describe('options list exact match search query', () => {
         fieldSpec: { type: 'number' } as unknown as FieldSpec,
       };
       const aggregationBuilder = getExactMatchAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(OptionsListDSLRequestBodyMock);
+      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
       expect(aggregation).toMatchObject({
         suggestions: {
           filter: {
@@ -123,7 +123,7 @@ describe('options list exact match search query', () => {
 
   describe('parsing', () => {
     test('parses keyword result', () => {
-      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         searchString: 'cool',
         allowExpensiveQueries: true,
@@ -155,7 +155,7 @@ describe('options list exact match search query', () => {
         },
       };
       expect(
-        aggregationBuilder.parse(searchResponseMock, OptionsListDSLRequestBodyMock)
+        aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock)
       ).toMatchObject({
         suggestions: [{ docCount: 5, value: 'cool1' }],
         totalCardinality: 1,
@@ -164,7 +164,7 @@ describe('options list exact match search query', () => {
   });
 
   test('parses numeric field result', () => {
-    const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+    const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
       size: 10,
       fieldName: 'bytes',
       allowExpensiveQueries: true,
@@ -196,9 +196,7 @@ describe('options list exact match search query', () => {
         },
       },
     };
-    expect(
-      aggregationBuilder.parse(searchResponseMock, OptionsListDSLRequestBodyMock)
-    ).toMatchObject({
+    expect(aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock)).toMatchObject({
       suggestions: [{ docCount: 5, value: 12345 }],
       totalCardinality: 1,
     });

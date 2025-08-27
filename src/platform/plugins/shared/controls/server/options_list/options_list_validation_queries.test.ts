@@ -38,25 +38,25 @@ describe('options list queries', () => {
   describe('validation aggregation', () => {
     test('returns empty aggregation when not given selections', () => {
       const validationAggBuilder = getValidationAggregationBuilder();
-      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
         allowExpensiveQueries: true,
       };
       expect(
-        validationAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock)
+        validationAggBuilder.buildAggregation(optionsListRequestBodyMock)
       ).toMatchInlineSnapshot(`Object {}`);
     });
 
     test('creates validation aggregation when given selections', () => {
       const validationAggBuilder = getValidationAggregationBuilder();
-      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
         allowExpensiveQueries: true,
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
-      expect(validationAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock))
+      expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
         .toMatchInlineSnapshot(`
         Object {
           "validation": Object {
@@ -86,7 +86,7 @@ describe('options list queries', () => {
 
     test('creates validation aggregation for nested fields when given selections', () => {
       const validationAggBuilder = getValidationAggregationBuilder();
-      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
         fieldSpec: {
@@ -96,7 +96,7 @@ describe('options list queries', () => {
         allowExpensiveQueries: true,
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
-      expect(validationAggBuilder.buildAggregation(OptionsListDSLRequestBodyMock))
+      expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
         .toMatchInlineSnapshot(`
         Object {
           "nestedValidation": Object {

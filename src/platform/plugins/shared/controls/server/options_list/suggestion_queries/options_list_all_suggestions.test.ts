@@ -14,7 +14,7 @@ import { getAllSuggestionsAggregationBuilder } from './options_list_all_suggesti
 describe('options list fetch all suggestions query', () => {
   describe('suggestion aggregation', () => {
     test('number field', () => {
-      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'bytes',
         allowExpensiveQueries: true,
@@ -27,7 +27,7 @@ describe('options list fetch all suggestions query', () => {
         },
       };
       const aggregationBuilder = getAllSuggestionsAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(OptionsListDSLRequestBodyMock);
+      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
 
       expect(aggregation).toMatchObject({
         suggestions: {
@@ -49,7 +49,7 @@ describe('options list fetch all suggestions query', () => {
     });
 
     test('nested string (keyword, text+keyword) field', () => {
-      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'testField',
         allowExpensiveQueries: true,
@@ -59,7 +59,7 @@ describe('options list fetch all suggestions query', () => {
         } as unknown as FieldSpec,
       };
       const aggregationBuilder = getAllSuggestionsAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(OptionsListDSLRequestBodyMock);
+      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
 
       expect(aggregation).toMatchObject({
         nestedSuggestions: {
@@ -90,7 +90,7 @@ describe('options list fetch all suggestions query', () => {
 
   describe('suggestion parsing', () => {
     test('test parsing for number field', () => {
-      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'bytes',
         allowExpensiveQueries: true,
@@ -131,7 +131,7 @@ describe('options list fetch all suggestions query', () => {
         },
       };
 
-      const parsed = aggregationBuilder.parse(searchResponseMock, OptionsListDSLRequestBodyMock);
+      const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
       expect(parsed).toMatchObject({
         suggestions: [
           { value: 1, docCount: 5 },
@@ -143,7 +143,7 @@ describe('options list fetch all suggestions query', () => {
     });
 
     test('test parsing for boolean field', () => {
-      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: 'cancelled',
         allowExpensiveQueries: true,
@@ -183,7 +183,7 @@ describe('options list fetch all suggestions query', () => {
         },
       };
 
-      const parsed = aggregationBuilder.parse(searchResponseMock, OptionsListDSLRequestBodyMock);
+      const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
       expect(parsed).toMatchObject({
         suggestions: [
           { value: 'false', docCount: 54 },
@@ -194,7 +194,7 @@ describe('options list fetch all suggestions query', () => {
     });
 
     test('test parsing for date field', () => {
-      const OptionsListDSLRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
         size: 10,
         fieldName: '@timestamp',
         allowExpensiveQueries: true,
@@ -235,7 +235,7 @@ describe('options list fetch all suggestions query', () => {
         },
       };
 
-      const parsed = aggregationBuilder.parse(searchResponseMock, OptionsListDSLRequestBodyMock);
+      const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
       expect(parsed).toMatchObject({
         suggestions: [
           { value: 1707810859000, docCount: 5 },
