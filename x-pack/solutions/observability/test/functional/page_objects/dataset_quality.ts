@@ -176,6 +176,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist',
     datasetQualityDetailsOverviewDegradedFieldToggleSwitch:
       'datasetQualityDetailsOverviewDegradedFieldToggleSwitch',
+    datasetQualityDetailsSummaryCardFailedDocuments:
+      'datasetQualityDetailsSummaryKpiCard-Failed documents',
+    datasetQualityDetailsSummaryCardNoFailureStore:
+      'datasetQualityDetailsSummaryKpiCard-No failure store',
+    datasetQualityDetailsEnableFailureStoreButton: 'datasetQualityDetailsEnableFailureStoreButton',
+    editFailureStoreModal: 'editFailureStoreModal',
+    enableFailureStoreToggle: 'enableFailureStoreToggle',
+    failureStoreModalSaveButton: 'failureStoreModalSaveButton',
   };
 
   return {

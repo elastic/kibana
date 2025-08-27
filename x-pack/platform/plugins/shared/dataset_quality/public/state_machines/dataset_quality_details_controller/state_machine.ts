@@ -41,6 +41,8 @@ import {
   fetchIntegrationDashboardsFailedNotifier,
   rolloverDataStreamFailedNotifier,
   updateFieldLimitFailedNotifier,
+  updateFailureStoreFailedNotifier,
+  updateFailureStoreSuccessNotifier,
 } from './notifications';
 import {
   filterIssues,
@@ -540,6 +542,32 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 ],
               },
             },
+            failureStoreUpdate: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    UPDATE_FAILURE_STORE: {
+                      target: 'updating',
+                      actions: ['storeDataStreamDetails'],
+                    },
+                  },
+                },
+                updating: {
+                  invoke: {
+                    src: 'updateFailureStore',
+                    onDone: {
+                      target: 'idle',
+                      actions: ['notifyUpdateFailureStoreSuccess', 'raiseForceTimeRangeRefresh'],
+                    },
+                    onError: {
+                      target: 'idle',
+                      actions: ['notifyUpdateFailureStoreFailed', 'raiseForceTimeRangeRefresh'],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         indexNotFound: {
@@ -838,6 +866,9 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         updateFieldLimitFailedNotifier(toasts, event.data),
       notifyRolloverDataStreamError: (context, event: DoneInvokeEvent<Error>) =>
         rolloverDataStreamFailedNotifier(toasts, event.data, context.dataStream),
+      notifyUpdateFailureStoreSuccess: () => updateFailureStoreSuccessNotifier(toasts),
+      notifyUpdateFailureStoreFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        updateFailureStoreFailedNotifier(toasts, event.data),
     },
     services: {
       checkDatasetIsAggregatable: (context) => {
@@ -980,6 +1011,21 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return dataStreamDetailsClient.rolloverDataStream({
           dataStream: context.dataStream,
         });
+      },
+      updateFailureStore: (context) => {
+        if (
+          'dataStreamDetails' in context &&
+          context.dataStreamDetails &&
+          context.dataStreamDetails.hasFailureStore
+        ) {
+          return dataStreamDetailsClient.updateFailureStore({
+            dataStream: context.dataStream,
+            failureStoreEnabled: context.dataStreamDetails.hasFailureStore,
+            customRetentionPeriod: context.dataStreamDetails.customRetentionPeriod,
+          });
+        }
+
+        return Promise.resolve();
       },
     },
   });

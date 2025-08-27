@@ -22,7 +22,8 @@ export class EnterForeachNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    const foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id);
+    this.wfExecutionRuntimeManager.enterScope();
+    let foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id);
 
     if (!foreachState) {
       await this.wfExecutionRuntimeManager.startStep(this.step.id);
@@ -30,7 +31,10 @@ export class EnterForeachNodeImpl implements StepImplementation {
 
       if (evaluatedItems.length === 0) {
         this.workflowLogger.logDebug(
-          `Foreach step "${this.step.id}" has no items to iterate over. Skipping execution.`
+          `Foreach step "${this.step.id}" has no items to iterate over. Skipping execution.`,
+          {
+            workflow: { step_id: this.step.id },
+          }
         );
         await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
           items: [],
@@ -42,30 +46,34 @@ export class EnterForeachNodeImpl implements StepImplementation {
       }
 
       this.workflowLogger.logDebug(
-        `Foreach step "${this.step.id}" will iterate over ${evaluatedItems.length} items.`
+        `Foreach step "${this.step.id}" will iterate over ${evaluatedItems.length} items.`,
+        {
+          workflow: { step_id: this.step.id },
+        }
       );
 
       // Initialize foreach state
-      await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
+      foreachState = {
         items: evaluatedItems,
         item: evaluatedItems[0],
         index: 0,
         total: evaluatedItems.length,
-      });
+      };
     } else {
       // Update items and index if they have changed
       const items = foreachState.items;
       const index = foreachState.index + 1;
       const item = items[index];
       const total = foreachState.total;
-      await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
+      foreachState = {
         items,
         index,
         item,
         total,
-      });
+      };
     }
 
+    await this.wfExecutionRuntimeManager.setStepState(this.step.id, foreachState);
     this.wfExecutionRuntimeManager.goToNextStep();
   }
 

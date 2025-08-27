@@ -20,6 +20,7 @@ import type {
   NonAggregatableDatasets,
   QualityIssue,
   UpdateFieldLimitResponse,
+  UpdateFailureStoreResponse,
 } from '../../../common/api_types';
 import type { IntegrationType } from '../../../common/data_stream_details';
 import type { TableCriteria, TimeRangeConfig } from '../../../common/types';
@@ -233,6 +234,14 @@ export type DatasetQualityDetailsControllerTypeState =
         WithDegradeFieldAnalysis &
         WithNewFieldLimit &
         WithNewFieldLimitResponse;
+    }
+  | {
+      value: 'initializing.failureStoreUpdate.idle';
+      context: WithDefaultControllerState;
+    }
+  | {
+      value: 'initializing.failureStoreUpdate.updating';
+      context: WithDefaultControllerState;
     };
 
 export type DatasetQualityDetailsControllerContext =
@@ -287,6 +296,10 @@ export type DatasetQualityDetailsControllerEvent =
       type: 'UPDATE_SELECTED_FIELDS';
       selectedFields: string[];
     }
+  | {
+      type: 'UPDATE_FAILURE_STORE';
+      dataStreamsDetails: DataStreamDetails;
+    }
   | DoneInvokeEvent<NonAggregatableDatasets>
   | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<Error>
@@ -300,4 +313,5 @@ export type DatasetQualityDetailsControllerEvent =
   | DoneInvokeEvent<DegradedFieldAnalysis>
   | DoneInvokeEvent<UpdateFieldLimitResponse>
   | DoneInvokeEvent<DataStreamRolloverResponse>
+  | DoneInvokeEvent<UpdateFailureStoreResponse>
   | DoneInvokeEvent<IntegrationType>;
