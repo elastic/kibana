@@ -68,6 +68,13 @@ export const resyncStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ request, getScopedClients }): Promise<ResyncStreamsResponse> => {
     const { streamsClient } = await getScopedClients({ request });
 
@@ -83,6 +90,13 @@ export const getStreamsStatusRoute = createServerRoute({
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean | 'conflict' }> => {

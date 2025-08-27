@@ -320,7 +320,7 @@ export const convert = (schema: z.ZodType): ReturnType<OpenAPIConverter['convert
   const convertionOutput = toJSON(schema);
 
   return {
-    shared,
+    shared: toOpenAPI30Nullable(shared),
     schema: convertionOutput as OpenAPIV3.SchemaObject,
   };
 };

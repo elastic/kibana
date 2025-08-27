@@ -51,6 +51,13 @@ const exportContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   async handler({ params, request, response, getScopedClients }) {
     const { assetClient, streamsClient } = await getScopedClients({ request });
 
@@ -147,6 +154,13 @@ const importContentRoute = createServerRoute({
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
     },
   },
   async handler({ params, request, getScopedClients }) {

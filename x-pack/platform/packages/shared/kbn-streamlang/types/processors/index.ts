@@ -197,12 +197,12 @@ export type StreamlangProcessorDefinition =
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.discriminatedUnion('action', [
-  // grokProcessorSchema,
-  // dissectProcessorSchema,
-  // dateProcessorSchema,
-  // renameProcessorSchema,
-  // setProcessorSchema,
-  // appendProcessorSchema,
+  grokProcessorSchema,
+  dissectProcessorSchema,
+  dateProcessorSchema,
+  renameProcessorSchema,
+  setProcessorSchema,
+  appendProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
