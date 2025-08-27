@@ -55,17 +55,20 @@ export const setFields = (
     });
   }
 
-  cmd.fields.length = 0;
-  cmd.fields.push(...(fields as ESQLAstRerankCommand['fields']));
-
   const isOnOption = (arg: ESQLAstItem): arg is ESQLCommandOption =>
     !!arg && !Array.isArray(arg) && arg.type === 'option' && arg.name === 'on';
 
   const onOption = cmd.args.find(isOnOption);
-  if (onOption) {
-    onOption.args.length = 0;
-    onOption.args.push(...(fields as ESQLAstRerankCommand['fields']));
+
+  if (!onOption) {
+    throw new Error('RERANK command must have a ON option');
   }
+
+  cmd.fields.length = 0;
+  cmd.fields.push(...(fields as ESQLAstRerankCommand['fields']));
+
+  onOption.args.length = 0;
+  onOption.args.push(...(fields as ESQLAstRerankCommand['fields']));
 };
 
 export const setWithParameter = (

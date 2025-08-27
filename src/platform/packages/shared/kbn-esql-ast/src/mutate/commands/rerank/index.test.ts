@@ -64,6 +64,17 @@ describe('commands.rerank', () => {
         'FROM index | RERANK "star wars" ON a, b, @timestamp WITH {"inference_id": "model_id"} | LIMIT 2'
       );
     });
+
+    it('should throw error when ON option is missing', () => {
+      const src = 'FROM index | RERANK "star wars"';
+      const query = EsqlQuery.fromSrc(src);
+
+      const cmd = [...commands.rerank.list(query.ast)][0];
+
+      expect(() => commands.rerank.setFields(cmd, ['newField'])).toThrow(
+        'RERANK command must have a ON option'
+      );
+    });
   });
 
   describe('.setWithParameter()', () => {
