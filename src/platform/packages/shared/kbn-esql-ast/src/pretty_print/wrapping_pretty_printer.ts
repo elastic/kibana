@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BinaryExpressionGroup } from '../ast/grouping';
-import { binaryExpressionGroup } from '../ast/grouping';
+import { BinaryExpressionGroup } from '../ast/grouping';
+import { binaryExpressionGroup, unaryExpressionGroup } from '../ast/grouping';
 import { isBinaryExpression } from '../ast/is';
 import type { ESQLAstBaseItem, ESQLAstQueryExpression } from '../types';
 import type {
@@ -589,18 +589,35 @@ export class WrappingPrettyPrinter {
 
       switch (node.subtype) {
         case 'unary-expression': {
-          const separator = operator === '-' || operator === '+' ? '' : ' ';
-          const formatted = ctx.visitArgument(0, inp);
+          operator = this.keyword(operator);
 
-          txt = `${operator}${separator}${formatted.txt}`;
+          const separator = operator === '-' || operator === '+' ? '' : ' ';
+          const argument = ctx.arguments()[0];
+          const argumentFormatted = ctx.visitArgument(0, inp);
+
+          const operatorPrecedence = unaryExpressionGroup(ctx.node);
+          const argumentPrecedence = binaryExpressionGroup(argument);
+
+          if (
+            argumentPrecedence !== BinaryExpressionGroup.none &&
+            argumentPrecedence < operatorPrecedence
+          ) {
+            argumentFormatted.txt = `(${argumentFormatted.txt})`;
+          }
+
+          txt = `${operator}${separator}${argumentFormatted.txt}`;
           break;
         }
         case 'postfix-unary-expression': {
+          operator = this.keyword(operator);
+
           const suffix = inp.suffix ?? '';
           txt = `${ctx.visitArgument(0, { ...inp, suffix: '' }).txt} ${operator}${suffix}`;
           break;
         }
         case 'binary-expression': {
+          operator = this.keyword(operator);
+
           return this.printBinaryOperatorExpression(ctx, operator, inp);
         }
         default: {
