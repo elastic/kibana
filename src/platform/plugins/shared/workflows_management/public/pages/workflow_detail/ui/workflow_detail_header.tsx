@@ -27,7 +27,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 
-interface WorkflowDetailHeaderProps {
+export interface WorkflowDetailHeaderProps {
   name: string | undefined;
   isLoading: boolean;
   activeTab: WorkflowUrlStateTabType;

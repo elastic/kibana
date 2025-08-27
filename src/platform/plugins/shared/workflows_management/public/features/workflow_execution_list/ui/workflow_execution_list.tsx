@@ -22,7 +22,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WorkflowExecutionListItem } from './workflow_execution_list_item';
 
-interface WorkflowExecutionListProps {
+export interface WorkflowExecutionListProps {
   executions: WorkflowExecutionListDto | null;
   isLoading: boolean;
   error: Error | null;
