@@ -2298,8 +2298,6 @@
       "@kbn/wc-framework-types-common/*": ["x-pack/solutions/chat/packages/wc-framework-types-common/*"],
       "@kbn/wc-framework-types-server": ["x-pack/solutions/chat/packages/wc-framework-types-server"],
       "@kbn/wc-framework-types-server/*": ["x-pack/solutions/chat/packages/wc-framework-types-server/*"],
-      "@kbn/wc-genai-utils": ["x-pack/solutions/chat/packages/wc-genai-utils"],
-      "@kbn/wc-genai-utils/*": ["x-pack/solutions/chat/packages/wc-genai-utils/*"],
       "@kbn/wc-index-schema-builder": ["x-pack/solutions/chat/packages/wc-index-schema-builder"],
       "@kbn/wc-index-schema-builder/*": ["x-pack/solutions/chat/packages/wc-index-schema-builder/*"],
       "@kbn/wc-integration-utils": ["x-pack/solutions/chat/packages/wc-integration-utils"],
