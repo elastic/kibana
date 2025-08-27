@@ -89,19 +89,12 @@ export const processRouter = async ({
         ...(description ? { description } : {}),
         ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
-        requestBody: !!validationSchemas?.body
-          ? {
-              content: {
-                [getVersionedContentTypeString(
-                  SERVERLESS_VERSION_2023_10_31,
-                  'public',
-                  contentType
-                )]: {
-                  schema: converter.convert(validationSchemas.body),
-                },
-              },
-            }
-          : undefined,
+        requestBody: extractRequestBody(
+          validationSchemas?.body,
+          route.options.access ?? 'public',
+          converter,
+          contentType
+        ),
         responses: extractResponses(route, converter),
         parameters,
         operationId: getOpId({ path: route.path, method: route.method }),
@@ -121,10 +114,29 @@ export const processRouter = async ({
       // Enrich the error message with a bit more context
       e.message = `Error generating OpenAPI for route '${route.path}': ${e.message}`;
       console.log('processRouter error: ', e);
-      // throw e;
+      throw e;
     }
   }
   return { paths };
+};
+
+export const extractRequestBody = (
+  requestBodySchema: unknown,
+  access: RouteAccess,
+  converter: OasConverter,
+  contentType: string[]
+) => {
+  if (!requestBodySchema || converter.isUndefined(requestBodySchema)) {
+    return undefined;
+  }
+
+  return {
+    content: {
+      [getVersionedContentTypeString(SERVERLESS_VERSION_2023_10_31, access, contentType)]: {
+        schema: converter.convert(requestBodySchema),
+      },
+    },
+  };
 };
 
 export const extractResponses = (route: InternalRouterRoute, converter: OasConverter) => {

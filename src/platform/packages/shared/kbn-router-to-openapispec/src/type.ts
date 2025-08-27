@@ -34,6 +34,8 @@ export interface OpenAPIConverter {
   };
 
   is(type: unknown): boolean;
+
+  isUndefined(type: unknown): boolean;
 }
 
 export type CustomOperationObject = OpenAPIV3.OperationObject<{

@@ -135,16 +135,8 @@ function postProcessJsonOutput(json: z.core.JSONSchema.BaseSchema) {
 
 function getCustomOpenApiMetadata(schema: z.core.$ZodType) {
   // If the schema has a custom OpenAPI metadata method, apply it
-  console.log(
-    'getCustomOpenApiMetadata>>>>>>>>checking schema:',
-    schema.constructor.name,
-    'hasMethod:',
-    typeof (schema as any).getOpenAPIMetadata === 'function'
-  );
   if (typeof (schema as any).getOpenAPIMetadata === 'function') {
-    console.log('getCustomOpenApiMetadata>>>>>>>>schema:', schema);
     const openAPIMetadata = (schema as any).getOpenAPIMetadata();
-    console.log('getCustomOpenApiMetadata>>>>>>>>openAPIMetadata:', openAPIMetadata);
     if (openAPIMetadata && typeof openAPIMetadata === 'object') {
       // Apply all OpenAPI metadata properties to ensure nothing is lost
       return openAPIMetadata;
@@ -160,7 +152,7 @@ function toJSON(schema: z.ZodType) {
   // let customOpenApiMetadata: z.core.JSONSchema.BaseSchema | undefined;
   const json = z.toJSONSchema(schema, {
     io: 'input',
-    target: 'draft-7',
+    target: 'draft-4',
     unrepresentable: 'any',
     override: (ctx) => {
       // Check for custom OpenAPI metadata first
@@ -239,6 +231,15 @@ function coerceUnrepresentableTypeIfNeeded(
 }
 
 /**
+ * Remove
+ */
+const removePropertyNames = (json: z.core.JSONSchema.BaseSchema): z.core.JSONSchema.BaseSchema => {
+  if (json.jsonSchema.propertyNames) {
+    delete json.jsonSchema.propertyNames;
+  }
+};
+
+/**
  * Checks if a Zod schema is suitable for a Request Body or Response Body in OpenAPI.
  * These can generally represent any valid JSON structure.
  */
@@ -263,14 +264,15 @@ const convertJsonSchemaToOpenAPIParam = (
   assertJSONSchemaType(schema, 'object', 'Expected schema to be an object');
   return Object.entries(schema.properties).map(([shapeKey, subShape]) => {
     const isOptional = schema.required?.includes(shapeKey);
-    const { description, ...json } = subShape;
+    const { description, examples, ...json } = subShape;
 
     return {
       name: shapeKey,
       in: isPathParameter ? 'path' : 'query',
       required: isPathParameter || isOptional,
       schema: json as OpenAPIV3.SchemaObject,
-      description,
+      ...(description !== undefined ? { description } : {}),
+      ...(examples !== undefined ? { examples } : {}),
     };
   });
 };
@@ -315,20 +317,7 @@ export const convert = (schema: z.ZodType): ReturnType<OpenAPIConverter['convert
     throw createError('Schema is not allowed as a request body or response schema');
   }
 
-  let convertionOutput: ReturnType<typeof toJSON>;
-
-  try {
-    convertionOutput = toJSON(schema);
-  } catch (e) {
-    // Use custom OpenAPI metadata if available, or fallback to a generic pass-through object
-    convertionOutput =
-      getCustomOpenApiMetadata(schema) ??
-      toJSON(
-        getPassThroughBodyObject(
-          'Could not convert the schema to OpenAPI equivalent, passing through as any.'
-        )
-      );
-  }
+  const convertionOutput = toJSON(schema);
 
   return {
     shared,

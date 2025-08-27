@@ -32,7 +32,10 @@ import {
   makeZodResponsesValidationObject,
 } from './make_zod_validation_object';
 import { validateAndDecodeParams } from './validate_and_decode_params';
-import { noParamsValidationObject, passThroughValidationObject } from './validation_objects';
+import {
+  getNoParamsValidationObjectForRouteMethod,
+  passThroughValidationObject,
+} from './validation_objects';
 
 const CLIENT_CLOSED_REQUEST = {
   statusCode: 499,
@@ -170,9 +173,9 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
     let validationObject;
     if (params === undefined) {
-      validationObject = noParamsValidationObject;
+      validationObject = getNoParamsValidationObjectForRouteMethod(method);
     } else if (isZod(params)) {
-      validationObject = makeZodValidationObject(params as ZodParamsObject);
+      validationObject = makeZodValidationObject(params as ZodParamsObject, method);
     } else {
       validationObject = passThroughValidationObject;
     }

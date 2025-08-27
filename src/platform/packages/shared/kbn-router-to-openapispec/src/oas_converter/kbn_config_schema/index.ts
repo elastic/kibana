@@ -8,10 +8,11 @@
  */
 
 import type { OpenAPIConverter } from '../../type';
-import { is, convert, convertQuery, convertPathParameters } from './lib';
+import { is, isUndefined, convert, convertQuery, convertPathParameters } from './lib';
 
 export const kbnConfigSchemaConverter: OpenAPIConverter = {
   is,
+  isUndefined,
   convert,
   convertQuery,
   convertPathParameters,

@@ -101,15 +101,40 @@ export const testOasGeneration = createObservabilityOnboardingServerRoute({
             'Kibana-style date string supporting relative dates like now-1d, now-7d, now/d, or ISO date strings. Uses the same datemath parser as other Kibana APIs.',
           example: 'now-1d',
           title: 'Kibana Date String',
-          examples: [
-            'now-1d',
-            'now-7d',
-            'now/d',
-            'now-30m',
-            'now+1h',
-            '2023-10-31T23:59:59Z',
-            '2023-10-31',
-          ],
+          examples: {
+            now: {
+              description: 'Current date and time',
+              value: 'now',
+            },
+            'now-1d': {
+              description: 'One day ago from now',
+              value: 'now-1d',
+            },
+            'now-7d': {
+              description: 'Seven days ago from now',
+              value: 'now-7d',
+            },
+            'now/d': {
+              description: 'Start of the current day',
+              value: 'now/d',
+            },
+            'now-30m': {
+              description: 'Thirty minutes ago from now',
+              value: 'now-30m',
+            },
+            'now+1h': {
+              description: 'One hour in the future from now',
+              value: 'now+1h',
+            },
+            '2023-10-31T23:59:59Z': {
+              description: 'Specific date and time in UTC',
+              value: '2023-10-31T23:59:59Z',
+            },
+            '2023-10-31': {
+              description: 'Specific date without time',
+              value: '2023-10-31',
+            },
+          },
         }),
       endDate: z.date().describe('End date for the query').default('now').optional().meta({
         example: '2023-10-31T23:59:59Z',

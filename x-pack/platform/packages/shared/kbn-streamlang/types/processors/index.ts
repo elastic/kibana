@@ -62,7 +62,7 @@ export const manualIngestPipelineProcessorSchema = processorBaseWithWhereSchema.
   action: z.literal('manual_ingest_pipeline'),
   processors: z.array(z.record(z.enum(elasticsearchProcessorTypes), z.unknown())),
   tag: z.optional(z.string()),
-  on_failure: z.optional(z.array(z.record(z.unknown()))),
+  on_failure: z.optional(z.array(z.record(z.string(), z.unknown()))),
 }) satisfies z.Schema<ManualIngestPipelineProcessor>;
 
 /**
@@ -197,12 +197,12 @@ export type StreamlangProcessorDefinition =
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.discriminatedUnion('action', [
-  grokProcessorSchema,
-  dissectProcessorSchema,
-  dateProcessorSchema,
-  renameProcessorSchema,
-  setProcessorSchema,
-  appendProcessorSchema,
+  // grokProcessorSchema,
+  // dissectProcessorSchema,
+  // dateProcessorSchema,
+  // renameProcessorSchema,
+  // setProcessorSchema,
+  // appendProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 

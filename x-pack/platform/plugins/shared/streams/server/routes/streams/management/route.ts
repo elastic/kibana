@@ -32,6 +32,13 @@ export const forkStreamsRoute = createServerRoute({
     }),
     body: z.object({ stream: z.object({ name: z.string() }), where: conditionSchema }),
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     const { streamsClient } = await getScopedClients({
       request,

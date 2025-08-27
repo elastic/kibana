@@ -46,8 +46,10 @@ export const isWhereBlock = (obj: any): obj is StreamlangWhereBlock => {
  * A step can be either a processor or a where block (optionally recursive)
  */
 export type StreamlangStep = StreamlangProcessorDefinition | StreamlangWhereBlock;
-export const streamlangStepSchema: z.ZodType<StreamlangStep> = z.lazy(() =>
-  z.union([streamlangProcessorSchema, streamlangWhereBlockSchema])
+export const streamlangStepSchema: z.ZodType<StreamlangStep> = z.lazy(
+  () =>
+    // z.union([streamlangProcessorSchema, streamlangWhereBlockSchema])
+    streamlangProcessorSchema
 );
 
 export const isActionBlock = (obj: any): obj is StreamlangProcessorDefinition => {
