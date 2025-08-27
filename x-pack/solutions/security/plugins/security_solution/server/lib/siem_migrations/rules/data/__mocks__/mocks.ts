@@ -62,14 +62,14 @@ export const mockDeleteMigration = jest.fn().mockResolvedValue(undefined);
 // Rule migrations data client
 export const createRuleMigrationsDataClientMock = () =>
   ({
-    rules: mockRuleMigrationsDataRulesClient,
+    items: mockRuleMigrationsDataRulesClient,
     resources: mockSiemMigrationsDataResourcesClient,
     integrations: mockRuleMigrationsDataIntegrationsClient,
     prebuiltRules: mockRuleMigrationsDataPrebuiltRulesClient,
     lookups: mockRuleMigrationsDataLookupsClient,
     migrations: mockRuleMigrationsDataMigrationsClient,
     deleteMigration: mockDeleteMigration,
-  } as unknown as jest.MockedObjectDeep<RuleMigrationsDataClient>);
+  } as jest.MockedObjectDeep<RuleMigrationsDataClient>);
 
 export const MockRuleMigrationsDataClient = jest
   .fn()

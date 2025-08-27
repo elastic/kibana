@@ -104,7 +104,6 @@ export abstract class SiemMigrationsTaskClient<
       id: migrationId,
       connectorId,
       ...this.getLastExecutionConfig(invocationConfig),
-      // skipPrebuiltRulesMatching: invocationConfig.configurable?.skipPrebuiltRulesMatching,
     });
 
     // run the migration in the background without awaiting and resolve the `start` promise
