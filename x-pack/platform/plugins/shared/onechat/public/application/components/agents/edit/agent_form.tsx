@@ -59,7 +59,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   const isCreateMode = !editingAgentId;
 
-  const onSaveSuccess = () => {
+  const onSaveSuccess = (agent: AgentDefinition) => {
     notifications.toasts.addSuccess(
       isCreateMode
         ? i18n.translate('xpack.onechat.agents.createSuccessMessage', {
