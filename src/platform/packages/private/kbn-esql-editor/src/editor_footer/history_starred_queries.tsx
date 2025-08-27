@@ -480,8 +480,21 @@ export function HistoryAndStarredQueriesTabs({
     EsqlStarredQueriesService | null | undefined
   >();
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
+  const [historyItems, setHistoryItems] = useState<QueryHistoryItem[]>(() =>
+    getHistoryItems('desc')
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [starredSearchQuery, setStarredSearchQuery] = useState('');
+
+  useEffect(() => {
+    const updateHistoryItems = () => {
+      setHistoryItems(getHistoryItems('desc'));
+    };
+
+    updateHistoryItems();
+
+    // Update on mount and when onUpdateAndSubmit changes (indicating potential new queries)
+  }, [onUpdateAndSubmit]);
 
   useEffect(() => {
     const initializeService = async () => {
@@ -511,14 +524,13 @@ export function HistoryAndStarredQueriesTabs({
 
   // Filter history items based on search query
   const filteredHistoryItems = useMemo(() => {
-    const historyItems = getHistoryItems('desc');
     if (!searchQuery.trim()) {
       return historyItems;
     }
     return historyItems.filter((item) =>
       item.queryString.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, historyItems]);
 
   // Filter starred queries based on search query
   const filteredStarredQueries = useMemo(() => {

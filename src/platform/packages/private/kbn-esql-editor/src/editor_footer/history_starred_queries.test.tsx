@@ -458,5 +458,29 @@ describe('Starred and History queries components', () => {
         );
       });
     });
+
+    it('should render search input for starred tab when selected', async () => {
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={800}
+            onUpdateAndSubmit={jest.fn()}
+            height={400}
+          />
+        </KibanaContextProvider>
+      );
+
+      // Switch to starred tab
+      act(() => {
+        screen.getByTestId('starred-queries-tab').click();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('ESQLEditor-starred-search')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Search starred queries')).toBeInTheDocument();
+        expect(screen.queryByTestId('ESQLEditor-history-search')).not.toBeInTheDocument();
+      });
+    });
   });
 });
