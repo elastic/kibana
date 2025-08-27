@@ -278,6 +278,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     chartsStateService,
     anomalyDetectionAlertsStateService,
     anomalyTableService,
+    annotationsStateService,
   } = useAnomalyExplorerContext();
 
   const tableData = useObservable(anomalyTableService.tableData$, anomalyTableService.tableData);
@@ -369,7 +370,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const mlIndexUtils = useMlIndexUtils();
   const mlLocator = useMlLocator();
 
-  const { annotations, filterPlaceHolder, indexPattern, influencers, loading } = explorerState;
+  const { filterPlaceHolder, indexPattern, influencers, loading } = explorerState;
 
   const chartsData = useObservable(
     chartsStateService.getChartsData$(),
@@ -394,7 +395,14 @@ export const Explorer: FC<ExplorerUIProps> = ({
     anomalyTimelineStateService.getSwimLaneBucketInterval()
   );
 
-  const { annotationsData, totalCount: allAnnotationsCnt, error: annotationsError } = annotations;
+  const {
+    annotationsData,
+    totalCount: allAnnotationsCnt,
+    error: annotationsError,
+  } = useObservable(
+    annotationsStateService.annotationsTable$,
+    annotationsStateService.annotationsTable
+  );
 
   const annotationsCnt = Array.isArray(annotationsData) ? annotationsData.length : 0;
   const badge =

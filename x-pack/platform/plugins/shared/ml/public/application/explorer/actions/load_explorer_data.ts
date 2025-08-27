@@ -23,10 +23,8 @@ import {
   getSelectionInfluencers,
   getSelectionJobIds,
   getSelectionTimeRange,
-  loadAnnotationsTableData,
   loadFilteredTopInfluencers,
   loadTopInfluencers,
-  loadOverallAnnotations,
 } from '../explorer_utils';
 
 import { useMlApi } from '../../contexts/kibana';
@@ -55,10 +53,6 @@ const memoize = <T extends (...a: any[]) => any>(func: T, context?: any) => {
     ...args: Parameters<T>
   ) => ReturnType<T>;
 };
-
-const memoizedLoadOverallAnnotations = memoize(loadOverallAnnotations);
-
-const memoizedLoadAnnotationsTableData = memoize(loadAnnotationsTableData);
 
 const memoizedLoadFilteredTopInfluencers = memoize(loadFilteredTopInfluencers);
 
@@ -113,16 +107,8 @@ const loadExplorerDataProvider = (
     const timerange = getSelectionTimeRange(selectedCells, bounds);
 
     // First get the data where we have all necessary args at hand using forkJoin:
-    // annotationsData, anomalyChartRecords, influencers, overallState
+    // anomalyChartRecords, influencers
     return forkJoin({
-      overallAnnotations: memoizedLoadOverallAnnotations(lastRefresh, mlApi, selectedJobs, bounds),
-      annotationsData: memoizedLoadAnnotationsTableData(
-        lastRefresh,
-        mlApi,
-        selectedCells,
-        selectedJobs,
-        bounds
-      ),
       anomalyChartRecords: anomalyExplorerChartsService.loadDataForCharts$(
         jobIds,
         timerange.earliestMs,
@@ -145,7 +131,7 @@ const loadExplorerDataProvider = (
             )
           : Promise.resolve({}),
     }).pipe(
-      switchMap(({ overallAnnotations, anomalyChartRecords, influencers, annotationsData }) =>
+      switchMap(({ anomalyChartRecords, influencers }) =>
         forkJoin({
           filteredTopInfluencers:
             (selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) &&
@@ -166,8 +152,6 @@ const loadExplorerDataProvider = (
         }).pipe(
           map(({ filteredTopInfluencers }) => {
             return {
-              overallAnnotations,
-              annotations: annotationsData,
               influencers: filteredTopInfluencers as any,
               loading: false,
               anomalyChartsDataLoading: false,

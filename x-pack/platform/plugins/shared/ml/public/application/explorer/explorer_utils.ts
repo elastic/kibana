@@ -366,61 +366,6 @@ export function getSelectionJobIds(
   return selectedJobs.map((d) => d.id);
 }
 
-export function loadOverallAnnotations(
-  mlApi: MlApi,
-  selectedJobs: ExplorerJob[],
-  bounds: TimeRangeBounds
-): Promise<AnnotationsTable> {
-  const jobIds = selectedJobs.map((d) => d.id);
-  const timeRange = getSelectionTimeRange(undefined, bounds);
-
-  return new Promise((resolve) => {
-    lastValueFrom(
-      mlApi.annotations.getAnnotations$({
-        jobIds,
-        earliestMs: timeRange.earliestMs,
-        latestMs: timeRange.latestMs,
-        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-      })
-    )
-      .then((resp) => {
-        if (resp.error !== undefined || resp.annotations === undefined) {
-          const errorMessage = extractErrorMessage(resp.error);
-          return resolve({
-            annotationsData: [],
-            error: errorMessage !== '' ? errorMessage : undefined,
-          });
-        }
-
-        const annotationsData: Annotations = [];
-        jobIds.forEach((jobId) => {
-          const jobAnnotations = resp.annotations[jobId];
-          if (jobAnnotations !== undefined) {
-            annotationsData.push(...jobAnnotations);
-          }
-        });
-
-        return resolve({
-          annotationsData: annotationsData
-            .sort((a, b) => {
-              return a.timestamp - b.timestamp;
-            })
-            .map((d, i) => {
-              d.key = (i + 1).toString();
-              return d;
-            }),
-        });
-      })
-      .catch((resp) => {
-        const errorMessage = extractErrorMessage(resp);
-        return resolve({
-          annotationsData: [],
-          error: errorMessage !== '' ? errorMessage : undefined,
-        });
-      });
-  });
-}
-
 export function loadAnnotationsTableData(
   mlApi: MlApi,
   selectedCells: AppStateSelectedCells | undefined | null,

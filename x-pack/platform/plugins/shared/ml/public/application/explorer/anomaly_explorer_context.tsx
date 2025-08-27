@@ -22,6 +22,7 @@ import { AnomalyDetectionAlertsStateService } from './alerts';
 import { useMlJobService } from '../services/job_service';
 import { useTableInterval } from '../components/controls/select_interval';
 import { AnomalyTableStateService } from './anomaly_table_state_service';
+import { AnnotationsStateService } from './annotations_state_service';
 
 export interface AnomalyExplorerContextValue {
   anomalyExplorerChartsService: AnomalyExplorerChartsService;
@@ -31,6 +32,7 @@ export interface AnomalyExplorerContextValue {
   chartsStateService: AnomalyChartsStateService;
   anomalyDetectionAlertsStateService: AnomalyDetectionAlertsStateService;
   anomalyTableService: AnomalyTableStateService;
+  annotationsStateService: AnnotationsStateService;
 }
 
 /**
@@ -137,6 +139,13 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       tableIntervalUrlStateService
     );
 
+    const annotationsStateService = new AnnotationsStateService(
+      mlApi,
+      timefilter,
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService
+    );
+
     setAnomalyExplorerContextValue({
       anomalyExplorerChartsService,
       anomalyExplorerCommonStateService,
@@ -145,6 +154,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       chartsStateService,
       anomalyDetectionAlertsStateService,
       anomalyTableService,
+      annotationsStateService,
     });
 
     return () => {
@@ -155,6 +165,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       chartsStateService.destroy();
       anomalyDetectionAlertsStateService.destroy();
       anomalyTableService.destroy();
+      annotationsStateService.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
