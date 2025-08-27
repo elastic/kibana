@@ -54,13 +54,13 @@ export function getQueryForFields(queryString: string, root: ESQLAstQueryExpress
        * Original query: FROM lolz | EVAL foo = 1, bar = foo + 1, baz = bar + 1, /
        * Simplified:     FROM lolz | EVAL foo = 1 | EVAL bar = foo + 1 | EVAL baz = bar + 1
        */
-      const individualEVALCommands: ESQLCommand[] = [];
+      const individualEvalCommands: ESQLCommand[] = [];
       for (const expression of lastCommand.args) {
-        individualEVALCommands.push(Builder.command({ name: 'eval', args: [expression] }));
+        individualEvalCommands.push(Builder.command({ name: 'eval', args: [expression] }));
       }
       const newCommands = commands
         .slice(0, -1)
-        .concat(endsWithComma ? individualEVALCommands : individualEVALCommands.slice(0, -1));
+        .concat(endsWithComma ? individualEvalCommands : individualEvalCommands.slice(0, -1));
       return BasicPrettyPrinter.print({ ...root, commands: newCommands });
     }
   }
