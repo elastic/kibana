@@ -69,9 +69,11 @@ export const getStorageStats = () => {
 
   return {
     queryCount: queries.length,
-    storageSizeKB: storageSizeKB.toFixed(2),
+    storageSizeKB: parseFloat(storageSizeKB.toFixed(2)),
     maxStorageLimitKB: MAX_STORAGE_SIZE_KB,
-    storageUsagePercent: Math.round((storageSizeKB / MAX_STORAGE_SIZE_KB) * 10000) / 100, // Round to 2 decimals
+    storageUsagePercent: parseFloat(
+      Math.round((storageSizeKB / MAX_STORAGE_SIZE_KB) * 100).toFixed(2)
+    ), // Round to 2 decimals
   };
 };
 
