@@ -5,29 +5,29 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
+import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
+import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { invalidOriginError } from './add_monitor';
 import {
   InvalidLocationError,
   InvalidScheduleError,
 } from '../../synthetics_service/project_monitor/normalizers/common_fields';
-import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
+import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
+import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './project_monitor/add_monitor_project';
-import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import { mergeSourceMonitor } from './formatters/saved_object_to_monitor';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import {
+import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+import type {
   MonitorFields,
   EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitorWithSecretsAttributes,
   SyntheticsMonitor,
-  ConfigKey,
   MonitorLocations,
 } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { MonitorValidationError, normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
@@ -35,7 +35,7 @@ import {
   sendTelemetryEvents,
   formatTelemetryUpdateEvent,
 } from '../telemetry/monitor_upgrade_sender';
-import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
+import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 
 // Simplify return promise type and type it with runtime_types
@@ -59,7 +59,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     },
   },
   handler: async (routeContext): Promise<any> => {
-    const { request, response, spaceId, server } = routeContext;
+    const { request, response, spaceId, server, monitorConfigRepository } = routeContext;
     const { logger } = server;
     const monitor = request.body as SyntheticsMonitor;
     const reqQuery = request.query as { internal?: boolean };
@@ -90,8 +90,9 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       /* Decrypting the previous monitor before editing ensures that all existing fields remain
        * on the object, even in flows where decryption does not take place, such as the enabled tab
        * on the monitor list table. We do not decrypt monitors in bulk for the monitor list table */
-      const previousMonitor = await getDecryptedMonitor(server, monitorId, spaceId);
-      const normalizedPreviousMonitor = normalizeSecrets(previousMonitor).attributes;
+      const { decryptedMonitor: decryptedMonitorPrevMonitor, normalizedMonitor: previousMonitor } =
+        await monitorConfigRepository.getDecrypted(monitorId, spaceId);
+      const normalizedPreviousMonitor = previousMonitor.attributes;
 
       if (normalizedPreviousMonitor.origin !== 'ui' && !reqQuery.internal) {
         return response.badRequest(getInvalidOriginError(monitor));
@@ -122,7 +123,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         previousMonitor.attributes.locations
       );
 
-      const validationResult = validateMonitor(editedMonitor as MonitorFields);
+      const validationResult = validateMonitor(editedMonitor as MonitorFields, spaceId);
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details, payload } = validationResult;
@@ -153,7 +154,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         editedMonitor: editedMonitorSavedObject,
       } = await syncEditedMonitor({
         routeContext,
-        decryptedPreviousMonitor: previousMonitor,
+        decryptedPreviousMonitor: decryptedMonitorPrevMonitor,
         normalizedMonitor: monitorWithRevision,
         spaceId,
       });
@@ -162,7 +163,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         await rollbackUpdate({
           routeContext,
           configId: monitorId,
-          attributes: previousMonitor.attributes,
+          attributes: decryptedMonitorPrevMonitor.attributes,
         });
         throw hasError?.error;
       }
@@ -219,7 +220,11 @@ const rollbackUpdate = async ({
 }) => {
   const { savedObjectsClient, server } = routeContext;
   try {
-    await savedObjectsClient.update<MonitorFields>(syntheticsMonitorType, configId, attributes);
+    await savedObjectsClient.update<MonitorFields>(
+      syntheticsMonitorSavedObjectType,
+      configId,
+      attributes
+    );
   } catch (error) {
     server.logger.error(
       `Unable to rollback edit for Synthetics monitor with id ${configId}, Error: ${error.message}`,
@@ -241,20 +246,22 @@ export const syncEditedMonitor = async ({
   routeContext: RouteContext;
   spaceId: string;
 }) => {
-  const { server, savedObjectsClient, syntheticsMonitorClient } = routeContext;
+  const { server, savedObjectsClient, syntheticsMonitorClient, monitorConfigRepository } =
+    routeContext;
   try {
     const monitorWithId = {
       ...normalizedMonitor,
       [ConfigKey.MONITOR_QUERY_ID]:
         normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
       [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
+      [ConfigKey.KIBANA_SPACES]:
+        normalizedMonitor[ConfigKey.KIBANA_SPACES] || decryptedPreviousMonitor.namespaces,
     };
     const formattedMonitor = formatSecrets(monitorWithId);
-
-    const editedSOPromise = savedObjectsClient.update<MonitorFields>(
-      syntheticsMonitorType,
+    const editedSOPromise = monitorConfigRepository.update(
       decryptedPreviousMonitor.id,
-      formattedMonitor
+      formattedMonitor,
+      decryptedPreviousMonitor
     );
 
     const allPrivateLocations = await getPrivateLocations(savedObjectsClient);

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Component, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 
 import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
@@ -15,6 +16,7 @@ import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 import { css } from '@emotion/react';
 
+import type { WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButton,
@@ -25,11 +27,11 @@ import {
   EuiSpacer,
   EuiText,
   withEuiTheme,
-  WithEuiThemeProps,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { BaseParams } from '@kbn/reporting-common/types';
 
@@ -140,7 +142,10 @@ class ReportingPanelContentUi extends Component<Props, State, WithEuiThemeProps>
       return <ErrorUrlTooLongPanel isUnsaved={false} />;
     }
     return (
-      <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
+      <EuiCopy
+        textToCopy={this.state.absoluteUrl}
+        tooltipProps={{ anchorClassName: 'eui-displayBlock' }}
+      >
         {(copy) => (
           <EuiButton
             color={isUnsaved ? 'warning' : 'primary'}

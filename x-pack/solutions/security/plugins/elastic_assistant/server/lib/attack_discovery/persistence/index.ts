@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import {
   type AttackDiscoveryAlert,
   type AttackDiscoveryCreateProps,
@@ -16,14 +17,13 @@ import {
   type GetAttackDiscoveryGenerationsResponse,
   type PostAttackDiscoveryGenerationsDismissResponse,
 } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import type { Logger } from '@kbn/core/server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
-import {
-  AIAssistantDataClient,
-  AIAssistantDataClientParams,
-} from '../../../ai_assistant_data_clients';
+import type { AIAssistantDataClientParams } from '../../../ai_assistant_data_clients';
+import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
+import { findDocuments } from '../../../ai_assistant_data_clients/find';
 import { findAllAttackDiscoveries } from './find_all_attack_discoveries/find_all_attack_discoveries';
 import { combineFindAttackDiscoveryFilters } from './combine_find_attack_discovery_filters';
 import { findAttackDiscoveryByConnectorId } from './find_attack_discovery_by_connector_id/find_attack_discovery_by_connector_id';
@@ -36,7 +36,7 @@ import { getAttackDiscoveryGenerationByIdQuery } from './get_attack_discovery_ge
 import { getAttackDiscoveryGenerationsQuery } from './get_attack_discovery_generations_query';
 import { getCombinedFilter } from './get_combined_filter';
 import { getFindAttackDiscoveryAlertsAggregation } from './get_find_attack_discovery_alerts_aggregation';
-import { AttackDiscoveryAlertDocument } from '../schedules/types';
+import type { AttackDiscoveryAlertDocument } from '../schedules/types';
 import { transformSearchResponseToAlerts } from './transforms/transform_search_response_to_alerts';
 import { getScheduledIndexPattern } from './get_scheduled_index_pattern';
 import { getUpdateAttackDiscoveryAlertsQuery } from '../get_update_attack_discovery_alerts_query';
@@ -145,6 +145,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     alertIds,
     authenticatedUser,
     end,
+    esClient,
     ids,
     index,
     logger,
@@ -157,6 +158,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     alertIds: string[] | undefined;
     authenticatedUser: AuthenticatedUser;
     end: string | undefined;
+    esClient: ElasticsearchClient;
     ids: string[] | undefined;
     index: string;
     logger: Logger;
@@ -182,14 +184,16 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       filter: connectorsAggsFilter,
     });
 
-    const aggsResult = await this.findDocuments<AttackDiscoveryAlertDocument>({
+    const aggsResult = await findDocuments<AttackDiscoveryAlertDocument>({
       aggs,
+      esClient,
       filter: combinedConnectorsAggsFilter,
       index,
+      logger,
       page,
       perPage,
       sortField,
-      sortOrder,
+      sortOrder: sortOrder as estypes.SortOrder,
     });
 
     const { connectorNames } = transformSearchResponseToAlerts({
@@ -202,18 +206,20 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
 
   public findAttackDiscoveryAlerts = async ({
     authenticatedUser,
+    esClient,
     findAttackDiscoveryAlertsParams,
     logger,
   }: {
     authenticatedUser: AuthenticatedUser;
+    esClient: ElasticsearchClient;
     findAttackDiscoveryAlertsParams: FindAttackDiscoveryAlertsParams;
     logger: Logger;
   }): Promise<AttackDiscoveryFindResponse> => {
-    const aggs = getFindAttackDiscoveryAlertsAggregation();
     const {
       alertIds,
       connectorNames, // <-- as a filter input
       end,
+      includeUniqueAlertIds,
       ids,
       search,
       shared,
@@ -224,6 +230,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       page = FIRST_PAGE,
       perPage = DEFAULT_PER_PAGE,
     } = findAttackDiscoveryAlertsParams;
+    const aggs = getFindAttackDiscoveryAlertsAggregation(includeUniqueAlertIds);
 
     const index = this.getScheduledAndAdHocIndexPattern();
 
@@ -243,25 +250,29 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       shared,
     });
 
-    const result = await this.findDocuments<AttackDiscoveryAlertDocument>({
+    const result = await findDocuments<AttackDiscoveryAlertDocument>({
       aggs,
+      esClient,
       filter: combinedFilter,
       index,
+      logger,
       page,
       perPage,
       sortField,
-      sortOrder,
+      sortOrder: sortOrder as estypes.SortOrder,
     });
 
-    const { data, uniqueAlertIdsCount } = transformSearchResponseToAlerts({
+    const { data, uniqueAlertIdsCount, uniqueAlertIds } = transformSearchResponseToAlerts({
       logger,
       response: result.data,
+      includeUniqueAlertIds,
     });
 
     const alertConnectorNames = await this.getAlertConnectorNames({
       alertIds,
       authenticatedUser,
       end,
+      esClient,
       ids,
       index,
       logger,
@@ -279,6 +290,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       per_page: result.perPage,
       total: result.total,
       unique_alert_ids_count: uniqueAlertIdsCount,
+      ...(includeUniqueAlertIds ? { unique_alert_ids: uniqueAlertIds } : {}),
     };
   };
 
@@ -334,20 +346,20 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
 
   public bulkUpdateAttackDiscoveryAlerts = async ({
     authenticatedUser,
+    esClient,
     ids,
     kibanaAlertWorkflowStatus,
     logger,
     visibility,
   }: {
     authenticatedUser: AuthenticatedUser;
+    esClient: ElasticsearchClient;
     ids: string[];
     kibanaAlertWorkflowStatus?: 'acknowledged' | 'closed' | 'open';
     logger: Logger;
     visibility?: 'not_shared' | 'shared';
   }): Promise<AttackDiscoveryAlert[]> => {
     const PER_PAGE = 1000;
-
-    const esClient = await this.options.elasticsearchClientPromise;
 
     const indexPattern = this.getScheduledAndAdHocIndexPattern();
 
@@ -403,6 +415,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
 
       const alertsResult = await this.findAttackDiscoveryAlerts({
         authenticatedUser,
+        esClient,
         findAttackDiscoveryAlertsParams: {
           ids,
           page: FIRST_PAGE,

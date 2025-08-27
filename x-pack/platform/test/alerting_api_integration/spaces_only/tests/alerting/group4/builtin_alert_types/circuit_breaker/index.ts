@@ -6,10 +6,15 @@
  */
 
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { buildUp, tearDown } from '../../../../helpers';
 
-// eslint-disable-next-line import/no-default-export
-export default function alertingCircuitBreakerTests({ loadTestFile }: FtrProviderContext) {
+export default function alertingCircuitBreakerTests({
+  loadTestFile,
+  getService,
+}: FtrProviderContext) {
   describe('circuit_breakers', () => {
+    before(async () => await buildUp(getService));
+    after(async () => await tearDown(getService));
     /**
      * This tests the expected behavior for a rule type that hits the alert limit in a single execution.
      */

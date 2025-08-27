@@ -9,6 +9,8 @@
 
 import { BehaviorSubject, Subject } from 'rxjs';
 
+export const highlightAnimationDuration = 2000;
+
 export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefined>) {
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -51,7 +53,7 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
           // Removes the class after the highlight animation finishes
           setTimeout(() => {
             panelRef.classList.remove('dshDashboardGrid__item--highlighted');
-          }, 5000);
+          }, highlightAnimationDuration);
         });
       }
       highlightPanelId$.next(undefined);

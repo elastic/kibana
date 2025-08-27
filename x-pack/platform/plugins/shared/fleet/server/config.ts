@@ -50,9 +50,11 @@ export const config: PluginConfigDescriptor = {
       fleetServerStandalone: true,
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
+      excludeDataStreamTypes: true,
     },
     integrationsHomeOverride: true,
     prereleaseEnabledByDefault: true,
+    hideDashboards: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -170,6 +172,12 @@ export const config: PluginConfigDescriptor = {
               ),
             })
           ),
+          deploymentSecrets: schema.maybe(
+            schema.object({
+              fleetAppToken: schema.maybe(schema.string()),
+              elasticsearchAppToken: schema.maybe(schema.string()),
+            })
+          ),
           customIntegrations: schema.maybe(
             schema.object({
               enabled: schema.maybe(schema.boolean({ defaultValue: false })),
@@ -269,6 +277,9 @@ export const config: PluginConfigDescriptor = {
               ]),
               { defaultValue: [] }
             ),
+            searchAiLakePackageAllowlistEnabled: schema.maybe(
+              schema.boolean({ defaultValue: false })
+            ),
           },
           {
             defaultValue: {
@@ -282,6 +293,9 @@ export const config: PluginConfigDescriptor = {
             },
           }
         ),
+        excludeDataStreamTypes: schema.arrayOf(schema.string(), {
+          defaultValue: () => [],
+        }),
       }),
       enabled: schema.boolean({ defaultValue: true }),
       /**
@@ -309,8 +323,24 @@ export const config: PluginConfigDescriptor = {
           retryDelays: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),
+      syncIntegrations: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      agentStatusChange: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      autoInstallContentPackages: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
       integrationsHomeOverride: schema.maybe(schema.string()),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
+      hideDashboards: schema.boolean({ defaultValue: false }),
     },
     {
       validate: (configToValidate) => {

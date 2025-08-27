@@ -8,20 +8,19 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import {
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { debounce } from 'lodash';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { dashboardServiceProvider, type DashboardItem } from '../common/services/dashboard_service';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
-import { ALERT_LINK_DASHBOARDS_TITLE, ALERT_LINK_DASHBOARDS_PLACEHOLDER } from '../translations';
+import {
+  ALERT_LINK_DASHBOARDS_TITLE,
+  ALERT_LINK_DASHBOARDS_PLACEHOLDER,
+  ALERT_LINK_DASHBOARDS_LABEL_TOOLTIP_CONTENT,
+} from '../translations';
+import { LabelWithTooltip } from './label_with_tooltip';
 
 export interface Props {
   contentManagement: ContentManagementPublicStart;
@@ -167,7 +166,12 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            label={ALERT_LINK_DASHBOARDS_TITLE}
+            label={
+              <LabelWithTooltip
+                labelContent={ALERT_LINK_DASHBOARDS_TITLE}
+                tooltipContent={ALERT_LINK_DASHBOARDS_LABEL_TOOLTIP_CONTENT}
+              />
+            }
             fullWidth
             labelAppend={OptionalFieldLabel}
           >

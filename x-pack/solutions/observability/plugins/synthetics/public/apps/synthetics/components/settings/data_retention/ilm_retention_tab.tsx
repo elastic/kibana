@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTable, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { PolicyLink, PolicyNameLabel } from '../policy_link';
 import { useGetIlmPolicies } from '../hooks/use_get_ilm_policies';
 import { Unprivileged } from './unprivileged';
@@ -49,7 +49,7 @@ export const IlmRetentionTab = () => {
 
   return (
     <div>
-      <EuiCallOut title={CALLOUT_TITLE} iconType="iInCircle">
+      <EuiCallOut title={CALLOUT_TITLE} iconType="info">
         <p>
           <FormattedMessage
             id="xpack.synthetics.settingsRoute.retentionCalloutDescription"

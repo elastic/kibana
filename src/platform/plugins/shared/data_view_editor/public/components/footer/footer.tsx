@@ -76,7 +76,7 @@ export const Footer = ({
   };
 
   return (
-    <EuiFlyoutFooter className="indexPatternEditor__footer">
+    <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -90,7 +90,7 @@ export const Footer = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center" wrap>
             {allowAdHoc && (
               <EuiFlexItem grow={false}>
                 <EuiButton

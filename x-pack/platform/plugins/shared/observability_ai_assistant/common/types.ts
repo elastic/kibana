@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import type { ToolSchema } from '@kbn/inference-common';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantChatService } from '../public';
@@ -29,31 +29,56 @@ export interface PendingMessage {
   aborted?: boolean;
   error?: any;
 }
-export interface DetectedEntity {
-  entity: string;
-  class_name: string;
-  start_pos: number;
-  end_pos: number;
-  hash: string;
-  type: 'ner' | 'regex';
+
+export interface Deanonymization {
+  start: number;
+  end: number;
+  entity: {
+    class_name: string;
+    value: string;
+    mask: string;
+  };
 }
 
-export type DetectedEntityType = DetectedEntity['type'];
-export interface Unredaction {
-  entity: string;
-  class_name: string;
-  start_pos: number;
-  end_pos: number;
-  type: 'ner' | 'regex';
+export interface DeanonymizationItem {
+  message: {
+    role: MessageRole;
+    content?: string;
+    toolCalls?: Array<{
+      function: {
+        name: string;
+        arguments: Record<string, any> | {};
+      };
+    }>;
+    name?: string;
+    response?: Record<string, any>;
+    toolCallId?: string;
+  };
+  deanonymizations: Deanonymization[];
 }
 
-export type UnredactionType = Unredaction['type'];
+export type DeanonymizationInput = DeanonymizationItem[];
+
+export interface DeanonymizationOutput {
+  message: {
+    content?: string;
+    toolCalls?: Array<{
+      toolCallId: string;
+      function: {
+        name: string;
+        arguments: Record<string, any>;
+      };
+    }>;
+    role: MessageRole;
+  };
+  deanonymizations: Deanonymization[];
+}
 
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
-    unredactions?: Unredaction[];
+    deanonymizations?: Deanonymization[];
     name?: string;
     role: MessageRole;
     function_call?: {
@@ -123,7 +148,7 @@ export enum KnowledgeBaseType {
   Contextual = 'contextual',
 }
 
-export enum KnowledgeBaseState {
+export enum InferenceModelState {
   NOT_INSTALLED = 'NOT_INSTALLED',
   MODEL_PENDING_DEPLOYMENT = 'MODEL_PENDING_DEPLOYMENT',
   DEPLOYING_MODEL = 'DEPLOYING_MODEL',
@@ -179,20 +204,4 @@ export interface ObservabilityAIAssistantScreenContext {
 export enum ConversationAccess {
   SHARED = 'shared',
   PRIVATE = 'private',
-}
-
-export interface InferenceChunk {
-  chunkText: string;
-  charStartOffset: number;
-}
-
-export interface AnonymizationRule {
-  id: string;
-  entityClass: string;
-  type: 'regex' | 'ner';
-  pattern?: string;
-  enabled: boolean;
-  builtIn: boolean;
-  description?: string;
-  normalize?: boolean;
 }

@@ -73,7 +73,6 @@ describe('SOR - bulk_update API', () => {
       management: {
         importableAndExportable: true,
       },
-      switchToModelVersionAt: '8.10.0',
       modelVersions: versionMap,
     };
   };
@@ -117,7 +116,6 @@ describe('SOR - bulk_update API', () => {
       management: {
         importableAndExportable: true,
       },
-      switchToModelVersionAt: '8.10.0',
       modelVersions: versionOtherMap,
     };
   };
@@ -134,7 +132,6 @@ describe('SOR - bulk_update API', () => {
       management: {
         importableAndExportable: true,
       },
-      switchToModelVersionAt: '8.10.0',
       modelVersions: {},
     };
   };

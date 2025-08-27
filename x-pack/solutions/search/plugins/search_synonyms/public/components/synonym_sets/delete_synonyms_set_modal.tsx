@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 
-import { EuiCodeBlock, EuiConfirmModal } from '@elastic/eui';
+import { EuiCodeBlock, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDeleteSynonymsSet } from '../../hooks/use_delete_synonyms_set';
 
@@ -20,6 +20,7 @@ export const DeleteSynonymsSetModal = ({
   closeDeleteModal,
   synonymsSetId,
 }: DeleteSynonymsSetModalProps) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const onSuccess = () => {
@@ -38,9 +39,11 @@ export const DeleteSynonymsSetModal = ({
   };
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
       title={i18n.translate('xpack.searchSynonyms.deleteSynonymsSetModal.title', {
         defaultMessage: 'Delete synonyms set',
       })}
+      titleProps={{ id: confirmModalTitleId }}
       onCancel={closeDeleteModal}
       onConfirm={deleteOperation}
       cancelButtonText={i18n.translate('xpack.searchSynonyms.deleteSynonymsSetModal.cancelButton', {

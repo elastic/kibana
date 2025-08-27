@@ -6,8 +6,8 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { RuleMigrationResourceType } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SiemMigrationRetryFilter } from '../../../../../../common/siem_migrations/constants';
+import type { SiemMigrationResourceType } from '../../../../../../common/siem_migrations/model/common.gen';
 
 export enum SiemMigrationsEventTypes {
   /**
@@ -19,6 +19,10 @@ export enum SiemMigrationsEventTypes {
    * When Rule Resources are uploaded
    */
   SetupMigrationCreated = 'siem_migrations_setup_rules_migration_created',
+  /**
+   * When a rules migration is deleted
+   */
+  SetupMigrationDeleted = 'siem_migrations_setup_rules_migration_deleted',
   /**
    * When new rules are uploaded to create a new migration
    */
@@ -43,6 +47,10 @@ export enum SiemMigrationsEventTypes {
    * When the translation of rules is started
    */
   StartMigration = 'siem_migrations_start_rules_migration',
+  /**
+   * When the translation of rules is stopped
+   */
+  StopMigration = 'siem_migrations_stop_rules_migration',
   /**
    * When a translated rule is updated
    */
@@ -88,6 +96,10 @@ export interface ReportSetupMigrationCreatedActionParams extends BaseResultActio
   migrationId?: string;
   rulesCount: number;
 }
+export interface ReportSetupMigrationDeletedActionParams extends BaseResultActionParams {
+  eventName: string;
+  migrationId: string;
+}
 export interface ReportSetupMacrosQueryCopiedActionParams {
   eventName: string;
   migrationId: string;
@@ -99,7 +111,7 @@ export interface ReportSetupLookupNameCopiedActionParams {
 export interface ReportSetupResourcesUploadedActionParams extends BaseResultActionParams {
   eventName: string;
   migrationId: string;
-  type: RuleMigrationResourceType;
+  type: SiemMigrationResourceType;
   count: number;
 }
 
@@ -107,8 +119,14 @@ export interface ReportStartMigrationActionParams extends BaseResultActionParams
   eventName: string;
   migrationId: string;
   connectorId: string;
+  skipPrebuiltRulesMatching: boolean;
   isRetry: boolean;
   retryFilter?: SiemMigrationRetryFilter;
+}
+
+export interface ReportStopMigrationActionParams extends BaseResultActionParams {
+  eventName: string;
+  migrationId: string;
 }
 
 // Translated rule actions
@@ -144,10 +162,12 @@ export interface SiemMigrationsTelemetryEventsMap {
   [SiemMigrationsEventTypes.SetupMigrationOpenResources]: ReportSetupMigrationOpenResourcesActionParams;
   [SiemMigrationsEventTypes.SetupRulesQueryCopied]: ReportSetupRulesQueryCopiedActionParams;
   [SiemMigrationsEventTypes.SetupMigrationCreated]: ReportSetupMigrationCreatedActionParams;
+  [SiemMigrationsEventTypes.SetupMigrationDeleted]: ReportSetupMigrationDeletedActionParams;
   [SiemMigrationsEventTypes.SetupMacrosQueryCopied]: ReportSetupMacrosQueryCopiedActionParams;
   [SiemMigrationsEventTypes.SetupLookupNameCopied]: ReportSetupLookupNameCopiedActionParams;
   [SiemMigrationsEventTypes.SetupResourcesUploaded]: ReportSetupResourcesUploadedActionParams;
   [SiemMigrationsEventTypes.StartMigration]: ReportStartMigrationActionParams;
+  [SiemMigrationsEventTypes.StopMigration]: ReportStopMigrationActionParams;
   [SiemMigrationsEventTypes.TranslatedRuleUpdate]: ReportTranslatedRuleUpdateActionParams;
   [SiemMigrationsEventTypes.TranslatedRuleInstall]: ReportTranslatedRuleInstallActionParams;
   [SiemMigrationsEventTypes.TranslatedRuleBulkInstall]: ReportTranslatedRuleBulkInstallActionParams;

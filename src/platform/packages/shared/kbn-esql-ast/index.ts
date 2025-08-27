@@ -11,12 +11,11 @@ export type {
   ESQLAst,
   ESQLAstItem,
   ESQLAstCommand,
-  ESQLAstTimeseriesCommand,
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLFunction,
-  ESQLTimeInterval,
+  ESQLTimeSpanLiteral,
   ESQLLocation,
   ESQLMessage,
   ESQLSingleAstItem,
@@ -28,39 +27,29 @@ export type {
   EditorError,
   ESQLAstNode,
   ESQLInlineCast,
-  ESQLAstRenameExpression,
   ESQLAstBaseItem,
   ESQLAstChangePointCommand,
 } from './src/types';
 
-export {
-  isColumn,
-  isDoubleLiteral,
-  isFunctionExpression,
-  isBinaryExpression,
-  isWhereExpression,
-  isFieldExpression,
-  isSource,
-  isIdentifier,
-  isIntegerLiteral,
-  isLiteral,
-  isParamLiteral,
-  isProperNode,
-} from './src/ast/helpers';
+export * from './src/ast/is';
 
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
 export {
   createParser,
   parse,
+  Parser,
   parseErrors,
   type ParseOptions,
   type ParseResult,
   ESQLErrorListener,
+  TIME_SPAN_UNITS,
 } from './src/parser';
 
 export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
+
 export * as synth from './src/synth';
+export { qry, cmd, exp } from './src/synth';
 
 export {
   LeafPrinter,
@@ -76,3 +65,12 @@ export { EsqlQuery } from './src/query';
 export * as mutate from './src/mutate';
 
 export { singleItems, resolveItem, lastItem, firstItem } from './src/visitor/utils';
+
+export { esqlCommandRegistry } from './src/commands_registry';
+
+export * from './src/commands_registry/complete_items';
+export * from './src/commands_registry/constants';
+export * from './src/definitions/constants';
+export * from './src/definitions/types';
+export { METADATA_FIELDS } from './src/commands_registry/options/metadata';
+export { TIME_SYSTEM_PARAMS } from './src/definitions/utils/literals';

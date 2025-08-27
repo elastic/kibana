@@ -9,43 +9,39 @@
 
 import React from 'react';
 import moment from 'moment';
-import EventEmitter from 'events';
+import type EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadgeProps, EuiCallOut } from '@elastic/eui';
+import type { EuiBetaBadgeProps } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { parse } from 'query-string';
 
-import { Capabilities } from '@kbn/core/public';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import {
-  showSaveModal,
-  SavedObjectSaveModalOrigin,
-  SavedObjectSaveOpts,
-  OnSaveProps,
-} from '@kbn/saved-objects-plugin/public';
+import type { Capabilities } from '@kbn/core/public';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import type { SavedObjectSaveOpts, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { showSaveModal, SavedObjectSaveModalOrigin } from '@kbn/saved-objects-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 import { saveVisualization } from '../../utils/saved_visualize_utils';
 import { VISUALIZE_EMBEDDABLE_TYPE, getFullPath } from '../..';
 
-import {
+import type {
   VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
-import { VisualizeLocatorParams } from '../../../common/locator';
+import type { VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
-import './visualize_navigation.scss';
 import { serializeReferences } from '../../utils/saved_visualization_references';
 import { serializeState } from '../../embeddable/state';
 
@@ -594,15 +590,6 @@ export const getTopNavConfig = (
                   savedVis.tags = selectedTags;
                 }
 
-                const saveOptions = {
-                  confirmOverwrite: false,
-                  isTitleDuplicateConfirmed,
-                  onTitleDuplicate,
-                  returnToOrigin,
-                  dashboardId: !!dashboardId ? dashboardId : undefined,
-                  copyOnSave: newCopyOnSave,
-                };
-
                 // If we're adding to a dashboard and not saving to library,
                 // we'll want to use a by-value operation
                 if (dashboardId && !addToLibrary) {
@@ -634,7 +621,14 @@ export const getTopNavConfig = (
 
                 // We're adding the viz to a library so we need to save it and then
                 // add to a dashboard if necessary
-                const response = await doSave(saveOptions);
+                const response = await doSave({
+                  confirmOverwrite: false,
+                  isTitleDuplicateConfirmed,
+                  onTitleDuplicate,
+                  returnToOrigin,
+                  dashboardId: !!dashboardId ? dashboardId : undefined,
+                  copyOnSave: newCopyOnSave,
+                });
                 // If the save wasn't successful, put the original values back.
                 if (!response.id || response.error) {
                   savedVis.title = currentTitle;

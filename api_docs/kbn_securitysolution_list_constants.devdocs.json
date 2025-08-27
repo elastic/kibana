@@ -75,19 +75,19 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/blocklist/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/blocklist/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/blocklist/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/blocklist/constants.ts"
           },
           {
             "plugin": "securitySolution",
@@ -188,6 +188,14 @@
         "references": [
           {
             "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/event_filters/constants.ts"
           },
           {
@@ -236,14 +244,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/event_filters/index.ts"
           },
           {
@@ -257,6 +257,54 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           }
         ],
         "initialIsOpen": false
@@ -349,19 +397,19 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/host_isolation_exceptions_validator.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/host_isolation_exceptions_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
           },
           {
             "plugin": "lists",
@@ -535,14 +583,6 @@
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
-          },
-          {
             "plugin": "lists",
             "path": "x-pack/solutions/security/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
           },
@@ -610,12 +650,12 @@
             "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/migrations.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
           },
           {
             "plugin": "securitySolution",
@@ -624,14 +664,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/solutions/security/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/solutions/security/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
           },
           {
             "plugin": "lists",
@@ -704,6 +736,30 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/trusted_apps/index.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-security",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           }
         ],
         "initialIsOpen": false
@@ -731,14 +787,6 @@
           {
             "plugin": "lists",
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
           },
           {
             "plugin": "lists",
@@ -1014,7 +1062,7 @@
           "\nThe IDs of all Endpoint artifact lists"
         ],
         "signature": [
-          "readonly (\"endpoint_trusted_apps\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\" | \"endpoint_event_filters\")[]"
+          "readonly (\"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\" | \"endpoint_event_filters\")[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
@@ -1031,7 +1079,7 @@
           "\nList definitions for Endpoint Artifact"
         ],
         "signature": [
-          "{ readonly trustedApps: Readonly<{ readonly id: \"endpoint_trusted_apps\"; readonly name: \"Endpoint Security Trusted Apps List\"; readonly description: \"Endpoint Security Trusted Apps List\"; }>; readonly eventFilters: Readonly<{ readonly id: \"endpoint_event_filters\"; readonly name: \"Endpoint Security Event Filters List\"; readonly description: \"Endpoint Security Event Filters List\"; }>; readonly hostIsolationExceptions: Readonly<{ readonly id: \"endpoint_host_isolation_exceptions\"; readonly name: \"Endpoint Security Host isolation exceptions List\"; readonly description: \"Endpoint Security Host isolation exceptions List\"; }>; readonly blocklists: Readonly<{ readonly id: \"endpoint_blocklists\"; readonly name: \"Endpoint Security Blocklists List\"; readonly description: \"Endpoint Security Blocklists List\"; }>; }"
+          "{ readonly trustedApps: Readonly<{ readonly id: \"endpoint_trusted_apps\"; readonly name: \"Endpoint Security Trusted Apps List\"; readonly description: \"Endpoint Security Trusted Apps List\"; }>; readonly trustedDevices: Readonly<{ readonly id: \"endpoint_trusted_devices\"; readonly name: \"Endpoint Security Trusted Devices List\"; readonly description: \"Endpoint Security Trusted Devices List\"; }>; readonly eventFilters: Readonly<{ readonly id: \"endpoint_event_filters\"; readonly name: \"Endpoint Security Event Filters List\"; readonly description: \"Endpoint Security Event Filters List\"; }>; readonly hostIsolationExceptions: Readonly<{ readonly id: \"endpoint_host_isolation_exceptions\"; readonly name: \"Endpoint Security Host isolation exceptions List\"; readonly description: \"Endpoint Security Host isolation exceptions List\"; }>; readonly blocklists: Readonly<{ readonly id: \"endpoint_blocklists\"; readonly name: \"Endpoint Security Blocklists List\"; readonly description: \"Endpoint Security Blocklists List\"; }>; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,

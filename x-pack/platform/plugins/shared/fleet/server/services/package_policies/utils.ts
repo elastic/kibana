@@ -38,7 +38,11 @@ export const mapPackagePolicySavedObjectToPackagePolicy = ({
   attributes,
   namespaces,
 }: SavedObject<PackagePolicySOAttributes>): PackagePolicy => {
-  const { bump_agent_policy_revision: bumpAgentPolicyRevision, ...restAttributes } = attributes;
+  const {
+    bump_agent_policy_revision: bumpAgentPolicyRevision,
+    latest_revision: latestRevision,
+    ...restAttributes
+  } = attributes;
   return {
     id,
     version,
@@ -124,7 +128,7 @@ export async function canUseOutputForIntegration(
   };
 }
 
-export function canDeployAsAgentlessOrThrow(
+export function canDeployCustomPackageAsAgentlessOrThrow(
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
 ) {

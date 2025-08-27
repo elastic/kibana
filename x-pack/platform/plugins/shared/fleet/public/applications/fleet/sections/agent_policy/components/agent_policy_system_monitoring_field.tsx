@@ -44,7 +44,7 @@ export const AgentPolicyFormSystemMonitoringCheckbox: React.FunctionComponent<Pr
                 />
               }
               position="right"
-              type="iInCircle"
+              type="info"
               color="subdued"
             />
           </>

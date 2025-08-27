@@ -16,7 +16,7 @@ export function RequestsViewCallout() {
       title={i18n.translate('xpack.maps.inspector.vectorTile.requestsView', {
         defaultMessage: `You're viewing vector tile search requests. To view requests submitted to the search API, set View to Requests.`,
       })}
-      iconType="iInCircle"
+      iconType="info"
     />
   );
 }

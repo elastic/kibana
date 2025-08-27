@@ -7,28 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import {
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type {
   Setup as InspectorSetup,
   Start as InspectorStartContract,
 } from '@kbn/inspector-plugin/public';
-import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { DatatableUtilitiesService } from '../common';
-import {
-  createFiltersFromMultiValueClickAction,
-  createFiltersFromRangeSelectAction,
-  createFiltersFromValueClickAction,
-} from './actions';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import type { DatatableUtilitiesService } from '../common';
 import type { ISearchSetup, ISearchStart } from './search';
-import { QuerySetup, QueryStart } from './query';
-import { DataViewsContract } from './data_views';
-import { NowProviderPublicContract } from './now_provider';
+import type { QuerySetup, QueryStart } from './query';
+import type { DataViewsContract } from './data_views';
+import type { NowProviderPublicContract } from './now_provider';
+import type {
+  MultiValueClickDataContext,
+  RangeSelectDataContext,
+  ValueClickDataContext,
+} from './actions/filters';
 
 export interface DataSetupDependencies {
   expressions: ExpressionsSetup;
@@ -60,9 +61,11 @@ export interface DataPublicPluginSetup {
  * utilities to generate filters from action context
  */
 export interface DataPublicPluginStartActions {
-  createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
-  createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;
-  createFiltersFromMultiValueClickAction: typeof createFiltersFromMultiValueClickAction;
+  createFiltersFromValueClickAction: (context: ValueClickDataContext) => Promise<Filter[]>;
+  createFiltersFromRangeSelectAction: (event: RangeSelectDataContext) => Promise<Filter[]>;
+  createFiltersFromMultiValueClickAction: (
+    context: MultiValueClickDataContext
+  ) => Promise<Filter[] | undefined>;
 }
 
 /**

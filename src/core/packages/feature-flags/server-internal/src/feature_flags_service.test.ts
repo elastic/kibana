@@ -14,7 +14,7 @@ import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { FeatureFlagsService } from '..';
-import { FeatureFlagsConfig } from './feature_flags_config';
+import type { FeatureFlagsConfig } from './feature_flags_config';
 
 describe('FeatureFlagsService Server', () => {
   let featureFlagsService: FeatureFlagsService;
@@ -318,6 +318,21 @@ describe('FeatureFlagsService Server', () => {
       'my-overridden-flag': true,
       'myPlugin.myOverriddenFlag': true,
       'myDestructuredObjPlugin.myOverriddenFlag': true,
+    });
+  });
+
+  describe('bootstrapping helpers', () => {
+    test('return empty initial feature flags if no getter registered', async () => {
+      const { getInitialFeatureFlags } = featureFlagsService.setup();
+      await expect(getInitialFeatureFlags()).resolves.toEqual({});
+    });
+
+    test('calls the getter when registered', async () => {
+      const { setInitialFeatureFlagsGetter, getInitialFeatureFlags } = featureFlagsService.setup();
+      const mockGetter = jest.fn().mockResolvedValue({ myFlag: true });
+      setInitialFeatureFlagsGetter(mockGetter);
+      await expect(getInitialFeatureFlags()).resolves.toEqual({ myFlag: true });
+      expect(mockGetter).toHaveBeenCalledTimes(1);
     });
   });
 });

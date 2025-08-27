@@ -24,6 +24,7 @@ const vCPURangeSchema = schema.object({
   min: schema.number(),
   max: schema.number(),
   static: schema.maybe(schema.number()),
+  maxThreads: schema.number(),
 });
 
 export const configSchema = schema.object({

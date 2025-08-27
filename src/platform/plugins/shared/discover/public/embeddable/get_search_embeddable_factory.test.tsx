@@ -255,8 +255,11 @@ describe('saved search embeddable', () => {
     });
 
     it('should resolve data source profile when fetching', async () => {
-      const scopedProfilesManager =
-        discoverServiceMock.profilesManager.createScopedProfilesManager();
+      const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager(
+        {
+          scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+        }
+      );
       const resolveDataSourceProfileSpy = jest.spyOn(
         scopedProfilesManager,
         'resolveDataSourceProfile'

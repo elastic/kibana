@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import type {
   BrowserUrlService,
   SharePluginSetup,
   SharePluginStart,
 } from '@kbn/share-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
@@ -31,7 +30,6 @@ import {
   TopNFunctionsLocatorDefinition,
   ServiceOverviewLocatorDefinition,
   TransactionDetailsByNameLocatorDefinition,
-  ServiceEntityLocatorDefinition,
   TransactionDetailsByTraceIdLocatorDefinition,
   type AssetDetailsFlyoutLocator,
   type AssetDetailsLocator,
@@ -43,24 +41,18 @@ import {
   type ServiceOverviewLocator,
   type TransactionDetailsByNameLocator,
   type MetricsExplorerLocator,
-  type ServiceEntityLocator,
   type TransactionDetailsByTraceIdLocator,
-  type EntitiesInventoryLocator,
-  EntitiesInventoryLocatorDefinition,
 } from '../common';
+import type { ObservabilitySharedBrowserConfig } from '../common/config';
 import { updateGlobalNavigation } from './services/update_global_navigation';
-import {
-  DependencyOverviewLocator,
-  DependencyOverviewLocatorDefinition,
-} from '../common/locators/apm/dependency_overview_locator';
+import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
+import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
 
 export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
-  cases: CasesPublicStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
 }
@@ -87,17 +79,17 @@ interface ObservabilitySharedLocators {
     dependencyOverview: DependencyOverviewLocator;
     transactionDetailsByName: TransactionDetailsByNameLocator;
     transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
-    serviceEntity: ServiceEntityLocator;
   };
-  entitiesInventory: EntitiesInventoryLocator;
 }
 
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
+  private config: ObservabilitySharedBrowserConfig;
 
-  constructor() {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+    this.config = this.initializerContext.config.get<ObservabilitySharedBrowserConfig>();
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
@@ -113,6 +105,7 @@ export class ObservabilitySharedPlugin implements Plugin {
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
+      config: this.config,
     };
   }
 
@@ -124,7 +117,6 @@ export class ObservabilitySharedPlugin implements Plugin {
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
-      guidedOnboardingApi: plugins.guidedOnboarding?.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart: core }),
       isSidebarEnabled$: this.isSidebarEnabled$,
     });
@@ -136,6 +128,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         registerSections: this.navigationRegistry.registerSections,
       },
       updateGlobalNavigation,
+      config: this.config,
     };
   }
 
@@ -166,9 +159,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         transactionDetailsByTraceId: urlService.locators.create(
           new TransactionDetailsByTraceIdLocatorDefinition()
         ),
-        serviceEntity: urlService.locators.create(new ServiceEntityLocatorDefinition()),
       },
-      entitiesInventory: urlService.locators.create(new EntitiesInventoryLocatorDefinition()),
     };
   }
 }

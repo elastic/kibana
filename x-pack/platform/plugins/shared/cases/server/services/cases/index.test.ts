@@ -287,12 +287,16 @@ describe('CasesService', () => {
 
         await service.patchCase({
           caseId: '1',
-          updatedAttributes: createCasePostParams({
-            connector: createJiraConnector(),
-            externalService: createExternalService(),
-            severity: CaseSeverity.CRITICAL,
-            status: CaseStatuses['in-progress'],
-          }),
+          updatedAttributes: {
+            ...createCasePostParams({
+              connector: createJiraConnector(),
+              externalService: createExternalService(),
+              severity: CaseSeverity.CRITICAL,
+              status: CaseStatuses['in-progress'],
+            }),
+            total_alerts: 10,
+            total_comments: 5,
+          },
           originalCase: {} as CaseSavedObjectTransformed,
         });
 
@@ -327,6 +331,8 @@ describe('CasesService', () => {
               "defacement",
             ],
             "title": "Super Bad Security Issue",
+            "total_alerts": 10,
+            "total_comments": 5,
             "updated_at": "2019-11-25T21:54:48.952Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -661,6 +667,33 @@ describe('CasesService', () => {
           expect(patchAttributes.status).toEqual(expectedStatus);
         }
       );
+
+      it('updates the total attachment stats', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue(
+          {} as SavedObjectsUpdateResponse<CasePersistedAttributes>
+        );
+
+        await service.patchCase({
+          caseId: '1',
+          updatedAttributes: {
+            ...createCasePostParams({
+              connector: createJiraConnector(),
+              externalService: createExternalService(),
+              severity: CaseSeverity.CRITICAL,
+              status: CaseStatuses['in-progress'],
+            }),
+            total_alerts: 10,
+            total_comments: 5,
+          },
+          originalCase: {} as CaseSavedObjectTransformed,
+        });
+
+        const patchAttributes = unsecuredSavedObjectsClient.update.mock
+          .calls[0][2] as CasePersistedAttributes;
+
+        expect(patchAttributes.total_alerts).toEqual(10);
+        expect(patchAttributes.total_comments).toEqual(5);
+      });
     });
 
     describe('bulkPatch', () => {
@@ -765,6 +798,39 @@ describe('CasesService', () => {
         expect(patchResults[1].attributes.status).toEqual(CasePersistedStatus.IN_PROGRESS);
         expect(patchResults[2].attributes.status).toEqual(CasePersistedStatus.CLOSED);
       });
+
+      it('updates the total attachment stats', async () => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            createCaseSavedObjectResponse({ caseId: '2' }),
+            createCaseSavedObjectResponse({ caseId: '3' }),
+          ],
+        });
+
+        await service.patchCases({
+          cases: [
+            {
+              caseId: '1',
+              updatedAttributes: {
+                ...createCasePostParams({
+                  connector: getNoneCaseConnector(),
+                  status: CaseStatuses.open,
+                }),
+                total_alerts: 10,
+                total_comments: 5,
+              },
+              originalCase: {} as CaseSavedObjectTransformed,
+            },
+          ],
+        });
+
+        const patchResults = unsecuredSavedObjectsClient.bulkUpdate.mock
+          .calls[0][0] as unknown as Array<SavedObject<CasePersistedAttributes>>;
+
+        expect(patchResults[0].attributes.total_alerts).toEqual(10);
+        expect(patchResults[0].attributes.total_comments).toEqual(5);
+      });
     });
 
     describe('createCase', () => {
@@ -852,8 +918,8 @@ describe('CasesService', () => {
               "defacement",
             ],
             "title": "Super Bad Security Issue",
-            "total_alerts": -1,
-            "total_comments": -1,
+            "total_alerts": 0,
+            "total_comments": 0,
             "updated_at": "2019-11-25T21:54:48.952Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -895,8 +961,8 @@ describe('CasesService', () => {
         const postAttributes = unsecuredSavedObjectsClient.create.mock
           .calls[0][1] as CasePersistedAttributes;
 
-        expect(postAttributes.total_alerts).toEqual(-1);
-        expect(postAttributes.total_comments).toEqual(-1);
+        expect(postAttributes.total_alerts).toEqual(0);
+        expect(postAttributes.total_comments).toEqual(0);
       });
 
       it('moves the connector.id and connector_id to the references', async () => {
@@ -1073,8 +1139,8 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
-                  "total_alerts": -1,
-                  "total_comments": -1,
+                  "total_alerts": 0,
+                  "total_comments": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -1112,8 +1178,8 @@ describe('CasesService', () => {
       const postAttributes = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0]
         .attributes as CasePersistedAttributes;
 
-      expect(postAttributes.total_alerts).toEqual(-1);
-      expect(postAttributes.total_comments).toEqual(-1);
+      expect(postAttributes.total_alerts).toEqual(0);
+      expect(postAttributes.total_comments).toEqual(0);
     });
   });
 
@@ -2200,7 +2266,10 @@ describe('CasesService', () => {
      * - external_service
      * - category
      *
-     * Decode is not expected to throw an error as they are defined.
+     * The following fields can be undefined:
+     * - total_alerts
+     * - total_comments
+     * - incremental_id
      */
     const attributesToValidateIfMissing = omit(
       caseTransformedAttributesProps,
@@ -2211,7 +2280,13 @@ describe('CasesService', () => {
       'category',
       'customFields',
       'observables',
-      'incremental_id'
+      'incremental_id',
+      'total_alerts',
+      'total_comments',
+      'in_progress_at',
+      'time_to_acknowledge',
+      'time_to_resolve',
+      'time_to_investigate'
     );
 
     describe('getCaseIdsByAlertId', () => {

@@ -12,19 +12,19 @@ import type {
   BulkOperationContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
-  RuleMigrationResource,
-  RuleMigrationResourceType,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+  SiemMigrationResourceType,
+  SiemMigrationResource,
+} from '../../../../../common/siem_migrations/model/common.gen';
 import type { StoredRuleMigrationResource } from '../types';
-import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
+import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import { MAX_ES_SEARCH_SIZE } from '../constants';
 
 export type CreateRuleMigrationResourceInput = Pick<
-  RuleMigrationResource,
+  SiemMigrationResource,
   'migration_id' | 'type' | 'name' | 'content' | 'metadata'
 >;
 export interface RuleMigrationResourceFilters {
-  type?: RuleMigrationResourceType;
+  type?: SiemMigrationResourceType;
   names?: string[];
   hasContent?: boolean;
 }
@@ -42,7 +42,7 @@ const BULK_MAX_SIZE = 500 as const;
  * when retrieving search results in batches. */
 const DEFAULT_SEARCH_BATCH_SIZE = 500 as const;
 
-export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseClient {
+export class RuleMigrationsDataResourcesClient extends SiemMigrationsDataBaseClient {
   public async upsert(resources: CreateRuleMigrationResourceInput[]): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
@@ -111,7 +111,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
     const query = this.getFilterQuery(migrationId, filters);
 
     return this.esClient
-      .search<RuleMigrationResource>({ index, query, size, from })
+      .search<SiemMigrationResource>({ index, query, size, from })
       .then(this.processResponseHits.bind(this))
       .catch((error) => {
         this.logger.error(`Error searching resources: ${error.message}`);
@@ -120,7 +120,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
   }
 
   /** Returns batching functions to traverse all the migration resources search results */
-  searchBatches<T extends RuleMigrationResource = RuleMigrationResource>(
+  searchBatches<T extends SiemMigrationResource = SiemMigrationResource>(
     migrationId: string,
     options: { scroll?: Duration; size?: number; filters?: RuleMigrationResourceFilters } = {}
   ) {

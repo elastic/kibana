@@ -20,6 +20,7 @@ import { WindowScroller, AutoSizer } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { areEqual, VariableSizeList as List } from 'react-window';
 import { css } from '@emotion/react';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import type {
@@ -43,6 +44,7 @@ interface AccordionWaterfallProps {
   displayLimit?: number;
   isEmbeddable?: boolean;
   scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
 }
 
 type WaterfallProps = Omit<
@@ -154,7 +156,14 @@ const VirtualRow = React.memo(
 
 const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   const { euiTheme } = useEuiTheme();
-  const { duration, waterfallItemId, onClickWaterfallItem, timelineMargins, node } = props;
+  const {
+    duration,
+    waterfallItemId,
+    onClickWaterfallItem,
+    getRelatedErrorsHref,
+    timelineMargins,
+    node,
+  } = props;
   const {
     criticalPathSegmentsById,
     getErrorCount,
@@ -191,7 +200,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
 
   return (
     <EuiAccordion
-      data-test-subj="waterfallItem"
+      data-test-subj="accordionWaterfall"
       style={{ position: 'relative' }}
       buttonClassName={`button_${node.item.id}`}
       id={node.item.id}
@@ -220,6 +229,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
               onClick={onWaterfallItemClick}
               segments={segments}
               isEmbeddable={isEmbeddable}
+              getRelatedErrorsHref={getRelatedErrorsHref}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

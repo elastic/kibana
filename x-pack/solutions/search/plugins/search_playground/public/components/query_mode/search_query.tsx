@@ -10,12 +10,12 @@ import React from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { Controller, useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { PlaygroundForm, PlaygroundFormFields } from '../../types';
+import type { PlaygroundForm } from '../../types';
+import { PlaygroundFormFields } from '../../types';
 
 export const SearchQuery = ({ isLoading }: { isLoading: boolean }) => {
   const { control } = useFormContext();
   const {
-    field: { value: searchBarValue },
     formState: { isSubmitting },
   } = useController<PlaygroundForm, PlaygroundFormFields.searchQuery>({
     name: PlaygroundFormFields.searchQuery,
@@ -29,8 +29,11 @@ export const SearchQuery = ({ isLoading }: { isLoading: boolean }) => {
         <EuiFieldText
           data-test-subj="searchPlaygroundSearchModeFieldText"
           prepend="{query}"
-          {...field}
-          value={searchBarValue}
+          name={field.name}
+          onBlur={field.onBlur}
+          onChange={field.onChange}
+          value={field.value}
+          inputRef={field.ref}
           icon="search"
           fullWidth
           placeholder={i18n.translate(

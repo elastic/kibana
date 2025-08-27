@@ -248,7 +248,7 @@ export const mobileServiceDetailRoute = {
       '/mobile-services/{serviceName}/service-map': page({
         tabKey: 'service-map',
         title: i18n.translate('xpack.apm.views.serviceMap.title', {
-          defaultMessage: 'Service Map',
+          defaultMessage: 'Service map',
         }),
         element: <ServiceMapServiceDetail />,
         searchBarOptions: {
@@ -263,7 +263,10 @@ export const mobileServiceDetailRoute = {
         element: <ServiceLogs />,
         searchBarOptions: {
           showMobileFilters: false,
-          showQueryInput: false,
+          showQueryInput: true,
+          searchBarPlaceholder: i18n.translate('xpack.apm.views.logs.searchBarPlaceholder', {
+            defaultMessage: 'Search for log entries',
+          }),
         },
       }),
       '/mobile-services/{serviceName}/alerts': {

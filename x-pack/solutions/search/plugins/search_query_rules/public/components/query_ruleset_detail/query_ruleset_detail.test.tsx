@@ -12,6 +12,14 @@ import React from 'react';
 import { QueryRulesetDetail } from './query_ruleset_detail';
 import { MOCK_QUERY_RULESET_RESPONSE_FIXTURE } from '../../../common/__fixtures__/query_rules_ruleset';
 
+jest.mock('../../hooks/use_fetch_ruleset_exists', () => ({
+  useFetchQueryRulesetExist: jest.fn(() => ({
+    data: { exists: false },
+    isLoading: false,
+    isError: false,
+  })),
+}));
+
 jest.mock('./use_query_ruleset_detail_state', () => ({
   useQueryRulesetDetailState: jest.fn(() => ({
     queryRuleset: MOCK_QUERY_RULESET_RESPONSE_FIXTURE,

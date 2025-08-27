@@ -5,31 +5,33 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useRef } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { Alert } from '@kbn/alerting-types';
-import type { EuiDataGridColumn } from '@elastic/eui';
-import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import type {
+  AlertsTableImperativeApi,
+  AlertsTableOnLoadedProps,
+} from '@kbn/response-ops-alerts-table/types';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
+import { useKibana } from '../../../common/lib/kibana';
+import { ActionsCell } from '../../../detections/components/alert_summary/table/actions_cell';
+import { CellValue } from '../../../detections/components/alert_summary/table/render_cell';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 import type { AdditionalTableContext } from '../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,
   ALERT_TABLE_CONSUMERS,
   CASES_CONFIGURATION,
-  columns,
   EuiDataGridStyleWrapper,
   GRID_STYLE,
   ROW_HEIGHTS_OPTIONS,
   RULE_TYPE_IDS,
   TOOLBAR_VISIBILITY,
+  columns,
 } from '../../../detections/components/alert_summary/table/table';
-import { ActionsCell } from '../../../detections/components/alert_summary/table/actions_cell';
-import { getDataViewStateFromIndexFields } from '../../../common/containers/source/use_data_view';
-import { useKibana } from '../../../common/lib/kibana';
-import { CellValue } from '../../../detections/components/alert_summary/table/render_cell';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useAdditionalBulkActions } from '../../../detections/hooks/alert_summary/use_additional_bulk_actions';
 
 export interface TableProps {
@@ -44,7 +46,7 @@ export interface TableProps {
   /**
    * Callback fired when the alerts have been first loaded
    */
-  onLoaded?: (alerts: Alert[], columns: EuiDataGridColumn[]) => void;
+  onLoaded?: (props: AlertsTableOnLoadedProps) => void;
   /**
    * List of installed AI for SOC integrations
    */
@@ -100,12 +102,7 @@ export const Table = memo(
       [application, cases, data, fieldFormats, http, licensing, notifications, settings]
     );
 
-    const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
-
-    const { browserFields } = useMemo(
-      () => getDataViewStateFromIndexFields('', dataViewSpec.fields),
-      [dataViewSpec.fields]
-    );
+    const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
 
     const additionalContext: AdditionalTableContext = useMemo(
       () => ({

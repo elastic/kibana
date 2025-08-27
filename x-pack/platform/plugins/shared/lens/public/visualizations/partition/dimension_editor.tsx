@@ -8,14 +8,16 @@
 import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, ColorMapping } from '@kbn/coloring';
-import { ColorPicker, FormatFactory } from '@kbn/visualization-ui-components';
+import type { PaletteRegistry, ColorMapping } from '@kbn/coloring';
+import type { FormatFactory } from '@kbn/visualization-ui-components';
+import { ColorPicker } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalette, KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
 
-import { PieVisualizationState } from '../../../common/types';
-import { VisualizationDimensionEditorProps } from '../../types';
+import type { PieVisualizationState } from '../../../common/types';
+import type { VisualizationDimensionEditorProps } from '../../types';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 import { getSortedAccessorsForGroup } from './to_expression';
@@ -124,10 +126,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
           isDarkMode={props.isDarkMode}
           panelRef={props.panelRef}
           palettes={props.palettes}
-          palette={props.state.palette}
+          palette={localState.palette}
           setPalette={(newPalette) => {
-            setLocalState({ ...props.state, palette: newPalette });
-            setColorMapping();
+            setLocalState({ ...localState, palette: newPalette });
+          }}
+          onModeChange={(isLegacy) => {
+            if (isLegacy) setColorMapping();
           }}
           colorMapping={currentLayer.colorMapping}
           setColorMapping={setColorMapping}
@@ -149,7 +153,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             columnId: props.accessor,
             paletteService: props.paletteService,
             datasource: props.datasource,
-            palette: props.state.palette,
+            palette: localState.palette,
           })}
           disabledMessage={colorPickerDisabledMessage}
           setConfig={setConfig}

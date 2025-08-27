@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,15 +22,15 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiToolTip,
-  EuiSwitchEvent,
   EuiIcon,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
-import { Conversation, useAssistantContext } from '../../../..';
+import type { Conversation } from '../../../..';
+import { useAssistantContext } from '../../../..';
 import * as i18n from '../../assistant_header/translations';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
 import { KNOWLEDGE_BASE_TAB } from '../const';
@@ -59,6 +60,7 @@ const ConditionalWrap = ({
 
 export const SettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false, onChatCleared, selectedConversation }: Params) => {
+    const confirmModalTitleId = useGeneratedHtmlId();
     const { euiTheme } = useEuiTheme();
     const {
       assistantAvailability,
@@ -106,7 +108,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showAssistantOverlay?.({ showOverlay: false });
       } else {
         navigateToApp('management', {
-          path: 'kibana/securityAiAssistantManagement',
+          path: 'ai/securityAiAssistantManagement',
         });
       }
     }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
@@ -125,7 +127,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showAssistantOverlay?.({ showOverlay: false });
       } else {
         navigateToApp('management', {
-          path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+          path: `ai/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
         });
       }
     }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
@@ -156,6 +158,11 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
 
     const selectedConversationHasAnonymizedValues = useMemo(
       () => conversationContainsAnonymizedValues(selectedConversation),
+      [selectedConversation]
+    );
+
+    const selectedConversationExists = useMemo(
+      () => selectedConversation && selectedConversation.id !== '',
       [selectedConversation]
     );
 
@@ -266,7 +273,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                     />
                   }
                 >
-                  <EuiIcon tabIndex={0} type="iInCircle" />
+                  <EuiIcon tabIndex={0} type="info" />
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -321,25 +328,28 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                     />
                   }
                 >
-                  <EuiIcon tabIndex={0} type="iInCircle" />
+                  <EuiIcon tabIndex={0} type="info" />
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>
-
-          <EuiHorizontalRule margin="none" />
-          <EuiContextMenuItem
-            aria-label={'clear-chat'}
-            key={'clear-chat'}
-            onClick={showDestroyModal}
-            icon={'refresh'}
-            data-test-subj={'clear-chat'}
-            css={css`
-              color: ${euiTheme.colors.textDanger};
-            `}
-          >
-            {i18n.RESET_CONVERSATION}
-          </EuiContextMenuItem>
+          {selectedConversationExists && (
+            <>
+              <EuiHorizontalRule margin="none" />
+              <EuiContextMenuItem
+                aria-label={'clear-chat'}
+                key={'clear-chat'}
+                onClick={showDestroyModal}
+                icon={'refresh'}
+                data-test-subj={'clear-chat'}
+                css={css`
+                  color: ${euiTheme.colors.textDanger};
+                `}
+              >
+                {i18n.RESET_CONVERSATION}
+              </EuiContextMenuItem>
+            </>
+          )}
         </EuiPanel>,
       ],
       [
@@ -356,6 +366,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showDestroyModal,
         euiTheme.size.m,
         euiTheme.size.xs,
+        selectedConversationExists,
         selectedConversationHasCitations,
         selectedConversationHasAnonymizedValues,
       ]
@@ -371,15 +382,13 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       <>
         <EuiPopover
           button={
-            <KnowledgeBaseTour>
-              <EuiButtonIcon
-                aria-label={AI_ASSISTANT_MENU}
-                isDisabled={isDisabled}
-                iconType="boxesVertical"
-                onClick={onButtonClick}
-                data-test-subj="chat-context-menu"
-              />
-            </KnowledgeBaseTour>
+            <EuiButtonIcon
+              aria-label={AI_ASSISTANT_MENU}
+              isDisabled={isDisabled}
+              iconType="boxesVertical"
+              onClick={onButtonClick}
+              data-test-subj="chat-context-menu"
+            />
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
@@ -399,7 +408,9 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         )}
         {isResetConversationModalVisible && (
           <EuiConfirmModal
+            aria-labelledby={confirmModalTitleId}
             title={i18n.RESET_CONVERSATION}
+            titleProps={{ id: confirmModalTitleId }}
             onCancel={closeDestroyModal}
             onConfirm={handleReset}
             cancelButtonText={i18n.CANCEL_BUTTON_TEXT}

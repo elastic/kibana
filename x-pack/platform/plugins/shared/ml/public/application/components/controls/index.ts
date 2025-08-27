@@ -7,4 +7,4 @@
 
 export { CheckboxShowCharts } from './checkbox_showcharts';
 export { SelectInterval } from './select_interval';
-export { SelectSeverity, SEVERITY_OPTIONS } from './select_severity';
+export { SelectSeverity } from './select_severity';

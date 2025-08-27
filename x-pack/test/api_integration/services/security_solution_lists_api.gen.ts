@@ -19,22 +19,29 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import { CreateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list/create_list.gen';
-import { CreateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list_item/create_list_item.gen';
-import { DeleteListRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list/delete_list.gen';
-import { DeleteListItemRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list_item/delete_list_item.gen';
-import { ExportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/export_list_items/export_list_items.gen';
-import { FindListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/find_list_items/find_list_items.gen';
-import { FindListsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/find_lists/find_lists.gen';
-import { ImportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/import_list_items/import_list_items.gen';
-import { PatchListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/patch_list/patch_list.gen';
-import { PatchListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/patch_list_item/patch_list_item.gen';
-import { ReadListRequestQueryInput } from '@kbn/securitysolution-lists-common/api/read_list/read_list.gen';
-import { ReadListItemRequestQueryInput } from '@kbn/securitysolution-lists-common/api/read_list_item/read_list_item.gen';
-import { UpdateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list/update_list.gen';
-import { UpdateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list_item/update_list_item.gen';
-import { routeWithNamespace } from '../../common/utils/security_solution';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { CreateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list/create_list.gen';
+import type { CreateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list_item/create_list_item.gen';
+import type { DeleteListRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list/delete_list.gen';
+import {} from '@kbn/securitysolution-lists-common/api/delete_list/delete_list.gen';
+import type { DeleteListItemRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list_item/delete_list_item.gen';
+import type { ExportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/export_list_items/export_list_items.gen';
+import {} from '@kbn/securitysolution-lists-common/api/export_list_items/export_list_items.gen';
+import type { FindListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/find_list_items/find_list_items.gen';
+import {} from '@kbn/securitysolution-lists-common/api/find_list_items/find_list_items.gen';
+import type { FindListsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/find_lists/find_lists.gen';
+import {} from '@kbn/securitysolution-lists-common/api/find_lists/find_lists.gen';
+import type { ImportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/import_list_items/import_list_items.gen';
+import {} from '@kbn/securitysolution-lists-common/api/import_list_items/import_list_items.gen';
+import type { PatchListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/patch_list/patch_list.gen';
+import type { PatchListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/patch_list_item/patch_list_item.gen';
+import type { ReadListRequestQueryInput } from '@kbn/securitysolution-lists-common/api/read_list/read_list.gen';
+import {} from '@kbn/securitysolution-lists-common/api/read_list/read_list.gen';
+import type { ReadListItemRequestQueryInput } from '@kbn/securitysolution-lists-common/api/read_list_item/read_list_item.gen';
+import type { UpdateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list/update_list.gen';
+import type { UpdateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list_item/update_list_item.gen';
+
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -45,7 +52,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     createList(props: CreateListProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/lists', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -56,7 +63,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     createListIndex(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/lists/index', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/lists/index', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -71,7 +78,7 @@ All value list items in the same list must be the same type. For example, each l
       */
     createListItem(props: CreateListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/lists/items', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -85,7 +92,7 @@ All value list items in the same list must be the same type. For example, each l
       */
     deleteList(props: DeleteListProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/lists', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -96,7 +103,7 @@ All value list items in the same list must be the same type. For example, each l
      */
     deleteListIndex(kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/lists/index', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/lists/index', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -106,7 +113,7 @@ All value list items in the same list must be the same type. For example, each l
      */
     deleteListItem(props: DeleteListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/lists/items', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -117,7 +124,7 @@ All value list items in the same list must be the same type. For example, each l
      */
     exportListItems(props: ExportListItemsProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/lists/items/_export', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/lists/items/_export', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -128,7 +135,7 @@ All value list items in the same list must be the same type. For example, each l
      */
     findListItems(props: FindListItemsProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/lists/items/_find', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/lists/items/_find', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -139,7 +146,7 @@ All value list items in the same list must be the same type. For example, each l
      */
     findLists(props: FindListsProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/lists/_find', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/lists/_find', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -153,7 +160,7 @@ You can import items to a new or existing list.
       */
     importListItems(props: ImportListItemsProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/lists/items/_import', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/lists/items/_import', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -164,7 +171,7 @@ You can import items to a new or existing list.
      */
     patchList(props: PatchListProps, kibanaSpace: string = 'default') {
       return supertest
-        .patch(routeWithNamespace('/api/lists', kibanaSpace))
+        .patch(getRouteUrlForSpace('/api/lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -175,7 +182,7 @@ You can import items to a new or existing list.
      */
     patchListItem(props: PatchListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .patch(routeWithNamespace('/api/lists/items', kibanaSpace))
+        .patch(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -186,7 +193,7 @@ You can import items to a new or existing list.
      */
     readList(props: ReadListProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/lists', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -197,7 +204,7 @@ You can import items to a new or existing list.
      */
     readListIndex(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/lists/index', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/lists/index', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -207,7 +214,7 @@ You can import items to a new or existing list.
      */
     readListItem(props: ReadListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/lists/items', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -215,7 +222,7 @@ You can import items to a new or existing list.
     },
     readListPrivileges(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/lists/privileges', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/lists/privileges', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -228,7 +235,7 @@ You can import items to a new or existing list.
       */
     updateList(props: UpdateListProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(routeWithNamespace('/api/lists', kibanaSpace))
+        .put(getRouteUrlForSpace('/api/lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -242,7 +249,7 @@ You can import items to a new or existing list.
       */
     updateListItem(props: UpdateListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(routeWithNamespace('/api/lists/items', kibanaSpace))
+        .put(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

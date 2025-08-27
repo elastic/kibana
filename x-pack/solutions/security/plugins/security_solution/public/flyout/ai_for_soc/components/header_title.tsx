@@ -13,7 +13,7 @@ import { DocumentSeverity } from '../../document_details/right/components/severi
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
-import { getAlertTitle } from '../../document_details/shared/utils';
+import { getAlertTitle, getField } from '../../document_details/shared/utils';
 import { RiskScore } from '../../document_details/right/components/risk_score';
 import { useAIForSOCDetailsContext } from '../context';
 import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
@@ -29,7 +29,9 @@ export const HEADER_INTEGRATION_TITLE_TEST_ID = 'ai-for-soc-alert-flyout-header-
  */
 export const HeaderTitle = memo(() => {
   const { dataFormattedForFieldBrowser, getFieldsData } = useAIForSOCDetailsContext();
-  const { ruleId, ruleName, timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { ruleName, timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const integrationName = getField(getFieldsData('relatedIntegrationPackage')) || '';
+
   const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
 
   const date = useMemo(() => new Date(timestamp), [timestamp]);
@@ -83,7 +85,7 @@ export const HeaderTitle = memo(() => {
                 />
               }
             >
-              <IntegrationIcon ruleId={ruleId} />
+              <IntegrationIcon integrationName={integrationName} />
             </AlertHeaderBlock>
           </EuiFlexItem>
         </EuiFlexGroup>

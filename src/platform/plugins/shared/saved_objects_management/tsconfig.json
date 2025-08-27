@@ -33,8 +33,10 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-table-persist",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",
+    "public/management_section/objects_table/saved_objects_table_pseudo.tsx"
   ]
 }

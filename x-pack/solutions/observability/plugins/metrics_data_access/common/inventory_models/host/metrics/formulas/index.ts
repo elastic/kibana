@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MetricConfigMap } from '../../../shared/metrics/types';
 import {
   cpuUsage,
   cpuUsageIowait,
@@ -25,7 +26,6 @@ import {
   diskIOWrite,
   diskReadThroughput,
   diskSpaceAvailable,
-  diskSpaceAvailability,
   diskUsage,
   diskUsageAverage,
   diskWriteThroughput,
@@ -55,7 +55,6 @@ export const formulas = {
   diskIOWrite,
   diskReadThroughput,
   diskWriteThroughput,
-  diskSpaceAvailability,
   diskSpaceAvailable,
   diskUsage,
   diskUsageAverage,
@@ -72,6 +71,6 @@ export const formulas = {
   memoryCache,
   rx,
   tx,
-} as const;
+} satisfies MetricConfigMap;
 
 export type HostFormulas = typeof formulas;

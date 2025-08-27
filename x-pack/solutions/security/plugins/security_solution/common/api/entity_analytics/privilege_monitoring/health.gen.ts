@@ -16,7 +16,14 @@
 
 import { z } from '@kbn/zod';
 
+import { PrivilegeMonitoringEngineStatus } from './common.gen';
+
 export type PrivMonHealthResponse = z.infer<typeof PrivMonHealthResponse>;
 export const PrivMonHealthResponse = z.object({
-  ok: z.boolean().optional(),
+  status: PrivilegeMonitoringEngineStatus,
+  error: z
+    .object({
+      message: z.string().optional(),
+    })
+    .optional(),
 });

@@ -5,12 +5,13 @@
  * 2.0.
  */
 import { createContext, useContext } from 'react';
-import { DatasetQualityControllerStateService } from '../../state_machines/dataset_quality_controller';
-import { ITelemetryClient } from '../../services/telemetry';
+import type { DatasetQualityControllerStateService } from '../../state_machines/dataset_quality_controller';
+import type { ITelemetryClient } from '../../services/telemetry';
 
 export interface DatasetQualityContextValue {
   service: DatasetQualityControllerStateService;
   telemetryClient: ITelemetryClient;
+  isDatasetQualityAllSignalsAvailable: boolean;
 }
 
 export const DatasetQualityContext = createContext({} as DatasetQualityContextValue);

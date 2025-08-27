@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import {
   TimelineAxisContainer,
   VerticalLinesContainer,
@@ -39,6 +40,7 @@ interface Props {
   displayLimit?: number;
   isEmbeddable?: boolean;
   scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {
@@ -79,6 +81,7 @@ export function Waterfall({
   displayLimit,
   isEmbeddable,
   scrollElement,
+  getRelatedErrorsHref,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
@@ -186,6 +189,7 @@ export function Waterfall({
             displayLimit={displayLimit}
             isEmbeddable={isEmbeddable}
             scrollElement={scrollElement}
+            getRelatedErrorsHref={getRelatedErrorsHref}
           />
         )}
       </WaterfallItemsContainer>

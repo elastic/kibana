@@ -6,17 +6,17 @@
  */
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { CUSTOM_PALETTE, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CUSTOM_PALETTE } from '@kbn/coloring';
+import type {
+  ExpressionAstExpression,
+  ExpressionAstFunction,
+} from '@kbn/expressions-plugin/common';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import {
-  FrameMock,
-  createMockDatasource,
-  createMockFramePublicAPI,
-  generateActiveData,
-} from '../../mocks';
-import {
+import type { FrameMock } from '../../mocks';
+import { createMockDatasource, createMockFramePublicAPI, generateActiveData } from '../../mocks';
+import type {
   DataType,
   DatasourceLayers,
   DatasourcePublicAPI,
@@ -26,9 +26,9 @@ import {
 } from '../../types';
 import { GROUP_ID } from './constants';
 import { getMetricVisualization } from './visualization';
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
-import { MetricVisualizationState } from './types';
+import type { MetricVisualizationState } from './types';
 import { getDefaultConfigForMode } from './helpers';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
@@ -1054,6 +1054,31 @@ describe('metric visualization', () => {
         }
       });
     });
+
+    it('forwards secondary prefix correctly when is an empty string', () => {
+      const expression = visualization.toExpression(
+        { ...fullState, secondaryPrefix: '', collapseFn: undefined },
+        datasourceLayers
+      );
+      if (expression && typeof expression === 'object') {
+        const secondaryPrefix = expression.chain[0].arguments.secondaryPrefix[0];
+        expect(secondaryPrefix).toBe('');
+      } else {
+        fail('Expression is not an object');
+      }
+    });
+
+    it('forwards secondary prefix correctly when is undefined', () => {
+      const expression = visualization.toExpression(
+        { ...fullState, secondaryPrefix: undefined, collapseFn: undefined },
+        datasourceLayers
+      );
+      if (expression && typeof expression === 'object') {
+        expect(expression.chain[0].arguments.secondaryPrefix).toBe(undefined);
+      } else {
+        fail('Expression is not an object');
+      }
+    });
   });
 
   it('clears a layer', () => {
@@ -1156,7 +1181,7 @@ describe('metric visualization', () => {
         )
       ).toEqual(
         expect.objectContaining({
-          state: expect.objectContaining({ secondaryTrend: getDefaultConfigForMode('static') }),
+          state: expect.objectContaining({ secondaryTrend: getDefaultConfigForMode('dynamic') }),
         })
       );
     });

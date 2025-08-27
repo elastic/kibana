@@ -6,14 +6,15 @@
  */
 
 import {
-  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   FINDINGS_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
 } from '@kbn/cloud-security-posture-common';
 import {
   BENCHMARK_SCORE_INDEX_PATTERN,
   ALERTS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const alertsSecurityUserIndices = [
@@ -22,7 +23,7 @@ const alertsSecurityUserIndices = [
     privileges: ['read'],
   },
   {
-    names: [CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN],
+    names: [CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS],
     privileges: ['read'],
   },
   {
@@ -45,7 +46,7 @@ const securityUserIndinces = [
     privileges: ['read'],
   },
   {
-    names: [CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN],
+    names: [CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS],
     privileges: ['read'],
   },
   {
@@ -89,7 +90,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         {
           base: [],
           feature: {
-            siemV2: ['read'],
+            [SECURITY_FEATURE_ID]: ['read'],
             fleet: ['all'],
             fleetv2: ['all'],
             savedObjectsManagement: ['all'],
@@ -107,7 +108,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         {
           base: [],
           feature: {
-            siemV2: ['read'],
+            [SECURITY_FEATURE_ID]: ['read'],
             fleet: ['all'],
             fleetv2: ['all'],
           },
@@ -140,7 +141,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         {
           base: [],
           feature: {
-            siemV2: ['all'],
+            [SECURITY_FEATURE_ID]: ['all'],
             fleet: ['all'],
             fleetv2: ['all'],
             savedObjectsManagement: ['all'],

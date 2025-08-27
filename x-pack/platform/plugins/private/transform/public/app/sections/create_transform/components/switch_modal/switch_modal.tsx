@@ -8,7 +8,7 @@
 import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 interface Props {
   onCancel: () => void;
@@ -59,18 +59,24 @@ const cancelButtonText = i18n.translate(
   }
 );
 
-export const SwitchModal: FC<Props> = ({ onCancel, onConfirm, type }) => (
-  <EuiConfirmModal
-    title={type === 'pivot' ? pivotModalTitle : sourceModalTitle}
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    cancelButtonText={cancelButtonText}
-    confirmButtonText={
-      type === 'pivot' ? pivotModalConfirmButtonText : sourceModalConfirmButtonText
-    }
-    buttonColor="danger"
-    defaultFocusedButton="confirm"
-  >
-    <p>{type === 'pivot' ? pivotModalMessage : sourceModalMessage}</p>
-  </EuiConfirmModal>
-);
+export const SwitchModal: FC<Props> = ({ onCancel, onConfirm, type }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
+  return (
+    <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      title={type === 'pivot' ? pivotModalTitle : sourceModalTitle}
+      titleProps={{ id: modalTitleId }}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText={cancelButtonText}
+      confirmButtonText={
+        type === 'pivot' ? pivotModalConfirmButtonText : sourceModalConfirmButtonText
+      }
+      buttonColor="danger"
+      defaultFocusedButton="confirm"
+    >
+      <p>{type === 'pivot' ? pivotModalMessage : sourceModalMessage}</p>
+    </EuiConfirmModal>
+  );
+};

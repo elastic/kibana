@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const LATEST_VERSION = 3;
+export const LATEST_VERSION = 1;
 
 export const CONTENT_ID = 'dashboard';
 

@@ -7,7 +7,7 @@
 
 import { getCanvasFeature } from './feature';
 import { reportingMock } from '@kbn/reporting-plugin/server/mocks';
-import { ReportingStart } from '@kbn/reporting-plugin/server/types';
+import type { ReportingStart } from '@kbn/reporting-plugin/server/types';
 
 let mockReportingPlugin: ReportingStart;
 beforeEach(() => {
@@ -107,7 +107,9 @@ it('Provides a feature declaration ', () => {
                   "minimumLicense": "gold",
                   "name": "Generate PDF reports",
                   "savedObject": Object {
-                    "all": Array [],
+                    "all": Array [
+                      "scheduled_report",
+                    ],
                     "read": Array [],
                   },
                   "ui": Array [
@@ -216,7 +218,9 @@ it(`Calls on Reporting whether to include Generate PDF as a sub-feature`, () => 
                   "minimumLicense": "gold",
                   "name": "Generate PDF reports",
                   "savedObject": Object {
-                    "all": Array [],
+                    "all": Array [
+                      "scheduled_report",
+                    ],
                     "read": Array [],
                   },
                   "ui": Array [

@@ -7,16 +7,13 @@
 
 import type { ComponentProps, FC } from 'react';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import type { AppMountParameters } from '@kbn/core/public';
+import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { SampleDataIngestPluginStart } from '@kbn/sample-data-ingest/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { App } from './components/stack_app';
-
-export interface SearchHomepageConfigType {
-  ui: {
-    enabled: boolean;
-  };
-}
 
 export interface SearchHomepageAppInfo {
   appRoute: string;
@@ -31,11 +28,6 @@ export interface SearchHomepagePluginSetup {
    * and deep links.
    */
   app: SearchHomepageAppInfo;
-  /**
-   * Checks if the Search Homepage feature flag is currently enabled.
-   * @returns true if Search Homepage feature is enabled
-   */
-  isHomepageFeatureEnabled: () => boolean;
 }
 
 export interface SearchHomepagePluginStart {
@@ -45,11 +37,6 @@ export interface SearchHomepagePluginStart {
    * and deep links.
    */
   app: SearchHomepageAppInfo;
-  /**
-   * Checks if the Search Homepage feature flag is currently enabled.
-   * @returns true if Search Homepage feature is enabled
-   */
-  isHomepageFeatureEnabled: () => boolean;
   /**
    * SearchHomepage shared component, used to render the search homepage in
    * the Stack search plugin
@@ -61,11 +48,20 @@ export interface SearchHomepageAppPluginStartDependencies {
   console?: ConsolePluginStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
+  sampleDataIngest?: SampleDataIngestPluginStart;
+  cloud?: CloudStart;
+  searchNavigation?: SearchNavigationPluginStart;
 }
 
-export interface SearchHomepageServicesContext extends SearchHomepageAppPluginStartDependencies {
+export interface SearchHomepageServicesContextDeps {
   history: AppMountParameters['history'];
+  usageCollection?: UsageCollectionStart;
 }
+
+export type SearchHomepageServicesContext = CoreStart &
+  SearchHomepageAppPluginStartDependencies & {
+    history: AppMountParameters['history'];
+  };
 
 export interface AppUsageTracker {
   click: (eventName: string | string[]) => void;

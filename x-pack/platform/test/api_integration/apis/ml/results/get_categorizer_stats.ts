@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { MlAnomalyCategorizerStatsDoc } from '@kbn/ml-anomaly-utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -53,7 +53,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('get categorizer_stats', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs'
+      );
       await ml.testResources.setKibanaTimeZoneToUTC();
       // @ts-expect-error not full interface
       await ml.api.createAndRunAnomalyDetectionLookbackJob(testJobConfig, testDatafeedConfig);

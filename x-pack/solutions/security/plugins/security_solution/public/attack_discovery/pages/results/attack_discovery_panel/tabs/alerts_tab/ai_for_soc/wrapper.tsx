@@ -57,8 +57,6 @@ export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) =>
     skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
   });
 
-  // TODO: use alert only data view when it is ready
-  // https://github.com/elastic/security-team/issues/12589
   const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
   const dataViewLoading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;

@@ -20,7 +20,7 @@ export function SizeLabel() {
         {i18n.translate('xpack.apm.storageExplorer.sizeLabel.title', {
           defaultMessage: 'Size',
         })}{' '}
-        <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
       </>
     </EuiToolTip>
   );

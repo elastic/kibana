@@ -12,31 +12,15 @@ import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 
-import type { DashboardPanelMap, DashboardSectionMap } from './dashboard_container/types';
-import type {
-  DashboardAttributes,
-  DashboardOptions,
-  DashboardPanel,
-  DashboardSection,
-} from '../server/content_management';
+import type { DashboardAttributes, DashboardOptions } from '../server/content_management';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
   createNew: boolean;
   show: boolean;
   [key: string]: boolean;
-}
-
-/**
- * A partially parsed version of the Dashboard Attributes used for inject and extract logic for both the Dashboard Container and the Dashboard Saved Object.
- */
-export interface ParsedDashboardAttributesWithType {
-  id: string;
-  panels: DashboardPanelMap;
-  sections: DashboardSectionMap;
-  type: 'dashboard';
 }
 
 export interface DashboardAttributesAndReferences {
@@ -52,13 +36,11 @@ export type DashboardSettings = Writable<DashboardOptions> & {
 };
 
 export interface DashboardState extends DashboardSettings {
-  query: Query;
-  filters: Filter[];
+  query?: Query;
+  filters?: Filter[];
   timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
-  viewMode: ViewMode;
-  panels: DashboardPanelMap;
-  sections: DashboardSectionMap;
+  panels: DashboardAttributes['panels'];
 
   /**
    * Temporary. Currently Dashboards are in charge of providing references to all of their children.
@@ -70,16 +52,16 @@ export interface DashboardState extends DashboardSettings {
    * Serialized control group state.
    * Contains state loaded from dashboard saved object
    */
-  controlGroupInput?: ControlGroupSerializedState;
+  controlGroupInput?: ControlsGroupState;
 }
 
 export type DashboardLocatorParams = Partial<
-  Omit<DashboardState, 'panels' | 'sections'> & {
+  DashboardState & {
     controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
 
-    panels: Array<DashboardPanel | DashboardSection>;
-
     references?: DashboardState['references'] & SerializableRecord;
+
+    viewMode?: ViewMode;
 
     /**
      * If provided, the dashboard with this id will be loaded. If not given, new, unsaved dashboard will be loaded.
@@ -102,5 +84,11 @@ export type DashboardLocatorParams = Partial<
      * (Background search)
      */
     searchSessionId?: string;
+
+    /**
+     * Set to pass state from solution to embeddables.
+     * See PassThroughContext presentation container interface for details
+     */
+    passThroughContext?: SerializableRecord;
   }
 >;

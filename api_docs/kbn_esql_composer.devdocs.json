@@ -1,0 +1,471 @@
+{
+  "id": "@kbn/esql-composer",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.drop",
+        "type": "Function",
+        "tags": [],
+        "label": "drop",
+        "description": [],
+        "signature": [
+          "(columns: (string | string[])[]) => ",
+          "QueryOperator"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/drop.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.drop.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "(string | string[])[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/drop.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.evaluate",
+        "type": "Function",
+        "tags": [],
+        "label": "evaluate",
+        "description": [],
+        "signature": [
+          "(body: TQuery, params: TParams | undefined) => ",
+          "QueryOperator"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/eval.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.evaluate.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "TQuery"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/eval.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.evaluate.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "TParams | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/eval.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.from",
+        "type": "Function",
+        "tags": [],
+        "label": "from",
+        "description": [],
+        "signature": [
+          "(patterns: (string | string[])[]) => ",
+          "QueryPipeline"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.from.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "patterns",
+            "description": [],
+            "signature": [
+              "(string | string[])[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.keep",
+        "type": "Function",
+        "tags": [],
+        "label": "keep",
+        "description": [],
+        "signature": [
+          "(columns: (string | string[])[]) => ",
+          "QueryOperator"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/keep.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.keep.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "(string | string[])[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/keep.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.limit",
+        "type": "Function",
+        "tags": [],
+        "label": "limit",
+        "description": [],
+        "signature": [
+          "(value: number) => ",
+          "QueryOperator"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/limit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.limit.$1",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/limit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.sort",
+        "type": "Function",
+        "tags": [],
+        "label": "sort",
+        "description": [],
+        "signature": [
+          "(body: TQuery, params: TParams | undefined) => ",
+          "QueryOperator"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.sort.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "TQuery"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.sort.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "TParams | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.sort",
+        "type": "Function",
+        "tags": [],
+        "label": "sort",
+        "description": [],
+        "signature": [
+          "(sorts: SortArgs[]) => ",
+          "QueryOperator"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.sort.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "sorts",
+            "description": [],
+            "signature": [
+              "SortArgs[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.sort",
+        "type": "Function",
+        "tags": [],
+        "label": "sort",
+        "description": [],
+        "signature": [
+          "(firstArg: SortArgs | TQuery, secondArg: SortArgs | TParams | undefined, restSorts: SortArgs[]) => ",
+          "QueryOperator"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.sort.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "firstArg",
+            "description": [],
+            "signature": [
+              "SortArgs | TQuery"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.sort.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "secondArg",
+            "description": [],
+            "signature": [
+              "SortArgs | TParams | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.sort.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "restSorts",
+            "description": [],
+            "signature": [
+              "SortArgs[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.stats",
+        "type": "Function",
+        "tags": [],
+        "label": "stats",
+        "description": [],
+        "signature": [
+          "(body: TQuery, params: TParams | undefined) => ",
+          "QueryOperator"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.stats.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "TQuery"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.stats.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "TParams | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.where",
+        "type": "Function",
+        "tags": [],
+        "label": "where",
+        "description": [],
+        "signature": [
+          "(body: TQuery, params: TParams | undefined) => ",
+          "QueryOperator"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/where.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.where.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "TQuery"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/where.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.where.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "TParams | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/where.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.SortOrder",
+        "type": "Enum",
+        "tags": [],
+        "label": "SortOrder",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  }
+}

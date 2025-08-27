@@ -10,14 +10,15 @@ import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { NodeViewModel } from '../types';
+import type { NodeViewModel } from '../types';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '.';
 
 import '@xyflow/react/dist/style.css';
+import { GlobalGraphStyles } from '../graph/styles';
 
 const meta: Meta<NodeViewModel> = {
-  title: 'Components/Graph Components',
+  title: 'Components/Graph Components/Node',
   argTypes: {
     color: {
       options: ['primary', 'danger', 'warning'],
@@ -31,10 +32,21 @@ const meta: Meta<NodeViewModel> = {
   },
   args: {
     id: 'siem-windows',
-    label: '',
+    label: 'tin-mpb-pro-15',
+    tag: 'Host',
+    ips: [
+      '10.200.0.202',
+      '192.14.29.80',
+      '192.14.29.80',
+      '74.25.14.20',
+      '192.14.29.80',
+      '10.200.0.202',
+    ],
+    countryCodes: ['us', 'ru', 'es', 'us', 'us'],
+    count: 5,
     color: 'primary',
     shape: 'hexagon',
-    icon: 'okta',
+    icon: 'aws',
     interactive: true,
   },
   decorators: [GlobalStylesStorybookDecorator],
@@ -61,7 +73,19 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
         {
           id: args.id,
           type: args.shape,
-          data: pick(args, ['id', 'label', 'color', 'icon', 'interactive', 'expandButtonClick']),
+          data: pick(args, [
+            'id',
+            'tag',
+            'label',
+            'color',
+            'icon',
+            'count',
+            'ips',
+            'oss',
+            'countryCodes',
+            'interactive',
+            'expandButtonClick',
+          ]),
           position: { x: 0, y: 0 },
         },
       ]}
@@ -69,6 +93,7 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
       <Controls />
       <Background />
     </ReactFlow>
+    <GlobalGraphStyles />
   </ThemeProvider>
 );
 

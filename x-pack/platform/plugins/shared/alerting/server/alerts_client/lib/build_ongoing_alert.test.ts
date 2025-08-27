@@ -244,6 +244,88 @@ for (const flattened of [true, false]) {
       });
     });
 
+    test(`should return alert document with kibana.space_ids set to '*' if dangerouslyCreateAlertsInAllSpaces=true`, () => {
+      const legacyAlert = new LegacyAlert<{}, {}, 'error' | 'warning'>('alert-A', {
+        meta: { uuid: 'abcdefg' },
+      });
+      legacyAlert
+        .scheduleActions('error')
+        .replaceState({ start: '2023-03-28T12:27:28.159Z', duration: '36000000' });
+      legacyAlert.setFlappingHistory([false, false, true, true]);
+      legacyAlert.setMaintenanceWindowIds(['maint-xyz']);
+
+      const alert = flattened
+        ? {
+            ...existingAlert,
+            [ALERT_FLAPPING_HISTORY]: [true, false, false, false, true, true],
+            [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+          }
+        : {
+            ...existingAlert,
+            kibana: {
+              // @ts-expect-error
+              ...existingAlert.kibana,
+              alert: {
+                // @ts-expect-error
+                ...existingAlert.kibana.alert,
+                flapping_history: [true, false, false, false, true, true],
+                maintenance_window_ids: ['maint-1', 'maint-321'],
+              },
+            },
+          };
+
+      expect(
+        buildOngoingAlert<{}, {}, {}, 'error' | 'warning', 'recovered'>({
+          // @ts-expect-error
+          alert,
+          legacyAlert,
+          rule: alertRule,
+          isImproving: null,
+          timestamp: '2023-03-29T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+          dangerouslyCreateAlertsInAllSpaces: true,
+        })
+      ).toEqual({
+        ...alertRule,
+        [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+        [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+        [EVENT_ACTION]: 'active',
+        [ALERT_ACTION_GROUP]: 'error',
+        [ALERT_CONSECUTIVE_MATCHES]: 0,
+        [ALERT_FLAPPING]: false,
+        [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
+        [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-xyz'],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
+        [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
+        [ALERT_STATUS]: 'active',
+        [ALERT_WORKFLOW_STATUS]: 'open',
+        [ALERT_DURATION]: 36000,
+        [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
+        [SPACE_IDS]: ['*'],
+        [VERSION]: '8.9.0',
+        [TAGS]: ['rule-', '-tags'],
+        ...(flattened
+          ? {
+              [EVENT_KIND]: 'signal',
+              [ALERT_INSTANCE_ID]: 'alert-A',
+              [ALERT_START]: '2023-03-28T12:27:28.159Z',
+              [ALERT_UUID]: 'abcdefg',
+            }
+          : {
+              event: {
+                kind: 'signal',
+              },
+              kibana: {
+                alert: {
+                  instance: { id: 'alert-A' },
+                  start: '2023-03-28T12:27:28.159Z',
+                  uuid: 'abcdefg',
+                },
+              },
+            }),
+      });
+    });
+
     test('should return alert document with updated isImproving', () => {
       const legacyAlert = new LegacyAlert<{}, {}, 'error' | 'warning'>('alert-A', {
         meta: { uuid: 'abcdefg' },

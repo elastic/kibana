@@ -10,9 +10,10 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 
-import { CodeEditorInput, CodeEditorInputProps } from './code_editor_input';
+import type { CodeEditorInputProps } from './code_editor_input';
+import { CodeEditorInput } from './code_editor_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
-import { CodeEditorProps } from '../code_editor';
+import type { CodeEditorProps } from '../code_editor';
 import { wrap } from '../mocks';
 
 const name = 'Some markdown field';

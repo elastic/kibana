@@ -9,6 +9,7 @@ import { useCallback, useRef } from 'react';
 import type { Subscription } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import memoizeOne from 'memoize-one';
+import deepEqual from 'fast-deep-equal';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { FieldCategory } from '@kbn/timelines-plugin/common/search_strategy';
@@ -44,6 +45,9 @@ interface DataViewInfo {
 /**
  * HOT Code path where the fields can be 16087 in length or larger. This is
  * VERY mutatious on purpose to improve the performance of the transform.
+ * TODO: newDataViewPickerEnabled - consider removing this in favor of the
+ * buildBrowserFieldsFromDataView util at x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/build_browser_fields.ts
+ * which utilizes the less expensive DataView.fields instead of the DataViewSpec.fields which is much more expensive to build.
  */
 export const getDataViewStateFromIndexFields = memoizeOne(
   (_title: string, fields: DataViewSpec['fields']): DataViewInfo => {
@@ -66,7 +70,7 @@ export const getDataViewStateFromIndexFields = memoizeOne(
       return { browserFields: browserFields as DangerCastForBrowserFieldsMutation };
     }
   },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1]?.length === lastArgs[1]?.length
+  (newArgs, lastArgs) => deepEqual(newArgs, lastArgs) // DataViewSpec['fields'] is an object, so we cannot do a length check.
 );
 
 export const useDataView = (): {

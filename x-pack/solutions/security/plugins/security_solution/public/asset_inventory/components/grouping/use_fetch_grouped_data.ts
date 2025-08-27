@@ -13,8 +13,9 @@ import { lastValueFrom } from 'rxjs';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import { useMemo } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
-import { QUERY_KEY_GROUPING_DATA } from '../../constants';
+import { QUERY_KEY_GROUPING_DATA, QUERY_KEY_ASSET_INVENTORY } from '../../constants';
 import { useDataViewContext } from '../../hooks/data_view_context';
+import { addEmptyDataFilterQuery } from '../../utils/add_empty_data_filter';
 
 type NumberOrNull = number | null;
 
@@ -54,6 +55,13 @@ export const getGroupedAssetsQuery = (query: GroupingQuery, indexPattern?: strin
 
   return {
     ...query,
+    query: {
+      ...query?.query,
+      bool: {
+        ...query?.query?.bool,
+        must_not: addEmptyDataFilterQuery([]),
+      },
+    },
     index: indexPattern,
     ignore_unavailable: true,
     size: 0,
@@ -79,7 +87,7 @@ export const useFetchGroupedData = ({
   }, [dataView]);
 
   return useQuery(
-    [QUERY_KEY_GROUPING_DATA, { query }],
+    [QUERY_KEY_ASSET_INVENTORY, QUERY_KEY_GROUPING_DATA, { query }],
     async () => {
       const {
         rawResponse: { aggregations },

@@ -58,6 +58,10 @@ export interface RetrieveDocumentationParams {
    * Optional functionCalling parameter to pass down to the inference APIs.
    */
   functionCalling?: FunctionCallingMode;
+  /**
+   * Inferece ID to route the request to the right index to perform the search.
+   */
+  inferenceId: string;
 }
 
 /**

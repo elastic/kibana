@@ -8,9 +8,10 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLMap } from '../../types';
+import type { ESQLMap } from '../../types';
 import { Walker } from '../../walker';
-import { WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import type { WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import { WrappingPrettyPrinter } from '../wrapping_pretty_printer';
 
 const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   const { root } = parse(src);
@@ -163,7 +164,11 @@ FROM index
     });
   });
 
-  describe('RERANK', () => {
+  /**
+   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+   * get back to it after 9.1 release.
+   */
+  describe.skip('RERANK', () => {
     test('default example', () => {
       const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
 
@@ -461,16 +466,6 @@ FROM
 👉   another_index,
 👉   another_index
 👉     METADATA _id, _source`);
-    });
-
-    test('supports quoted source, quoted cluster name, and quoted index selector component', () => {
-      const query = `FROM "this is a cluster name" : "this is a quoted index name", "this is another quoted index" :: "and this is a quoted index selector"`;
-      const text = reprint(query, { pipeTab: '  ' }).text;
-
-      expect('\n' + text).toBe(`
-FROM
-  "this is a cluster name":"this is a quoted index name",
-  "this is another quoted index"::"and this is a quoted index selector"`);
     });
 
     test('can break multiple options', () => {
@@ -994,7 +989,8 @@ ROW
                     1234567890,
                     1234567890,
                     1234567890,
-                    1234567890]))))))))`);
+                    1234567890
+                  ]))))))))`);
       });
     });
 
@@ -1021,8 +1017,40 @@ ROW
   [
     "..............................................",
     "..............................................",
-    ".............................................."]`);
+    ".............................................."
+  ]`);
       });
+    });
+  });
+
+  describe('list tuples', () => {
+    test('wraps long lists over one line', () => {
+      const query =
+        'FROM a | WHERE b in (1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890)';
+      const text = reprint(query).text;
+
+      expect('\n' + text).toBe(`
+FROM a
+  | WHERE
+      b IN
+        (1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890,
+          1234567890, 1234567890, 1234567890)`);
+    });
+
+    test('breaks lists with long items', () => {
+      const query =
+        'FROM a | WHERE b not in ("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")';
+      const text = reprint(query).text;
+
+      expect('\n' + text).toBe(`
+FROM a
+  | WHERE
+      b NOT IN
+        (
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+        )`);
     });
   });
 });

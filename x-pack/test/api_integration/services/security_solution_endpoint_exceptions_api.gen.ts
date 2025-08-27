@@ -19,78 +19,82 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import { CreateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/create_endpoint_list_item/create_endpoint_list_item.gen';
-import { DeleteEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/delete_endpoint_list_item/delete_endpoint_list_item.gen';
-import { FindEndpointListItemsRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
-import { ReadEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
-import { UpdateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
-import { routeWithNamespace } from '../../common/utils/security_solution';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { CreateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/create_endpoint_list_item/create_endpoint_list_item.gen';
+import type { DeleteEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/delete_endpoint_list_item/delete_endpoint_list_item.gen';
+import {} from '@kbn/securitysolution-endpoint-exceptions-common/api/delete_endpoint_list_item/delete_endpoint_list_item.gen';
+import type { FindEndpointListItemsRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
+import {} from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
+import type { ReadEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
+import {} from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
+import type { UpdateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
+
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   return {
     /**
-     * Create an endpoint exception list, which groups endpoint exception list items. If an endpoint exception list already exists, an empty response is returned.
+     * Create the exception list for Elastic Endpoint rule exceptions. When you create the exception list, it will have a `list_id` of `endpoint_list`. If the Elastic Endpoint exception list already exists, your request will return an empty response.
      */
     createEndpointList(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/endpoint_list', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint_list', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Create an endpoint exception list item, and associate it with the endpoint exception list.
+     * Create an Elastic Endpoint exception list item, and associate it with the Elastic Endpoint exception list.
      */
     createEndpointListItem(props: CreateEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/endpoint_list/items', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint_list/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
     /**
-     * Delete an endpoint exception list item using the `id` or `item_id` field.
+     * Delete an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
      */
     deleteEndpointListItem(props: DeleteEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/endpoint_list/items', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/endpoint_list/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
     /**
-     * Get a list of all endpoint exception list items.
+     * Get a list of all Elastic Endpoint exception list items.
      */
     findEndpointListItems(props: FindEndpointListItemsProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/endpoint_list/items/_find', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/endpoint_list/items/_find', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
     /**
-     * Get the details of an endpoint exception list item using the `id` or `item_id` field.
+     * Get the details of an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
      */
     readEndpointListItem(props: ReadEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/endpoint_list/items', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/endpoint_list/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
     /**
-     * Update an endpoint exception list item using the `id` or `item_id` field.
+     * Update an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
      */
     updateEndpointListItem(props: UpdateEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(routeWithNamespace('/api/endpoint_list/items', kibanaSpace))
+        .put(getRouteUrlForSpace('/api/endpoint_list/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

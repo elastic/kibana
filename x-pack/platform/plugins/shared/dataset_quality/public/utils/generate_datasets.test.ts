@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DataStreamStatType } from '../../common/data_streams_stats';
-import { Integration } from '../../common/data_streams_stats/integration';
+import type { DataStreamStatType } from '../../common/data_streams_stats';
+import type { Integration } from '../../common/data_streams_stats/integration';
 import { DEFAULT_DICTIONARY_TYPE } from '../state_machines/dataset_quality_controller';
 import { generateDatasets } from './generate_datasets';
 
@@ -36,6 +36,7 @@ describe('generateDatasets', () => {
 
   const dataStreamStats: DataStreamStatType[] = [
     {
+      hasFailureStore: true,
       name: 'logs-system.application-default',
       lastActivity: 1712911241117,
       size: '82.1kb',
@@ -48,6 +49,7 @@ describe('generateDatasets', () => {
       },
     },
     {
+      hasFailureStore: false,
       name: 'logs-synth-default',
       lastActivity: 1712911241117,
       size: '62.5kb',
@@ -114,7 +116,7 @@ describe('generateDatasets', () => {
           canReadFailureStore: true,
         },
         docsInTimeRange: 102,
-        quality: 'degraded',
+        quality: 'warning',
         degradedDocs: {
           percentage: 0,
           count: 0,
@@ -123,6 +125,7 @@ describe('generateDatasets', () => {
           percentage: 1.9607843137254901,
           count: 2,
         },
+        hasFailureStore: true,
       },
       {
         name: 'synth',
@@ -149,6 +152,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
     ]);
   });
@@ -188,6 +192,7 @@ describe('generateDatasets', () => {
           percentage: 100,
           count: 2,
         },
+        hasFailureStore: true,
       },
       {
         name: 'synth',
@@ -214,6 +219,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
     ]);
   });
@@ -244,6 +250,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
       {
         name: 'synth',
@@ -267,6 +274,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
     ]);
   });
@@ -300,6 +308,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
       {
         name: 'synth',
@@ -323,6 +332,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
       {
         name: 'another',
@@ -346,6 +356,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
     ]);
   });
@@ -379,6 +390,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: true,
       },
       {
         name: 'synth',
@@ -405,12 +417,14 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
     ]);
   });
 
   it('merges integration information with dataStreamStats when dataset is not an integration default one', () => {
     const nonDefaultDataset = {
+      hasFailureStore: false,
       name: 'logs-system.custom-default',
       lastActivity: 1712911241117,
       size: '82.1kb',
@@ -451,6 +465,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
     ]);
   });

@@ -267,3 +267,13 @@ export function registerTraceEventsTopNThreadsSearchRoute(parameters: RouteRegis
     highCardinality: true,
   });
 }
+
+export function registerTraceEventsTopNExecutablesSearchRoute(parameters: RouteRegisterParameters) {
+  const paths = getRoutePaths();
+  return queryTopNCommon({
+    ...parameters,
+    pathName: paths.TopNExecutables,
+    searchField: getFieldNameForTopNType(TopNType.Executables),
+    highCardinality: true,
+  });
+}

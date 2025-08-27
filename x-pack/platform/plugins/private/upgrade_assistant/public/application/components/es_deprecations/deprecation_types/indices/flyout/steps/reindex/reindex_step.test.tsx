@@ -9,11 +9,11 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import {
+import type {
   EnrichedDeprecationInfo,
   ReindexAction,
-  ReindexStatus,
 } from '../../../../../../../../../common/types';
+import { ReindexStatus } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { ReindexFlyoutStep } from './reindex_step';
@@ -152,14 +152,6 @@ describe('ReindexStep', () => {
 
     wrapper.find('EuiButton').simulate('click');
     expect(props.startReindex).toHaveBeenCalled();
-  });
-
-  it('shows read-only button when reindexing fails', () => {
-    const props = cloneDeep(defaultProps);
-    props.reindexState.status = ReindexStatus.failed;
-    props.reindexState.errorMessage = 'Reindex failed';
-    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-    expect(wrapper.find('[data-test-subj="startIndexReadonlyButton"]').exists()).toBe(true);
   });
 
   it('only shows read-only button when status is failed', () => {

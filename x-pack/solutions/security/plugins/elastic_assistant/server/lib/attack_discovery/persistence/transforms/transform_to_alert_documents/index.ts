@@ -7,14 +7,18 @@
 
 import { createHash } from 'crypto';
 import { EcsVersion } from '@elastic/ecs';
-import { Alert } from '@kbn/alerts-as-data-utils';
-import { AuthenticatedUser } from '@kbn/core/server';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { AuthenticatedUser } from '@kbn/core/server';
+import type {
+  AttackDiscovery,
+  Replacements,
+  CreateAttackDiscoveryAlertsParams,
+} from '@kbn/elastic-assistant-common';
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_ID,
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
-  type CreateAttackDiscoveryAlertsParams,
   replaceAnonymizedValuesWithOriginalValues,
-  AttackDiscovery,
+  getOriginalAlertIds,
 } from '@kbn/elastic-assistant-common';
 import {
   ALERT_INSTANCE_ID,
@@ -26,6 +30,7 @@ import {
   ALERT_RULE_REVISION,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_START,
   ALERT_STATUS,
   ALERT_URL,
   ALERT_UUID,
@@ -56,7 +61,7 @@ import {
   ALERT_ATTACK_DISCOVERY_USERS,
   ALERT_RISK_SCORE,
 } from '../../../schedules/fields/field_names';
-import { AttackDiscoveryAlertDocument } from '../../../schedules/types';
+import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
 import { getAlertUrl } from './get_alert_url';
 
 type AttackDiscoveryAlertDocumentBase = Omit<
@@ -68,11 +73,13 @@ export const generateAttackDiscoveryAlertHash = ({
   attackDiscovery,
   connectorId,
   ownerId,
+  replacements,
   spaceId,
 }: {
   attackDiscovery: AttackDiscovery;
   connectorId: string;
   ownerId: string;
+  replacements: Replacements | undefined;
   spaceId: string;
 }) => {
   /**
@@ -84,8 +91,10 @@ export const generateAttackDiscoveryAlertHash = ({
    *               We store ad hoc attacks for all users within the same index and that is why we need this separation.
    * - `spaceId` - to separate attacks on a space basis
    */
+  const alertIds = attackDiscovery.alertIds;
+  const originalAlertIds = getOriginalAlertIds({ alertIds, replacements });
   return createHash('sha256')
-    .update([...attackDiscovery.alertIds].sort().join())
+    .update([...originalAlertIds].sort().join())
     .update(connectorId)
     .update(ownerId)
     .update(spaceId)
@@ -195,6 +204,7 @@ export const transformToAlertDocuments = ({
       attackDiscovery,
       connectorId: restParams.apiConfig.connectorId,
       ownerId: authenticatedUser.username ?? authenticatedUser.profile_uid,
+      replacements: restParams.replacements,
       spaceId,
     });
 
@@ -210,6 +220,7 @@ export const transformToAlertDocuments = ({
       ...baseAlertDocument,
 
       '@timestamp': now.toISOString(),
+      [ALERT_START]: now.toISOString(),
       [ALERT_ATTACK_DISCOVERY_USER_ID]: authenticatedUser.profile_uid,
       [ALERT_ATTACK_DISCOVERY_USER_NAME]: authenticatedUser.username,
       [ALERT_ATTACK_DISCOVERY_USERS]: [

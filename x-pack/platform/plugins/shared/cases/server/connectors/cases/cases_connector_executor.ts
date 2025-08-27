@@ -16,6 +16,7 @@ import { getFlattenedObject } from '@kbn/std';
 import type {
   CustomFieldsConfiguration,
   TemplatesConfiguration,
+  UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
   MAX_ALERTS_PER_CASE,
@@ -33,7 +34,12 @@ import {
   MAX_CONCURRENT_ES_REQUEST,
   MAX_OPEN_CASES,
 } from './constants';
-import type { BulkCreateOracleRecordRequest, CasesConnectorRunParams, OracleRecord } from './types';
+import type {
+  BulkCreateOracleRecordRequest,
+  CasesConnectorRunParams,
+  CasesGroupedAlerts,
+  OracleRecord,
+} from './types';
 import type { CasesOracleService } from './cases_oracle_service';
 import {
   convertValueToString,
@@ -60,12 +66,7 @@ interface CasesConnectorExecutorParams {
   spaceId: string;
 }
 
-interface GroupedAlerts {
-  alerts: CasesConnectorRunParams['alerts'];
-  grouping: Record<string, unknown>;
-}
-
-type GroupedAlertsWithOracleKey = GroupedAlerts & { oracleKey: string };
+type GroupedAlertsWithOracleKey = CasesGroupedAlerts & { oracleKey: string };
 type GroupedAlertsWithOracleRecords = GroupedAlertsWithOracleKey & { oracleRecord: OracleRecord };
 type GroupedAlertsWithCaseId = GroupedAlertsWithOracleRecords & { caseId: string };
 type GroupedAlertsWithCases = GroupedAlertsWithCaseId & { theCase: Case };
@@ -92,9 +93,9 @@ export class CasesConnectorExecutor {
   }
 
   public async execute(params: CasesConnectorRunParams) {
-    const { alerts, groupingBy } = params;
+    const { alerts, groupedAlerts: casesGroupedAlerts, groupingBy } = params;
 
-    const groupedAlerts = this.groupAlerts({ params, alerts, groupingBy });
+    const groupedAlerts = casesGroupedAlerts ?? this.groupAlerts({ params, alerts, groupingBy });
     const groupedAlertsWithCircuitBreakers = this.applyCircuitBreakers(params, groupedAlerts);
 
     if (groupedAlertsWithCircuitBreakers.length === 0) {
@@ -165,10 +166,10 @@ export class CasesConnectorExecutor {
     );
 
     /**
-     * Now that all cases are fetched or created per grouping, we attach the alerts
-     * to the corresponding cases.
+     * Now that all cases are fetched or created per grouping, we attach
+     * comments (if available) and alerts to the corresponding cases.
      */
-    await this.attachAlertsToCases(groupedAlertsWithClosedCasesHandled, params);
+    await this.attachCommentAndAlertsToCases(groupedAlertsWithClosedCasesHandled, params);
   }
 
   private groupAlerts({
@@ -177,7 +178,7 @@ export class CasesConnectorExecutor {
     groupingBy,
   }: Pick<CasesConnectorRunParams, 'alerts' | 'groupingBy'> & {
     params: CasesConnectorRunParams;
-  }): GroupedAlerts[] {
+  }): CasesGroupedAlerts[] {
     if (this.logger.isLevelEnabled('debug')) {
       this.logger.debug(
         `[CasesConnector][CasesConnectorExecutor][groupAlerts] Grouping ${alerts.length} alerts`,
@@ -189,7 +190,7 @@ export class CasesConnectorExecutor {
     }
 
     const uniqueGroupingByFields = Array.from(new Set<string>(groupingBy));
-    const groupingMap = new Map<string, GroupedAlerts>();
+    const groupingMap = new Map<string, CasesGroupedAlerts>();
 
     /**
      * We are interested in alerts that have a value for any
@@ -249,8 +250,8 @@ export class CasesConnectorExecutor {
 
   private applyCircuitBreakers(
     params: CasesConnectorRunParams,
-    groupedAlerts: GroupedAlerts[]
-  ): GroupedAlerts[] {
+    groupedAlerts: CasesGroupedAlerts[]
+  ): CasesGroupedAlerts[] {
     if (groupedAlerts.length > params.maximumCasesToOpen || groupedAlerts.length > MAX_OPEN_CASES) {
       const maxCasesCircuitBreaker = Math.min(params.maximumCasesToOpen, MAX_OPEN_CASES);
 
@@ -265,7 +266,7 @@ export class CasesConnectorExecutor {
     return groupedAlerts;
   }
 
-  private removeGrouping(groupedAlerts: GroupedAlerts[]): GroupedAlerts[] {
+  private removeGrouping(groupedAlerts: CasesGroupedAlerts[]): CasesGroupedAlerts[] {
     const allAlerts = groupedAlerts.map(({ alerts }) => alerts).flat();
 
     return [{ alerts: allAlerts, grouping: {} }];
@@ -273,7 +274,7 @@ export class CasesConnectorExecutor {
 
   private generateOracleKeys(
     params: CasesConnectorRunParams,
-    groupedAlerts: GroupedAlerts[]
+    groupedAlerts: CasesGroupedAlerts[]
   ): Map<string, GroupedAlertsWithOracleKey> {
     if (this.logger.isLevelEnabled('debug')) {
       this.logger.debug(
@@ -286,7 +287,7 @@ export class CasesConnectorExecutor {
 
     const oracleMap = new Map<string, GroupedAlertsWithOracleKey>();
 
-    for (const { grouping, alerts } of groupedAlerts) {
+    for (const { grouping, alerts, comments, title } of groupedAlerts) {
       const getRecordIdParams = {
         ruleId: rule.id,
         grouping,
@@ -306,7 +307,7 @@ export class CasesConnectorExecutor {
         );
       }
 
-      oracleMap.set(oracleKey, { oracleKey, grouping, alerts });
+      oracleMap.set(oracleKey, { oracleKey, grouping, alerts, comments, title });
     }
 
     if (this.logger.isLevelEnabled('debug')) {
@@ -616,6 +617,8 @@ export class CasesConnectorExecutor {
         caseId,
         alerts: entry.alerts,
         grouping: entry.grouping,
+        comments: entry.comments,
+        title: entry.title,
         oracleKey: recordId,
         oracleRecord: entry.oracleRecord,
       });
@@ -756,7 +759,7 @@ export class CasesConnectorExecutor {
     customFieldsConfigurations?: CustomFieldsConfiguration,
     templatesConfigurations?: TemplatesConfiguration
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
-    const { grouping, caseId, oracleRecord } = groupingData;
+    const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
 
     const selectedTemplate = templatesConfigurations?.find(
@@ -786,6 +789,7 @@ export class CasesConnectorExecutor {
         caseFieldsFromTemplate?.description ?? this.getCaseDescription(params, flattenGrouping),
       tags: this.getCaseTags(params, flattenGrouping, caseFieldsFromTemplate?.tags),
       title:
+        title ??
         caseFieldsFromTemplate?.title ??
         this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: caseFieldsFromTemplate?.connector ?? {
@@ -810,7 +814,7 @@ export class CasesConnectorExecutor {
 
   private getCasesTitle(
     params: CasesConnectorRunParams,
-    grouping: GroupedAlerts['grouping'],
+    grouping: CasesGroupedAlerts['grouping'],
     oracleCounter: number
   ) {
     const totalDots = 3;
@@ -860,7 +864,10 @@ export class CasesConnectorExecutor {
     return `${ruleNameTrimmedWithDots}${suffix}`;
   }
 
-  private getCaseDescription(params: CasesConnectorRunParams, grouping: GroupedAlerts['grouping']) {
+  private getCaseDescription(
+    params: CasesConnectorRunParams,
+    grouping: CasesGroupedAlerts['grouping']
+  ) {
     const ruleName = params.rule.ruleUrl
       ? `['${params.rule.name}'](${params.rule.ruleUrl})`
       : params.rule.name;
@@ -882,7 +889,7 @@ export class CasesConnectorExecutor {
 
   private getCaseTags(
     params: CasesConnectorRunParams,
-    grouping: GroupedAlerts['grouping'],
+    grouping: CasesGroupedAlerts['grouping'],
     templateCaseTags?: string[]
   ) {
     const ruleTags = Array.isArray(params.rule.tags) ? params.rule.tags : [];
@@ -898,7 +905,7 @@ export class CasesConnectorExecutor {
       .map((tag) => tag.slice(0, MAX_LENGTH_PER_TAG));
   }
 
-  private getGroupingAsTags(grouping: GroupedAlerts['grouping']): string[] {
+  private getGroupingAsTags(grouping: CasesGroupedAlerts['grouping']): string[] {
     return Object.entries(grouping)
       .map(([key, value]) => [key, `${key}:${convertValueToString(value)}`])
       .flat();
@@ -1096,7 +1103,7 @@ export class CasesConnectorExecutor {
     return casesMapWithNewCases;
   }
 
-  private async attachAlertsToCases(
+  private async attachCommentAndAlertsToCases(
     groupedAlertsWithCases: Map<string, GroupedAlertsWithCases>,
     params: CasesConnectorRunParams
   ): Promise<void> {
@@ -1105,7 +1112,7 @@ export class CasesConnectorExecutor {
       this.getLogMetadata(params, { tags: ['case-connector:attachAlertsToCases'] })
     );
 
-    const { rule } = params;
+    const { internallyManagedAlerts, rule } = params;
 
     const [casesUnderAlertLimit, casesOverAlertLimit] = partition(
       Array.from(groupedAlertsWithCases.values()),
@@ -1135,23 +1142,34 @@ export class CasesConnectorExecutor {
     );
 
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
-      ({ theCase, alerts }) => ({
-        caseId: theCase.id,
-        attachments: [
-          {
-            type: AttachmentType.alert,
-            rule: { id: rule.id, name: rule.name },
-            /**
-             * Map traverses the array in ascending order.
-             * The order is guaranteed to be the same for
-             * both calls by the ECMA-262 spec.
-             */
-            alertId: alerts.map((alert) => alert._id),
-            index: alerts.map((alert) => alert._index),
+      ({ theCase, alerts, comments }) => {
+        const extraComments: UserCommentAttachmentPayload[] =
+          comments?.map((comment) => ({
+            type: AttachmentType.user,
+            comment,
             owner: theCase.owner,
-          },
-        ],
-      })
+          })) ?? [];
+        return {
+          caseId: theCase.id,
+          attachments: [
+            ...extraComments,
+            {
+              type: AttachmentType.alert,
+              rule: internallyManagedAlerts
+                ? { id: null, name: null }
+                : { id: rule.id, name: rule.name },
+              /**
+               * Map traverses the array in ascending order.
+               * The order is guaranteed to be the same for
+               * both calls by the ECMA-262 spec.
+               */
+              alertId: alerts.map((alert) => alert._id),
+              index: alerts.map((alert) => alert._index),
+              owner: theCase.owner,
+            },
+          ],
+        };
+      }
     );
 
     await pMap(

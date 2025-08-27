@@ -26,6 +26,7 @@ import {
 } from './rule_form_errors';
 import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
 import { getAvailableRuleTypes, parseRuleCircuitBreakerErrorMessage } from './utils';
+import type { RuleFormStepId } from './constants';
 import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 
 export interface EditRuleFormProps {
@@ -38,6 +39,7 @@ export interface EditRuleFormProps {
   onSubmit?: (ruleId: string) => void;
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
   initialMetadata?: RuleTypeMetaData;
+  initialEditStep?: RuleFormStepId;
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
@@ -51,6 +53,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     isFlyout,
     onChangeMetaData,
     initialMetadata,
+    initialEditStep,
   } = props;
   const { http, notifications, docLinks, ruleTypeRegistry, application, fieldsMetadata, ...deps } =
     plugins;
@@ -229,6 +232,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
         onSave={onSave}
         onCancel={onCancel}
         onChangeMetaData={onChangeMetaData}
+        initialEditStep={initialEditStep}
       />
     </RuleFormStateProvider>
   );

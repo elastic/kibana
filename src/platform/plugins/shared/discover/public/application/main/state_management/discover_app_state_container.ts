@@ -106,6 +106,7 @@ export interface DiscoverAppState {
    * Hide chart
    */
   hideChart?: boolean;
+
   /**
    * The current data source
    */
@@ -271,7 +272,10 @@ export const getDiscoverAppStateContainer = ({
     // Set the default profile state only if not loading a saved search,
     // to avoid overwriting saved search state
     if (!currentSavedSearch.id) {
-      const { breakdownField, columns, rowHeight } = getCurrentUrlState(stateStorage, services);
+      const { breakdownField, columns, rowHeight, hideChart } = getCurrentUrlState(
+        stateStorage,
+        services
+      );
 
       // Only set default state which is not already set in the URL
       internalState.dispatch(
@@ -280,6 +284,7 @@ export const getDiscoverAppStateContainer = ({
             columns: columns === undefined,
             rowHeight: rowHeight === undefined,
             breakdownField: breakdownField === undefined,
+            hideChart: hideChart === undefined,
           },
         })
       );

@@ -7,36 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
-import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type {
+  EmbeddableComponentProps,
+  LensEmbeddableInput,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
 import { useEffect, useMemo, useState } from 'react';
-import { Observable, Subject, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
-import { pick } from 'lodash';
+import { cloneDeep } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
-import { UnifiedHistogramChartProps } from '../components/chart/chart';
-import {
+import useLatest from 'react-use/lib/useLatest';
+import type { UnifiedHistogramChartProps } from '../components/chart/chart';
+import type {
   UnifiedHistogramExternalVisContextStatus,
-  UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
-  UnifiedHistogramSuggestionType,
   UnifiedHistogramVisContext,
 } from '../types';
-import {
+import { UnifiedHistogramSuggestionType } from '../types';
+import type {
   UnifiedHistogramStateOptions,
   UnifiedHistogramStateService,
-  createStateService,
 } from '../services/state_service';
-import { useStateProps } from './use_state_props';
-import { useRequestParams } from './use_request_params';
 import { LensVisService } from '../services/lens_vis_service';
 import { checkChartAvailability } from '../components/chart';
-import { UnifiedHistogramLayoutProps } from '../components/layout/layout';
-import { getBreakdownField } from '../utils/local_storage_utils';
+import type { UnifiedHistogramLayoutProps } from '../components/layout/layout';
+import { useServicesBootstrap } from './use_services_bootstrap';
 
 export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'services'> & {
   /**
@@ -122,6 +124,12 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
     nextVisContext: UnifiedHistogramVisContext | undefined,
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
   ) => void;
+  /**
+   * Callback to modify the default Lens vis attributes used in the chart
+   */
+  getModifiedVisAttributes?: (
+    attributes: TypedLensByValueInput['attributes']
+  ) => TypedLensByValueInput['attributes'];
 };
 
 export type UnifiedHistogramApi = {
@@ -154,82 +162,30 @@ const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = 
 });
 
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
-  const [stateService] = useState(() => {
-    const { services, initialState, localStorageKeyPrefix } = props;
-    return createStateService({ services, initialState, localStorageKeyPrefix });
-  });
   const [lensVisService, setLensVisService] = useState<LensVisService>();
-  const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
-  const [api, setApi] = useState<UnifiedHistogramApi>();
+
+  const { stateProps, requestParams, api, input$ } = useServicesBootstrap(props);
 
   // Load async services and initialize API
   useMount(async () => {
     const apiHelper = await services.lens.stateHelperApi();
     setLensVisService(new LensVisService({ services, lensSuggestionsApi: apiHelper.suggestions }));
-    setApi({
-      fetch: () => {
-        input$.next({ type: 'fetch' });
-      },
-      ...pick(
-        stateService,
-        'state$',
-        'setChartHidden',
-        'setTopPanelHeight',
-        'setTimeInterval',
-        'setTotalHits'
-      ),
-    });
   });
 
-  const {
-    services,
-    dataView,
-    query,
-    columns,
-    searchSessionId,
-    requestAdapter,
-    isChartLoading,
-    localStorageKeyPrefix,
-    filters,
-    timeRange,
-    table,
-    externalVisContext,
-  } = props;
-  const initialBreakdownField = useMemo(
-    () =>
-      localStorageKeyPrefix
-        ? getBreakdownField(services.storage, localStorageKeyPrefix)
-        : undefined,
-    [localStorageKeyPrefix, services.storage]
-  );
-  const stateProps = useStateProps({
-    services,
-    localStorageKeyPrefix,
-    stateService,
-    dataView,
-    query,
-    searchSessionId,
-    requestAdapter,
-    columns,
-    breakdownField: 'breakdownField' in props ? props.breakdownField : initialBreakdownField,
-    onBreakdownFieldChange: props.onBreakdownFieldChange,
-    onVisContextChanged: props.onVisContextChanged,
-  });
+  const { services, dataView, columns, isChartLoading, timeRange, table, externalVisContext } =
+    props;
+
   const columnsMap = useMemo(() => {
     return columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {
       acc[column.id] = column;
       return acc;
     }, {});
   }, [columns]);
-  const requestParams = useRequestParams({
-    services,
-    query,
-    filters,
-    timeRange,
-  });
+
   const lensVisServiceCurrentSuggestionContext = useObservable(
     lensVisService?.currentSuggestionContext$ ?? EMPTY_SUGGESTION_CONTEXT
   );
+  const latestGetModifiedVisAttributes = useLatest(props.getModifiedVisAttributes);
 
   useEffect(() => {
     if (isChartLoading || !lensVisService) {
@@ -252,6 +208,9 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       table,
       onSuggestionContextChange: stateProps.onSuggestionContextChange,
       onVisContextChanged: stateProps.onVisContextChanged,
+      getModifiedVisAttributes: (attributes) => {
+        return latestGetModifiedVisAttributes.current?.(cloneDeep(attributes)) ?? attributes;
+      },
     });
   }, [
     columns,
@@ -259,6 +218,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     dataView,
     externalVisContext,
     isChartLoading,
+    latestGetModifiedVisAttributes,
     lensVisService,
     requestParams.filters,
     requestParams.query,

@@ -5,17 +5,31 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { CreateAnalyticsButton } from './create_analytics_button';
 
 describe('Data Frame Analytics: <CreateAnalyticsButton />', () => {
-  test('Minimal initialization', () => {
-    const wrapper = mount(
-      <CreateAnalyticsButton isDisabled={false} navigateToSourceSelection={jest.fn()} />
+  test('renders button with correct text', () => {
+    render(<CreateAnalyticsButton isDisabled={false} navigateToSourceSelection={jest.fn()} />);
+
+    expect(screen.getByText('Create job')).toBeInTheDocument();
+  });
+
+  test('calls navigateToSourceSelection when clicked', async () => {
+    const navigateToSourceSelection = jest.fn();
+    const user = userEvent.setup();
+
+    render(
+      <CreateAnalyticsButton
+        isDisabled={false}
+        navigateToSourceSelection={navigateToSourceSelection}
+      />
     );
 
-    expect(wrapper.find('EuiButton').text()).toBe('Create job');
+    await user.click(screen.getByText('Create job'));
+    expect(navigateToSourceSelection).toHaveBeenCalledTimes(1);
   });
 });

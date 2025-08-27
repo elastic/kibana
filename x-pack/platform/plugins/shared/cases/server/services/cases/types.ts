@@ -26,6 +26,11 @@ export interface PushedArgs {
   pushed_by: User;
 }
 
+export interface AttachmentStatsAttributes {
+  total_comments: number;
+  total_alerts: number;
+}
+
 export interface GetCaseArgs {
   id: string;
 }
@@ -57,7 +62,7 @@ export interface BulkCreateCasesArgs extends IndexRefresh {
 
 export interface PatchCase extends IndexRefresh {
   caseId: string;
-  updatedAttributes: Partial<CaseTransformedAttributes & PushedArgs>;
+  updatedAttributes: Partial<CaseTransformedAttributes & PushedArgs & AttachmentStatsAttributes>;
   originalCase: CaseSavedObjectTransformed;
   version?: string;
 }

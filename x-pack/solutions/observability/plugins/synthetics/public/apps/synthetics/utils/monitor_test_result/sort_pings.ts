@@ -6,7 +6,7 @@
  */
 
 import { get as getProp } from 'lodash';
-import { Ping } from '../../../../../common/runtime_types';
+import type { Ping } from '../../../../../common/runtime_types';
 
 export function sortPings(pings: Ping[], sortField: string, sortDirection: 'asc' | 'desc') {
   const toSort = [...pings];

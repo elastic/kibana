@@ -9,9 +9,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import deepEqual from 'fast-deep-equal';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs';
-import { createStateContainer, StateContainer } from '@kbn/kibana-utils-plugin/public';
+import type { StateContainer } from '@kbn/kibana-utils-plugin/public';
+import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { SearchSessionSavedObject } from './sessions_client';
 
 /**
@@ -77,7 +78,7 @@ export interface TrackedSearch<SearchDescriptor = unknown, SearchMeta extends {}
  * Internal state of SessionService
  * {@link SearchSessionState} is inferred from this state
  *
- * @private
+ * @internal
  */
 export interface SessionStateInternal<SearchDescriptor = unknown, SearchMeta extends {} = {}> {
   /**

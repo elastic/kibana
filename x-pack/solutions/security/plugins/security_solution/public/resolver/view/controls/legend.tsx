@@ -61,14 +61,14 @@ export const NodeLegend = ({
       closePopover={closePopover}
       anchorPosition="leftCenter"
     >
-      <EuiPopoverTitle style={{ textTransform: 'uppercase' }}>
+      <EuiPopoverTitle css={{ textTransform: 'uppercase' }}>
         {i18n.translate('xpack.securitySolution.resolver.graphControls.nodeLegend', {
           defaultMessage: 'legend',
         })}
       </EuiPopoverTitle>
       <div
         // Limit the width based on UX design
-        style={{ maxWidth: '212px' }}
+        css={{ maxWidth: '212px' }}
       >
         <StyledDescriptionList
           data-test-subj="resolver:graph-controls:node-legend"

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import type * as estypes from '@kbn/es-types';
 
 import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
-export interface CreateEsSearchIterableOptions<TDocument = unknown> {
+export interface CreateEsSearchIterableOptions<
+  TDocument = unknown,
+  TResultDocument = SearchResponse<TDocument>
+> {
   esClient: ElasticsearchClient;
   searchRequest: Omit<SearchRequest, 'search_after' | 'from' | 'sort' | 'pit' | 'index'> &
     Pick<Required<SearchRequest>, 'sort' | 'index'>;
@@ -23,16 +24,10 @@ export interface CreateEsSearchIterableOptions<TDocument = unknown> {
    *
    * @param data
    */
-  resultsMapper?: (data: SearchResponse<TDocument>) => any;
+  resultsMapper?: (data: SearchResponse<TDocument>) => TResultDocument | Promise<TResultDocument>;
   /** If a Point in Time should be used while executing the search. Defaults to `true` */
   usePointInTime?: boolean;
 }
-
-// FIXME:PT need to revisit this type - its not working as expected
-type InferEsSearchIteratorResultValue<TDocument = unknown> =
-  CreateEsSearchIterableOptions<TDocument>['resultsMapper'] extends undefined
-    ? SearchResponse<TDocument>
-    : ReturnType<Required<CreateEsSearchIterableOptions<TDocument>>['resultsMapper']>;
 
 /**
  * Creates an `AsyncIterable` that can be used to iterate (ex. via `for..await..of`) over all the data
@@ -61,17 +56,20 @@ type InferEsSearchIteratorResultValue<TDocument = unknown> =
  *    }
  *  }
  */
-export const createEsSearchIterable = <TDocument = unknown>({
+export const createEsSearchIterable = <
+  /** The ES Document type */
+  TDocument = unknown,
+  /** Type that is returned after the Mapper (if any) has manipulated the data */
+  TResultDocument = SearchResponse<TDocument>
+>({
   esClient,
   searchRequest: { size = 1000, index, ...searchOptions },
   resultsMapper,
   usePointInTime = true,
-}: CreateEsSearchIterableOptions<TDocument>): AsyncIterable<
-  InferEsSearchIteratorResultValue<TDocument>
-> => {
+}: CreateEsSearchIterableOptions<TDocument, TResultDocument>): AsyncIterable<TResultDocument> => {
   const keepAliveValue = '5m';
   let done = false;
-  let value: SearchResponse<TDocument>;
+  let value: TResultDocument;
   let searchAfterValue: estypes.SearchHit['sort'] | undefined;
   let pointInTime: Promise<{ id: string }> = usePointInTime
     ? esClient.openPointInTime({
@@ -81,13 +79,16 @@ export const createEsSearchIterable = <TDocument = unknown>({
       })
     : Promise.resolve({ id: '' });
 
-  const createIteratorResult = (): IteratorResult<SearchResponse<TDocument>> => {
+  const createIteratorResult = (): IteratorResult<TResultDocument> => {
     return { done, value };
   };
 
   const setValue = async (searchResponse: SearchResponse<TDocument>): Promise<void> => {
-    value = resultsMapper ? resultsMapper(searchResponse) : searchResponse;
+    value = (resultsMapper
+      ? resultsMapper(searchResponse)
+      : searchResponse) as unknown as TResultDocument;
 
+    // @ts-expect-error TS2638: Type NonNullable<TResultDocument> may represent a primitive value, which is not permitted as the right operand of the in operator.
     if (value && 'then' in value && typeof value.then === 'function') {
       // eslint-disable-next-line require-atomic-updates
       value = await value;

@@ -477,6 +477,32 @@ export function defineRoutes(
     }
   );
 
+  router.post(
+    {
+      path: `/api/alerts_fixture/maintenance_window_events_generation/_run_soon`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
+    async function (
+      _: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const taskId = `maintenance-window:generate-events-generator`;
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
   router.get(
     {
       path: '/api/alerts_fixture/rule/{id}/_get_api_key',
@@ -785,6 +811,8 @@ export function defineRoutes(
         },
       });
 
+      await eventLogClient.refreshIndex();
+
       try {
         await pRetry(
           async () => {
@@ -804,6 +832,29 @@ export function defineRoutes(
           body: { message: 'Amount of gaps did not increase' },
         });
       }
+    }
+  );
+
+  router.post(
+    {
+      path: '/_test/event_log/refresh',
+      validate: {},
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ) => {
+      const [, { eventLog }] = await core.getStartServices();
+      const eventLogClient = eventLog.getClient(req);
+      await eventLogClient.refreshIndex();
+      return res.ok({ body: { ok: true } });
     }
   );
 
@@ -864,7 +915,9 @@ export function defineRoutes(
       res: KibanaResponseFactory
     ) => {
       try {
+        const [, { eventLog }] = await core.getStartServices();
         const es = (await context.core).elasticsearch.client.asInternalUser;
+        const eventLogClient = eventLog.getClient(req);
 
         await es.deleteByQuery({
           index: '.kibana-event-log*',
@@ -877,6 +930,8 @@ export function defineRoutes(
           wait_for_completion: true,
         });
 
+        await eventLogClient.refreshIndex();
+
         return res.ok({ body: { ok: true } });
       } catch (err) {
         logger.error(err);
@@ -884,6 +939,46 @@ export function defineRoutes(
           statusCode: 500,
           body: { message: 'Error when removing gaps' },
         });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/alerts_fixture/rule/internally_managed',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [_, { alerting }] = await core.getStartServices();
+        const rulesClient = await alerting.getRulesClientWithRequest(req);
+
+        return res.ok({
+          body: await rulesClient.create({
+            data: {
+              enabled: true,
+              name: 'Internal Rule',
+              schedule: { interval: '1m' },
+              tags: [],
+              alertTypeId: 'test.internal-rule-type',
+              consumer: 'alertsFixture',
+              params: {},
+              actions: [],
+            },
+          }),
+        });
+      } catch (err) {
+        return res.badRequest({ body: err });
       }
     }
   );

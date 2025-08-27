@@ -35,7 +35,6 @@ const secrets = {
   }),
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function geminiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');

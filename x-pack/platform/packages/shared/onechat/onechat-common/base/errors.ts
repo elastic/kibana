@@ -6,17 +6,17 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
-import type { SerializedToolIdentifier } from '../tools';
-import type { SerializedAgentIdentifier } from '../agents';
 
 /**
  * Code to identify onechat errors
  */
 export enum OnechatErrorCode {
   internalError = 'internalError',
+  badRequest = 'badRequest',
   toolNotFound = 'toolNotFound',
   agentNotFound = 'agentNotFound',
   conversationNotFound = 'conversationNotFound',
+  requestAborted = 'requestAborted',
 }
 
 const OnechatError = ServerSentEventError;
@@ -28,6 +28,8 @@ export type OnechatError<
   TCode extends OnechatErrorCode,
   TMeta extends Record<string, any> = Record<string, any>
 > = ServerSentEventError<TCode, TMeta>;
+
+export type SerializedOnechatError = ReturnType<OnechatError<OnechatErrorCode>['toJSON']>;
 
 export const isOnechatError = (err: unknown): err is OnechatError<OnechatErrorCode> => {
   return err instanceof OnechatError;
@@ -61,6 +63,25 @@ export const createInternalError = (
 };
 
 /**
+ * Represents a generic bad request error
+ */
+export type OnechatBadRequestError = OnechatError<OnechatErrorCode.badRequest>;
+
+/**
+ * Checks if the given error is a {@link OnechatInternalError}
+ */
+export const isBadRequestError = (err: unknown): err is OnechatBadRequestError => {
+  return isOnechatError(err) && err.code === OnechatErrorCode.badRequest;
+};
+
+export const createBadRequestError = (
+  message: string,
+  meta: Record<string, any> = {}
+): OnechatBadRequestError => {
+  return new OnechatError(OnechatErrorCode.badRequest, message, { ...meta, statusCode: 400 });
+};
+
+/**
  * Error thrown when trying to retrieve or execute a tool not present or available in the current context.
  */
 export type OnechatToolNotFoundError = OnechatError<OnechatErrorCode.toolNotFound>;
@@ -77,7 +98,7 @@ export const createToolNotFoundError = ({
   customMessage,
   meta = {},
 }: {
-  toolId: SerializedToolIdentifier;
+  toolId: string;
   customMessage?: string;
   meta?: Record<string, any>;
 }): OnechatToolNotFoundError => {
@@ -105,7 +126,7 @@ export const createAgentNotFoundError = ({
   customMessage,
   meta = {},
 }: {
-  agentId: SerializedAgentIdentifier;
+  agentId: string;
   customMessage?: string;
   meta?: Record<string, any>;
 }): OnechatAgentNotFoundError => {
@@ -144,6 +165,25 @@ export const createConversationNotFoundError = ({
     customMessage ?? `Conversation ${conversationId} not found`,
     { ...meta, conversationId, statusCode: 404 }
   );
+};
+
+/**
+ * Represents an internal error
+ */
+export type OnechatRequestAbortedError = OnechatError<OnechatErrorCode.requestAborted>;
+
+/**
+ * Checks if the given error is a {@link OnechatRequestAbortedError}
+ */
+export const isRequestAbortedError = (err: unknown): err is OnechatRequestAbortedError => {
+  return isOnechatError(err) && err.code === OnechatErrorCode.requestAborted;
+};
+
+export const createRequestAbortedError = (
+  message: string,
+  meta?: Record<string, any>
+): OnechatRequestAbortedError => {
+  return new OnechatError(OnechatErrorCode.requestAborted, message, meta ?? {});
 };
 
 /**

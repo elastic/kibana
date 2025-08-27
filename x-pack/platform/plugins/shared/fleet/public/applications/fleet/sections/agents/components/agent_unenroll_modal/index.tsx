@@ -7,7 +7,14 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiConfirmModal, EuiFormFieldset, EuiCheckbox, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiFormFieldset,
+  EuiCheckbox,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent } from '../../../../types';
@@ -32,6 +39,8 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
   useForceUnenroll,
   hasFleetServer = false,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const { notifications } = useStartServices();
   const [forceUnenroll, setForceUnenroll] = useState<boolean>(useForceUnenroll || false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,6 +97,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
   return (
     <EuiConfirmModal
       data-test-subj="agentUnenrollModal"
+      aria-labelledby={confirmModalTitleId}
       title={
         isSingleAgent ? (
           <FormattedMessage
@@ -102,6 +112,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
           />
         )
       }
+      titleProps={{ id: confirmModalTitleId }}
       onCancel={onClose}
       onConfirm={onSubmit}
       cancelButtonText={

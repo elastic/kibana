@@ -137,6 +137,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
               isInvalid={errorExists}
             >
               <EuiTextArea
+                isInvalid={errorExists}
                 placeholder={i18n.ADD_COMMENT_PLACEHOLDER}
                 aria-label="Comment Input"
                 value={newCommentValue}

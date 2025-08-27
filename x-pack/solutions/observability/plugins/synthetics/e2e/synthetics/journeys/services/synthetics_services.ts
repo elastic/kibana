@@ -7,10 +7,10 @@
 
 import axios from 'axios';
 import type { Client } from '@elastic/elasticsearch';
-import { KbnClient } from '@kbn/test';
+import type { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
-import {
+import type {
   SyntheticsMonitor,
   SyntheticsPrivateLocations,
 } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -202,7 +202,9 @@ export class SyntheticsServices {
       const getService = this.params.getService;
       const server = getService('kibanaServer');
 
-      await server.savedObjects.clean({ types: ['synthetics-monitor', 'alert'] });
+      await server.savedObjects.clean({
+        types: ['synthetics-monitor', 'synthetics-monitor-multi-space', 'alert'],
+      });
       await this.cleanUpAlerts();
     } catch (e) {
       // eslint-disable-next-line no-console

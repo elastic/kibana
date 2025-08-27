@@ -19,13 +19,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { PlaygroundHeaderDocs } from './playground_header_docs';
-import { Toolbar } from './toolbar';
-import { PlaygroundPageMode, PlaygroundViewMode } from '../types';
 import { useSearchPlaygroundFeatureFlag } from '../hooks/use_search_playground_feature_flag';
-import { usePlaygroundParameters } from '../hooks/use_playground_parameters';
+import { PlaygroundPageMode, PlaygroundViewMode } from '../types';
+import { PlaygroundHeaderDocs } from './playground_header_docs';
+import { SaveNewPlaygroundButton } from './save_new_playground_button';
+import { Toolbar } from './toolbar';
 
 interface HeaderProps {
+  pageMode: PlaygroundPageMode;
+  viewMode: PlaygroundViewMode;
   showDocs?: boolean;
   onModeChange: (mode: PlaygroundViewMode) => void;
   onSelectPageModeChange: (mode: PlaygroundPageMode) => void;
@@ -33,12 +35,13 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  pageMode,
+  viewMode,
   onModeChange,
   showDocs = false,
   isActionsDisabled = false,
   onSelectPageModeChange,
 }) => {
-  const { pageMode, viewMode } = usePlaygroundParameters();
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
   const { euiTheme } = useEuiTheme();
   const options: Array<EuiButtonGroupOptionProps & { id: PlaygroundViewMode }> = [
@@ -80,9 +83,13 @@ export const Header: React.FC<HeaderProps> = ({
             size="xs"
           >
             <h2>
-              <FormattedMessage id="xpack.searchPlayground.pageTitle" defaultMessage="Playground" />
+              <FormattedMessage
+                id="xpack.searchPlayground.unsaved.pageTitle"
+                defaultMessage="Unsaved RAG playground"
+              />
             </h2>
           </EuiTitle>
+
           {isSearchModeEnabled && (
             <EuiSelect
               data-test-subj="page-mode-select"
@@ -111,6 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
         <EuiFlexGroup alignItems="center">
           {showDocs && <PlaygroundHeaderDocs />}
           <Toolbar selectedPageMode={pageMode} />
+          <SaveNewPlaygroundButton disabled={isActionsDisabled} />
         </EuiFlexGroup>
       </EuiPageHeaderSection>
     </EuiPageTemplate.Header>

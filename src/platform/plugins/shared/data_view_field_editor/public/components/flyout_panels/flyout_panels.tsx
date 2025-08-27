@@ -15,9 +15,9 @@ import React, {
   useMemo,
   useLayoutEffect,
 } from 'react';
-import { EuiFlexGroup, EuiFlexGroupProps, EuiFlyoutProps } from '@elastic/eui';
-
-import './flyout_panels.scss';
+import { css } from '@emotion/react';
+import type { EuiFlexGroupProps, EuiFlyoutProps } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 
 interface Panel {
   width?: number;
@@ -138,7 +138,7 @@ export const Panels: React.FC<Props> = ({
 
   return (
     <flyoutPanelsContext.Provider value={ctx}>
-      <EuiFlexGroup className="fieldEditor__flyoutPanels" gutterSize="none" {...props} />
+      <EuiFlexGroup css={styles.flyoutPanels} gutterSize="none" {...props} />
     </flyoutPanelsContext.Provider>
   );
 };
@@ -151,4 +151,10 @@ export const useFlyoutPanelsContext = (): Context => {
   }
 
   return ctx;
+};
+
+const styles = {
+  flyoutPanels: css({
+    height: '100%',
+  }),
 };

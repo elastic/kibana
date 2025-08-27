@@ -10,7 +10,7 @@
 /*
  * Mock the function "populateContext" that accesses the autocomplete definitions
  */
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 
 const mockPopulateContext = jest.fn();
 
@@ -21,13 +21,12 @@ jest.mock('../../../../lib/autocomplete/engine', () => {
     },
   };
 });
-import { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
+import type { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
 import {
   getDocumentationLinkFromAutocomplete,
   getUrlPathCompletionItems,
   shouldTriggerSuggestions,
   getInsertText,
-  isInsideTripleQuotes,
 } from './autocomplete_utils';
 
 describe('autocomplete_utils', () => {
@@ -291,27 +290,6 @@ describe('autocomplete_utils', () => {
       expect(getInsertText({ name: 'field', value: '[' } as ResultTerm, '', mockContext)).toBe(
         '"field": [$0]'
       );
-    });
-  });
-
-  describe('isInsideTripleQuotes', () => {
-    it('should return false for an empty string', () => {
-      expect(isInsideTripleQuotes('')).toBe(false);
-    });
-
-    it('should return false for a request without triple quotes', () => {
-      const request = `POST _search\n{\n  \"query\": {\n    \"match\": {\n      \"message\": \"hello world\"\n    }\n  }\n}`;
-      expect(isInsideTripleQuotes(request)).toBe(false);
-    });
-
-    it('should return true for a request ending inside triple quotes', () => {
-      const request = `POST _ingest/pipeline/_simulate\n{\n  \"pipeline\": {\n    \"processors\": [\n      {\n        \"script\": {\n          \"source\":\n          \"\"\"\n            for (field in params['fields']){\n                if (!$(field, '').isEmpty()){\n`;
-      expect(isInsideTripleQuotes(request)).toBe(true);
-    });
-
-    it('should return false for a properly closed triple-quoted string', () => {
-      const request = `POST _ingest/pipeline/_simulate\n{\n  \"pipeline\": {\n    \"processors\": [\n      {\n        \"script\": {\n          \"source\":\n          \"\"\"\n            return 'hello';\n          \"\"\"\n        }\n      }\n    ]\n  }\n}`;
-      expect(isInsideTripleQuotes(request)).toBe(false);
     });
   });
 });

@@ -35,13 +35,18 @@ export const TYPE = 'fleet:sync-integrations-task';
 export const VERSION = '1.0.5';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
-const INTERVAL = '5m';
+const DEFAULT_INTERVAL = '5m';
 const TIMEOUT = '5m';
+
+interface SyncIntegrationsTaskConfig {
+  taskInterval?: string;
+}
 
 interface SyncIntegrationsTaskSetupContract {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
   logFactory: LoggerFactory;
+  config: SyncIntegrationsTaskConfig;
 }
 
 interface SyncIntegrationsTaskStartContract {
@@ -51,24 +56,29 @@ interface SyncIntegrationsTaskStartContract {
 export class SyncIntegrationsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
+  private taskInterval: string;
 
   constructor(setupContract: SyncIntegrationsTaskSetupContract) {
-    const { core, taskManager, logFactory } = setupContract;
+    const { core, taskManager, logFactory, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
+    this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              return this.runTask(taskInstance, core, abortController);
             },
-            cancel: async () => {
-              this.abortController.abort('Task cancelled');
-            },
+            cancel: async () => {},
           };
         },
       },
@@ -82,7 +92,7 @@ export class SyncIntegrationsTask {
     }
 
     this.wasStarted = true;
-    this.logger.info(`[SyncIntegrationsTask] Started with interval of [${INTERVAL}]`);
+    this.logger.info(`[SyncIntegrationsTask] Started with interval of [${this.taskInterval}]`);
 
     try {
       await taskManager.ensureScheduled({
@@ -90,7 +100,7 @@ export class SyncIntegrationsTask {
         taskType: TYPE,
         scope: SCOPE,
         schedule: {
-          interval: INTERVAL,
+          interval: this.taskInterval,
         },
         state: {},
         params: { version: VERSION },
@@ -108,7 +118,11 @@ export class SyncIntegrationsTask {
     this.logger.info(`[SyncIntegrationsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
-  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+  public runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    abortController: AbortController
+  ) => {
     if (!this.wasStarted) {
       this.logger.debug('[SyncIntegrationsTask] runTask Aborted. Task not started yet');
       return;
@@ -124,6 +138,7 @@ export class SyncIntegrationsTask {
     this.logger.info(`[runTask()] started`);
 
     if (!canEnableSyncIntegrations()) {
+      this.logger.debug(`[SyncIntegrationsTask] Remote synced integration cannot be enabled.`);
       return;
     }
 
@@ -133,14 +148,14 @@ export class SyncIntegrationsTask {
 
     try {
       // write integrations on main cluster
-      await this.updateSyncedIntegrationsData(esClient, soClient);
+      await this.updateSyncedIntegrationsData(esClient, soClient, abortController);
 
       // sync integrations on remote cluster
       await syncIntegrationsOnRemote(
         esClient,
         soClient,
         packageService.asInternalUser,
-        this.abortController,
+        abortController,
         this.logger
       );
 
@@ -181,7 +196,8 @@ export class SyncIntegrationsTask {
 
   private updateSyncedIntegrationsData = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient
+    soClient: SavedObjectsClient,
+    abortController: AbortController
   ) => {
     const outputs = await outputService.list(soClient);
     const remoteESOutputs = outputs.items.filter(
@@ -254,7 +270,7 @@ export class SyncIntegrationsTask {
         esClient,
         soClient,
         newDoc.integrations,
-        this.abortController,
+        abortController,
         previousSyncIntegrationsData
       );
       newDoc.custom_assets = keyBy(customAssets, (asset) => `${asset.type}:${asset.name}`);
@@ -272,7 +288,7 @@ export class SyncIntegrationsTask {
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         body: newDoc,
       },
-      { signal: this.abortController.signal }
+      { signal: abortController.signal }
     );
   };
 }

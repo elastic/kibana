@@ -8,22 +8,26 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
 } from './stream_enrichment_state_machine';
-import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { ProcessorActorRef } from '../processor_state_machine';
-import { PreviewDocsFilterOption, SimulationActorSnapshot } from '../simulation_state_machine';
-import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import type { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
+import type {
+  PreviewDocsFilterOption,
+  SimulationActorSnapshot,
+  SimulationContext,
+} from '../simulation_state_machine';
+import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 import { isGrokProcessor } from '../../utils';
 
 const consoleInspector = createConsoleInspector();
 
 const StreamEnrichmentContext = createActorContext(streamEnrichmentMachine);
 
-export const useStreamsEnrichmentSelector = StreamEnrichmentContext.useSelector;
+export const useStreamEnrichmentSelector = StreamEnrichmentContext.useSelector;
 
 export type StreamEnrichmentEvents = ReturnType<typeof useStreamEnrichmentEvents>;
 
@@ -37,17 +41,20 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
-      addProcessor: (processor: ProcessorDefinitionWithUIAttributes) => {
+      addProcessor: (processor?: StreamlangProcessorDefinition) => {
         service.send({ type: 'processors.add', processor });
       },
-      reorderProcessors: (processorsRefs: ProcessorActorRef[]) => {
-        service.send({ type: 'processors.reorder', processorsRefs });
+      reorderProcessors: (from: number, to: number) => {
+        service.send({ type: 'processors.reorder', from, to });
       },
       resetChanges: () => {
         service.send({ type: 'stream.reset' });
       },
       saveChanges: () => {
         service.send({ type: 'stream.update' });
+      },
+      refreshSimulation: () => {
+        service.send({ type: 'simulation.refresh' });
       },
       viewSimulationPreviewData: () => {
         service.send({ type: 'simulation.viewDataPreview' });
@@ -63,6 +70,36 @@ export const useStreamEnrichmentEvents = () => {
       },
       unmapField: (fieldName: string) => {
         service.send({ type: 'simulation.fields.unmap', fieldName });
+      },
+      openDataSourcesManagement: () => {
+        service.send({ type: 'dataSources.openManagement' });
+      },
+      closeDataSourcesManagement: () => {
+        service.send({ type: 'dataSources.closeManagement' });
+      },
+      addDataSource: (dataSource: EnrichmentDataSource) => {
+        service.send({ type: 'dataSources.add', dataSource });
+      },
+      setExplicitlyEnabledPreviewColumns: (columns: string[]) => {
+        service.send({
+          type: 'previewColumns.updateExplicitlyEnabledColumns',
+          columns: columns.filter((col) => col.trim() !== ''),
+        });
+      },
+      setExplicitlyDisabledPreviewColumns: (columns: string[]) => {
+        service.send({
+          type: 'previewColumns.updateExplicitlyDisabledColumns',
+          columns: columns.filter((col) => col.trim() !== ''),
+        });
+      },
+      setPreviewColumnsOrder: (columns: string[]) => {
+        service.send({
+          type: 'previewColumns.order',
+          columns: columns.filter((col) => col.trim() !== ''),
+        });
+      },
+      setPreviewColumnsSorting: (sorting: SimulationContext['previewColumnsSorting']) => {
+        service.send({ type: 'previewColumns.setSorting', sorting });
       },
     }),
     [service]
@@ -127,15 +164,11 @@ const ListenForDefinitionChanges = ({
 };
 
 export const useSimulatorRef = () => {
-  return useStreamsEnrichmentSelector((state) => state.context.simulatorRef);
+  return useStreamEnrichmentSelector((state) => state.context.simulatorRef);
 };
 
 export const useSimulatorSelector = <T,>(selector: (snapshot: SimulationActorSnapshot) => T): T => {
   const simulationRef = useSimulatorRef();
-
-  if (!simulationRef) {
-    throw new Error('useSimulatorSelector must be used within a StreamEnrichmentContextProvider');
-  }
 
   return useSelector(simulationRef, selector);
 };

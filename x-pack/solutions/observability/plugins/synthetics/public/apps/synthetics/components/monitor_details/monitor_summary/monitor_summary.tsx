@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
+import { MonitorMWsCallout } from '../../common/mws_callout/monitor_mws_callout';
 import { SummaryPanel } from './summary_panel';
 
 import { useMonitorDetailsPage } from '../use_monitor_details_page';
@@ -21,11 +22,14 @@ import { MonitorDetailsPanelContainer } from './monitor_details_panel_container'
 import { LastTestRun } from './last_test_run';
 import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
+import { useMonitorScreenContext } from '../hooks/use_monitor_screen_context';
 
 export const MonitorSummary = () => {
   const { from, to } = useMonitorRangeFrom();
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
+
+  useMonitorScreenContext();
 
   const redirect = useMonitorDetailsPage();
   if (redirect) {
@@ -34,6 +38,7 @@ export const MonitorSummary = () => {
 
   return (
     <MonitorPendingWrapper>
+      <MonitorMWsCallout />
       <SummaryPanel dateLabel={dateLabel} from={from} to={to} />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" wrap={true} responsive={false}>

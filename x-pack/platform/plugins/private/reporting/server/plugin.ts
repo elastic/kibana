@@ -24,9 +24,10 @@ import type {
   ReportingStart,
   ReportingStartDeps,
 } from './types';
-import { ReportingRequestHandlerContext } from './types';
+import type { ReportingRequestHandlerContext } from './types';
 import { registerReportingEventTypes, registerReportingUsageCollector } from './usage';
 import { registerFeatures } from './features';
+import { setupSavedObjects } from './saved_objects';
 
 /*
  * @internal
@@ -74,6 +75,9 @@ export class ReportingPlugin
     registerDeprecations({ core });
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
     registerReportingEventTypes(core);
+
+    // Saved objects
+    setupSavedObjects(core.savedObjects);
 
     // Routes
     registerRoutes(reportingCore, this.logger);

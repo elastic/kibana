@@ -11,7 +11,7 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { Frequency, Weekday } from '@kbn/rrule';
+import type { Frequency } from '@kbn/rrule';
 import { isErr, tryAsResult } from './lib/result_type';
 import type { Interval } from './lib/intervals';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -21,6 +21,7 @@ export const DEFAULT_TIMEOUT = '5m';
 
 export enum TaskPriority {
   Low = 1,
+  NormalLongRunning = 40,
   Normal = 50,
 }
 
@@ -62,6 +63,7 @@ export interface RunContext {
    * is generated using the API key and passed as part of the run context.
    */
   fakeRequest?: KibanaRequest;
+  abortController: AbortController;
 }
 
 /**
@@ -77,6 +79,7 @@ export type SuccessfulRunResult = {
   taskRunError?: DecoratedError;
   shouldValidate?: boolean;
   shouldDeleteTask?: boolean;
+  shouldDisableTask?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -259,27 +262,28 @@ export interface IntervalSchedule {
   rrule?: never;
 }
 
+export type Rrule = RruleMonthly | RruleWeekly | RruleDaily;
 export interface RruleSchedule {
-  rrule: RruleMonthly | RruleWeekly | RruleDaily;
+  rrule: Rrule;
   interval?: never;
 }
 
 interface RruleCommon {
+  dtstart?: string;
   freq: Frequency;
   interval: number;
   tzid: string;
 }
-
 interface RruleMonthly extends RruleCommon {
   freq: Frequency.MONTHLY;
   bymonthday?: number[];
   byhour?: number[];
   byminute?: number[];
-  byweekday?: Weekday[];
+  byweekday?: string[];
 }
 interface RruleWeekly extends RruleCommon {
   freq: Frequency.WEEKLY;
-  byweekday?: Weekday[];
+  byweekday?: string[];
   byhour?: number[];
   byminute?: number[];
   bymonthday?: never;
@@ -288,7 +292,7 @@ interface RruleDaily extends RruleCommon {
   freq: Frequency.DAILY;
   byhour?: number[];
   byminute?: number[];
-  byweekday?: Weekday[];
+  byweekday?: string[];
   bymonthday?: never;
 }
 

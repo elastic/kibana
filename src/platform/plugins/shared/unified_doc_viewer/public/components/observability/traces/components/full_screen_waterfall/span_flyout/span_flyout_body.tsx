@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
-import { DataTableRecord, PARENT_ID_FIELD } from '@kbn/discover-utils';
+import { EuiErrorBoundary, EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import SpanOverview from '../../../doc_viewer_span_overview';
 import TransactionOverview from '../../../doc_viewer_transaction_overview';
 import DocViewerTable from '../../../../../doc_viewer_table';
 import DocViewerSource from '../../../../../doc_viewer_source';
+import { useDataSourcesContext } from '../../../hooks/use_data_sources';
+import { isSpanHit } from '../helpers/is_span';
 
 const tabIds = {
   OVERVIEW: 'unifiedDocViewerTracesSpanFlyoutOverview',
@@ -55,9 +57,10 @@ export interface SpanFlyoutProps {
   onCloseFlyout: () => void;
 }
 
-export const SpanFlyoutBody = ({ tracesIndexPattern, hit, loading, dataView }: SpanFlyoutProps) => {
+export const SpanFlyoutBody = ({ hit, loading, dataView }: SpanFlyoutProps) => {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
-  const isSpan = !!hit?.flattened[PARENT_ID_FIELD];
+  const isSpan = isSpanHit(hit);
+  const { indexes } = useDataSourcesContext();
   const onSelectedTabChanged = (id: string) => setSelectedTabId(id);
 
   const renderTabs = () => {
@@ -80,24 +83,27 @@ export const SpanFlyoutBody = ({ tracesIndexPattern, hit, loading, dataView }: S
         <>
           <EuiTabs size="s">{renderTabs()}</EuiTabs>
           <EuiSkeletonText isLoading={loading}>
-            {selectedTabId === tabIds.OVERVIEW &&
-              (isSpan ? (
-                <SpanOverview
-                  hit={hit}
-                  tracesIndexPattern={tracesIndexPattern}
-                  showWaterfall={false}
-                  showActions={false}
-                  dataView={dataView}
-                />
-              ) : (
-                <TransactionOverview
-                  hit={hit}
-                  tracesIndexPattern={tracesIndexPattern}
-                  showWaterfall={false}
-                  showActions={false}
-                  dataView={dataView}
-                />
-              ))}
+            {selectedTabId === tabIds.OVERVIEW && (
+              <EuiErrorBoundary>
+                {isSpan ? (
+                  <SpanOverview
+                    hit={hit}
+                    indexes={indexes}
+                    showWaterfall={false}
+                    showActions={false}
+                    dataView={dataView}
+                  />
+                ) : (
+                  <TransactionOverview
+                    hit={hit}
+                    indexes={indexes}
+                    showWaterfall={false}
+                    showActions={false}
+                    dataView={dataView}
+                  />
+                )}
+              </EuiErrorBoundary>
+            )}
 
             {selectedTabId === tabIds.TABLE && <DocViewerTable hit={hit} dataView={dataView} />}
 

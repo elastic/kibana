@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import {
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type {
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
   Message,
 } from '@kbn/elastic-assistant-common';
+import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createConversation } from './create_conversation';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { deleteConversation } from './delete_conversation';
 import { appendConversationMessages } from './append_conversation_messages';
-import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
+import type { AIAssistantDataClientParams } from '..';
+import { AIAssistantDataClient } from '..';
+import { deleteAllConversations } from './delete_all_conversations';
 
 /**
  * Params for when creating ConversationDataClient in Request Context Factory. Useful if needing to modify
@@ -33,7 +36,7 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
   }
 
   /**
-   * Updates a conversation with the new messages.
+   * Gets a conversation by its id.
    * @param options
    * @param options.id The existing conversation id.
    * @param options.authenticatedUser Current authenticated user.
@@ -148,13 +151,30 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
    * @param options.id The id of the conversation to delete
    * @returns The conversation deleted if found, otherwise null
    */
-  public deleteConversation = async (id: string) => {
+  public deleteConversation = async (id: string): Promise<number | undefined> => {
     const esClient = await this.options.elasticsearchClientPromise;
     return deleteConversation({
       esClient,
       conversationIndex: this.indexTemplateAndPattern.alias,
       id,
       logger: this.options.logger,
+    });
+  };
+
+  /**
+   * Deletes all conversations in the index.
+   * @param options.excludedIds An array of ids to exclude from deletion.
+   * @returns The number of conversations deleted
+   */
+  public deleteAllConversations = async (options?: {
+    excludedIds?: string[];
+  }): Promise<DeleteByQueryResponse | undefined> => {
+    const esClient = await this.options.elasticsearchClientPromise;
+    return deleteAllConversations({
+      esClient,
+      conversationIndex: this.indexTemplateAndPattern.alias,
+      logger: this.options.logger,
+      excludedIds: options?.excludedIds,
     });
   };
 }

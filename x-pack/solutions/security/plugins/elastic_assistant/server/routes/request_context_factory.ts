@@ -10,14 +10,14 @@ import { memoize } from 'lodash';
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import {
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type {
   ElasticAssistantApiRequestHandlerContext,
   ElasticAssistantPluginCoreSetupDependencies,
   ElasticAssistantPluginSetupDependencies,
   ElasticAssistantRequestHandlerContext,
 } from '../types';
-import { AIAssistantService } from '../ai_assistant_service';
+import type { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
 
 export interface IRequestContextFactory {
@@ -107,12 +107,16 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getCurrentUser,
 
-      getRegisteredTools: (pluginName: string) => {
+      getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
 
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
+      },
+
+      checkPrivileges: () => {
+        return startPlugins.security.authz.checkPrivilegesWithRequest(request);
       },
       llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,

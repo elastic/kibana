@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import type { Connector, Meta } from '@kbn/search-connectors';
 
-import { HttpSetup } from '@kbn/core/public';
-import {
-  DeleteConnectorApiLogic,
-  DeleteConnectorApiLogicActions,
-} from '../../api/connector/delete_connector_api_logic';
-import {
-  FetchConnectorsApiLogic,
-  FetchConnectorsApiLogicActions,
-} from '../../api/connector/fetch_connectors.api';
+import type { HttpSetup } from '@kbn/core/public';
+import type { DeleteConnectorApiLogicActions } from '../../api/connector/delete_connector_api_logic';
+import { DeleteConnectorApiLogic } from '../../api/connector/delete_connector_api_logic';
+import type { FetchConnectorsApiLogicActions } from '../../api/connector/fetch_connectors.api';
+import { FetchConnectorsApiLogic } from '../../api/connector/fetch_connectors.api';
 import { Status } from '../../../common/types/api';
 
 export type ConnectorViewItem = Connector & { docsCount?: number; indexExists: boolean };
@@ -137,13 +134,11 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
     },
   }),
   path: ['content_connectors', 'content', 'connectors_logic'],
-  // @ts-expect-error upgrade typescript v5.1.6
   reducers: ({ props }) => ({
     deleteModalConnectorId: [
       '',
       {
         closeDeleteModal: () => '',
-        // @ts-expect-error upgrade typescript v5.1.6
         openDeleteModal: (_, { connectorId }) => connectorId,
       },
     ],
@@ -151,7 +146,6 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
       '',
       {
         closeDeleteModal: () => '',
-        // @ts-expect-error upgrade typescript v5.1.6
         openDeleteModal: (_, { connectorName }) => connectorName,
       },
     ],
@@ -159,7 +153,6 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
       null,
       {
         closeDeleteModal: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         openDeleteModal: (_, { indexName }) => indexName,
       },
     ],
@@ -186,20 +179,17 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
         size: 10,
       },
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         apiSuccess: ({ fetchCrawlersOnly, searchQuery }, { meta }) => ({
           fetchCrawlersOnly,
           from: meta.page.from,
           searchQuery,
           size: meta.page.size,
         }),
-        // @ts-expect-error upgrade typescript v5.1.6
         fetchConnectors: (state, payload) => ({
           ...state,
           ...payload,
           http: props.http,
         }),
-        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => ({
           ...state,
           from: (newPageIndex - 1) * state.size,

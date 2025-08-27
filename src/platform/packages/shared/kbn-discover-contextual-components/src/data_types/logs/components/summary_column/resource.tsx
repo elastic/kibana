@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { CommonProps, EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { ResourceFieldDescriptor } from './utils';
 
@@ -28,10 +29,11 @@ export const Resource = ({ fields, limited = false, onFilter, ...props }: Resour
 
   return (
     <EuiFlexGroup gutterSize="s" {...props}>
-      {displayedFields.map(({ name, rawValue, value, ResourceBadge, Icon }) => (
+      {displayedFields.map(({ name, rawValue, value, ResourceBadge, Icon, property }) => (
         <ResourceBadge
           key={name}
-          property={name}
+          name={name}
+          property={property}
           rawValue={rawValue}
           value={value}
           icon={Icon}

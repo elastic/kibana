@@ -7,8 +7,12 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import DateMath from '@kbn/datemath';
-import { EXCLUDE_RUN_ONCE_FILTER, SUMMARY_FILTER } from '../constants/client_defaults';
-import { CertResult, GetCertsParams, Ping } from '../runtime_types';
+import {
+  EXCLUDE_RUN_ONCE_FILTER,
+  SUMMARY_FILTER,
+  getRangeFilter,
+} from '../constants/client_defaults';
+import type { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
 import type { CertificatesResults } from '../../server/legacy_uptime/lib/requests/get_certs';
@@ -88,6 +92,10 @@ export const getCertsRequestBody = ({
               field: 'tls.server.hash.sha256',
             },
           },
+          getRangeFilter({
+            from: 'now-7d',
+            to: 'now',
+          }),
           {
             range: {
               'monitor.timespan': {

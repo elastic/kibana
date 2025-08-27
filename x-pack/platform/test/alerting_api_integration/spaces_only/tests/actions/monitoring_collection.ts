@@ -10,7 +10,6 @@ import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 const CLUSTER_ACTIONS_MONITORING_COLLECTION_URL = `/api/monitoring_collection/cluster_actions`;
 
-// eslint-disable-next-line import/no-default-export
 export default function actionsMonitoringCollectionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 

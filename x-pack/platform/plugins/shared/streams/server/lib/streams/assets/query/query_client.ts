@@ -6,17 +6,18 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { Logger } from '@kbn/core/server';
-import { StreamQuery } from '@kbn/streams-schema';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { StreamQuery } from '@kbn/streams-schema';
+import { buildEsqlQuery } from '@kbn/streams-schema';
 import { map, partition } from 'lodash';
 import pLimit from 'p-limit';
-import { QueryLink } from '../../../../../common/assets';
-import { StreamsConfig } from '../../../../../common/config';
-import { EsqlRuleParams } from '../../../rules/esql/types';
-import { AssetClient, getAssetLinkUuid } from '../asset_client';
+import type { QueryLink } from '../../../../../common/assets';
+import type { EsqlRuleParams } from '../../../rules/esql/types';
+import type { AssetClient } from '../asset_client';
+import { getAssetLinkUuid } from '../asset_client';
 import { ASSET_ID, ASSET_TYPE } from '../fields';
-import { getKqlAsCommandArg, getRuleIdFromQueryLink } from './helpers/query';
+import { getRuleIdFromQueryLink } from './helpers/query';
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
   return currentQuery.kql.query !== nextQuery.kql.query;
@@ -32,31 +33,21 @@ function toQueryLink(query: StreamQuery, stream: string): QueryLink {
 }
 
 export class QueryClient {
-  private readonly isSignificantEventsEnabled: boolean;
-
   constructor(
     private readonly dependencies: {
       assetClient: AssetClient;
       rulesClient: RulesClient;
       logger: Logger;
-      config: StreamsConfig;
-    }
-  ) {
-    this.isSignificantEventsEnabled =
-      dependencies.config.experimental?.significantEventsEnabled ?? false;
-  }
+    },
+    private readonly isSignificantEventsEnabled: boolean = false
+  ) {}
 
   public async syncQueries(stream: string, queries: StreamQuery[]) {
     if (!this.isSignificantEventsEnabled) {
-      return await this.dependencies.assetClient.syncAssetList(
-        stream,
-        queries.map((query) => ({
-          [ASSET_ID]: query.id,
-          [ASSET_TYPE]: 'query' as const,
-          query,
-        })),
-        'query'
+      this.dependencies.logger.debug(
+        `Skipping syncQueries for stream "${stream}" because significant events feature is disabled.`
       );
+      return;
     }
 
     /**
@@ -68,7 +59,10 @@ export class QueryClient {
      * - If a query is updated without a breaking change, it updates the existing rule.
      * - If a query is deleted, it removes the associated rule.
      */
-    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
+    const { [stream]: currentQueryLinks } = await this.dependencies.assetClient.getAssetLinks(
+      [stream],
+      ['query']
+    );
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const nextIds = new Set(queries.map((query) => query.id));
 
@@ -112,66 +106,58 @@ export class QueryClient {
   }
 
   public async upsert(stream: string, query: StreamQuery) {
-    const { assetClient } = this.dependencies;
-
     if (!this.isSignificantEventsEnabled) {
-      return await assetClient.linkAsset(stream, {
-        [ASSET_ID]: query.id,
-        [ASSET_TYPE]: 'query',
-        query,
-      });
+      this.dependencies.logger.debug(
+        `Skipping upsert for stream "${stream}" because significant events feature is disabled.`
+      );
+      return;
     }
 
     await this.bulk(stream, [{ index: query }]);
   }
 
   public async delete(stream: string, queryId: string) {
-    const { assetClient } = this.dependencies;
-
     if (!this.isSignificantEventsEnabled) {
-      return await assetClient.unlinkAsset(stream, {
-        [ASSET_TYPE]: 'query',
-        [ASSET_ID]: queryId,
-      });
+      this.dependencies.logger.debug(
+        `Skipping delete for stream "${stream}" because significant events feature is disabled.`
+      );
+      return;
     }
 
     await this.bulk(stream, [{ delete: { id: queryId } }]);
+  }
+
+  public async deleteAll(stream: string) {
+    if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping deleteAll for stream "${stream}" because significant events feature is disabled.`
+      );
+      return;
+    }
+
+    const { [stream]: currentQueryLinks } = await this.dependencies.assetClient.getAssetLinks(
+      [stream],
+      ['query']
+    );
+    const queriesToDelete = currentQueryLinks.map((link) => ({ delete: { id: link.query.id } }));
+    await this.bulk(stream, queriesToDelete);
   }
 
   public async bulk(
     stream: string,
     operations: Array<{ index?: StreamQuery; delete?: { id: string } }>
   ) {
-    const { assetClient } = this.dependencies;
-
     if (!this.isSignificantEventsEnabled) {
-      return await assetClient.bulk(
-        stream,
-        operations.map((operation) => {
-          if (operation.index) {
-            return {
-              index: {
-                asset: {
-                  [ASSET_TYPE]: 'query',
-                  [ASSET_ID]: operation.index.id,
-                  query: operation.index,
-                },
-              },
-            };
-          }
-          return {
-            delete: {
-              asset: {
-                [ASSET_TYPE]: 'query',
-                [ASSET_ID]: operation.delete!.id,
-              },
-            },
-          };
-        })
+      this.dependencies.logger.debug(
+        `Skipping bulk update for stream "${stream}" because significant events feature is disabled.`
       );
+      return;
     }
 
-    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
+    const { [stream]: currentQueryLinks } = await this.dependencies.assetClient.getAssetLinks(
+      [stream],
+      ['query']
+    );
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const indexOperationsMap = new Map(
       operations
@@ -217,6 +203,7 @@ export class QueryClient {
               if (isBoom(error) && error.output.statusCode === 409) {
                 return rulesClient.update<EsqlRuleParams>(this.toUpdateRuleParams(query, stream));
               }
+              throw error;
             })
         );
       }),
@@ -228,6 +215,7 @@ export class QueryClient {
               if (isBoom(error) && error.output.statusCode === 404) {
                 return rulesClient.create<EsqlRuleParams>(this.toCreateRuleParams(query, stream));
               }
+              throw error;
             })
         );
       }),
@@ -252,6 +240,8 @@ export class QueryClient {
 
   private toCreateRuleParams(query: QueryLink, stream: string) {
     const ruleId = getRuleIdFromQueryLink(query);
+
+    const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
     return {
       data: {
         name: query.query.title,
@@ -260,12 +250,10 @@ export class QueryClient {
         actions: [],
         params: {
           timestampField: '@timestamp',
-          query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
-            query.query.kql.query
-          )}\")`,
+          query: esqlQuery,
         },
         enabled: true,
-        tags: ['streams'],
+        tags: ['streams', stream],
         schedule: {
           interval: '1m',
         },
@@ -278,6 +266,7 @@ export class QueryClient {
 
   private toUpdateRuleParams(query: QueryLink, stream: string) {
     const ruleId = getRuleIdFromQueryLink(query);
+    const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
     return {
       id: ruleId,
       data: {
@@ -285,11 +274,9 @@ export class QueryClient {
         actions: [],
         params: {
           timestampField: '@timestamp',
-          query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
-            query.query.kql.query
-          )}\")`,
+          query: esqlQuery,
         },
-        tags: ['streams'],
+        tags: ['streams', stream],
         schedule: {
           interval: '1m',
         },

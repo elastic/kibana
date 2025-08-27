@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import moment from 'moment';
@@ -178,6 +179,7 @@ export class NewEventModal extends Component {
                 onChange={this.handleTimeStartChange}
                 placeholder={TIME_FORMAT}
                 value={startDateString}
+                data-test-subj="mlCalendarEventStartDateInput"
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -196,6 +198,7 @@ export class NewEventModal extends Component {
                 onChange={this.handleTimeEndChange}
                 placeholder={TIME_FORMAT}
                 value={endDateString}
+                data-test-subj="mlCalendarEventEndDateInput"
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -258,6 +261,7 @@ export class NewEventModal extends Component {
   render() {
     const { closeModal } = this.props;
     const { description } = this.state;
+    const modalTitleId = htmlIdGenerator()('modalTitle');
 
     return (
       <Fragment>
@@ -266,9 +270,10 @@ export class NewEventModal extends Component {
           initialFocus="[name=eventDescription]"
           maxWidth={false}
           data-test-subj={'mlCalendarEventForm'}
+          aria-labelledby={modalTitleId}
         >
           <EuiModalHeader>
-            <EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.newEventModal.createNewEventTitle"
                 defaultMessage="Create new event"

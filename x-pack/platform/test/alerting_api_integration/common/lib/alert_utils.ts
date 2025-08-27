@@ -537,6 +537,29 @@ export class AlertUtils {
     }
     return await request.send();
   }
+
+  public async createInternallyManagedRule(objectRemover?: ObjectRemover) {
+    let request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule`)
+      .set('kbn-xsrf', 'foo');
+
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+
+    const response = await request.send({
+      ...getTestRuleData({
+        name: 'test.internal-rule-type',
+        rule_type_id: 'test.internal-rule-type',
+      }),
+    });
+
+    if (response.statusCode === 200 && objectRemover) {
+      objectRemover.add(this.space.id, response.body.id, 'rule', 'alerting');
+    }
+
+    return response;
+  }
 }
 
 export function getUnauthorizedErrorMessage(operation: string, alertType: string, scope: string) {
@@ -752,5 +775,17 @@ function getAlwaysFiringRuleWithSystemAction(reference: string) {
         params: { myParam: 'param from rule action', index: ES_TEST_INDEX_NAME, reference },
       },
     ],
+  };
+}
+
+export function getAlwaysFiringInternalRule() {
+  return {
+    enabled: true,
+    name: 'Internal Rule',
+    schedule: { interval: '1m' },
+    tags: [],
+    rule_type_id: 'test.internal-rule-type',
+    consumer: 'alertsFixture',
+    params: {},
   };
 }

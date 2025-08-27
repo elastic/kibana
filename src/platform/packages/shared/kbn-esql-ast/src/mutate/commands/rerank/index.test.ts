@@ -11,7 +11,11 @@ import { BasicPrettyPrinter } from '../../../pretty_print';
 import * as commands from '..';
 import { EsqlQuery } from '../../../query';
 
-describe('commands.rerank', () => {
+/**
+ * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+ * get back to it after 9.1 release.
+ */
+describe.skip('commands.rerank', () => {
   describe('.list()', () => {
     it('lists the only "RERANK" commands', () => {
       const src =

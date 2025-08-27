@@ -13,16 +13,18 @@ import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import {
-  APP_WRAPPER_CLASS,
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import type {
   App,
   AppMountParameters,
   AppUpdater,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
   ScopedHistory,
+} from '@kbn/core/public';
+import {
+  APP_WRAPPER_CLASS,
+  DEFAULT_APP_CATEGORIES,
   type CoreSetup,
   type CoreStart,
 } from '@kbn/core/public';
@@ -30,7 +32,7 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
@@ -62,21 +64,15 @@ import type {
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
-import { DashboardMountContextProps } from './dashboard_app/types';
-import {
-  DASHBOARD_APP_ID,
-  LANDING_PAGE_PATH,
-  LEGACY_DASHBOARD_APP_ID,
-  SEARCH_SESSION_ID,
-} from '../common/constants';
-import {
-  GetPanelPlacementSettings,
-  registerDashboardPanelPlacementSetting,
-} from './panel_placement';
+import type { DashboardMountContextProps } from './dashboard_app/types';
+import { DASHBOARD_APP_ID, LANDING_PAGE_PATH, SEARCH_SESSION_ID } from '../common/constants';
+import type { GetPanelPlacementSettings } from './panel_placement';
+import { registerDashboardPanelSettings } from './panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
+import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -123,7 +119,7 @@ interface DashboardSetup {}
 
 export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
-  registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
+  registerDashboardPanelSettings: <SerializedState extends object = object>(
     embeddableType: string,
     getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
   ) => void;
@@ -143,7 +139,7 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
+    { share, home, data, contentManagement, urlForwarding }: DashboardSetupDependencies
   ) {
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
@@ -255,24 +251,9 @@ export class DashboardPlugin
     };
 
     core.application.register(app);
-    urlForwarding.forwardApp(DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
-      const [, tail] = /(\?.*)/.exec(path) || [];
-      // carry over query if it exists
-      return `#/list${tail || ''}`;
-    });
-    urlForwarding.forwardApp(LEGACY_DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
-      const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
-      if (!id && !tail) {
-        // unrecognized sub url
-        return '#/list';
-      }
-      if (!id && tail) {
-        // unsaved dashboard, but probably state in URL
-        return `#/create${tail || ''}`;
-      }
-      // persisted dashboard, probably with url state
-      return `#/view/${id}${tail || ''}`;
-    });
+
+    setupUrlForwarding(urlForwarding);
+
     const dashboardAppTitle = i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
       defaultMessage: 'Dashboard',
     });
@@ -314,7 +295,7 @@ export class DashboardPlugin
     untilPluginStartServicesReady().then(() => registerActions(plugins));
 
     return {
-      registerDashboardPanelPlacementSetting,
+      registerDashboardPanelSettings,
       findDashboardsService: async () => {
         const { getDashboardContentManagementService } = await import(
           './services/dashboard_content_management_service'

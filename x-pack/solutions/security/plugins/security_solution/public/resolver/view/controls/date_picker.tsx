@@ -99,7 +99,7 @@ export const DateSelectionButton = memo(
         closePopover={closePopover}
         anchorPosition="leftCenter"
       >
-        <EuiPopoverTitle style={{ textTransform: 'uppercase' }}>
+        <EuiPopoverTitle css={{ textTransform: 'uppercase' }}>
           {dateRangeDescription}
         </EuiPopoverTitle>
         <EuiSuperDatePicker

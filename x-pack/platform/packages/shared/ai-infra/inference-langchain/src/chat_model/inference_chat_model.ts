@@ -22,26 +22,25 @@ import type {
 import type { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { isZodSchema } from '@langchain/core/utils/types';
-import { ChatGenerationChunk, ChatResult, ChatGeneration } from '@langchain/core/outputs';
+import type { ChatResult, ChatGeneration } from '@langchain/core/outputs';
+import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { OutputParserException } from '@langchain/core/output_parsers';
-import {
-  Runnable,
-  RunnablePassthrough,
-  RunnableSequence,
-  RunnableLambda,
-} from '@langchain/core/runnables';
-import {
+import type { Runnable } from '@langchain/core/runnables';
+import { RunnablePassthrough, RunnableSequence, RunnableLambda } from '@langchain/core/runnables';
+import type {
   InferenceConnector,
   ChatCompleteAPI,
   ChatCompleteOptions,
   FunctionCallingMode,
+  ConnectorTelemetryMetadata,
+  ChatCompleteResponse,
+} from '@kbn/inference-common';
+import {
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
   isToolValidationError,
   getConnectorDefaultModel,
   getConnectorProvider,
-  ConnectorTelemetryMetadata,
-  ChatCompleteResponse,
 } from '@kbn/inference-common';
 import type { ToolChoice } from './types';
 import { toAsyncIterator, wrapInferenceError } from './utils';
@@ -99,6 +98,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
 
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
+  protected maxRetries?: number;
   protected model?: string;
   protected signal?: AbortSignal;
 
@@ -112,6 +112,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.functionCallingMode = args.functionCallingMode;
     this.model = args.model;
     this.signal = args.signal;
+    this.maxRetries = args.maxRetries;
   }
 
   static lc_name() {
@@ -186,6 +187,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
       toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
       abortSignal: options.signal ?? this.signal,
+      maxRetries: this.maxRetries,
       metadata: { connectorTelemetry: this.telemetryMetadata },
     };
   }

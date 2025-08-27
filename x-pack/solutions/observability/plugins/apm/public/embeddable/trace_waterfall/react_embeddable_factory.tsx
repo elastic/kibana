@@ -15,6 +15,9 @@ import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { isEmpty } from 'lodash';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { i18n } from '@kbn/i18n';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../common/waterfall/typings';
 import { ApmEmbeddableContext } from '../embeddable_context';
 import type { EmbeddableDeps } from '../types';
 import { APM_TRACE_WATERFALL_EMBEDDABLE } from './constant';
@@ -37,6 +40,7 @@ export interface ApmTraceWaterfallEmbeddableEntryProps extends BaseProps, Serial
   displayLimit?: number;
   scrollElement?: Element;
   onNodeClick?: (nodeSpanId: string) => void;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
 }
 
 export type ApmTraceWaterfallEmbeddableProps =
@@ -67,6 +71,9 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
       const onNodeClick$ = new BehaviorSubject(
         'onNodeClick' in state ? state.onNodeClick : undefined
       );
+      const getRelatedErrorsHref$ = new BehaviorSubject(
+        'getRelatedErrorsHref' in state ? state.getRelatedErrorsHref : undefined
+      );
 
       function serializeState() {
         return {
@@ -81,6 +88,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             docId: docId$.getValue(),
             scrollElement: scrollElement$.getValue(),
             onNodeClick: onNodeClick$.getValue(),
+            getRelatedErrorsHref: getRelatedErrorsHref$.getValue(),
           },
         };
       }
@@ -99,7 +107,8 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           displayLimit$,
           docId$,
           scrollElement$,
-          onNodeClick$
+          onNodeClick$,
+          getRelatedErrorsHref$
         ).pipe(map(() => undefined)),
         getComparators: () => {
           return {
@@ -113,6 +122,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             docId: 'referenceEquality',
             scrollElement: 'referenceEquality',
             onNodeClick: 'referenceEquality',
+            getRelatedErrorsHref: 'referenceEquality',
           };
         },
         onReset: (lastSaved) => {
@@ -130,6 +140,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           displayLimit$.next(entryState?.displayLimit ?? 0);
           scrollElement$.next(entryState?.scrollElement ?? undefined);
           onNodeClick$.next(entryState?.onNodeClick ?? undefined);
+          getRelatedErrorsHref$.next(entryState?.getRelatedErrorsHref ?? undefined);
 
           // reset focused state
           const focusedState = lastSaved?.rawState as ApmTraceWaterfallEmbeddableFocusedProps;
@@ -156,6 +167,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             docId,
             scrollElement,
             onNodeClick,
+            getRelatedErrorsHref,
           ] = useBatchedPublishingSubjects(
             serviceName$,
             traceId$,
@@ -165,7 +177,8 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             displayLimit$,
             docId$,
             scrollElement$,
-            onNodeClick$
+            onNodeClick$,
+            getRelatedErrorsHref$
           );
           const content = isEmpty(docId) ? (
             <TraceWaterfallEmbeddable
@@ -177,6 +190,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
               displayLimit={displayLimit}
               onNodeClick={onNodeClick}
               scrollElement={scrollElement}
+              getRelatedErrorsHref={getRelatedErrorsHref}
             />
           ) : (
             <FocusedTraceWaterfallEmbeddable
@@ -188,9 +202,18 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           );
 
           return (
-            <ApmEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
-              {content}
-            </ApmEmbeddableContext>
+            <KibanaSectionErrorBoundary
+              sectionName={i18n.translate(
+                'xpack.apm.embeddable.traceWaterfall.kibanaSectionErrorBoundary.sectionName',
+                {
+                  defaultMessage: 'Trace waterfall',
+                }
+              )}
+            >
+              <ApmEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
+                {content}
+              </ApmEmbeddableContext>
+            </KibanaSectionErrorBoundary>
           );
         },
       };

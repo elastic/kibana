@@ -30,13 +30,9 @@ import {
   getOwningTeamsForPath,
   findAreaForCodeOwner,
 } from '@kbn/code-owners';
-import {
-  ScoutEventsReport,
-  ScoutFileInfo,
-  ScoutReportEventAction,
-  type ScoutTestRunInfo,
-  uploadScoutReportEvents,
-} from '../../report';
+import { SCOUT_TARGET_TYPE, SCOUT_TARGET_MODE } from '@kbn/scout-info';
+import type { ScoutFileInfo } from '../../report';
+import { ScoutEventsReport, ScoutReportEventAction, type ScoutTestRunInfo } from '../../report';
 import { environmentMetadata } from '../../../datasources';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
 import { generateTestRunId, getTestIDForTitle } from '../../../helpers';
@@ -63,7 +59,13 @@ export class ScoutPlaywrightReporter implements Reporter {
     this.log.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutEventsReport(this.log);
-    this.baseTestRunInfo = { id: this.runId };
+    this.baseTestRunInfo = {
+      id: this.runId,
+      target: {
+        type: SCOUT_TARGET_TYPE,
+        mode: SCOUT_TARGET_MODE,
+      },
+    };
     this.codeOwnersEntries = getCodeOwnersEntries();
   }
 
@@ -113,6 +115,7 @@ export class ScoutPlaywrightReporter implements Reporter {
 
     this.baseTestRunInfo = {
       ...this.baseTestRunInfo,
+      fully_parallel: config.fullyParallel,
       config: configInfo,
     };
 
@@ -275,7 +278,6 @@ export class ScoutPlaywrightReporter implements Reporter {
     // Save, upload events & conclude the report
     try {
       this.report.save(this.reportRootPath);
-      await uploadScoutReportEvents(this.report.eventLogPath, this.log);
     } catch (e) {
       // Log the error but don't propagate it
       this.log.error(e);

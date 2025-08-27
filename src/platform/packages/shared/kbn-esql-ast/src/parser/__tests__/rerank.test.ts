@@ -8,316 +8,299 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { Walker } from '../../walker';
+import type { ESQLAstRerankCommand, ESQLCommandOption } from '../../types';
 
-describe('RERANK command', () => {
-  describe('correctly formatted', () => {
-    it('can parse the command', () => {
-      const text = `FROM index | RERANK "query text" ON title, description`;
-      const query = EsqlQuery.fromSrc(text);
+describe('RERANK', () => {
+  describe('basic parsing', () => {
+    it('should parse basic RERANK query without target field assignment', () => {
+      const text = 'FROM movies | RERANK "star wars" ON title WITH { "inference_id" : "reranker" }';
+      const { ast } = EsqlQuery.fromSrc(text);
 
-      expect(query.errors.length).toBe(0);
-      expect(query.ast.commands[1]).toMatchObject({
+      expect(ast.commands[1]).toMatchObject({
         type: 'command',
         name: 'rerank',
+        query: {
+          type: 'literal',
+          literalType: 'keyword',
+          value: '"star wars"',
+        },
+        fields: [
+          {
+            type: 'column',
+            name: 'title',
+          },
+        ],
+        args: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'literal',
+            value: '"star wars"',
+          }),
+        ]),
       });
+
+      expect(ast.commands[1]).not.toHaveProperty('targetField');
     });
 
-    it('can parse the command with inference id', () => {
-      const text = `FROM index | RERANK "query text" ON title, description WITH \`reranker-inference-id\``;
-      const query = EsqlQuery.fromSrc(text);
+    it('should parse ON clause as an option in the AST', () => {
+      const text = 'FROM movies | RERANK "star wars" ON title WITH { "inference_id" : "reranker" }';
+      const { ast } = EsqlQuery.fromSrc(text);
+      const rerankCmd = ast.commands[1] as ESQLAstRerankCommand;
 
-      expect(query.errors.length).toBe(0);
-      expect(query.ast.commands[1]).toMatchObject({
-        type: 'command',
-        name: 'rerank',
-      });
-    });
+      const onOption = rerankCmd.args.find(
+        (arg): arg is ESQLCommandOption =>
+          'type' in arg && arg.type === 'option' && arg.name === 'on'
+      );
 
-    it('fills in command "args" array', () => {
-      const text = `FROM index | RERANK "query text" ON title, description WITH \`reranker-inference-id\``;
-      const query = EsqlQuery.fromSrc(text);
-
-      expect(query.errors.length).toBe(0);
-      expect(query.ast.commands[1]).toMatchObject({
-        type: 'command',
-        name: 'rerank',
+      expect(onOption).toBeDefined();
+      expect(onOption).toMatchObject({
+        type: 'option',
+        name: 'on',
         args: [
           {
-            type: 'literal',
-            literalType: 'keyword',
-            valueUnquoted: 'query text',
-          },
-          {
-            type: 'option',
-            name: 'on',
-            args: [
-              {
-                type: 'column',
-                name: 'title',
-                args: [{ type: 'identifier', name: 'title' }],
-              },
-              {
-                type: 'column',
-                name: 'description',
-                args: [{ type: 'identifier', name: 'description' }],
-              },
-            ],
-          },
-          {
-            type: 'option',
-            name: 'with',
-            args: [
-              {
-                type: 'identifier',
-                name: 'reranker-inference-id',
-              },
-            ],
+            type: 'column',
+            name: 'title',
           },
         ],
       });
     });
 
-    it('correctly parses locations', () => {
-      const text = `FROM index | RERANK "query text" ON title, description WITH \`reranker-inference-id\``;
-      const query = EsqlQuery.fromSrc(text);
+    it('should parse RERANK with multiple fields', () => {
+      const text =
+        'FROM movies | RERANK "star wars" ON title, description, actors WITH { "inference_id" : "reranker" }';
+      const { ast } = EsqlQuery.fromSrc(text);
 
-      const command = Walker.match(query.ast, { type: 'command', name: 'rerank' })!;
-      expect(text.slice(command.location!.min, command.location!.max + 1)).toBe(
-        'RERANK "query text" ON title, description WITH `reranker-inference-id`'
-      );
-
-      const optionOn = Walker.match(query.ast, { type: 'option', name: 'on' })!;
-      expect(text.slice(optionOn.location!.min, optionOn.location!.max + 1)).toBe(
-        'ON title, description'
-      );
-
-      const title = Walker.match(query.ast, { type: 'identifier', name: 'title' })!;
-      expect(text.slice(title.location!.min, title.location!.max + 1)).toBe('title');
-
-      const description = Walker.match(query.ast, { type: 'identifier', name: 'description' })!;
-      expect(text.slice(description.location!.min, description.location!.max + 1)).toBe(
-        'description'
-      );
-
-      const optionWith = Walker.match(query.ast, { type: 'option', name: 'with' })!;
-      expect(text.slice(optionWith.location!.min, optionWith.location!.max + 1)).toBe(
-        'WITH `reranker-inference-id`'
-      );
-
-      const id = Walker.match(query.ast, { type: 'identifier', name: 'reranker-inference-id' })!;
-      expect(text.slice(id.location!.min, id.location!.max + 1)).toBe('`reranker-inference-id`');
-    });
-
-    describe('can parse RERANK <query>', () => {
-      it('single quoted query', () => {
-        const text = `FROM index | RERANK "query text" ON title, description WITH \`reranker-inference-id\``;
-        const query = EsqlQuery.fromSrc(text);
-
-        expect(query.errors.length).toBe(0);
-        expect(query.ast.commands[1]).toMatchObject({
-          type: 'command',
-          name: 'rerank',
-          query: {
-            type: 'literal',
-            literalType: 'keyword',
-            valueUnquoted: 'query text',
-          },
-        });
-      });
-
-      it('triple quoted query', () => {
-        const text = `FROM index | RERANK """query text""" ON title, description WITH \`reranker-inference-id\``;
-        const query = EsqlQuery.fromSrc(text);
-
-        expect(query.errors.length).toBe(0);
-        expect(query.ast.commands[1]).toMatchObject({
-          type: 'command',
-          name: 'rerank',
-          query: {
-            type: 'literal',
-            literalType: 'keyword',
-            valueUnquoted: 'query text',
-          },
-        });
-      });
-
-      it('query can be param', () => {
-        const text = `FROM index | RERANK ?param ON title, description WITH \`reranker-inference-id\``;
-        const query = EsqlQuery.fromSrc(text);
-
-        expect(query.errors.length).toBe(0);
-        expect(query.ast.commands[1]).toMatchObject({
-          type: 'command',
-          name: 'rerank',
-          query: {
-            type: 'literal',
-            literalType: 'param',
-            value: 'param',
-          },
-        });
-      });
-    });
-
-    describe('can parse RERANK ... ON <fields>', () => {
-      it('a single field', () => {
-        const text = `FROM index | RERANK "query text" ON title WITH \`reranker-inference-id\``;
-        const query = EsqlQuery.fromSrc(text);
-
-        expect(query.errors.length).toBe(0);
-        expect(query.ast.commands[1]).toMatchObject({
-          type: 'command',
-          name: 'rerank',
-          fields: [
-            {
-              type: 'column',
-              name: 'title',
-              args: [{ type: 'identifier', name: 'title' }],
-            },
-          ],
-        });
-      });
-
-      it('two fields', () => {
-        const text = `FROM index | RERANK "query text" ON title, description WITH \`reranker-inference-id\``;
-        const query = EsqlQuery.fromSrc(text);
-
-        expect(query.errors.length).toBe(0);
-        expect(query.ast.commands[1]).toMatchObject({
-          type: 'command',
-          name: 'rerank',
-          fields: [
-            {
-              type: 'column',
-              name: 'title',
-              args: [{ type: 'identifier', name: 'title' }],
-            },
-            {
-              type: 'column',
-              name: 'description',
-              args: [{ type: 'identifier', name: 'description' }],
-            },
-          ],
-        });
-      });
-
-      it('cannot be functions without assignments', () => {
-        const text = `FROM index | RERANK "query text" ON AVG(123) WITH \`reranker-inference-id\``;
-        const query = EsqlQuery.fromSrc(text);
-
-        expect(query.errors.length > 0).toBe(true);
-      });
-
-      it('can be assignments', () => {
-        const text = `FROM index | RERANK "query text" ON foo = AVG(123) WITH \`reranker-inference-id\``;
-        const query = EsqlQuery.fromSrc(text);
-
-        expect(query.errors.length).toBe(0);
-        expect(query.ast.commands[1]).toMatchObject({
-          type: 'command',
-          name: 'rerank',
-          fields: [{ type: 'function', name: '=' }],
-        });
-      });
-
-      it('can be param', () => {
-        const text = `FROM index | RERANK "query text" ON a = ?123 WITH \`reranker-inference-id\``;
-        const query = EsqlQuery.fromSrc(text);
-
-        expect(query.errors.length).toBe(0);
-        expect(query.ast.commands[1]).toMatchObject({
-          type: 'command',
-          name: 'rerank',
-          fields: [
-            {
-              type: 'function',
-              name: '=',
-              args: [
-                {},
-                {
-                  type: 'literal',
-                  literalType: 'param',
-                  paramType: 'positional',
-                  value: 123,
-                },
-              ],
-            },
-          ],
-        });
-      });
-    });
-
-    describe('can parse RERANK ... WITH <inferenceId>', () => {
-      it('backtick quoted ID', () => {
-        const text = `FROM index | RERANK "query text" ON title, description WITH \`reranker-inference-id\``;
-        const query = EsqlQuery.fromSrc(text);
-
-        expect(query.errors.length).toBe(0);
-        expect(query.ast.commands[1]).toMatchObject({
-          type: 'command',
-          name: 'rerank',
-          inferenceId: {
-            type: 'identifier',
-            name: 'reranker-inference-id',
-          },
-        });
-      });
-
-      it('unquoted ID', () => {
-        const text = `FROM index | RERANK "query text" ON title, description WITH the_id`;
-        const query = EsqlQuery.fromSrc(text);
-
-        expect(query.errors.length).toBe(0);
-        expect(query.ast.commands[1]).toMatchObject({
-          type: 'command',
-          name: 'rerank',
-          inferenceId: {
-            type: 'identifier',
-            name: 'the_id',
-          },
-        });
-      });
-
-      it('as param', () => {
-        const text = `FROM index | RERANK "query text" ON title, description WITH ?`;
-        const query = EsqlQuery.fromSrc(text);
-
-        expect(query.errors.length).toBe(0);
-        expect(query.ast.commands[1]).toMatchObject({
-          type: 'command',
-          name: 'rerank',
-          inferenceId: {
-            type: 'literal',
-            literalType: 'param',
-            paramType: 'unnamed',
-          },
-        });
+      expect(ast.commands[1]).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+        fields: [
+          { type: 'column', name: 'title' },
+          { type: 'column', name: 'description' },
+          { type: 'column', name: 'actors' },
+        ],
       });
     });
   });
 
-  describe('incorrectly formatted', () => {
-    const assertError = (text: string) => {
-      const query = EsqlQuery.fromSrc(text);
-      const command = query.ast.commands[1];
+  describe('target field assignment', () => {
+    it('should parse target field assignment with correct AST structure', () => {
+      const text =
+        'FROM movies | RERANK rerank_score = "star wars" ON title WITH { "inference_id" : "reranker" }';
+      const { ast } = EsqlQuery.fromSrc(text);
 
-      expect(query.errors.length > 0).toBe(true);
-      expect(command).toMatchObject({
+      const rerankCmd = ast.commands[1];
+
+      expect(rerankCmd).toMatchObject({
         type: 'command',
         name: 'rerank',
-        incomplete: true,
+        query: {
+          type: 'literal',
+          literalType: 'keyword',
+          value: '"star wars"',
+        },
+        targetField: {
+          type: 'column',
+          name: 'rerank_score',
+        },
+        args: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'function',
+            subtype: 'binary-expression',
+            name: '=',
+          }),
+        ]),
       });
-    };
+    });
+  });
 
-    it('errors on missing ON clause', () => {
-      assertError(`FROM index | RERANK "query text" ON  WITH asdf`);
-      assertError(`FROM index | RERANK "query text" ON WITH asdf`);
-      assertError(`FROM index | RERANK "query text" WITH asdf`);
+  describe('field assignments', () => {
+    it('should parse computed field assignments with correct binary expression', () => {
+      const text =
+        'FROM movies | RERANK "star wars" ON title, overview=SUBSTRING(overview, 0, 100) WITH { "inference_id" : "reranker" }';
+      const { ast } = EsqlQuery.fromSrc(text);
+
+      expect(ast.commands[1]).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+        fields: [
+          {
+            type: 'column',
+            name: 'title',
+          },
+          {
+            type: 'function',
+            subtype: 'binary-expression',
+            name: '=',
+            args: expect.arrayContaining([
+              expect.objectContaining({ type: 'column', name: 'overview' }),
+              expect.arrayContaining([
+                expect.objectContaining({
+                  type: 'function',
+                  name: 'substring',
+                }),
+              ]),
+            ]),
+          },
+        ],
+      });
     });
 
-    it('errors on missing query', () => {
-      assertError(`FROM index | RERANK  ON asdf WITH asdf`);
-      assertError(`FROM index | RERANK ON asdf WITH asdf`);
+    it('should parse multiple field assignments', () => {
+      const text =
+        'FROM movies | RERANK "star wars" ON title=BOOST(title, 2), description=BOOST(description, 1.5) WITH { "inference_id" : "reranker" }';
+      const { ast } = EsqlQuery.fromSrc(text);
+      const rerankCmd = ast.commands[1] as ESQLAstRerankCommand;
+
+      expect(rerankCmd).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+        fields: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'function',
+            subtype: 'binary-expression',
+            name: '=',
+          }),
+          expect.objectContaining({
+            type: 'function',
+            subtype: 'binary-expression',
+            name: '=',
+          }),
+        ]),
+      });
+
+      expect(rerankCmd.fields).toHaveLength(2);
+    });
+  });
+
+  describe('error cases and edge scenarios and catch errors', () => {
+    it('should handle missing query text gracefully', () => {
+      const text = 'FROM movies | RERANK ON title WITH { "inference_id" : "reranker" }';
+      const { ast, errors } = EsqlQuery.fromSrc(text);
+
+      expect(ast.commands).toHaveLength(2);
+      expect(ast.commands[1]).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+      });
+
+      expect(errors).toHaveLength(2);
+    });
+
+    it('should handle missing WITH clause', () => {
+      const text = 'FROM movies | RERANK "star wars" ON title';
+      const { ast } = EsqlQuery.fromSrc(text);
+      const rerankCmd = ast.commands[1] as ESQLAstRerankCommand;
+
+      expect(rerankCmd).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+        query: {
+          type: 'literal',
+          value: '"star wars"',
+        },
+        fields: [{ type: 'column', name: 'title' }],
+      });
+
+      expect(rerankCmd).not.toHaveProperty('inferenceId');
+    });
+
+    it('should handle missing ON clause', () => {
+      const text = 'FROM movies | RERANK "star wars" WITH { "inference_id" : "reranker" }';
+      const { ast, errors } = EsqlQuery.fromSrc(text);
+
+      expect(ast.commands[1]).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+      });
+      expect(errors).toHaveLength(1);
+    });
+
+    it('should handle incomplete WITH clause', () => {
+      const text = 'FROM movies | RERANK "star wars" ON title WITH';
+      const { ast, errors } = EsqlQuery.fromSrc(text);
+
+      expect(ast.commands[1]).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+      });
+      expect(errors).toHaveLength(1);
+    });
+
+    it('should handle malformed assignment syntax and catch an error', () => {
+      const text = 'FROM movies | RERANK score = ON title WITH { "inference_id" : "test" }';
+      const { ast, errors } = EsqlQuery.fromSrc(text);
+
+      expect(ast.commands).toHaveLength(2);
+      expect(ast.commands[1]).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+      });
+
+      expect(errors).toHaveLength(1);
+    });
+
+    it('should handle empty field list and catch an error', () => {
+      const text = 'FROM movies | RERANK "query" ON WITH { "inference_id" : "test" }';
+      const { ast, errors } = EsqlQuery.fromSrc(text);
+      const rerankCmd = ast.commands[1] as ESQLAstRerankCommand;
+
+      expect(rerankCmd).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+        fields: [
+          expect.objectContaining({
+            type: 'column',
+            incomplete: true,
+          }),
+        ],
+      });
+
+      expect(errors).toHaveLength(1);
+    });
+  });
+
+  describe('WITH clause with multiple parameters', () => {
+    it('should parse WITH clause containing multiple parameters including scoreColumn', () => {
+      const text =
+        'FROM movies | RERANK "star wars" ON title, overview=SUBSTRING(overview, 0, 100), actors WITH {"inferenceId":"rerankerInferenceId", "scoreColumn":"rerank_score""}';
+      const { ast } = EsqlQuery.fromSrc(text);
+      const rerankCmd = ast.commands[1] as ESQLAstRerankCommand;
+
+      expect(rerankCmd).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+        query: {
+          type: 'literal',
+          value: '"star wars"',
+        },
+      });
+
+      expect(rerankCmd.fields).toHaveLength(3);
+      expect(rerankCmd.fields[0]).toMatchObject({ type: 'column', name: 'title' });
+      expect(rerankCmd.fields[1]).toMatchObject({ type: 'function', name: '=' });
+      expect(rerankCmd.fields[2]).toMatchObject({ type: 'column', name: 'actors' });
+
+      const withOption = rerankCmd.args.find(
+        (arg): arg is ESQLCommandOption =>
+          'type' in arg && arg.type === 'option' && arg.name === 'with'
+      );
+
+      expect(withOption).toBeDefined();
+
+      if (withOption) {
+        const mapArg = withOption.args[0] as any;
+        expect(mapArg.type).toBe('map');
+        expect(mapArg.entries).toHaveLength(2);
+
+        // Check that all three keys are present
+        const keys = mapArg.entries.map((entry: any) => entry.key.value);
+        expect(keys).toContain('"inferenceId"');
+        expect(keys).toContain('"scoreColumn"');
+
+        // Check that all three values are correct
+        const values = mapArg.entries.map((entry: any) => entry.value.value);
+        expect(values).toContain('"rerankerInferenceId"');
+        expect(values).toContain('"rerank_score"');
+      }
     });
   });
 });

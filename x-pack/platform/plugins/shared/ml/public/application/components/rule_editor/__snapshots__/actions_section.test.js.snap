@@ -1,268 +1,328 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ActionsSection renders with no actions selected 1`] = `
-<Fragment>
-  <EuiText>
+<div>
+  <div
+    class="euiText emotion-euiText-m"
+  >
     <p>
-      <MemoizedFormattedMessage
-        defaultMessage="Choose the actions to take when the job rule matches an anomaly."
-        id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
-      />
+      Choose the actions to take when the job rule matches an anomaly.
     </p>
-  </EuiText>
-  <EuiSpacer
-    size="s"
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="s"
-    responsive={false}
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
   >
-    <EuiFlexItem
-      grow={false}
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiCheckbox
-        checked={false}
-        id="skip_result_cb"
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Skip result (recommended)"
-            id="xpack.ml.ruleEditor.actionsSection.skipResultLabel"
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="empty"
           />
-        }
-        onChange={[MockFunction]}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+          <input
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="skip_result_cb"
+            type="checkbox"
+          />
+        </div>
+        <label
+          class="euiCheckbox__label emotion-euiCheckbox__label"
+          for="skip_result_cb"
+        >
+          Skip result (recommended)
+        </label>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiIconTip
-        content={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="The result will not be created."
-            id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
-          />
-        }
-        position="right"
-        size="s"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="s"
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <span
+          data-euiicon-type="question"
+          tabindex="0"
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="s"
-    responsive={false}
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
   >
-    <EuiFlexItem
-      grow={false}
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiCheckbox
-        checked={false}
-        id="skip_model_update_cb"
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Skip model update"
-            id="xpack.ml.ruleEditor.actionsSection.skipModelUpdateLabel"
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="empty"
           />
-        }
-        onChange={[MockFunction]}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+          <input
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="skip_model_update_cb"
+            type="checkbox"
+          />
+        </div>
+        <label
+          class="euiCheckbox__label emotion-euiCheckbox__label"
+          for="skip_model_update_cb"
+        >
+          Skip model update
+        </label>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiIconTip
-        content={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="The value for that series will not be used to update the model."
-            id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
-          />
-        }
-        position="right"
-        size="s"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</Fragment>
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <span
+          data-euiicon-type="question"
+          tabindex="0"
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`ActionsSection renders with skip_result and skip_model_update selected 1`] = `
-<Fragment>
-  <EuiText>
+<div>
+  <div
+    class="euiText emotion-euiText-m"
+  >
     <p>
-      <MemoizedFormattedMessage
-        defaultMessage="Choose the actions to take when the job rule matches an anomaly."
-        id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
-      />
+      Choose the actions to take when the job rule matches an anomaly.
     </p>
-  </EuiText>
-  <EuiSpacer
-    size="s"
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="s"
-    responsive={false}
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
   >
-    <EuiFlexItem
-      grow={false}
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiCheckbox
-        checked={true}
-        id="skip_result_cb"
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Skip result (recommended)"
-            id="xpack.ml.ruleEditor.actionsSection.skipResultLabel"
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="check"
           />
-        }
-        onChange={[Function]}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+          <input
+            checked=""
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="skip_result_cb"
+            type="checkbox"
+          />
+        </div>
+        <label
+          class="euiCheckbox__label emotion-euiCheckbox__label"
+          for="skip_result_cb"
+        >
+          Skip result (recommended)
+        </label>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiIconTip
-        content={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="The result will not be created."
-            id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
-          />
-        }
-        position="right"
-        size="s"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="s"
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <span
+          data-euiicon-type="question"
+          tabindex="0"
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="s"
-    responsive={false}
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
   >
-    <EuiFlexItem
-      grow={false}
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiCheckbox
-        checked={true}
-        id="skip_model_update_cb"
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Skip model update"
-            id="xpack.ml.ruleEditor.actionsSection.skipModelUpdateLabel"
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="check"
           />
-        }
-        onChange={[Function]}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+          <input
+            checked=""
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="skip_model_update_cb"
+            type="checkbox"
+          />
+        </div>
+        <label
+          class="euiCheckbox__label emotion-euiCheckbox__label"
+          for="skip_model_update_cb"
+        >
+          Skip model update
+        </label>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiIconTip
-        content={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="The value for that series will not be used to update the model."
-            id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
-          />
-        }
-        position="right"
-        size="s"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</Fragment>
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <span
+          data-euiicon-type="question"
+          tabindex="0"
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`ActionsSection renders with skip_result selected 1`] = `
-<Fragment>
-  <EuiText>
+<div>
+  <div
+    class="euiText emotion-euiText-m"
+  >
     <p>
-      <MemoizedFormattedMessage
-        defaultMessage="Choose the actions to take when the job rule matches an anomaly."
-        id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
-      />
+      Choose the actions to take when the job rule matches an anomaly.
     </p>
-  </EuiText>
-  <EuiSpacer
-    size="s"
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="s"
-    responsive={false}
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
   >
-    <EuiFlexItem
-      grow={false}
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiCheckbox
-        checked={true}
-        id="skip_result_cb"
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Skip result (recommended)"
-            id="xpack.ml.ruleEditor.actionsSection.skipResultLabel"
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="check"
           />
-        }
-        onChange={[MockFunction]}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+          <input
+            checked=""
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="skip_result_cb"
+            type="checkbox"
+          />
+        </div>
+        <label
+          class="euiCheckbox__label emotion-euiCheckbox__label"
+          for="skip_result_cb"
+        >
+          Skip result (recommended)
+        </label>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiIconTip
-        content={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="The result will not be created."
-            id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
-          />
-        }
-        position="right"
-        size="s"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="s"
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <span
+          data-euiicon-type="question"
+          tabindex="0"
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="s"
-    responsive={false}
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
   >
-    <EuiFlexItem
-      grow={false}
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiCheckbox
-        checked={false}
-        id="skip_model_update_cb"
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Skip model update"
-            id="xpack.ml.ruleEditor.actionsSection.skipModelUpdateLabel"
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="empty"
           />
-        }
-        onChange={[MockFunction]}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+          <input
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="skip_model_update_cb"
+            type="checkbox"
+          />
+        </div>
+        <label
+          class="euiCheckbox__label emotion-euiCheckbox__label"
+          for="skip_model_update_cb"
+        >
+          Skip model update
+        </label>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiIconTip
-        content={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="The value for that series will not be used to update the model."
-            id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
-          />
-        }
-        position="right"
-        size="s"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</Fragment>
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <span
+          data-euiicon-type="question"
+          tabindex="0"
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
 `;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
+import type { InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
 import { addAliasesForNamespacedFields, baseMappings, baseFields } from './logs_layer';
 
 describe('logs_layer', () => {
@@ -22,6 +22,8 @@ describe('logs_layer', () => {
             fields: {
               'resource.attributes.host.name': { type: 'keyword' },
               'attributes.transaction.id': { type: 'keyword' },
+              // this is a semconv field that has a different ECS equivalent
+              'resource.attributes.host.arch': { type: 'keyword' },
               'regular.field': { type: 'keyword' },
             },
           },
@@ -57,6 +59,18 @@ describe('logs_layer', () => {
         alias_for: 'resource.attributes.service.name',
       });
 
+      expect(result['host.architecture']).toEqual({
+        type: 'keyword',
+        from: 'test-stream',
+        alias_for: 'resource.attributes.host.arch',
+      });
+
+      expect(result['host.arch']).toEqual({
+        type: 'keyword',
+        from: 'test-stream',
+        alias_for: 'resource.attributes.host.arch',
+      });
+
       expect(result.data).toEqual({
         type: 'keyword',
         from: 'grandparent-stream',
@@ -78,6 +92,38 @@ describe('logs_layer', () => {
 
       // Regular fields should not have aliases
       expect(result['regular.field']).toBeUndefined();
+    });
+
+    it('should prioritize the ECS equivalent alias over the original field if both are mapped', () => {
+      const result = addAliasesForNamespacedFields(
+        {
+          ...mockStreamDefinition,
+          ingest: {
+            ...mockStreamDefinition.ingest,
+            wired: {
+              ...mockStreamDefinition.ingest.wired,
+              fields: {
+                ...mockStreamDefinition.ingest.wired.fields,
+                'resource.attributes.host.architecture': { type: 'keyword' },
+              },
+            },
+          },
+        },
+        {
+          ...mockInheritedFields,
+        }
+      );
+
+      expect(result['host.architecture']).toEqual({
+        type: 'keyword',
+        from: 'test-stream',
+        alias_for: 'resource.attributes.host.arch',
+      });
+      expect(result['host.arch']).toEqual({
+        type: 'keyword',
+        from: 'test-stream',
+        alias_for: 'resource.attributes.host.arch',
+      });
     });
 
     it('should include aliases from base mappings', () => {
@@ -153,7 +199,7 @@ describe('logs_layer', () => {
               routing: [],
             },
             lifecycle: { inherit: {} },
-            processing: [],
+            processing: { steps: [] },
           },
         },
         conflictingFields

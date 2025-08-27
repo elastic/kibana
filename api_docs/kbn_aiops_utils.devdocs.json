@@ -1,0 +1,136 @@
+{
+  "id": "@kbn/aiops-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.getCategorizationDataViewField",
+        "type": "Function",
+        "tags": [],
+        "label": "getCategorizationDataViewField",
+        "description": [
+          "\nThis function returns the categorization field from the DataView.\nIt checks for the presence of 'message', 'error.message', or 'event.original' in that order.\nIf none of these fields are present, it returns the first text field from the DataView.\n"
+        ],
+        "signature": [
+          "(dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ") => { messageField: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          " | null; dataViewFields: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          "[]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-aiops-utils/src/get_categorization_field.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.getCategorizationDataViewField.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              ", the DataView to check"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-aiops-utils/src/get_categorization_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "an object containing the message field DataViewField and dataViewFields"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.getCategorizationField",
+        "type": "Function",
+        "tags": [],
+        "label": "getCategorizationField",
+        "description": [
+          "\nThis function returns the categorization field from the list of fields.\nIt checks for the presence of 'message', 'error.message', or 'event.original' in that order.\nIf none of these fields are present, it returns the first field from the list,\nAssumes text fields have been passed in the `fields` array.\n"
+        ],
+        "signature": [
+          "(fields: string[]) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-aiops-utils/src/get_categorization_field.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.getCategorizationField.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              ", the list of fields to check"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-aiops-utils/src/get_categorization_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "string | undefined, the categorization field if found, otherwise undefined"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

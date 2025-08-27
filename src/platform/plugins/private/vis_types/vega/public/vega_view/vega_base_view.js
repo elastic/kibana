@@ -438,7 +438,7 @@ export class VegaBaseView {
 
   /**
    * Parse start and end values, determining the mode, and if order should be reversed
-   * @private
+   * @internal
    */
   static _parseTimeRange(start, end) {
     const absStart = moment(start);

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useEffect, forwardRef } from 'react';
+import React, { useRef, useEffect } from 'react';
+import type { ListRowRenderer } from 'react-virtualized';
+import { List as VirtualizedList, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import { css } from '@emotion/react';
 import {
   EuiFlexGrid,
@@ -15,9 +17,9 @@ import {
   EuiAutoSizer,
   EuiSkeletonRectangle,
 } from '@elastic/eui';
-import { VariableSizeList as List } from 'react-window';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WindowScroller } from 'react-virtualized';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 import type { IntegrationCardItem } from '../../screens/home';
 
@@ -32,32 +34,6 @@ interface GridColumnProps {
   emptyStateStyles?: Record<string, string>;
 }
 
-const VirtualizedRow: React.FC<{
-  index: number;
-  onHeightChange: (index: number, size: number) => void;
-  style: any;
-  children: React.ReactNode;
-}> = ({ index, children, style, onHeightChange }) => {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (ref.current) {
-      onHeightChange(index, ref.current.clientHeight);
-    }
-  }, [index, onHeightChange]);
-
-  return (
-    <div style={style}>
-      <div ref={ref}>
-        {children}
-        <EuiSpacer size="m" />
-      </div>
-    </div>
-  );
-};
-
-const CARD_OFFSET = 16;
-
 export const GridColumn = ({
   list,
   showMissingIntegrationMessage = false,
@@ -66,18 +42,25 @@ export const GridColumn = ({
   scrollElementId,
   emptyStateStyles,
 }: GridColumnProps) => {
-  const itemsSizeRefs = useRef(new Map<number, number>());
-  const listRef = useRef<List>(null);
-  const onHeightChange = useCallback((index: number, size: number) => {
-    itemsSizeRefs.current.set(index, size);
-    if (listRef.current) {
-      listRef.current.resetAfterIndex(index);
+  const windowScrollerRef = useRef<WindowScroller>(null);
+  const listRef = useRef<VirtualizedList>(null);
+  const rowMeasurementCache = useRef<CellMeasurerCache>(
+    new CellMeasurerCache({
+      fixedWidth: true,
+      defaultHeight: 150,
+    })
+  );
+
+  // Reset the row measurement cache when the list changes
+  useEffect(() => {
+    if (rowMeasurementCache.current) {
+      rowMeasurementCache.current.clearAll();
     }
-  }, []);
+  }, [list]);
 
   if (isLoading) {
     return (
-      <EuiFlexGrid gutterSize="l" columns={3}>
+      <EuiFlexGrid gutterSize="m" columns={3} alignItems="start">
         {Array.from({ length: 12 }).map((_, index) => (
           <EuiFlexItem key={index} grow={3}>
             <EuiSkeletonRectangle height="160px" width="100%" />
@@ -89,7 +72,13 @@ export const GridColumn = ({
 
   if (!list.length) {
     return (
-      <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="emptyState" style={emptyStateStyles}>
+      <EuiFlexGrid
+        gutterSize="m"
+        columns={3}
+        data-test-subj="emptyState"
+        style={emptyStateStyles}
+        alignItems="start"
+      >
         <EuiFlexItem grow={3}>
           <EuiText>
             <p>
@@ -111,81 +100,85 @@ export const GridColumn = ({
     );
   }
 
-  return (
-    <>
-      <WindowScroller
-        onScroll={({ scrollTop }) => {
-          if (listRef.current) {
-            listRef.current.scrollTo(scrollTop);
-          }
-        }}
-        scrollElement={
-          scrollElementId ? document.getElementById(scrollElementId) ?? undefined : undefined
-        }
+  const rowRenderer: ListRowRenderer = ({ index, key, parent, style }) => {
+    const items = list.slice(index * 3, index * 3 + 3);
+    return (
+      <CellMeasurer
+        cache={rowMeasurementCache.current}
+        key={key}
+        columnIndex={0}
+        rowIndex={index}
+        parent={parent}
       >
-        {() => (
-          <EuiAutoSizer disableHeight>
-            {({ width }: { width: number }) => (
-              <List
-                style={{ height: '100%', overflow: 'visible' }}
-                ref={listRef}
-                layout="vertical"
-                itemCount={Math.ceil(list.length / 3)}
-                innerElementType={forwardRef(({ style, children, ...rest }, ref) => (
-                  <div
-                    ref={ref}
-                    // provides extra padding to the top and bottom of the list to prevent clipping and other strange behavior.
-                    // for more info see: https://github.com/bvaughn/react-window?tab=readme-ov-file#can-i-add-padding-to-the-top-and-bottom-of-a-list
-                    style={{ ...style, height: `${parseFloat(style.height) + CARD_OFFSET * 2}px` }}
-                    {...rest}
-                  >
-                    {children}
-                  </div>
-                ))}
-                itemSize={(index) => {
-                  const test = itemsSizeRefs.current.get(index) ?? 200;
-
-                  return test;
-                }}
-                height={window.innerHeight} // plus Don't see an integration message
-                estimatedItemSize={200}
-                width={width}
-              >
-                {({ index, style }) => {
-                  return (
-                    <VirtualizedRow
-                      index={index}
-                      // this is necessary to prevent clipping of the first row during animaiton, or if the cards have a badge.
-                      // for more info see: https://github.com/bvaughn/react-window?tab=readme-ov-file#can-i-add-padding-to-the-top-and-bottom-of-a-list
-                      style={{ ...style, top: `${(Number(style.top) ?? 0) + CARD_OFFSET}px` }}
-                      onHeightChange={onHeightChange}
-                    >
-                      <EuiFlexGrid gutterSize="l" columns={3}>
-                        {list.slice(index * 3, index * 3 + 3).map((item) => {
-                          return (
-                            <EuiFlexItem
-                              key={item.id}
-                              // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
-                              css={css`
-                                & > .euiPopover,
-                                & > .euiPopover > .euiCard {
-                                  height: 100%;
-                                }
-                              `}
-                            >
-                              <PackageCard {...item} showLabels={showCardLabels} />
-                            </EuiFlexItem>
-                          );
-                        })}
-                      </EuiFlexGrid>
-                    </VirtualizedRow>
-                  );
-                }}
-              </List>
-            )}
-          </EuiAutoSizer>
+        {({ registerChild }) => (
+          <div ref={registerChild} style={style}>
+            <EuiFlexGrid columns={3} gutterSize="m" alignItems="start">
+              {items.map((item) => (
+                <EuiFlexItem
+                  key={item.id}
+                  // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
+                  css={css`
+                    align-self: stretch;
+                    & > .euiPopover,
+                    & > .euiPopover > .euiCard {
+                      height: 100%;
+                    }
+                  `}
+                  tabIndex={-1}
+                >
+                  <PackageCard {...item} showLabels={showCardLabels} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGrid>
+            <EuiSpacer size="m" />
+          </div>
         )}
-      </WindowScroller>
-    </>
+      </CellMeasurer>
+    );
+  };
+
+  return (
+    <WindowScroller
+      ref={windowScrollerRef}
+      scrollElement={
+        (scrollElementId && document.getElementById(scrollElementId)) ||
+        document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ||
+        window
+      }
+      onResize={() => {
+        if (rowMeasurementCache.current) {
+          rowMeasurementCache.current.clearAll();
+        }
+      }}
+    >
+      {({ height, isScrolling, onChildScroll, scrollTop }) => (
+        <EuiAutoSizer disableHeight>
+          {({ width }) => (
+            <VirtualizedList
+              tabIndex={-1}
+              ref={listRef}
+              autoHeight
+              height={height}
+              isScrolling={isScrolling}
+              onScroll={onChildScroll}
+              overscanRowCount={2}
+              rowCount={Math.ceil(list.length / 3)}
+              deferredMeasurementCache={rowMeasurementCache.current}
+              rowHeight={rowMeasurementCache.current.rowHeight}
+              rowRenderer={rowRenderer}
+              scrollTop={scrollTop}
+              width={width}
+              // Prevent clipping of card shadows on hover
+              css={css`
+                overflow: visible !important;
+                .ReactVirtualized__Grid__innerScrollContainer {
+                  overflow: visible !important;
+                }
+              `}
+            />
+          )}
+        </EuiAutoSizer>
+      )}
+    </WindowScroller>
   );
 };

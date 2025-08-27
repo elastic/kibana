@@ -90,6 +90,20 @@
           },
           {
             "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.maxRetries",
+            "type": "number",
+            "tags": [],
+            "label": "maxRetries",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
             "id": "def-common.InferenceChatModel.model",
             "type": "string",
             "tags": [],

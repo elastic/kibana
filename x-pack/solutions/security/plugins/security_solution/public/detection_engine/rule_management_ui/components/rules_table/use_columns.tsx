@@ -62,6 +62,8 @@ interface ActionColumnsProps {
   confirmDeletion: () => Promise<boolean>;
 }
 
+const loadingActionsSet = new Set(['disable', 'enable', 'edit', 'delete', 'run', 'fill_gaps']);
+
 export const useEnabledColumn = ({
   hasCRUDPermissions,
   startMlJobs,
@@ -71,10 +73,7 @@ export const useEnabledColumn = ({
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
 
   const loadingIds = useMemo(
-    () =>
-      ['disable', 'enable', 'edit', 'delete', 'run'].includes(loadingRulesAction ?? '')
-        ? loadingRuleIds
-        : [],
+    () => (loadingActionsSet.has(loadingRulesAction ?? '') ? loadingRuleIds : []),
     [loadingRuleIds, loadingRulesAction]
   );
 
@@ -437,7 +436,7 @@ export const useGapDurationColumn = () => {
       <TableHeaderTooltipCell
         title={i18n.COLUMN_GAP}
         customTooltip={
-          <div style={{ maxWidth: '20px' }}>
+          <div css={{ maxWidth: '20px' }}>
             <PopoverTooltip columnName={i18n.COLUMN_GAP} anchorColor="subdued">
               <EuiText css={{ width: 300 }}>
                 <FormattedMessage

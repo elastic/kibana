@@ -6,8 +6,8 @@
  */
 
 import { css } from '@emotion/react';
-import { UseEuiTheme } from '@elastic/eui';
-import type { EmotionStyles } from '@kbn/core/public';
+import type { UseEuiTheme } from '@elastic/eui';
+import type { EmotionStyles } from '@kbn/css-utils/public/use_memo_css';
 
 export const mapColorStopsStyles: EmotionStyles = {
   mapColorStops: ({ euiTheme }: UseEuiTheme) =>

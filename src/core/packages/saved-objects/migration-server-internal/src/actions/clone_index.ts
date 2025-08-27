@@ -10,7 +10,7 @@
 import * as Either from 'fp-ts/Either';
 import * as TaskEither from 'fp-ts/TaskEither';
 import { pipe } from 'fp-ts/function';
-import { errors as EsErrors } from '@elastic/elasticsearch';
+import type { errors as EsErrors } from '@elastic/elasticsearch';
 import type {
   ElasticsearchClient,
   ElasticsearchCapabilities,

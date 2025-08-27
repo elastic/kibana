@@ -61,6 +61,10 @@ export const AdminSearchBar = memo(() => {
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
+            suggestionsAbstraction={{
+              type: 'endpoints',
+              fields: {},
+            }}
           />
         </div>
       )}

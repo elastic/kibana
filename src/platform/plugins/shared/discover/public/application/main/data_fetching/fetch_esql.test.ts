@@ -21,7 +21,9 @@ describe('fetchEsql', () => {
     jest.clearAllMocks();
   });
 
-  const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager();
+  const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager({
+    scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+  });
   const fetchEsqlMockProps = {
     query: { esql: 'from *' },
     dataView: dataViewWithTimefieldMock,

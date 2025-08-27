@@ -20,15 +20,17 @@ import {
   EuiFlexItem,
   EuiStat,
 } from '@elastic/eui';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { CoreStart } from '@kbn/core/public';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
+import type { CoreStart } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
 import {
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '@kbn/alerting-plugin/common';
-import { ALERTING_EXAMPLE_APP_ID, AlwaysFiringParams } from '../../common/constants';
-import { Rule, RuleTaskState } from '../../common/types';
+import type { AlwaysFiringParams } from '../../common/constants';
+import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
+import type { Rule, RuleTaskState } from '../../common/types';
 
 type Props = RouteComponentProps & {
   http: CoreStart['http'];
@@ -70,7 +72,7 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
         <h2>Alerts</h2>
       </EuiText>
       {isEmpty(alertState.alerts) ? (
-        <EuiCallOut title="No Alerts!" color="warning" iconType="help">
+        <EuiCallOut title="No Alerts!" color="warning" iconType="question">
           <p>
             The people in {alert.params.craft as string} at the moment <b>are not</b>{' '}
             {alert.params.op as string} {alert.params.outerSpaceCapacity as string}

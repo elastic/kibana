@@ -80,6 +80,7 @@ export const IndexInput: FC<Props> = ({
       )}
     >
       <EuiFieldText
+        isInvalid={indexNameError !== ''}
         fullWidth
         value={indexNameLocal}
         onChange={(e) => setIndexNameLocal(e.target.value)}

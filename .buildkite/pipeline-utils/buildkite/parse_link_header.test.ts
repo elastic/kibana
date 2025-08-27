@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expect } from 'chai';
 import { parseLinkHeader } from './parse_link_header';
 
 describe('parseLinkHeader', () => {
@@ -16,7 +15,7 @@ describe('parseLinkHeader', () => {
       '<https://api.buildkite.com/v2/organizations/elastic/agents?page=2&per_page=1>; rel="next", <https://api.buildkite.com/v2/organizations/elastic/agents?page=5&per_page=1>; rel="last"'
     );
 
-    expect(result).to.eql({
+    expect(result).toEqual({
       last: 'https://api.buildkite.com/v2/organizations/elastic/agents?page=5&per_page=1',
       next: 'https://api.buildkite.com/v2/organizations/elastic/agents?page=2&per_page=1',
     });
@@ -28,7 +27,7 @@ describe('parseLinkHeader', () => {
       'https://api.buildkite.com'
     );
 
-    expect(result).to.eql({
+    expect(result).toEqual({
       last: '/v2/organizations/elastic/agents?page=5&per_page=1',
       next: '/v2/organizations/elastic/agents?page=2&per_page=1',
     });

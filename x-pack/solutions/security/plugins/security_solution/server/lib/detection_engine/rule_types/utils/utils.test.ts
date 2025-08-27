@@ -58,7 +58,7 @@ import {
 import type { ShardError } from '../../../types';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 
 describe('utils', () => {
@@ -350,6 +350,23 @@ describe('utils', () => {
       expect(someTuple.maxSignals).toEqual(20);
       expect(tuples.length).toEqual(1);
       expect(warningStatusMessage).toEqual(undefined);
+    });
+
+    test('should return originalFrom and originalTo in response', async () => {
+      const { originalFrom, originalTo } = await getRuleRangeTuples({
+        previousStartedAt: moment().subtract(30, 's').toDate(),
+        startedAt: moment().toDate(),
+        interval: '30s',
+        from: 'now-30s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+      });
+
+      expect(originalFrom).toBeDefined();
+      expect(originalTo).toBeDefined();
+      expect(moment.duration(originalTo.diff(originalFrom)).asSeconds()).toEqual(30);
     });
   });
 
@@ -1097,7 +1114,7 @@ describe('utils', () => {
   describe('addToSearchAfterReturn', () => {
     test('merges the values from bulk create response into search after return type', () => {
       const current = createSearchAfterReturnType();
-      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+      const next: GenericBulkCreateResponse<DetectionAlertLatest> = {
         success: false,
         bulkCreateDuration: '100',
         enrichmentDuration: '0',
@@ -1115,7 +1132,7 @@ describe('utils', () => {
 
     test('does not duplicate error messages', () => {
       const current = createSearchAfterReturnType({ errors: ['error 1'] });
-      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+      const next: GenericBulkCreateResponse<DetectionAlertLatest> = {
         success: true,
         bulkCreateDuration: '0',
         enrichmentDuration: '0',
@@ -1131,7 +1148,7 @@ describe('utils', () => {
 
     test('adds new error messages', () => {
       const current = createSearchAfterReturnType({ errors: ['error 1'] });
-      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+      const next: GenericBulkCreateResponse<DetectionAlertLatest> = {
         success: true,
         bulkCreateDuration: '0',
         enrichmentDuration: '0',

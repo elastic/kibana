@@ -30,6 +30,8 @@
       "dashboard",
       "fieldsMetadata",
       "logsDataAccess",
+      "embeddable",
+      "savedSearch",
       "spaces"
     ],
     "optionalPlugins": [
@@ -41,7 +43,6 @@
       "telemetry",
       "discover",
       "ingestPipelines",
-      "guidedOnboarding",
       "automaticImport"
     ],
     "requiredBundles": [

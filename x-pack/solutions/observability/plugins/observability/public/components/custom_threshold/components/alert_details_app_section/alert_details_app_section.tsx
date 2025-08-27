@@ -28,25 +28,25 @@ import {
   ALERT_GROUP,
   ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import moment from 'moment';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { TimeRange } from '@kbn/es-query';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
-import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { Threshold } from '../threshold';
-import { CustomThresholdAlert } from '../types';
+import type { CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
 import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';
 import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
-import { SearchConfigurationWithExtractedReferenceType } from '../../../../../common/custom_threshold_rule/types';
+import type { SearchConfigurationWithExtractedReferenceType } from '../../../../../common/custom_threshold_rule/types';
 import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and_tooltip';
 
 interface AppSectionProps {
@@ -59,13 +59,13 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   const {
     charts,
     data,
+    application,
     share: {
       url: { locators },
     },
   } = services;
-  const { hasAtLeast } = useLicense();
   const { euiTheme } = useEuiTheme();
-  const hasLogRateAnalysisLicense = hasAtLeast('platinum');
+  const aiopsEnabled = application.capabilities.aiops?.enabled ?? false;
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
@@ -215,9 +215,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
           </EuiFlexItem>
         );
       })}
-      {hasLogRateAnalysisLicense && (
-        <LogRateAnalysis alert={alert} dataView={dataView} services={services} />
-      )}
+      {aiopsEnabled && <LogRateAnalysis alert={alert} dataView={dataView} services={services} />}
     </EuiFlexGroup>
   );
 }

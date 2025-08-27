@@ -17,8 +17,9 @@ import { alertWithGroupsAndTags, mockAlertUuid, untrackedAlert } from '../mock/a
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 
 import { HeaderActions } from './header_actions';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
-import { AlertStatus, ALERT_STATUS } from '@kbn/rule-data-utils';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_BASE_PATH, RULES_PATH } from '../../../../common/locators/paths';
 
 jest.mock('../../../utils/kibana_react');
@@ -104,6 +105,12 @@ describe('Header Actions', () => {
           alertIndex={'alert-index'}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+          // @ts-expect-error partial implementation for testing
+          rule={{
+            id: mockRuleId,
+            name: mockRuleName,
+          }}
         />
       );
 
@@ -129,6 +136,12 @@ describe('Header Actions', () => {
           alertIndex={'alert-index'}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+          // @ts-expect-error partial implementation for testing
+          rule={{
+            id: mockRuleId,
+            name: mockRuleName,
+          }}
         />
       );
 
@@ -141,6 +154,7 @@ describe('Header Actions', () => {
           alert={alertWithGroupsAndTags}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
         />
       );
       expect(queryByTestId('alert-details-header-actions-menu-button')).toBeTruthy();
@@ -153,6 +167,12 @@ describe('Header Actions', () => {
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
+            refetch={jest.fn()}
+            // @ts-expect-error partial implementation for testing
+            rule={{
+              id: mockRuleId,
+              name: mockRuleName,
+            }}
           />
         );
 
@@ -166,6 +186,12 @@ describe('Header Actions', () => {
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
+            refetch={jest.fn()}
+            // @ts-expect-error partial implementation for testing
+            rule={{
+              id: mockRuleId,
+              name: mockRuleName,
+            }}
           />
         );
 
@@ -180,6 +206,12 @@ describe('Header Actions', () => {
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
+            refetch={jest.fn()}
+            // @ts-expect-error partial implementation for testing
+            rule={{
+              id: mockRuleId,
+              name: mockRuleName,
+            }}
           />
         );
 
@@ -193,6 +225,12 @@ describe('Header Actions', () => {
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
+            refetch={jest.fn()}
+            // @ts-expect-error partial implementation for testing
+            rule={{
+              id: mockRuleId,
+              name: mockRuleName,
+            }}
           />
         );
 
@@ -218,6 +256,7 @@ describe('Header Actions', () => {
           alert={alertWithGroupsAndTags}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
         />
       );
 
@@ -231,6 +270,7 @@ describe('Header Actions', () => {
           alert={untrackedAlert}
           alertStatus={untrackedAlert.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
         />
       );
 
@@ -244,6 +284,7 @@ describe('Header Actions', () => {
           alert={alertWithGroupsAndTags}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
         />
       );
       fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));

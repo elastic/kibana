@@ -131,7 +131,7 @@ export const ArtifactEntryCardMinified = memo(
                 iconSide="right"
                 iconSize="m"
                 onClick={handleOnToggleAccordion}
-                style={{ fontWeight: 400 }}
+                css={{ fontWeight: 400 }}
               >
                 {getAccordionTitle()}
               </EuiButtonEmpty>

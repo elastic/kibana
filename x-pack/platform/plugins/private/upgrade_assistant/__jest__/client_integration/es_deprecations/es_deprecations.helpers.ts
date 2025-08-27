@@ -6,8 +6,9 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
 import { waitFor } from '@testing-library/dom';
 import { EsDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
@@ -39,18 +40,23 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
-    clickDeprecationRowAt: async (
+    clickDeprecationRowAt: async (config: {
       deprecationType:
         | 'mlSnapshot'
         | 'indexSetting'
         | 'reindex'
         | 'default'
         | 'clusterSetting'
-        | 'dataStream',
-      index: number
-    ) => {
+        | 'dataStream'
+        | 'unfreeze';
+      index: number;
+      action?: 'reindex' | 'readonly' | 'unfreeze';
+    }) => {
+      const { deprecationType, index, action } = config;
       await act(async () => {
-        find(`deprecation-${deprecationType}`).at(index).simulate('click');
+        find(`deprecation-${deprecationType}${action ? `-${action}` : ''}`)
+          .at(index)
+          .simulate('click');
       });
 
       component.update();
@@ -189,6 +195,13 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
+    clickUnfreezeButton: async () => {
+      await act(async () => {
+        find('startIndexUnfreezeButton').simulate('click');
+      });
+
+      component.update();
+    },
     checkMigrationWarningCheckbox: async () => {
       await act(async () => {
         find('warninStepCheckbox')
@@ -219,7 +232,7 @@ const createActions = (testBed: TestBed) => {
     },
     closeFlyout: async () => {
       await act(async () => {
-        find('closeDataStreamReindexingButton').simulate('click');
+        find('closeDataStreamConfirmStepButton').simulate('click');
       });
       component.update();
     },

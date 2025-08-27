@@ -8,17 +8,20 @@
  */
 
 import { parse } from '../../parser';
-import { WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import type { WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import { WrappingPrettyPrinter } from '../wrapping_pretty_printer';
 
 const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   const { root } = parse(src, { withFormatting: true });
   const text = WrappingPrettyPrinter.print(root, opts);
+  // console.log(JSON.stringify(root, null, 2));
 
   return { text };
 };
 
 const assertReprint = (src: string, expected: string = src) => {
   const text = reprint(src).text;
+  // console.log(text);
   expect(text).toBe(expected);
 };
 
@@ -103,7 +106,11 @@ FROM index
     });
   });
 
-  describe('RERANK', () => {
+  /**
+   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+   * get back to it after 9.1 release.
+   */
+  describe.skip('RERANK', () => {
     test('comments around all elements', () => {
       assertReprint(
         `FROM a
@@ -440,6 +447,34 @@ ROW
     });
   });
 
+  describe('list tuple expressions', () => {
+    test('numeric list literal, surrounded from three sides', () => {
+      assertReprint(`FROM a | WHERE b IN ()`);
+      assertReprint(`FROM a | WHERE b NOT IN (/* 1 */ 123456789 /* 2 */)`);
+      assertReprint(`FROM a
+  | WHERE
+      b IN
+        (
+          /* 1 */ 123456789 /* 2 */ // 3
+        )`);
+      assertReprint(`FROM a
+  | WHERE
+      b IN
+        (
+          /* 1 */ 123456789 /* 2 */, // 3
+          "asdfasdfasdfasdfasdfasdfasdfasdfasfd" /* 4 */
+        )`);
+      assertReprint(`FROM a
+  | WHERE
+      b IN
+        (
+          /* 1 */ 123456789 /* 2 */, // 3
+          "asdfasdfasdfasdfasdfasdfasdfasdfasfd" /* 4 */,
+          /* 5 */ 123456789 /* 6 */ // 7
+        )`);
+    });
+  });
+
   describe('rename expressions', () => {
     test('rename expression, surrounded from three sides', () => {
       const query = `
@@ -571,6 +606,18 @@ FROM index
         expect(text).toBe(`ROW 1 * /* 1 */ /* 2 */ 2 /* 3 */ /* 4 */`);
       });
 
+      test('right from function call', () => {
+        const query = `FROM logs-*-* | WHERE QSTR("term") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */ | LIMIT 10`;
+        const text = reprint(query).text;
+
+        expect(text).toBe(
+          `FROM logs-*-*
+  | WHERE
+      QSTR("term") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */
+  | LIMIT 10`
+        );
+      });
+
       test('first operand with top comment', () => {
         const query = `ROW
           // One is important here
@@ -606,6 +653,39 @@ ROW
         expect(text).toBe(
           'FROM a | STATS /* 1 */ a /* 2 */ WHERE /* 3 */ a /* 4 */ == /* 5 */ 1 /* 6 */'
         );
+      });
+    });
+
+    describe('variadic call', () => {
+      test('right from function call', () => {
+        const query = `FROM logs-*-* | WHERE QSTR("term") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */ | LIMIT 10`;
+        const text = reprint(query).text;
+
+        expect(text).toBe(
+          `FROM logs-*-*
+  | WHERE
+      QSTR("term") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */
+  | LIMIT 10`
+        );
+      });
+
+      test('can decorate a function call from all sides', () => {
+        assertReprint(`FROM logs-*-*
+  | WHERE
+      // t1
+      /* t2 */
+      /* l1 */ /* l2 */ QSTR("term") /* r1 */ /* r2 */ // r3
+  | LIMIT 10`);
+      });
+
+      test('can decorate a function call outside and inside', () => {
+        assertReprint(`FROM logs-*-*
+  | WHERE
+      /* t0 */
+      // t1
+      /* t2 */
+      /* l1 */ /* l2 */ QSTR(/* i1 */ "term" /* i2 */ /* i3 */) /* r1 */ /* r2 */ // r3
+  | LIMIT 10`);
       });
     });
   });

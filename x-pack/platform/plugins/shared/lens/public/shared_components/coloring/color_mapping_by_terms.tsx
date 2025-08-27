@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { MutableRefObject, useState } from 'react';
+import type { MutableRefObject } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -17,20 +18,22 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import {
+import type {
   ColorMapping,
-  DEFAULT_COLOR_MAPPING_CONFIG,
-  CategoricalColorMapping,
-  SPECIAL_TOKENS_STRING_CONVERSION,
   PaletteOutput,
   PaletteRegistry,
   CustomPaletteParams,
+} from '@kbn/coloring';
+import {
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  CategoricalColorMapping,
+  SPECIAL_TOKENS_STRING_CONVERSION,
   getConfigFromPalette,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
-import { KbnPalettes } from '@kbn/palettes';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { SerializedValue } from '@kbn/data-plugin/common';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SerializedValue } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { PalettePicker } from '../palette_picker';
@@ -43,6 +46,7 @@ interface ColorMappingByTermsProps {
   palette?: PaletteOutput<CustomPaletteParams>;
   palettes: KbnPalettes;
   isInlineEditing?: boolean;
+  onModeChange?: (isLegacy: boolean) => void;
   setPalette: (palette: PaletteOutput) => void;
   setColorMapping: (colorMapping?: ColorMapping.Config) => void;
   paletteService: PaletteRegistry;
@@ -58,6 +62,7 @@ export function ColorMappingByTerms({
   palette,
   palettes,
   isInlineEditing,
+  onModeChange,
   setPalette,
   setColorMapping,
   paletteService,
@@ -138,7 +143,7 @@ export function ColorMappingByTerms({
                         }}
                         position="top"
                         size="s"
-                        type="questionInCircle"
+                        type="question"
                       />
                     </span>
                   </EuiText>
@@ -146,16 +151,17 @@ export function ColorMappingByTerms({
                 data-test-subj="lns_colorMappingOrLegacyPalette_switch"
                 compressed
                 checked={useLegacyPalettes}
-                onChange={({ target: { checked } }) => {
-                  const newColorMapping = checked
+                onChange={({ target: { checked: isLegacy } }) => {
+                  const newColorMapping = isLegacy
                     ? undefined
                     : palette
                     ? getConfigFromPalette(palettes, palette.name)
                     : { ...DEFAULT_COLOR_MAPPING_CONFIG };
 
-                  trackUiCounterEvents(`color_mapping_switch_${checked ? 'disabled' : 'enabled'}`);
+                  trackUiCounterEvents(`color_mapping_switch_${isLegacy ? 'disabled' : 'enabled'}`);
                   setColorMapping(newColorMapping);
-                  setUseLegacyPalettes(checked);
+                  setUseLegacyPalettes(isLegacy);
+                  onModeChange?.(isLegacy);
                 }}
               />
               <EuiSpacer size="s" />

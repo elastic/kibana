@@ -13,7 +13,6 @@ import type { FtrProviderContext } from '../../../../../common/ftr_provider_cont
 const ACTION_ID = 'preconfigured-es-index-action';
 const ES_TEST_INDEX_NAME = 'functional-test-actions-index-preconfigured';
 
-// eslint-disable-next-line import/no-default-export
 export default function indexTest({ getService }: FtrProviderContext) {
   const es: Client = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');

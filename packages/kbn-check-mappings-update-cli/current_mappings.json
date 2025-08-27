@@ -1079,7 +1079,7 @@
       "managed": {
         "type": "boolean"
       },
-        "matchers": {
+      "matchers": {
         "dynamic": false,
         "type": "object"
       },
@@ -1255,6 +1255,9 @@
       "package_assets": {
         "dynamic": false,
         "properties": {}
+      },
+      "previous_version": {
+        "type": "keyword"
       },
       "verification_key_id": {
         "type": "keyword"
@@ -1835,6 +1838,9 @@
       "is_managed": {
         "type": "boolean"
       },
+      "latest_revision": {
+        "type": "boolean"
+      },
       "name": {
         "type": "keyword"
       },
@@ -1994,21 +2000,6 @@
         "type": "text"
       }
     }
-  },
-  "guided-onboarding-guide-state": {
-    "dynamic": false,
-    "properties": {
-      "guideId": {
-        "type": "keyword"
-      },
-      "isActive": {
-        "type": "boolean"
-      }
-    }
-  },
-  "guided-onboarding-plugin-state": {
-    "dynamic": false,
-    "properties": {}
   },
   "index-pattern": {
     "dynamic": false,
@@ -2436,6 +2427,9 @@
         "properties": {}
       },
       "is_managed": {
+        "type": "boolean"
+      },
+      "latest_revision": {
         "type": "boolean"
       },
       "name": {
@@ -3027,10 +3021,17 @@
       }
     }
   },
+  "privmon-api-key": {
+    "dynamic": false,
+    "properties": {}
+  },
   "product-doc-install-status": {
     "dynamic": false,
     "properties": {
       "index_name": {
+        "type": "keyword"
+      },
+      "inference_id": {
         "type": "keyword"
       },
       "installation_status": {
@@ -3116,6 +3117,14 @@
       },
       "unInstallCount": {
         "type": "long"
+      }
+    }
+  },
+  "scheduled_report": {
+    "dynamic": false,
+    "properties": {
+      "createdBy": {
+        "type": "keyword"
       }
     }
   },
@@ -3216,6 +3225,20 @@
       },
       "version": {
         "type": "long"
+      }
+    }
+  },
+  "security:reference-data": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "owner": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
       }
     }
   },
@@ -3735,6 +3758,139 @@
           }
         }
       },
+      "maintenance_windows": {
+        "type": "keyword"
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "normalizer": "lowercase",
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "origin": {
+        "type": "keyword"
+      },
+      "project_id": {
+        "fields": {
+          "text": {
+            "type": "text"
+          }
+        },
+        "type": "keyword"
+      },
+      "schedule": {
+        "properties": {
+          "number": {
+            "type": "integer"
+          }
+        }
+      },
+      "tags": {
+        "fields": {
+          "text": {
+            "type": "text"
+          }
+        },
+        "type": "keyword"
+      },
+      "throttling": {
+        "properties": {
+          "label": {
+            "type": "keyword"
+          }
+        }
+      },
+      "type": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "urls": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      }
+    }
+  },
+  "synthetics-monitor-multi-space": {
+    "dynamic": false,
+    "properties": {
+      "alert": {
+        "properties": {
+          "status": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          },
+          "tls": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "config_id": {
+        "type": "keyword"
+      },
+      "custom_heartbeat_id": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "hash": {
+        "type": "keyword"
+      },
+      "hosts": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "journey_id": {
+        "type": "keyword"
+      },
+      "locations": {
+        "properties": {
+          "id": {
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            },
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "label": {
+            "type": "text"
+          }
+        }
+      },
+      "maintenance_windows": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -4089,6 +4245,52 @@
       },
       "updated_at": {
         "type": "date"
+      }
+    }
+  },
+  "workflow": {
+    "dynamic": false,
+    "properties": {
+      "createdBy": {
+        "type": "keyword"
+      },
+      "definition": {
+        "enabled": false,
+        "type": "object"
+      },
+      "deleted_at": {
+        "type": "date"
+      },
+      "description": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "lastUpdatedBy": {
+        "type": "keyword"
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "yaml": {
+        "index": false,
+        "type": "text"
       }
     }
   },

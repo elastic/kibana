@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -130,6 +130,9 @@ export default ({ getService }: FtrProviderContext) => {
         undefined,
         'max_single_ml_node_processors should be present'
       );
+
+      expect(resp.showLicenseInfo).to.eql(true, 'showLicenseInfo should be true');
+      expect(resp.showNodeInfo).to.eql(true, 'showNodeInfo should be true');
     });
   });
 };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { loadAiConnectors } from '../../../../../../common/utils/connectors/ai_connectors';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
-import { loadAiConnectors } from '../../common/connectors/ai_connectors';
 import { getConnectorsAuthz } from '../../common/connectors/authz';
 import type { AIConnectorCardMetadata } from './types';
 

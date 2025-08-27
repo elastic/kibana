@@ -196,7 +196,7 @@ export class StepDateHistogram extends Component {
               flush="right"
               href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
-              iconType="help"
+              iconType="question"
               data-test-subj="rollupJobCreateDateHistogramDocsButton"
             >
               <FormattedMessage

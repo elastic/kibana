@@ -20,7 +20,9 @@ const getFlyoutCloseButton = (flyout: DiscoverFlyouts): HTMLElement | null => {
     case DiscoverFlyouts.lensEdit:
       return document.getElementById('lnsCancelEditOnFlyFlyout');
     case DiscoverFlyouts.docViewer:
-      return document.querySelector('[data-test-subj="docViewerFlyoutCloseButton"]');
+      return document.querySelector(
+        '[data-test-subj="docViewerFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
+      );
     case DiscoverFlyouts.esqlDocs:
       return document.querySelector(
         '[data-test-subj="esqlInlineDocumentationFlyout"] [data-test-subj="euiFlyoutCloseButton"]'

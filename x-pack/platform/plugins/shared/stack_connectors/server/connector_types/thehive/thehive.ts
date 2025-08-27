@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { CaseConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
@@ -154,15 +155,35 @@ export class TheHiveConnector extends CaseConnector<
     return res.data;
   }
 
+  private formatAlertBody(alert: ExecutorSubActionCreateAlertParams) {
+    try {
+      const { body, isRuleSeverity, ...restOfAlert } = alert;
+      const bodyJson = JSON.parse(body || '{}');
+      const mergedAlertBody = { ...bodyJson, ...restOfAlert };
+
+      return mergedAlertBody;
+    } catch (err) {
+      throw new Error(
+        i18n.translate('xpack.stackConnectors.thehive.alertBodyParsingError', {
+          defaultMessage: 'Error parsing alert body for thehive: {err}',
+          values: {
+            err: err.toString(),
+          },
+        })
+      );
+    }
+  }
+
   public async createAlert(
     alert: ExecutorSubActionCreateAlertParams,
     connectorUsageCollector: ConnectorUsageCollector
   ) {
+    const mergedAlertBody = this.formatAlertBody(alert);
     await this.request(
       {
         method: 'post',
         url: `${this.url}/api/${API_VERSION}/alert`,
-        data: alert,
+        data: mergedAlertBody,
         headers: this.getAuthHeaders(),
         responseSchema: TheHiveCreateAlertResponseSchema,
       },
