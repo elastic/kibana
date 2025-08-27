@@ -21,8 +21,8 @@ export const getFiberType = (fiber: ReactFiberNode): string | null => {
     return fiber.type?.name;
   } else if (typeof fiber.type?.displayName === 'string') {
     return fiber.type?.displayName;
-  } else if (typeof fiber.elementType === 'string') {
-    return fiber.elementType;
+  } else if (typeof fiber?.elementType === 'string') {
+    return fiber?.elementType;
   }
 
   return null;

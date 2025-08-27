@@ -10,7 +10,7 @@
 import React from 'react';
 import type { ComponentData } from '../../../../lib/get_inspected_element_data';
 import { EuiDocsLink } from './eui_docs_link';
-import { PreviewImage } from './preview_image';
+import { ComponentPreview } from './component_preview';
 import { ComponentTitle } from './component_title';
 import { IconType } from './icon_type';
 import { CodeownersList } from './codeowners_list';
@@ -20,14 +20,18 @@ interface Props {
 }
 
 export const DataSection = ({ componentData }: Props) => {
-  const { codeowners, euiData, iconType, sourceComponent } = componentData;
+  const {
+    fileData: { codeowners },
+    euiData,
+    sourceComponent,
+  } = componentData;
 
   return (
     <>
-      <PreviewImage element={sourceComponent.element} />
+      <ComponentPreview element={sourceComponent.element} />
       <ComponentTitle sourceComponentType={sourceComponent.type} />
       <CodeownersList codeowners={codeowners} />
-      <IconType iconType={iconType} />
+      <IconType iconType={euiData.iconType} />
       <EuiDocsLink euiData={euiData} />
     </>
   );

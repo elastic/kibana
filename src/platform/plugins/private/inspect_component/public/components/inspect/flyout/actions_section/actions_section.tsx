@@ -8,25 +8,30 @@
  */
 
 import React from 'react';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ComponentData } from '../../../../lib/get_inspected_element_data';
 import { ActionButtons } from './action_buttons';
 import { ActionsSubTitle } from './actions_sub_title';
-import { ActionsTitle } from './actions_title';
 
 interface Props {
   componentData: ComponentData;
 }
 
 export const ActionsSection = ({ componentData }: Props) => {
-  const {
-    _debugSource: { columnNumber, fileName, lineNumber },
-    relativePath,
-    baseFileName,
-  } = componentData;
+  const { columnNumber, fileName, lineNumber, relativePath, baseFileName } = componentData.fileData;
 
   return (
     <>
-      <ActionsTitle />
+      <EuiTitle size="s" data-test-subj="inspectComponentActionsTitle">
+        <h3>
+          <FormattedMessage
+            id="kbnInspectComponent.inspectFlyout.actionsSection.title"
+            defaultMessage="Actions"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <ActionsSubTitle relativePath={relativePath} baseFileName={baseFileName} />
       <ActionButtons
         fileName={fileName}

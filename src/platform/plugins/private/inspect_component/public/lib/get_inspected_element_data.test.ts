@@ -12,44 +12,43 @@ import { fetchComponentData } from '../api/fetch_component_data';
 import { getIconType } from './dom/get_icon_type';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { ReactFiberNodeWithHtmlElement } from './fiber/types';
+import { findFirstEuiComponent } from './fiber/find_first_eui_component';
 
 jest.mock('../api/fetch_component_data');
 jest.mock('./dom/get_icon_type');
+jest.mock('./fiber/find_first_eui_component');
 
 describe('getInspectedElementData', () => {
   const mockHttpService = httpServiceMock.createStartContract();
 
-  const mockTarget = document.createElement('div');
   const mockSourceComponent = {
     type: 'EuiButton',
     element: document.createElement('button'),
   };
 
+  const mockTarget = document.createElement('p');
+
   const mockTargetFiberNodeWithHtmlElement: ReactFiberNodeWithHtmlElement = {
-    elementType: 'button',
-    type: 'EuiButton',
+    type: 'p',
+    element: mockTarget,
     _debugSource: {
-      fileName: '/path/to/component.tsx',
+      fileName: '/path/to/capybara.tsx',
       lineNumber: 42,
       columnNumber: 10,
     },
-    _debugOwner: undefined,
-    stateNode: mockTarget,
-    child: undefined,
-    sibling: undefined,
-    return: undefined,
-    element: mockTarget,
+    _debugOwner: null,
   };
 
   const mockResponse = {
-    baseFileName: 'component.tsx',
-    relativePath: 'src/path/to/component.tsx',
-    codeowners: ['team-kibana', 'team-platform'],
+    baseFileName: 'capybara.tsx',
+    relativePath: 'src/path/to/capybara.tsx',
+    codeowners: ['@elastic/team-capybara'],
   };
 
   const mockEuiDocs = {
-    componentName: 'EuiButton',
+    componentType: 'EuiButton',
     docsLink: 'https://eui.elastic.co/docs/components/navigation/buttons/button',
+    iconType: 'copy',
   };
 
   beforeEach(() => {
@@ -59,7 +58,6 @@ describe('getInspectedElementData', () => {
   it('should return null if targetFiberNodeWithHtmlElement is null', async () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
-      target: mockTarget,
       sourceComponent: mockSourceComponent,
       targetFiberNodeWithHtmlElement: null,
     });
@@ -70,7 +68,6 @@ describe('getInspectedElementData', () => {
   it('should return null if sourceComponent is null', async () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
-      target: mockTarget,
       sourceComponent: null,
       targetFiberNodeWithHtmlElement: mockTargetFiberNodeWithHtmlElement,
     });
@@ -83,7 +80,6 @@ describe('getInspectedElementData', () => {
 
     const result = await getInspectedElementData({
       httpService: mockHttpService,
-      target: mockTarget,
       sourceComponent: mockSourceComponent,
       targetFiberNodeWithHtmlElement: mockTargetFiberNodeWithHtmlElement,
     });
@@ -92,16 +88,17 @@ describe('getInspectedElementData', () => {
       httpService: mockHttpService,
       fileName: mockTargetFiberNodeWithHtmlElement._debugSource.fileName,
     });
+
     expect(result).toBeNull();
   });
 
-  it('should return complete component data when all sources return data', async () => {
+  it('should return component data', async () => {
     (fetchComponentData as jest.Mock).mockResolvedValue(mockResponse);
     (getIconType as jest.Mock).mockReturnValue('copy');
+    (findFirstEuiComponent as jest.Mock).mockReturnValue('EuiButton');
 
     const result = await getInspectedElementData({
       httpService: mockHttpService,
-      target: mockTarget,
       sourceComponent: mockSourceComponent,
       targetFiberNodeWithHtmlElement: mockTargetFiberNodeWithHtmlElement,
     });
@@ -113,9 +110,10 @@ describe('getInspectedElementData', () => {
     expect(getIconType).toHaveBeenCalledWith(mockTarget);
 
     expect(result).toEqual({
-      ...mockTargetFiberNodeWithHtmlElement,
-      ...mockResponse,
-      iconType: 'copy',
+      fileData: {
+        ...mockTargetFiberNodeWithHtmlElement._debugSource,
+        ...mockResponse,
+      },
       euiData: mockEuiDocs,
       sourceComponent: mockSourceComponent,
     });

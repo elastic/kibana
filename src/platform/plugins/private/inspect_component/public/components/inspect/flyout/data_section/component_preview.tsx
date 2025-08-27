@@ -33,9 +33,9 @@ interface Props {
 }
 
 /**
- * The PreviewImage component is responsible for display a preview of a user-creted component associated with the targeteted HTML element.
+ * The ComponentPreview component is responsible for display a preview of a user-creted component associated with the targeteted HTML element.
  */
-export const PreviewImage = ({ element }: Props) => {
+export const ComponentPreview = ({ element }: Props) => {
   const [screenshot, setScreenshot] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 

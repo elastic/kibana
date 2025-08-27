@@ -10,24 +10,21 @@
 import type { ComponentData } from '../lib/get_inspected_element_data';
 
 export const mockComponentData: ComponentData = {
-  _debugSource: {
-    columnNumber: 19,
+  fileData: {
     fileName: '/Users/dev/Desktop/kibana/src/plugins/shared/zoo/hot_spring/capybara.tsx',
+    columnNumber: 19,
     lineNumber: 93,
+    relativePath: 'src/plugins/shared/zoo/hot_spring/capybara.tsx',
+    baseFileName: 'capybara.tsx',
+    codeowners: ['@elastic/team-capybara'],
   },
-  relativePath: 'src/plugins/shared/zoo/hot_spring/capybara.tsx',
-  baseFileName: 'capybara.tsx',
-  codeowners: ['@elastic/team-capybara'],
   euiData: {
-    componentName: 'EuiButton',
+    componentType: 'EuiButton',
     docsLink: 'https://eui.elastic.co/docs/components/button',
+    iconType: 'warning',
   },
-  iconType: 'warning',
   sourceComponent: {
     type: 'CapybaraWrapper',
     element: document.createElement('div'),
   },
-  elementType: null,
-  type: 'button',
-  element: document.createElement('button'),
 };

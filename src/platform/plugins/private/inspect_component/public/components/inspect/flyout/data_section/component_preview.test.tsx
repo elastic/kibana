@@ -10,14 +10,16 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { ActionsTitle } from './actions_title';
+import { ComponentPreview } from './component_preview';
 
-describe('ActionsTitle', () => {
+describe('ComponentPreview', () => {
+  const mockElement = document.createElement('div');
+
   it('should render correctly', () => {
-    renderWithI18n(<ActionsTitle />);
+    renderWithI18n(<ComponentPreview element={mockElement} />);
 
-    const title = screen.getByTestId('inspectComponentActionsTitle');
+    const previewImage = screen.getByTestId('inspectFlyoutPreviewImage');
 
-    expect(title).toBeInTheDocument();
+    expect(previewImage).toBeInTheDocument();
   });
 });

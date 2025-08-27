@@ -29,11 +29,11 @@ export const EuiDocsLink = ({ euiData }: Props) => {
       <EuiText css={boldTextCss} size="s">
         <FormattedMessage
           id="kbnInspectComponent.inspectFlyout.dataSection.euiDocsLabel"
-          defaultMessage="EUI Docs:"
+          defaultMessage="EUI:"
         />
       </EuiText>
       <EuiLink href={euiData.docsLink} target="_blank" external data-test-subj="euiDocsLink">
-        {euiData.componentName}
+        {euiData.componentType}
       </EuiLink>
     </EuiFlexGroup>
   );

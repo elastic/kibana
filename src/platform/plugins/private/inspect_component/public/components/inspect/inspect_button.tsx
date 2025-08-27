@@ -34,7 +34,7 @@ interface Props {
  */
 export const InspectButton = ({ core }: Props) => {
   const [isInspecting, setIsInspecting] = useState(false);
-  const [flyoutOverlayRef, setFlyoutOverlayRef] = useState<OverlayRef>();
+  const [flyoutOverlayRef, setFlyoutOverlayRef] = useState<OverlayRef | null>(null);
 
   const buttonStyle = css`
     & > .euiButtonEmpty__content > svg {
@@ -52,7 +52,7 @@ export const InspectButton = ({ core }: Props) => {
   const handleTogglingInspectMode = () => {
     if (flyoutOverlayRef) {
       flyoutOverlayRef.close();
-      setFlyoutOverlayRef(undefined);
+      setFlyoutOverlayRef(null);
     }
     setIsInspecting((prev) => !prev);
   };

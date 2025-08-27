@@ -16,7 +16,7 @@ import type { EuiData } from '../../../../lib/fiber/types';
 describe('EuiDocsLink', () => {
   it('should render', () => {
     const mockEuiData: EuiData = {
-      componentName: 'EuiButton',
+      componentType: 'EuiButton',
       docsLink: 'https://eui.elastic.co/docs/components/button',
     };
 

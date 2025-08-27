@@ -26,7 +26,7 @@ import { InspectHighlight } from './inspect_highlight';
 
 interface Props {
   core: CoreStart;
-  setFlyoutOverlayRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
+  setFlyoutOverlayRef: Dispatch<SetStateAction<OverlayRef | null>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -92,7 +92,6 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       }
 
       const componentData = await getInspectedElementData({
-        target,
         httpService: core.http,
         targetFiberNodeWithHtmlElement: targetFiberNodeWithElement,
         sourceComponent,
@@ -112,7 +111,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       );
 
       flyout.onClose.then(() => {
-        setFlyoutOverlayRef(undefined);
+        setFlyoutOverlayRef(null);
       });
 
       setFlyoutOverlayRef(flyout);

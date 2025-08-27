@@ -26,10 +26,10 @@ export interface DebugSource {
  * for DOM traversal and Fiber tree navigation.
  */
 export interface ReactFiberNode {
-  /** The type of the React element represented by this Fiber node. */
-  elementType: string | null;
   /** The resolved type of the component. */
   type: ComponentType | string;
+  /** The type of the React element represented by this Fiber node. */
+  elementType?: string | null;
   /** Metadata about the source file where this Fiber was created. */
   _debugSource?: DebugSource;
   /** The Fiber node that created this node. */
@@ -66,7 +66,9 @@ export interface SourceComponent {
  */
 export interface EuiData {
   /** The React component name of this EUI component. */
-  componentName: string;
+  componentType: string;
   /** Link to the EUI documentation for this EUI component. */
   docsLink: string;
+  /** The EUI icon type for the icon inside this component. */
+  iconType: string | null;
 }
