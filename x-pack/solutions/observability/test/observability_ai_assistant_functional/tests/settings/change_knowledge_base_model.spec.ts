@@ -7,12 +7,10 @@
 
 import expect from '@kbn/expect';
 import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createConnector, deleteConnectors } from '../../common/connectors';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
+import type { LlmProxy } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
+import { createLlmProxy } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
 import {
   deployTinyElserAndSetupKb,
   stopTinyElserModel,
@@ -39,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ui.auth.login('editor');
       await PageObjects.common.navigateToUrlWithBrowserHistory(
         'management',
-        '/kibana/observabilityAiAssistantManagement'
+        '/ai/observabilityAiAssistantManagement'
       );
     });
 

@@ -441,7 +441,7 @@ export const ARCHIVE_CALLOUT_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.archiveCallout.subtitle',
   {
     defaultMessage:
-      'The changes you have made here will not be saved. Are you sure you want to discard these unsaved changes and archive this maintenance window?',
+      'Upcoming maintenance window events will be canceled, and the window will be queued for deletion. Any other changes made here will not be saved. Are you sure you want to discard changes and archive this maintenance window?',
   }
 );
 

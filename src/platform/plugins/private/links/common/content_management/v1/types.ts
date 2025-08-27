@@ -13,8 +13,8 @@ import type {
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
 
-import { LinksContentType } from '../../types';
-import {
+import type { LinksContentType } from '../../types';
+import type {
   DASHBOARD_LINK_TYPE,
   EXTERNAL_LINK_TYPE,
   LINKS_HORIZONTAL_LAYOUT,

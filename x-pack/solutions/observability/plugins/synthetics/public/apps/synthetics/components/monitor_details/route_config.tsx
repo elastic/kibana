@@ -7,8 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
-import { EuiIcon, EuiPageHeaderProps } from '@elastic/eui';
+import type { useHistory } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MonitorDetailsAlerts } from './monitor_alerts/monitor_detail_alerts';
 import { MonitorAlertsIcon } from './monitor_alerts/alerts_icon';
@@ -30,7 +32,7 @@ import {
   MONITOR_ROUTE,
   MONITORS_ROUTE,
 } from '../../../../../common/constants';
-import { RouteProps } from '../../routes';
+import type { RouteProps } from '../../routes';
 
 export const getMonitorDetailsRoute = (
   history: ReturnType<typeof useHistory>,

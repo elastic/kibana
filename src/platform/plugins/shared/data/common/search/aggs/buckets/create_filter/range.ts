@@ -8,8 +8,8 @@
  */
 
 import { buildRangeFilter } from '@kbn/es-query';
-import { AggTypesDependencies } from '../../agg_types';
-import { IBucketAggConfig } from '../bucket_agg_type';
+import type { AggTypesDependencies } from '../../agg_types';
+import type { IBucketAggConfig } from '../bucket_agg_type';
 
 /** @internal */
 export const createFilterRange = (

@@ -8,11 +8,12 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { search } from '@kbn/data-plugin/public';
 import type { UnifiedHistogramChartContext } from '../../types';
-import { ToolbarSelector, ToolbarSelectorProps, SelectableEntry } from './toolbar_selector';
+import type { ToolbarSelectorProps, SelectableEntry } from './toolbar_selector';
+import { ToolbarSelector } from './toolbar_selector';
 
 export interface TimeIntervalSelectorProps {
   chart: UnifiedHistogramChartContext;

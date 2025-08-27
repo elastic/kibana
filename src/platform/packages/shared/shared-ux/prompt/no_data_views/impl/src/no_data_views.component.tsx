@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -21,9 +21,7 @@ import {
   EuiPageTemplate,
   EuiToolTip,
 } from '@elastic/eui';
-import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
-
-import { i18n } from '@kbn/i18n';
+import type { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { DataViewIllustration } from './data_view_illustration';
 import { EsqlIllustration } from './esql_illustration';
 import { DocumentationLink } from './documentation_link';

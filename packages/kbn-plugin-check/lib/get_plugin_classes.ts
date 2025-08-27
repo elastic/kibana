@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Project } from 'ts-morph';
+import type { Project } from 'ts-morph';
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { PluginOrPackage } from '@kbn/docs-utils/src/types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { PluginOrPackage } from '@kbn/docs-utils/src/types';
 
 /**
  * Return the `client` and `server` plugin classes for a plugin.

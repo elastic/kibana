@@ -10,9 +10,9 @@
 import React from 'react';
 import { EuiButton, EuiPageTemplate, EuiTitle, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { NoDataCardComponentProps as Props } from '@kbn/shared-ux-card-no-data-types';
 import { ElasticAgentCardIllustration } from './elastic_agent_card_illustration';
+
 
 const defaultTitle = i18n.translate('sharedUXPackages.card.noData.title', {
   defaultMessage: 'Add Data to get started',

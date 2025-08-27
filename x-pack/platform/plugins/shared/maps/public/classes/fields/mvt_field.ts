@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { AbstractField, IField } from './field';
-import { FIELD_ORIGIN, MVT_FIELD_TYPE } from '../../../common/constants';
-import { IVectorSource } from '../sources/vector_source';
-import { IMvtVectorSource } from '../sources/vector_source';
-import { MVTFieldDescriptor } from '../../../common/descriptor_types';
+import type { IField } from './field';
+import { AbstractField } from './field';
+import type { FIELD_ORIGIN } from '../../../common/constants';
+import { MVT_FIELD_TYPE } from '../../../common/constants';
+import type { IVectorSource } from '../sources/vector_source';
+import type { IMvtVectorSource } from '../sources/vector_source';
+import type { MVTFieldDescriptor } from '../../../common/descriptor_types';
 
 export class MVTField extends AbstractField implements IField {
   private readonly _source: IMvtVectorSource;

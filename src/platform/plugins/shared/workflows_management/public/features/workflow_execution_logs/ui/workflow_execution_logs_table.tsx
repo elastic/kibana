@@ -8,9 +8,9 @@
  */
 
 import React, { useMemo } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiBadge,
   EuiLoadingSpinner,
   EuiEmptyPrompt,

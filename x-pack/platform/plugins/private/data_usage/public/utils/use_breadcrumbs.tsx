@@ -8,7 +8,7 @@
 import type { ChromeBreadcrumb, ChromeStart } from '@kbn/core-chrome-browser';
 
 import { useEffect } from 'react';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 export const useBreadcrumbs = (
   breadcrumbs: ChromeBreadcrumb[],

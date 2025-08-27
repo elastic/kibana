@@ -11,9 +11,12 @@ import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
-import { AnalyticsNoDataPageFlavor, Services } from '@kbn/shared-ux-page-analytics-no-data-types';
+import type {
+  AnalyticsNoDataPageFlavor,
+  Services,
+} from '@kbn/shared-ux-page-analytics-no-data-types';
 import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
-import { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
+import type { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
 import { getHasApiKeys$ } from '../lib/get_has_api_keys';
 
 /**

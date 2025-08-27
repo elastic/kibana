@@ -12,7 +12,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
-import { NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
+
+import type { NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { getNoDataViewsPromptServicesMock } from '@kbn/shared-ux-prompt-no-data-views-mocks';
 
 import { NoDataViewsPrompt } from './no_data_views';

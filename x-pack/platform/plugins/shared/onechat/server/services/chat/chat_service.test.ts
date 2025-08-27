@@ -17,18 +17,18 @@ import {
 } from './chat_service.test.mocks';
 
 import { firstValueFrom, toArray, of } from 'rxjs';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { AgentMode } from '@kbn/onechat-common';
 import {
   createAgentsServiceStartMock,
   createConversationServiceMock,
   createEmptyConversation,
 } from '../../test_utils';
-import { ChatService, createChatService } from './chat_service';
+import type { ChatService } from './chat_service';
+import { createChatService } from './chat_service';
 
 const createChatModel = (): InferenceChatModel => {
   // we don't really need it
@@ -37,7 +37,6 @@ const createChatModel = (): InferenceChatModel => {
 
 describe('ChatService', () => {
   let inference: ReturnType<typeof inferenceMock.createStartContract>;
-  let actions: ReturnType<typeof actionsMock.createStart>;
   let logger: MockedLogger;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let agentService: ReturnType<typeof createAgentsServiceStartMock>;
@@ -49,14 +48,12 @@ describe('ChatService', () => {
     logger = loggerMock.create();
     request = httpServerMock.createKibanaRequest();
     inference = inferenceMock.createStartContract();
-    actions = actionsMock.createStart();
     agentService = createAgentsServiceStartMock();
     conversationService = createConversationServiceMock();
 
     chatService = createChatService({
       inference,
       logger,
-      actions,
       agentService,
       conversationService,
     });
@@ -101,7 +98,6 @@ describe('ChatService', () => {
       conversation$: expect.anything(),
       agentId: 'my-agent',
       request,
-      mode: AgentMode.normal,
       agentService,
     });
   });

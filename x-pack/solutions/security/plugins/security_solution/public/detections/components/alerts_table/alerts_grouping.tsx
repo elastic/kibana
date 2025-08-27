@@ -238,12 +238,11 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       dispatch(
         updateGroups({
           activeGroups: selectedGroups,
-          options: groupingOptions,
           tableId: props.tableId,
         })
       );
     }
-  }, [groupingOptions, dispatch, props.tableId, selectedGroups]);
+  }, [dispatch, props.tableId, selectedGroups]);
 
   useEffect(() => {
     if (groupInRedux != null && !isNoneGroup(groupInRedux.activeGroups)) {

@@ -117,6 +117,7 @@ export const COVERAGE_OVERVIEW_PATH = '/rules_coverage_overview' as const;
 export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
+export const ENDPOINT_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/endpoint_exceptions` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
 export const TRUSTED_DEVICES_PATH = `${MANAGEMENT_PATH}/trusted_devices` as const;
 export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
@@ -138,6 +139,8 @@ export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
 export const APP_POLICIES_PATH = `${APP_PATH}${POLICIES_PATH}` as const;
+export const APP_ENDPOINT_EXCEPTIONS_PATH = `${APP_PATH}${ENDPOINT_EXCEPTIONS_PATH}` as const;
+export const APP_MANAGE_PATH = `${APP_PATH}${MANAGE_PATH}` as const;
 export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}` as const;
 export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as const;
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
@@ -189,6 +192,15 @@ export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
 
 /** This Kibana Advanced Setting enables the warnings for CCS read permissions */
 export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
+
+/** This Kibana Advanced Setting when turned on keeps the suppression window open when an alert is closed */
+export const SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
+  'securitySolution:suppressionBehaviorOnAlertClosure' as const;
+
+export enum SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM {
+  RestartWindow = 'restart-suppression',
+  ContinueWindow = 'continue-until-window-ends',
+}
 
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
@@ -434,7 +446,7 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
   SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',

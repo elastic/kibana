@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
 import { getEsqlRule } from '../../../../objects/rule';
 
 import {
@@ -28,6 +29,10 @@ describe(
   'Detection ES|QL rules, details view',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     const rule = getEsqlRule();
 
     beforeEach(() => {

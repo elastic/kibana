@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const metricbeatIndexCreateRequest: IndicesCreateRequest = {
   index: 'metricbeat-[environment].evaluations-[date]',

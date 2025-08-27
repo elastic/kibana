@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PropsWithChildren, SetStateAction, Dispatch } from 'react';
 import React, {
   useContext,
   useState,
   useRef,
   createContext,
-  PropsWithChildren,
   forwardRef,
   useImperativeHandle,
-  SetStateAction,
-  Dispatch,
   useMemo,
   useEffect,
   type ComponentProps,

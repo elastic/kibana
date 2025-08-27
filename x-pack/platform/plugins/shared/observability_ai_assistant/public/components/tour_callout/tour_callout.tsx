@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { ReactElement, useEffect, useState } from 'react';
-import { EuiButtonEmpty, EuiText, EuiTourStep, EuiTourStepProps } from '@elastic/eui';
+import type { ReactElement } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { EuiTourStepProps } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface TourCalloutProps

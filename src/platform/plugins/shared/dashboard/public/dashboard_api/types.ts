@@ -8,23 +8,24 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { PublishesESQLVariables } from '@kbn/esql-types';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import {
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { PublishesESQLVariables } from '@kbn/esql-types';
+import type { GridLayoutData } from '@kbn/grid-layout';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type {
   CanAddNewSection,
   CanExpandPanels,
   HasLastSavedChildState,
   HasSerializedChildState,
+  PassThroughContext,
   PresentationContainer,
   PublishesSettings,
   TrackContentfulRender,
 } from '@kbn/presentation-containers';
-import { type TracksOverlays } from '@kbn/presentation-util';
-import {
+import type {
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -42,17 +43,18 @@ import {
   SerializedPanelState,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
+import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { type TracksOverlays } from '@kbn/presentation-util';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
 import type { DashboardAttributes, GridData } from '../../server/content_management';
-import {
+import type {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import { DashboardLayout } from './layout_manager/types';
+import type { DashboardLayout } from './layout_manager/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -60,6 +62,8 @@ export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
 export interface DashboardCreationOptions {
   getInitialInput?: () => Partial<DashboardState & { viewMode?: ViewMode }>;
+
+  getPassThroughContext?: PassThroughContext['getPassThroughContext'];
 
   getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 
@@ -96,6 +100,7 @@ export type DashboardApi = CanExpandPanels &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &
+  PassThroughContext &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &
@@ -156,6 +161,7 @@ export interface DashboardInternalApi {
   controlGroupReload$: Subject<void>;
   panelsReload$: Subject<void>;
   layout$: BehaviorSubject<DashboardLayout>;
+  gridLayout$: BehaviorSubject<GridLayoutData>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
   serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;

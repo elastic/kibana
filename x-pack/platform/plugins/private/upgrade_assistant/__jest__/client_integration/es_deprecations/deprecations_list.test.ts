@@ -8,18 +8,17 @@
 import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import {
-  ReindexStep,
+import type {
   ESUpgradeStatus,
   EnrichedDeprecationInfo,
   MlAction,
   ReindexAction,
   UnfreezeAction,
-  ReindexStatus,
-  DataStreamMigrationStatus,
 } from '../../../common/types';
+import { ReindexStep, ReindexStatus, DataStreamMigrationStatus } from '../../../common/types';
 import { setupEnvironment } from '../helpers';
-import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
+import type { ElasticsearchTestBed } from './es_deprecations.helpers';
+import { setupElasticsearchPage } from './es_deprecations.helpers';
 import {
   esDeprecationsMockResponse,
   MOCK_SNAPSHOT_ID,

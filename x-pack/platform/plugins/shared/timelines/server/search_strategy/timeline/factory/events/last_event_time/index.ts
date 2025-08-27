@@ -8,10 +8,10 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
-import { TimelineEventsLastEventTimeStrategyResponse } from '../../../../../../common/search_strategy/timeline';
+import type { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
+import type { TimelineEventsLastEventTimeStrategyResponse } from '../../../../../../common/search_strategy/timeline';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { TimelineFactory } from '../../types';
+import type { TimelineFactory } from '../../types';
 import { buildLastEventTimeQuery } from './query.events_last_event_time.dsl';
 
 export const timelineEventsLastEventTime: TimelineFactory<TimelineEventsQueries.lastEventTime> = {

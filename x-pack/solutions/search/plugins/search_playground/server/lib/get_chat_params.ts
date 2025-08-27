@@ -11,7 +11,7 @@ import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/
 import { INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { BaseLanguageModel } from '@langchain/core/language_models/base';
+import type { BaseLanguageModel } from '@langchain/core/language_models/base';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';

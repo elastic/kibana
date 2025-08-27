@@ -227,7 +227,6 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         });
       })
     );
-
   // execute a tool
   router.versioned
     .post({

@@ -10,13 +10,9 @@ import type {
   ElasticsearchClient,
   ElasticsearchServiceStart,
 } from '@kbn/core-elasticsearch-server';
-import {
-  createBadRequestError,
-  EsqlToolConfig,
-  isToolNotFoundError,
-  ToolType,
-} from '@kbn/onechat-common';
-import { ToolTypeClient, ToolTypeDefinition } from '../tool_provider';
+import type { EsqlToolConfig } from '@kbn/onechat-common';
+import { createBadRequestError, isToolNotFoundError, ToolType } from '@kbn/onechat-common';
+import type { ToolTypeClient, ToolTypeDefinition } from '../tool_provider';
 import type { ToolPersistedDefinition } from '../client';
 import { createClient } from '../client';
 import { toToolDefinition } from './utils/to_tool_definition';
