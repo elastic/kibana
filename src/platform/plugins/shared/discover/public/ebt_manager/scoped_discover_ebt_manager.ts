@@ -34,7 +34,6 @@ enum FieldUsageEventName {
   dataTableSelection = 'dataTableSelection',
   dataTableRemoval = 'dataTableRemoval',
   filterAddition = 'filterAddition',
-  updateQuery = 'updateQuery',
 }
 interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
