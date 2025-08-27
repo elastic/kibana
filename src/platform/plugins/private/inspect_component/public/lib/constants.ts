@@ -10,9 +10,10 @@
 export const EUI_DATA_ICON_TYPE = 'data-icon-type';
 export const INSPECT_OVERLAY_ID = 'inspectOverlay';
 export const INSPECT_FLYOUT_ID = 'inspectComponentFlyout';
-export const INSPECT_FLYOUT_MAX_WIDTH = 480;
 export const EUI_PORTAL_ATTRIBUTE = '[data-euiportal="true"]';
 export const EUI_DOCS_BASE = 'https://eui.elastic.co/docs';
+export const INSPECT_FLYOUT_MAX_WIDTH = 480;
+
 export const EXCLUDED_COMPONENT_TYPES = [
   'Emotion',
   'ConnectFunction',

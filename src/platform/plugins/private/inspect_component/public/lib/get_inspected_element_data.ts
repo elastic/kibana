@@ -9,16 +9,16 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import { findFirstEuiComponent } from './fiber/find_first_eui_component';
+import { getIconType } from './dom/get_icon_type';
+import { fetchComponentData } from '../api/fetch_component_data';
+import { EUI_COMPONENTS_DOCS_MAP, EUI_DOCS_BASE } from './constants';
+import type { InspectComponentResponse } from '../api/fetch_component_data';
 import type {
   DebugSource,
   EuiData,
   ReactFiberNodeWithHtmlElement,
   SourceComponent,
 } from './fiber/types';
-import { EUI_COMPONENTS_DOCS_MAP, EUI_DOCS_BASE } from './constants';
-import { getIconType } from './dom/get_icon_type';
-import type { InspectComponentResponse } from '../api/fetch_component_data';
-import { fetchComponentData } from '../api/fetch_component_data';
 
 /** Information about the file where the component is defined. */
 interface FileData extends DebugSource, InspectComponentResponse {

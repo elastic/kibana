@@ -18,9 +18,9 @@ interface HandleEventPropagationOptions {
 }
 
 /**
- * Handle event propagation for inspected elements.
- * It invokes the provided callback only for click events or if the target element is disabled.
- * This allows for inspecting disabled elements and prevents triggering 'onClick' behavior on underlying elements.
+ * Handles event propagation for inspected HTML elements.
+ * Prevents triggering 'onClick' behavior.
+ * Allows for inspecting disabled HTML elements.
  * @param {HandleEventPropagationOptions} options
  * @param {MouseEvent} options.event The mouse event to handle.
  * @param {function} options.callback The callback to invoke if the event should be handled.
@@ -37,12 +37,11 @@ export const handleEventPropagation = ({
   const isClickEvent = event.type === 'click';
 
   /**
-   * We want to block propagation of click events to not trigger 'onClick' behavior, but at the same time
-   * allow inspecting disabled elements and allow hover events.
-   * To access disabled elements we need to handle this on 'pointerdown' event as 'click' event is not triggered
-   * for disabled elements. But we can't simply allow inspecting on 'pointerdown' as it would trigger 'onClick'
-   * behavior on underlying elements. So the solution is to inspect on 'pointerdown'
-   * only if the target element is disabled.
+   * Blocks propagation of click events to stop triggering 'onClick' behavior and at the same time
+   * allows hover events and inspecting disabled HTML elements.
+   * To inspect disabled HTML elements 'pointerdown' event is used because 'click' event type is not triggered
+   * for them. Blocking 'onClick' behavior is not possible for 'pointerdown' event, so for this event type
+   * we allow event propagation only if the inspected HTML element is disabled.
    */
   if (isClickEvent || isTargetDisabled) {
     callback(event);

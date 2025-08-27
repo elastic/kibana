@@ -9,12 +9,12 @@
 
 import { sep } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { GetComponentDataRequestBody } from './get_component_data';
-import { getComponentData } from './get_component_data';
-import { getComponentCodeowners } from '../../lib/codeowners/get_component_codeowners';
-import { loggingSystemMock } from '@kbn/core/public/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpResourcesMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/public/mocks';
+import { getComponentData } from './get_component_data';
+import { getComponentCodeowners } from '../../lib/codeowners/get_component_codeowners';
+import type { GetComponentDataRequestBody } from './get_component_data';
 
 jest.mock('../../lib/codeowners/get_component_codeowners');
 

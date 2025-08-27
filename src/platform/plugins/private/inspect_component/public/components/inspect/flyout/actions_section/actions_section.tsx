@@ -10,9 +10,9 @@
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ComponentData } from '../../../../lib/get_inspected_element_data';
 import { ActionButtons } from './action_buttons';
 import { ActionsSubTitle } from './actions_sub_title';
+import type { ComponentData } from '../../../../lib/get_inspected_element_data';
 
 interface Props {
   componentData: ComponentData;

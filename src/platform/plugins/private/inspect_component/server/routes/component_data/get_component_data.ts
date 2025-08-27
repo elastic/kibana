@@ -8,8 +8,6 @@
  */
 
 import { sep } from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   IKibanaResponse,
@@ -17,6 +15,8 @@ import type {
   KibanaResponseFactory,
   Logger,
 } from '@kbn/core/server';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { schema } from '@kbn/config-schema';
 import { getComponentCodeowners } from '../../lib/codeowners/get_component_codeowners';
 
 export const getComponentDataBodySchema = schema.object({
@@ -35,6 +35,7 @@ interface GetComponentDataOptions {
   res: KibanaResponseFactory;
   logger: Logger;
 }
+
 /**
  * Response structure for {@link getComponentData}.
  */

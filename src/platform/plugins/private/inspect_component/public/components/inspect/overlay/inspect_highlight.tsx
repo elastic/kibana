@@ -18,8 +18,8 @@ interface Props {
 }
 
 /**
- * The InspectHighlight component is responsible for displaying a highlight box around the currently
- * inspected HTML element, along with a badge displaying the associated React component name.
+ * InspectHighlight displays a highlight box around the currently
+ * inspected HTML element, along with a badge containing the source component name.
  */
 export const InspectHighlight = ({ currentPosition, path }: Props) => {
   const { euiTheme } = useEuiTheme();

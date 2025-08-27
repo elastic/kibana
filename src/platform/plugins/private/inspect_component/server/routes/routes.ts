@@ -19,6 +19,7 @@ interface InspectComponentRoutesOptions {
   /** The logger instance. */
   logger: Logger;
 }
+
 /**
  * Register routes for the Inspect Component plugin.
  * @param {InspectComponentRoutesOptions} options

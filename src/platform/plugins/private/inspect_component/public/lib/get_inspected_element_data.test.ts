@@ -11,8 +11,8 @@ import { getInspectedElementData } from './get_inspected_element_data';
 import { fetchComponentData } from '../api/fetch_component_data';
 import { getIconType } from './dom/get_icon_type';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import type { ReactFiberNodeWithHtmlElement } from './fiber/types';
 import { findFirstEuiComponent } from './fiber/find_first_eui_component';
+import type { ReactFiberNodeWithHtmlElement } from './fiber/types';
 
 jest.mock('../api/fetch_component_data');
 jest.mock('./dom/get_icon_type');

@@ -52,7 +52,7 @@ export interface ReactFiberNodeWithHtmlElement extends ReactFiberNode {
 }
 
 /**
- * The name of the top-level React component and the associated HTML element.
+ * The name of the closest user-defined React component and the associated HTML element.
  */
 export interface SourceComponent {
   /** The component name. */

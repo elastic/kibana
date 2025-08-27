@@ -43,7 +43,7 @@ export class InspectComponentPluginPublic implements Plugin {
           }
         })
         .catch(() => {
-          this.logger.error('Failed to load plugin dependencies');
+          this.logger.error('Failed to import plugin files.');
         });
     }
     return {};

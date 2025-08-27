@@ -17,20 +17,19 @@ import { REPO_ROOT } from '@kbn/repo-info';
  * @param {string} path The file path to look up codeowners for, relative to the repository root.
  * @returns {string[]} An array of codeowners responsible for the specified path.
  */
-export function getComponentCodeowners(componentPath: string): string[] {
+export function getComponentCodeowners(path: string): string[] {
   const codeownersPath = join(REPO_ROOT, '.github', 'CODEOWNERS');
   if (!existsSync(codeownersPath)) {
     return [];
   }
 
-  const normalizedComponentPath = componentPath.split(sep).join('/');
+  const normalizedComponentPath = path.split(sep).join('/');
 
   const codeowners = readFileSync(codeownersPath, 'utf8');
   const lines = codeowners.split('\n');
 
   const matchingPaths: Array<{ path: string; owners: string[] }> = [];
 
-  // Extract path patterns and owners from CODEOWNERS file
   for (const line of lines) {
     const trimmedLine = line.trim();
     if (trimmedLine === '' || trimmedLine.startsWith('#')) {
@@ -50,7 +49,6 @@ export function getComponentCodeowners(componentPath: string): string[] {
     }
   }
 
-  // Find the most specific path match (longest path)
   if (matchingPaths.length === 0) {
     return [];
   }

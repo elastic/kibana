@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as fs from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { getComponentCodeowners } from './get_component_codeowners';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -17,8 +17,8 @@ jest.mock('@kbn/repo-info', () => ({
   REPO_ROOT: '/mock/repo/root',
 }));
 
-const mockExistsSync = fs.existsSync as jest.MockedFunction<typeof fs.existsSync>;
-const mockReadFileSync = fs.readFileSync as jest.MockedFunction<typeof fs.readFileSync>;
+const mockExistsSync = existsSync as jest.MockedFunction<typeof existsSync>;
+const mockReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync>;
 
 describe('getComponentCodeowners', () => {
   beforeEach(() => {

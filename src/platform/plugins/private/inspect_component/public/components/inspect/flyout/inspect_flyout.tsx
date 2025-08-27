@@ -9,18 +9,18 @@
 
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { EuiFlyoutBody, EuiPortal, EuiSpacer, EuiWindowEvent, useEuiTheme } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
-import type { ComponentData } from '../../../lib/get_inspected_element_data';
+import { EuiFlyoutBody, EuiPortal, EuiSpacer, EuiWindowEvent, useEuiTheme } from '@elastic/eui';
 import { DataSection } from './data_section/data_section';
 import { InspectFlyoutHeader } from './inspect_flyout_header';
 import { ActionsSection } from './actions_section/actions_section';
+import { InspectHighlight } from '../overlay/inspect_highlight';
 import {
   EUI_PORTAL_ATTRIBUTE,
   INSPECT_FLYOUT_ID,
   INSPECT_FLYOUT_MAX_WIDTH,
 } from '../../../lib/constants';
-import { InspectHighlight } from '../overlay/inspect_highlight';
+import type { ComponentData } from '../../../lib/get_inspected_element_data';
 
 interface Props {
   componentData: ComponentData;

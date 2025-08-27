@@ -8,12 +8,12 @@
  */
 
 import React from 'react';
-import type { ComponentData } from '../../../../lib/get_inspected_element_data';
 import { EuiDocsLink } from './eui_docs_link';
 import { ComponentPreview } from './component_preview';
 import { ComponentTitle } from './component_title';
 import { IconType } from './icon_type';
 import { CodeownersList } from './codeowners_list';
+import type { ComponentData } from '../../../../lib/get_inspected_element_data';
 
 interface Props {
   componentData: ComponentData;

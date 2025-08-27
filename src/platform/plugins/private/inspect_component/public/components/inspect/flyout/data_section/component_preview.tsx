@@ -8,9 +8,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiImage, EuiSkeletonRectangle, EuiCard, EuiSpacer } from '@elastic/eui';
 // @ts-expect-error - this module has no exported types
 import domtoimage from 'dom-to-image-more';
+import { EuiImage, EuiSkeletonRectangle, EuiCard, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
@@ -33,7 +33,7 @@ interface Props {
 }
 
 /**
- * The ComponentPreview component is responsible for display a preview of a user-creted component associated with the targeteted HTML element.
+ * ComponentPreview component displays a preview of the source component associated with the inspected HTML element.
  */
 export const ComponentPreview = ({ element }: Props) => {
   const [screenshot, setScreenshot] = useState('');

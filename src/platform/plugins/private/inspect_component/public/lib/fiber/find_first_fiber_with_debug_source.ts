@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DebugSource, ReactFiberNode, ReactFiberNodeWithHtmlElement } from './types';
 import { getFiberFromHtmlElement } from './get_fiber_from_html_element';
+import type { DebugSource, ReactFiberNode, ReactFiberNodeWithHtmlElement } from './types';
 
 const hasDebugSource = (
   fiber: ReactFiberNode

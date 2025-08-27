@@ -8,8 +8,8 @@
  */
 
 import { isEui, isHtmlTag, isExcludedComponent } from '../utils';
-import type { ReactFiberNode, ReactFiberNodeWithHtmlElement, SourceComponent } from './types';
 import { getFiberType } from './get_fiber_type';
+import type { ReactFiberNode, ReactFiberNodeWithHtmlElement, SourceComponent } from './types';
 
 /**
  * Find the source component from target Fiber node.

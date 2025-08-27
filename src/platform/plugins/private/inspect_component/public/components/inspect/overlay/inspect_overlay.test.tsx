@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { InspectOverlay } from './inspect_overlay';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { CoreStart } from '@kbn/core/public';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { InspectOverlay } from './inspect_overlay';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
 import { findSourceComponent } from '../../../lib/fiber/find_source_component';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
-import type { CoreStart } from '@kbn/core/public';
 
 jest.mock('../../../lib/dom/get_element_from_point', () => ({
   getElementFromPoint: jest.fn(),

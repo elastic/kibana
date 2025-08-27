@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { InspectHighlight } from './inspect_highlight';
 
 describe('InspectHighlight', () => {
@@ -26,7 +27,7 @@ describe('InspectHighlight', () => {
   });
 
   it('should render highlight box with correct position and size', () => {
-    render(
+    renderWithI18n(
       <InspectHighlight
         currentPosition={{
           top: 10,
@@ -49,7 +50,7 @@ describe('InspectHighlight', () => {
   });
 
   it('should render badge when path is provided', () => {
-    render(
+    renderWithI18n(
       <InspectHighlight
         currentPosition={{
           top: 0,
@@ -58,11 +59,11 @@ describe('InspectHighlight', () => {
           height: 20,
           transform: 'translate(0px,0px)',
         }}
-        path="MyComponent"
+        path="CapybaraWrapper"
       />
     );
 
-    const badge = screen.getByText('MyComponent');
+    const badge = screen.getByText('CapybaraWrapper');
 
     expect(badge).toBeInTheDocument();
   });
@@ -76,7 +77,7 @@ describe('InspectHighlight', () => {
       height: 50,
     } as DOMRect;
 
-    render(
+    renderWithI18n(
       <InspectHighlight
         currentPosition={{
           top: 0,
@@ -85,7 +86,7 @@ describe('InspectHighlight', () => {
           height: 50,
           transform: 'translate(900px,0px)',
         }}
-        path="MyComponent"
+        path="CapybaraWrapper"
       />
     );
 
@@ -107,7 +108,7 @@ describe('InspectHighlight', () => {
       height: 50,
     } as DOMRect;
 
-    render(
+    renderWithI18n(
       <InspectHighlight
         currentPosition={{
           top: 780,
@@ -116,7 +117,7 @@ describe('InspectHighlight', () => {
           height: 50,
           transform: 'translate(0px,780px)',
         }}
-        path="MyComponent"
+        path="CapybaraWrapper"
       />
     );
 

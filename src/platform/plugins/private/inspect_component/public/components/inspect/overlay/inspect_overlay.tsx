@@ -8,21 +8,20 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-
+import type { CSSProperties, Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/css';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { CSSProperties, Dispatch, SetStateAction } from 'react';
-import type { ReactFiberNodeWithHtmlElement, SourceComponent } from '../../../lib/fiber/types';
 import { findFirstFiberWithDebugSource } from '../../../lib/fiber/find_first_fiber_with_debug_source';
 import { handleEventPropagation } from '../../../lib/dom/handle_event_propagation';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
 import { findSourceComponent } from '../../../lib/fiber/find_source_component';
 import { InspectFlyout, flyoutOptions } from '../flyout/inspect_flyout';
-import { INSPECT_OVERLAY_ID } from '../../../lib/constants';
 import { InspectHighlight } from './inspect_highlight';
+import { INSPECT_OVERLAY_ID } from '../../../lib/constants';
+import type { ReactFiberNodeWithHtmlElement, SourceComponent } from '../../../lib/fiber/types';
 
 interface Props {
   core: CoreStart;
@@ -31,8 +30,8 @@ interface Props {
 }
 
 /**
- * The InspectOverlay component is responsible for rendering an overlay over the entire viewport
- * when inspect mode is enabled. It highlights HTML elements as they get hovered over.
+ * nspectOverlay renders an overlay over the entire viewport when inspect mode is enabled.
+ * It highlights HTML elements as they get hovered over.
  */
 export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: Props) => {
   const { euiTheme } = useEuiTheme();

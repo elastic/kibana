@@ -18,6 +18,7 @@ describe('EuiDocsLink', () => {
     const mockEuiData: EuiData = {
       componentType: 'EuiButton',
       docsLink: 'https://eui.elastic.co/docs/components/button',
+      iconType: 'copy',
     };
 
     renderWithI18n(<EuiDocsLink euiData={mockEuiData} />);
