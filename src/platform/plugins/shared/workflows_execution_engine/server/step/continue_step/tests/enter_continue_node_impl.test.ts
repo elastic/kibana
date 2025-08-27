@@ -56,9 +56,7 @@ describe('EnterContinueNodeImpl', () => {
 
     it('should log debug message about error caught', async () => {
       await underTest.catchError();
-      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
-        `Error caught in continue step "continueStep1", continuing execution.`
-      );
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(`Error caught, continuing execution.`);
     });
 
     it('should go to exit continue node', async () => {

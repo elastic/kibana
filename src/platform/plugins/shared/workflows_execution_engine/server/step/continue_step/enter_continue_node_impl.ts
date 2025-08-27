@@ -25,9 +25,7 @@ export class EnterContinueNodeImpl implements StepImplementation, StepErrorCatch
   }
 
   public async catchError(): Promise<void> {
-    this.workflowLogger.logDebug(
-      `Error caught in continue step "${this.node.id}", continuing execution.`
-    );
+    this.workflowLogger.logDebug(`Error caught, continuing execution.`);
 
     // Continue step should always go to exit continue node to continue execution
     // regardless of any errors that occurred within its scope
