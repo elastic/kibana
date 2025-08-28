@@ -1,0 +1,34 @@
+openapi: 3.0.0
+
+info:
+  title: Schedule Privilege Monitoring Engine Now
+  version: "2023-10-31"
+paths:
+  /api/entity_analytics/monitoring/engine/schedule_now:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ScheduleMonitoringEngine
+      summary: Schedule the Privilege Monitoring Engine
+
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates the scheduling was successful
+        "409":
+          description: Conflict - Monitoring engine is already running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message indicating the engine is already running
