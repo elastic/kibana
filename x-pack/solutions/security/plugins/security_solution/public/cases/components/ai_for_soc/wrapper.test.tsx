@@ -10,15 +10,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { AiForSOCAlertsTable, CONTENT_TEST_ID, ERROR_TEST_ID, SKELETON_TEST_ID } from './wrapper';
 import { TestProviders } from '../../../common/mock';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
-import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+
 jest.mock('./table', () => ({
   Table: () => <div />,
 }));
 jest.mock('../../../detections/hooks/alert_summary/use_fetch_integrations');
-jest.mock('../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../common/hooks/use_create_data_view');
@@ -33,10 +32,6 @@ describe('<AiForSOCAlertsTab />', () => {
 
     (useFetchIntegrations as jest.Mock).mockReturnValue({
       installedPackages: [],
-      isLoading: false,
-    });
-    (useFindRulesQuery as jest.Mock).mockReturnValue({
-      data: [],
       isLoading: false,
     });
   });

@@ -273,6 +273,7 @@ import type {
 } from './entity_analytics/privilege_monitoring/engine/delete.gen';
 import type { DisableMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/disable.gen';
 import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
+import type { ScheduleMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/schedule_now.gen';
 import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
 import type {
   CreateEntitySourceRequestBodyInput,
@@ -2556,6 +2557,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async scheduleMonitoringEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API ScheduleMonitoringEngine`);
+    return this.kbnClient
+      .request<ScheduleMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/schedule_now',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }

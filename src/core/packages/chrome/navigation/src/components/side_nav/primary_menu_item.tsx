@@ -115,6 +115,7 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
           disableScreenReaderOutput
           onMouseOut={handleMouseOut}
           position="right"
+          repositionOnScroll
         >
           {menuItem}
         </EuiToolTip>
