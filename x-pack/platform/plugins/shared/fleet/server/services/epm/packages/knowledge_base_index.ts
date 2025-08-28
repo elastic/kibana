@@ -82,6 +82,9 @@ export async function saveKnowledgeBaseContentToIndex({
       for (const item of bulkResponse.items) {
         if (item.index && item.index._id && !item.index.error) {
           successfullyIndexedIds.push(item.index._id);
+        } else {
+          const logger = appContextService.getLogger();
+          logger.error(`Bulk index operation failed: ${JSON.stringify(item)}`);
         }
       }
     }

@@ -126,8 +126,8 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       knowledgeBaseContent,
     });
 
-    // Wait a moment for the index operation to complete
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Wait a moment for the index operation to complete after the model deployment finishes up
+    await new Promise((resolve) => setTimeout(resolve, 10000));
 
     // Step 2: Retrieve knowledge base content through the API
     const retrievedKnowledgeBase = await getPackageKnowledgeBase({
