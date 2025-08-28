@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
   AppendConversationMessageRequestBody,
@@ -231,6 +232,7 @@ export const getEsCreateConversationSchemaMock = (
   exclude_from_last_conversation_storage: false,
   messages: [
     {
+      id: uuidv4(),
       content: 'test content',
       role: 'user',
       '@timestamp': '2019-12-13T16:40:33.400Z',
