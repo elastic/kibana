@@ -110,7 +110,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const statusBadgeText = await testSubjects.getVisibleText(
         'observabilityAiAssistantKnowledgeBaseStatus'
       );
-      expect(statusBadgeText).to.be("Model pending deployment...");
+      expect(statusBadgeText).to.be('Model pending deployment...');
     });
   });
 }
