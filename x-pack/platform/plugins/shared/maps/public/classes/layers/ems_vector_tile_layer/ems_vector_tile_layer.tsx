@@ -40,6 +40,7 @@ interface SourceRequestData {
 
 export class EmsVectorTileLayer extends AbstractLayer {
   private readonly _style: EMSVectorTileStyle;
+  protected readonly _descriptor: EMSVectorTileLayerDescriptor;
 
   static createDescriptor(
     options: Partial<EMSVectorTileLayerDescriptor>
@@ -62,6 +63,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     layerDescriptor: EMSVectorTileLayerDescriptor;
   }) {
     super({ source, layerDescriptor });
+    this._descriptor = layerDescriptor;
     if (!layerDescriptor.style) {
       const defaultStyle = EMSVectorTileStyle.createDescriptor();
       this._style = new EMSVectorTileStyle(defaultStyle);

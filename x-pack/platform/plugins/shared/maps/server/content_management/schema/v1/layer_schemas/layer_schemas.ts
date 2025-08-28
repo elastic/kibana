@@ -66,7 +66,6 @@ const layerSchema = schema.object({
       },
     })
   ),
-  locale: schema.maybe(schema.string()),
   maxZoom: schema.maybe(
     schema.number({
       min: 0,
@@ -107,9 +106,10 @@ const layerSchema = schema.object({
 });
 
 export const EMSVectorTileLayerSchema = layerSchema.extends({
-  type: schema.literal(LAYER_TYPE.EMS_VECTOR_TILE),
+  locale: schema.maybe(schema.string()),
   sourceDescriptor: EMSTMSSourceSchema,
   style: EMSVectorTileStyleSchema,
+  type: schema.literal(LAYER_TYPE.EMS_VECTOR_TILE),
 });
 
 export const heatmapLayerSchema = layerSchema.extends({
