@@ -78,6 +78,7 @@ const otelFields = {
   'service.name': {
     name: 'service.name',
     description: 'Logical name of the service.',
+
     type: 'keyword',
     example: 'shoppingcart',
   },
@@ -89,21 +90,33 @@ const otelFields = {
   },
   '@timestamp': {
     name: '@timestamp',
-    description: 'Time when the event originated (OTel version).',
-    type: 'date',
+    description: 'Time when the event occurred. UNIX Epoch time in nanoseconds.',
+    type: 'date_nanos',
   },
-  _index: {
-    name: '_index',
-    description: 'Index name (OTel version).',
+  observed_timestamp: {
+    name: 'observed_timestamp',
+    description: 'Time when the event was observed by the collection system.',
+    type: 'date_nanos',
+  },
+  severity_number: {
+    name: 'severity_number',
+    description: 'Numerical value of the severity.',
+    type: 'long',
+  },
+  severity_text: {
+    name: 'severity_text',
+    description: 'The severity text (also known as log level).',
     type: 'keyword',
   },
-} satisfies TOtelFields;
+} as Partial<TOtelFields>;
 
 describe('FieldsMetadataClient class', () => {
   const logger = loggerMock.create();
   const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
   const metadataFieldsRepository = MetadataFieldsRepository.create({ metadataFields });
-  const otelFieldsRepository = OtelFieldsRepository.create({ otelFields });
+  const otelFieldsRepository = OtelFieldsRepository.create({
+    otelFields: otelFields as TOtelFields,
+  });
   const integrationFieldsExtractor = jest.fn();
   const integrationListExtractor = jest.fn();
   integrationFieldsExtractor.mockImplementation(() => Promise.resolve(integrationFields));
