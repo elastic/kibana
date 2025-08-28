@@ -358,6 +358,33 @@ paths:
       summary: Initialize the Privilege Monitoring Engine
       tags:
         - Security Entity Analytics API
+  /api/entity_analytics/monitoring/engine/schedule_now:
+    post:
+      operationId: ScheduleMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    description: Indicates the scheduling was successful
+                    type: boolean
+          description: Successful response
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    description: Error message indicating the engine is already running
+                    type: string
+          description: Conflict - Monitoring engine is already running
+      summary: Schedule the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/health:
     get:
       operationId: PrivMonHealth
@@ -1394,6 +1421,7 @@ components:
             - green
             - yellow
             - red
+            - unavailable
             - unknown
           type: string
         id:
