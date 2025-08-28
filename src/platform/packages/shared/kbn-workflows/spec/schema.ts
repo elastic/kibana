@@ -74,13 +74,15 @@ export const WorkflowOnFailureSchema = z.object({
 });
 export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
 
+const IfPropSchema = z.string().optional();
+
+const ForEachPropSchema = z.string().optional();
+
+const TimeoutPropSchema = z.number().optional();
+
 // Base step schema, with recursive steps property
 export const BaseStepSchema = z.object({
   name: z.string().min(1),
-  if: z.string().optional(),
-  foreach: z.string().optional(),
-  'on-failure': WorkflowOnFailureSchema.optional(),
-  timeout: z.number().optional(),
 });
 export type BaseStep = z.infer<typeof BaseStepSchema>;
 
@@ -88,6 +90,10 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   type: z.string().min(1),
   'connector-id': z.string().optional(), // http.request for example, doesn't need connectorId
   with: z.record(z.string(), z.any()).optional(),
+  if: IfPropSchema,
+  foreach: ForEachPropSchema,
+  timeout: TimeoutPropSchema,
+  'on-failure': WorkflowOnFailureSchema.optional(),
 });
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
@@ -99,6 +105,40 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
+export const HttpStepSchema = BaseStepSchema.extend({
+  type: z.literal('http'),
+  with: z.object({
+    url: z.string().min(1),
+    method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH']).optional().default('GET'),
+    headers: z
+      .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+      .optional()
+      .default({}),
+    body: z.any().optional(),
+    timeout: z.string().optional().default('30s'),
+  }),
+  if: IfPropSchema,
+  foreach: ForEachPropSchema,
+  timeout: TimeoutPropSchema,
+  'on-failure': WorkflowOnFailureSchema.optional(),
+});
+export type HttpStep = z.infer<typeof HttpStepSchema>;
+
+export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
+  const schema = HttpStepSchema.extend({
+    'on-failure': WorkflowOnFailureSchema.extend({
+      'fallback-step': stepSchema.optional(),
+    }),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+}
+
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
   foreach: z.string(),
@@ -107,10 +147,13 @@ export const ForEachStepSchema = BaseStepSchema.extend({
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
 
 export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
-  const schema = BaseStepSchema.extend({
-    type: z.literal('foreach'),
-    foreach: z.string(),
+  const schema = ForEachStepSchema.extend({
     steps: z.array(stepSchema).min(1),
+    if: IfPropSchema,
+    timeout: TimeoutPropSchema,
+    'on-failure': WorkflowOnFailureSchema.extend({
+      'fallback-step': stepSchema.optional(),
+    }),
   });
 
   if (loose) {
@@ -124,15 +167,13 @@ export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = fal
 export const IfStepSchema = BaseStepSchema.extend({
   type: z.literal('if'),
   condition: z.string(),
-  steps: z.array(BaseStepSchema),
+  steps: z.array(BaseStepSchema).min(1),
   else: z.array(BaseStepSchema).optional(),
 });
 export type IfStep = z.infer<typeof IfStepSchema>;
 
 export const getIfStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
-  const schema = BaseStepSchema.extend({
-    type: z.literal('if'),
-    condition: z.string(),
+  const schema = IfStepSchema.extend({
     steps: z.array(stepSchema).min(1),
     else: z.array(stepSchema).optional(),
   });
@@ -157,8 +198,7 @@ export const ParallelStepSchema = BaseStepSchema.extend({
 export type ParallelStep = z.infer<typeof ParallelStepSchema>;
 
 export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
-  const schema = BaseStepSchema.extend({
-    type: z.literal('parallel'),
+  const schema = ParallelStepSchema.extend({
     branches: z.array(z.object({ name: z.string(), steps: z.array(stepSchema) })),
   });
 
@@ -178,9 +218,7 @@ export const MergeStepSchema = BaseStepSchema.extend({
 export type MergeStep = z.infer<typeof MergeStepSchema>;
 
 export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
-  const schema = BaseStepSchema.extend({
-    type: z.literal('merge'),
-    sources: z.array(z.string()), // references to branches or steps to merge
+  const schema = MergeStepSchema.extend({
     steps: z.array(stepSchema), // steps to run after merge
   });
 
@@ -248,6 +286,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    HttpStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,
