@@ -66,7 +66,7 @@ while read -r config; do
     cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
   fi
 
-  cmd=$cmd"\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+  cmd=$cmd"\" NODE_ENV=test node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
 
   echo "actual full command is:"
   echo "$cmd"
