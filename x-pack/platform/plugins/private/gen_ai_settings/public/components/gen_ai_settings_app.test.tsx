@@ -97,7 +97,6 @@ describe('GenAiSettingsApp', () => {
       // Connectors section
       expect(screen.getByTestId('connectorsSection')).toBeInTheDocument();
       expect(screen.getByTestId('connectorsTitle')).toBeInTheDocument();
-      expect(screen.getByTestId('connectorsTitle')).toBeInTheDocument();
       expect(screen.getByTestId('defaultAiConnectorComboBox')).toBeInTheDocument();
       expect(screen.getByTestId('defaultAiConnectorCheckbox')).toBeInTheDocument();
 
