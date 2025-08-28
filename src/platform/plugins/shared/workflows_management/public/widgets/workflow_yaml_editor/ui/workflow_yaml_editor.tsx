@@ -35,8 +35,8 @@ import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors'
 
 const getTriggerNodes = (
   yamlDocument: YAML.Document
-): Array<{ node: any; triggerType: string }> => {
-  const triggerNodes: Array<{ node: any; triggerType: string }> = [];
+): Array<{ node: any; triggerType: string; typePair: any }> => {
+  const triggerNodes: Array<{ node: any; triggerType: string; typePair: any }> = [];
 
   if (!yamlDocument?.contents) return triggerNodes;
 
@@ -66,6 +66,7 @@ const getTriggerNodes = (
         triggerNodes.push({
           node: triggerMapNode,
           triggerType,
+          typePair: pair, // Store the actual type pair for precise positioning
         });
       }
     },
@@ -301,18 +302,45 @@ export const WorkflowYAMLEditor = ({
     }
 
     const decorations = alertTriggers
-      .map(({ node }) => {
-        const triggerRange = getMonacoRangeFromYamlNode(model, node);
-        if (!triggerRange) {
-          return null;
+      .map(({ node, typePair }) => {
+        // Try to get the range from the typePair first, fallback to searching within the trigger node
+        let typeRange = getMonacoRangeFromYamlNode(model, typePair);
+
+        if (!typeRange) {
+          // Fallback: use the trigger node range and search for the type line
+          const triggerRange = getMonacoRangeFromYamlNode(model, node);
+          if (!triggerRange) {
+            return null;
+          }
+
+          // Find the specific line that contains "type:" and "alert" within this trigger
+          let typeLineNumber = triggerRange.startLineNumber;
+          for (
+            let lineNum = triggerRange.startLineNumber;
+            lineNum <= triggerRange.endLineNumber;
+            lineNum++
+          ) {
+            const lineContent = model.getLineContent(lineNum);
+            if (lineContent.includes('type:') && lineContent.includes('alert')) {
+              typeLineNumber = lineNum;
+              break;
+            }
+          }
+
+          typeRange = {
+            startLineNumber: typeLineNumber,
+            endLineNumber: typeLineNumber,
+            startColumn: 1,
+            endColumn: model.getLineMaxColumn(typeLineNumber),
+          };
         }
 
-        const decoration: monaco.editor.IModelDeltaDecoration = {
+        const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
           range: new monaco.Range(
-            triggerRange.startLineNumber,
-            triggerRange.startColumn,
-            triggerRange.startLineNumber,
-            triggerRange.endColumn
+            typeRange.startLineNumber,
+            1,
+            typeRange.startLineNumber,
+            model.getLineMaxColumn(typeRange.startLineNumber)
           ),
           options: {
             glyphMarginClassName: 'alert-trigger-glyph',
@@ -328,8 +356,23 @@ export const WorkflowYAMLEditor = ({
           },
         };
 
-        return decoration;
+        const lineHighlightDecoration: monaco.editor.IModelDeltaDecoration = {
+          range: new monaco.Range(
+            typeRange.startLineNumber,
+            1,
+            typeRange.startLineNumber,
+            model.getLineMaxColumn(typeRange.startLineNumber)
+          ),
+          options: {
+            className: 'alert-trigger-highlight',
+            marginClassName: 'alert-trigger-highlight',
+            isWholeLine: true,
+          },
+        };
+
+        return [glyphDecoration, lineHighlightDecoration];
       })
+      .flat()
       .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
 
     alertTriggerDecorationCollectionRef.current =
@@ -581,6 +624,9 @@ const componentStyles = {
           backgroundColor: euiTheme.colors.warning,
           borderRadius: '50%',
         },
+      },
+      '.alert-trigger-highlight': {
+        backgroundColor: euiTheme.colors.backgroundLightWarning,
       },
     }),
   editorContainer: css({
