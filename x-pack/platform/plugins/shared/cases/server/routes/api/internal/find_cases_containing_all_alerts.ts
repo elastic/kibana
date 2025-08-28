@@ -13,6 +13,7 @@ import { INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL } from '../../../../common/co
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { type CasesClient } from '../../../client';
 import { type caseApiV1 } from '../../../../common/types/api';
+import { buildFilter } from '../../../client/utils';
 
 // cases modal shows 10 cases by default
 const MAX_CONCURRENT_CASES = 10;
@@ -77,26 +78,15 @@ export const processCase = async (
   caseId: string,
   alertIds: Set<string>
 ) => {
-  const caseAlertIds = new Set<string>();
-
   const alertsForCase = await casesClient.attachments.getAllAlertsAttachToCase({
     caseId,
+    filter: buildFilter({
+      filters: Array.from(alertIds),
+      field: 'alertId',
+      operator: 'or',
+      type: 'cases-comments',
+    }),
   });
 
-  // there are more selected alerts than attached alerts
-  if (alertIds.size > alertsForCase.length) return null;
-
-  // we must walk the case's attached alerts
-  for (const alert of alertsForCase) {
-    if (alertIds.has(alert.id)) {
-      caseAlertIds.add(alert.id);
-    }
-  }
-
-  // `caseSet` will only contain matched IDs, if the ID count is the same the case contains all selected alerts
-  if (alertIds.size === caseAlertIds.size) {
-    return caseId;
-  }
-
-  return null;
+  return alertIds.size === alertsForCase.length ? caseId : null;
 };
