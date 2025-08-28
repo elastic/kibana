@@ -315,10 +315,8 @@ ComposerQuery
     const limit = 123;
 
     expect(() => {
-      esql`FROM index | LIMIT ${
-        // @ts-expect-error - Parameter shorthand must be an object with a single key
-        { limit, noMoreFields: true }
-      }`;
+      // @ts-expect-error - Parameter shorthand must be an object with a single key
+      esql`FROM index | LIMIT ${{ limit, noMoreFields: true }}`;
     }).toThrowErrorMatchingInlineSnapshot(
       `"Unexpected synth hole: {\\"limit\\":123,\\"noMoreFields\\":true}"`
     );

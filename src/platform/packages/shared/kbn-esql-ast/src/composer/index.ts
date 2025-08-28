@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
+export type * from './types';
 export { esql, e } from './esql';
 export { ComposerQuery } from './composer_query';
 export { ParameterHole } from './parameter_hole';
