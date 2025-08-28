@@ -6,15 +6,7 @@
  */
 import { consoleTutorials } from '@kbn/search-code-examples';
 import { TryInConsoleButton } from '@kbn/try-in-console';
-import {
-  EuiBadge,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
@@ -29,7 +21,7 @@ interface TutorialMetadata {
 
 export const ConsoleTutorialsGroup = () => {
   const { application, share, console: consolePlugin } = useKibana().services;
-  const { euiTheme } = useEuiTheme();
+  const [hoveredTutorial, setHoveredTutorial] = React.useState<string | null>(null);
 
   const tutorials: TutorialMetadata[] = [
     {
@@ -85,16 +77,11 @@ export const ConsoleTutorialsGroup = () => {
           {tutorials.map((tutorial, index) => (
             <EuiFlexItem key={index}>
               <EuiCard
-                css={{
-                  border: euiTheme.border.thin,
-                  borderColor: euiTheme.colors.borderBaseFloating,
-                  '&:hover': {
-                    backgroundColor: 'transparent',
-                    borderColor: euiTheme.colors.borderBasePlain,
-                  },
-                }}
+                hasBorder={hoveredTutorial === tutorial.dataTestSubj}
+                display={hoveredTutorial === tutorial.dataTestSubj ? 'plain' : 'subdued'}
+                onMouseEnter={() => setHoveredTutorial(tutorial.dataTestSubj)}
+                onMouseLeave={() => setHoveredTutorial(null)}
                 paddingSize="s"
-                display="subdued"
                 title={tutorial.title}
                 titleSize="xs"
                 description={
