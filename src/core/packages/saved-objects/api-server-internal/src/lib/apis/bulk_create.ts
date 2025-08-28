@@ -21,6 +21,7 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
+  SavedObjectAccessControl,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
@@ -49,7 +50,10 @@ type ExpectedResult = Either<
   { type: string; id?: string; error: Payload },
   {
     method: 'index' | 'create';
-    object: SavedObjectsBulkCreateObject & { id: string };
+    object: Omit<SavedObjectsBulkCreateObject, 'accessControl'> & {
+      id: string;
+      accessControl?: SavedObjectAccessControl;
+    };
     preflightCheckIndex?: number;
   }
 >;
@@ -112,13 +116,39 @@ export const performBulkCreate = async <T>(
 
     const method = requestId && overwrite ? 'index' : 'create';
     const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
+    const accessMode = object.accessControl?.accessMode ?? options.accessControl?.accessMode; // options.accessControl?.accessMode;
+    const typeSupportsAccessControl = registry.supportsAccessControl(type);
 
+    // This condition is fine, the option will just be ignored
+    // if (!typeSupportsAccessControl && accessMode) {
+    //   throw SavedObjectsErrorHelpers.createBadRequestError(
+    //     `The "accessMode" field is not supported for saved objects of type "${type}".`
+    //   );
+    // }
+
+    // Should this just be a more generic check? If the options include an accessMode, or any of the objects include an accessMode,
+    // and there is no current user, then throw an error?
+    if (!createdBy && typeSupportsAccessControl && accessMode === 'read_only') {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
+      );
+    }
+
+    // This will effectively create the accessControl property for supporting types and remove the property for non-supporting types
+    const accessControlToWrite =
+      typeSupportsAccessControl && createdBy
+        ? {
+            owner: createdBy,
+            accessMode: accessMode,
+          }
+        : undefined;
     return right({
       method,
       object: {
         ...object,
         id,
         managed: setManaged({ optionsManaged, objectManaged }),
+        accessControl: accessControlToWrite,
       },
       ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
     }) as ExpectedResult;
@@ -157,6 +187,7 @@ export const performBulkCreate = async <T>(
       initialNamespaces: object.initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source.namespaces ?? [],
       name: SavedObjectsUtils.getName(registry.getNameAttribute(object.type), object),
+      ...(object.accessControl && { accessControl: object.accessControl }),
     };
   });
 
@@ -235,6 +266,7 @@ export const performBulkCreate = async <T>(
         ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         managed: setManaged({ optionsManaged, objectManaged: object.managed }),
+        ...(object.accessControl && { accessControl: object.accessControl }),
         updated_at: time,
         created_at: time,
         ...(createdBy && { created_by: createdBy }),

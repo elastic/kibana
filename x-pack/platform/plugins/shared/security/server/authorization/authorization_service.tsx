@@ -16,6 +16,7 @@ import type {
   CustomBrandingSetup,
   HttpServiceSetup,
   IClusterClient,
+  ISavedObjectTypeRegistry,
   KibanaRequest,
   Logger,
   LoggerFactory,
@@ -72,6 +73,7 @@ interface AuthorizationServiceSetupParams {
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
 
   customBranding: CustomBrandingSetup;
+  getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>;
 }
 
 interface AuthorizationServiceStartParams {
@@ -109,14 +111,14 @@ export class AuthorizationService {
     getSpacesService,
     getCurrentUser,
     customBranding,
+    getTypeRegistry,
   }: AuthorizationServiceSetupParams): AuthorizationServiceSetupInternal {
     this.logger = loggers.get('authorization');
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
 
     const mode = authorizationModeFactory(license);
     const actions = new Actions();
-    this.privileges = privilegesFactory(actions, features, license);
-
+    this.privileges = privilegesFactory(actions, features, license, getTypeRegistry);
     const { checkPrivilegesWithRequest, checkUserProfilesPrivileges } = checkPrivilegesFactory(
       actions,
       getClusterClient,

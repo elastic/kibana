@@ -18,7 +18,7 @@ import {
   mockExecuteImportHooks,
 } from './import_saved_objects.test.mock';
 
-import { Readable } from 'stream';
+import { PassThrough, Readable } from 'stream';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { v4 as uuidv4 } from 'uuid';
 import type {
@@ -31,6 +31,8 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
   SavedObject,
+  AccessControlImportTransforms,
+  AccessControlImportTransformsFactory,
 } from '@kbn/core-saved-objects-server';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -39,6 +41,22 @@ import {
   type ImportSavedObjectsOptions,
 } from './import_saved_objects';
 import type { ImportStateMap } from './lib';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { KibanaRequest } from '@kbn/core-http-server';
+
+const request = httpServerMock.createKibanaRequest();
+
+// Simple implementation of createAccessControlImportTransforms just so we can test that it is called
+const createAccessControlImportTransforms: AccessControlImportTransformsFactory = (
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  request: KibanaRequest,
+  registry: ISavedObjectTypeRegistry,
+  errors: SavedObjectsImportFailure[]
+): AccessControlImportTransforms => {
+  return {
+    filterStream: new PassThrough(),
+  } as AccessControlImportTransforms;
+};
 
 describe('#importSavedObjectsFromStream', () => {
   let logger: MockedLogger;
@@ -84,11 +102,13 @@ describe('#importSavedObjectsFromStream', () => {
       } as any),
     importHooks = {},
     managed,
+    accessControl,
   }: {
     createNewCopies?: boolean;
     getTypeImpl?: (name: string) => any;
     importHooks?: Record<string, SavedObjectsImportHook[]>;
     managed?: boolean;
+    accessControl?: boolean;
   } = {}): ImportSavedObjectsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -105,6 +125,10 @@ describe('#importSavedObjectsFromStream', () => {
       importHooks,
       managed,
       log: logger,
+      request,
+      ...(accessControl && {
+        createAccessControlImportTransforms,
+      }),
     };
   };
   const createObject = ({
@@ -149,7 +173,14 @@ describe('#importSavedObjectsFromStream', () => {
 
       await importSavedObjectsFromStream(options);
       expect(typeRegistry.getImportableAndExportableTypes).toHaveBeenCalled();
-      const collectSavedObjectsOptions = { readStream, objectLimit, supportedTypes };
+      const collectSavedObjectsOptions = {
+        readStream,
+        objectLimit,
+        supportedTypes,
+        createAccessControlImportTransforms: undefined,
+        request,
+        typeRegistry,
+      };
       expect(mockCollectSavedObjects).toHaveBeenCalledWith(collectSavedObjectsOptions);
     });
 
@@ -552,6 +583,47 @@ describe('#importSavedObjectsFromStream', () => {
           managed: false,
         };
         expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
+      });
+    });
+
+    describe('access control', () => {
+      test(`calls 'collectSavedObjects' with createAccessControlImportTransforms function if provided`, async () => {
+        const options = setupOptions({ accessControl: true });
+        const supportedTypes = ['foo-type'];
+        typeRegistry.getImportableAndExportableTypes.mockReturnValue(
+          supportedTypes.map((name) => ({ name })) as SavedObjectsType[]
+        );
+
+        await importSavedObjectsFromStream(options);
+        expect(typeRegistry.getImportableAndExportableTypes).toHaveBeenCalled();
+        const collectSavedObjectsOptions = {
+          readStream,
+          objectLimit,
+          supportedTypes,
+          request,
+          typeRegistry,
+          createAccessControlImportTransforms,
+        };
+        expect(mockCollectSavedObjects).toHaveBeenCalledWith(collectSavedObjectsOptions);
+      });
+
+      test(`does not call 'collectSavedObjects' with createAccessControlImportTransforms function if undefined`, async () => {
+        const options = setupOptions({ accessControl: false });
+        const supportedTypes = ['foo-type'];
+        typeRegistry.getImportableAndExportableTypes.mockReturnValue(
+          supportedTypes.map((name) => ({ name })) as SavedObjectsType[]
+        );
+
+        await importSavedObjectsFromStream(options);
+        expect(typeRegistry.getImportableAndExportableTypes).toHaveBeenCalled();
+        const collectSavedObjectsOptions = {
+          readStream,
+          objectLimit,
+          supportedTypes,
+          request,
+          typeRegistry,
+        };
+        expect(mockCollectSavedObjects).toHaveBeenCalledWith(collectSavedObjectsOptions);
       });
     });
   });

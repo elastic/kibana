@@ -9,6 +9,7 @@ import type { AuthenticatedUser, CoreSetup, KibanaRequest } from '@kbn/core/serv
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
+import { exportTransform, getImportTransformsFactory } from './access_control_transforms';
 import { SavedObjectsSecurityExtension } from './saved_objects_security_extension';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 
@@ -42,7 +43,7 @@ export function setupSavedObjects({
       }
   );
 
-  savedObjects.setSecurityExtension(({ request }) => {
+  savedObjects.setSecurityExtension(({ request, typeRegistry }) => {
     return authz.mode.useRbacForRequest(request)
       ? new SavedObjectsSecurityExtension({
           actions: authz.actions,
@@ -50,8 +51,14 @@ export function setupSavedObjects({
           checkPrivileges: authz.checkSavedObjectsPrivilegesWithRequest(request),
           errors: SavedObjectsClient.errors,
           getCurrentUser: () => getCurrentUser(request),
+          typeRegistry,
         })
       : undefined;
+  });
+
+  savedObjects.setAccessControlTransforms({
+    exportTransform,
+    createImportTransforms: getImportTransformsFactory(getCurrentUser),
   });
 }
 

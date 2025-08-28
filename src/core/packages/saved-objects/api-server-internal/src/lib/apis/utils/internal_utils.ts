@@ -24,6 +24,11 @@ import {
   encodeHitVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
 
+export interface GetBulkOperationErrorRawResponse {
+  status: number;
+  error: { type: string; reason?: string | null; index: string };
+}
+
 /**
  * Checks the raw response of a bulk operation and returns an error if necessary.
  *
@@ -36,11 +41,7 @@ import {
 export function getBulkOperationError(
   type: string,
   id: string,
-  rawResponse: {
-    status: number;
-    error?: { type: string; reason?: string | null; index: string };
-    // Other fields are present on a bulk operation result but they are irrelevant for this function
-  }
+  rawResponse: GetBulkOperationErrorRawResponse
 ): Payload | undefined {
   const { status, error } = rawResponse;
   if (error) {
@@ -115,6 +116,7 @@ export function getSavedObjectFromSource<T>(
     coreMigrationVersion,
     typeMigrationVersion,
     managed,
+    accessControl,
     migrationVersion = migrationVersionCompatibility === 'compatible' && typeMigrationVersion
       ? { [type]: typeMigrationVersion }
       : undefined,
@@ -143,6 +145,7 @@ export function getSavedObjectFromSource<T>(
     attributes: doc._source[type],
     references: doc._source.references || [],
     managed,
+    accessControl,
   };
 }
 

@@ -32,6 +32,7 @@ import {
   createRegistry,
   createDocumentMigrator,
   createSpySerializer,
+  ACCESS_CONTROL_TYPE,
 } from '../../test_helpers/repository.test.common';
 
 describe('#deleteByNamespace', () => {
@@ -153,6 +154,7 @@ describe('#deleteByNamespace', () => {
           namespaces: [namespace],
           type: [
             ...allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
+            ACCESS_CONTROL_TYPE,
             LEGACY_URL_ALIAS_TYPE,
           ],
           kueryNode: expect.anything(),
