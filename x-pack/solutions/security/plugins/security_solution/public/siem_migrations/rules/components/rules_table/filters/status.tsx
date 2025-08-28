@@ -51,6 +51,11 @@ export const StatusFilterButton: React.FC<StatusFilterButtonProps> = React.memo(
         data: { status: StatusFilter.FAILED },
         checked: status === StatusFilter.FAILED ? 'on' : undefined,
       },
+      {
+        label: i18n.INDEX_PATTERN_MISSING_FILTER_OPTION,
+        data: { status: StatusFilter.INDEX_PATTERN_MISSING },
+        checked: status === StatusFilter.INDEX_PATTERN_MISSING ? 'on' : undefined,
+      },
     ];
 
     const handleOptionsChange = useCallback(

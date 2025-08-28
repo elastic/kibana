@@ -13,12 +13,12 @@ import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_clie
 import {
   SiemMigrationStatus,
   RuleTranslationResult,
+  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { AddRuleMigrationRulesInput } from './rule_migrations_data_rules_client';
 import type { StoredRuleMigration } from '../types';
-import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
 import { conditions } from './search';
 
 describe('RuleMigrationsDataRulesClient', () => {
@@ -774,10 +774,13 @@ describe('RuleMigrationsDataRulesClient', () => {
         script: {
           source: expect.stringContaining(
             `def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;`
           ),
           lang: 'painless',
+          params: {
+            indexPattern,
+          },
         },
         query: {
           bool: {
@@ -796,6 +799,7 @@ describe('RuleMigrationsDataRulesClient', () => {
             ],
           },
         },
+        refresh: true,
       });
       expect(result).toBe(2);
     });
@@ -814,10 +818,13 @@ describe('RuleMigrationsDataRulesClient', () => {
         script: {
           source: expect.stringContaining(
             `def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;`
           ),
           lang: 'painless',
+          params: {
+            indexPattern,
+          },
         },
         query: {
           bool: {
@@ -831,6 +838,7 @@ describe('RuleMigrationsDataRulesClient', () => {
             ],
           },
         },
+        refresh: true,
       });
       expect(result).toBe(5);
     });

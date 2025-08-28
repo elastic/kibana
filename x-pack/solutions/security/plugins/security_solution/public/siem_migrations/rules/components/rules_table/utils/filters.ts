@@ -20,6 +20,7 @@ const STATUS_FILTERS: Record<StatusFilter, RuleMigrationFilters> = {
   [StatusFilter.TRANSLATED]: { installed: false, fullyTranslated: true },
   [StatusFilter.PARTIALLY_TRANSLATED]: { partiallyTranslated: true },
   [StatusFilter.UNTRANSLATABLE]: { untranslatable: true },
+  [StatusFilter.INDEX_PATTERN_MISSING]: { missingIndex: true },
 };
 
 export const convertFilterOptions = (filterOptions?: FilterOptions) => {

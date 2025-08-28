@@ -32,12 +32,15 @@ import { useInstallMigrationRules } from '../../logic/use_install_migration_rule
 import { useGetMigrationRules } from '../../logic/use_get_migration_rules';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { useGetMigrationPrebuiltRules } from '../../logic/use_get_migration_prebuilt_rules';
+import { useUpdateIndexPattern } from '../../logic/use_update_index_pattern';
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
 import {
   RuleTranslationResult,
   SiemMigrationRetryFilter,
+  SiemMigrationStatus,
+  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
@@ -46,6 +49,7 @@ import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { SiemTranslatedRulesTour } from '../tours/translation_guide';
 import { StartRuleMigrationModal } from './start_rule_migration_modal';
+import { UpdateIndexPatternForm } from './update_index_pattern';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -86,12 +90,19 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const [sortField, setSortField] = useState<keyof RuleMigrationRule>(DEFAULT_SORT_FIELD);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     const [searchTerm, setSearchTerm] = useState<string | undefined>();
+    const [isMissingIndexPatternFlyoutOpen, setIsMissingIndexPatternFlyoutOpen] = useState(false);
+    const [missingIndexPatternSelected, setMissingIndexPatternSelected] = useState(0);
+    const [installTranslatedRulesSelected, setInstallTranslatedRulesSelected] = useState(0);
+    const [reprocessFailedRulesSelected, setReprocessFailedRulesSelected] = useState(0);
 
     // Filters
     const [filterOptions, setFilterOptions] = useState<FilterOptions | undefined>();
 
-    const { data: translationStats, isLoading: isStatsLoading } =
-      useGetMigrationTranslationStats(migrationId);
+    const {
+      data: translationStats,
+      isLoading: isStatsLoading,
+      refetch: refetchTranslationStats,
+    } = useGetMigrationTranslationStats(migrationId);
 
     const { data: prebuiltRules = {}, isLoading: isPrebuiltRulesLoading } =
       useGetMigrationPrebuiltRules(migrationId);
@@ -114,10 +125,32 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     });
 
     const [selectedMigrationRules, setSelectedMigrationRules] = useState<RuleMigrationRule[]>([]);
+    const onSelectionChange = useCallback((selectedRules: RuleMigrationRule[]) => {
+      setSelectedMigrationRules(selectedRules);
+      setMissingIndexPatternSelected(
+        selectedRules.filter((rule) =>
+          rule.elastic_rule?.query?.includes(SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER)
+        ).length
+      );
+      setInstallTranslatedRulesSelected(
+        selectedRules.filter((rule) => rule.translation_result === RuleTranslationResult.FULL)
+          .length
+      );
+      setReprocessFailedRulesSelected(
+        selectedRules.filter((rule) => rule.status === SiemMigrationStatus.FAILED).length
+      );
+    }, []);
     const tableSelection: EuiTableSelectionType<RuleMigrationRule> = useMemo(
       () => ({
         selectable: (item: RuleMigrationRule) => {
-          return !item.elastic_rule?.id && item.translation_result === RuleTranslationResult.FULL;
+          if (item.translation_result === RuleTranslationResult.FULL) {
+            return !item.elastic_rule?.id;
+          } else {
+            return (
+              item.elastic_rule?.query?.includes(SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER) ??
+              false
+            );
+          }
         },
         selectableMessage: (selectable: boolean, item: RuleMigrationRule) => {
           if (selectable) {
@@ -127,10 +160,10 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
             ? i18n.ALREADY_TRANSLATED_RULE_TOOLTIP
             : i18n.NOT_FULLY_TRANSLATED_RULE_TOOLTIP;
         },
-        onSelectionChange: setSelectedMigrationRules,
+        onSelectionChange,
         selected: selectedMigrationRules,
       }),
-      [selectedMigrationRules]
+      [onSelectionChange, selectedMigrationRules]
     );
 
     const pagination = useMemo(() => {
@@ -174,8 +207,25 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       migrationId,
       translationStats
     );
+    const { mutateAsync: updateIndexPattern } = useUpdateIndexPattern({
+      onSuccess: () => {
+        refetchData?.();
+        refetchTranslationStats();
+        setIsMissingIndexPatternFlyoutOpen(false);
+      },
+    });
     const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
 
+    const onSubmitMissingIndexPattern = useCallback(
+      (indexPattern: string) => {
+        updateIndexPattern({
+          migrationId,
+          indexPattern,
+          ids: selectedMigrationRules.map((rule) => rule.id),
+        });
+      },
+      [migrationId, updateIndexPattern, selectedMigrationRules]
+    );
     const [isTableLoading, setTableLoading] = useState(false);
     const installSingleRule = useCallback(
       async (migrationRule: RuleMigrationRule, enabled?: boolean) => {
@@ -381,9 +431,16 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                       numberOfFailedRules={translationStats.rules.failed}
                       numberOfTranslatedRules={translationStats.rules.success.installable}
                       numberOfSelectedRules={selectedMigrationRules.length}
+                      numberOfRulesWithMissingIndex={translationStats.rules.success.missing_index}
+                      setMissingIndexPatternFlyoutOpen={() =>
+                        setIsMissingIndexPatternFlyoutOpen(true)
+                      }
                       installTranslatedRule={installTranslatedRules}
                       installSelectedRule={installSelectedRule}
                       reprocessFailedRules={showReprocessFailedRulesModal}
+                      missingIndexPatternSelected={missingIndexPatternSelected}
+                      installTranslatedRulesSelected={installTranslatedRulesSelected}
+                      reprocessFailedRulesSelected={reprocessFailedRulesSelected}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -403,6 +460,12 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
             )
           }
         />
+        {isMissingIndexPatternFlyoutOpen && (
+          <UpdateIndexPatternForm
+            onClose={() => setIsMissingIndexPatternFlyoutOpen(false)}
+            onSubmit={onSubmitMissingIndexPattern}
+          />
+        )}
         {rulePreviewFlyout}
       </>
     );

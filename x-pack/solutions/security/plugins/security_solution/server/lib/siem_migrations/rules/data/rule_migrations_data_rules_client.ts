@@ -21,6 +21,7 @@ import type { InternalUpdateRuleMigrationRule, StoredRuleMigration } from '../ty
 import {
   SiemMigrationStatus,
   RuleTranslationResult,
+  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
 } from '../../../../../common/siem_migrations/constants';
 import {
   type RuleMigrationTaskStats,
@@ -31,7 +32,7 @@ import {
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
-import { MAX_ES_SEARCH_SIZE, SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
+import { MAX_ES_SEARCH_SIZE } from '../constants';
 
 export type AddRuleMigrationRulesInput = Omit<
   RuleMigrationRule,
@@ -492,12 +493,16 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient 
         script: {
           source: `
                 def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;
               `,
           lang: 'painless',
+          params: {
+            indexPattern,
+          },
         },
         query,
+        refresh: true,
       })
       .catch((error) => {
         this.logger.error(`Error updating index pattern for migration ${id}: ${error}`);

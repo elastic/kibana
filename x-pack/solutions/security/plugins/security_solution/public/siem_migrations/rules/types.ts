@@ -23,6 +23,7 @@ export enum StatusFilter {
   PARTIALLY_TRANSLATED = 'partially_translated',
   UNTRANSLATABLE = 'untranslatable',
   FAILED = 'failed',
+  INDEX_PATTERN_MISSING = 'index_pattern_missing',
 }
 
 export interface FilterOptions {

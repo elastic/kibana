@@ -284,6 +284,11 @@ paths:
           required: false
           schema:
             type: boolean
+        - name: is_missing_index
+          in: query
+          required: false
+          schema:
+            type: boolean
       responses:
         200:
           description: Indicates rule migration have been retrieved correctly.

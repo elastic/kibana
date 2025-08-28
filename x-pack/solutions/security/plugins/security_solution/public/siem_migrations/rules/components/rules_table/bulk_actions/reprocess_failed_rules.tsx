@@ -16,6 +16,7 @@ interface ReprocessFailedRulesButtonProps {
   numberOfFailedRules: number;
   isDisabled?: boolean;
   isAuthorized: boolean;
+  reprocessFailedRulesSelected: number;
 }
 
 const ReprocessFailedRulesButtonComp = React.memo(function ReprocessFailedRulesButton({
@@ -24,7 +25,9 @@ const ReprocessFailedRulesButtonComp = React.memo(function ReprocessFailedRulesB
   numberOfFailedRules = 0,
   isDisabled = false,
   isAuthorized,
+  reprocessFailedRulesSelected,
 }: ReprocessFailedRulesButtonProps) {
+  const isSelected = reprocessFailedRulesSelected > 0;
   return (
     <EuiButton
       iconType="refresh"
@@ -35,7 +38,9 @@ const ReprocessFailedRulesButtonComp = React.memo(function ReprocessFailedRulesB
       data-test-subj="reprocessFailedRulesButton"
       aria-label={i18n.REPROCESS_FAILED_ARIA_LABEL}
     >
-      {i18n.REPROCESS_FAILED_RULES(numberOfFailedRules)}
+      {isSelected
+        ? i18n.REPROCESS_FAILED_SELECTED_RULES(reprocessFailedRulesSelected)
+        : i18n.REPROCESS_FAILED_RULES(numberOfFailedRules)}
     </EuiButton>
   );
 });
