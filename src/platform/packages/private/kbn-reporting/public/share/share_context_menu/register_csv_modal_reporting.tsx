@@ -65,7 +65,9 @@ export const reportingCsvShareProvider = ({
     const licenseHasCsvReporting = licenseCheck.showLinks;
     const licenseDisabled = !licenseCheck.enableLinks;
 
-    const capabilityHasCsvReporting = application.capabilities.discover_v2?.generateCsv === true;
+    const capabilityHasCsvReporting =
+      application.capabilities.discover_v2?.generateCsv === true ||
+      application.capabilities.reportingLegacy?.generateReport === true;
 
     const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
       const { reportType, decoratedJobParams } = getSearchCsvJobParams({

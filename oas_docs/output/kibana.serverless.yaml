@@ -101,17 +101,11 @@ tags:
     description: Manage the roles that grant Elasticsearch and Kibana privileges.
     externalDocs:
       description: Kibana role management
-<<<<<<< HEAD
-      url: https://www.elastic.co/guide/en/kibana/master/kibana-role-management.html
-  - description: |
-      Export sets of saved objects that you want to import into Kibana, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
-=======
       url: https://www.elastic.co/docs/deploy-manage/users-roles/serverless-custom-roles
   - name: saved objects
     x-displayName: Saved objects
     description: |
       Export or import sets of saved objects.
->>>>>>> 128b8457a61 ([DOCS] Fix URLs in Kibana API documentation (#215989))
 
       To manage a specific type of saved object, use the corresponding APIs.
       For example, use:
@@ -12086,7 +12080,11 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}:
     get:
-      description: Get information for the specified file using the file ID.
+      description: |
+        Get information for the specified file using the file ID.
+        > info
+        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileInfo
       parameters:
         - in: path
@@ -12111,7 +12109,11 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
-      description: Download a file from an endpoint.
+      description: |
+        Download a file from an endpoint. 
+        > info
+        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileDownload
       parameters:
         - in: path

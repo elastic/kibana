@@ -854,6 +854,7 @@ x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
 x-pack/platform/plugins/private/graph @elastic/kibana-visualizations
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
 x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-management
+x-pack/platform/plugins/private/indices_metadata @elastic/security-solution
 x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
 x-pack/platform/plugins/private/logstash @elastic/logstash
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring

@@ -15,6 +15,7 @@
     "@kbn/logging",
     "@kbn/serverless",
     "@kbn/core-plugins-browser",
+    "@kbn/deeplinks-search",
   ],
   "exclude": ["target/**/*"]
 }
