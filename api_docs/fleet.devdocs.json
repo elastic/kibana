@@ -1271,7 +1271,7 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => void; } & { url: ",
+              ") => Promise<void>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -3309,7 +3309,7 @@
               "\nA callback that should be executed anytime a change to the Integration Policy needs to\nbe reported back to the Fleet Policy Edit page"
             ],
             "signature": [
-              "(opts: { isValid: boolean; updatedPolicy: ",
+              "(opts: { isValid?: boolean | undefined; updatedPolicy: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -3337,11 +3337,14 @@
                   {
                     "parentPluginId": "fleet",
                     "id": "def-public.PackagePolicyCreateExtensionComponentProps.onChange.$1.isValid",
-                    "type": "boolean",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "isValid",
                     "description": [
                       "is current form state is valid"
+                    ],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/types/ui_extensions.ts",
                     "deprecated": false,
@@ -3616,7 +3619,7 @@
               "\nA callback that should be executed anytime a change to the Integration Policy needs to\nbe reported back to the Fleet Policy Edit page.\n\n**NOTE:**\nthis callback will be recreated everytime the policy data changes, thus logic around its\ninvocation should take that into consideration in order to avoid an endless loop."
             ],
             "signature": [
-              "(opts: { isValid: boolean; updatedPolicy: Partial<",
+              "(opts: { isValid?: boolean | undefined; updatedPolicy: Partial<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -3644,11 +3647,14 @@
                   {
                     "parentPluginId": "fleet",
                     "id": "def-public.PackagePolicyEditExtensionComponentProps.onChange.$1.isValid",
-                    "type": "boolean",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "isValid",
                     "description": [
                       "is current form state is valid"
+                    ],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/types/ui_extensions.ts",
                     "deprecated": false,
@@ -8534,7 +8540,7 @@
             "label": "createWithPackagePolicies",
             "description": [],
             "signature": [
-              "({ soClient, esClient, agentPolicy, packagePolicies, options: { hasFleetServer, withSysMonitoring, monitoringEnabled, spaceId, user, authorizationHeader, force, }, }: { soClient: ",
+              "({ soClient, esClient, agentPolicy, packagePolicies, options: { hasFleetServer, withSysMonitoring, monitoringEnabled, spaceId, user, authorizationHeader, force, forcePackagePolicyCreation, }, }: { soClient: ",
               "SavedObjectsClientContract",
               "; esClient: ",
               "ElasticsearchClient",
@@ -8558,7 +8564,7 @@
               "AuthenticatedUser",
               " | undefined; authorizationHeader?: ",
               "HTTPAuthorizationHeader",
-              " | null | undefined; force?: boolean | undefined; }; }) => Promise<",
+              " | null | undefined; force?: boolean | undefined; forcePackagePolicyCreation?: boolean | undefined; }; }) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -8605,7 +8611,7 @@
                   "AuthenticatedUser",
                   " | undefined; authorizationHeader?: ",
                   "HTTPAuthorizationHeader",
-                  " | null | undefined; force?: boolean | undefined; }; }"
+                  " | null | undefined; force?: boolean | undefined; forcePackagePolicyCreation?: boolean | undefined; }; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
                 "deprecated": false,

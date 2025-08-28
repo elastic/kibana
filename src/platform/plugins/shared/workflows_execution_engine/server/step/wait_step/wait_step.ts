@@ -11,6 +11,7 @@ import type { StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
+import { parseDuration } from '../../utils';
 
 export class WaitStepImpl implements StepImplementation {
   private static readonly SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
@@ -37,7 +38,7 @@ export class WaitStepImpl implements StepImplementation {
       return this.durationCache;
     }
 
-    return (this.durationCache = this.parseDuration(this.node.configuration.with.duration));
+    return (this.durationCache = parseDuration(this.node.configuration.with.duration));
   }
 
   public async handleShortDuration(): Promise<void> {
@@ -68,6 +69,7 @@ export class WaitStepImpl implements StepImplementation {
     const resumeExecutionTask = await this.workflowTaskManager.scheduleResumeTask({
       runAt,
       workflowRunId: workflowExecution.id,
+      spaceId: workflowExecution.spaceId,
     });
     this.workflowLogger.logDebug(
       `Scheduled resume execution task for wait step "${this.node.id}" with ID ${
@@ -101,42 +103,5 @@ export class WaitStepImpl implements StepImplementation {
     this.workflowLogger.logInfo(
       `Finished waiting for ${this.node.configuration.with.duration} in step ${this.node.id}`
     );
-  }
-
-  private parseDuration(duration: string): number {
-    const units = {
-      ms: 1,
-      s: 1000,
-      m: 60 * 1000,
-      h: 60 * 60 * 1000,
-      d: 24 * 60 * 60 * 1000,
-      w: 7 * 24 * 60 * 60 * 1000,
-    };
-
-    let total = 0;
-    // Regular expression to validate the duration format and order (w, d, h, m, s, ms)
-    const validDurationRegex = /^(?:(\d+w)?(\d+d)?(\d+h)?(\d+m)?(\d+s)?(\d+ms)?)$/;
-    const orderValidationRegex = /^(?:\d+w)?(?:\d+d)?(?:\d+h)?(?:\d+m)?(?:\d+s)?(?:\d+ms)?$/;
-
-    if (
-      !duration ||
-      typeof duration !== 'string' ||
-      !validDurationRegex.test(duration) ||
-      !orderValidationRegex.test(duration)
-    ) {
-      throw new Error(
-        `Invalid duration format: ${duration}. Use format like "1w2d3h4m5s6ms" with units in descending order.`
-      );
-    }
-
-    const durationComponentsRegex = /(\d+)(ms|s|m|h|d|w)(?![a-zA-Z])/g;
-    let match;
-    while ((match = durationComponentsRegex.exec(duration)) !== null) {
-      const value = Number(match[1]);
-      const unit = match[2];
-      const multiplier = units[unit as keyof typeof units];
-      total += value * multiplier;
-    }
-    return total;
   }
 }
