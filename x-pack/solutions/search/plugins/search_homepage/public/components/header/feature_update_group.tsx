@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
-interface FeatureUpdateGroupProps {
-  updates: string[];
+export interface FeatureUpdateGroupProps {
+  updates: React.ReactNode[];
 }
 
 export const FeatureUpdateGroup: React.FC<FeatureUpdateGroupProps> = ({ updates }) => {
