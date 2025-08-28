@@ -38,6 +38,53 @@
       },
       {
         "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.ChartSectionTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "ChartSectionTemplate",
+        "description": [],
+        "signature": [
+          "({ id, toolbarCss, toolbar, children, }: ",
+          {
+            "pluginId": "@kbn/unified-histogram",
+            "scope": "public",
+            "docId": "kibKbnUnifiedHistogramPluginApi",
+            "section": "def-public.ChartSectionTemplateProps",
+            "text": "ChartSectionTemplateProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ChartSectionTemplate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  id,\n  toolbarCss,\n  toolbar,\n  children,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-histogram",
+                "scope": "public",
+                "docId": "kibKbnUnifiedHistogramPluginApi",
+                "section": "def-public.ChartSectionTemplateProps",
+                "text": "ChartSectionTemplateProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
         "id": "def-public.getBreakdownField",
         "type": "Function",
         "tags": [],
@@ -467,6 +514,53 @@
       },
       {
         "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.ToolbarSelector",
+        "type": "Function",
+        "tags": [],
+        "label": "ToolbarSelector",
+        "description": [],
+        "signature": [
+          "({ \"data-test-subj\": dataTestSubj, \"data-selected-value\": dataSelectedValue, buttonLabel, popoverTitle, options, searchable, onChange, optionMatcher, }: ",
+          {
+            "pluginId": "@kbn/unified-histogram",
+            "scope": "public",
+            "docId": "kibKbnUnifiedHistogramPluginApi",
+            "section": "def-public.ToolbarSelectorProps",
+            "text": "ToolbarSelectorProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ToolbarSelector.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  'data-test-subj': dataTestSubj,\n  'data-selected-value': dataSelectedValue,\n  buttonLabel,\n  popoverTitle,\n  options,\n  searchable,\n  onChange,\n  optionMatcher,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-histogram",
+                "scope": "public",
+                "docId": "kibKbnUnifiedHistogramPluginApi",
+                "section": "def-public.ToolbarSelectorProps",
+                "text": "ToolbarSelectorProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
         "id": "def-public.UnifiedBreakdownFieldSelector",
         "type": "Function",
         "tags": [],
@@ -771,6 +865,278 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.ChartSectionTemplateProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChartSectionTemplateProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ChartSectionTemplateProps.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ChartSectionTemplateProps.toolbarCss",
+            "type": "Object",
+            "tags": [],
+            "label": "toolbarCss",
+            "description": [],
+            "signature": [
+              "SerializedStyles",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ChartSectionTemplateProps.toolbar",
+            "type": "Object",
+            "tags": [],
+            "label": "toolbar",
+            "description": [],
+            "signature": [
+              "{ leftSide?: React.ReactNode; rightSide?: ",
+              {
+                "pluginId": "@kbn/shared-ux-button-toolbar",
+                "scope": "public",
+                "docId": "kibKbnSharedUxButtonToolbarPluginApi",
+                "section": "def-public.IconButton",
+                "text": "IconButton"
+              },
+              "[] | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ChartSectionTemplateProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.ToolbarSelectorProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolbarSelectorProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ToolbarSelectorProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ToolbarSelectorProps.dataselectedvalue",
+            "type": "string",
+            "tags": [],
+            "label": "'data-selected-value'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ToolbarSelectorProps.buttonLabel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "buttonLabel",
+            "description": [],
+            "signature": [
+              "string | React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ToolbarSelectorProps.popoverTitle",
+            "type": "string",
+            "tags": [],
+            "label": "popoverTitle",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ToolbarSelectorProps.options",
+            "type": "Array",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "((",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableGroupLabelOption",
+              "<{ value: string; }>, ",
+              "EuiSelectableLIOption",
+              "<{ value: string; }>> & ",
+              "CommonProps",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              "EuiTextTruncateProps",
+              ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+              "EuiToolTipProps",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableLIOption",
+              "<{ value: string; }>, ",
+              "EuiSelectableGroupLabelOption",
+              "<{ value: string; }>> & Omit<",
+              "EuiSelectableOptionBase",
+              ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }))[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ToolbarSelectorProps.searchable",
+            "type": "boolean",
+            "tags": [],
+            "label": "searchable",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ToolbarSelectorProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "((chosenOption: (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableGroupLabelOption",
+              "<{ value: string; }>, ",
+              "EuiSelectableLIOption",
+              "<{ value: string; }>> & ",
+              "CommonProps",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              "EuiTextTruncateProps",
+              ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+              "EuiToolTipProps",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableLIOption",
+              "<{ value: string; }>, ",
+              "EuiSelectableGroupLabelOption",
+              "<{ value: string; }>> & Omit<",
+              "EuiSelectableOptionBase",
+              ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }) | undefined) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-histogram",
+                "id": "def-public.ToolbarSelectorProps.onChange.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "chosenOption",
+                "description": [],
+                "signature": [
+                  "(",
+                  "DisambiguateSet",
+                  "<",
+                  "EuiSelectableGroupLabelOption",
+                  "<{ value: string; }>, ",
+                  "EuiSelectableLIOption",
+                  "<{ value: string; }>> & ",
+                  "CommonProps",
+                  " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+                  "EuiTextTruncateProps",
+                  ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+                  "EuiToolTipProps",
+                  ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+                  "DisambiguateSet",
+                  "<",
+                  "EuiSelectableLIOption",
+                  "<{ value: string; }>, ",
+                  "EuiSelectableGroupLabelOption",
+                  "<{ value: string; }>> & Omit<",
+                  "EuiSelectableOptionBase",
+                  ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }) | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.ToolbarSelectorProps.optionMatcher",
+            "type": "Function",
+            "tags": [],
+            "label": "optionMatcher",
+            "description": [],
+            "signature": [
+              "EuiSelectableOptionMatcher",
+              "<{}> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2590,6 +2956,60 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.ChartSectionConfiguration",
+        "type": "Type",
+        "tags": [],
+        "label": "ChartSectionConfiguration",
+        "description": [
+          "\nSupports customizing the chart (UnifiedHistogram) section in Discover"
+        ],
+        "signature": [
+          "{ Component: React.ComponentType<",
+          "ChartSectionProps",
+          ">; replaceDefaultChart: true; localStorageKeyPrefix: string; } | { replaceDefaultChart: false; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.SelectableEntry",
+        "type": "Type",
+        "tags": [],
+        "label": "SelectableEntry",
+        "description": [],
+        "signature": [
+          "(",
+          "DisambiguateSet",
+          "<",
+          "EuiSelectableGroupLabelOption",
+          "<{ value: string; }>, ",
+          "EuiSelectableLIOption",
+          "<{ value: string; }>> & ",
+          "CommonProps",
+          " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+          "EuiTextTruncateProps",
+          ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+          "EuiToolTipProps",
+          ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+          "DisambiguateSet",
+          "<",
+          "EuiSelectableLIOption",
+          "<{ value: string; }>, ",
+          "EuiSelectableGroupLabelOption",
+          "<{ value: string; }>> & Omit<",
+          "EuiSelectableOptionBase",
+          ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; })"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/toolbar_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/unified-histogram",
         "id": "def-public.UnifiedHistogramAdapters",
