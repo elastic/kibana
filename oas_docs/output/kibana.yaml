@@ -18724,6 +18724,8 @@ paths:
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
                             agent_logging_files_keepfiles:
                               nullable: true
                             agent_logging_files_rotateeverybytes:
@@ -19416,6 +19418,8 @@ paths:
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
                     agent_logging_files_keepfiles:
                       nullable: true
                     agent_logging_files_rotateeverybytes:
@@ -19636,6 +19640,8 @@ paths:
                           agent_download_timeout:
                             nullable: true
                           agent_limits_go_max_procs:
+                            nullable: true
+                          agent_logging_files_interval:
                             nullable: true
                           agent_logging_files_keepfiles:
                             nullable: true
@@ -20348,6 +20354,8 @@ paths:
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
                             agent_logging_files_keepfiles:
                               nullable: true
                             agent_logging_files_rotateeverybytes:
@@ -21037,6 +21045,8 @@ paths:
                           agent_download_timeout:
                             nullable: true
                           agent_limits_go_max_procs:
+                            nullable: true
+                          agent_logging_files_interval:
                             nullable: true
                           agent_logging_files_keepfiles:
                             nullable: true
@@ -21728,6 +21738,8 @@ paths:
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
                     agent_logging_files_keepfiles:
                       nullable: true
                     agent_logging_files_rotateeverybytes:
@@ -21950,6 +21962,8 @@ paths:
                           agent_download_timeout:
                             nullable: true
                           agent_limits_go_max_procs:
+                            nullable: true
+                          agent_logging_files_interval:
                             nullable: true
                           agent_logging_files_keepfiles:
                             nullable: true
@@ -22732,6 +22746,8 @@ paths:
                           agent_download_timeout:
                             nullable: true
                           agent_limits_go_max_procs:
+                            nullable: true
+                          agent_logging_files_interval:
                             nullable: true
                           agent_logging_files_keepfiles:
                             nullable: true
@@ -23547,6 +23563,10 @@ paths:
                                         type: string
                                       verification_mode:
                                         type: string
+                                  target_directory:
+                                    type: string
+                                  timeout:
+                                    type: string
                                 required:
                                   - sourceURI
                               features:
@@ -23581,6 +23601,12 @@ paths:
                                         type: number
                                   level:
                                     type: string
+                                  metrics:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      period:
+                                        type: string
                                   to_files:
                                     type: boolean
                               monitoring:
