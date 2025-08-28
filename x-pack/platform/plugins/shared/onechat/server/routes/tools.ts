@@ -98,8 +98,6 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
     );
 
   // create tool
-  // @ts-ignore
-  // @ts-ignore
   router.versioned
     .post({
       path: '/api/chat/tools',
@@ -123,8 +121,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           request: {
             body: schema.object({
               id: schema.string(),
-              // @ts-expect-error schema.oneOf expects at least one element.
-              //                  this usually works with consts, but the `map` operator messes with it...
+              // @ts-expect-error schema.oneOf expects at least one element, and `map` returns a list
               type: schema.oneOf(editableToolTypes.map((type) => schema.literal(type))),
               description: schema.string({ defaultValue: '' }),
               tags: schema.arrayOf(schema.string(), { defaultValue: [] }),

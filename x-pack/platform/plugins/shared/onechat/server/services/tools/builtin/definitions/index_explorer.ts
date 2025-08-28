@@ -37,7 +37,7 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
                   *Example:*
                   User: "Show me my latest alerts"
                   You: call tool 'index_explorer' with { query: 'indices containing user alerts' }
-                  Tool result: [{ indexName: '.alerts' }]
+                  Tool result: [{ type: "index", name: '.alerts' }]
                   `,
     schema: indexExplorerSchema,
     handler: async (
@@ -58,9 +58,10 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
           {
             type: ToolResultType.other,
             data: {
-              indices: response.indices.map((result) => ({
-                index: result.indexName,
-                reason: result.reason,
+              resources: response.resources.map((resource) => ({
+                type: resource.type,
+                name: resource.name,
+                reason: resource.reason,
               })),
             },
           },

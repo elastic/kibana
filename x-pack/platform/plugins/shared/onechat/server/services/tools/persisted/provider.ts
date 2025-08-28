@@ -95,6 +95,9 @@ export const createPersistedToolClient = ({
       const tools = await toolClient.list();
       return tools.map((tool) => {
         const definition = definitionMap[tool.type];
+        if (!definition) {
+          throw createBadRequestError(`Unknown tool type: '${tool.type}'`);
+        }
         return definition.toToolDefinition(tool as ToolPersistedDefinition<any>);
       });
     },

@@ -37,7 +37,7 @@ export type ToolTypeUpdateValidator<ToolTypeConfig extends object = Record<strin
 
 export interface PersistedToolTypeDefinition<ToolTypeConfig extends object = Record<string, any>> {
   toolType: ToolType;
-  toToolDefinition: ToolDefinitionConverter<ToolTypeConfig>;
+  toToolDefinition: ToolDefinitionConverter<ToolTypeConfig, any>;
   createSchema: ObjectType;
   updateSchema: ObjectType;
   validateForCreate: ToolTypeCreateValidator<ToolTypeConfig>;

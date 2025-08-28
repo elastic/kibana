@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EsResourceType } from '@kbn/onechat-common';
 import type { ResourceDescriptor } from './index_explorer';
 import { createIndexSelectorPrompt, formatResource } from './index_explorer';
 
@@ -12,7 +13,7 @@ describe('createIndexSelectorPrompt', () => {
   const nlQuery = 'some NL query';
 
   const indexDescriptor: ResourceDescriptor = {
-    type: 'index',
+    type: EsResourceType.index,
     name: 'some_index',
     description: 'some description',
     fields: ['foo', 'bar'],
