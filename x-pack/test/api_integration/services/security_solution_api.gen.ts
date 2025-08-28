@@ -1880,7 +1880,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Run a shell command on an endpoint.
+     * Run a script on a host. Currently supported only for some agent types
      */
     runScriptAction(props: RunScriptActionProps, kibanaSpace: string = 'default') {
       return supertest
