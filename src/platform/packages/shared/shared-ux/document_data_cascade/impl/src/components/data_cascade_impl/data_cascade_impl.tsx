@@ -10,12 +10,11 @@
 import React, { Children, isValidElement, useEffect, useRef, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiAutoSizer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { flexRender } from '@tanstack/react-table';
 import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
 import { CascadeRowPrimitive } from './data_cascade_row';
 import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
 import { useDataCascadeActions, type GroupNode, type LeafNode } from '../../store_provider';
-import { useTableHelper } from '../../lib/core/table';
+import { useTableHelper, flexRender } from '../../lib/core/table';
 import {
   useRowVirtualizerHelper,
   getGridHeaderPositioningStyle,
