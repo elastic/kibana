@@ -33,6 +33,8 @@ export {
   contentReferenceBlock,
   removeContentReferences,
   pruneContentReferences,
+  enrichDocument,
+  sanitizeMessages,
 } from './impl/content_references';
 
 export type {
@@ -78,7 +80,9 @@ export {
 } from './impl/utils/get_attack_discovery_markdown';
 
 export {
+  getOriginalAlertIds,
   getTacticLabel,
   getTacticMetadata,
   replaceNewlineLiterals,
+  transformInternalReplacements,
 } from './impl/utils/attack_discovery_helpers';

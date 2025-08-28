@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createRegisteredRuleTypeTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
@@ -69,6 +68,7 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
         'apm.anomaly',
         'apm.error_rate',
         'apm.transaction_error_rate',
+        'attack-discovery',
         'datasetQuality.degradedDocs',
       ];
 

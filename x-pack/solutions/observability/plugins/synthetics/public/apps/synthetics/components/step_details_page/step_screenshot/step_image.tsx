@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButtonGroup, EuiSpacer, EuiTitle, useEuiTheme, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../../common/screenshot/journey_step_screenshot_container';
 import { LastSuccessfulScreenshot } from './last_successful_screenshot';
 

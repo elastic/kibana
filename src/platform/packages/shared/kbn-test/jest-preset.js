@@ -113,6 +113,8 @@ module.exports = {
     '^.+\\.(txt|html)?$':
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/raw.js',
     '^.+\\.peggy?$': '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/peggy.js',
+    '^.+\\.text?$':
+      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/dot_text.js',
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation

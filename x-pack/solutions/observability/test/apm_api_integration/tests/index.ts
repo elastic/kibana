@@ -6,7 +6,7 @@
  */
 import globby from 'globby';
 import path from 'path';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 
 const cwd = path.join(__dirname);
 const envGrepFiles = process.env.APM_TEST_GREP_FILES as string;
@@ -29,7 +29,6 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
   // DO NOT SKIP
   // Skipping here will skip the entire apm api test suite
   // Instead skip (flaky) tests individually
-  // Failing: See https://github.com/elastic/kibana/issues/176948
   describe('APM API tests', function () {
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });

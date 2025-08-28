@@ -1,5 +1,5 @@
 {
-  "description": "Security: Authentication - Detects unusually high number of authentication attempts.",
+  "description": "Security: Authentication - Detects unusually high number of authentication attempts for a host.",
   "groups": ["security", "authentication"],
   "analysis_config": {
     "bucket_span": "15m",

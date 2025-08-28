@@ -62,12 +62,12 @@ export const useOverviewSummaryPanel = () => {
   );
 
   const degradedPercentage = calculatePercentage({
-    totalDocs: dataStreamDetails.docsCount,
+    totalDocs: +totalDocsCount,
     count: dataStreamDetails?.degradedDocsCount,
   });
 
   const failedPercentage = calculatePercentage({
-    totalDocs: dataStreamDetails.docsCount,
+    totalDocs: +totalDocsCount,
     count: dataStreamDetails?.failedDocsCount,
   });
 
@@ -82,6 +82,10 @@ export const useOverviewSummaryPanel = () => {
     isSummaryPanelLoading,
     totalDegradedDocsCount,
     totalFailedDocsCount,
+    degradedPercentage,
+    failedPercentage,
+    degradedQuality: mapPercentageToQuality([degradedPercentage]),
+    failedQuality: mapPercentageToQuality([failedPercentage]),
     quality,
   };
 };

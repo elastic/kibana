@@ -40,6 +40,8 @@ import {
   getPackageUsageStats,
 } from './get';
 
+const mockPackagePolicySavedObjectType = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
+
 jest.mock('../registry');
 jest.mock('../../settings');
 jest.mock('../../audit_logging');
@@ -52,6 +54,11 @@ jest.mock('../archive/storage', () => {
       .mockImplementation((...args) =>
         jest.requireActual('../archive/storage').getEsPackage(...args)
       ),
+  };
+});
+jest.mock('../../package_policy', () => {
+  return {
+    getPackagePolicySavedObjectType: () => mockPackagePolicySavedObjectType,
   };
 });
 
@@ -176,48 +183,25 @@ describe('When using EPM `get` services', () => {
         },
       ];
       soClient.find.mockImplementation(async ({ page = 1, perPage = 20 }) => {
-        let savedObjectsResponse: typeof savedObjects;
-
-        switch (page) {
-          case 1:
-            savedObjectsResponse = [savedObjects[0]];
-            break;
-          case 2:
-            savedObjectsResponse = savedObjects.slice(1);
-            break;
-          default:
-            savedObjectsResponse = [];
-        }
-
         return {
           page,
           per_page: perPage,
-          total: 1500,
-          saved_objects: savedObjectsResponse,
+          total: 4,
+          saved_objects: savedObjects,
         };
       });
     });
 
     it('should query and paginate SO using package name as filter', async () => {
       await getPackageUsageStats({ savedObjectsClient: soClient, pkgName: 'system' });
-      expect(soClient.find).toHaveBeenNthCalledWith(1, {
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        perPage: 1000,
-        page: 1,
-        filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: system`,
-      });
-      expect(soClient.find).toHaveBeenNthCalledWith(2, {
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        perPage: 1000,
-        page: 2,
-        filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: system`,
-      });
-      expect(soClient.find).toHaveBeenNthCalledWith(3, {
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        perPage: 1000,
-        page: 3,
-        filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: system`,
-      });
+      expect(soClient.find).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          perPage: 10000,
+          filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: system`,
+        })
+      );
     });
 
     it('should return count of unique agent policies', async () => {
@@ -225,6 +209,7 @@ describe('When using EPM `get` services', () => {
         await getPackageUsageStats({ savedObjectsClient: soClient, pkgName: 'system' })
       ).toEqual({
         agent_policy_count: 3,
+        package_policy_count: 4,
       });
     });
   });
@@ -613,6 +598,76 @@ owner: elastic`,
       });
       expect(packages.find((item) => item.id === 'nginx')).toBeUndefined();
     });
+
+    it('should filter packages containing only data streams in xpack.fleet.internal.excludeDataStreamTypes', async () => {
+      MockRegistry.fetchList.mockResolvedValue([
+        {
+          name: 'nginx',
+          version: '1.0.0',
+          title: 'Nginx',
+          data_streams: [
+            {
+              dataset: 'nginx.access',
+              type: 'logs',
+              namespace: 'default',
+            },
+            {
+              dataset: 'nginx.stubstatus',
+              type: 'metrics',
+              namespace: 'default',
+            },
+          ],
+        } as any,
+        {
+          id: 'fleet_server',
+          name: 'fleet_server',
+          version: '1.0.0',
+          title: 'Fleet Server',
+        } as any,
+        {
+          name: 'apache_spark',
+          version: '1.0.0',
+          title: 'Apache Spark',
+          data_streams: [
+            {
+              dataset: 'apache_spark.metrics',
+              type: 'metrics',
+              namespace: 'default',
+            },
+          ],
+        } as any,
+      ]);
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          excludeDataStreamTypes: ['metrics'],
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+      } as any);
+      const packages = await getPackages({
+        savedObjectsClient: soClient,
+      });
+      expect(packages.find((item) => item.id === 'apache_spark')).toBeUndefined();
+      expect(packages.find((item) => item.id === 'nginx')).toEqual({
+        data_streams: [
+          {
+            dataset: 'nginx.access',
+            namespace: 'default',
+            type: 'logs',
+          },
+        ],
+        id: 'nginx',
+        name: 'nginx',
+        status: 'not_installed',
+        title: 'Nginx',
+        version: '1.0.0',
+      });
+      expect(packages.find((item) => item.id === 'fleet_server')).toBeDefined();
+    });
   });
 
   describe('getInstalledPackages', () => {
@@ -969,6 +1024,194 @@ owner: elastic`,
       });
 
       expect(MockRegistry.getPackage).not.toHaveBeenCalled();
+    });
+
+    it('should remove excluded data stream types and policy templates', async () => {
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          excludeDataStreamTypes: ['metrics'],
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
+        name: 'nginx',
+        version: '1.0.0',
+      } as RegistryPackage);
+      const packageInfo = {
+        name: 'nginx',
+        version: '1.0.0',
+        assets: [],
+        data_streams: [
+          {
+            dataset: 'nginx.access',
+            type: 'logs',
+            namespace: 'default',
+          },
+          {
+            dataset: 'nginx.stubstatus',
+            type: 'metrics',
+            namespace: 'default',
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'nginx',
+            inputs: [
+              {
+                type: 'nginx/metrics',
+              },
+              {
+                type: 'logfile',
+              },
+            ],
+          },
+        ],
+      } as unknown as RegistryPackage;
+      MockRegistry.fetchInfo.mockResolvedValue(packageInfo);
+      MockRegistry.getPackage.mockResolvedValue({
+        paths: [],
+        assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+        packageInfo,
+      });
+
+      await expect(
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'nginx',
+          pkgVersion: '1.0.0',
+        })
+      ).resolves.toMatchObject({
+        latestVersion: '1.0.0',
+        status: 'not_installed',
+        data_streams: [
+          {
+            dataset: 'nginx.access',
+            type: 'logs',
+            namespace: 'default',
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'nginx',
+            inputs: [
+              {
+                type: 'logfile',
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('should throw a not found error if package contains only excluded data streams type', async () => {
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          excludeDataStreamTypes: ['metrics'],
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
+        name: 'nginx',
+        version: '1.0.0',
+      } as RegistryPackage);
+      const packageInfo = {
+        name: 'nginx',
+        version: '1.0.0',
+        assets: [],
+        data_streams: [
+          {
+            dataset: 'nginx.stubstatus',
+            type: 'metrics',
+            namespace: 'default',
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'nginx',
+            inputs: [
+              {
+                type: 'nginx/metrics',
+              },
+              {
+                type: 'logfile',
+              },
+            ],
+          },
+        ],
+      } as unknown as RegistryPackage;
+      MockRegistry.fetchInfo.mockResolvedValue(packageInfo);
+      MockRegistry.getPackage.mockResolvedValue({
+        paths: [],
+        assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+        packageInfo,
+      });
+
+      await expect(
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'nginx',
+          pkgVersion: '1.0.0',
+        })
+      ).rejects.toThrowError(PackageNotFoundError);
+    });
+
+    it('should do nothing if no excluded data streams', async () => {
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          excludeDataStreamTypes: ['metrics'],
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
+        name: 'pkg',
+        version: '1.0.0',
+      } as RegistryPackage);
+      const packageInfo = {
+        name: 'pkg',
+        version: '1.0.0',
+        assets: [],
+        policy_templates: [
+          {
+            name: 'pkg',
+            inputs: [],
+          },
+        ],
+      } as unknown as RegistryPackage;
+      MockRegistry.fetchInfo.mockResolvedValue(packageInfo);
+      MockRegistry.getPackage.mockResolvedValue({
+        paths: [],
+        assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+        packageInfo,
+      });
+
+      await expect(
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'pkg',
+          pkgVersion: '1.0.0',
+        })
+      ).resolves.toMatchObject({
+        latestVersion: '1.0.0',
+        status: 'not_installed',
+        policy_templates: [
+          {
+            name: 'pkg',
+            inputs: [],
+          },
+        ],
+      });
     });
 
     describe('installation status', () => {

@@ -5,59 +5,89 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 
 import { EditDescriptionPopover } from './edit_description_popover';
 
-function prepareTest(updateDescriptionFn) {
-  const props = {
-    description: 'A list of known safe domains',
-    updateDescription: updateDescriptionFn,
-    canCreateFilter: true,
-  };
-
-  const wrapper = shallowWithIntl(<EditDescriptionPopover {...props} />);
-
-  return wrapper;
-}
-
 describe('FilterListUsagePopover', () => {
+  const defaultDescription = 'A list of known safe domains';
   test('renders the popover with no description', () => {
-    const updateDescription = jest.fn(() => {});
-
+    const updateDescription = jest.fn();
     const props = {
       updateDescription,
       canCreateFilter: true,
     };
 
-    const component = shallowWithIntl(<EditDescriptionPopover {...props} />);
+    const { container } = renderWithI18n(<EditDescriptionPopover {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders the popover with a description', () => {
-    const updateDescription = jest.fn(() => {});
-    const wrapper = prepareTest(updateDescription);
-    expect(wrapper).toMatchSnapshot();
+    const updateDescription = jest.fn();
+    const props = {
+      description: defaultDescription,
+      updateDescription,
+      canCreateFilter: true,
+    };
+
+    const { container } = renderWithI18n(<EditDescriptionPopover {...props} />);
+
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  test('opens the popover onButtonClick', () => {
-    const updateDescription = jest.fn(() => {});
-    const wrapper = prepareTest(updateDescription);
-    const instance = wrapper.instance();
-    instance.onButtonClick();
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+  test('opens the popover when clicking the button', async () => {
+    const updateDescription = jest.fn();
+    const props = {
+      description: defaultDescription,
+      updateDescription,
+      canCreateFilter: true,
+    };
+
+    renderWithI18n(<EditDescriptionPopover {...props} />);
+
+    const editButton = screen.getByTestId('mlFilterListEditDescriptionButton');
+    fireEvent.click(editButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mlFilterListDescriptionInput')).toBeInTheDocument();
+    });
+
+    // Verify the input has the correct initial value
+    const input = screen.getByTestId('mlFilterListDescriptionInput');
+    expect(input.value).toBe(defaultDescription);
   });
 
-  test('calls updateDescription on closing', () => {
-    const updateDescription = jest.fn(() => {});
-    const wrapper = prepareTest(updateDescription);
-    const instance = wrapper.instance();
-    instance.onButtonClick();
-    instance.closePopover();
-    wrapper.update();
-    expect(updateDescription).toHaveBeenCalled();
+  test('calls updateDescription when closing the popover', async () => {
+    const updateDescription = jest.fn();
+    const props = {
+      description: defaultDescription,
+      updateDescription,
+      canCreateFilter: true,
+    };
+
+    renderWithI18n(<EditDescriptionPopover {...props} />);
+
+    const editButton = screen.getByTestId('mlFilterListEditDescriptionButton');
+    fireEvent.click(editButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mlFilterListDescriptionInput')).toBeInTheDocument();
+    });
+
+    // Change the description
+    const input = screen.getByTestId('mlFilterListDescriptionInput');
+    fireEvent.change(input, { target: { value: 'Updated description' } });
+
+    // Click outside to close the popover (simulated by calling EuiPopover's closePopover prop)
+    // In RTL, we can't easily click outside, so we'll click the button again to close it
+    fireEvent.click(editButton);
+
+    // Verify updateDescription was called with the new value
+    await waitFor(() => {
+      expect(updateDescription).toHaveBeenCalledWith('Updated description');
+    });
   });
 });

@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { AgentIcon } from '@kbn/custom-icons';
-import { AgentName } from '@kbn/elastic-agent-utils';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';
@@ -63,7 +63,7 @@ export function ServiceNameLink({
     : undefined;
 
   const content = (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {agentName && (
         <EuiFlexItem grow={false}>
           <AgentIcon agentName={agentName as AgentName} size="m" />
@@ -83,7 +83,7 @@ export function ServiceNameLink({
           {content}
         </EuiLink>
       ) : (
-        serviceName
+        content
       )}
     </>
   );

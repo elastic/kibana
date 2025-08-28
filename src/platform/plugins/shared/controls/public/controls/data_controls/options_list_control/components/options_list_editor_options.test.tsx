@@ -10,7 +10,7 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

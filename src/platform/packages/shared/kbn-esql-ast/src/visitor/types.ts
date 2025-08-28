@@ -59,7 +59,6 @@ export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitFunctionCallExpression'> &
       VisitorInput<Methods, 'visitLiteralExpression'> &
       VisitorInput<Methods, 'visitListLiteralExpression'> &
-      VisitorInput<Methods, 'visitTimeIntervalLiteralExpression'> &
       VisitorInput<Methods, 'visitInlineCastExpression'> &
       VisitorInput<Methods, 'visitOrderExpression'> &
       VisitorInput<Methods, 'visitIdentifierExpression'> &
@@ -78,7 +77,6 @@ export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitFunctionCallExpression'>
   | VisitorOutput<Methods, 'visitLiteralExpression'>
   | VisitorOutput<Methods, 'visitListLiteralExpression'>
-  | VisitorOutput<Methods, 'visitTimeIntervalLiteralExpression'>
   | VisitorOutput<Methods, 'visitInlineCastExpression'>
   | VisitorOutput<Methods, 'visitOrderExpression'>
   | VisitorOutput<Methods, 'visitIdentifierExpression'>
@@ -194,7 +192,7 @@ export interface VisitorMethods<
   >;
   visitSampleCommand?: Visitor<contexts.SampleCommandVisitorContext<Visitors, Data>, any, any>;
   visitCommandOption?: Visitor<contexts.CommandOptionVisitorContext<Visitors, Data>, any, any>;
-  visitRrfCommand?: Visitor<contexts.RrfCommandVisitorContext<Visitors, Data>, any, any>;
+  visitFuseCommand?: Visitor<contexts.FuseCommandVisitorContext<Visitors, Data>, any, any>;
   visitExpression?: Visitor<contexts.ExpressionVisitorContext<Visitors, Data>, any, any>;
   visitSourceExpression?: Visitor<
     contexts.SourceExpressionVisitorContext<Visitors, Data>,
@@ -218,11 +216,6 @@ export interface VisitorMethods<
   >;
   visitListLiteralExpression?: Visitor<
     contexts.ListLiteralExpressionVisitorContext<Visitors, Data>,
-    any,
-    any
-  >;
-  visitTimeIntervalLiteralExpression?: Visitor<
-    contexts.TimeIntervalLiteralExpressionVisitorContext<Visitors, Data>,
     any,
     any
   >;
@@ -264,8 +257,6 @@ export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQ
   ? 'visitLiteralExpression'
   : Node extends ast.ESQLList
   ? 'visitListLiteralExpression'
-  : Node extends ast.ESQLTimeInterval
-  ? 'visitTimeIntervalLiteralExpression'
   : Node extends ast.ESQLInlineCast
   ? 'visitInlineCastExpression'
   : Node extends ast.ESQLIdentifier

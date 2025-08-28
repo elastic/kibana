@@ -6,101 +6,192 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Observable, firstValueFrom, toArray } from 'rxjs';
-import { ServerSentEvent } from '@kbn/sse-utils';
-import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import type { Observable } from 'rxjs';
+import { firstValueFrom, toArray } from 'rxjs';
+import type { ServerSentEvent } from '@kbn/sse-utils';
+import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ConversationUpdatedEvent, ConversationCreatedEvent } from '@kbn/onechat-common';
 import {
-  AgentMode,
-  OneChatDefaultAgentId,
+  oneChatDefaultAgentId,
   isRoundCompleteEvent,
   isConversationUpdatedEvent,
   isConversationCreatedEvent,
-  ConversationUpdatedEvent,
-  ConversationCreatedEvent,
 } from '@kbn/onechat-common';
-import type { ChatResponse } from '../../common/http_api/chat';
+import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { apiPrivileges } from '../../common/features';
+import type { ChatService } from '../services/chat';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
+import { getTechnicalPreviewWarning } from './utils';
 
-export function registerChatRoutes({ router, getInternalServices, logger }: RouteDependencies) {
+const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Chat API');
+
+export function registerChatRoutes({
+  router,
+  getInternalServices,
+  coreSetup,
+  logger,
+}: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  router.post(
-    {
-      path: '/internal/onechat/chat',
+  const conversePayloadSchema = schema.object({
+    agent_id: schema.string({ defaultValue: oneChatDefaultAgentId }),
+    connector_id: schema.maybe(schema.string()),
+    conversation_id: schema.maybe(schema.string()),
+    input: schema.string(),
+  });
+
+  const callConverse = ({
+    payload,
+    request,
+    chatService,
+    abortSignal,
+  }: {
+    chatService: ChatService;
+    payload: ChatRequestBodyPayload;
+    request: KibanaRequest;
+    abortSignal: AbortSignal;
+  }) => {
+    const {
+      agent_id: agentId,
+      connector_id: connectorId,
+      conversation_id: conversationId,
+      input,
+    } = payload;
+
+    return chatService.converse({
+      agentId,
+      connectorId,
+      conversationId,
+      abortSignal,
+      nextInput: { message: input },
+      request,
+    });
+  };
+
+  router.versioned
+    .post({
+      path: '/api/chat/converse',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
-      validate: {
-        query: schema.object({
-          stream: schema.boolean({ defaultValue: false }),
-        }),
-        body: schema.object({
-          agentId: schema.string({ defaultValue: OneChatDefaultAgentId }),
-          mode: schema.oneOf(
-            [
-              schema.literal(AgentMode.normal),
-              schema.literal(AgentMode.reason),
-              schema.literal(AgentMode.plan),
-              schema.literal(AgentMode.research),
-            ],
-            { defaultValue: AgentMode.normal }
-          ),
-          connectorId: schema.maybe(schema.string()),
-          conversationId: schema.maybe(schema.string()),
-          nextMessage: schema.string(),
-        }),
+      access: 'public',
+      summary: 'Converse with an agent',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        availability: {
+          stability: 'experimental',
+        },
       },
-    },
-    wrapHandler(async (ctx, request, response) => {
-      const { chat: chatService } = getInternalServices();
-      const { agentId, mode, connectorId, conversationId, nextMessage } = request.body;
-      const { stream } = request.query;
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: { body: conversePayloadSchema },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { chat: chatService } = getInternalServices();
+        const payload: ChatRequestBodyPayload = request.body;
 
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
-
-      const chatEvents$ = chatService.converse({
-        agentId,
-        mode,
-        connectorId,
-        conversationId,
-        nextInput: { message: nextMessage },
-        request,
-      });
-
-      if (stream) {
-        return response.ok({
-          body: observableIntoEventSourceStream(
-            chatEvents$ as unknown as Observable<ServerSentEvent>,
-            {
-              signal: abortController.signal,
-              logger,
-            }
-          ),
+        const abortController = new AbortController();
+        request.events.aborted$.subscribe(() => {
+          abortController.abort();
         });
-      } else {
+
+        const chatEvents$ = callConverse({
+          chatService,
+          payload,
+          request,
+          abortSignal: abortController.signal,
+        });
+
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
         const {
           data: { round },
         } = events.find(isRoundCompleteEvent)!;
         const {
-          data: { conversationId: convId },
+          data: { conversation_id: convId },
         } = events.find(
           (e): e is ConversationUpdatedEvent | ConversationCreatedEvent =>
             isConversationUpdatedEvent(e) || isConversationCreatedEvent(e)
         )!;
         return response.ok<ChatResponse>({
           body: {
-            conversationId: convId,
+            conversation_id: convId,
+            trace_id: round.trace_id,
             steps: round.steps,
-            response: round.assistantResponse,
+            response: round.response,
           },
         });
-      }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: '/api/chat/converse/async',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+
+      access: 'public',
+      summary: 'Converse with an agent and stream events',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        availability: {
+          stability: 'experimental',
+        },
+      },
     })
-  );
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: { body: conversePayloadSchema },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const [, { cloud }] = await coreSetup.getStartServices();
+        const { chat: chatService } = getInternalServices();
+        const payload: ChatRequestBodyPayload = request.body;
+
+        const abortController = new AbortController();
+        request.events.aborted$.subscribe(() => {
+          abortController.abort();
+        });
+
+        const chatEvents$ = callConverse({
+          chatService,
+          payload,
+          request,
+          abortSignal: abortController.signal,
+        });
+
+        return response.ok({
+          headers: {
+            // cloud compress text/* types, loosing chunking capabilities which we need for SSE
+            'Content-Type': cloud?.isCloudEnabled
+              ? 'application/octet-stream'
+              : 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+            'Transfer-Encoding': 'chunked',
+            'X-Content-Type-Options': 'nosniff',
+            // This disables response buffering on proxy servers
+            'X-Accel-Buffering': 'no',
+          },
+          body: observableIntoEventSourceStream(
+            chatEvents$ as unknown as Observable<ServerSentEvent>,
+            {
+              signal: abortController.signal,
+              flushThrottleMs: 100,
+              flushMinBytes: cloud?.isCloudEnabled ? cloudProxyBufferSize : undefined,
+              logger,
+            }
+          ),
+        });
+      })
+    );
 }

@@ -10,19 +10,19 @@ import { escapeRegExp } from 'lodash';
 import type { RuleFormData } from '@kbn/response-ops-rule-form';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
-import { ESQLControlVariable, apiPublishesESQLVariables } from '@kbn/esql-types';
-import { tracksOverlays } from '@kbn/presentation-containers';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import React from 'react';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { AggregateQuery } from '@kbn/es-query';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
 import { parse, Walker } from '@kbn/esql-ast';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { KibanaContextProvider } from '../lib/kibana';
 
 export interface ServiceDependencies {
@@ -40,8 +40,9 @@ export async function getRuleFlyoutComponent(
   ruleTypeRegistry: RuleTypeRegistryContract,
   actionTypeRegistry: ActionTypeRegistryContract,
   parentApi: unknown,
+  closeFlyout: () => void,
   passedInitialValues?: RuleFormData<EsQueryRuleParams>
-): Promise<React.ComponentType<{}>> {
+): Promise<JSX.Element> {
   const { coreStart } = startDependencies;
   const ruleFormPlugins = {
     ...startDependencies,
@@ -77,17 +78,11 @@ export async function getRuleFlyoutComponent(
         }
   ) as RuleFormData<EsQueryRuleParams>;
 
-  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
+  const { RuleForm } = await import('@kbn/response-ops-rule-form/flyout');
 
-  const closeRuleForm = () => {
-    overlayTracker?.clearOverlays();
-  };
-
-  const { RuleFormFlyout } = await import('@kbn/response-ops-rule-form/flyout');
-
-  return () => (
+  return (
     <KibanaContextProvider services={ruleFormPlugins}>
-      <RuleFormFlyout
+      <RuleForm
         data-test-subj="lensEmbeddableRuleForm"
         plugins={{
           ...ruleFormPlugins,
@@ -99,8 +94,9 @@ export async function getRuleFlyoutComponent(
         initialMetadata={{
           isManagementPage: false,
         }}
-        onCancel={closeRuleForm}
-        onSubmit={closeRuleForm}
+        onCancel={closeFlyout}
+        onSubmit={closeFlyout}
+        isFlyout
       />
     </KibanaContextProvider>
   );

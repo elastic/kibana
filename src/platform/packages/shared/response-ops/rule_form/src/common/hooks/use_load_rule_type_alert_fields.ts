@@ -52,6 +52,8 @@ export const useLoadRuleTypeAlertFields = (props: UseLoadRuleTypeAlertFieldsProp
     queryKey: ['useLoadRuleTypeAlertFields', ruleTypeId],
     queryFn,
     select: (dataViewFields) => {
+      if (!dataViewFields) return [];
+
       return dataViewFields?.map<ActionVariable>((d) => ({
         name: d.name,
         description: getDescription(d.name, ecsFlat.current),

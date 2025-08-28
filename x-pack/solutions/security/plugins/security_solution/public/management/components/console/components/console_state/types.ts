@@ -98,6 +98,9 @@ export interface ArgSelectorState<TState = any> {
   store?: TState;
 }
 
+/**
+ * Manages internal state for Argument Value Selectors
+ */
 export interface EnteredCommand {
   commandDefinition: CommandDefinition;
 
@@ -117,6 +120,8 @@ export interface InputHistoryItem {
   input: string;
   /** The display value in the UI's input history popup */
   display: string;
+  /** The state of arguments that utilize a value selector component */
+  argState: Record<string, ArgSelectorState[]>;
 }
 
 export interface CommandHistoryItem {
@@ -201,6 +206,8 @@ export type ConsoleDataAction =
         command: string;
         /** The display value in the UI's input history popup. Defaults to `command` */
         display?: string;
+        /** Any state for arguments that utilize a value selector component */
+        argState?: Record<string, ArgSelectorState[]>;
       };
     }
   | {

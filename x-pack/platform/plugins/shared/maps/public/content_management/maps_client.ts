@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type {
   SerializableAttributes,
   VisualizationClient,

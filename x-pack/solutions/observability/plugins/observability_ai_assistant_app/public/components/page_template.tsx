@@ -14,7 +14,7 @@ const pageSectionContentClassName = css`
   flex-grow: 1;
   padding-top: 0;
   padding-bottom: 0;
-  max-block-size: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
+  max-block-size: var(--kbn-application--content-height);
 `;
 
 export function ObservabilityAIAssistantPageTemplate({ children }: { children: React.ReactNode }) {

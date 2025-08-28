@@ -54,6 +54,9 @@ const StatusRuleConditionSchema = schema.object({
   ]),
   includeRetests: schema.maybe(schema.boolean()),
   alertOnNoData: schema.maybe(schema.boolean()),
+  recoveryStrategy: schema.maybe(
+    schema.oneOf([schema.literal('firstUp'), schema.literal('conditionNotMet')])
+  ),
 });
 
 export const syntheticsMonitorStatusRuleParamsSchema = schema.object(

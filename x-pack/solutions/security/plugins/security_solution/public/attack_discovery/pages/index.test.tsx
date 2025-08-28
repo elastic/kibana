@@ -8,7 +8,6 @@
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -22,10 +21,6 @@ import { AttackDiscoveryPage } from '.';
 import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
 import { UpsellingProvider } from '../../common/components/upselling_provider';
 import { mockFindAnonymizationFieldsResponse } from './mock/mock_find_anonymization_fields_response';
-import {
-  getMockUseAttackDiscoveriesWithCachedAttackDiscoveries,
-  getMockUseAttackDiscoveriesWithNoAttackDiscoveriesLoading,
-} from './mock/mock_use_attack_discovery';
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
@@ -38,7 +33,22 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue(['test-id', jest.fn()]));
+jest.mock('react-use/lib/useLocalStorage', () =>
+  jest.fn().mockImplementation((key, defaultValue) => {
+    // Return different values based on the localStorage key
+    if (key.includes('START_LOCAL_STORAGE_KEY')) {
+      return ['now-24h', jest.fn()];
+    }
+    if (key.includes('END_LOCAL_STORAGE_KEY')) {
+      return ['now', jest.fn()];
+    }
+    if (key.includes('CONNECTOR_ID_LOCAL_STORAGE_KEY')) {
+      return ['test-id', jest.fn()];
+    }
+    // For other keys, return the default value or 'test-id'
+    return [defaultValue || 'test-id', jest.fn()];
+  })
+);
 jest.mock('react-use/lib/useSessionStorage', () =>
   jest.fn().mockReturnValue([undefined, jest.fn()])
 );
@@ -80,34 +90,14 @@ jest.mock('../../common/links', () => ({
 
 jest.mock('./use_attack_discovery', () => ({
   useAttackDiscovery: jest.fn().mockReturnValue({
-    approximateFutureTime: null,
-    attackDiscoveries: [],
-    cachedAttackDiscoveries: {},
-    didInitialFetch: true,
     fetchAttackDiscoveries: jest.fn(),
-    failureReason: null,
-    generationIntervals: undefined,
     isLoading: false,
-    isLoadingPost: false,
-    lastUpdated: null,
-    replacements: {},
   }),
 }));
 
 const mockFilterManager = createFilterManagerMock();
 
-const stubSecurityDataView = createStubDataView({
-  spec: {
-    id: 'security',
-    title: 'security',
-  },
-});
-
-const mockDataViewsService = {
-  ...dataViewPluginMocks.createStartContract(),
-  get: () => Promise.resolve(stubSecurityDataView),
-  clearInstanceCache: () => Promise.resolve(),
-};
+const mockDataViewsService = dataViewPluginMocks.createStartContract();
 
 const mockUpselling = new UpsellingService();
 
@@ -152,8 +142,8 @@ const mockUseKibanaReturnValue = {
         },
       },
     },
-    featureFlags: {
-      getBooleanValue: jest.fn().mockReturnValue(false), // legacy view enabled
+    lens: {
+      EmbeddableComponent: () => null,
     },
     notifications: jest.fn().mockReturnValue({
       addError: jest.fn(),
@@ -178,6 +168,11 @@ const mockUseKibanaReturnValue = {
     },
     uiSettings: {
       get: jest.fn(),
+    },
+    unifiedSearch: {
+      ui: {
+        SearchBar: () => null,
+      },
     },
   },
 };
@@ -216,8 +211,6 @@ describe('AttackDiscovery', () => {
       isFetched: true,
       data: mockConnectors,
     });
-
-    (useLocalStorage as jest.Mock).mockReturnValue(['test-id', jest.fn()]);
   });
 
   describe('page layout', () => {
@@ -239,63 +232,44 @@ describe('AttackDiscovery', () => {
       );
     });
 
-    it('renders the header', () => {
-      expect(screen.getByTestId('header')).toBeInTheDocument();
+    it('renders the actions', () => {
+      expect(screen.getByTestId('actions')).toBeInTheDocument();
+    });
+
+    it('renders the history', () => {
+      expect(screen.getByTestId('history')).toBeInTheDocument();
+    });
+
+    it('opens the settings flyout when the settings button is clicked', () => {
+      const settingsButton = screen.getByTestId('settings');
+
+      fireEvent.click(settingsButton);
+
+      expect(screen.getByTestId('settingsFlyout')).toBeInTheDocument();
     });
   });
 
-  describe('when there are no attack discoveries', () => {
+  describe('Generating ad hoc attack discoveries', () => {
+    let fetchAttackDiscoveriesMock: jest.Mock;
     beforeEach(() => {
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-    });
-
-    it('does NOT render the animated logo', () => {
-      expect(screen.queryByTestId('animatedLogo')).toBeNull();
-    });
-
-    it('does NOT render the summary', () => {
-      expect(screen.queryByTestId('summary')).toBeNull();
-    });
-
-    it('does NOT render the loading callout', () => {
-      expect(screen.queryByTestId('loadingCallout')).toBeNull();
-    });
-
-    it('renders the empty prompt', () => {
-      expect(screen.getByTestId('emptyPrompt')).toBeInTheDocument();
-    });
-
-    it('does NOT render attack discoveries', () => {
-      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(0);
-    });
-
-    it('does NOT render the upgrade call to action', () => {
-      expect(screen.queryByTestId('upgrade')).toBeNull();
-    });
-  });
-
-  describe('when connectors are configured and didInitialFetch is false', () => {
-    beforeEach(() => {
+      fetchAttackDiscoveriesMock = jest.fn();
       (useAttackDiscovery as jest.Mock).mockReturnValue({
-        approximateFutureTime: null,
-        attackDiscoveries: [],
-        cachedAttackDiscoveries: {},
-        didInitialFetch: false, // <-- didInitialFetch is false
-        fetchAttackDiscoveries: jest.fn(),
-        failureReason: null,
-        generationIntervals: undefined,
+        fetchAttackDiscoveries: fetchAttackDiscoveriesMock,
         isLoading: false,
-        isLoadingPost: false,
-        lastUpdated: null,
-        replacements: {},
+      });
+
+      // Override the localStorage mock to return proper values for this test
+      (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
+        if (key.includes('attackDiscovery.start')) {
+          return ['now-24h', jest.fn()];
+        }
+        if (key.includes('attackDiscovery.end')) {
+          return ['now', jest.fn()];
+        }
+        if (key.includes('attackDiscovery.connectorId')) {
+          return ['test-id', jest.fn()];
+        }
+        return [undefined, jest.fn()];
       });
 
       render(
@@ -309,271 +283,22 @@ describe('AttackDiscovery', () => {
       );
     });
 
-    it('renders the animated logo, because connectors are configured and the initial fetch is pending', () => {
-      expect(screen.getByTestId('animatedLogo')).toBeInTheDocument();
-    });
+    it('invokes fetchAttackDiscoveries with the expected parameters when the run button is clicked,', () => {
+      const run = screen.getAllByTestId('run');
 
-    it('does NOT render the summary', () => {
-      expect(screen.queryByTestId('summary')).toBeNull();
-    });
+      fireEvent.click(run[0]);
 
-    it('does NOT render the loading callout', () => {
-      expect(screen.queryByTestId('loadingCallout')).toBeNull();
-    });
-
-    it('does NOT render the empty prompt', () => {
-      expect(screen.queryByTestId('emptyPrompt')).toBeNull();
-    });
-
-    it('does NOT render attack discoveries', () => {
-      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(0);
-    });
-
-    it('does NOT render the upgrade call to action', () => {
-      expect(screen.queryByTestId('upgrade')).toBeNull();
-    });
-  });
-
-  describe('when connectors are configured, connectorId is undefined, and didInitialFetch is false', () => {
-    // At least two connectors are required for this scenario,
-    // because a single connector will be automatically selected,
-    // which will set connectorId to a non-undefined value:
-    const multipleMockConnectors: unknown[] = [
-      {
-        id: 'mock-connector-1',
-        name: 'OpenAI connector 1',
-        actionTypeId: '.gen-ai',
-      },
-      {
-        id: 'mock-connector-2',
-        name: 'OpenAI connector 2',
-        actionTypeId: '.gen-ai',
-      },
-    ];
-
-    beforeEach(() => {
-      (useLoadConnectors as jest.Mock).mockReturnValue({
-        isFetched: true,
-        data: multipleMockConnectors, // <-- multiple connectors, so none are auto-selected
+      expect(fetchAttackDiscoveriesMock).toHaveBeenCalledWith({
+        end: 'now',
+        filter: undefined,
+        overrideConnectorId: undefined,
+        overrideEnd: undefined,
+        overrideFilter: undefined,
+        overrideSize: undefined,
+        overrideStart: undefined,
+        size: 100,
+        start: 'now-24h',
       });
-
-      (useLocalStorage as jest.Mock).mockReturnValue([undefined, jest.fn()]); // <-- connectorId is undefined
-
-      (useAttackDiscovery as jest.Mock).mockReturnValue({
-        approximateFutureTime: null,
-        attackDiscoveries: [],
-        cachedAttackDiscoveries: {},
-        didInitialFetch: false, // <-- didInitialFetch is false
-        fetchAttackDiscoveries: jest.fn(),
-        failureReason: null,
-        generationIntervals: undefined,
-        isLoading: false,
-        isLoadingPost: false,
-        lastUpdated: null,
-        replacements: {},
-      });
-
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-    });
-
-    it('does NOT render the animated logo, because connectorId is undefined', () => {
-      expect(screen.queryByTestId('animatedLogo')).toBeNull();
-    });
-
-    it('does NOT render the summary', () => {
-      expect(screen.queryByTestId('summary')).toBeNull();
-    });
-
-    it('does NOT render the loading callout', () => {
-      expect(screen.queryByTestId('loadingCallout')).toBeNull();
-    });
-
-    it('renders the empty prompt', () => {
-      expect(screen.getByTestId('emptyPrompt')).toBeInTheDocument();
-    });
-
-    it('does NOT render attack discoveries', () => {
-      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(0);
-    });
-
-    it('does NOT render the upgrade call to action', () => {
-      expect(screen.queryByTestId('upgrade')).toBeNull();
-    });
-  });
-
-  describe('when connectors are NOT configured and didInitialFetch is false', () => {
-    beforeEach(() => {
-      (useLoadConnectors as jest.Mock).mockReturnValue({
-        isFetched: true,
-        data: [], // <-- connectors are NOT configured
-      });
-
-      (useAttackDiscovery as jest.Mock).mockReturnValue({
-        approximateFutureTime: null,
-        attackDiscoveries: [],
-        cachedAttackDiscoveries: {},
-        didInitialFetch: false, // <-- didInitialFetch is false
-        fetchAttackDiscoveries: jest.fn(),
-        failureReason: null,
-        generationIntervals: undefined,
-        isLoading: false,
-        isLoadingPost: false,
-        lastUpdated: null,
-        replacements: {},
-      });
-
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-    });
-
-    it('does NOT render the animated logo, because connectors are NOT configured', () => {
-      expect(screen.queryByTestId('animatedLogo')).toBeNull();
-    });
-
-    it('does NOT render the summary', () => {
-      expect(screen.queryByTestId('summary')).toBeNull();
-    });
-
-    it('does NOT render the loading callout', () => {
-      expect(screen.queryByTestId('loadingCallout')).toBeNull();
-    });
-
-    it('does NOT render the empty prompt', () => {
-      expect(screen.queryByTestId('emptyPrompt')).toBeNull();
-    });
-
-    it('does NOT render attack discoveries', () => {
-      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(0);
-    });
-
-    it('does NOT render the upgrade call to action', () => {
-      expect(screen.queryByTestId('upgrade')).toBeNull();
-    });
-  });
-
-  describe('when there are attack discoveries', () => {
-    const mockUseAttackDiscoveriesResults = getMockUseAttackDiscoveriesWithCachedAttackDiscoveries(
-      jest.fn()
-    );
-    const { attackDiscoveries } = mockUseAttackDiscoveriesResults;
-
-    beforeEach(() => {
-      (useAttackDiscovery as jest.Mock).mockReturnValue(mockUseAttackDiscoveriesResults);
-
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-    });
-
-    it('does NOT render the animated logo', () => {
-      expect(screen.queryByTestId('animatedLogo')).toBeNull();
-    });
-
-    it('renders the summary', () => {
-      expect(screen.getByTestId('summary')).toBeInTheDocument();
-    });
-
-    it('does NOT render the loading callout', () => {
-      expect(screen.queryByTestId('loadingCallout')).toBeNull();
-    });
-
-    it('renders the expected number of attack discoveries', () => {
-      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(attackDiscoveries.length);
-    });
-
-    it('does NOT render the empty prompt', () => {
-      expect(screen.queryByTestId('emptyPrompt')).toBeNull();
-    });
-
-    it('does NOT render the upgrade call to action', () => {
-      expect(screen.queryByTestId('upgrade')).toBeNull();
-    });
-  });
-
-  describe('Alerts filtering feature', () => {
-    beforeEach(() => {
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-    });
-
-    it('invokes fetchAttackDiscoveries with the end, filter, size, and start parameters when the generate button is clicked,', () => {
-      const generate = screen.getAllByTestId('generate');
-
-      fireEvent.click(generate[0]);
-
-      expect(
-        (useAttackDiscovery as jest.Mock)().fetchAttackDiscoveries as jest.Mock
-      ).toHaveBeenCalledWith({ end: 'test-id', filter: undefined, size: 20, start: 'test-id' });
-    });
-  });
-
-  describe('when loading', () => {
-    beforeEach(() => {
-      (useAttackDiscovery as jest.Mock).mockReturnValue(
-        getMockUseAttackDiscoveriesWithNoAttackDiscoveriesLoading(jest.fn()) // <-- loading
-      );
-
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-    });
-
-    it('does NOT render the animated logo, because didInitialFetch is true', () => {
-      expect(screen.queryByTestId('animatedLogo')).toBeNull();
-    });
-
-    it('does NOT render the summary', () => {
-      expect(screen.queryByTestId('summary')).toBeNull();
-    });
-
-    it('renders the loading callout', () => {
-      expect(screen.getByTestId('loadingCallout')).toBeInTheDocument();
-    });
-
-    it('does NOT render attack discoveries', () => {
-      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(0);
-    });
-
-    it('does NOT render the empty prompt', () => {
-      expect(screen.queryByTestId('emptyPrompt')).toBeNull();
-    });
-
-    it('does NOT render the upgrade call to action', () => {
-      expect(screen.queryByTestId('upgrade')).toBeNull();
     });
   });
 });

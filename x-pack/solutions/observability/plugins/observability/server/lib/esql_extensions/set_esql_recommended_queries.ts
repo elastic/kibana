@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 
 const TRACES_INDEX_PATTERN = 'traces-*';
 const METRICS_INDEX_PATTERN = 'metrics-*';
@@ -29,7 +29,7 @@ const TRACES_ESQL_RECOMMENDED_QUERIES = [
     name: i18n.translate('xpack.observability.recommendedQueries.slowDatabaseQueries.name', {
       defaultMessage: 'Database queries',
     }),
-    query: `FROM ${TRACES_INDEX_PATTERN} | WHERE QSTR("span.type:db OR db.system:*")`,
+    query: `FROM ${TRACES_INDEX_PATTERN} | WHERE QSTR("span.type:db OR db.system.name:*")`,
     description: i18n.translate(
       'xpack.observability.recommendedQueries.slowDatabaseQueries.description',
       {

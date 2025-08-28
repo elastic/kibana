@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getMarkdownEditorStorageKey } from './utils';
+import { getMarkdownEditorStorageKey, isOwner } from './utils';
 
 describe('getMarkdownEditorStorageKey', () => {
   it('should return correct session key', () => {
@@ -45,5 +45,15 @@ describe('getMarkdownEditorStorageKey', () => {
     const commentId = 'comment-id';
     const sessionKey = getMarkdownEditorStorageKey({ caseId, commentId });
     expect(sessionKey).toEqual(`cases.cases.${caseId}.${commentId}.markdownEditor`);
+  });
+});
+
+describe('isOwner', () => {
+  it('returns true for a valid owner', () => {
+    expect(isOwner('cases')).toBe(true);
+  });
+
+  it('returns false for an invalid owner', () => {
+    expect(isOwner('notAnOwner')).toBe(false);
   });
 });

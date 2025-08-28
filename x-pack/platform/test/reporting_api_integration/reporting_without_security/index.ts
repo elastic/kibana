@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('Reporting API Integration Tests with Security disabled', function () {
     this.tags('skipFIPS');

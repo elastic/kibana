@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   HasUniqueId,
   PublishesUnsavedChanges,
   PublishingSubject,
-  apiHasUniqueId,
-  apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
+import { apiHasUniqueId, apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { combineLatest, debounceTime, map, of, switchMap } from 'rxjs';
 
 export const DEBOUNCE_TIME = 100;

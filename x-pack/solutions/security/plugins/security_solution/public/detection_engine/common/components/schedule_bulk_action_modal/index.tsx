@@ -96,7 +96,7 @@ const ScheduleBulkActionModalComponent = ({
       confirmButtonText={text.confirmButton}
       cancelButtonText={text.cancelButton}
       confirmButtonDisabled={isInvalid}
-      style={{ width: MODAL_WIDTH }}
+      css={{ width: MODAL_WIDTH }}
     >
       <EuiForm data-test-subj="schedule-bulk-action-modal-form" fullWidth>
         <EuiFormRow

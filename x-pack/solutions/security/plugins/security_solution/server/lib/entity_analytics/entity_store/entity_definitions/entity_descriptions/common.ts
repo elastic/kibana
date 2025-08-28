@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store';
+import type { BaseECSEntityField } from '../../../../../../common/api/entity_analytics/entity_store';
 import type { FieldDescription } from '../../installation/types';
 
 import { oldestValue, newestValue } from './field_utils';
 
-export const getCommonFieldDescriptions = (entityType: EntityType): FieldDescription[] => {
+export const getCommonFieldDescriptions = (ecsField: BaseECSEntityField): FieldDescription[] => {
   return [
     oldestValue({
       source: '_index',
@@ -18,16 +18,16 @@ export const getCommonFieldDescriptions = (entityType: EntityType): FieldDescrip
     }),
     newestValue({ source: 'asset.criticality' }),
     newestValue({
-      source: `${entityType}.risk.calculated_level`,
+      source: `${ecsField}.risk.calculated_level`,
     }),
     newestValue({
-      source: `${entityType}.risk.calculated_score`,
+      source: `${ecsField}.risk.calculated_score`,
       mapping: {
         type: 'float',
       },
     }),
     newestValue({
-      source: `${entityType}.risk.calculated_score_norm`,
+      source: `${ecsField}.risk.calculated_score_norm`,
       mapping: {
         type: 'float',
       },

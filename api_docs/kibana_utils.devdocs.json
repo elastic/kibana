@@ -8724,6 +8724,38 @@
       },
       {
         "parentPluginId": "kibanaUtils",
+        "id": "def-common.defaultFreeze",
+        "type": "Function",
+        "tags": [],
+        "label": "defaultFreeze",
+        "description": [],
+        "signature": [
+          "<T>(value: T) => T"
+        ],
+        "path": "src/platform/plugins/shared/kibana_utils/common/state_containers/create_state_container.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.defaultFreeze.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/plugins/shared/kibana_utils/common/state_containers/create_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
         "id": "def-common.defer",
         "type": "Function",
         "tags": [],

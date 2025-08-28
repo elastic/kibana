@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-server';
 import type {
-  SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
+  SavedObjectsMappingPropertiesSafe,
 } from '@kbn/core-saved-objects-server';
 import type { VirtualVersionMap } from '../model_version';
 
@@ -52,9 +53,16 @@ export interface SavedObjectsTypeMappingDefinitions {
 
 /** @internal */
 export interface IndexMapping {
-  dynamic?: boolean | 'strict';
+  dynamic?: false | 'false' | 'strict';
   properties: SavedObjectsMappingProperties;
   _meta?: IndexMappingMeta;
+}
+
+/** @internal */
+export interface IndexMappingSafe extends IndexMapping {
+  // we forbid the `dynamic: false` to make sure the definitions match what is stored by ES (dynamic: 'false')
+  dynamic?: 'false' | 'strict';
+  properties: SavedObjectsMappingPropertiesSafe;
 }
 
 /** @internal */

@@ -8,13 +8,15 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
+import type { WebElement, WebDriver } from 'selenium-webdriver';
+import { By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { ToolingLog } from '@kbn/tooling-log';
-import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
-// @ts-ignore not supported yet
+import type { ToolingLog } from '@kbn/tooling-log';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import type { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
+
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../remote/browsers';
 
@@ -198,9 +200,9 @@ export class WebElementWrapper {
    *
    * @return {Promise<void>}
    */
-  public async click(topOffset?: number) {
+  public async click(topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number }) {
     await this.retryCall(async function click(wrapper) {
-      await wrapper.scrollIntoViewIfNecessary(topOffset);
+      await wrapper.scrollIntoViewIfNecessary(topOffsetOrOptions);
       await wrapper._webElement.click();
     });
   }
@@ -779,6 +781,7 @@ export class WebElementWrapper {
     await this.driver.executeScript(
       scrollIntoViewIfNecessary,
       this._webElement,
+      APP_MAIN_SCROLL_CONTAINER_ID,
       topOffset || this.fixedHeaderHeight,
       bottomOffset
     );

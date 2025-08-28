@@ -13,13 +13,12 @@ import type {
   FieldCapsResponse,
   MsearchRequest,
   ScalarValue,
-  SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { Required, ValuesType } from 'utility-types';
-import { DedotObject } from '@kbn/utility-types';
+import type { Required, ValuesType } from 'utility-types';
+import type { DedotObject } from '@kbn/utility-types';
 import { unflattenObject } from '@kbn/task-manager-plugin/server/metrics/lib';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 
@@ -85,11 +84,13 @@ export interface TracedElasticsearchClient {
     operationName: string,
     parameters: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>>;
-  msearch<TDocument = unknown>(
+  msearch<TDocument = unknown, TSearchRequest extends MsearchRequest = MsearchRequest>(
     operationName: string,
-    parameters: MsearchRequest
+    parameters: TSearchRequest
   ): Promise<{
-    responses: Array<SearchResponse<TDocument>>;
+    responses: Array<
+      InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>
+    >;
   }>;
   fieldCaps(
     operationName: string,
@@ -200,10 +201,15 @@ export function createTracedEsClient({
         >;
       });
     },
-    msearch<TDocument = unknown>(operationName: string, parameters: MsearchRequest) {
+    msearch<TDocument = unknown, TSearchRequest extends MsearchRequest = MsearchRequest>(
+      operationName: string,
+      parameters: TSearchRequest
+    ) {
       return callWithLogger(operationName, parameters, () => {
         return client.msearch<TDocument>(parameters) as unknown as Promise<{
-          responses: Array<SearchResponse<TDocument>>;
+          responses: Array<
+            InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>
+          >;
         }>;
       });
     },

@@ -37,7 +37,7 @@ export function ComparisonSideHelpInfo({ options }: ComparisonSideHelpInfoProps)
 
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
-      <EuiText style={{ width: POPOVER_WIDTH }} size="s">
+      <EuiText css={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.rules.upgradeRules.comparisonSide.upgradeHelpText"
           defaultMessage="The {title} lets you compare the values of a field across different versions of a rule:"

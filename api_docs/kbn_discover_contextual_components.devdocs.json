@@ -520,6 +520,27 @@
           },
           {
             "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.ResourceFieldDescriptor.property",
+            "type": "Object",
+            "tags": [],
+            "label": "property",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
             "id": "def-public.ResourceFieldDescriptor.rawValue",
             "type": "Unknown",
             "tags": [],

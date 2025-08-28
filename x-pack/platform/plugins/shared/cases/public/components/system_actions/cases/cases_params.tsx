@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import type { ServerlessProjectType } from '../../../../common/constants/types';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
 import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
@@ -48,13 +49,16 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
+  const serverlessProjectType = cloud?.isServerlessEnabled
+    ? (cloud.serverless.projectType as ServerlessProjectType)
+    : undefined;
+
   const owner = getOwnerFromRuleConsumerProducer({
     consumer: featureId,
     producer: producerId,
     // This is a workaround for a very specific bug with the cases action in serverless security
     // More info here: https://github.com/elastic/kibana/issues/195599
-    isServerlessSecurity:
-      cloud?.isServerlessEnabled && cloud?.serverless.projectType === 'security',
+    serverlessProjectType,
   });
 
   const { dataView, isLoading: loadingAlertDataViews } = useAlertsDataView({
@@ -188,8 +192,26 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [editSubActionProperty]
   );
 
-  const groupByComponent = useMemo(() => {
+  if (isAttackDiscoveryRuleType) {
     return (
+      <EuiToolTip
+        data-test-subj="case-action-attack-discovery-tooltip"
+        content={i18n.ATTACK_DISCOVERY_TEMPLATE_TOOLTIP}
+      >
+        <TemplateSelector
+          key={currentConfiguration.id}
+          isLoading={isLoadingCaseConfiguration}
+          templates={[defaultTemplate, ...currentConfiguration.templates]}
+          onTemplateChange={onTemplateChange}
+          initialTemplate={selectedTemplate}
+          isDisabled={true}
+        />
+      </EuiToolTip>
+    );
+  }
+
+  return (
+    <>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
           <EuiFormRow fullWidth label={i18n.GROUP_BY_ALERT} labelAppend={OptionalFieldLabel}>
@@ -207,71 +229,54 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-    );
-  }, [loadingAlertDataViews, onChangeComboBox, options, selectedOptions]);
-
-  const timeWindowComponent = useMemo(() => {
-    return (
-      <>
-        <EuiFormRow
-          fullWidth
-          id="timeWindow"
-          error={errors.timeWindow as string[]}
-          isInvalid={
-            errors.timeWindow !== undefined &&
-            Number(errors.timeWindow.length) > 0 &&
-            timeWindow !== undefined
-          }
-        >
-          <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={4}>
-              <EuiFieldNumber
-                prepend={i18n.TIME_WINDOW}
-                data-test-subj="time-window-size-input"
-                value={timeWindowSize}
-                min={1}
-                step={1}
-                onChange={(e) => {
-                  handleTimeWindowChange('timeWindowSize', e.target.value);
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={3}>
-              <EuiSelect
-                fullWidth
-                data-test-subj="time-window-unit-select"
-                value={timeWindowUnit}
-                onChange={(e) => {
-                  handleTimeWindowChange('timeWindowUnit', e.target.value);
-                }}
-                options={getTimeUnitOptions(timeWindowSize)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
-        <EuiSpacer size="s" />
-        {showTimeWindowWarning && (
-          <EuiCallOut
-            data-test-subj="show-time-window-warning"
-            title={i18n.TIME_WINDOW_WARNING}
-            color="warning"
-            iconType="alert"
-            size="s"
-          />
-        )}
-      </>
-    );
-  }, [
-    errors.timeWindow,
-    handleTimeWindowChange,
-    showTimeWindowWarning,
-    timeWindow,
-    timeWindowSize,
-    timeWindowUnit,
-  ]);
-
-  const templateSelectorComponent = useMemo(() => {
-    return (
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        fullWidth
+        id="timeWindow"
+        error={errors.timeWindow as string[]}
+        isInvalid={
+          errors.timeWindow !== undefined &&
+          Number(errors.timeWindow.length) > 0 &&
+          timeWindow !== undefined
+        }
+      >
+        <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={4}>
+            <EuiFieldNumber
+              prepend={i18n.TIME_WINDOW}
+              data-test-subj="time-window-size-input"
+              value={timeWindowSize}
+              min={1}
+              step={1}
+              onChange={(e) => {
+                handleTimeWindowChange('timeWindowSize', e.target.value);
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <EuiSelect
+              fullWidth
+              data-test-subj="time-window-unit-select"
+              value={timeWindowUnit}
+              onChange={(e) => {
+                handleTimeWindowChange('timeWindowUnit', e.target.value);
+              }}
+              options={getTimeUnitOptions(timeWindowSize)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+      <EuiSpacer size="s" />
+      {showTimeWindowWarning && (
+        <EuiCallOut
+          data-test-subj="show-time-window-warning"
+          title={i18n.TIME_WINDOW_WARNING}
+          color="warning"
+          iconType="alert"
+          size="s"
+        />
+      )}
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
           <TemplateSelector
@@ -280,23 +285,10 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             templates={[defaultTemplate, ...currentConfiguration.templates]}
             onTemplateChange={onTemplateChange}
             initialTemplate={selectedTemplate}
-            isDisabled={isAttackDiscoveryRuleType}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    );
-  }, [
-    currentConfiguration.id,
-    currentConfiguration.templates,
-    defaultTemplate,
-    isAttackDiscoveryRuleType,
-    isLoadingCaseConfiguration,
-    onTemplateChange,
-    selectedTemplate,
-  ]);
-
-  const reopenClosedCasesComponent = useMemo(() => {
-    return (
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiCheckbox
@@ -310,26 +302,6 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    );
-  }, [editSubActionProperty, index, reopenClosedCases]);
-
-  if (isAttackDiscoveryRuleType) {
-    return (
-      <EuiToolTip content={i18n.ATTACK_DISCOVERY_TEMPLATE_TOOLTIP}>
-        {templateSelectorComponent}
-      </EuiToolTip>
-    );
-  }
-
-  return (
-    <>
-      {groupByComponent}
-      <EuiSpacer size="m" />
-      {timeWindowComponent}
-      <EuiSpacer size="m" />
-      {templateSelectorComponent}
-      <EuiSpacer size="m" />
-      {reopenClosedCasesComponent}
     </>
   );
 };

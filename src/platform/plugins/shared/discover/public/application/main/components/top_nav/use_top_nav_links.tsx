@@ -58,6 +58,7 @@ export const useTopNavLinks = ({
   adHocDataViews,
   topNavCustomization,
   shouldShowESQLToDataViewTransitionModal,
+  hasShareIntegration,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -67,6 +68,7 @@ export const useTopNavLinks = ({
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
+  hasShareIntegration: boolean;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
@@ -89,9 +91,11 @@ export const useTopNavLinks = ({
       dataView,
       adHocDataViews,
       authorizedRuleTypeIds: getAuthorizedWriteConsumerIds(authorizedRuleTypes),
-      onUpdateAdHocDataViews: async (adHocDataViewList) => {
-        await dispatch(internalStateActions.loadDataViewList());
-        dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
+      actions: {
+        updateAdHocDataViews: async (adHocDataViewList) => {
+          await dispatch(internalStateActions.loadDataViewList());
+          dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
+        },
       },
     }),
     [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes]
@@ -156,6 +160,7 @@ export const useTopNavLinks = ({
           discoverParams,
           services,
           stateContainer: state,
+          hasIntegrations: hasShareIntegration,
         });
         items.push(...shareAppMenuItem);
       }
@@ -169,6 +174,7 @@ export const useTopNavLinks = ({
       state,
       isEsqlMode,
       currentDataView,
+      hasShareIntegration,
     ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');

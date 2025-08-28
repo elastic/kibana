@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -16,10 +16,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
 import { staticValueOperation } from '.';
-import { FormBasedLayer } from '../../types';
-import { IndexPattern } from '../../../../types';
-import { StaticValueIndexPatternColumn } from './static_value';
-import { TermsIndexPatternColumn } from './terms';
+import type { FormBasedLayer } from '../../types';
+import type { IndexPattern } from '../../../../types';
+import type { StaticValueIndexPatternColumn } from './static_value';
+import type { TermsIndexPatternColumn } from './terms';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 const dateRange = {
@@ -248,7 +248,6 @@ describe('static_value', () => {
         dataType: 'number',
         operationType: 'static_value',
         isBucketed: false,
-        scale: 'ratio',
         params: { value: '100' },
         references: [],
       });
@@ -264,7 +263,6 @@ describe('static_value', () => {
             dataType: 'number',
             operationType: 'static_value',
             isBucketed: false,
-            scale: 'ratio',
             params: { value: '23' },
             references: [],
           } as StaticValueIndexPatternColumn,
@@ -274,7 +272,6 @@ describe('static_value', () => {
         dataType: 'number',
         operationType: 'static_value',
         isBucketed: false,
-        scale: 'ratio',
         params: { value: '23' },
         references: [],
       });
@@ -294,7 +291,6 @@ describe('static_value', () => {
         dataType: 'number',
         operationType: 'static_value',
         isBucketed: false,
-        scale: 'ratio',
         params: { value: '23' },
         references: [],
       });
@@ -311,7 +307,6 @@ describe('static_value', () => {
               dataType: 'number',
               operationType: 'static_value',
               isBucketed: false,
-              scale: 'ratio',
               params: { value: '23' },
               references: [],
             } as StaticValueIndexPatternColumn,
@@ -323,7 +318,6 @@ describe('static_value', () => {
         dataType: 'number',
         operationType: 'static_value',
         isBucketed: false,
-        scale: 'ratio',
         params: { value: '53' },
         references: [],
       });

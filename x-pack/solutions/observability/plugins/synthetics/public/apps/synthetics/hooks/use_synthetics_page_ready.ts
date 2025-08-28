@@ -6,10 +6,10 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import { usePageReady } from '@kbn/ebt-tools';
+import { usePageReady, type Meta } from '@kbn/ebt-tools';
 import { initialLoadReported, selectOverviewStatus } from '../state/overview_status';
 
-export const useSyntheticsPageReady = () => {
+export const useSyntheticsPageReady = (props?: { meta?: Meta }) => {
   const {
     loaded,
     isInitialLoad,
@@ -29,5 +29,6 @@ export const useSyntheticsPageReady = () => {
     // This will collect the metric even when we are periodically refreshing the data in the background
     // and not only when the user decides to refresh the data, the action is the same
     isRefreshing: loaded && isLoadingOverviewStatus,
+    meta: props?.meta,
   });
 };

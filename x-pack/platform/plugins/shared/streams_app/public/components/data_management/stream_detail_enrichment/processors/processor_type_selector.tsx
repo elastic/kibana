@@ -6,23 +6,25 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiFormRow, EuiSuperSelect, EuiSuperSelectProps } from '@elastic/eui';
+import type { EuiSuperSelectProps } from '@elastic/eui';
+import { EuiLink, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
-import { ProcessorType } from '@kbn/streams-schema';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { ProcessorType } from '@kbn/streamlang';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../utils';
-import { ProcessorFormState } from '../types';
+import type { ProcessorFormState } from '../types';
 import { configDrivenProcessors } from './config_driven';
 import { useGetStreamEnrichmentState } from '../state_management/stream_enrichment_state_machine';
-import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
+import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';
 import { useStreamEnrichmentSelector } from '../state_management/stream_enrichment_state_machine';
 
 interface TAvailableProcessor {
   type: ProcessorType;
   inputDisplay: string;
-  getDocUrl: (esDocUrl: string) => React.ReactNode;
+  getDocUrl: (docLinks: DocLinksStart) => React.ReactNode;
 }
 
 type TAvailableProcessors = Record<ProcessorType, TAvailableProcessor>;
@@ -31,23 +33,22 @@ export const ProcessorTypeSelector = ({
   disabled = false,
 }: Pick<EuiSuperSelectProps, 'disabled'>) => {
   const { core } = useKibana();
-  const esDocUrl = core.docLinks.links.elasticsearch.docsBase;
   const getEnrichmentState = useGetStreamEnrichmentState();
 
   const { reset } = useFormContext();
-  const { field, fieldState } = useController<ProcessorFormState, 'type'>({
-    name: 'type',
+  const { field, fieldState } = useController<ProcessorFormState, 'action'>({
+    name: 'action',
     rules: { required: true },
   });
 
-  const processorType = useWatch<{ type: ProcessorType }>({ name: 'type' });
+  const processorType = useWatch<{ action: ProcessorType }>({ name: 'action' });
 
   const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
 
   const handleChange = (type: ProcessorType) => {
     const formState = getDefaultFormStateByType(
       type,
-      selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+      selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
       { grokCollection }
     );
     reset(formState);
@@ -60,9 +61,10 @@ export const ProcessorTypeSelector = ({
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorLabel',
         { defaultMessage: 'Processor' }
       )}
-      helpText={getProcessorDescription(esDocUrl)(processorType)}
+      helpText={getProcessorDescription(core.docLinks)(processorType)}
     >
       <EuiSuperSelect
+        data-test-subj="streamsAppProcessorTypeSelector"
         disabled={disabled}
         options={processorTypeSelectorOptions}
         isInvalid={fieldState.invalid}
@@ -92,7 +94,7 @@ const availableProcessors: TAvailableProcessors = {
   dissect: {
     type: 'dissect',
     inputDisplay: 'Dissect',
-    getDocUrl: (esDocUrl: string) => (
+    getDocUrl: (docLinks: DocLinksStart) => (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectHelpText"
         defaultMessage="Uses {dissectLink} patterns to extract matches from a field."
@@ -102,7 +104,7 @@ const availableProcessors: TAvailableProcessors = {
               data-test-subj="streamsAppAvailableProcessorsDissectLink"
               external
               target="_blank"
-              href={esDocUrl + 'dissect-processor.html'}
+              href={docLinks.links.ingest.dissect}
             >
               {i18n.translate('xpack.streams.availableProcessors.dissectLinkLabel', {
                 defaultMessage: 'dissect',
@@ -116,7 +118,7 @@ const availableProcessors: TAvailableProcessors = {
   grok: {
     type: 'grok',
     inputDisplay: 'Grok',
-    getDocUrl: (esDocUrl: string) => (
+    getDocUrl: (docLinks: DocLinksStart) => (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.grokHelpText"
         defaultMessage="Uses {grokLink} expressions to extract matches from a field."
@@ -126,7 +128,7 @@ const availableProcessors: TAvailableProcessors = {
               data-test-subj="streamsAppAvailableProcessorsGrokLink"
               external
               target="_blank"
-              href={esDocUrl + 'grok-processor.html'}
+              href={docLinks.links.ingest.grok}
             >
               {i18n.translate('xpack.streams.availableProcessors.grokLinkLabel', {
                 defaultMessage: 'grok',
@@ -136,6 +138,37 @@ const availableProcessors: TAvailableProcessors = {
         }}
       />
     ),
+  },
+  set: {
+    type: 'set' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.setInputDisplay',
+      {
+        defaultMessage: 'Set',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setHelpText"
+          defaultMessage="{setLink} If the field already exists, its value will be replaced with the provided one."
+          values={{
+            setLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsSetLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.set}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.setLinkLabel', {
+                  defaultMessage: 'Sets one field and associates it with the specified value.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
   },
   ...configDrivenProcessors,
   manual_ingest_pipeline: {
@@ -150,8 +183,9 @@ const availableProcessors: TAvailableProcessors = {
   },
 };
 
-const getProcessorDescription = (esDocUrl: string) => (type: ProcessorType) =>
-  availableProcessors[type].getDocUrl(esDocUrl);
+const getProcessorDescription = (docLinks: DocLinksStart) => (type: ProcessorType) => {
+  return availableProcessors[type].getDocUrl(docLinks);
+};
 
 const processorTypeSelectorOptions = Object.values(availableProcessors).map(
   ({ type, inputDisplay }) => ({ value: type, inputDisplay })

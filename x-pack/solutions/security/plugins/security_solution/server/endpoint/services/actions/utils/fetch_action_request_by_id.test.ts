@@ -25,6 +25,10 @@ describe('fetchActionRequestById() utility', () => {
   });
 
   it('should search the actions index with expected query', async () => {
+    (
+      endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
+
     await fetchActionRequestById(endpointServiceMock, 'default', '123');
   });
 
@@ -41,6 +45,9 @@ describe('fetchActionRequestById() utility', () => {
   });
 
   it('should not validate space access to the action when feature is disabled', async () => {
+    // @ts-expect-error
+    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
+
     await fetchActionRequestById(endpointServiceMock, 'default', '123');
 
     expect(
@@ -116,6 +123,19 @@ describe('fetchActionRequestById() utility', () => {
       await expect(fetchActionRequestById(endpointServiceMock, 'foo', '123')).rejects.toThrow(
         'Action [123] not found'
       );
+    });
+
+    it('should not validate action against spaces if `bypassSpaceValidation` is true', async () => {
+      (
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).mockResolvedValue(undefined);
+      await fetchActionRequestById(endpointServiceMock, 'default', '123', {
+        bypassSpaceValidation: true,
+      });
+
+      expect(
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).not.toHaveBeenCalled();
     });
   });
 });

@@ -11,7 +11,7 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 
 import '@kbn/core-provider-plugin/types';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 declare global {
   interface Window {
@@ -226,7 +226,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.files.maxSize (number?)',
         'xpack.cases.markdownPlugins.lens (boolean?)',
         'xpack.cases.stack.enabled (boolean?)',
-        'xpack.cases.incrementalId.enabled (boolean?)',
+        'xpack.cases.unsafe.enableCaseSummary (boolean?)',
         'xpack.ccr.ui.enabled (boolean?)',
         'xpack.cloud.base_url (string?)',
         'xpack.cloud.cname (string?)',
@@ -256,7 +256,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
-        'xpack.cloud.serverless.project_type (string?)',
+        'xpack.cloud.serverless.project_type (observability?|security?|search?|chat?)',
+        'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
         'xpack.cloud.onboarding.default_solution (string?)',
         'xpack.contentConnectors.ui.enabled (boolean?)',
@@ -268,6 +269,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.fleet.agentless.customIntegrations.enabled (boolean?)',
         'xpack.fleet.enableExperimental (array?)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number?)',
+        'xpack.fleet.internal.excludeDataStreamTypes (array?)',
         'xpack.fleet.internal.fleetServerStandalone (boolean?)',
         'xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions (boolean?)',
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number?)',
@@ -297,6 +299,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (boolean?)',
         // to be removed in https://github.com/elastic/kibana/issues/221904
         'xpack.infra.featureFlags.profilingEnabled (boolean?)',
+        'xpack.infra.featureFlags.hostOtelEnabled (boolean?)',
 
         'xpack.index_management.enableIndexActions (boolean?|never)',
         'xpack.index_management.enableLegacyTemplates (boolean?|never)',
@@ -317,12 +320,15 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.ml.nlp.modelDeployment.vCPURange.high.max (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.high.min (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.high.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.high.maxThreads (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.low.max (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.low.min (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.low.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.low.maxThreads (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.medium.max (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.medium.min (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.medium.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.medium.maxThreads (number)',
         'xpack.osquery.actionEnabled (boolean?)',
         'xpack.remote_clusters.ui.enabled (boolean?)',
         'xpack.ingest_pipelines.enableManageProcessors (boolean?|never)',
@@ -379,8 +385,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
+        'xpack.observabilityShared.unsafe.investigativeExperienceEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
-        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
+        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
+        'xpack.genAiSettings.showAiBreadcrumb (boolean?)',
+        'xpack.genAiSettings.showSpacesIntegration (boolean?)',
         /**
          * Rule form V2 feature flags
          */

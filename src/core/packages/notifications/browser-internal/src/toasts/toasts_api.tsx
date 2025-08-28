@@ -15,6 +15,7 @@ import { apm } from '@elastic/apm-rum';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ErrorToastOptions,
   IToasts,
@@ -35,16 +36,38 @@ const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
   return omitBy(toastOrTitle, isUndefined);
 };
 
+const getMountPointText = (mountPoint: MountPoint, prefix: string): string => {
+  const div = document.createElement('div');
+  const unmount = mountPoint(div);
+  try {
+    return `${prefix}: ${div.textContent || div.innerText || 'Fallback ' + prefix}`;
+  } finally {
+    unmount?.();
+  }
+};
+
 const getToastTitleOrText = (toastOrTitle: ToastInput): string => {
+  const toastInfo = [];
+
   if (typeof toastOrTitle === 'string') {
-    return toastOrTitle;
-  } else if (typeof toastOrTitle.title === 'string') {
-    return toastOrTitle.title;
-  } else if (typeof toastOrTitle.text === 'string') {
-    return toastOrTitle.text;
+    toastInfo.push(toastOrTitle);
+  } else {
+    // Handle toastOrTitle.title?: string | MountPoint
+    if (typeof toastOrTitle.title === 'string') {
+      toastInfo.push(`Title: ${toastOrTitle.title}`);
+    } else if (toastOrTitle.title instanceof Function) {
+      toastInfo.push(getMountPointText(toastOrTitle.title, 'Title'));
+    }
+
+    // Handle toastOrTitle.text?: string | MountPoint
+    if (typeof toastOrTitle.text === 'string') {
+      toastInfo.push(`Text: ${toastOrTitle.text}`);
+    } else if (toastOrTitle.text instanceof Function) {
+      toastInfo.push(getMountPointText(toastOrTitle.text, 'Text'));
+    }
   }
 
-  return 'No title or text is provided.';
+  return !!toastInfo.length ? toastInfo.join(', ') : 'No title or text is provided.';
 };
 
 const getApmLabels = (errorType: 'ToastError' | 'ToastDanger') => {
@@ -192,8 +215,15 @@ export class ToastsApi implements IToasts {
    * @returns a {@link Toast}
    */
   public addError(error: Error, options: ErrorToastOptions) {
+    const optionsLabels = {
+      title: options.title,
+      ...(options.toastMessage && { toast_message: options.toastMessage }),
+    };
     apm.captureError(error, {
-      labels: getApmLabels('ToastError'),
+      labels: {
+        ...getApmLabels('ToastError'),
+        ...optionsLabels,
+      },
     });
     const message = options.toastMessage || error.message;
     return this.add({

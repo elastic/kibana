@@ -10,7 +10,8 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { ESQLControlVariable, EsqlControlType } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/esql-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
@@ -130,6 +131,7 @@ export function ControlType({
             fullWidth
             isDisabled={isDisabled}
             compressed
+            isClearable={false}
             data-test-subj="esqlControlTypeDropdown"
             inputPopoverProps={{
               'data-test-subj': 'esqlControlTypeInputPopover',
@@ -309,13 +311,19 @@ export function ControlWidth({
   );
 }
 
-export function Header({ isInEditMode }: { isInEditMode: boolean }) {
+export function Header({
+  isInEditMode,
+  ariaLabelledBy,
+}: {
+  isInEditMode: boolean;
+  ariaLabelledBy: string;
+}) {
   return (
     <EuiFlyoutHeader hasBorder>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h2>
+            <h2 id={ariaLabelledBy}>
               {isInEditMode
                 ? i18n.translate('esql.flyout.editTitle', {
                     defaultMessage: 'Edit ES|QL control',

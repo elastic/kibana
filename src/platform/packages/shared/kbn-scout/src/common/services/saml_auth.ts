@@ -15,11 +15,14 @@ import {
   readRolesDescriptorsFromResource,
 } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { HostOptions, SamlSessionManager } from '@kbn/test';
-import { ScoutTestConfig } from '../../types';
-import { Protocol } from '../../playwright/types';
-import { ScoutLogger } from './logger';
+import type { HostOptions } from '@kbn/test';
+import { SamlSessionManager } from '@kbn/test';
+import type { ScoutTestConfig } from '../../types';
+import type { Protocol } from '../../playwright/types';
+import type { ScoutLogger } from './logger';
 
+// TODO: Add support for serverless projects with different tiers
+// ref https://github.com/elastic/kibana/pull/229919
 const getResourceDirPath = (config: ScoutTestConfig) => {
   return config.serverless
     ? path.resolve(SERVERLESS_ROLES_ROOT_PATH, config.projectType!)

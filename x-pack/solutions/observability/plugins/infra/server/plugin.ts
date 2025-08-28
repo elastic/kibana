@@ -20,7 +20,7 @@ import {
 import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import { mapValues } from 'lodash';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
-import { getLogsFeature, getMetricsFeature } from './features';
+import { getMetricsFeature } from './features';
 import { registerRoutes } from './infra_server';
 import type {
   InfraServerPluginSetupDeps,
@@ -180,7 +180,6 @@ export class InfraServerPlugin
     };
 
     plugins.features.registerKibanaFeature(getMetricsFeature());
-    plugins.features.registerKibanaFeature(getLogsFeature());
 
     // Register an handler to retrieve the fallback logView starting from a source configuration
     plugins.logsShared.logViews.registerLogViewFallbackHandler(async (sourceId, { soClient }) => {
@@ -195,16 +194,14 @@ export class InfraServerPlugin
       countLogs: () => UsageCollector.countLogs(),
     });
 
-    if (this.config.featureFlags.logsUIEnabled) {
-      plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
-        {
-          sampleObject: null, // indicates that there is no sample object associated with this app link's path
-          getPath: () => `/app/logs`,
-          label: logsSampleDataLinkLabel,
-          icon: 'logsApp',
-        },
-      ]);
-    }
+    plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
+      {
+        sampleObject: null, // indicates that there is no sample object associated with this app link's path
+        getPath: () => `/app/logs`,
+        label: logsSampleDataLinkLabel,
+        icon: 'logsApp',
+      },
+    ]);
 
     registerRuleTypes(plugins.alerting, this.libs, this.config, {
       alertsLocator,

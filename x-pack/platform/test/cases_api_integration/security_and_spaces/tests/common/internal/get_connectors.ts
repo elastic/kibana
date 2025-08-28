@@ -12,7 +12,6 @@ import { createCase, deleteAllCaseItems } from '../../../../common/lib/api';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { getConnectors } from '../../../../common/lib/api';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');

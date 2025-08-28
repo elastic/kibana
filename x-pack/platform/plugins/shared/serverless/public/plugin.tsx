@@ -6,17 +6,13 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
-import {
-  generateManageOrgMembersNavCard,
-  manageOrgMembersNavCardName,
-  SideNavComponent,
-} from './navigation';
-import {
+import { generateManageOrgMembersNavCard, manageOrgMembersNavCardName } from './navigation';
+import type {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
   ServerlessPluginStart,
@@ -58,9 +54,6 @@ export class ServerlessPlugin
     }
     project.setCloudUrls(cloud);
 
-    const activeNavigationNodes$ = project.getActiveNavigationNodes$();
-    const navigationTreeUi$ = project.getNavigationTreeUi$();
-
     chrome.navControls.registerRight({
       order: 1,
       mount: toMountPoint(
@@ -81,16 +74,8 @@ export class ServerlessPlugin
     });
 
     return {
-      setSideNavComponentDeprecated: (sideNavigationComponent) =>
-        project.setSideNavComponent(sideNavigationComponent),
-      initNavigation: (id, navigationTree$, { dataTestSubj } = {}) => {
-        project.initNavigation(id, navigationTree$);
-        project.setSideNavComponent(() => (
-          <SideNavComponent
-            navProps={{ navigationTree$: navigationTreeUi$, dataTestSubj }}
-            deps={{ core, activeNodes$: activeNavigationNodes$ }}
-          />
-        ));
+      initNavigation: (id, navigationTree$, config) => {
+        project.initNavigation(id, navigationTree$, config);
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),

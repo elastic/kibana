@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
 
+import type { ActionAccordionFormProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/action_form';
 import styled from 'styled-components';
 
 import type {
@@ -20,6 +21,7 @@ import type {
 import type {
   RuleAction,
   RuleActionAlertsFilterProperty,
+  RuleActionFrequency,
   RuleActionParam,
 } from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
@@ -83,6 +85,8 @@ interface Props {
   field: FieldHook;
   messageVariables: ActionVariables;
   summaryMessageVariables: ActionVariables;
+  defaultRuleFrequency?: RuleActionFrequency;
+  minimumThrottleInterval?: ActionAccordionFormProps['minimumThrottleInterval'];
 }
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
@@ -119,6 +123,8 @@ export const RuleActionsField: React.FC<Props> = ({
   field,
   messageVariables,
   summaryMessageVariables,
+  defaultRuleFrequency = NOTIFICATION_DEFAULT_FREQUENCY,
+  minimumThrottleInterval,
 }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
@@ -224,14 +230,14 @@ export const RuleActionsField: React.FC<Props> = ({
         updatedActions[index] = {
           ...updatedActions[index],
           frequency: {
-            ...(updatedActions[index].frequency ?? NOTIFICATION_DEFAULT_FREQUENCY),
+            ...(updatedActions[index].frequency ?? defaultRuleFrequency),
             [key]: value,
           },
         };
         return updatedActions;
       });
     },
-    [field]
+    [defaultRuleFrequency, field]
   );
 
   const isFormValidated = isValid !== undefined;
@@ -255,8 +261,9 @@ export const RuleActionsField: React.FC<Props> = ({
         hideActionHeader: true,
         hasAlertsMappings: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
-        defaultRuleFrequency: NOTIFICATION_DEFAULT_FREQUENCY,
+        defaultRuleFrequency,
         disableErrorMessages: !isFormValidated,
+        minimumThrottleInterval,
       }),
     [
       getActionForm,
@@ -269,7 +276,9 @@ export const RuleActionsField: React.FC<Props> = ({
       setActionFrequency,
       setActionAlertsFilterProperty,
       ruleTypeId,
+      defaultRuleFrequency,
       isFormValidated,
+      minimumThrottleInterval,
     ]
   );
 

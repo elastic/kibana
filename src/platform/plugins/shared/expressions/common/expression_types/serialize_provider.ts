@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionType } from './expression_type';
-import { ExpressionValue } from './types';
+import type { ExpressionType } from './expression_type';
+import type { ExpressionValue } from './types';
 import { getType } from './get_type';
 
 const identity = <T>(x: T) => x;

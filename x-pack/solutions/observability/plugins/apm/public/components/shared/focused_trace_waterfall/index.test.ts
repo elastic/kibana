@@ -99,22 +99,24 @@ describe('flattenChildren', () => {
       {
         traceDoc: {
           id: 'a',
-          timestamp: '1',
+          timestampUs: 1,
           name: 'name-a',
           traceId: 'trace-a',
           duration: 100,
           serviceName: 'service-a',
+          errorCount: 0,
         },
         children: [],
       },
       {
         traceDoc: {
           id: 'b',
-          timestamp: '2',
+          timestampUs: 2,
           name: 'name-b',
           traceId: 'trace-b',
           duration: 200,
           serviceName: 'service-b',
+          errorCount: 0,
         },
         children: [],
       },
@@ -122,19 +124,22 @@ describe('flattenChildren', () => {
     expect(flattenChildren(children)).toEqual([
       {
         id: 'a',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-a',
         traceId: 'trace-a',
         duration: 100,
         serviceName: 'service-a',
+        errorCount: 0,
       },
+
       {
         id: 'b',
-        timestamp: '2',
+        timestampUs: 2,
         name: 'name-b',
         traceId: 'trace-b',
         duration: 200,
         serviceName: 'service-b',
+        errorCount: 0,
       },
     ]);
   });
@@ -144,31 +149,34 @@ describe('flattenChildren', () => {
       {
         traceDoc: {
           id: 'a',
-          timestamp: '1',
+          timestampUs: 1,
           name: 'name-a',
           traceId: 'trace-a',
           duration: 100,
           serviceName: 'service-a',
+          errorCount: 0,
         },
         children: [
           {
             traceDoc: {
               id: 'b',
-              timestamp: '1',
+              timestampUs: 1,
               name: 'name-b',
               traceId: 'trace-b',
               duration: 100,
               serviceName: 'service-b',
+              errorCount: 0,
             },
             children: [
               {
                 traceDoc: {
                   id: 'c',
-                  timestamp: '1',
+                  timestampUs: 1,
                   name: 'name-c',
                   traceId: 'trace-c',
                   duration: 100,
                   serviceName: 'service-c',
+                  errorCount: 0,
                 },
                 children: [],
               },
@@ -179,11 +187,12 @@ describe('flattenChildren', () => {
       {
         traceDoc: {
           id: 'd',
-          timestamp: '1',
+          timestampUs: 1,
           name: 'name-d',
           traceId: 'trace-d',
           duration: 100,
           serviceName: 'service-d',
+          errorCount: 0,
         },
         children: [],
       },
@@ -191,35 +200,39 @@ describe('flattenChildren', () => {
     expect(flattenChildren(children)).toEqual([
       {
         id: 'a',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-a',
         traceId: 'trace-a',
         duration: 100,
         serviceName: 'service-a',
+        errorCount: 0,
       },
       {
         id: 'b',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-b',
         traceId: 'trace-b',
         duration: 100,
         serviceName: 'service-b',
+        errorCount: 0,
       },
       {
         id: 'c',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-c',
         traceId: 'trace-c',
         duration: 100,
         serviceName: 'service-c',
+        errorCount: 0,
       },
       {
         id: 'd',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-d',
         traceId: 'trace-d',
         duration: 100,
         serviceName: 'service-d',
+        errorCount: 0,
       },
     ]);
   });
@@ -229,21 +242,23 @@ describe('flattenChildren', () => {
       {
         traceDoc: {
           id: 'a',
-          timestamp: '1',
+          timestampUs: 1,
           name: 'name-a',
           traceId: 'trace-a',
           duration: 100,
           serviceName: 'service-a',
+          errorCount: 0,
         },
       },
       {
         traceDoc: {
           id: 'b',
-          timestamp: '1',
+          timestampUs: 1,
           name: 'name-b',
           traceId: 'trace-b',
           duration: 100,
           serviceName: 'service-b',
+          errorCount: 0,
         },
         children: [],
       },
@@ -251,19 +266,21 @@ describe('flattenChildren', () => {
     expect(flattenChildren(children)).toEqual([
       {
         id: 'a',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-a',
         traceId: 'trace-a',
         duration: 100,
         serviceName: 'service-a',
+        errorCount: 0,
       },
       {
         id: 'b',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-b',
         traceId: 'trace-b',
         duration: 100,
         serviceName: 'service-b',
+        errorCount: 0,
       },
     ]);
   });

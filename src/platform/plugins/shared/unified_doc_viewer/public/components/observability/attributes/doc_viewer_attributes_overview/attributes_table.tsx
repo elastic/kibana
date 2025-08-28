@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { EuiDataGridProps } from '@elastic/eui';
+import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React, { useMemo } from 'react';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { FieldRow } from '../../../doc_viewer_table/field_row';
 import { TableCell } from '../../../doc_viewer_table/table_cell';
 import {
   getFieldCellActions,
   getFieldValueCellActions,
 } from '../../../doc_viewer_table/table_cell_actions';
-import { FieldRow } from '../../../doc_viewer_table/field_row';
-import { getUnifiedDocViewerServices } from '../../../../plugin';
-import { AttributeField } from './attributes_overview';
+import type { AttributeField } from './attributes_overview';
 
 interface AttributesTableProps
   extends Pick<

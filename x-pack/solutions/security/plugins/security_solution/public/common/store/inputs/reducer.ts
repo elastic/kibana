@@ -45,7 +45,11 @@ import type { InputsModel, TimeRange } from './model';
 
 export type InputsState = InputsModel;
 
-const { socTrends: socTrendsUnused, ...timeRangeSettings } = getTimeRangeSettings(false);
+const {
+  socTrends: socTrendsUnused,
+  valueReport: valueReportSettings,
+  ...timeRangeSettings
+} = getTimeRangeSettings(false);
 
 export const initialInputsState: InputsState = {
   global: {
@@ -78,10 +82,15 @@ export const initialInputsState: InputsState = {
     filters: [],
     fullScreen: false,
   },
+  valueReport: {
+    timerange: valueReportSettings,
+    policy: getIntervalSettings(false),
+    linkTo: [],
+  },
 };
 
 export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState => {
-  const { from, fromStr, to, toStr, socTrends } = getTimeRangeSettings();
+  const { from, fromStr, to, toStr, valueReport, socTrends } = getTimeRangeSettings();
   const { kind, duration } = getIntervalSettings();
   return {
     global: {
@@ -125,6 +134,14 @@ export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState
       },
       filters: [],
       fullScreen: false,
+    },
+    valueReport: {
+      timerange: valueReport,
+      linkTo: [],
+      policy: {
+        kind,
+        duration,
+      },
     },
     ...(socTrendsEnabled
       ? {

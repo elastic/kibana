@@ -6,8 +6,7 @@
  */
 
 import { EuiCode, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
-import type { ReactElement } from 'react';
-import React, { useMemo, type FC, type PropsWithChildren } from 'react';
+import React, { useMemo, type FC, type PropsWithChildren, type ReactElement } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
@@ -57,7 +56,7 @@ export const SessionPreview: FC = () => {
             />
           }
         >
-          <span style={emphasisStyles}>{processName}</span>
+          <span css={emphasisStyles}>{processName}</span>
         </ValueContainer>
       )
     );
@@ -141,7 +140,7 @@ export const SessionPreview: FC = () => {
       <ValueContainer>
         <EuiIcon type="user" />
         &nbsp;
-        <span style={emphasisStyles}>{userName}</span>
+        <span css={emphasisStyles}>{userName}</span>
       </ValueContainer>
       {processNameFragment}
       {timeFragment}

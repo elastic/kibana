@@ -7,14 +7,11 @@
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
-import {
-  EmbeddableTypes,
-  EmbeddableExpressionType,
-  EmbeddableExpression,
-} from '../../expression_types';
+import type { EmbeddableExpression } from '../../expression_types';
+import { EmbeddableTypes, EmbeddableExpressionType } from '../../expression_types';
 
 import { buildEmbeddableFilters } from '../../../common/lib/build_embeddable_filters';
-import { ExpressionValueFilter } from '../../../types';
+import type { ExpressionValueFilter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

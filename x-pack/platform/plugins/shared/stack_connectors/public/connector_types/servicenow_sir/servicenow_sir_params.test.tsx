@@ -9,10 +9,10 @@ import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import ServiceNowSIRParamsFields from './servicenow_sir_params';
-import { Choice } from '../lib/servicenow/types';
+import type { Choice } from '../lib/servicenow/types';
 import { merge } from 'lodash';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';

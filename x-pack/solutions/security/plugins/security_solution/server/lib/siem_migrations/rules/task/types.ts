@@ -8,7 +8,7 @@
 import type { AuthenticatedUser } from '@kbn/core/server';
 import type { LangSmithEvaluationOptions } from '../../../../../common/siem_migrations/model/common.gen';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
-import type { SiemRuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
+import type { RuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
 import type { getRuleMigrationAgent } from './agent';
 import type { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
 import type { ChatModel } from './util/actions_client_chat';
@@ -25,7 +25,7 @@ export interface RuleMigrationInput extends Pick<StoredRuleMigration, 'id' | 'or
 export interface RuleMigrationTaskCreateClientParams {
   currentUser: AuthenticatedUser;
   dataClient: RuleMigrationsDataClient;
-  dependencies: SiemRuleMigrationsClientDependencies;
+  dependencies: RuleMigrationsClientDependencies;
 }
 
 export interface RuleMigrationTaskStartParams {

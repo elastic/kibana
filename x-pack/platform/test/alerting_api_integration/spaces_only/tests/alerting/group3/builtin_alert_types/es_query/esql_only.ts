@@ -25,7 +25,6 @@ import {
 } from './common';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
 
-// eslint-disable-next-line import/no-default-export
 export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const {

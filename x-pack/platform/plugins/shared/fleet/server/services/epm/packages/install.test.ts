@@ -31,11 +31,15 @@ import * as installStateMachine from './install_state_machine/_state_machine_pac
 import { getBundledPackageByPkgKey } from './bundled_packages';
 
 import { getInstallationObject } from './get';
+import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 
 jest.mock('../../data_streams');
 jest.mock('./get');
 jest.mock('./install_index_template_pipeline');
 jest.mock('./es_assets_reference');
+jest.mock('./exclude_datastreams_helper', () => ({
+  shouldIncludePackageWithDatastreamTypes: jest.fn(() => true),
+}));
 jest.mock('../../app_context', () => {
   const logger = { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() };
   const mockedSavedObjectTagging = {
@@ -202,6 +206,7 @@ describe('install', () => {
         newVersion: '1.1.0',
         packageName: 'apache',
         status: 'failure',
+        automaticInstall: false,
       });
     });
 
@@ -224,6 +229,33 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'failure',
+        automaticInstall: false,
+      });
+    });
+
+    it('should send telemetry on install failure, datastream type exclusion', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest.mocked(shouldIncludePackageWithDatastreamTypes).mockReturnValueOnce(false);
+
+      await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'apache-1.3.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+        currentVersion: 'not_installed',
+        dryRun: false,
+        errorMessage:
+          'Installation package: apache is not allowed due to data stream type exclusions',
+        eventType: 'package-install',
+        installType: 'install',
+        newVersion: '1.3.0',
+        packageName: 'apache',
+        status: 'failure',
+        automaticInstall: false,
       });
     });
 
@@ -245,6 +277,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'success',
+        automaticInstall: false,
       });
     });
 
@@ -270,6 +303,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'success',
+        automaticInstall: false,
       });
     });
 
@@ -296,6 +330,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'failure',
+        automaticInstall: false,
       });
     });
 
@@ -485,6 +520,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'success',
+        automaticInstall: false,
       });
     });
 
@@ -506,6 +542,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'success',
+        automaticInstall: false,
       });
     });
 
@@ -532,6 +569,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'failure',
+        automaticInstall: false,
       });
     });
   });

@@ -23,11 +23,9 @@ import {
 
 import { css } from '@emotion/react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RuleTableItem, SnoozeSchedule } from '../../../../types';
-import {
-  ComponentOpts as BulkOperationsComponentOpts,
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
+import type { RuleTableItem, SnoozeSchedule } from '../../../../types';
+import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { isRuleSnoozed } from '../../../lib';
 import { futureTimeToInterval, SnoozePanel } from './rule_snooze';
 import {
@@ -208,10 +206,12 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   const onDisableClick = useCallback(() => {
     if (isDisabled) {
       onEnable();
+    } else if (item.autoRecoverAlerts === false) {
+      onDisable(false);
     } else {
       onDisableModalOpen();
     }
-  }, [isDisabled, onEnable, onDisableModalOpen]);
+  }, [isDisabled, item.autoRecoverAlerts, onEnable, onDisableModalOpen, onDisable]);
 
   const panels = [
     {

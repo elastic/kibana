@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FormBasedLayer } from '../../types';
+import type { FormBasedLayer } from '../../types';
 import { documentField } from '../../document_field';
-import { IndexPatternMap, OperationMetadata } from '../../../../types';
-import {
+import type { IndexPatternMap, OperationMetadata } from '../../../../types';
+import type {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
   StaticValueIndexPatternColumn,
@@ -108,7 +108,6 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
     dataType: 'number',
     operationType: 'static_value',
     isBucketed: false,
-    scale: 'ratio',
     params: {
       value: '0.75',
     },

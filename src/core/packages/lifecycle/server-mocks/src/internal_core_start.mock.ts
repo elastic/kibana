@@ -23,6 +23,8 @@ import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 
 export function createInternalCoreStartMock() {
   const startDeps = {
@@ -42,6 +44,8 @@ export function createInternalCoreStartMock() {
     security: securityServiceMock.createInternalStart(),
     userProfile: userProfileServiceMock.createInternalStart(),
     pricing: pricingServiceMock.createStartContract(),
+    injection: injectionServiceMock.createInternalStartContract(),
+    dataStreams: dataStreamServiceMock.createStartContract(),
   };
   return startDeps;
 }

@@ -43,6 +43,7 @@ const trackingFns = [
   { name: 'reportAssistantInvoked', eventType: AssistantEventTypes.AssistantInvoked },
   { name: 'reportAssistantMessageSent', eventType: AssistantEventTypes.AssistantMessageSent },
   { name: 'reportAssistantQuickPrompt', eventType: AssistantEventTypes.AssistantQuickPrompt },
+  { name: 'reportAssistantStarterPrompt', eventType: AssistantEventTypes.AssistantStarterPrompt },
 ];
 
 describe('useAssistantTelemetry', () => {

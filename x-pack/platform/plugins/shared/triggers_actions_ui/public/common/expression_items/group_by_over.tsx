@@ -9,6 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiExpression,
   EuiPopover,
@@ -17,13 +18,12 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiFieldNumber,
-  EuiComboBoxOptionOption,
   EuiComboBox,
 } from '@elastic/eui';
 import { builtInGroupByTypes } from '../constants';
-import { FieldOption, GroupByType } from '../types';
+import type { FieldOption, GroupByType } from '../types';
 import { ClosablePopoverTitle } from './components';
-import { IErrorObject } from '../../types';
+import type { IErrorObject } from '../../types';
 
 interface GroupByOverFieldOption {
   label: string;

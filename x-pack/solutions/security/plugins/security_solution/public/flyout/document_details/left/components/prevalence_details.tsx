@@ -49,7 +49,7 @@ import {
 } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { IS_OPERATOR } from '../../../../../common/types';
-import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
+import { PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
@@ -65,7 +65,7 @@ export const LicenseProtectedCell: React.FC = () => {
   return (
     <div
       data-test-subj={PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID}
-      style={{ height: '16px', width: '100%', background: euiTheme.colors.lightShade }}
+      css={{ height: '16px', width: '100%', background: euiTheme.colors.lightShade }}
     />
   );
 };
@@ -116,31 +116,20 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
     render: (data: PrevalenceDetailsRow) => (
       <EuiFlexGroup direction="column" gutterSize="none">
-        {data.values.map((value) => {
-          if (hasPreview(data.field)) {
-            return (
-              <EuiFlexItem key={value}>
-                <CellActions field={data.field} value={value}>
-                  <PreviewLink
-                    field={data.field}
-                    value={value}
-                    scopeId={data.scopeId}
-                    data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
-                  >
-                    <EuiText size="xs">{value}</EuiText>
-                  </PreviewLink>
-                </CellActions>
-              </EuiFlexItem>
-            );
-          }
-          return (
-            <EuiFlexItem key={value}>
-              <CellActions field={data.field} value={value}>
+        {data.values.map((value) => (
+          <EuiFlexItem key={value}>
+            <CellActions field={data.field} value={value}>
+              <PreviewLink
+                field={data.field}
+                value={value}
+                scopeId={data.scopeId}
+                data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
+              >
                 <EuiText size="xs">{value}</EuiText>
-              </CellActions>
-            </EuiFlexItem>
-          );
-        })}
+              </PreviewLink>
+            </CellActions>
+          </EuiFlexItem>
+        ))}
       </EuiFlexGroup>
     ),
     width: '20%',

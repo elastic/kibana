@@ -17,6 +17,6 @@ import { getSecuritySolutionLink } from './utils/security_solution_links';
  */
 export const indicatorsLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('indicators'),
-  globalNavPosition: 8,
+  globalNavPosition: 10,
   capabilities: [`${SECURITY_FEATURE_ID}.threat-intelligence`],
 };
