@@ -15,13 +15,13 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionStatus } from '@kbn/workflows';
+import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 
-import { v4 as generateUuid } from 'uuid';
 import { Client } from '@elastic/elasticsearch';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { v4 as generateUuid } from 'uuid';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
 import type {
@@ -33,19 +33,20 @@ import type {
 
 import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
 import { ConnectorExecutor } from './connector_executor';
+import { UrlValidator } from './lib/url_validator';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
-import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
+import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
+import { workflowExecutionLoop } from './workflow_execution_loop';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
-import { workflowExecutionLoop } from './workflow_execution_loop';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -166,6 +167,7 @@ export class WorkflowsExecutionEnginePlugin
         workflowId: workflow.id,
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
+        yaml: workflow.yaml,
         context,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
@@ -264,12 +266,17 @@ async function createContainer(
 
   const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);
 
+  const urlValidator = new UrlValidator({
+    allowedHosts: config.http.allowedHosts,
+  });
+
   const nodesFactory = new StepFactory(
     contextManager,
     connectorExecutor,
     workflowRuntime,
     workflowLogger,
-    workflowTaskManager
+    workflowTaskManager,
+    urlValidator
   );
 
   return {
