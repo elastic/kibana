@@ -89,6 +89,10 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
     return visitRetryStep(graph, previousStep, modifiedCurrentStep as RetryStep);
   }
 
+  if ((modifiedCurrentStep as FallbackStep).type === 'fall-back') {
+    return visitFallbackStep(graph, previousStep, modifiedCurrentStep as FallbackStep);
+  }
+
   return visitAtomicStep(graph, previousStep, modifiedCurrentStep);
 }
 
