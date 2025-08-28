@@ -41,7 +41,6 @@ import { getTestUrl } from './utils';
 
 import { TIME_RANGE_TYPE } from './constants';
 import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
-import { CustomUrls } from '../custom_urls';
 
 function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
@@ -59,7 +58,7 @@ function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
  * Uses source index for partial DFA jobs since destination index doesn't exist yet.
  * For discover URLs: Extracts data view ID directly from the URL state.
  */
-function findDataViewId(
+export function findDataViewId(
   job: Job | DataFrameAnalyticsConfig,
   customUrl: MlKibanaUrlConfig,
   dataViewListItems?: DataViewListItem[],
