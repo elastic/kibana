@@ -1472,14 +1472,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (stateP.currentBatch + 1 < stateP.bulkOperationBatches.length) {
         return {
           ...stateP,
-          logs,
           controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
           currentBatch: stateP.currentBatch + 1,
         };
       }
       return {
         ...stateP,
-        logs,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
         corruptDocumentIds: [],
         transformErrors: [],
