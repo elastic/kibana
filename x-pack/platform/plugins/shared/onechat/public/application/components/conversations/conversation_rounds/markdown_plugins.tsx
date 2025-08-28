@@ -18,27 +18,26 @@ import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 
 export const visualizationPlugin = () => {
   const visitor = (node: Node) => {
-    // Recurse into children first
     if ('children' in node) {
       const parent = node as Parent;
       parent.children.forEach((child) => visitor(child));
     }
 
-    // Only handle raw HTML mdast nodes
     if ((node as any).type !== 'html') {
       return;
     }
 
+    // find <visualization> nodes
     const value = (node as any).value as string | undefined;
     if (!value || !value.trim().toLowerCase().startsWith('<visualization')) {
       return;
     }
 
-    // Extract attributes
+    // extract attributes
     const toolResultAttrValue = value.match(/tool-result-id="([^"]*)"/i);
     const toolResultId = toolResultAttrValue ? toolResultAttrValue[1] : undefined;
 
-    // Transform the node from type `html` to custom `visualization`
+    // transform the node from type `html` to (custom) type `visualization`
     (node as any).type = 'visualization';
     (node as any).toolResultId = toolResultId;
     delete (node as any).value; // remove the raw HTML value
