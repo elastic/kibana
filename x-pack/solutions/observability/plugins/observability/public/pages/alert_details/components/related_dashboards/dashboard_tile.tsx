@@ -39,6 +39,7 @@ export function DashboardTile({
 }) {
   const {
     services: {
+      telemetryClient,
       share: { url: urlService },
       savedObjectsTagging: { ui: savedObjectsTaggingUi },
     },
@@ -54,6 +55,8 @@ export function DashboardTile({
     <>
       <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id} alignItems="center">
         <EuiFlexGroup key={dashboard.id} gutterSize="s" direction="column">
+          {/* Allowing both href and onClick to allow telemetry to be reported */}
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiLink
             data-test-subj="o11yDashboardTileLink"
             href={dashboardLocator?.getRedirectUrl({
@@ -61,6 +64,11 @@ export function DashboardTile({
               timeRange,
             })}
             target="_blank"
+            onClick={() => {
+              if (telemetryClient) {
+                telemetryClient.reportLinkedDashboardViewed(dashboard.id);
+              }
+            }}
           >
             {dashboard.title}
           </EuiLink>

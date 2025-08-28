@@ -8,7 +8,6 @@
 import { useCallback, useMemo } from 'react';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { CaseStatuses } from '../../../../common/types/domain';
-import { CASE_SELECTED_FROM_MODAL_EVENT_TYPE } from '../../../../common/constants';
 import type { AllCasesSelectorModalProps } from '.';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { CaseUI } from '../../../containers/types';
@@ -19,7 +18,6 @@ import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
 import { NO_ATTACHMENTS_ADDED } from '../translations';
-import { useKibana } from '../../../common/lib/kibana';
 
 export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRowClick'> & {
   successToaster?: {
@@ -31,7 +29,6 @@ export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRo
     content?: string;
   };
   onSuccess?: (theCase: CaseUI) => void;
-  sourceContext?: string; // Track where the modal was opened from for telemetry
 };
 
 export const useCasesAddToExistingCaseModal = ({
@@ -40,7 +37,6 @@ export const useCasesAddToExistingCaseModal = ({
   onSuccess,
   onClose,
   onCreateCaseClicked,
-  sourceContext,
 }: AddToExistingCaseModalProps = {}) => {
   const handleSuccess = useCallback(
     (theCase?: CaseUI) => {
@@ -62,7 +58,6 @@ export const useCasesAddToExistingCaseModal = ({
   const casesToasts = useCasesToast();
   const { mutateAsync: createAttachments } = useCreateAttachments();
   const { startTransaction } = useAddAttachmentToExistingCaseTransaction();
-  const { analytics } = useKibana().services;
 
   const closeModal = useCallback(() => {
     dispatch({
@@ -149,12 +144,6 @@ export const useCasesAddToExistingCaseModal = ({
           onCreateCaseClicked,
           onRowClick: (theCase?: CaseUI) => {
             handleOnRowClick(theCase, getAttachments);
-            if (sourceContext) {
-              analytics.reportEvent(CASE_SELECTED_FROM_MODAL_EVENT_TYPE, {
-                caseId: theCase?.id,
-                addedFromPage: sourceContext,
-              });
-            }
           },
           onClose: (theCase?: CaseUI, isCreateCase?: boolean) => {
             closeModal();
@@ -166,7 +155,7 @@ export const useCasesAddToExistingCaseModal = ({
         },
       });
     },
-    [analytics, closeModal, dispatch, handleOnRowClick, onClose, onCreateCaseClicked, sourceContext]
+    [closeModal, dispatch, handleOnRowClick, onClose, onCreateCaseClicked]
   );
 
   return useMemo(() => {

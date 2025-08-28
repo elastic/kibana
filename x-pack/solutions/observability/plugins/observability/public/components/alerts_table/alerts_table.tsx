@@ -43,7 +43,6 @@ const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> =
 export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
   const { observability } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
-
   return (
     <AlertsTable<ObservabilityAlertsTableContext>
       columns={columns}
