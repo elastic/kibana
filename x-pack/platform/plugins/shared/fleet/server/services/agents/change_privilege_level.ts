@@ -35,7 +35,11 @@ export async function changeAgentPrivilegeLevel(
     .filter((pkg) => pkg && pkg.requires_root);
   if (packagesWithRootAccess.length > 0) {
     throw new FleetUnauthorizedError(
-      `Agent policy ${agent.policy_id} contains integrations that require root access: ${packagesWithRootAccess.map((pkg) => pkg?.name).join(', ')}`
+      `Agent policy ${
+        agent.policy_id
+      } contains integrations that require root access: ${packagesWithRootAccess
+        .map((pkg) => pkg?.name)
+        .join(', ')}`
     );
   }
 
