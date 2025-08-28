@@ -58,9 +58,9 @@ Your final output MUST be a single, valid JSON object. Do not include any text o
         "evidence_snippet": "A direct snippet from the tool 'result' or null."
       },
       "explanation": "A brief explanation of the verdict reasoning."
-    },
-    "summary_verdict": "GROUNDED | GROUNDED_WITH_DISCLOSURE | MINOR_HALLUCINATIONS | MAJOR_HALLUCINATIONS"
+    }
   ]
+  "summary_verdict": "GROUNDED | GROUNDED_WITH_DISCLOSURE | MINOR_HALLUCINATIONS | MAJOR_HALLUCINATIONS"
 }
 ```
 
@@ -114,13 +114,13 @@ EXAMPLE 1:
       "explanation": "This claim is an opinionated statement and is not found anywhere in the provided policy document excerpt."
     }
   ],
-  "summary_verdict": "MAJOR_HALLUCINATIONS"
+"summary_verdict": "MAJOR_HALLUCINATIONS"
 }
 ```
 
 EXAMPLE 2:
 [User Query]: "My laptop's VPN client keeps disconnecting. How do I reset it?"
-Tool Call History]:
+[Tool Call History]:
 ```json
 [
   {
@@ -185,6 +185,6 @@ As a general IT tip, restarting your laptop can sometimes help with connection i
       "explanation": "The agent makes it clear this is external advice and not part of the official source."
     }
   ],
-  "summary_verdict": "MAJOR_HALLUCINATIONS"
+"summary_verdict": "MAJOR_HALLUCINATIONS"
 }
 ```
