@@ -6,6 +6,11 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
+    OriginalDashboardVendor:
+      type: string
+      description: The original dashboard vendor identifier.
+      enum:
+        - splunk
 
     DashboardMigration:
       description: The dashboard migration object with its settings.
@@ -102,8 +107,8 @@ components:
           type: string
           description: The unique identifier for the dashboard
         vendor:
-          type: string
-          description: The vendor of the dashboard (e.g., 'splunk')
+          description: The original dashboard vendor identifier.
+          $ref: '#/components/schemas/OriginalDashboardVendor'
         title:
           type: string
           description: The title of the dashboard
@@ -111,8 +116,8 @@ components:
           type: string
           description: The description of the dashboard
         data:
-          type: object
-          description: The data of the dashboard, typically in JSON format
+          type: string
+          description: The data of the dashboard, format could depend on the vendor
         last_updated:
           type: string
           description: The last updated timestamp of the dashboard

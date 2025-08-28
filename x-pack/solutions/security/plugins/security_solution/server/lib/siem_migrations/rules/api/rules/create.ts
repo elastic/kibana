@@ -13,7 +13,7 @@ import {
   CreateRuleMigrationRulesRequestBody,
   CreateRuleMigrationRulesRequestParams,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
+import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { AddRuleMigrationRulesInput } from '../../data/rule_migrations_data_rules_client';
 import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
@@ -63,20 +63,23 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
                 count: rulesCount,
               });
 
-              const ruleMigrations = originalRules.map<AddRuleMigrationRulesInput>(
+              const rulesToBeAdded = originalRules.map<AddRuleMigrationRulesInput>(
                 (originalRule) => ({
                   migration_id: migrationId,
                   original_rule: originalRule,
                 })
               );
 
-              await ruleMigrationsClient.data.rules.create(ruleMigrations);
+              await ruleMigrationsClient.data.rules.create(rulesToBeAdded);
 
               // Create identified resource documents without content to keep track of them
-              const resourceIdentifier = new ResourceIdentifier(firstOriginalRule.vendor);
-              const resources = resourceIdentifier
-                .fromOriginalRules(originalRules)
-                .map((resource) => ({ ...resource, migration_id: migrationId }));
+              const resourceIdentifier = new RuleResourceIdentifier(firstOriginalRule.vendor);
+              const extractedResources = await resourceIdentifier.fromOriginals(originalRules);
+
+              const resources = extractedResources.map((resource) => ({
+                ...resource,
+                migration_id: migrationId,
+              }));
 
               if (resources.length > 0) {
                 await ruleMigrationsClient.data.resources.create(resources);
