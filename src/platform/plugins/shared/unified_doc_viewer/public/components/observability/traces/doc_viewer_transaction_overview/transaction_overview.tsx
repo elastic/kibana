@@ -162,7 +162,7 @@ export function TransactionOverview({
               )}
             </EuiFlexItem>
             <EuiFlexItem>
-              <TraceContextLogEvents traceId={traceId} />
+              <TraceContextLogEvents traceId={traceId} transactionId={transactionId} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </FieldActionsProvider>

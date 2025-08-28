@@ -172,6 +172,7 @@ export function SpanOverview({
                 <TraceContextLogEvents
                   traceId={flattenedDoc[TRACE_ID_FIELD]}
                   spanId={flattenedDoc[SPAN_ID_FIELD]}
+                  transactionId={transactionId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

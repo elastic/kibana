@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
+import { useLogsQuery } from '../../hooks/use_logs_query';
 
 const logsTitle = i18n.translate('unifiedDocViewer.observability.traces.section.logs.title', {
   defaultMessage: 'Logs',
@@ -27,34 +28,27 @@ const logsDescription = i18n.translate(
 export interface TraceContextLogEventsProps {
   traceId: string;
   spanId?: string;
+  transactionId?: string;
 }
-export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEventsProps) {
+export function TraceContextLogEvents({
+  traceId,
+  transactionId,
+  spanId,
+}: TraceContextLogEventsProps) {
   const { data: dataService, discoverShared } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
   const { from, to } = dataService.query.timefilter.timefilter.getTime();
 
   const timeRange = useMemo(() => ({ from, to }), [from, to]);
+  const query = useLogsQuery({ traceId, spanId, transactionId });
 
-  const savedSearchTimeRange = React.useMemo(
+  const savedSearchTimeRange = useMemo(
     () => ({
       from: timeRange.from,
       to: timeRange.to,
     }),
     [timeRange.from, timeRange.to]
   );
-
-  const query = useMemo(() => {
-    const queryStrings = [`(trace.id:"${traceId}" OR (not trace.id:* AND "${traceId}"))`];
-
-    if (spanId) {
-      queryStrings.push(`(span.id:"${spanId}" OR (not span.id* AND "${spanId}"))`);
-    }
-
-    return {
-      language: 'kuery',
-      query: queryStrings.join(' AND '),
-    };
-  }, [traceId, spanId]);
 
   const LogEvents = discoverShared.features.registry.getById('observability-log-events');
 
