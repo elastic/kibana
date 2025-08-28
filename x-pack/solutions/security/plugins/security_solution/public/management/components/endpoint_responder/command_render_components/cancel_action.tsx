@@ -14,14 +14,14 @@ import type { ActionRequestComponentProps } from '../types';
 
 export const CancelActionResult = memo<
   ActionRequestComponentProps<{
-    id: string[];
+    action: string[];
   }>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendCancelRequest();
 
   const actionRequestBody = useMemo<undefined | CancelActionRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
-    const { id, comment } = command.args.args;
+    const { action, comment } = command.args.args;
     const agentType = command.commandDefinition?.meta?.agentType;
 
     return endpointId
@@ -30,7 +30,7 @@ export const CancelActionResult = memo<
           endpoint_ids: [endpointId],
           comment: comment?.[0],
           parameters: {
-            id: id[0],
+            id: action[0],
           },
         }
       : undefined;

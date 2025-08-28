@@ -350,8 +350,6 @@ export function registerResponseActionRoutes(
           request: CancelActionRequestSchema,
         },
       },
-      // TODO: Refactor to use withEndpointAuthz pattern for architectural consistency
-      // Follow-up required within 1 sprint to align with established route patterns
       withEndpointAuthz(
         { all: ['canReadActionsLogManagement'] },
         logger,

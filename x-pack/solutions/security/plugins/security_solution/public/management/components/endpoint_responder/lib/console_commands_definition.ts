@@ -539,19 +539,22 @@ export const getEndpointConsoleCommands = ({
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
-      exampleUsage: 'cancel --id="action-123-456-789"',
+      exampleUsage: 'cancel --action="action-123-456-789"',
       exampleInstruction: i18n.translate(
         'xpack.securitySolution.endpointConsoleCommands.cancel.exampleInstruction',
         { defaultMessage: 'Select a pending action to cancel' }
       ),
       mustHaveArgs: true,
       args: {
-        id: {
+        action: {
           required: true,
           allowMultiples: false,
-          about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.cancel.id.about', {
-            defaultMessage: 'The response action to cancel',
-          }),
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
+            {
+              defaultMessage: 'The response action to cancel',
+            }
+          ),
           mustHaveValue: 'truthy',
           selectorShowTextValue: true,
           SelectorComponent: PendingActionsSelector,
