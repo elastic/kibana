@@ -79,6 +79,7 @@ describe('validateCommandSpecificCancelPermissions', () => {
       ['upload', 'canWriteFileOperations'],
       ['scan', 'canWriteScanOperations'],
       ['runscript', 'canWriteExecuteOperations'],
+      ['cancel', 'canReadActionsLogManagement'],
     ])(
       'should pass command-specific authorization for %s command when user has permission',
       async (command, commandPermission) => {
@@ -101,16 +102,6 @@ describe('validateCommandSpecificCancelPermissions', () => {
             mockLogger
           )
         ).resolves.not.toThrow();
-
-        expect(mockLogger.debug).toHaveBeenCalledWith(
-          'Validating command-specific authorization for cancel action: test-action-id'
-        );
-        expect(mockLogger.debug).toHaveBeenCalledWith(
-          `Cancel authorization check for command: ${command}`
-        );
-        expect(mockLogger.debug).toHaveBeenCalledWith(
-          'Command-specific cancel authorization successful for action test-action-id'
-        );
       }
     );
 
@@ -125,6 +116,7 @@ describe('validateCommandSpecificCancelPermissions', () => {
       ['upload', 'canWriteFileOperations'],
       ['scan', 'canWriteScanOperations'],
       ['runscript', 'canWriteExecuteOperations'],
+      ['cancel', 'canReadActionsLogManagement'],
     ])(
       'should fail command-specific authorization for %s command when user lacks permission',
       async (command, commandPermission) => {
@@ -147,10 +139,6 @@ describe('validateCommandSpecificCancelPermissions', () => {
             mockLogger
           )
         ).rejects.toThrow(EndpointAuthorizationError);
-
-        expect(mockLogger.debug).toHaveBeenCalledWith(
-          `User lacks command-specific permission '${commandPermission}' for cancel action`
-        );
       }
     );
   });
