@@ -8,7 +8,7 @@
  */
 import { walk } from '../../../walker';
 import { type ESQLCommand } from '../../../types';
-import type { ESQLFieldWithMetadata } from '../../types';
+import type { ESQLColumnData } from '../../types';
 import type { ICommandContext } from '../../types';
 
 function unquoteTemplate(inputString: string): string {
@@ -35,7 +35,7 @@ export function extractDissectColumnNames(pattern: string): string[] {
 
 export const columnsAfter = (
   command: ESQLCommand,
-  previousColumns: ESQLFieldWithMetadata[],
+  previousColumns: ESQLColumnData[],
   context?: ICommandContext
 ) => {
   const columns: string[] = [];
@@ -49,6 +49,13 @@ export const columnsAfter = (
 
   return [
     ...previousColumns,
-    ...columns.map((column) => ({ name: column, type: 'keyword' as const })),
+    ...columns.map((column) => {
+      const newColumn: ESQLColumnData = {
+        name: column,
+        type: 'keyword' as const,
+        userDefined: false,
+      };
+      return newColumn;
+    }),
   ];
 };

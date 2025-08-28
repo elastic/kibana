@@ -63,6 +63,7 @@ export const validate = (
       name: targetName,
       location: targetField?.location || command.location,
       type: 'keyword',
+      userDefined: true,
     },
   ]);
 

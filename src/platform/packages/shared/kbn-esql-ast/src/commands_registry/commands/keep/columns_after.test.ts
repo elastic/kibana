@@ -10,7 +10,7 @@ import { synth } from '../../../..';
 import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
 import { columnsAfter } from './columns_after';
 
-describe('FORK', () => {
+describe('KEEP', () => {
   const context = {
     userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([]),
     fields: new Map<string, ESQLFieldWithMetadata>([

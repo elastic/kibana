@@ -22,7 +22,8 @@ export const columnsAfter = (
       {
         name: '_fork',
         type: 'keyword' as const,
-      },
+        userDefined: false,
+      } as ESQLFieldWithMetadata,
     ],
     'name'
   );

@@ -8,7 +8,7 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLMessage, ESQLCommand, ESQLAst } from '../types';
-import type { ISuggestionItem, ESQLFieldWithMetadata, ICommandCallbacks } from './types';
+import type { ISuggestionItem, ICommandCallbacks, ESQLColumnData } from './types';
 
 /**
  * Interface defining the methods that each ES|QL command should register.
@@ -59,9 +59,9 @@ export interface ICommandMethods<TContext = any> {
    */
   columnsAfter?: (
     command: ESQLCommand,
-    previousColumns: ESQLFieldWithMetadata[],
+    previousColumns: ESQLColumnData[],
     context?: TContext
-  ) => ESQLFieldWithMetadata[];
+  ) => ESQLColumnData[];
 }
 
 export interface ICommandMetadata {

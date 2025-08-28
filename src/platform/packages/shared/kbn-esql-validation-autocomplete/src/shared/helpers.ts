@@ -13,6 +13,7 @@ import {
   type FunctionDefinition,
 } from '@kbn/esql-ast';
 import type {
+  ESQLColumnData,
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
 } from '@kbn/esql-ast/src/commands_registry/types';
@@ -128,9 +129,9 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
 export async function getCurrentQueryAvailableFields(
   query: string,
   commands: ESQLAstCommand[],
-  previousPipeFields: ESQLFieldWithMetadata[]
+  previousPipeFields: ESQLColumnData[]
 ) {
-  const cacheCopy = new Map<string, ESQLFieldWithMetadata>();
+  const cacheCopy = new Map<string, ESQLColumnData>();
   previousPipeFields.forEach((field) => cacheCopy.set(field.name, field));
   const lastCommand = commands[commands.length - 1];
   const commandDefinition = esqlCommandRegistry.getCommandByName(lastCommand.name);

@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import uniqBy from 'lodash/uniqBy';
-import type { ESQLCommand, ESQLFunction, ESQLAstBaseItem } from '../../../types';
 import { isFunctionExpression } from '../../../ast/is';
-import type { ESQLFieldWithMetadata } from '../../types';
-import type { ICommandContext } from '../../types';
+import type { ESQLAstBaseItem, ESQLCommand, ESQLFunction } from '../../../types';
+import type { ESQLColumnData, ICommandContext } from '../../types';
 
 export const columnsAfter = (
   command: ESQLCommand,
-  previousColumns: ESQLFieldWithMetadata[],
+  previousColumns: ESQLColumnData[],
   context?: ICommandContext
 ) => {
   const asRenamePairs: ESQLFunction[] = [];
@@ -51,5 +50,5 @@ export const columnsAfter = (
     return oldColumn; // No rename found, keep the old name
   });
 
-  return uniqBy(newFields, 'name');
+  return uniqBy(newFields, 'name') as ESQLColumnData[];
 };

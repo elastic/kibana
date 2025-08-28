@@ -9,7 +9,7 @@
 import uniqBy from 'lodash/uniqBy';
 import type { ESQLCommand } from '../../../types';
 import { walk } from '../../../walker';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
+import type { ESQLColumnData, ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
 import type { ICommandContext } from '../../types';
 import type { FieldType } from '../../../definitions/types';
 import { isColumn } from '../../../ast/is';
@@ -36,7 +36,7 @@ function transformMapToESQLFields(
 
 export const columnsAfter = (
   command: ESQLCommand,
-  previousColumns: ESQLFieldWithMetadata[],
+  previousColumns: ESQLColumnData[],
   context?: ICommandContext
 ) => {
   const columns: string[] = [];

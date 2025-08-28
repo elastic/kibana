@@ -97,9 +97,11 @@ export type GetColumnsByTypeFn = (
   }
 ) => Promise<ISuggestionItem[]>;
 
+// TODO consider not exporting this
 export interface ESQLFieldWithMetadata {
   name: string;
   type: FieldType;
+  userDefined?: false; // TODO consider making required property
   isEcs?: boolean;
   hasConflict?: boolean;
   metadata?: {
@@ -107,14 +109,18 @@ export interface ESQLFieldWithMetadata {
   };
 }
 
+// TODO consider not exporting this
 export interface ESQLUserDefinedColumn {
   name: string;
   // invalid expressions produce columns of type "unknown"
   // also, there are some cases where we can't yet infer the type of
   // a valid expression as with `CASE` which can return union types
   type: SupportedDataType | 'unknown';
-  location: ESQLLocation;
+  userDefined: true;
+  location: ESQLLocation; // TODO should this be optional?
 }
+
+export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;
 
 export interface ESQLPolicy {
   name: string;
@@ -131,6 +137,7 @@ export interface ICommandCallbacks {
 }
 
 export interface ICommandContext {
+  // TODO collapse userDefinedColumns and fields into one
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
   fields: Map<string, ESQLFieldWithMetadata>;
   sources?: ESQLSourceResult[];
