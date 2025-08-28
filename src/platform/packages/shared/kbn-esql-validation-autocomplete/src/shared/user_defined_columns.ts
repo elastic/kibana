@@ -157,7 +157,7 @@ export function collectUserDefinedColumns(
     })
     .on('visitCommand', (ctx) => {
       const ret = [];
-      if (['row', 'eval', 'stats', 'inlinestats', 'ts', 'rename'].includes(ctx.node.name)) {
+      if (['row', 'stats', 'inlinestats', 'ts', 'rename'].includes(ctx.node.name)) {
         ret.push(...ctx.visitArgs());
       }
       if (['stats', 'inlinestats', 'enrich'].includes(ctx.node.name)) {

@@ -10,7 +10,7 @@
 import { parse } from '@kbn/esql-ast';
 import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLCallbacks } from './types';
-import { getFieldsFromES, getCurrentQueryAvailableFields } from './helpers';
+import { getFieldsFromES, getCurrentQueryAvailableColumns } from './helpers';
 import { removeLastPipe, processPipes, toSingleLine } from './query_string_utils';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
@@ -42,7 +42,7 @@ function getValueInsensitive(keyToCheck: string) {
  * for the next time the same query is used.
  * @param queryText
  */
-async function cacheFieldsForQuery(queryText: string) {
+async function cacheColumnsForQuery(queryText: string) {
   const existsInCache = checkCacheInsensitive(queryText);
   if (existsInCache) {
     // this is already in the cache
@@ -53,7 +53,7 @@ async function cacheFieldsForQuery(queryText: string) {
   const fieldsAvailableAfterPreviousCommand = getValueInsensitive(queryTextWithoutLastPipe);
   if (fieldsAvailableAfterPreviousCommand && fieldsAvailableAfterPreviousCommand?.length) {
     const { root } = parse(queryText);
-    const availableFields = await getCurrentQueryAvailableFields(
+    const availableFields = await getCurrentQueryAvailableColumns(
       queryText,
       root.commands,
       fieldsAvailableAfterPreviousCommand
@@ -80,7 +80,7 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
 
     // build fields cache for every partial query
     for (const query of partialQueries) {
-      await cacheFieldsForQuery(query);
+      await cacheColumnsForQuery(query);
     }
   };
 

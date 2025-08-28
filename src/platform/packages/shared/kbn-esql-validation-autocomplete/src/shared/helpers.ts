@@ -126,7 +126,7 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
  * @param previousPipeFields, the fields from the previous pipe
  * @returns a list of fields that are available for the current pipe
  */
-export async function getCurrentQueryAvailableFields(
+export async function getCurrentQueryAvailableColumns(
   query: string,
   commands: ESQLAstCommand[],
   previousPipeFields: ESQLColumnData[]
@@ -142,10 +142,8 @@ export async function getCurrentQueryAvailableFields(
   // user-defined columns and other fields... need to consider this
   // If the command has a columnsAfter function, use it to get the fields
   if (commandDefinition?.methods.columnsAfter) {
-    const userDefinedColumns = collectUserDefinedColumns([lastCommand], cacheCopy, query);
-
     return commandDefinition.methods.columnsAfter(lastCommand, previousPipeFields, {
-      userDefinedColumns,
+      userDefinedColumns: new Map(),
     });
   } else {
     // If the command doesn't have a columnsAfter function, use the default behavior
