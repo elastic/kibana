@@ -31,9 +31,20 @@ group=$SCOUT_CONFIG_GROUP_TYPE
 # The first retry should only run the configs that failed in the previous attempt
 # Any subsequent retries, which would generally only happen by someone clicking the button in the UI, will run everything
 if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
-  configs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '')
-  if [[ "$configs" ]]; then
-    echo "--- Retrying only failed configs"
+  failed_data=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '')
+  if [[ "$failed_data" ]]; then
+    echo "--- Retrying only failed configs and modes"
+    # Parse the failed data and reconstruct configs with their specific failed modes
+    # Format: config_path:mode1,mode2|config_path2:mode1
+    while IFS='|' read -d '|' -r failure_entry; do
+      if [[ -z "$failure_entry" ]]; then
+        continue
+      fi
+      IFS=':' read -r failed_config_path failed_modes <<< "$failure_entry"
+      for mode in ${failed_modes//,/ }; do
+        configs+="$failed_config_path"$'\n'
+      done
+    done <<< "$failed_data"
     echo "$configs"
   fi
 fi
@@ -67,6 +78,7 @@ fi
 results=()
 failedConfigs=()
 failedConfigPaths=()  # Store plain config paths for retry
+failedConfigModes=()  # Store failed modes for each config
 configWithoutTests=()
 
 FINAL_EXIT_CODE=0
@@ -78,6 +90,8 @@ while read -r config_path; do
   fi
 
   config_failed=false
+  config_failed_modes=()  # Track failed modes for this specific config
+  
   for mode in $RUN_MODE_LIST; do
     echo "--- Running tests: $config_path ($mode)"
 
@@ -92,15 +106,21 @@ while read -r config_path; do
     elif [[ $EXIT_CODE -ne 0 ]]; then
       failedConfigs+=("$config_path ($mode) ❌")
       config_failed=true
+      # Extract mode name without -- prefix for storage
+      mode_name=${mode#--}
+      config_failed_modes+=("$mode_name")
       FINAL_EXIT_CODE=10  # Ensure we exit with failure if any test fails with (exit code 10 to match FTR)
     else
       results+=("$config_path ($mode) ✅")
     fi
   done
 
-  # Add config path to failedConfigPaths only once per config, regardless of how many modes failed
+  # Add config path and its failed modes to tracking arrays
   if [[ "$config_failed" == true ]]; then
     failedConfigPaths+=("$config_path")
+    # Join failed modes with comma for storage
+    failed_modes_str=$(IFS=','; echo "${config_failed_modes[*]}")
+    failedConfigModes+=("$failed_modes_str")
   fi
 done <<< "$configs"
 
@@ -128,9 +148,17 @@ if [[ ${#failedConfigs[@]} -gt 0 ]]; then
   echo "❌ Failed tests:"
   printf '%s\n' "${failedConfigs[@]}"
 
-  # Store plain config paths for retry (convert array to newline-separated string)
-  failed_configs_for_retry=$(printf '%s\n' "${failedConfigPaths[@]}")
-  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failed_configs_for_retry"
+  # Store failed configs with their failed modes for retry
+  # Format: config_path:mode1,mode2|config_path2:mode1
+  failed_data=""
+  for i in "${!failedConfigPaths[@]}"; do
+    if [[ $i -gt 0 ]]; then
+      failed_data+="|"
+    fi
+    failed_data+="${failedConfigPaths[$i]}:${failedConfigModes[$i]}"
+  done
+  
+  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failed_data"
 fi
 
 echo "--- Upload Scout reporter events to AppEx QA's team cluster"
