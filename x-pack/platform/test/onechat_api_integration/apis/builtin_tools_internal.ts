@@ -12,7 +12,8 @@ import type { FtrProviderContext } from '../../api_integration/ftr_provider_cont
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Builtin Tools internal API', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/233013
+  describe.skip('Builtin Tools internal API', () => {
     describe('POST /internal/chat/tools/_bulk_delete', () => {
       it('should return error results when attempting to bulk delete builtin system tools', async () => {
         const toolIds = Object.values(builtinToolIds).slice(0, 3) as string[];
