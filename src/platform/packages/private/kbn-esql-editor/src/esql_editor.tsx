@@ -38,10 +38,11 @@ import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { FieldType } from '@kbn/esql-ast';
+import { firstValueFrom, of } from 'rxjs';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -71,6 +72,7 @@ import type {
   ControlsContext,
 } from './types';
 import { useRestorableState, withRestorableState } from './restorable_state';
+import { useCanCreateLookupIndex, useCreateLookupIndexCommand } from './custom_commands';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -461,7 +463,9 @@ const ESQLEditorInternal = function ESQLEditor({
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
 
-  const esqlCallbacks: ESQLCallbacks = useMemo(() => {
+  const canCreateLookupIndex = useCanCreateLookupIndex();
+
+  const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, fixedQuery);
@@ -528,6 +532,9 @@ const ESQLEditorInternal = function ESQLEditor({
         return variablesService?.areSuggestionsEnabled ?? false;
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
+      getCurrentAppId: async () => {
+        return await firstValueFrom(application?.currentAppId$ ?? of(undefined));
+      },
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
       getEditorExtensions: async (queryString: string) => {
         if (activeSolutionId) {
@@ -557,6 +564,7 @@ const ESQLEditorInternal = function ESQLEditor({
         };
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
+      canCreateLookupIndex,
     };
     return callbacks;
   }, [
@@ -576,6 +584,8 @@ const ESQLEditorInternal = function ESQLEditor({
     variablesService?.areSuggestionsEnabled,
     histogramBarTarget,
     activeSolutionId,
+    application?.currentAppId$,
+    canCreateLookupIndex,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -658,6 +668,28 @@ const ESQLEditorInternal = function ESQLEditor({
       }
     },
     [parseMessages, dataErrorsControl?.enabled]
+  );
+
+  const onLookupIndexCreate = useCallback(
+    async (resultQuery: string) => {
+      if (kibana.services?.esql?.getJoinIndicesAutocomplete) {
+        // forces refresh
+        await kibana.services?.esql?.getJoinIndicesAutocomplete({ forceRefresh: true });
+      }
+      onQueryUpdate(resultQuery);
+      // Need to force validation, as the query might be unchanged,
+      // but the lookup index was created
+      await queryValidation({ active: true });
+    },
+    [kibana.services?.esql, onQueryUpdate, queryValidation]
+  );
+
+  const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useCreateLookupIndexCommand(
+    editor1,
+    editorModel,
+    kibana.services?.esql?.getJoinIndicesAutocomplete,
+    query,
+    onLookupIndexCreate
   );
 
   useDebounceWithOptions(
@@ -781,6 +813,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const [labelInFocus, setLabelInFocus] = useState(false);
   const editorPanel = (
     <>
+      <Global styles={lookupIndexBadgeStyle} />
       {Boolean(editorIsInline) && (
         <EuiFlexGroup
           gutterSize="none"
@@ -880,18 +913,24 @@ const ESQLEditorInternal = function ESQLEditor({
                   onChange={onQueryUpdate}
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
-                  editorDidMount={(editor) => {
+                  editorDidMount={async (editor) => {
                     editor1.current = editor;
                     const model = editor.getModel();
                     if (model) {
                       editorModel.current = model;
+                      await addLookupIndicesDecorator();
                     }
+
+                    monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
+                      wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
+                    });
+
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
                     // and the user needs to click again the editor.
                     // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                    editor.onMouseDown(() => {
+                    editor.onMouseDown(async (e) => {
                       setTimeout(() => {
                         editor.focus();
                       }, 100);
@@ -930,7 +969,10 @@ const ESQLEditorInternal = function ESQLEditor({
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
 
-                    editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
+                    editor.onDidChangeModelContent(async () => {
+                      await addLookupIndicesDecorator();
+                      showSuggestionsIfEmptyQuery();
+                    });
 
                     // Auto-focus the editor and move the cursor to the end.
                     if (!disableAutoFocus) {

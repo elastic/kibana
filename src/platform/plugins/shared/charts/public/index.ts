@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110891
-
 import type {
   RangeSelectContext,
   ValueClickContext,

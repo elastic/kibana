@@ -128,6 +128,8 @@ export interface ICommandCallbacks {
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
   getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
+  getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
 }
 
 export interface ICommandContext {
@@ -143,6 +145,7 @@ export interface ICommandContext {
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
+  appId?: string;
 }
 
 /**
