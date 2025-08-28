@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, NonEmptyTimestamp, User } from '../common_attributes.gen';
+import { NonEmptyString, User, NonEmptyTimestamp } from '../common_attributes.gen';
 
 /**
  * Trace Data
