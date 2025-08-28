@@ -4296,7 +4296,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/check-mappings-update-cli@link:packages/kbn-check-mappings-update-cli":
+"@kbn/check-saved-objects-cli@link:packages/kbn-check-saved-objects-cli":
   version "0.0.0"
   uid ""
 

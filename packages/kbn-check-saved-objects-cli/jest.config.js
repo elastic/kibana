@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-check-mappings-update-cli'],
+  roots: ['<rootDir>/packages/kbn-check-saved-objects-cli'],
 };

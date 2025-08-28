@@ -1,4 +1,4 @@
-# @kbn/check-mappings-update-cli
+# @kbn/check-saved-objects-cli
 
 Saved Objects CLI tool that can be used to check whether a snapshot of current
 mappings (i.e., mappings on main) is compatible with mappings we can extract
