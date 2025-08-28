@@ -97,8 +97,9 @@ const texts = {
   datasetLastActivityColumn: 'Last activity',
   datasetActionsColumn: 'Actions',
   datasetIssueColumn: 'Issue',
-  datasetDocsCountColumn: 'Docs count',
-  datasetLastOccurrenceColumn: 'Last Occurrence',
+  datasetFieldColumn: 'Field',
+  datasetDocsCountColumn: 'Documents',
+  datasetLastOccurrenceColumn: 'Last occurred',
 };
 
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
@@ -145,6 +146,10 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityTypesSelectableButton: 'datasetQualityFilterTypeSelectableButton',
     datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
     datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
+    datasetQualityDetailsIssueTypeSelector: 'datasetQualityDetailsIssueTypeSelectorOptions',
+    datasetQualityDetailsIssueTypeSelectorButton: 'datasetQualityDetailsIssueTypeSelectorButton',
+    datasetQualityDetailsFieldSelector: 'datasetQualityDetailsFieldSelectorOptions',
+    datasetQualityDetailsFieldSelectorButton: 'datasetQualityDetailsFieldSelectorButton',
     datasetQualityDetailsEmptyPrompt: 'datasetQualityDetailsEmptyPrompt',
     datasetQualityDetailsEmptyPromptBody: 'datasetQualityDetailsEmptyPromptBody',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
@@ -384,7 +389,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetQualityDetailsDegradedFieldTable();
       return this.parseTable(table, [
-        '0',
+        '0', // Expand button column
+        texts.datasetFieldColumn,
         texts.datasetIssueColumn,
         texts.datasetDocsCountColumn,
         texts.datasetLastOccurrenceColumn,
@@ -412,6 +418,30 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         testSubjectSelectors.datasetQualityQualitiesSelectableButton,
         testSubjectSelectors.datasetQualityQualitiesSelectable,
         qualities
+      );
+    },
+
+    async filterForIssueTypes(issueTypes: string[]) {
+      // Wait for the component to be available before attempting to filter
+      await testSubjects.existOrFail(
+        testSubjectSelectors.datasetQualityDetailsIssueTypeSelectorButton
+      );
+
+      return euiSelectable.selectOnlyOptionsWithText(
+        testSubjectSelectors.datasetQualityDetailsIssueTypeSelectorButton,
+        testSubjectSelectors.datasetQualityDetailsIssueTypeSelector,
+        issueTypes
+      );
+    },
+
+    async filterForFields(fields: string[]) {
+      // Wait for the component to be available before attempting to filter
+      await testSubjects.existOrFail(testSubjectSelectors.datasetQualityDetailsFieldSelectorButton);
+
+      return euiSelectable.selectOnlyOptionsWithText(
+        testSubjectSelectors.datasetQualityDetailsFieldSelectorButton,
+        testSubjectSelectors.datasetQualityDetailsFieldSelector,
+        fields
       );
     },
 
@@ -520,12 +550,11 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     async openDegradedFieldFlyout(fieldName: string) {
       await this.waitUntilTableLoaded();
+
       const cols = await this.parseDegradedFieldTable();
-      const fieldNameCol = cols.Issue;
+      const fieldNameCol = cols.Field;
       const fieldNameColCellTexts = await fieldNameCol.getCellTexts();
-      const testDatasetRowIndex = fieldNameColCellTexts.findIndex(
-        (dName) => dName === `${fieldName} field ignored`
-      );
+      const testDatasetRowIndex = fieldNameColCellTexts.findIndex((dName) => dName === fieldName);
 
       expect(testDatasetRowIndex).to.be.greaterThan(-1);
 
@@ -538,11 +567,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const fieldExpandButton = expandButtons[testDatasetRowIndex];
 
-      const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
-
-      if (isCollapsed) {
-        await fieldExpandButton.click();
-      }
+      await fieldExpandButton.click();
 
       await this.waitUntilDegradedFieldFlyoutLoaded();
     },
@@ -567,11 +592,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const fieldExpandButton = expandButtons[testDatasetRowIndex];
 
-      const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
-
-      if (isCollapsed) {
-        await fieldExpandButton.click();
-      }
+      await fieldExpandButton.click();
 
       await this.waitUntilDegradedFieldFlyoutLoaded();
     },
@@ -596,7 +617,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async getQualityIssueSwitchState() {
       const isSelected = await testSubjects.getAttribute(
         testSubjectSelectors.datasetQualityDetailsOverviewDegradedFieldToggleSwitch,
-        'aria-checked'
+        'aria-pressed'
       );
       return isSelected === 'true';
     },
