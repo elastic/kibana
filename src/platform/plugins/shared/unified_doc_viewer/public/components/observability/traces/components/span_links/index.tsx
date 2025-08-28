@@ -33,10 +33,7 @@ import { SPAN_LINKS_SPAN_ID } from '@kbn/apm-types';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
-import {
-  toESQLParamName,
-  useGetGenerateDiscoverLink,
-} from '../../hooks/use_get_generate_discover_link';
+import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 import { getColumns } from './get_columns';
 import { useFetchSpanLinks } from './use_fetch_span_links';
 
