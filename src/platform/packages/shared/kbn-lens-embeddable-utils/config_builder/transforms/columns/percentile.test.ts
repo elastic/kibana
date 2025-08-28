@@ -18,6 +18,7 @@ describe('Percentile Transforms', () => {
       const input: LensApiPercentileOperation = {
         operation: 'percentile',
         field: 'response_time',
+        percentile: LENS_PERCENTILE_DEFAULT_VALUE,
       };
 
       const expected: PercentileIndexPatternColumn = {
@@ -40,6 +41,7 @@ describe('Percentile Transforms', () => {
       const input: LensApiPercentileOperation = {
         operation: 'percentile',
         field: 'response_time',
+        percentile: LENS_PERCENTILE_DEFAULT_VALUE,
       };
 
       const result = fromPercentileAPItoLensState(input);
@@ -55,6 +57,7 @@ describe('Percentile Transforms', () => {
         format: {
           type: 'number',
           decimals: 2,
+          compact: false,
         },
       };
 
@@ -117,23 +120,10 @@ describe('Percentile Transforms', () => {
       const expected: LensApiPercentileOperation = {
         operation: 'percentile',
         field: 'response_time',
+        percentile: LENS_PERCENTILE_DEFAULT_VALUE,
       };
 
       expect(fromPercentileLensStateToAPI(input)).toEqual(expected);
-    });
-
-    it('should remove percentile default value when provided in params', () => {
-      const input: PercentileIndexPatternColumn = {
-        operationType: 'percentile',
-        sourceField: 'response_time',
-        label: 'Percentile of response_time',
-        isBucketed: false,
-        dataType: 'number',
-        params: { percentile: LENS_PERCENTILE_DEFAULT_VALUE },
-      };
-
-      const result = fromPercentileLensStateToAPI(input);
-      expect('percentile' in result).toBeFalsy();
     });
 
     it('should handle format configuration', () => {
@@ -157,6 +147,8 @@ describe('Percentile Transforms', () => {
       const result = fromPercentileLensStateToAPI(input);
       expect(result.format).toEqual({
         type: 'number',
+        compact: false,
+        decimals: 2,
       });
     });
 
@@ -193,6 +185,7 @@ describe('Percentile Transforms', () => {
       const input: LensApiPercentileOperation = {
         operation: 'percentile',
         field: 'response_time',
+        percentile: LENS_PERCENTILE_DEFAULT_VALUE,
       };
 
       const result = fromPercentileAPItoLensState(input);

@@ -86,6 +86,8 @@ describe('Range Transforms', () => {
       const input: LensApiHistogramOperation = {
         operation: 'histogram',
         field: 'price',
+        granularity: LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
+        include_empty_rows: LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
       };
 
       const result = fromRangeOrHistogramLensApiToLensState(input);
@@ -123,7 +125,7 @@ describe('Range Transforms', () => {
           { gt: 50, lte: 100, label: 'Medium' },
           { gt: 100, label: 'High' },
         ],
-        format: { type: 'number' },
+        format: { type: 'number', decimals: 2, compact: false },
       };
 
       expect(fromRangeOrHistogramLensStateToAPI(input)).toEqual(expected);
@@ -150,7 +152,8 @@ describe('Range Transforms', () => {
         operation: 'histogram',
         field: 'price',
         granularity: 10,
-        format: { type: 'number', decimals: 0 },
+        include_empty_rows: true,
+        format: { type: 'number', decimals: 0, compact: false },
       };
 
       expect(fromRangeOrHistogramLensStateToAPI(input)).toEqual(expected);

@@ -39,7 +39,6 @@ export const fromPercentileRankLensStateToAPI = (
   return {
     operation: options.operationType,
     field: options.sourceField,
-    // @TODO: strip this out once fixed the schema output types
     rank: options.params?.value ?? LENS_PERCENTILE_RANK_DEFAULT_VALUE,
     ...getLensAPIMetricSharedProps(options, ofName(options.sourceField, options.params?.value)),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),

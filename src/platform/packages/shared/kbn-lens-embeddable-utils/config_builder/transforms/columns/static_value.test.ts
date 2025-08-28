@@ -53,6 +53,7 @@ describe('Static Value Transforms', () => {
         format: {
           type: 'number',
           decimals: 2,
+          compact: false,
         },
       };
 
@@ -100,23 +101,6 @@ describe('Static Value Transforms', () => {
       expect(fromStaticValueLensStateToAPI(input)).toEqual(expected);
     });
 
-    it('should not include value when equal to default', () => {
-      const input: StaticValueIndexPatternColumn = {
-        operationType: 'static_value',
-        label: 'Static Value',
-        customLabel: false,
-        dataType: 'number',
-        isBucketed: false,
-        references: [],
-        params: {
-          value: String(LENS_STATIC_VALUE_DEFAULT),
-        },
-      };
-
-      const result = fromStaticValueLensStateToAPI(input);
-      expect(result.value).toBeUndefined();
-    });
-
     it('should handle format configuration', () => {
       const input: StaticValueIndexPatternColumn = {
         operationType: 'static_value',
@@ -139,6 +123,8 @@ describe('Static Value Transforms', () => {
       const result = fromStaticValueLensStateToAPI(input);
       expect(result.format).toEqual({
         type: 'number',
+        compact: false,
+        decimals: 2,
       });
     });
   });

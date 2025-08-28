@@ -61,70 +61,64 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
   /**
    * Sub label
    */
-  sub_label: schema.maybe(schema.string({ defaultValue: '', meta: { description: 'Sub label' } })),
+  sub_label: schema.string({ defaultValue: '', meta: { description: 'Sub label' } }),
   /**
    * Alignments of the labels and values for the primary metric.
    * For example, align the labels to the left and the values to the right.
    */
-  alignments: schema.maybe(
-    schema.object(
-      {
-        /**
-         * Alignments for labels. Possible values:
-         * - 'left': Align label to the left
-         * - 'center': Align label to the center
-         * - 'right': Align label to the right
-         */
-        labels: schema.maybe(
-          schema.oneOf(
-            [schema.literal('left'), schema.literal('center'), schema.literal('right')],
-            { meta: { description: 'Alignments for labels' }, defaultValue: 'left' }
-          )
-        ),
-        /**
-         * Alignments for value. Possible values:
-         * - 'left': Align value to the left
-         * - 'center': Align value to the center
-         * - 'right': Align value to the right
-         */
-        value: schema.maybe(
-          schema.oneOf(
-            [schema.literal('left'), schema.literal('center'), schema.literal('right')],
-            { meta: { description: 'Alignments for value' }, defaultValue: 'left' }
-          )
-        ),
-      },
-      { defaultValue: { labels: 'left', value: 'left' } }
-    )
+  alignments: schema.object(
+    {
+      /**
+       * Alignments for labels. Possible values:
+       * - 'left': Align label to the left
+       * - 'center': Align label to the center
+       * - 'right': Align label to the right
+       */
+      labels: schema.oneOf(
+        [schema.literal('left'), schema.literal('center'), schema.literal('right')],
+        {
+          meta: { description: 'Alignments for labels' },
+          defaultValue: 'left',
+        }
+      ),
+      /**
+       * Alignments for value. Possible values:
+       * - 'left': Align value to the left
+       * - 'center': Align value to the center
+       * - 'right': Align value to the right
+       */
+      value: schema.oneOf(
+        [schema.literal('left'), schema.literal('center'), schema.literal('right')],
+        {
+          meta: { description: 'Alignments for value' },
+          defaultValue: 'left',
+        }
+      ),
+    },
+    { defaultValue: { labels: 'left', value: 'left' } }
   ),
   /**
    * Whether to fit the value
    */
-  fit: schema.maybe(
-    schema.boolean({ meta: { description: 'Whether to fit the value' }, defaultValue: false })
-  ),
+  fit: schema.boolean({ meta: { description: 'Whether to fit the value' }, defaultValue: false }),
   /**
    * Icon configuration
    */
-  icon: schema.maybe(
-    schema.object({
-      /**
-       * Icon name
-       */
-      name: schema.string({ meta: { description: 'Icon name' } }),
-      /**
-       * Icon alignment. Possible values:
-       * - 'right': Icon is aligned to the right
-       * - 'left': Icon is aligned to the left
-       */
-      align: schema.maybe(
-        schema.oneOf([schema.literal('right'), schema.literal('left')], {
-          meta: { description: 'Icon alignment' },
-          defaultValue: 'right',
-        })
-      ),
-    })
-  ),
+  icon: schema.object({
+    /**
+     * Icon name
+     */
+    name: schema.string({ meta: { description: 'Icon name' } }),
+    /**
+     * Icon alignment. Possible values:
+     * - 'right': Icon is aligned to the right
+     * - 'left': Icon is aligned to the left
+     */
+    align: schema.oneOf([schema.literal('right'), schema.literal('left')], {
+      meta: { description: 'Icon alignment' },
+      defaultValue: 'right',
+    }),
+  }),
   /**
    * Color configuration
    */
@@ -139,7 +133,7 @@ const metricStateSecondaryMetricOptionsSchema = schema.object({
   /**
    * Prefix
    */
-  prefix: schema.maybe(schema.string({ meta: { description: 'Prefix' }, defaultValue: '' })),
+  prefix: schema.string({ meta: { description: 'Prefix' }, defaultValue: '' }),
   /**
    * Compare to
    */
@@ -154,12 +148,10 @@ const metricStateBreakdownByOptionsSchema = schema.object({
   /**
    * Number of columns
    */
-  columns: schema.maybe(
-    schema.number({
-      defaultValue: 5,
-      meta: { description: 'Number of columns' },
-    })
-  ),
+  columns: schema.number({
+    defaultValue: 5,
+    meta: { description: 'Number of columns' },
+  }),
   /**
    * Collapse by function. This parameter is used to collapse the
    * metric chart when the number of columns is bigger than the

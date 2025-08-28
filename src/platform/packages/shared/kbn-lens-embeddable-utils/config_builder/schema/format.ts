@@ -15,20 +15,17 @@ const numericFormatSchema = schema.object({
   /**
    * Number of decimals
    */
-  decimals: schema.maybe(
-    schema.number({
-      defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
-      meta: {
-        description: 'Number of decimals',
-      },
-    })
-  ),
+  decimals: schema.number({
+    defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
+    meta: {
+      description: 'Number of decimals',
+    },
+  }),
   /**
    * Suffix
    */
   suffix: schema.maybe(
     schema.string({
-      defaultValue: '',
       meta: {
         description: 'Suffix',
       },
@@ -37,14 +34,12 @@ const numericFormatSchema = schema.object({
   /**
    * Whether to use compact notation
    */
-  compact: schema.maybe(
-    schema.boolean({
-      defaultValue: false,
-      meta: {
-        description: 'Whether to use compact notation',
-      },
-    })
-  ),
+  compact: schema.boolean({
+    defaultValue: false,
+    meta: {
+      description: 'Whether to use compact notation',
+    },
+  }),
 });
 
 const byteFormatSchema = schema.object({

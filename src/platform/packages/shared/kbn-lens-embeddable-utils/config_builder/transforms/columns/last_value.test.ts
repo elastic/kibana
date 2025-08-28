@@ -19,6 +19,7 @@ describe('Last Value Transforms', () => {
         operation: 'last_value',
         field: 'status',
         sort_by: '@timestamp',
+        show_array_values: false,
       };
 
       const expected: LastValueIndexPatternColumn = {
@@ -43,9 +44,11 @@ describe('Last Value Transforms', () => {
         operation: 'last_value',
         field: 'price',
         sort_by: '@timestamp',
+        show_array_values: true,
         format: {
           type: 'number',
           decimals: 2,
+          compact: false,
         },
       };
 
@@ -63,6 +66,7 @@ describe('Last Value Transforms', () => {
         operation: 'last_value',
         field: 'status',
         sort_by: 'timestamp',
+        show_array_values: true,
       };
 
       const result = fromLastValueAPItoLensState(input);
@@ -100,6 +104,7 @@ describe('Last Value Transforms', () => {
         operation: 'last_value',
         field: 'status',
         sort_by: '@timestamp',
+        show_array_values: true,
       };
 
       expect(fromLastValueLensStateToAPI(input)).toEqual(expected);
@@ -171,6 +176,7 @@ describe('Last Value Transforms', () => {
         operation: 'last_value',
         field: '',
         sort_by: '@timestamp',
+        show_array_values: true,
       };
 
       const result = fromLastValueAPItoLensState(input);
@@ -182,6 +188,7 @@ describe('Last Value Transforms', () => {
         operation: 'last_value',
         field: 'user_status',
         sort_by: '@timestamp',
+        show_array_values: true,
       };
 
       const result = fromLastValueAPItoLensState(input);

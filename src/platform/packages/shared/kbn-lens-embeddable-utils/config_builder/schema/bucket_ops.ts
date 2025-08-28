@@ -291,34 +291,30 @@ export const bucketHistogramOperationSchema = formatSchema.extends({
   /**
    * Granularity of the histogram
    */
-  granularity: schema.maybe(
-    schema.oneOf(
-      [
-        schema.number({
-          meta: {
-            description: 'Granularity of the histogram',
-          },
-          min: LENS_HISTOGRAM_GRANULARITY_MIN,
-          max: LENS_HISTOGRAM_GRANULARITY_MAX,
-        }),
-        schema.literal('auto'),
-      ],
-      {
-        defaultValue: LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
-      }
-    )
+  granularity: schema.oneOf(
+    [
+      schema.number({
+        meta: {
+          description: 'Granularity of the histogram',
+        },
+        min: LENS_HISTOGRAM_GRANULARITY_MIN,
+        max: LENS_HISTOGRAM_GRANULARITY_MAX,
+      }),
+      schema.literal('auto'),
+    ],
+    {
+      defaultValue: LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
+    }
   ),
   /**
    * Whether to include empty rows
    */
-  include_empty_rows: schema.maybe(
-    schema.boolean({
-      meta: {
-        description: 'Whether to include empty rows',
-      },
-      defaultValue: LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
-    })
-  ),
+  include_empty_rows: schema.boolean({
+    meta: {
+      description: 'Whether to include empty rows',
+    },
+    defaultValue: LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+  }),
 });
 
 export const bucketRangesOperationSchema = formatSchema.extends({

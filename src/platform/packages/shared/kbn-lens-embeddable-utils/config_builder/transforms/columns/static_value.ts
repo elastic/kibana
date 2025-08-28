@@ -48,9 +48,7 @@ export const fromStaticValueLensStateToAPI = (
 ): LensApiStaticValueOperation => {
   return {
     operation: 'static_value',
-    ...(options.params?.value != null && options.params.value !== String(LENS_STATIC_VALUE_DEFAULT)
-      ? { value: Number(options.params?.value) }
-      : {}),
+    value: Number(options.params?.value) ?? LENS_STATIC_VALUE_DEFAULT,
     ...getLensAPIMetricSharedProps(options, ofName(options.params.value)),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };

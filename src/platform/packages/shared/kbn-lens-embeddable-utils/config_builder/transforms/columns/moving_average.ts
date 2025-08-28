@@ -48,7 +48,6 @@ export function fromMovingAverageLensStateToAPI(
     operation: 'moving_average',
     ...getLensAPIMetricSharedProps(column, ofName(refDefaultLabel)),
     of: ref,
-    // @TODO: strip this out once fixed the schema output types
     window: column.params.window ?? LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
     ...(column.params?.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
   };

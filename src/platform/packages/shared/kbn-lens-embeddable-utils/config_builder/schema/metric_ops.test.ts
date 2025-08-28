@@ -8,6 +8,12 @@
  */
 
 import {
+  LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+  LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
+  LENS_PERCENTILE_DEFAULT_VALUE,
+  LENS_PERCENTILE_RANK_DEFAULT_VALUE,
+} from './constants';
+import {
   metricOperationDefinitionSchema,
   staticOperationDefinitionSchema,
   formulaOperationDefinitionSchema,
@@ -122,7 +128,7 @@ describe('Metric Operations Schemas', () => {
       };
 
       const validated = percentileOperationSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toEqual({ ...input, percentile: LENS_PERCENTILE_DEFAULT_VALUE });
     });
 
     it('validates percentile operation without percentile', () => {
@@ -132,7 +138,7 @@ describe('Metric Operations Schemas', () => {
       };
 
       const validated = percentileOperationSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toEqual({ ...input, percentile: LENS_PERCENTILE_DEFAULT_VALUE });
     });
 
     it('validates percentile ranks operation', () => {
@@ -153,7 +159,7 @@ describe('Metric Operations Schemas', () => {
       };
 
       const validated = percentileRanksOperationSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toEqual({ ...input, rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE });
     });
 
     it('should use percentile rank pass ', () => {
@@ -164,7 +170,7 @@ describe('Metric Operations Schemas', () => {
       };
 
       const validated = percentileRanksOperationSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toEqual({ ...input, rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE });
     });
 
     it('validates differences operation', () => {
@@ -204,7 +210,7 @@ describe('Metric Operations Schemas', () => {
       };
 
       const validated = movingAverageOperationSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toEqual({ ...input, window: LENS_MOVING_AVERAGE_DEFAULT_WINDOW });
     });
 
     it('validates moving average operation with undefined window param', () => {
@@ -218,7 +224,7 @@ describe('Metric Operations Schemas', () => {
       };
 
       const validated = movingAverageOperationSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toEqual({ ...input, window: LENS_MOVING_AVERAGE_DEFAULT_WINDOW });
     });
   });
 
@@ -251,7 +257,10 @@ describe('Metric Operations Schemas', () => {
       };
 
       const validated = lastValueOperationSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toEqual({
+        ...input,
+        show_array_values: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+      });
     });
 
     it('validates last value operation with undefined show_array_values value', () => {
@@ -263,7 +272,10 @@ describe('Metric Operations Schemas', () => {
       };
 
       const validated = lastValueOperationSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toEqual({
+        ...input,
+        show_array_values: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+      });
     });
   });
 

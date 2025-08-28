@@ -80,14 +80,9 @@ export function fromRangeOrHistogramLensStateToAPI(
   return {
     operation: 'histogram',
     field: column.sourceField,
+    include_empty_rows: column.params.includeEmptyRows ?? LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+    granularity: column.params?.maxBars ?? LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
     ...(column.label !== column.sourceField ? { label: column.label } : {}),
-    ...(column.params?.maxBars != null &&
-    column.params.maxBars !== LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE
-      ? { granularity: column.params.maxBars }
-      : {}),
-    ...(column.params.includeEmptyRows !== LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT
-      ? { include_empty_rows: column.params.includeEmptyRows }
-      : {}),
     ...(column.params?.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
   };
 }

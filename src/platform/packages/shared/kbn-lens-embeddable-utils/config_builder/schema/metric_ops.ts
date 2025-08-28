@@ -36,14 +36,12 @@ export const staticOperationDefinitionSchema = genericOperationOptionsSchema.ext
   /**
    * Static value
    */
-  value: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'Static value',
-      },
-      defaultValue: LENS_STATIC_VALUE_DEFAULT,
-    })
-  ),
+  value: schema.number({
+    meta: {
+      description: 'Static value',
+    },
+    defaultValue: LENS_STATIC_VALUE_DEFAULT,
+  }),
 });
 
 export const formulaOperationDefinitionSchema = genericOperationOptionsSchema.extends({
@@ -137,31 +135,26 @@ export const sumMetricOperationSchema = fieldBasedOperationSharedSchema.extends(
 export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('last_value'),
   sort_by: schema.string(),
-  show_array_values: schema.maybe(
-    schema.boolean({
-      defaultValue: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
-    })
-  ),
+  show_array_values: schema.boolean({
+    meta: { description: 'Handle array values' },
+    defaultValue: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+  }),
 });
 
 export const percentileOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('percentile'),
-  percentile: schema.maybe(
-    schema.number({
-      meta: { description: 'Percentile' },
-      defaultValue: LENS_PERCENTILE_DEFAULT_VALUE,
-    })
-  ),
+  percentile: schema.number({
+    meta: { description: 'Percentile' },
+    defaultValue: LENS_PERCENTILE_DEFAULT_VALUE,
+  }),
 });
 
 export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('percentile_rank'),
-  rank: schema.maybe(
-    schema.number({
-      meta: { description: 'Percentile Rank' },
-      defaultValue: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
-    })
-  ),
+  rank: schema.number({
+    meta: { description: 'Percentile Rank' },
+    defaultValue: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
+  }),
 });
 
 export const fieldMetricOperationsSchema = schema.oneOf([
@@ -182,12 +175,10 @@ export const differencesOperationSchema = metricOperationSharedSchema.extends({
 export const movingAverageOperationSchema = metricOperationSharedSchema.extends({
   operation: schema.literal('moving_average'),
   of: fieldMetricOperationsSchema,
-  window: schema.maybe(
-    schema.number({
-      meta: { description: 'Window' },
-      defaultValue: LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
-    })
-  ),
+  window: schema.number({
+    meta: { description: 'Window' },
+    defaultValue: LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
+  }),
 });
 
 export const cumulativeSumOperationSchema = fieldBasedOperationSharedSchema.extends({

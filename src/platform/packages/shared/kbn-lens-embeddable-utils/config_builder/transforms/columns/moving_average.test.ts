@@ -74,6 +74,7 @@ describe('Moving Average Transforms', () => {
         format: {
           type: 'number',
           decimals: 2,
+          compact: false,
         },
       };
 
@@ -165,6 +166,8 @@ describe('Moving Average Transforms', () => {
       const result = fromMovingAverageLensStateToAPI(input, referenceOp, 'Total Sales');
       expect(result.format).toEqual({
         type: 'number',
+        compact: false,
+        decimals: 2,
       });
     });
   });

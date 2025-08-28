@@ -19,7 +19,11 @@ describe('Format Transforms', () => {
 
     describe('number and percent formats', () => {
       it('should transform number format with defaults', () => {
-        const input: LensApiMetricOperation['format'] = { type: 'number' };
+        const input: LensApiMetricOperation['format'] = {
+          type: 'number',
+          decimals: 2,
+          compact: false,
+        };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'number',
           params: { decimals: 2 },
@@ -30,6 +34,7 @@ describe('Format Transforms', () => {
         const input: LensApiMetricOperation['format'] = {
           type: 'percent',
           decimals: 1,
+          compact: false,
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'percent',
@@ -41,6 +46,8 @@ describe('Format Transforms', () => {
         const input: LensApiMetricOperation['format'] = {
           type: 'number',
           suffix: ' units',
+          decimals: 2,
+          compact: false,
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'number',
@@ -52,6 +59,7 @@ describe('Format Transforms', () => {
         const input: LensApiMetricOperation['format'] = {
           type: 'number',
           compact: true,
+          decimals: 2,
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'number',
@@ -151,6 +159,7 @@ describe('Format Transforms', () => {
         expect(fromFormatLensStateToAPI(input)).toEqual({
           type: 'number',
           decimals: 3,
+          compact: false,
         });
       });
 
@@ -161,6 +170,8 @@ describe('Format Transforms', () => {
         };
         expect(fromFormatLensStateToAPI(input)).toEqual({
           type: 'number',
+          compact: false,
+          decimals: 2,
         });
       });
 

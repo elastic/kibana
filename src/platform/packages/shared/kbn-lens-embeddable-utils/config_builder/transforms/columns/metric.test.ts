@@ -20,6 +20,7 @@ import type {
   LensApiCumulativeSumOperation,
   LensApiCountMetricOperation,
   LensApiUniqueCountMetricOperation,
+  LensApiFormulaOperation,
 } from '../../schema/metric_ops';
 import { isAPIColumnOfType, isApiColumnOfReferableType } from './utils';
 
@@ -44,11 +45,12 @@ describe('Metric Transforms', () => {
           { operation: 'average' as const, field: 'sales' },
         ];
 
-        const nonReferableOps = [
+        const nonReferableOps: [LensApiFormulaOperation, LensApiMovingAverageOperation] = [
           { operation: 'formula' as const, formula: 'sales * 2' },
           {
             operation: 'moving_average' as const,
             of: { operation: 'sum' as const, field: 'sales' },
+            window: 7,
           },
         ];
 

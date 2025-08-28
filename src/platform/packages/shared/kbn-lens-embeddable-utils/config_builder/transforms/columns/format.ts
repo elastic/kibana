@@ -13,6 +13,7 @@ import type { LensApiMetricOperation } from '../../schema/metric_ops';
 // @TODO: move it into the shared values/type package
 const DEFAULT_FORMAT_PARAMS = {
   decimals: 2,
+  compact: false,
 };
 
 export function fromFormatAPIToLensState(
@@ -73,12 +74,9 @@ export function fromFormatLensStateToAPI(
   if (format.id === 'number' || format.id === 'percent') {
     return {
       type: format.id,
-      ...(format.params?.decimals != null &&
-      format.params.decimals !== DEFAULT_FORMAT_PARAMS.decimals
-        ? { decimals: format.params?.decimals }
-        : {}),
+      decimals: format.params?.decimals ?? DEFAULT_FORMAT_PARAMS.decimals,
+      compact: format.params?.compact ?? DEFAULT_FORMAT_PARAMS.compact,
       ...(format.params?.suffix ? { suffix: format.params.suffix } : {}),
-      ...(format.params?.compact ? { compact: format.params.compact } : {}),
     };
   }
   if (format.id === 'bits' || format.id === 'bytes') {

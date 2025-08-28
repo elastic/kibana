@@ -44,6 +44,7 @@ describe('Percentile Ranks Transforms', () => {
       const input: LensApiPercentileRanksOperation = {
         operation: 'percentile_rank',
         field: 'response_time',
+        rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
       };
 
       const expected: PercentileRanksIndexPatternColumn = {
@@ -66,6 +67,7 @@ describe('Percentile Ranks Transforms', () => {
       const input: LensApiPercentileRanksOperation = {
         operation: 'percentile_rank',
         field: 'response_time',
+        rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
       };
 
       const result = fromPercentileRanksAPItoLensState(input);
@@ -159,6 +161,7 @@ describe('Percentile Ranks Transforms', () => {
       const input: LensApiPercentileRanksOperation = {
         operation: 'percentile_rank',
         field: 'response_time',
+        rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
       };
 
       const result = fromPercentileRanksAPItoLensState(input);

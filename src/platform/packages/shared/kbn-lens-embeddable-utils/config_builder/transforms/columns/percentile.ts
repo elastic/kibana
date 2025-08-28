@@ -39,9 +39,7 @@ export const fromPercentileLensStateToAPI = (
   return {
     operation: options.operationType,
     field: options.sourceField,
-    ...(options.params?.percentile && options.params?.percentile !== LENS_PERCENTILE_DEFAULT_VALUE
-      ? { percentile: options.params.percentile }
-      : {}),
+    percentile: options.params.percentile ?? LENS_PERCENTILE_DEFAULT_VALUE,
     ...getLensAPIMetricSharedProps(
       options,
       ofName(options.sourceField, options.params?.percentile)
