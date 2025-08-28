@@ -193,6 +193,19 @@ EOF
   vault_get kibana-ci-sa-proxy-key key | base64 -d > "$KIBANA_SERVICE_ACCOUNT_PROXY_KEY"
 }
 
+# Acquire credentials for legacy vault if needed
+{
+  if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
+    VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
+    VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
+  else
+    VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
+    VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
+  fi
+  export VAULT_ROLE_ID
+  export VAULT_SECRET_ID
+}
+
 # Inject moon remote-cache credentials on CI
 if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
   MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
