@@ -28,10 +28,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ARCHIVES = [
     'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/search.json',
     'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
-    'x-pack/platform/test/api_integration/fixtures/kbn_archives/streams/rule.json',
+    'x-pack/platform/test/api_integration/fixtures/kbn_archives/streams/rules.json',
   ];
 
-  const RULE_ID = '0b7002db-73e3-450f-8649-b7c82f030443';
+  const RULE_ID_1 = '09cef989-3ded-4a1e-b2b0-53d491d13397';
+  const RULE_ID_2 = '312638da-43d1-4d6e-8fb8-9cae201cdd3a';
 
   describe('Asset links', function () {
     before(async () => {
@@ -54,11 +55,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await kibanaServer.importExport.load(archive, { space: SPACE_ID });
         }
 
-        await linkRule(apiClient, 'logs', RULE_ID);
+        await linkRule(apiClient, 'logs', RULE_ID_1);
       });
 
       after(async () => {
-        await unlinkRule(apiClient, 'logs', RULE_ID);
+        await unlinkRule(apiClient, 'logs', RULE_ID_1);
         for (const archive of ARCHIVES) {
           await kibanaServer.importExport.unload(archive, { space: SPACE_ID });
         }
@@ -84,6 +85,48 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.rules.length).to.eql(1);
       });
 
+      describe('add second rule', () => {
+        before(async () => {
+          await linkRule(apiClient, 'logs', RULE_ID_2);
+        });
+
+        after(async () => {
+          await unlinkRule(apiClient, 'logs', RULE_ID_2);
+        });
+
+        it('lists the second rule in the stream response', async () => {
+          const response = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+            params: { path: { name: 'logs' } },
+          });
+
+          expect(response.status).to.eql(200);
+
+          expect(response.body.rules?.length).to.eql(2);
+        });
+
+        it('lists the second rule in the rules get response', async () => {
+          const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
+            params: { path: { name: 'logs' } },
+          });
+
+          expect(response.status).to.eql(200);
+
+          expect(response.body.rules.length).to.eql(2);
+        });
+
+        it('unlink one rule and keeps the other', async () => {
+          await unlinkRule(apiClient, 'logs', RULE_ID_1);
+
+          const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
+            params: { path: { name: 'logs' } },
+          });
+
+          expect(response.status).to.eql(200);
+
+          expect(response.body.rules.length).to.eql(1);
+        });
+      });
+
       describe('after disabling', () => {
         before(async () => {
           // disabling and re-enabling streams wipes the asset links
@@ -102,7 +145,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('recovers on write and lists the linked rule', async () => {
-          await linkRule(apiClient, 'logs', RULE_ID);
+          await linkRule(apiClient, 'logs', RULE_ID_1);
 
           const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
             params: { path: { name: 'logs' } },
@@ -114,18 +157,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('after deleting the rule no longer lists the rule as a linked asset', async () => {
-        await kibanaServer.importExport.unload(
-          'x-pack/platform/test/api_integration/fixtures/kbn_archives/streams/rule.json',
-          { space: SPACE_ID }
-        );
-        const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-          params: { path: { name: 'logs' } },
+      describe('after deleting the rule', () => {
+        before(async () => {
+          await kibanaServer.importExport.unload(
+            'x-pack/platform/test/api_integration/fixtures/kbn_archives/streams/rules.json',
+            { space: SPACE_ID }
+          );
         });
 
-        expect(response.status).to.eql(200);
+        after(async () => {
+          // Reload the rule archive for other tests
+          await kibanaServer.importExport.load(
+            'x-pack/platform/test/api_integration/fixtures/kbn_archives/streams/rules.json',
+            { space: SPACE_ID }
+          );
+        });
 
-        expect(response.body.rules.length).to.eql(0);
+        it('no longer lists the rule as a linked asset', async () => {
+          const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
+            params: { path: { name: 'logs' } },
+          });
+
+          // When a linked rule is deleted, the streams API returns 404 because
+          // it tries to fetch the rule details and the rule no longer exists
+          expect(response.status).to.eql(404);
+        });
       });
     });
 
