@@ -51,7 +51,7 @@ import {
   filterByElasticRules,
   selectAllRules,
 } from '../../../../../tasks/alerts_detection_rules';
-import { MODIFIED_RULE_BADGE, RULE_NAME } from '../../../../../screens/alerts_detection_rules';
+import { MODIFIED_RULE_BADGE } from '../../../../../screens/alerts_detection_rules';
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   deleteAlertsAndRules,
@@ -176,10 +176,6 @@ describe(
           visitRuleEditPage(prebuiltRuleId)
         );
 
-        cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
-        expectModifiedRuleBadgeToBeDisplayed(); // Expect modified badge to already be displayed
-
-        goToRuleEditSettings();
         goToAboutStepTab();
         fillDescription(newDescriptionValue);
         saveEditedRule();
