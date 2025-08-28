@@ -131,9 +131,9 @@ export function fetchAll(
     );
 
     // Calculate query range in seconds
-    const queryRangeSeconds = calculateQueryRangeSeconds(
-      currentTab.dataRequestParams.timeRangeAbsolute
-    );
+    const queryRangeSeconds = currentTab.dataRequestParams.timeRangeAbsolute
+      ? calculateQueryRangeSeconds(currentTab.dataRequestParams.timeRangeAbsolute)
+      : 0;
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response

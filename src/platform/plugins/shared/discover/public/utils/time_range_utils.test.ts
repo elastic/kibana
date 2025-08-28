@@ -57,4 +57,12 @@ describe('calculateQueryRangeSeconds', () => {
     };
     expect(calculateQueryRangeSeconds(timeRange)).toBe(900); // 15 * 60
   });
+
+  it('should handle invalid date strings gracefully', () => {
+    const timeRange = {
+      from: 'invalid-date',
+      to: '2023-01-01T00:15:00.000Z',
+    };
+    expect(calculateQueryRangeSeconds(timeRange)).toBeNaN();
+  });
 });
