@@ -11,7 +11,6 @@ import type {
   Duration,
   BulkOperationContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-// TODO: Use a common schema to define the common types
 import type {
   SiemMigrationResource,
   SiemMigrationResourceType,

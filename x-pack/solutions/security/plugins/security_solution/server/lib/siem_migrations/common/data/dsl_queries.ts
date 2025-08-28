@@ -7,7 +7,6 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
-  // TODO: RuleTranslationResult -> TranslationResult
   MigrationTranslationResult,
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';

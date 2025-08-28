@@ -111,7 +111,7 @@ components:
     MigrationTranslationResult:
       type: string
       description: The migration translation result.
-      enum: # should match RuleTranslationResult enum at ../constants.ts TODO: refactor enum to MigrationTranslationResult
+      enum:
         - full
         - partial
         - untranslatable
