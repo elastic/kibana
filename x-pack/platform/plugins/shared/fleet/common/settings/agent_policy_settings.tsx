@@ -179,21 +179,45 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     schema: z.number().int().min(0),
   },
   {
-    name: 'agent.logging.files.interval',
-    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalitle', {
-      defaultMessage: 'Agent logging number of files',
+    name: 'agent.monitoring._runtime_experimental',
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeTitle', {
+      defaultMessage: 'Monitoring Runtime (experimental)',
     }),
     description: (
       <FormattedMessage
-        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalescription"
-        defaultMessage="Enable log file rotation on time intervals in addition to size-based rotation, i.e. 24h, 7d."
+        id="xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeDescription"
+        defaultMessage="Change how the Beat inputs used for Elastic Agent self-monitored are executed."
       />
     ),
     api_field: {
-      name: 'agent_logging_files_interval',
+      name: 'agent_monitoring_runtime_experimental',
     },
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
-    schema: zodStringWithDurationValidation,
+    schema: z.enum(['', 'process', 'runtime']).default(''),
+    options: [
+      {
+        value: '',
+        text: i18n.translate(
+          'xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeDefaultLabel',
+          {
+            defaultMessage: 'Default',
+          }
+        ),
+      },
+      {
+        value: 'process',
+        text: i18n.translate(
+          'xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeProcessLabel',
+          {
+            defaultMessage: 'Process',
+          }
+        ),
+      },
+      {
+        value: 'runtime',
+        text: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeLabel', {
+          defaultMessage: 'OTel',
+        }),
+      },
+    ],
   },
 ];
