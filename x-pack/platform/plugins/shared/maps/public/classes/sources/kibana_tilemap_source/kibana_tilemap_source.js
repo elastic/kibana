@@ -17,6 +17,7 @@ export const sourceTitle = i18n.translate('xpack.maps.source.kbnTMSTitle', {
   defaultMessage: 'Configured Tile Map Service',
 });
 
+// TODO extend TMSSource or RasterSource
 export class KibanaTilemapSource extends AbstractSource {
   static type = SOURCE_TYPES.KIBANA_TILEMAP;
 
