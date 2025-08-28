@@ -187,6 +187,25 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     example_value: 10,
   },
   {
+    name: 'agent.logging.files.interval',
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalitle', {
+      defaultMessage: 'Agent logging number of files',
+    }),
+    description: (
+      <FormattedMessage
+        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalescription"
+        defaultMessage="Enable log file rotation on time intervals in addition to size-based rotation, i.e. 24h, 7d."
+      />
+    ),
+    api_field: {
+      name: 'agent_logging_files_interval',
+    },
+    learnMoreLink:
+      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
+    schema: zodStringWithDurationValidation,
+    example_value: '10m',
+  },
+  {
     name: 'agent.monitoring._runtime_experimental',
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeTitle', {
       defaultMessage: 'Monitoring Runtime (experimental)',
