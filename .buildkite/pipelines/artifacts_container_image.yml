@@ -6,4 +6,5 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-16
+      diskSizeGb: 150
     timeout_in_minutes: 60

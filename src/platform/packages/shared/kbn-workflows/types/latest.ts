@@ -27,6 +27,8 @@ export type {
   // commands
   CreateWorkflowCommand,
   UpdatedWorkflowResponseDto,
+  RunWorkflowCommand,
+  RunWorkflowResponseDto,
 
   // execution engine
   Provider,
@@ -53,6 +55,8 @@ export type {
   ExitConditionBranchNodeSchema,
   EnterForeachNode,
   ExitForeachNode,
+  EnterRetryNode,
+  ExitRetryNode,
   AtomicGraphNode,
   WaitGraphNodeSchema,
   WaitGraphNode,

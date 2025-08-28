@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RoutingDefinition, Streams } from '@kbn/streams-schema';
+import type { RoutingDefinition, RoutingStatus, Streams } from '@kbn/streams-schema';
 import type { ErrorActorEvent } from 'xstate5';
 import { fromPromise } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
@@ -58,6 +58,7 @@ export type ForkStreamResponse = APIReturnType<'POST /api/streams/{name}/_fork 2
 export interface ForkStreamInput {
   definition: Streams.WiredStream.GetResponse;
   where: Condition;
+  status: RoutingStatus;
   destination: string;
 }
 export function createForkStreamActor({
@@ -77,6 +78,7 @@ export function createForkStreamActor({
           },
           body: {
             where: input.where,
+            status: input.status,
             stream: {
               name: input.destination,
             },
