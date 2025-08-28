@@ -18,6 +18,7 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import { createDataSourcesService } from '../data_sources/data_sources_service';
+import { config } from '../../../../config';
 
 export const createPrivilegeMonitoringIndicesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -55,7 +56,9 @@ export const createPrivilegeMonitoringIndicesRoute = (
         );
 
         const dataClient = secSol.getPrivilegeMonitoringDataClient();
-        const dataSourcesService = createDataSourcesService(dataClient);
+        const maxUsersAllowed =
+          config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+        const dataSourcesService = createDataSourcesService(dataClient, maxUsersAllowed);
         try {
           await dataSourcesService.createImportIndex(indexName, indexMode);
           return response.ok();

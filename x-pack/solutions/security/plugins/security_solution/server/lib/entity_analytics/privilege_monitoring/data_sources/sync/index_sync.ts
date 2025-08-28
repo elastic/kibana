@@ -18,13 +18,12 @@ import { MonitoringEntitySourceDescriptorClient } from '../../saved_objects';
 import { createBulkUtilsService } from '../bulk';
 import { findStaleUsersForIndexFactory } from './stale_users';
 import { getErrorFromBulkResponse } from './utils';
-import type { ConfigType } from '../../../../../config';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
 export const createIndexSyncService = (
   dataClient: PrivilegeMonitoringDataClient,
-  config: ConfigType
+  maxUsersAllowed: number
 ) => {
   const { deps } = dataClient;
   const esClient = deps.clusterClient.asCurrentUser;
@@ -63,7 +62,7 @@ export const createIndexSyncService = (
 
     dataClient.log(
       'info',
-      `Privilege monitoring sync started - Max allowed users: ${config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed}`
+      `Privilege monitoring sync started - Max allowed users: ${maxUsersAllowed}`
     );
 
     const allStaleUsers: PrivMonBulkUser[] = [];
