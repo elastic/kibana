@@ -60,14 +60,19 @@ export const TriggerSchema = z.discriminatedUnion('type', [
 /* --- Steps --- */
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
-  delay: z.number().min(0),
+  delay: z
+    .string()
+    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
+    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
 });
+export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
 export const WorkflowOnFailureSchema = z.object({
   retry: WorkflowRetrySchema,
-  'fallback-step': z.string().min(1),
+  'fallback-step': z.string().min(1).optional(),
   continue: z.boolean().optional(),
 });
+export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
 
 // Base step schema, with recursive steps property
 export const BaseStepSchema = z.object({

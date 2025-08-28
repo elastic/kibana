@@ -26,6 +26,7 @@ import {
   ExitIfNodeImpl,
 } from './if_step';
 import { WaitStepImpl } from './wait_step/wait_step';
+import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './retry_step';
 
 export class StepFactory {
   constructor(
@@ -56,6 +57,15 @@ export class StepFactory {
         );
       case 'exit-foreach':
         return new ExitForeachNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+      case 'enter-retry':
+        return new EnterRetryNodeImpl(
+          step as any,
+          this.workflowRuntime,
+          this.workflowTaskManager,
+          this.workflowLogger
+        );
+      case 'exit-retry':
+        return new ExitRetryNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
       case 'enter-if':
         return new EnterIfNodeImpl(
           step as any,

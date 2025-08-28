@@ -16,6 +16,7 @@ import type {
   IfStep,
   WaitStep,
   WorkflowYaml,
+  WorkflowRetry,
 } from '../../spec/schema';
 import type {
   AtomicGraphNode,
@@ -27,7 +28,20 @@ import type {
   ExitIfNode,
   HttpGraphNode,
   WaitGraphNode,
+  EnterRetryNode,
+  ExitRetryNode,
 } from '../../types/execution';
+
+/**
+ * TODO: We don't have primitive RetryStep so far, but we may need it in the future.
+ * For now, we only use it internally when building the graph from the workflow definition.
+ * And only as a wrapper for steps that have 'on-failure' with 'retry' defined.
+ */
+interface RetryStep extends BaseStep {
+  type: 'retry';
+  steps: BaseStep[];
+  retry: WorkflowRetry;
+}
 
 function getNodeId(node: BaseStep): string {
   // TODO: This is a workaround for the fact that some steps do not have an `id` field.
@@ -51,6 +65,10 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
 
   if ((modifiedCurrentStep as HttpStep).type === 'http') {
     return visitHttpStep(graph, previousStep, modifiedCurrentStep);
+  }
+  if ((modifiedCurrentStep as RetryStep).type === 'retry') {
+    // Retry steps are treated as atomic steps for graph purposes
+    return visitRetryStep(graph, previousStep, modifiedCurrentStep as RetryStep);
   }
 
   return visitAtomicStep(graph, previousStep, modifiedCurrentStep);
@@ -185,6 +203,38 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
   return exitConditionNode;
 }
 
+function visitRetryStep(graph: graphlib.Graph, previousStep: any, currentStep: RetryStep): any {
+  const enterRetryNodeId = getNodeId(currentStep);
+  const retryNestedSteps: BaseStep[] = currentStep.steps || [];
+  const exitNodeId = `exitRetry(${enterRetryNodeId})`;
+  const enterRetryNode: EnterRetryNode = {
+    id: enterRetryNodeId,
+    type: 'enter-retry',
+    exitNodeId,
+    configuration: currentStep.retry,
+  };
+  const exitRetryNode: ExitRetryNode = {
+    type: 'exit-retry',
+    id: exitNodeId,
+    startNodeId: enterRetryNodeId,
+  };
+
+  let previousNodeToLink: any = enterRetryNode;
+  retryNestedSteps.forEach(
+    (step: any) => (previousNodeToLink = visitAbstractStep(graph, previousNodeToLink, step))
+  );
+
+  graph.setNode(exitRetryNode.id, exitRetryNode);
+  graph.setEdge(getNodeId(previousNodeToLink), exitRetryNode.id);
+  graph.setNode(enterRetryNodeId, enterRetryNode);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), enterRetryNodeId);
+  }
+
+  return exitRetryNode;
+}
+
 function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
   const enterForeachNodeId = getNodeId(currentStep);
   const foreachStep = currentStep as ForEachStep;
@@ -241,6 +291,25 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
    * The order of operations is important here.
    * The order affects what context will be available in the step if/foreach/etc operation.
    */
+
+  if ((currentStep as BaseStep)?.['on-failure']?.retry) {
+    // Wrap the current step in a retry step
+    // and remove the retry from the current step's on-failure to avoid infinite nesting
+    // The retry logic will be handled by the outer retry step
+    // We keep other on-failure properties (like fallback-step, continue) on the inner step
+    // so they can be handled if the retry attempts are exhausted
+    return {
+      name: `retry_${getNodeId(currentStep)}`,
+      type: 'retry',
+      steps: [
+        handleStepLevelOperations({
+          ...currentStep,
+          'on-failure': omit(currentStep['on-failure'], ['retry']) as any,
+        }),
+      ],
+      retry: (currentStep as BaseStep)['on-failure']?.retry,
+    } as RetryStep;
+  }
 
   // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
   // when the step is already a foreach step
