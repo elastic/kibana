@@ -22,6 +22,13 @@ export interface AggregatedTransactionsCounts {
   transaction_count: number;
 }
 
+export interface APMPerAgentConfigSettings {
+  agent_name: string;
+  has_error: boolean;
+  settings: string[];
+  advanced_settings: string[];
+}
+
 export interface APMPerService {
   service_id: string;
   timed_out: boolean;
@@ -213,12 +220,7 @@ export interface APMUsage {
     total: number;
   };
   per_service: APMPerService[];
-  per_agent_config_settings: Array<{
-    agent_name: string;
-    has_error: boolean;
-    settings: string[];
-    advanced_settings: string[];
-  }>;
+  per_agent_config_settings: APMPerAgentConfigSettings[];
   top_traces: {
     max: number;
     median: number;
