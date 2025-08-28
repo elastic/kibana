@@ -35,7 +35,6 @@
     "@kbn/esql-ast",
     "@kbn/presentation-util",
     "@kbn/content-management-plugin",
-    "@kbn/esql-ast",
     "@kbn/index-editor",
     "@kbn/share-plugin",
     "@kbn/field-formats-plugin",
