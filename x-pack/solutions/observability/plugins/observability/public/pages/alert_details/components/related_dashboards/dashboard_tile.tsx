@@ -58,7 +58,7 @@ export function DashboardTile({
           {/* Allowing both href and onClick to allow telemetry to be reported */}
           {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiLink
-            data-test-subj="o11yDashboardTileLink"
+            data-test-subj={`alertDetailsPage_relatedDashboardTab_viewLinkedDashboard_${actionButtonProps?.ruleType}`}
             href={dashboardLocator?.getRedirectUrl({
               dashboardId: dashboard.id,
               timeRange,
@@ -66,7 +66,9 @@ export function DashboardTile({
             target="_blank"
             onClick={() => {
               if (telemetryClient) {
-                telemetryClient.reportLinkedDashboardViewed(dashboard.id);
+                telemetryClient.reportLinkedDashboardViewed(
+                  actionButtonProps?.ruleType || 'unknown'
+                );
               }
             }}
           >
@@ -87,7 +89,10 @@ export function DashboardTile({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj={`addSuggestedDashboard_alertDetailsPage_${actionButtonProps.ruleType}`}
-              onClick={() => actionButtonProps.onClick(dashboard)}
+              onClick={() => {
+                actionButtonProps.onClick(dashboard);
+                telemetryClient.reportSuggestedDashboardAdded(actionButtonProps.ruleType);
+              }}
               isLoading={actionButtonProps.isLoading}
               isDisabled={actionButtonProps.isDisabled}
               iconType="plus"

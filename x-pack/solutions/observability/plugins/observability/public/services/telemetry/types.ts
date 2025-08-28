@@ -14,6 +14,7 @@ export interface ITelemetryClient {
   reportAlertDetailsPageView(ruleType: string): void;
   reportAlertAddedToCase(newCaseCreated: boolean, from: string, ruleTypeId: string): void;
   reportLinkedDashboardViewed(ruleTypeId: string): void;
+  reportSuggestedDashboardAdded(ruleTypeId: string): void;
 }
 
 export enum TelemetryEventTypes {
@@ -21,6 +22,7 @@ export enum TelemetryEventTypes {
   ALERT_DETAILS_PAGE_VIEW = 'Alert Details Page View',
   ALERT_ADDED_TO_CASE = 'Alert Added to Case',
   LINKED_DASHBOARD_VIEW = 'Linked Dashboard View',
+  SUGGESTED_DASHBOARD_ADDED = 'Suggested Dashboard Added',
 }
 
 interface RelatedAlertsLoadedParams {
@@ -58,15 +60,25 @@ interface LinkedDashboardViewEvent {
   eventType: TelemetryEventTypes.LINKED_DASHBOARD_VIEW;
   schema: RootSchema<LinkedDashboardViewParams>;
 }
+interface SuggestedDashboardAddedParams {
+  rule_type_id: string;
+}
+
+interface SuggestedDashboardAddedEvent {
+  eventType: TelemetryEventTypes.SUGGESTED_DASHBOARD_ADDED;
+  schema: RootSchema<SuggestedDashboardAddedParams>;
+}
 
 export type TelemetryEvent =
   | AlertDetailsPageViewEvent
   | RelatedAlertsLoadedEvent
   | AlertAddedToCaseEvent
-  | LinkedDashboardViewEvent;
+  | LinkedDashboardViewEvent
+  | SuggestedDashboardAddedEvent;
 
 export type TelemetryEventParams =
   | RelatedAlertsLoadedParams
   | AlertDetailsPageViewParams
   | AlertAddedToCaseParams
-  | LinkedDashboardViewParams;
+  | LinkedDashboardViewParams
+  | SuggestedDashboardAddedParams;
