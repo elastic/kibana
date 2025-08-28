@@ -502,8 +502,6 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
     }
   }
 
-  // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
-  // when the step is already a foreach step
   if ((currentStep as StepWithIfCondition).if) {
     const stepWithIfCondition = currentStep as StepWithIfCondition;
     const modifiedStep = omit(stepWithIfCondition, ['if']) as BaseStep;
@@ -515,6 +513,8 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
     } as IfStep;
   }
 
+  // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
+  // when the step is already a foreach step
   if ((currentStep as StepWithForeach).foreach && (currentStep as ForEachStep).type !== 'foreach') {
     const stepWithForeach = currentStep as StepWithForeach;
     const modifiedStep = omit(stepWithForeach, ['foreach']) as BaseStep;
