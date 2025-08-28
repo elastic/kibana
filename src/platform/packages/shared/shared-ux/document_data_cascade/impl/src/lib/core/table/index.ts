@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type FC, useRef } from 'react';
+import { type FC, useRef, useMemo } from 'react';
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -16,6 +16,7 @@ import {
   type Table,
   type TableOptions,
   type CellContext,
+  type Row,
 } from '@tanstack/react-table';
 export { flexRender } from '@tanstack/react-table';
 import type { LeafNode } from '../../../store_provider';
@@ -132,3 +133,46 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
     },
   };
 };
+
+interface TableRowAdapterProps<G extends GroupNode> {
+  rowInstance: Row<G>;
+}
+
+export function useTableRowAdapter<G extends GroupNode>({ rowInstance }: TableRowAdapterProps<G>) {
+  return useMemo(() => {
+    return {
+      rowId: rowInstance.id,
+      rowParentId: rowInstance.parentId,
+      get rowIsExpanded() {
+        return rowInstance.getIsExpanded();
+      },
+      get hasAllParentsExpanded() {
+        return rowInstance.getIsAllParentsExpanded();
+      },
+      get rowDepth() {
+        return rowInstance.depth;
+      },
+      get rowChildren() {
+        return rowInstance.subRows;
+      },
+      get rowChildrenCount() {
+        return this.rowChildren.length;
+      },
+      get rowVisibleCells() {
+        return rowInstance.getVisibleCells();
+      },
+      get rowIsSelected() {
+        return rowInstance.getIsSelected();
+      },
+      get rowHasSelectedChildren() {
+        return rowInstance.getIsSomeSelected();
+      },
+      get rowCanSelect() {
+        // maybe we also want to check if the row has children?
+        return rowInstance.getCanSelect();
+      },
+      rowSelectionFn: rowInstance.getToggleSelectedHandler(),
+      rowToggleFn: rowInstance.getToggleExpandedHandler(),
+    };
+  }, [rowInstance]);
+}

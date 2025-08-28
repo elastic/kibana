@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
-import { flexRender } from '../../../lib/core/table';
+import { flexRender, useTableRowAdapter } from '../../../lib/core/table';
 import {
   type LeafNode,
   type GroupNode,
@@ -48,27 +48,39 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   size,
   virtualRow,
   virtualRowStyle,
+  enableRowSelection,
 }: CascadeRowPrimitiveProps<G, L>) {
   const { euiTheme } = useEuiTheme();
   const actions = useDataCascadeActions<G, L>();
   const { currentGroupByColumns } = useDataCascadeState<G, L>();
   const [isPendingRowGroupDataFetch, setRowGroupDataFetch] = useState<boolean>(false);
+  const {
+    rowIsExpanded,
+    hasAllParentsExpanded,
+    rowChildren,
+    rowDepth,
+    rowId,
+    rowParentId,
+    rowToggleFn,
+    rowSelectionFn,
+    rowHasSelectedChildren,
+    rowIsSelected,
+    rowVisibleCells,
+    rowCanSelect,
+  } = useTableRowAdapter<G>({ rowInstance });
 
   const isGroupNode = useMemo(() => {
-    return currentGroupByColumns.length - 1 > rowInstance.depth;
-  }, [currentGroupByColumns, rowInstance]);
-  const isRowExpanded = rowInstance.getIsExpanded();
-  const hasAllParentsExpanded = rowInstance.getIsAllParentsExpanded();
-  const rowToggleFn = rowInstance.getToggleExpandedHandler();
+    return currentGroupByColumns.length - 1 > rowDepth;
+  }, [currentGroupByColumns.length, rowDepth]);
 
   const styles = useMemo(() => {
     return cascadeRowStyles(
       euiTheme,
-      Boolean(rowInstance.parentId && hasAllParentsExpanded),
-      rowInstance.depth,
+      Boolean(rowParentId && hasAllParentsExpanded),
+      rowDepth,
       size
     );
-  }, [euiTheme, hasAllParentsExpanded, rowInstance.depth, rowInstance.parentId, size]);
+  }, [euiTheme, hasAllParentsExpanded, rowDepth, rowParentId, size]);
 
   const fetchGroupNodeData = useCallback(() => {
     const dataFetchFn = async () => {
@@ -82,15 +94,15 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
         return;
       }
       actions.updateRowGroupNodeData({
-        id: rowInstance.id,
+        id: rowId,
         data: groupNodeData,
       });
     };
     return dataFetchFn().catch((error) => {
       // eslint-disable-next-line no-console -- added for debugging purposes
-      console.error('Error fetching data for row with ID: %s', rowInstance.id, error);
+      console.error('Error fetching data for row with ID: %s', rowId, error);
     });
-  }, [actions, onCascadeGroupNodeExpanded, rowInstance, currentGroupByColumns]);
+  }, [onCascadeGroupNodeExpanded, rowInstance, currentGroupByColumns, actions, rowId]);
 
   const fetchCascadeRowGroupNodeData = useCallback(() => {
     setRowGroupDataFetch(true);
@@ -101,6 +113,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
 
   const onCascadeRowToggle = useCallback(() => {
     rowToggleFn();
+
     if (isGroupNode) {
       // can expand here denotes it still has some nesting, hence we need to fetch the data for the sub-rows
       fetchCascadeRowGroupNodeData();
@@ -115,21 +128,21 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
    */
   const rowARIAProps = useMemo(() => {
     return {
-      id: rowInstance.id,
+      id: rowId,
       role: 'row',
-      'aria-expanded': isRowExpanded,
-      'aria-level': rowInstance.depth + 1,
-      ...(rowInstance.subRows.length > 0 && {
-        'aria-owns': rowInstance.subRows.map((row) => row.id).join(' '),
+      'aria-expanded': rowIsExpanded,
+      'aria-level': rowDepth + 1,
+      ...(rowChildren.length > 0 && {
+        'aria-owns': rowChildren.map((row) => row.id).join(' '),
       }),
     };
-  }, [rowInstance, isRowExpanded]);
+  }, [rowId, rowIsExpanded, rowDepth, rowChildren]);
 
   return (
     <div
       {...rowARIAProps}
       data-index={virtualRow.index}
-      data-row-type={rowInstance.depth === 0 ? rootRowAttribute : childRowAttribute}
+      data-row-type={rowDepth === 0 ? rootRowAttribute : childRowAttribute}
       ref={innerRef}
       style={virtualRowStyle}
       {...(isActiveSticky ? { 'data-active-sticky': true } : {})}
@@ -142,7 +155,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
               <EuiProgress
                 size="xs"
                 color="accent"
-                position={rowInstance.depth === 0 ? 'fixed' : 'absolute'}
+                position={rowDepth === 0 ? 'fixed' : 'absolute'}
               />
             )}
           </React.Fragment>
@@ -154,14 +167,18 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
           >
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem>
-                  <EuiCheckbox
-                    id={'dataCascadeSelectRowCheckbox'}
-                    indeterminate={rowInstance.getIsSomeSelected()}
-                    checked={rowInstance.getIsSelected()}
-                    onChange={rowInstance.getToggleSelectedHandler()}
-                  />
-                </EuiFlexItem>
+                <React.Fragment>
+                  {enableRowSelection && rowCanSelect && (
+                    <EuiFlexItem>
+                      <EuiCheckbox
+                        id={`dataCascadeSelectRowCheckbox-${rowId}`}
+                        indeterminate={rowHasSelectedChildren}
+                        checked={rowIsSelected}
+                        onChange={rowSelectionFn}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </React.Fragment>
                 <EuiFlexItem>
                   <EuiButtonIcon
                     iconType="expand"
@@ -172,12 +189,12 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
                         defaultMessage: 'expand row',
                       }
                     )}
-                    data-test-subj={`expand-row-${rowInstance.id}-button`}
+                    data-test-subj={`expand-row-${rowId}-button`}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiButtonIcon
-                    iconType={isRowExpanded ? 'arrowUp' : 'arrowDown'}
+                    iconType={rowIsExpanded ? 'arrowUp' : 'arrowDown'}
                     onClick={onCascadeRowToggle}
                     aria-label={i18n.translate(
                       'sharedUXPackages.dataCascade.toggleRowButtonLabel',
@@ -185,7 +202,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
                         defaultMessage: 'toggle row',
                       }
                     )}
-                    data-test-subj={`toggle-row-${rowInstance.id}-button`}
+                    data-test-subj={`toggle-row-${rowId}-button`}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -235,9 +252,9 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
           </EuiFlexGroup>
         </EuiFlexItem>
         <React.Fragment>
-          {!isGroupNode && isRowExpanded && hasAllParentsExpanded && (
+          {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
             <EuiFlexItem role="gridcell">
-              {rowInstance.getVisibleCells().map((cell) => (
+              {rowVisibleCells.map((cell) => (
                 <React.Fragment key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </React.Fragment>
