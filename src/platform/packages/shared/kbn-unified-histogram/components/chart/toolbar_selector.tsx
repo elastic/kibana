@@ -212,7 +212,7 @@ export const ToolbarSelector = ({
       {popoverTitle && <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>}
       <EuiSelectable<SelectableEntry>
         id={`${dataTestSubj}Selectable`}
-        singleSelection={singleSelection}
+        singleSelection={singleSelection ?? true}
         aria-label={popoverTitle}
         data-test-subj={`${dataTestSubj}Selectable`}
         isPreFiltered={searchable}

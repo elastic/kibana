@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data_view';
-export * from './es_hits';
-export * from './logs_context_service';
-export * from './traces_context_service';
-export * from './apm_errors_context_service';
-export * from './data_table_record';
-export * from './metrics_context_service';
+import type { MetricsContextService } from '../data_types';
+
+export const createMetricsContextServiceMock = (): MetricsContextService => {
+  const metricsExperienceClient = {
+    getDimensions: jest.fn().mockResolvedValue([]),
+    getFields: jest.fn().mockResolvedValue([]),
+    postData: jest.fn().mockResolvedValue({}),
+  };
+
+  return {
+    getMetricsExperienceClient: jest.fn().mockReturnValue(metricsExperienceClient),
+  };
+};

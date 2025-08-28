@@ -42,7 +42,6 @@ export interface ProfileProviderServices extends DiscoverServices {
   logsContextService: LogsContextService;
   tracesContextService: TracesContextService;
   apmErrorsContextService: ApmErrorsContextService;
-
   metricsContextService: MetricsContextService;
 }
 
