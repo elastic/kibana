@@ -167,5 +167,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/licensing-types",
     "@kbn/product-intercept-plugin",
+    "@kbn/onechat-common",
   ]
 }

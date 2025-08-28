@@ -8,10 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
-import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -31,6 +28,8 @@ import {
   AlertDetailsRuleFormFlyout,
   type AlertDetailsRuleFormFlyoutBaseProps,
 } from './alert_details_rule_form_flyout';
+import { ObsCasesContext } from './obs_cases_context';
+import { AddToCaseButton } from './add_to_case_button';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
@@ -58,8 +57,6 @@ export function HeaderActions({
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
-  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
-
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
 
   const handleUntrackAlert = useCallback(async () => {
@@ -77,26 +74,6 @@ export function HeaderActions({
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const handleClosePopover = () => setIsPopoverOpen(false);
 
-  const attachments: CaseAttachmentsWithoutOwner =
-    alert && rule
-      ? [
-          {
-            alertId: alert?.fields[ALERT_UUID] || '',
-            index: alertIndex || '',
-            rule: {
-              id: rule.id,
-              name: rule.name,
-            },
-            type: AttachmentType.alert,
-          },
-        ]
-      : [];
-
-  const handleAddToCase = () => {
-    setIsPopoverOpen(false);
-    selectCaseModal?.open({ getAttachments: () => attachments });
-  };
-
   const handleOpenSnoozeModal = () => {
     setIsPopoverOpen(false);
     setSnoozeModalOpen(true);
@@ -107,18 +84,14 @@ export function HeaderActions({
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
         {cases && (
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="plus"
-              onClick={handleAddToCase}
-              data-test-subj="add-to-case-button"
-            >
-              <EuiText size="s">
-                {i18n.translate('xpack.observability.alertDetails.addToCase', {
-                  defaultMessage: 'Add to case',
-                })}
-              </EuiText>
-            </EuiButton>
+            <ObsCasesContext>
+              <AddToCaseButton
+                alert={alert}
+                alertIndex={alertIndex}
+                rule={rule}
+                setIsPopoverOpen={setIsPopoverOpen}
+              />
+            </ObsCasesContext>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
