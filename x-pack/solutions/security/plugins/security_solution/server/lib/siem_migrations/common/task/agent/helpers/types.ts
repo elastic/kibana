@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type NodeTool<I extends object, O extends object> = (input: I) => Promise<O>;
-export type NodeToolCreator<P extends object, I extends object, O extends object> = (
+export type NodeHelper<I extends object, O extends object> = (input: I) => Promise<O>;
+export type NodeHelperCreator<P extends object, I extends object, O extends object> = (
   params: P
-) => NodeTool<I, O>;
+) => NodeHelper<I, O>;

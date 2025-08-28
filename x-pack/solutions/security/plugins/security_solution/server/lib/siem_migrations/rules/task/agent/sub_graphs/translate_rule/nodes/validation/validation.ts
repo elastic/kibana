@@ -8,7 +8,7 @@
 import {
   getValidateEsql,
   type GetValidateEsqlParams,
-} from '../../../../../../../common/task/agent/tools/validate_esql';
+} from '../../../../../../../common/task/agent/helpers/validate_esql';
 import type { GraphNode } from '../../types';
 
 /**

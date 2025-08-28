@@ -31,12 +31,12 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
   const translatePanelSubGraph = getTranslatePanelGraph(params);
   return {
     // Fan-in: the results of the individual panel translations are aggregated back into the overall dashboard state via state reducer.
-    node: async ({ panel, resources, index }) => {
+    node: async ({ index, ...nodeParams }) => {
       try {
-        if (!panel.query) {
+        if (!nodeParams.parsed_panel.query) {
           throw new Error('Panel query is missing');
         }
-        const output = await translatePanelSubGraph.invoke({ parsed_panel: panel, resources });
+        const output = await translatePanelSubGraph.invoke(nodeParams);
         return {
           translated_panels: [
             {
@@ -68,7 +68,13 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
           state.resources,
           panel
         );
-        const translatePanelParams: TranslatePanelNodeParams = { panel, resources, index: i };
+        const description = state.panel_descriptions[panel.id];
+        const translatePanelParams: TranslatePanelNodeParams = {
+          parsed_panel: panel,
+          description,
+          resources,
+          index: i,
+        };
         return new Send('translatePanel', translatePanelParams);
       });
     },

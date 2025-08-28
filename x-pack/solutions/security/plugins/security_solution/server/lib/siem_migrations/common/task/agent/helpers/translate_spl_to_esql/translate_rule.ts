@@ -10,7 +10,7 @@ import type { MigrationComments } from '../../../../../../../../common/siem_migr
 import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
 import type { EsqlKnowledgeBase } from '../../../util/esql_knowledge_base';
 import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';
-import type { NodeToolCreator } from '../types';
+import type { NodeHelperCreator } from '../types';
 
 export interface GetTranslateSplToEsqlParams {
   esqlKnowledgeBase: EsqlKnowledgeBase;
@@ -29,7 +29,7 @@ export interface TranslateSplToEsqlOutput {
   comments: MigrationComments;
 }
 
-export const getTranslateSplToEsql: NodeToolCreator<
+export const getTranslateSplToEsql: NodeHelperCreator<
   GetTranslateSplToEsqlParams,
   TranslateSplToEsqlInput,
   TranslateSplToEsqlOutput

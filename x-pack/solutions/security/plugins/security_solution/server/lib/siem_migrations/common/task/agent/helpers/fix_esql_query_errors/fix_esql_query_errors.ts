@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { NodeToolCreator } from '../types';
+import type { NodeHelperCreator } from '../types';
 import type { EsqlKnowledgeBase } from '../../../util/esql_knowledge_base';
 import { RESOLVE_ESQL_ERRORS_TEMPLATE } from './prompts';
 
@@ -22,7 +22,7 @@ export interface FixEsqlQueryErrorsOutput {
   query?: string;
 }
 
-export const getFixEsqlQueryErrors: NodeToolCreator<
+export const getFixEsqlQueryErrors: NodeHelperCreator<
   GetFixEsqlQueryErrorsParams,
   FixEsqlQueryErrorsInput,
   FixEsqlQueryErrorsOutput

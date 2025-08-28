@@ -6,14 +6,16 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { getParseOriginalDashboardNode } from './nodes/parse_original_dashboard';
 import { migrateDashboardConfigSchema, migrateDashboardState } from './state';
 import type { MigrateDashboardGraphParams } from './types';
+import { getParseOriginalDashboardNode } from './nodes/parse_original_dashboard';
+import { getCreateDescriptionsNode } from './nodes/create_descriptions';
 import { getTranslatePanelNode } from './nodes/translate_panel/translate_panel';
 import { getAggregateDashboardNode } from './nodes/aggregate_dashboard';
 
 export function getDashboardMigrationAgent(params: MigrateDashboardGraphParams) {
   const parseOriginalDashboardNode = getParseOriginalDashboardNode();
+  const createDescriptionsNode = getCreateDescriptionsNode(params);
   const translatePanel = getTranslatePanelNode(params);
   const aggregateDashboardNode = getAggregateDashboardNode();
 
@@ -23,13 +25,13 @@ export function getDashboardMigrationAgent(params: MigrateDashboardGraphParams) 
   )
     // Nodes
     .addNode('parseOriginalDashboard', parseOriginalDashboardNode)
+    .addNode('createDescriptions', createDescriptionsNode)
     .addNode('translatePanel', translatePanel.node, { subgraphs: [translatePanel.subgraph] })
     .addNode('aggregateDashboard', aggregateDashboardNode)
     // Edges
     .addEdge(START, 'parseOriginalDashboard')
-    .addConditionalEdges('parseOriginalDashboard', translatePanel.conditionalEdge, [
-      'translatePanel',
-    ])
+    .addEdge('parseOriginalDashboard', 'createDescriptions')
+    .addConditionalEdges('createDescriptions', translatePanel.conditionalEdge, ['translatePanel'])
     .addEdge('translatePanel', 'aggregateDashboard')
     .addEdge('aggregateDashboard', END);
 

@@ -30,11 +30,7 @@ export class ActionsClientChat {
     connectorId,
     abortController,
   }: CreateModelParams): Promise<ChatModel> {
-    const { actionsClient, inferenceService } = this.dependencies;
-    const connector = await actionsClient.get({ id: connectorId });
-    if (!connector) {
-      throw new Error(`Connector not found: ${connectorId}`);
-    }
+    const { inferenceService } = this.dependencies;
 
     return inferenceService.getChatModel({
       request: this.request,

@@ -12,7 +12,7 @@ import type { MigrationComments } from '../../../../../../../../common/siem_migr
 import type { ChatModel } from '../../../util/actions_client_chat';
 import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
 import type { MigrationResources } from '../../../retrievers/resource_retriever';
-import type { NodeToolCreator } from '../types';
+import type { NodeHelperCreator } from '../types';
 import { REPLACE_QUERY_RESOURCE_PROMPT, getResourcesContext } from './prompts';
 
 export interface GetInlineSplQueryParams {
@@ -29,7 +29,7 @@ export interface InlineSplQueryOutput {
   comments: MigrationComments;
 }
 
-export const getInlineSplQuery: NodeToolCreator<
+export const getInlineSplQuery: NodeHelperCreator<
   GetInlineSplQueryParams,
   InlineSplQueryInput,
   InlineSplQueryOutput

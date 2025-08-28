@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { isEmpty } from 'lodash/fp';
 import { parseEsqlQuery } from '@kbn/securitysolution-utils';
-import type { NodeToolCreator } from '../types';
+import type { NodeHelperCreator } from '../types';
 
 export interface GetValidateEsqlParams {
   logger: Logger;
@@ -22,7 +22,7 @@ export interface ValidateEsqlOutput {
   error?: string;
 }
 
-export const getValidateEsql: NodeToolCreator<
+export const getValidateEsql: NodeHelperCreator<
   GetValidateEsqlParams,
   ValidateEsqlInput,
   ValidateEsqlOutput

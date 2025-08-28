@@ -43,6 +43,9 @@ export interface ParsedOriginalDashboard {
   panels: Array<ParsedPanel>;
 }
 
+/** Record of panel descriptions strings indexed by the parsed panel ID */
+export type PanelDescriptions = Record<string, string>;
+
 export type TranslatedPanels = Array<{
   /**
    * The index in the panels array, to keep the same order as in the original dashboard.
@@ -62,10 +65,12 @@ export type FailedPanelTranslations = Array<{
 }>;
 
 export interface TranslatePanelNodeParams {
-  panel: ParsedPanel;
+  parsed_panel: ParsedPanel;
+  description: string;
   resources: MigrationResources;
   index: number;
 }
+
 export type TranslatePanelNode = (
   params: TranslatePanelNodeParams
 ) => Promise<Partial<MigrateDashboardState>>;

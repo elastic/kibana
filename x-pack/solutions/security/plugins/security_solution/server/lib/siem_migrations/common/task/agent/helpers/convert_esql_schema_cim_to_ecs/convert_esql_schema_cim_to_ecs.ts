@@ -11,7 +11,7 @@ import type { EsqlKnowledgeBase } from '../../../util/esql_knowledge_base';
 import { CIM_TO_ECS_MAP } from './cim_ecs_map';
 import { ESQL_CONVERT_CIM_TO_ECS_PROMPT } from './prompts';
 import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
-import type { NodeToolCreator } from '../types';
+import type { NodeHelperCreator } from '../types';
 
 export interface GetConvertEsqlSchemaCisToEcsParams {
   esqlKnowledgeBase: EsqlKnowledgeBase;
@@ -28,7 +28,7 @@ export interface ConvertEsqlSchemaCisToEcsOutput {
   comments: MigrationComments;
 }
 
-export const getConvertEsqlSchemaCisToEcs: NodeToolCreator<
+export const getConvertEsqlSchemaCisToEcs: NodeHelperCreator<
   GetConvertEsqlSchemaCisToEcsParams,
   ConvertEsqlSchemaCisToEcsInput,
   ConvertEsqlSchemaCisToEcsOutput

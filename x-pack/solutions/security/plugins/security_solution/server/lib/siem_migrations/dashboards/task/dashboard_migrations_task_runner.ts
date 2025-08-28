@@ -64,9 +64,6 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
     });
     const modelName = this.actionsClientChat.getModelName(model);
 
-    // TODO: inference model name
-    // console.log('modelName', modelName);
-
     const telemetryClient = new DashboardMigrationTelemetryClient(
       this.dependencies.telemetry,
       this.logger,
