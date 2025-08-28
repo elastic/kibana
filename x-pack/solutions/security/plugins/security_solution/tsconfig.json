@@ -257,6 +257,5 @@
     "@kbn/spaces-utils",
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
-    "@kbn/security-solution-plugin",
   ]
 }
