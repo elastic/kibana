@@ -42,8 +42,6 @@ export default defineCypressConfig({
           launchOptions.args.push(
             '--js-flags="--max_old_space_size=4096 --max_semi_space_size=1024"'
           );
-          launchOptions.args.push('--disable-dev-shm-usage');
-          launchOptions.args.push('--no-sandbox');
         }
         return launchOptions;
       });
