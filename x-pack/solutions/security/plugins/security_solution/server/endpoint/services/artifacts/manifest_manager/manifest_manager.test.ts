@@ -1225,6 +1225,14 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({
         experimentalFeatures: ['trustedDevices'],
       });
+      context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+        return (
+          key === ProductFeatureKey.endpointTrustedDevices ||
+          key === ProductFeatureKey.endpointArtifactManagement
+        );
+      });
+      context.licenseService = createLicenseServiceMock();
+      context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -2479,7 +2487,7 @@ describe('ManifestManager', () => {
         context.licenseService = createLicenseServiceMock();
       });
 
-      test('should return true when PLI (product feature) is enabled', () => {
+      test('should return false when only PLI is enabled (enterprise required)', () => {
         context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
           return key === ProductFeatureKey.endpointTrustedDevices;
         });
@@ -2490,13 +2498,13 @@ describe('ManifestManager', () => {
           manifestManager as unknown as ManifestManagerWithPrivateMethods
         ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
 
-        expect(shouldRetrieve).toBe(true);
+        expect(shouldRetrieve).toBe(false);
         expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
           ProductFeatureKey.endpointTrustedDevices
         );
       });
 
-      test('should return true when enterprise license is present (even if PLI disabled)', () => {
+      test('should return false when only enterprise license is present (PLI required)', () => {
         context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
         context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
         manifestManager = new ManifestManager(context);
@@ -2505,8 +2513,7 @@ describe('ManifestManager', () => {
           manifestManager as unknown as ManifestManagerWithPrivateMethods
         ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
 
-        expect(shouldRetrieve).toBe(true);
-        expect(context.licenseService.isEnterprise).toHaveBeenCalled();
+        expect(shouldRetrieve).toBe(false);
       });
 
       test('should return true when both PLI and enterprise license are enabled', () => {
@@ -2524,6 +2531,7 @@ describe('ManifestManager', () => {
         expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
           ProductFeatureKey.endpointTrustedDevices
         );
+        expect(context.licenseService.isEnterprise).toHaveBeenCalled();
       });
 
       test('should return false when neither PLI nor enterprise license are enabled', () => {
@@ -2539,7 +2547,6 @@ describe('ManifestManager', () => {
         expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
           ProductFeatureKey.endpointTrustedDevices
         );
-        expect(context.licenseService.isEnterprise).toHaveBeenCalled();
       });
     });
 
@@ -2607,7 +2614,9 @@ describe('ManifestManager', () => {
 
       test('should return false and log error when licenseService throws', () => {
         const loggerSpy = jest.spyOn(context.logger, 'warn').mockImplementation();
-        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointTrustedDevices; // Return true to reach licenseService
+        });
         context.licenseService.isEnterprise = jest.fn().mockImplementation(() => {
           throw new Error('License service error');
         });

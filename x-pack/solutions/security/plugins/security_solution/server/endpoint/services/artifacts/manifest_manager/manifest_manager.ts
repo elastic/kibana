@@ -185,7 +185,7 @@ export class ManifestManager {
 
       try {
         const isEnabled =
-          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointTrustedDevices) ||
+          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointTrustedDevices) &&
           this.licenseService.isEnterprise();
 
         if (!isEnabled) {
