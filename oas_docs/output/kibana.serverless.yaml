@@ -28871,7 +28871,7 @@ paths:
                               enum:
                                 - elasticsearch
                               type: string
-                            write_to_streams:
+                            write_to_logs_streams:
                               type: boolean
                           required:
                             - name
@@ -29035,7 +29035,7 @@ paths:
                               enum:
                                 - remote_elasticsearch
                               type: string
-                            write_to_streams:
+                            write_to_logs_streams:
                               type: boolean
                           required:
                             - name
@@ -29650,7 +29650,7 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
-                    write_to_streams:
+                    write_to_logs_streams:
                       type: boolean
                   required:
                     - name
@@ -29814,7 +29814,7 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
-                    write_to_streams:
+                    write_to_logs_streams:
                       type: boolean
                   required:
                     - name
@@ -30385,7 +30385,7 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
-                          write_to_streams:
+                          write_to_logs_streams:
                             type: boolean
                         required:
                           - name
@@ -30549,7 +30549,7 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
-                          write_to_streams:
+                          write_to_logs_streams:
                             type: boolean
                         required:
                           - name
@@ -31232,7 +31232,7 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
-                          write_to_streams:
+                          write_to_logs_streams:
                             type: boolean
                         required:
                           - name
@@ -31396,7 +31396,7 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
-                          write_to_streams:
+                          write_to_logs_streams:
                             type: boolean
                         required:
                           - name
@@ -32004,7 +32004,7 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
-                    write_to_streams:
+                    write_to_logs_streams:
                       type: boolean
                 - additionalProperties: false
                   type: object
@@ -32162,7 +32162,7 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
-                    write_to_streams:
+                    write_to_logs_streams:
                       type: boolean
                 - additionalProperties: false
                   type: object
@@ -32720,7 +32720,7 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
-                          write_to_streams:
+                          write_to_logs_streams:
                             type: boolean
                         required:
                           - name
@@ -32884,7 +32884,7 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
-                          write_to_streams:
+                          write_to_logs_streams:
                             type: boolean
                         required:
                           - name
