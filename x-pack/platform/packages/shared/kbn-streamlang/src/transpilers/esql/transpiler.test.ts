@@ -12,19 +12,19 @@ import {
   notConditionsTestDSL,
 } from '../shared/mocks/test_dsls';
 
-describe('transpile (Streamlang DSL to ingest pipeline)', () => {
+describe('transpile - Streamlang DSL to ES|QL)', () => {
   it('should transpile a variety of processor steps and where blocks', () => {
     const result = transpile(comprehensiveTestDSL);
-    expect(result).toMatchSnapshot();
+    expect(result.query).toMatchSnapshot();
   });
 
   it('should handle not conditions', () => {
     const result = transpile(notConditionsTestDSL);
-    expect(result).toMatchSnapshot();
+    expect(result.query).toMatchSnapshot();
   });
 
-  it('should handle manual_ingest_pipeline with nested and top-level if', () => {
+  it('should warn when manual_ingest_pipeline is used', () => {
     const result = transpile(manualIngestPipelineTestDSL);
-    expect(result).toMatchSnapshot();
+    expect(result.query).toMatchSnapshot();
   });
 });
