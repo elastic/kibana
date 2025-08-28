@@ -131,7 +131,7 @@ async function runCiChecks(input: z.infer<typeof runCiChecksInputSchema>) {
 
   if (parallel) {
     // Run checks in parallel
-    const promises = checks.map((check) => runCheck(check, cleanCache));
+    const promises = checks.map((check: string) => runCheck(check, cleanCache));
     const parallelResults = await Promise.all(promises);
     results.push(...parallelResults);
   } else {
@@ -140,10 +140,9 @@ async function runCiChecks(input: z.infer<typeof runCiChecksInputSchema>) {
       const result = await runCheck(check, cleanCache);
       results.push(result);
 
-      // If a check fails and we're running sequentially, we might want to stop
-      // or continue depending on the use case
+      // If a check fails and we're running sequentially, stop executing further checks
       if (result.status === 'failed') {
-        // Continue with remaining checks
+        break;
       }
     }
   }
