@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
-import { EntityManagerServerSetup } from '../../../types';
+import type { EntityManagerServerSetup } from '../../../types';
 import { canManageEntityDefinition, entityDefinitionRuntimePrivileges } from '../privileges';
 import { BUILT_IN_ALLOWED_INDICES } from '../../entities/built_in/constants';
 

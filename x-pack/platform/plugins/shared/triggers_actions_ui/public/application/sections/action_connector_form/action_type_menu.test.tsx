@@ -11,9 +11,10 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionTypeMenu } from './action_type_menu';
-import { GenericValidationResult } from '../../../types';
+import type { GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
-import { AppMockRenderer, createAppMockRenderer } from '../test_utils';
+import type { AppMockRenderer } from '../test_utils';
+import { createAppMockRenderer } from '../test_utils';
 jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/action_connector_api', () => ({

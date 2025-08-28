@@ -6,19 +6,13 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ProcessorDefinition } from '@kbn/streams-schema';
-import {
-  ConfigDrivenProcessorFormState,
-  ConfigDrivenProcessorType,
-  FieldConfiguration,
-  FieldOptions,
-} from './types';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { ConfigDrivenProcessorFormState, FieldConfiguration, FieldOptions } from './types';
 
 export const getConvertFormStateToConfig = <
   FormState extends ConfigDrivenProcessorFormState,
-  ProcessorState extends ProcessorDefinition
+  ProcessorState extends StreamlangProcessorDefinition
 >(
-  key: ConfigDrivenProcessorType,
   fieldConfigurations: FieldConfiguration[],
   fieldOptions: FieldOptions
 ): ((formState: FormState) => ProcessorState) => {
@@ -26,14 +20,18 @@ export const getConvertFormStateToConfig = <
     const state = Object.keys(formState).reduce((acc: Record<string, unknown>, field) => {
       const value = formState[field as keyof FormState];
 
-      if (field === 'field') {
-        acc.field = value;
+      if (field === 'action') {
+        acc.action = value;
+      }
+
+      if (field === 'from' || field === 'to') {
+        acc[field] = value;
       } else if (field === 'ignore_failure' && fieldOptions.includeIgnoreFailures) {
         acc.ignore_failure = value;
       } else if (field === 'ignore_missing' && fieldOptions.includeIgnoreMissing) {
         acc.ignore_missing = value;
-      } else if (field === 'if' && fieldOptions.includeCondition) {
-        acc.if = value;
+      } else if (field === 'where' && fieldOptions.includeCondition) {
+        acc.where = value;
       } else {
         const fieldConfig = fieldConfigurations.find((config) => config.field === field);
 
@@ -55,24 +53,17 @@ export const getConvertFormStateToConfig = <
       return acc;
     }, {});
 
-    return {
-      [key]: state,
-    } as unknown as ProcessorState;
+    return state as unknown as ProcessorState;
   };
 };
 
-export const getConvertProcessorToFormState = <
-  ProcessorState extends ProcessorDefinition,
-  FormState extends ConfigDrivenProcessorFormState
->(
-  key: ConfigDrivenProcessorType,
+export const getConvertProcessorToFormState = <ProcessorState, FormState>(
   defaultFormState: FormState
 ): ((processorState: ProcessorState) => FormState) => {
   return (processorState: ProcessorState): FormState => {
-    const processor = processorState[key as keyof ProcessorState] as Record<string, unknown>;
-    const values = Object.keys(processor).reduce(
+    const values = Object.keys(processorState as StreamlangProcessorDefinition).reduce(
       (acc, field) => {
-        const value = processor[field];
+        const value = processorState[field as keyof ProcessorState];
 
         if (value !== undefined) {
           acc[field as keyof FormState] = value as FormState[keyof FormState];
@@ -85,7 +76,6 @@ export const getConvertProcessorToFormState = <
 
     return structuredClone({
       ...values,
-      type: key as FormState['type'],
     });
   };
 };

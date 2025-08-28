@@ -9,7 +9,7 @@
 
 import { BaseParamType } from './base';
 import { JsonParamType } from './json';
-import { IAggConfig } from '../agg_config';
+import type { IAggConfig } from '../agg_config';
 
 describe('JSON', function () {
   const paramName = 'json_test';

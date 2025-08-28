@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useCallback, ChangeEventHandler } from 'react';
+import type { ChangeEventHandler } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { EuiFieldText, EuiFormRow, type UseEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({

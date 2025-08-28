@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

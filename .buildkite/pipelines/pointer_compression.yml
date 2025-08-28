@@ -25,6 +25,8 @@ steps:
       preemptible: true
     key: build
     timeout_in_minutes: 60
+    env:
+      CI_FORCE_NODE_POINTER_COMPRESSION: false
     retry:
       automatic:
         - exit_status: '*'

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps, FC, ReactNode, useCallback } from 'react';
+import type { ComponentProps, FC, ReactNode } from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 

@@ -10,15 +10,15 @@
 import * as Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import {
+import type {
   CiStatsReporter,
   CiStatsReportTestsOptions,
   CiStatsTestType,
 } from '@kbn/ci-stats-reporter';
 
-import { Config } from '../../config';
-import { Runner, Runnable } from '../../../fake_mocha_types';
-import { Lifecycle } from '../../lifecycle';
+import type { Config } from '../../config';
+import type { Runner, Runnable } from '../../../fake_mocha_types';
+import type { Lifecycle } from '../../lifecycle';
 import { getSnapshotOfRunnableLogs } from '../../../../mocha';
 
 function getHookType(hook: Runnable): CiStatsTestType {

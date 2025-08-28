@@ -9,11 +9,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { first } from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   ClusterService,

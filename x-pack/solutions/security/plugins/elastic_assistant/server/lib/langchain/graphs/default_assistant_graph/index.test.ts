@@ -11,13 +11,13 @@ import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { loggerMock } from '@kbn/logging-mocks';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
-import { AgentExecutorParams, AssistantDataClients } from '../../executors/types';
+import type { AgentExecutorParams, AssistantDataClients } from '../../executors/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { AssistantTool, AssistantToolParams } from '../../../..';
+import type { AssistantTool, AssistantToolParams } from '../../../..';
 import { promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptDictionary } from '../../../prompt';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
@@ -301,7 +301,22 @@ describe('callAssistantGraph', () => {
         status: 'ok',
         conversationId: 'new-conversation-id',
       });
-      expect(getChatModel).toHaveBeenCalled();
+      expect(getChatModel).toHaveBeenCalledWith({
+        chatModelOptions: {
+          maxRetries: 0,
+          model: 'test-model',
+          telemetryMetadata: {
+            pluginId: 'security_ai_assistant',
+          },
+          temperature: 0.2,
+        },
+        connectorId: 'test-connector',
+        request: {
+          body: {
+            model: 'test-model',
+          },
+        },
+      });
     });
 
     it('calls streamGraph with correct parameters for streaming', async () => {

@@ -16,7 +16,7 @@ import type {
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server/types';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { DefaultRouteHandlerResources } from '@kbn/server-route-repository-utils';
+import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository-utils';
 import type { ObservabilityAIAssistantService } from '../service';
 import type {
   ObservabilityAIAssistantPluginSetupDependencies,

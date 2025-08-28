@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
 
@@ -82,7 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         const { solutionNavigation } = pageObjects;
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'RAG Playground' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: testPlaygroundName,
         });

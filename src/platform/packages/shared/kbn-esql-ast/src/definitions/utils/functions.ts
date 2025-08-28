@@ -9,7 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
-import { ESQLControlVariable, ESQLVariableType, RecommendedField } from '@kbn/esql-types';
+import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import {
   type FunctionDefinition,
@@ -17,18 +18,17 @@ import {
   type FunctionParameterType,
   FunctionDefinitionTypes,
   type SupportedDataType,
-  type FunctionReturnType,
 } from '../types';
 import { operatorsDefinitions } from '../all_operators';
 import { aggFunctionDefinitions } from '../generated/aggregation_functions';
 import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
-import { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
+import type { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
-import { ESQLAstItem, ESQLFunction } from '../../types';
+import type { ESQLAstItem, ESQLFunction } from '../../types';
 import { removeFinalUnknownIdentiferArg, isParamExpressionType } from './shared';
 import { getTestFunctions } from './test_functions';
 
@@ -426,32 +426,3 @@ export const buildFieldsDefinitionsWithMetadata = (
 
   return [...suggestions];
 };
-
-export function printFunctionSignature(arg: ESQLFunction): string {
-  const fnDef = getFunctionDefinition(arg.name);
-  if (fnDef) {
-    const signature = getFunctionSignatures(
-      {
-        ...fnDef,
-        signatures: [
-          {
-            ...fnDef?.signatures[0],
-            params: arg.args.map((innerArg) =>
-              Array.isArray(innerArg)
-                ? { name: `InnerArgument[]`, type: 'any' as const }
-                : // this cast isn't actually correct, but we're abusing the
-                  // getFunctionSignatures API anyways
-                  { name: innerArg.text, type: innerArg.type as FunctionParameterType }
-            ),
-            // this cast isn't actually correct, but we're abusing the
-            // getFunctionSignatures API anyways
-            returnType: '' as FunctionReturnType,
-          },
-        ],
-      },
-      { withTypes: false, capitalize: true }
-    );
-    return signature[0].declaration;
-  }
-  return '';
-}

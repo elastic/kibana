@@ -6,13 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  timeUnitsToSuggest,
-  FieldType,
-  dataTypes,
-  SupportedDataType,
-  FunctionDefinition,
-} from '@kbn/esql-ast';
+import type { FieldType, SupportedDataType, FunctionDefinition } from '@kbn/esql-ast';
+import { timeUnitsToSuggest, dataTypes, getNoValidCallSignatureError } from '@kbn/esql-ast';
 import { getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
@@ -128,7 +123,7 @@ function getFieldMapping(
     date: 'now()',
   };
   return params.map(
-    ({ name: _name, type, constantOnly, acceptedValues: literalOptions, ...rest }) => {
+    ({ name: _name, type, constantOnly, suggestedValues: literalOptions, ...rest }) => {
       const typeString: string = type as string;
       if (dataTypes.includes(typeString as SupportedDataType)) {
         if (useLiterals && literalOptions) {
@@ -418,7 +413,7 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | rename textField as', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        'Error: [as] function expects exactly 2 arguments, got 1.',
+        '[as] expected 2 arguments, but got 1.',
       ]);
       testErrorsAndWarnings('row a = 10 | rename a as this is fine', [
         "SyntaxError: mismatched input 'is' expecting <EOF>",
@@ -691,7 +686,7 @@ describe('validation logic', () => {
 
       // takes into account casting in function arguments
       testErrorsAndWarnings('from a_index | eval trim("23"::double)', [
-        'Argument of [trim] must be [keyword], found value ["23"::double] type [double]',
+        getNoValidCallSignatureError('trim', ['double']),
       ]);
       testErrorsAndWarnings('from a_index | eval trim(23::keyword)', []);
       testErrorsAndWarnings('from a_index | eval 1 + "2"::long', []);
@@ -700,14 +695,11 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval 1 + "2"::LoNg', []);
 
       testErrorsAndWarnings('from a_index | eval 1 + "2"', [
-        // just a counter-case to make sure the previous test is meaningful
-        'Argument of [+] must be [date], found value [1] type [integer]',
+        getNoValidCallSignatureError('+', ['integer', 'keyword']),
       ]);
       testErrorsAndWarnings(
         'from a_index | eval trim(to_double("23")::keyword::double::long::keyword::double)',
-        [
-          'Argument of [trim] must be [keyword], found value [to_double("23")::keyword::double::long::keyword::double] type [double]',
-        ]
+        [getNoValidCallSignatureError('trim', ['double'])]
       );
 
       testErrorsAndWarnings('from a_index | eval CEIL(23::long)', []);
@@ -717,9 +709,6 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval CEIL(23::Integer)', []);
       testErrorsAndWarnings('from a_index | eval CEIL(23::double)', []);
       testErrorsAndWarnings('from a_index | eval CEIL(23::DOUBLE)', []);
-      testErrorsAndWarnings('from a_index | eval CEIL(23::doubla)', [
-        'Argument of [ceil] must be [double], found value [23::doubla] type [doubla]',
-      ]);
 
       testErrorsAndWarnings('from a_index | eval TRIM(23::keyword)', []);
       testErrorsAndWarnings('from a_index | eval TRIM(23::text)', []);
@@ -729,7 +718,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval true AND 0::bool', []);
       testErrorsAndWarnings('from a_index | eval true AND 0', [
         // just a counter-case to make sure the previous tests are meaningful
-        'Argument of [and] must be [boolean], found value [0] type [integer]',
+        getNoValidCallSignatureError('and', ['boolean', 'integer']),
       ]);
 
       // enforces strings for cartesian_point conversion
@@ -737,15 +726,15 @@ describe('validation logic', () => {
 
       // still validates nested functions when they are casted
       testErrorsAndWarnings('from a_index | eval to_lower(trim(doubleField)::keyword)', [
-        'Argument of [trim] must be [keyword], found value [doubleField] type [double]',
+        getNoValidCallSignatureError('trim', ['double']),
       ]);
       testErrorsAndWarnings(
         'from a_index | eval to_upper(trim(doubleField)::keyword::keyword::keyword::keyword)',
-        ['Argument of [trim] must be [keyword], found value [doubleField] type [double]']
+        [getNoValidCallSignatureError('trim', ['double'])]
       );
       testErrorsAndWarnings(
         'from a_index | eval to_lower(to_upper(trim(doubleField)::keyword)::keyword)',
-        ['Argument of [trim] must be [keyword], found value [doubleField] type [double]']
+        [getNoValidCallSignatureError('trim', ['double'])]
       );
     });
 

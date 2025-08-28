@@ -9,7 +9,7 @@
 
 import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { createColumn, getFormat } from './column';
-import { CommonColumnsConverterArgs, CounterRateColumn, MaxColumn } from './types';
+import type { CommonColumnsConverterArgs, CounterRateColumn, MaxColumn } from './types';
 
 export const convertToCounterRateColumn = ({
   series,

@@ -7,7 +7,7 @@
 import 'cypress-axe';
 import 'cypress-real-events/support';
 import URL from 'url';
-import { LoginState } from '@kbn/security-plugin/common/login_state';
+import type { LoginState } from '@kbn/security-plugin/common/login_state';
 import { request } from '@kbn/cypress-test-helper/src/api';
 
 Cypress.Commands.add('loginAsElasticUser', () => {

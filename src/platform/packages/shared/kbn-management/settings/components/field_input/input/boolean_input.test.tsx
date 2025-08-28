@@ -14,7 +14,7 @@ import { BooleanInput } from './boolean_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 import { wrap } from '../mocks';
-import { InputProps } from '../types';
+import type { InputProps } from '../types';
 
 const name = 'Some boolean field';
 const id = 'some:boolean:field';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Params, QueryOperator } from '../types';
+import type { Params, QueryOperator } from '../types';
 import { append } from '../pipeline/append';
 
 export enum SortOrder {
@@ -19,6 +19,12 @@ type Sort = Record<string, SortOrder>;
 
 type SortArgs = Sort | string | Array<Sort | string>;
 
+/**
+ * Appends a `SORT` command to the ESQL composer pipeline.
+ *
+ * @param sorts The sort criteria.
+ * @returns A `QueryPipeline` instance with the `SORT` command appended.
+ */
 export function sort<TQuery extends string, TParams extends Params<TQuery>>(
   body: TQuery,
   params?: TParams

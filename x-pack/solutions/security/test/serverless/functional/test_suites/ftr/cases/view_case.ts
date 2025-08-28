@@ -19,7 +19,7 @@ import {
   createAndNavigateToCase,
   navigateToCasesApp,
 } from '@kbn/test-suites-xpack-platform/serverless/shared/lib/cases/helpers';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const owner = SECURITY_SOLUTION_OWNER;
 
@@ -531,7 +531,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await toggle.click();
+        await toggle.click({
+          bottomOffset: 100 /* account for fixed footer when deciding if toggle is visible */,
+        });
 
         await header.waitUntilLoadingHasFinished();
 

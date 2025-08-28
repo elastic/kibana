@@ -6,15 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import {
-  ConversationCategoryEnum,
-  ConversationCreateProps,
-  ConversationResponse,
-} from '@kbn/elastic-assistant-common';
+import type { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
+import { ConversationCategoryEnum } from '@kbn/elastic-assistant-common';
 import { getConversation } from './get_conversation';
-import { CreateMessageSchema } from './types';
+import type { CreateMessageSchema } from './types';
 
 export interface CreateConversationParams {
   esClient: ElasticsearchClient;
@@ -93,6 +90,7 @@ export const transformToCreateScheme = (
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
     messages: messages?.map((message) => ({
       '@timestamp': message.timestamp,
+      id: message.id ?? uuidv4(),
       content: message.content,
       is_error: message.isError,
       reader: message.reader,

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { IAggConfig } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { SchemaConfig } from '../../..';
+import type { SchemaConfig } from '../../..';
 import { convertToSiblingPipelineColumns } from './sibling_pipeline';
 
 const mockConvertMetricToColumns = jest.fn();

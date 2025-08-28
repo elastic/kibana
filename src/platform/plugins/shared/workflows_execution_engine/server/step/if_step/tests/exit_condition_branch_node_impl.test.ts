@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExitConditionBranchNode, ExitIfNode } from '@kbn/workflows';
-import { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { ExitConditionBranchNode, ExitIfNode } from '@kbn/workflows';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitConditionBranchNodeImpl } from '../exit_condition_branch_node_impl';
 
 describe('ExitConditionBranchNodeImpl', () => {

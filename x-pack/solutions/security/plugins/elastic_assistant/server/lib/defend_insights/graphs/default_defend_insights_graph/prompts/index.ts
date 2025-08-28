@@ -7,14 +7,12 @@
 
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import {
-  getIncompatibleAntivirusPrompt,
-  DefendInsightsCombinedPrompts,
-} from './incompatible_antivirus';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { DefendInsightsCombinedPrompts } from './incompatible_antivirus';
+import { getIncompatibleAntivirusPrompt } from './incompatible_antivirus';
 import { InvalidDefendInsightTypeError } from '../../../errors';
 
 export function getDefendInsightsPrompt({

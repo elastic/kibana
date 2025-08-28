@@ -9,7 +9,7 @@
 
 import * as antlr from 'antlr4';
 import * as cst from '../antlr/esql_parser';
-import * as ast from '../types';
+import type * as ast from '../types';
 import { isCommand } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import { getPosition, nonNullable } from './helpers';
@@ -593,17 +593,7 @@ export class CstToAstConverter {
     const command = this.createCommand('stats', ctx);
 
     if (ctx._stats) {
-      const fields = ctx.aggFields();
-
-      for (const fieldCtx of fields.aggField_list()) {
-        if (fieldCtx.getText() === '') continue;
-
-        const field = this.fromAggField(fieldCtx);
-
-        if (field) {
-          command.args.push(field);
-        }
-      }
+      command.args.push(...this.fromAggFields(ctx.aggFields()));
     }
 
     if (ctx._grouping) {
@@ -1252,10 +1242,180 @@ export class CstToAstConverter {
 
   // ------------------------------------------------------------------- RERANK
 
+  /**
+   * Supports two syntax forms:
+   * - RERANK "query" ON fields WITH {options}
+   * - RERANK target = "query" ON fields WITH {options}
+   */
   private fromRerankCommand(ctx: cst.RerankCommandContext): ast.ESQLAstRerankCommand {
-    const command = this.createCommand<'rerank', ast.ESQLAstRerankCommand>('rerank', ctx, {});
+    const command = this.createCommand<'rerank', ast.ESQLAstRerankCommand>('rerank', ctx);
+
+    this.parseRerankQuery(ctx, command);
+    this.parseRerankOnOption(ctx, command);
+    this.parseRerankWithOption(ctx, command);
 
     return command;
+  }
+
+  /**
+   * Parses the query text and optional target field assignment.
+   * Handles: RERANK [target =] "query" ...
+   */
+  private parseRerankQuery(ctx: cst.RerankCommandContext, command: ast.ESQLAstRerankCommand): void {
+    if (!ctx._queryText) {
+      return;
+    }
+
+    const queryText = this.fromConstant(ctx._queryText);
+    if (!queryText) {
+      return;
+    }
+
+    command.query = queryText as ast.ESQLLiteral;
+
+    // Handle target field assignment: RERANK target = "query"
+    if (ctx._targetField && ctx.ASSIGN()) {
+      const targetField = this.toColumn(ctx._targetField);
+      const assignment = this.createFunction(
+        ctx.ASSIGN().getText(),
+        ctx,
+        undefined,
+        'binary-expression'
+      ) as ast.ESQLBinaryExpression;
+
+      assignment.args.push(targetField, queryText);
+      assignment.location = this.computeLocationExtends(assignment);
+
+      command.targetField = targetField;
+      command.args.push(assignment);
+    } else {
+      command.args.push(queryText);
+    }
+  }
+
+  /**
+   * Parses the ON fields list.
+   * Handles: ... ON field1, field2 = X(field2, 2)
+   */
+  private parseRerankOnOption(
+    ctx: cst.RerankCommandContext,
+    command: ast.ESQLAstRerankCommand
+  ): void {
+    const onToken = ctx.ON();
+    const rerankFieldsCtx = ctx.rerankFields();
+
+    if (!onToken || !rerankFieldsCtx) {
+      return;
+    }
+
+    const onOption = this.toOption(onToken.getText().toLowerCase(), rerankFieldsCtx);
+    const fields = this.fromRerankFields(rerankFieldsCtx);
+
+    onOption.args.push(...fields);
+    onOption.location.min = onToken.symbol.start;
+
+    const lastArg = lastItem(onOption.args);
+    if (lastArg) {
+      onOption.location.max = lastArg.location.max;
+    }
+
+    command.args.push(onOption);
+    command.fields = fields;
+  }
+
+  /**
+   * Parses WITH parameters as a generic map.
+   * Handles: ... WITH {inference_id: "model", scoreColumn: "score", ...}
+   */
+  private parseRerankWithOption(
+    ctx: cst.RerankCommandContext,
+    command: ast.ESQLAstRerankCommand
+  ): void {
+    const namedParamsCtx = ctx.commandNamedParameters();
+
+    if (!namedParamsCtx) {
+      return;
+    }
+
+    const withOption = this.fromCommandNamedParameters(namedParamsCtx);
+    if (withOption && !withOption.incomplete) {
+      command.args.push(withOption);
+    }
+  }
+
+  /**
+   * Collects all ON fields for RERANK.
+   *
+   * - Accepts simple columns (e.g. `title`).
+   * - Accepts assignments (e.g. `title = X(title, 2)`).
+   * - Accepts expressions after a qualified name (e.g. `field < 10`).
+   */
+  private fromRerankFields(ctx: cst.RerankFieldsContext | undefined): ast.ESQLAstField[] {
+    const fields: ast.ESQLAstField[] = [];
+    if (!ctx) {
+      return fields;
+    }
+
+    try {
+      for (const fieldCtx of ctx.rerankField_list()) {
+        const field = this.fromRerankField(fieldCtx);
+
+        if (field) {
+          fields.push(field);
+        }
+      }
+    } catch (e) {
+      // do nothing
+    }
+    return fields;
+  }
+
+  /**
+   * Parses a single RERANK field entry.
+   *
+   * Supports three forms:
+   * 1) Assignment:     qualifiedName '=' booleanExpression
+   * 2) Expression:      qualifiedName booleanExpression
+   * 3) Column only:     qualifiedName
+   */
+  private fromRerankField(ctx: cst.RerankFieldContext): ast.ESQLAstField | undefined {
+    try {
+      const qualifiedNameCtx = ctx.qualifiedName();
+
+      if (!qualifiedNameCtx) {
+        return undefined;
+      }
+
+      // 1) field assignment: <col> = <booleanExpression>
+      if (ctx.ASSIGN() && ctx.booleanExpression()) {
+        const left = this.toColumn(qualifiedNameCtx);
+        const right = this.collectBooleanExpression(ctx.booleanExpression());
+        const assignment = this.createFunction(
+          ctx.ASSIGN().getText(),
+          ctx,
+          undefined,
+          'binary-expression'
+        ) as ast.ESQLBinaryExpression;
+        assignment.args.push(left, right);
+        assignment.location = this.computeLocationExtends(assignment);
+
+        return assignment;
+      }
+
+      // 2) expression following a qualified name
+      if (ctx.booleanExpression()) {
+        return this.collectBooleanExpression(ctx.booleanExpression())[0] as
+          | ast.ESQLAstField
+          | undefined;
+      }
+
+      // 3) simple column reference
+      return this.toColumn(qualifiedNameCtx);
+    } catch (e) {
+      // do nothing
+    }
+
+    return undefined;
   }
 
   // --------------------------------------------------------------------- FUSE
@@ -2072,7 +2232,9 @@ export class CstToAstConverter {
 
     try {
       for (const aggField of ctx.aggField_list()) {
-        const field = this.fromField(aggField.field());
+        if (aggField.getText() === '') continue;
+
+        const field = this.fromAggField(aggField);
 
         if (field) {
           fields.push(field);
