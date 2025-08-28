@@ -28,7 +28,7 @@ const STATS_GROUP_SIGNAL_RULE_ID_MULTI = i18n.translate(
   }
 );
 
-export const TABLE_GROUP_STATS_TEST_ID = 'ai-for-soc-alert-table-group-stats';
+export const TABLE_GROUP_STATS_TEST_ID = 'ease-alert-table-group-stats';
 
 interface IntegrationProps {
   /**
@@ -39,7 +39,7 @@ interface IntegrationProps {
 
 /**
  * Renders the icon for the integration that matches the integration name.
- * In AI for SOC, we can retrieve the integration/package via the kibana.rule.parameters field on the alert.
+ * In EASE, we can retrieve the integration/package via the kibana.rule.parameters field on the alert.
  */
 export const IntegrationIcon = memo(({ integrationName }: IntegrationProps) => {
   const { packages } = useTableSectionContext();

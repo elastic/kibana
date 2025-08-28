@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { FlyoutPanelHistory } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { IOCPanelKey } from '../../ai_for_soc/constants/panel_keys';
+import { EasePanelKey } from '../../ease/constants/panel_keys';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
@@ -61,7 +61,7 @@ export interface FlyoutHistoryRowProps {
 export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }) => {
   switch (item.panel.id) {
     case DocumentDetailsRightPanelKey:
-    case IOCPanelKey:
+    case EasePanelKey:
       return <DocumentDetailsHistoryRow item={item} index={index} />;
     case RulePanelKey:
       return <RuleHistoryRow item={item} index={index} />;
