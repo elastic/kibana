@@ -126,7 +126,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                   fullWidth
                   isInvalid={isInvalid || Boolean(taskTypeError)}
                   error={errorMessage || taskTypeError}
-                  data-test-subj={'configuration-formrow-contextWidnowLength'}
+                  data-test-subj={'configuration-formrow-contextWindowLength'}
                 >
                   <EuiFormControlLayout
                     fullWidth
@@ -256,7 +256,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
         {contextWindowLengthSettings}
         {taskTypeSettings}
         <EuiSpacer size="m" />
-        <EuiTitle size="xxs" data-test-subj="task-type-details-label">
+        <EuiTitle size="xxs" data-test-subj="inference-endpoint-details-label">
           <h4>
             <FormattedMessage
               id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceEndpointLabel"
