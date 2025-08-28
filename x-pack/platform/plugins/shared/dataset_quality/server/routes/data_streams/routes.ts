@@ -294,6 +294,7 @@ const nonAggregatableDatasetRoute = createDatasetQualityServerRoute({
 
     return await getNonAggregatableDataStreams({
       esClient,
+      dataStream: params.path.dataStream,
       ...params.query,
     });
   },
