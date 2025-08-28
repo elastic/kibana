@@ -194,4 +194,24 @@ The tool provides detailed compliance findings including passed/failed checks, c
 Provide the asset identifier (hostname, entity ID, username, or service name) to get comprehensive compliance and security posture information.`,
     },
   },
+  {
+    promptId: 'AssetVulnerabilityTool',
+    promptGroupId,
+    prompt: {
+      default: `Call this tool to get detailed vulnerability assessment information for a specific asset. This includes CVE details, severity levels, affected packages, and available fixes.
+
+Use this tool when the user wants to:
+- Check vulnerability status of an asset, host, user, or service
+- Get CVE information and CVSS scores for an entity
+- Review security vulnerabilities and patches
+- See critical and high severity vulnerabilities that need attention
+- Get package vulnerabilities and fix versions
+- Assess security risk based on vulnerability severity
+- Understand exposure to known security issues
+
+The tool provides detailed vulnerability findings including severity counts, CVE details, affected packages, fix availability, and CVSS scoring.
+
+Provide the asset identifier (hostname, entity ID, username, or service name) to get comprehensive vulnerability and security risk information.`,
+    },
+  },
 ];

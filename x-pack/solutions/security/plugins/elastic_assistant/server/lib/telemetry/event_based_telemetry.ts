@@ -81,6 +81,7 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
     AlertCountsTool?: number;
     AssetInventory?: number;
     AssetComplianceTool?: number;
+    AssetVulnerabilityTool?: number;
     GenerateESQLTool?: number;
     AskAboutESQLTool?: number;
     GenerateAssetESQLTool?: number;
@@ -151,6 +152,13 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
           },
         },
         AssetComplianceTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        AssetVulnerabilityTool: {
           type: 'long',
           _meta: {
             description: 'Number of times tool was invoked.',
