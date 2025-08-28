@@ -70,6 +70,9 @@ export const handleProcessingGrokSuggestions = async ({
   });
   const reviewResult = response.toolCalls[0].function.arguments;
 
+  // if the stream is wired, or if it matches the logs-*.otel-* pattern, use the OTEL field names
+  const useOtelFieldNames = isWiredStream || params.path.name.match(/^logs-.*\.otel-/);
+
   return {
     log_source: reviewResult.log_source,
     fields: reviewResult.fields.map((field) => {
@@ -77,11 +80,7 @@ export const handleProcessingGrokSuggestions = async ({
         ? field.ecs_field.replace('@timestamp', 'custom.timestamp')
         : field.ecs_field;
       return {
-        // if the stream is wired, or if it matches the logs-*.otel-* pattern, use the OTEL field names
-        name:
-          isWiredStream || params.path.name.match(/^logs-.*\.otel-/)
-            ? getOtelFieldName(name)
-            : name,
+        name: useOtelFieldNames ? getOtelFieldName(name) : name,
         columns: field.columns,
         grok_components: field.grok_components,
       };
