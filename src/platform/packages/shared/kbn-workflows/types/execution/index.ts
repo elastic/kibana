@@ -21,5 +21,13 @@ export type {
   ExitRetryNode,
   EnterContinueNode,
   ExitContinueNode,
+  EnterOnFailureZoneNodeSchema,
+  EnterOnFailureZoneNode,
+  ExitOnFailureZoneNodeSchema,
+  ExitOnFailureZoneNode,
+  EnterPathNodeSchema,
+  EnterPathNode,
+  ExitPathNodeSchema,
+  ExitPathNode,
 } from './nodes/on_failure_nodes';
 export type { AtomicGraphNode, WaitGraphNodeSchema, WaitGraphNode } from './nodes/base';
