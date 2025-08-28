@@ -11,7 +11,6 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { Stream } from 'stream';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { OAuthTokenManager } from './o_auth_token_manager';
 import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsoft_defender_endpoint/constants';
 import {
