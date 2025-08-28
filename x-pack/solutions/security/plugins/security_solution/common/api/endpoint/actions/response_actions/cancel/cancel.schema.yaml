@@ -2,6 +2,7 @@ openapi: 3.0.0
 info:
   title: Cancel Action Schema
   version: '2023-10-31'
+  description: Schema for canceling response actions
 components:
   schemas:
     CancelActionRequestBody:
@@ -12,5 +13,9 @@ components:
         id:
           type: string
           minLength: 1
-          description: The ID of the action to cancel
-
+          description: The unique identifier of the response action to cancel. This should be the internal Kibana action ID, not the external system's action ID.
+          example: "7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d"
+        comment:
+          type: string
+          description: Optional comment explaining the reason for canceling the action
+          example: "Action no longer needed due to resolved incident"

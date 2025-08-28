@@ -1203,6 +1203,50 @@ describe('Response actions', () => {
           statusCode: 400,
         });
       });
+
+      it('returns 404 when user tries to cancel action from different space', async () => {
+        // Simulate action not found in current space (user in 'other-space', action in 'default')
+        fetchActionByIdSpy.mockResolvedValue(null);
+        await callRoute(CANCEL_ROUTE, {
+          body: { parameters: { id: 'action-from-different-space' } } as CancelActionRequestBody,
+          authz: { canReadActionsLogManagement: true },
+          version: '2023-10-31',
+        });
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          body: expect.objectContaining({
+            message: "Action with id 'action-from-different-space' not found.",
+          }),
+          statusCode: 404,
+        });
+      });
+
+      it('handles race condition when action is completed between validation and cancellation', async () => {
+        // Mock the action as existing during validation
+        fetchActionByIdSpy.mockResolvedValue(mockIsolateAction);
+
+        // Mock the response actions client to simulate action already completed
+        responseActionsClientMockInstance.cancel = jest
+          .fn()
+          .mockRejectedValue(
+            new ResponseActionsClientError(
+              'Action cannot be cancelled as it has already completed',
+              400
+            )
+          );
+
+        await callRoute(CANCEL_ROUTE, {
+          body: { parameters: { id: 'already-completed-action' } } as CancelActionRequestBody,
+          authz: { canReadActionsLogManagement: true, canIsolateHost: true },
+          version: '2023-10-31',
+        });
+
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          body: expect.objectContaining({
+            message: 'Action cannot be cancelled as it has already completed',
+          }),
+          statusCode: 400,
+        });
+      });
     });
   });
 

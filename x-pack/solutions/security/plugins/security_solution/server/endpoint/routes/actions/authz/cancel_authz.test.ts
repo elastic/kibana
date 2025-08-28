@@ -208,4 +208,61 @@ describe('validateCommandSpecificCancelPermissions', () => {
       );
     });
   });
+
+  describe('cross-space authorization scenarios', () => {
+    it('should handle action not found across different spaces', async () => {
+      // Mock action not found in current space
+      mockedFetchActionRequestById.mockResolvedValue(null as unknown as LogsEndpointAction);
+
+      await expect(
+        validateCommandSpecificCancelPermissions(
+          mockContext as unknown as SecuritySolutionRequestHandlerContext,
+          mockRequest,
+          endpointContext,
+          mockLogger
+        )
+      ).rejects.toThrow(
+        new CustomHttpRequestError(`Action with id 'test-action-id' not found.`, 404)
+      );
+    });
+
+    it('should properly validate permissions for actions from same space', async () => {
+      // Mock finding action in same space
+      mockedFetchActionRequestById.mockResolvedValue({
+        EndpointActions: {
+          data: { command: 'isolate' },
+        },
+      } as unknown as LogsEndpointAction);
+
+      const authz = getEndpointAuthzInitialStateMock({
+        canIsolateHost: true,
+      });
+      mockContext.securitySolution.getEndpointAuthz.mockResolvedValue(authz);
+
+      await expect(
+        validateCommandSpecificCancelPermissions(
+          mockContext as unknown as SecuritySolutionRequestHandlerContext,
+          mockRequest,
+          endpointContext,
+          mockLogger
+        )
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe('network failure scenarios', () => {
+    it('should handle network failures when fetching action details', async () => {
+      // Mock network error
+      mockedFetchActionRequestById.mockRejectedValue(new Error('Network error: timeout'));
+
+      await expect(
+        validateCommandSpecificCancelPermissions(
+          mockContext as unknown as SecuritySolutionRequestHandlerContext,
+          mockRequest,
+          endpointContext,
+          mockLogger
+        )
+      ).rejects.toThrow('Network error: timeout');
+    });
+  });
 });
