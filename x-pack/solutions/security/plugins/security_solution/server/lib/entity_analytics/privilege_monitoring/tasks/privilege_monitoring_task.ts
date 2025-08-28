@@ -22,6 +22,7 @@ import moment from 'moment';
 import type { RunSoonResult } from '@kbn/task-manager-plugin/server/task_scheduling';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import type { ConfigType } from '../../../../config';
 
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from '../constants';
 import {
@@ -52,6 +53,7 @@ interface RunParams {
   experimentalFeatures: ExperimentalFeatures;
   taskInstance: ConcreteTaskInstance;
   core: CoreStart;
+  config: ConfigType;
   getPrivilegedUserMonitoringDataClient: (
     namespace: string
   ) => Promise<undefined | PrivilegeMonitoringDataClient>;
@@ -143,7 +145,8 @@ const createPrivilegeMonitoringTaskRunnerFactory =
     const isCancelled = () => cancelled;
     return {
       run: async () => {
-        const [core] = await deps.getStartServices();
+        const [core, plugins] = await deps.getStartServices();
+        const config = plugins.securitySolution.config;
         return runPrivilegeMonitoringTask({
           isCancelled,
           logger: deps.logger,
@@ -151,6 +154,7 @@ const createPrivilegeMonitoringTaskRunnerFactory =
           taskInstance,
           experimentalFeatures: deps.experimentalFeatures,
           core,
+          config,
           getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
         });
       },
@@ -193,6 +197,7 @@ const runPrivilegeMonitoringTask = async ({
   taskInstance,
   getPrivilegedUserMonitoringDataClient,
   core,
+  config,
 }: RunParams): Promise<{
   state: PrivilegeMonitoringTaskState;
 }> => {
@@ -215,7 +220,9 @@ const runPrivilegeMonitoringTask = async ({
       logger.error('[Privilege Monitoring] error creating data client.');
       throw Error('No data client was found');
     }
-    const dataSourcesService = createDataSourcesService(dataClient);
+    const maxUsersAllowed =
+      config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+    const dataSourcesService = createDataSourcesService(dataClient, maxUsersAllowed);
     const request = buildFakeScopedRequest({
       namespace: state.namespace,
       coreStart: core,

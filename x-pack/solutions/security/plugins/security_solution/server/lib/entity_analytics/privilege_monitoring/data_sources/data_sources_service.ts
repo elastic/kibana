@@ -55,7 +55,6 @@ export const createDataSourcesService = (
       (name) => !POST_EXCLUDE_INDICES.some((pattern) => name.startsWith(pattern))
     );
   };
-
   return {
     createImportIndex,
     searchPrivilegesIndices,
