@@ -43,7 +43,6 @@ export const listIndices = async <const T extends ListIndicesOptions>({
   showDetails = false,
   esClient,
 }: T): Promise<ListIndexResult<T>> => {
-  includeKibanaIndices = true; // TODO: remove
   let response = await esClient.cat.indices({
     index: includeKibanaIndices ? [pattern] : [pattern, kibanaIndicesExclusionPattern],
     expand_wildcards: includeHidden ? ['open', 'hidden'] : ['open'],
