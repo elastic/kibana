@@ -4652,6 +4652,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-data-streams-server-internal@link:src/core/packages/data-streams/server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-data-streams-server-mocks@link:src/core/packages/data-streams/server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-data-streams-server@link:src/core/packages/data-streams/server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-deprecations-browser-internal@link:src/core/packages/deprecations/browser-internal":
   version "0.0.0"
   uid ""
@@ -5537,6 +5549,14 @@
   uid ""
 
 "@kbn/data-stream-adapter@link:x-pack/solutions/security/packages/data-stream-adapter":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-streams-example-plugin@link:examples/data_streams_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-streams@link:src/platform/packages/private/kbn-data-streams":
   version "0.0.0"
   uid ""
 
