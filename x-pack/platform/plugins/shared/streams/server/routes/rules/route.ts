@@ -6,8 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import { internal } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import type { Asset, RuleAsset } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
