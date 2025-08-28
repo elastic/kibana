@@ -55,7 +55,7 @@ const errorTitles: Record<IndexEditorErrors, string> = {
   [IndexEditorErrors.NO_DATA_TO_SAVE_ERROR]: i18n.translate(
     'indexEditor.flyout.error.noDataToSaveError',
     {
-      defaultMessage: 'Taken operations resulted in no data to save.',
+      defaultMessage: 'The operations taken resulted in no data to save',
     }
   ),
 };
