@@ -54,11 +54,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         response.body.results.some((result: any) =>
           isEqual(result, {
             id: 'logs',
-            score: 100,
+            score: 85,
             title: 'logs',
             type: 'Wired stream',
-            url: '/app/streams/logs/management/lifecycle',
-            icon: 'logsApp',
+            url: '/app/streams/logs',
           })
         )
       ).to.be(true);
