@@ -183,6 +183,13 @@ export const configSchema = schema.object({
       }),
     }),
   }),
+  cdn: schema.maybe(
+    schema.object({
+      url: schema.maybe(schema.string()),
+      // PEM-encoded public key used to verify the global artifact manifest signature.
+      publicKey: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

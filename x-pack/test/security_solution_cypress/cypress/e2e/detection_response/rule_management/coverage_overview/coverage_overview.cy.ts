@@ -22,9 +22,10 @@ import { createRule } from '../../../../tasks/api_calls/rules';
 import { visit } from '../../../../tasks/navigation';
 import { RULES_COVERAGE_OVERVIEW_URL } from '../../../../urls/rules_management';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
-import { getNewRule } from '../../../../objects/rule';
+import { getCustomQueryRuleParams, getNewRule } from '../../../../objects/rule';
 import {
   createAndInstallMockedPrebuiltRules,
+  installMockPrebuiltRulesPackage,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import {
@@ -191,6 +192,10 @@ const prebuiltRules = [
 
 // https://github.com/elastic/kibana/issues/179052
 describe('Coverage overview', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   describe('base cases', () => {
     beforeEach(() => {
       login();
@@ -199,7 +204,7 @@ describe('Coverage overview', { tags: ['@ess', '@serverless', '@skipInServerless
       preventPrebuiltRulesPackageInstallation();
       createAndInstallMockedPrebuiltRules(prebuiltRules);
       createRule(
-        getNewRule({
+        getCustomQueryRuleParams({
           rule_id: 'enabled_custom_rule',
           enabled: true,
           name: 'Enabled custom rule',
@@ -207,7 +212,7 @@ describe('Coverage overview', { tags: ['@ess', '@serverless', '@skipInServerless
         })
       );
       createRule(
-        getNewRule({
+        getCustomQueryRuleParams({
           rule_id: 'disabled_custom_rule',
           name: 'Disabled custom rule',
           enabled: false,

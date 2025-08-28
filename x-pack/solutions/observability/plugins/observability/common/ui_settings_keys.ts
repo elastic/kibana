@@ -49,3 +49,4 @@ export const apmEnableTransactionProfiling = 'observability:apmEnableTransaction
 export const profilingFetchTopNFunctionsFromStacktraces =
   'observability:profilingFetchTopNFunctionsFromStacktraces';
 export const searchExcludedDataTiers = 'observability:searchExcludedDataTiers';
+export const enableDiagnosticMode = 'observability:enableDiagnosticMode';
