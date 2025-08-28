@@ -11,9 +11,8 @@ import { wrapper } from '../../mocks';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getKpiUniqueIpsBarLensAttributes } from './kpi_unique_ips_bar';
-import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks/mock_data_view';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import { withIndices } from '@kbn/security-solution-plugin/public/data_view_manager/hooks/__mocks__/use_data_view';
+import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({

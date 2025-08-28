@@ -17,7 +17,6 @@ import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../com
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 jest.mock('../unified_components', () => {
   return {
