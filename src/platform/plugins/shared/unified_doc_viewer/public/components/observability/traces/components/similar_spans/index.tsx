@@ -16,7 +16,6 @@ import { ContentFrameworkSection } from '../../../../content_framework/section';
 import type { SpanLatencyChartData } from '../../doc_viewer_span_overview/hooks/use_span_latency_chart';
 
 export interface SimilarSpansProps {
-  id: string;
   spanDuration: number;
   latencyChart: {
     data: SpanLatencyChartData | null; // TODO move this interface
@@ -33,19 +32,17 @@ export function SimilarSpans({
   spanDuration,
   esqlQuery,
   isOtelSpan,
-  id,
 }: SimilarSpansProps) {
   return (
     <ContentFrameworkSection
-      id={id}
-      data-test-subj={`docViewerSimilarSpans-${id}`}
+      id="similarSpans"
+      data-test-subj={'docViewerSimilarSpansSection'}
       title={i18n.translate('unifiedDocViewer.observability.traces.similarSpans', {
         defaultMessage: 'Similar spans',
       })}
     >
       <ContentFrameworkChart
-        id={id}
-        data-test-subj={`docViewerSimilarSpansLatencyChart-${id}`}
+        data-test-subj={`docViewerSimilarSpansLatencyChart`}
         title={i18n.translate('unifiedDocViewer.observability.traces.similarSpans.latency.title', {
           defaultMessage: 'Latency',
         })}
@@ -63,7 +60,7 @@ export function SimilarSpans({
             showAxisTitle={false}
             showLegend={false}
             isOtelData={isOtelSpan}
-            dataTestSubPrefix="docViewerSimilarSpansDurationDistributionChart"
+            data-test-subj="docViewerSimilarSpansDurationDistributionChart"
           />
         )}
       </ContentFrameworkChart>
