@@ -100,6 +100,16 @@ jest.mock('../output', () => {
       type: 'remote_elasticsearch',
       hosts: ['http://127.0.0.1:9201'],
     },
+    'test-streams-id': {
+      id: 'test-streams-id',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'streams output',
+      // @ts-ignore
+      type: 'elasticsearch',
+      hosts: ['http://127.0.0.1:9201'],
+      write_to_streams: true,
+    },
   };
   return {
     outputService: {
@@ -1083,6 +1093,83 @@ describe('getFullAgentPolicy', () => {
         },
       },
       revision: 1,
+    });
+  });
+
+  it('should return a policy with logs permissions when write_to_streams is enabled', async () => {
+    mockAgentPolicy({
+      data_output_id: 'test-streams-id',
+      package_policies: [
+        {
+          name: 'test-policy',
+          namespace: 'defaultspace',
+          id: 'package-policy-uuid-test-123',
+          enabled: true,
+          policy_ids: ['agent-policy'],
+          package: {
+            name: 'some-logs',
+            title: 'Some logs',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logfile',
+              enabled: true,
+              streams: [
+                {
+                  id: 'logfile-some-logs.log',
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'some-logs.log',
+                    type: 'logs',
+                  },
+                },
+              ],
+            },
+          ],
+          revision: 1,
+          created_at: '2020-01-01',
+          created_by: '',
+          updated_at: '2020-01-01',
+          updated_by: '',
+        },
+      ],
+    });
+
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      output_permissions: {
+        'test-streams-id': {
+          _elastic_agent_checks: {
+            cluster: ['monitor'],
+          },
+          _elastic_agent_monitoring: {
+            indices: [
+              {
+                names: [],
+                privileges: [],
+              },
+            ],
+          },
+          'package-policy-uuid-test-123': {
+            indices: [
+              {
+                names: ['logs-some-logs.log-defaultspace'],
+                privileges: ['auto_configure', 'create_doc'],
+              },
+            ],
+          },
+          _write_to_streams: {
+            indices: [
+              {
+                names: ['logs', 'logs.*'],
+                privileges: ['auto_configure', 'create_doc'],
+              },
+            ],
+          },
+        },
+      },
     });
   });
 

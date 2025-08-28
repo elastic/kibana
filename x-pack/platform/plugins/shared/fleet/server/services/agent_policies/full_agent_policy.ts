@@ -41,6 +41,7 @@ import {
   DEFAULT_OUTPUT,
   kafkaCompressionType,
   outputType,
+  PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
@@ -304,6 +305,22 @@ export async function getFullAgentPolicy(
         packagePoliciesByOutputId[outputId].length > 0
       ) {
         Object.assign(permissions, dataPermissionsByOutputId[outputId]);
+      }
+
+      // Add logs-* permissions for outputs with write_to_streams enabled
+      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+      if (originalOutput?.write_to_streams) {
+        const streamsPermissions = {
+          _write_to_streams: {
+            indices: [
+              {
+                names: ['logs', 'logs.*'],
+                privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
+              },
+            ],
+          },
+        };
+        Object.assign(permissions, streamsPermissions);
       }
 
       outputPermissions[outputId] = permissions;
@@ -655,11 +672,6 @@ export function transformOutputToFullPolicyOutput(
 
   if (outputTypeSupportPresets(output.type)) {
     newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', load);
-  }
-
-  // Add streams configuration when write_to_streams is enabled
-  if ((output as any).write_to_streams === true) {
-    newOutput.streams = ['logs', 'logs.*'];
   }
 
   return newOutput;
