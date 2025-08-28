@@ -6,7 +6,7 @@
  */
 
 import type { FC, ChangeEvent } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -52,6 +52,36 @@ function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   return interval !== null;
 }
 
+function findDataViewId(
+  job: Job | DataFrameAnalyticsConfig,
+  customUrl: MlKibanaUrlConfig,
+  dataViewListItems?: DataViewListItem[],
+  isPartialDFAJob?: boolean
+): string | undefined {
+  // Ensure cast as dfaJob if it's just a partial from the wizard
+  const dfaJob = job as DataFrameAnalyticsConfig;
+
+  let dataViewId;
+  // DFA job url - need the timefield to test the URL. Get it from the job config. Use source index when partial job since dest index does not exist yet.
+  if (customUrl.url_value.includes('dashboards')) {
+    const sourceIndex = Array.isArray(dfaJob.source.index)
+      ? dfaJob.source.index.join()
+      : dfaJob.source.index;
+    // need to get the dataview from the dashboard to get timefield
+    const indexName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
+    const backupIndexName = sourceIndex;
+    dataViewId = dataViewListItems?.find((item) => item.title === indexName)?.id;
+    if (!dataViewId) {
+      dataViewId = dataViewListItems?.find((item) => item.title === backupIndexName)?.id;
+    }
+  } else {
+    const urlState = parseUrlState(customUrl.url_value);
+    dataViewId = urlState._a?.index;
+  }
+  // should I add try catch error handling for the case that dataViewId was not found?
+  return dataViewId;
+}
+
 export interface CustomUrlListProps {
   job: Job | DataFrameAnalyticsConfig;
   customUrls: MlUrlConfig[];
@@ -81,6 +111,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
   const mlApi = useMlApi();
   const { displayErrorToast } = useToastNotificationService();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
+  const [shouldShowTimeRange, setShouldShowTimeRange] = useState<boolean[]>([]);
 
   const styles = useMemo(
     () => ({
@@ -96,6 +127,31 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     }),
     [euiTheme.size.xl, euiTheme.size.xxxxl]
   );
+
+  useEffect(() => {
+    if (customUrls.length === 0) return;
+
+    const checkTimeRangeVisibility = async () => {
+      const results = await Promise.all(
+        customUrls.map(async (customUrl) => {
+          const kibanaUrl = customUrl as MlKibanaUrlConfig;
+          const dataViewId = findDataViewId(job, kibanaUrl, dataViewListItems, isPartialDFAJob);
+
+          if (!dataViewId) return false;
+
+          try {
+            const dataView = await dataViews.get(dataViewId);
+            return !!dataView?.timeFieldName;
+          } catch {
+            return false;
+          }
+        })
+      );
+      setShouldShowTimeRange(results);
+    };
+
+    checkTimeRangeVisibility();
+  }, [customUrls, job, dataViewListItems, isPartialDFAJob, dataViews]);
 
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     if (index < customUrls.length) {
@@ -153,25 +209,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
       customUrl.time_range !== undefined &&
       customUrl.time_range !== TIME_RANGE_TYPE.AUTO
     ) {
-      // Ensure cast as dfaJob if it's just a partial from the wizard
-      const dfaJob = job as DataFrameAnalyticsConfig;
-      let dataViewId;
-      // DFA job url - need the timefield to test the URL. Get it from the job config. Use source index when partial job since dest index does not exist yet.
-      if (customUrl.url_value.includes('dashboards')) {
-        const sourceIndex = Array.isArray(dfaJob.source.index)
-          ? dfaJob.source.index.join()
-          : dfaJob.source.index;
-        // need to get the dataview from the dashboard to get timefield
-        const indexName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
-        const backupIndexName = sourceIndex;
-        dataViewId = dataViewListItems?.find((item) => item.title === indexName)?.id;
-        if (!dataViewId) {
-          dataViewId = dataViewListItems?.find((item) => item.title === backupIndexName)?.id;
-        }
-      } else {
-        const urlState = parseUrlState(customUrl.url_value);
-        dataViewId = urlState._a?.index;
-      }
+      const dataViewId = findDataViewId(job, customUrl, dataViewListItems, isPartialDFAJob);
 
       if (dataViewId) {
         const dataView = await dataViews.get(dataViewId);
@@ -333,7 +371,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                 />
               </EuiFormRow>
             </EuiFlexItem>
-            {isCustomTimeRange === false ? (
+            {isCustomTimeRange === false && shouldShowTimeRange[index] ? (
               <EuiFlexItem css={styles.narrowField} grow={2}>
                 <EuiFormRow
                   fullWidth={true}
