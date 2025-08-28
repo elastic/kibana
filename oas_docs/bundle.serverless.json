@@ -27806,6 +27806,9 @@
                                   "elasticsearch"
                                 ],
                                 "type": "string"
+                              },
+                              "write_to_streams": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -28038,6 +28041,9 @@
                                   "remote_elasticsearch"
                                 ],
                                 "type": "string"
+                              },
+                              "write_to_streams": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -28971,6 +28977,9 @@
                           "elasticsearch"
                         ],
                         "type": "string"
+                      },
+                      "write_to_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -29203,6 +29212,9 @@
                           "remote_elasticsearch"
                         ],
                         "type": "string"
+                      },
+                      "write_to_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -30069,6 +30081,9 @@
                                 "elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -30301,6 +30316,9 @@
                                 "remote_elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -31332,6 +31350,9 @@
                                 "elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -31564,6 +31585,9 @@
                                 "remote_elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -32489,6 +32513,9 @@
                           "elasticsearch"
                         ],
                         "type": "string"
+                      },
+                      "write_to_streams": {
+                        "type": "boolean"
                       }
                     },
                     "type": "object"
@@ -32714,6 +32741,9 @@
                           "remote_elasticsearch"
                         ],
                         "type": "string"
+                      },
+                      "write_to_streams": {
+                        "type": "boolean"
                       }
                     },
                     "type": "object"
@@ -33565,6 +33595,9 @@
                                 "elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -33797,6 +33830,9 @@
                                 "remote_elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
