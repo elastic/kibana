@@ -8,6 +8,7 @@
  */
 
 import type Handlebars from '@kbn/handlebars';
+// eslint-disable-next-line @kbn/imports/no_direct_handlebars_import
 import type { HelperOptions } from 'handlebars';
 import { snakeCase, camelCase, upperCase } from 'lodash';
 
