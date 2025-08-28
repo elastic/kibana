@@ -6,8 +6,8 @@ Adds mock trace data that will enable the span and transaction cues to appear.
 1. Open Kibana Dev Tools
 2. Copy and paste the requests below
 3. Execute them to create test data
-4. Create a data view with both name and index pattern set to `traces-*`
-4. Navigate to Discover to test the observability cues
+4. Create two data views, one with name and index patter of `traces-*` and another with `logs-*`
+4. Navigate to Discover, select one of the data views, and see the observability cues
 
 ## Test Data Description
 This creates sample APM span and transaction data that will trigger both the span overview cue and transaction overview cue in Discover.
@@ -25,10 +25,15 @@ Don't forget to create the `traces-*` data view.
 ### Additional Transaction Data (Optional)
 To test the transaction overview cue specifically, you can also add this transaction data:
 
+DELETE _data_stream/traces-apm.default
+DELETE _data_stream/logs-app.default
+DELETE _index_template/traces-apm-mock-template
+DELETE _index_template/logs-app-mock-template
+
 PUT _index_template/traces-apm-mock-template
 {
   "index_patterns": ["traces-apm.*"],
-  "data_stream": {},                 // <-- required for data streams
+  "data_stream": {},
   "priority": 200,
   "template": {
     "mappings": {
@@ -38,9 +43,7 @@ PUT _index_template/traces-apm-mock-template
         "processor": { "properties": { "event": { "type": "keyword" } } },
 
         "trace": { "properties": { "id": { "type": "keyword" } } },
-        "transaction": { "properties": { "id": { "type": "keyword" } } },
-
-        "span": {
+        "transaction": {
           "properties": {
             "id": { "type": "keyword" },
             "name": { "type": "keyword" },
@@ -48,13 +51,39 @@ PUT _index_template/traces-apm-mock-template
             "duration": { "properties": { "us": { "type": "long" } } }
           }
         },
-
+        "span": {
+          "properties": {
+            "id": { "type": "keyword" },
+            "name": { "type": "keyword" },
+            "type": { "type": "keyword" },
+            "subtype": { "type": "keyword" },
+            "duration": { "properties": { "us": { "type": "long" } } }
+          }
+        },
         "parent": { "properties": { "id": { "type": "keyword" } } },
 
         "service": {
           "properties": {
             "name": { "type": "keyword" },
-            "environment": { "type": "keyword" }
+            "environment": { "type": "keyword" },
+            "version": { "type": "keyword" }
+          }
+        },
+
+        "event": { "properties": { "outcome": { "type": "keyword" } } },
+
+        "error": {
+          "properties": {
+            "id": { "type": "keyword" },
+            "message": { "type": "text" },
+            "stack_trace": { "type": "text" },
+            "exception": {
+              "properties": {
+                "type": { "type": "keyword" },
+                "message": { "type": "text" },
+                "stacktrace": { "type": "text" }
+              }
+            }
           }
         },
 
@@ -70,15 +99,85 @@ PUT _index_template/traces-apm-mock-template
   }
 }
 
-# Create a traces data stream (name under "traces-apm.*")
-PUT _data_stream/traces-apm.mock-default
+PUT _index_template/logs-app-mock-template
+{
+  "index_patterns": ["logs-app.*"],
+  "data_stream": {},
+  "priority": 200,
+  "template": {
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
 
-# Index the same mock spans into the data stream
+        "processor": { "properties": { "event": { "type": "keyword" } } },
+
+        "message": { "type": "text" },
+        "event": {
+          "properties": {
+            "original": { "type": "text" },
+            "dataset":  { "type": "keyword" },
+            "severity": { "type": "keyword" }
+          }
+        },
+        "log": { "properties": { "level": { "type": "keyword" } } },
+
+        "service": {
+          "properties": {
+            "name": { "type": "keyword" },
+            "environment": { "type": "keyword" }
+          }
+        },
+        "host": { "properties": { "name": { "type": "keyword" } } },
+        "container": { "properties": { "id": { "type": "keyword" } } },
+        "cloud": { "properties": { "provider": { "type": "keyword" } } },
+
+        "trace": { "properties": { "id": { "type": "keyword" } } },
+        "transaction": { "properties": { "id": { "type": "keyword" } } },
+
+        "error": {
+          "properties": {
+            "id": { "type": "keyword" },
+            "message": { "type": "text" },
+            "stack_trace": { "type": "text" },
+            "exception": {
+              "properties": {
+                "type": { "type": "keyword" },
+                "message": { "type": "text" },
+                "stacktrace": { "type": "text" }
+              }
+            }
+          }
+        },
+
+        "data_stream": {
+          "properties": {
+            "type":      { "type": "constant_keyword", "value": "logs" },
+            "dataset":   { "type": "keyword" },
+            "namespace": { "type": "keyword" }
+          }
+        }
+      }
+    }
+  }
+}
+
+PUT _data_stream/traces-apm.default
+PUT _data_stream/logs-app.default
+
 POST _bulk
-{"create":{"_index":"traces-apm.mock-default"}}
-{"@timestamp":"2025-08-25T17:06:53.500Z","processor":{"event":"span"},"trace":{"id":"demo-trace-1"},"transaction":{"id":"txn-1"},"span":{"id":"span-root","name":"GET /checkout","type":"request","duration":{"us":350000}},"service":{"name":"web-frontend","environment":"dev"}}
-{"create":{"_index":"traces-apm.mock-default"}}
-{"@timestamp":"2025-08-25T17:06:53.550Z","processor":{"event":"span"},"trace":{"id":"demo-trace-1"},"transaction":{"id":"txn-1"},"span":{"id":"span-db","name":"SELECT cart","type":"db","duration":{"us":120000}},"parent":{"id":"span-root"},"service":{"name":"web-frontend","environment":"dev"}}
-{"create":{"_index":"traces-apm.mock-default"}}
-{"@timestamp":"2025-08-25T17:06:53.600Z","processor":{"event":"span"},"trace":{"id":"demo-trace-1"},"transaction":{"id":"txn-1"},"span":{"id":"span-ext","name":"POST /payments","type":"external","duration":{"us":90000}},"parent":{"id":"span-root"},"service":{"name":"web-frontend","environment":"dev"}}
+{"create":{"_index":"traces-apm.default"}}
+{"@timestamp":"2025-08-28T12:00:00.000Z","processor":{"event":"transaction"},"trace":{"id":"trace-1"},"transaction":{"id":"txn-1","name":"GET /checkout","type":"request","duration":{"us":350000}},"service":{"name":"web-frontend","environment":"dev","version":"1.0.0"},"event":{"outcome":"success"},"data_stream":{"type":"traces","dataset":"apm","namespace":"default"}}
+{"create":{"_index":"traces-apm.default"}}
+{"@timestamp":"2025-08-28T12:00:00.050Z","processor":{"event":"span"},"trace":{"id":"trace-1"},"transaction":{"id":"txn-1"},"span":{"id":"span-1","name":"SELECT cart","type":"db","subtype":"mysql","duration":{"us":120000}},"parent":{"id":"txn-1"},"service":{"name":"web-frontend","environment":"dev","version":"1.0.0"},"event":{"outcome":"success"},"data_stream":{"type":"traces","dataset":"apm","namespace":"default"}}
+{"create":{"_index":"traces-apm.default"}}
+{"@timestamp":"2025-08-28T12:00:00.100Z","processor":{"event":"span"},"trace":{"id":"trace-1"},"transaction":{"id":"txn-1"},"span":{"id":"span-2","name":"POST /payments","type":"external","subtype":"http","duration":{"us":90000}},"parent":{"id":"txn-1"},"service":{"name":"web-frontend","environment":"dev","version":"1.0.0"},"event":{"outcome":"success"},"data_stream":{"type":"traces","dataset":"apm","namespace":"default"}}
 
+POST _bulk
+{"create":{"_index":"logs-app.default"}}
+{"@timestamp":"2025-08-28T12:00:05.000Z","processor":{"event":"log"},"message":"Checkout request received","log":{"level":"info"},"event":{"dataset":"app.checkout","severity":"info"},"service":{"name":"web-frontend","environment":"dev"},"host":{"name":"host-a"},"trace":{"id":"trace-1"},"transaction":{"id":"txn-1"},"data_stream":{"type":"logs","dataset":"app","namespace":"default"}}
+{"create":{"_index":"logs-app.default"}}
+{"@timestamp":"2025-08-28T12:00:05.200Z","processor":{"event":"error"},"message":"Payment provider returned 502 Bad Gateway","log":{"level":"error"},"event":{"dataset":"app.checkout","severity":"error"},"service":{"name":"web-frontend","environment":"dev"},"host":{"name":"host-a"},"error":{"id":"err-1001","message":"Upstream 502","exception":{"type":"UpstreamError","message":"HTTP 502 from pay.example","stacktrace":"UpstreamError: 502\n  at /srv/pay.js:42:17"}},"trace":{"id":"trace-1"},"transaction":{"id":"txn-1"},"data_stream":{"type":"logs","dataset":"app","namespace":"default"}}
+
+POST _bulk
+{"create":{"_index":"traces-apm.default"}}
+{"@timestamp":"2025-08-28T12:00:00.150Z","processor":{"event":"error"},"message":"Span failed with timeout","error":{"id":"terr-1","message":"Timeout connecting to payments","exception":{"type":"TimeoutError","message":"connect ETIMEDOUT"}},"trace":{"id":"trace-1"},"transaction":{"id":"txn-1"},"span":{"id":"span-2"},"service":{"name":"web-frontend","environment":"dev"},"data_stream":{"type":"traces","dataset":"apm","namespace":"default"}}

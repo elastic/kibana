@@ -30,7 +30,12 @@ interface FlyoutCueProps {
   demoIsTrial?: boolean;
 }
 
-export const FlyoutCue: React.FC<FlyoutCueProps> = ({ document, className, demoCanManageSpaces, demoIsTrial }) => {
+export const FlyoutCue: React.FC<FlyoutCueProps> = ({
+  document,
+  className,
+  demoCanManageSpaces,
+  demoIsTrial,
+}) => {
   const services = useDiscoverServices();
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -49,24 +54,34 @@ export const FlyoutCue: React.FC<FlyoutCueProps> = ({ document, className, demoC
   const solutionType = activeSpace?.solution;
 
   // Check if user can manage spaces (use demo state if provided, otherwise real services)
-  const canManageSpaces = demoCanManageSpaces !== undefined ? demoCanManageSpaces : services.application.capabilities.spaces?.manage ?? false;
+  const canManageSpaces =
+    demoCanManageSpaces !== undefined
+      ? demoCanManageSpaces
+      : services.application.capabilities.spaces?.manage ?? false;
 
   // Check if current license is a trial (use demo state if provided, otherwise real services)
-  const isTrial = demoIsTrial !== undefined ? demoIsTrial : services.licensing?.license?.type === 'trial';
+  const isTrial =
+    demoIsTrial !== undefined ? demoIsTrial : services.licensing?.license?.type === 'trial';
 
   // Get conditional message based on document type and trial status
   const getBannerMessage = () => {
     if (documentType === 'span') {
       if (isTrial) {
-        return 'Explore span analytic — See latency breakdowns and service dependencies in Observability.';
+        return 'Explore span analytics — See latency breakdowns and service dependencies in Observability.';
       } else {
-        return 'Unlock span analytics.';
+        return 'Unlock span analytics — Correlate performance across services - for everyone in this space.';
       }
     } else if (documentType === 'transaction') {
       if (isTrial) {
-        return 'Explore transaction analytics.';
+        return 'Explore transaction analytics — See performance metrics and error rates in Observability.';
       } else {
-        return 'Unlock transaction analytic.';
+        return 'Unlock transaction analytics — Monitor application performance - for everyone in this space.';
+      }
+    } else if (documentType === 'log') {
+      if (isTrial) {
+        return 'Explore log analytics — Search and analyze logs with advanced filtering in Observability.';
+      } else {
+        return 'Unlock log analytics — Centralized log management - for everyone in this space.';
       }
     }
     return '';
@@ -119,67 +134,138 @@ export const FlyoutCue: React.FC<FlyoutCueProps> = ({ document, className, demoC
     setIsDismissed(true);
   }, []);
 
-  // Check if this is an APM document (span or transaction)
+  // Check if this is an APM document (span, transaction) or log document
   const documentType = useMemo(() => {
     if (!document) return null;
-    
+
     const source = document.raw._source;
     const fields = document.raw.fields;
-    
-    // Check for traces data stream and index pattern
-    const hasTracesDataStream = fields?.['data_stream.type']?.[0] === 'traces';
-    const isTracesIndex = !!document.raw._index?.match(/^(\.ds-)?traces-/);
-    
-    if (!hasTracesDataStream || !isTracesIndex) {
-      return null;
-    }
-    
-    // Check for required common fields
-    const hasTimestamp = source?.['@timestamp'] || fields?.['@timestamp']?.[0];
-    const hasTraceId = source?.trace?.id || fields?.['trace.id']?.[0];
-    
-    if (!hasTimestamp || !hasTraceId) {
-      return null;
-    }
-    
+
     // Check processor.event
     const processorEvent = source?.processor?.event || fields?.['processor.event']?.[0];
-    
-    if (processorEvent === 'span') {
-      // Check for required span fields
-      const hasSpanId = source?.span?.id || fields?.['span.id']?.[0];
-      const hasSpanDuration = source?.span?.duration?.us || fields?.['span.duration.us']?.[0];
-      
-      if (hasSpanId && hasSpanDuration) {
-        return 'span';
+
+    // Check for required common fields
+    const hasTimestamp = source?.['@timestamp'] || fields?.['@timestamp']?.[0];
+
+    if (!hasTimestamp) {
+      return null;
+    }
+
+    // Check for APM documents (span/transaction)
+    if (processorEvent === 'span' || processorEvent === 'transaction') {
+      // Check for traces data stream and index pattern
+      const hasTracesDataStream = fields?.['data_stream.type']?.[0] === 'traces';
+      const isTracesIndex = !!document.raw._index?.match(/^(\.ds-)?traces-/);
+
+      if (!hasTracesDataStream || !isTracesIndex) {
+        return null;
       }
-    } else if (processorEvent === 'transaction') {
-      // Check for required transaction fields
-      const hasTransactionId = source?.transaction?.id || fields?.['transaction.id']?.[0];
-      const hasTransactionName = source?.transaction?.name || fields?.['transaction.name']?.[0];
-      const hasTransactionType = source?.transaction?.type || fields?.['transaction.type']?.[0];
-      const hasTransactionDuration = source?.transaction?.duration?.us || fields?.['transaction.duration.us']?.[0];
-      
-      if (hasTransactionId && hasTransactionName && hasTransactionType && hasTransactionDuration) {
-        return 'transaction';
+
+      // Check for required trace fields
+      const hasTraceId = source?.trace?.id || fields?.['trace.id']?.[0];
+
+      if (!hasTraceId) {
+        return null;
+      }
+
+      if (processorEvent === 'span') {
+        // Check for required span fields
+        const hasSpanId = source?.span?.id || fields?.['span.id']?.[0];
+        const hasSpanDuration = source?.span?.duration?.us || fields?.['span.duration.us']?.[0];
+
+        if (hasSpanId && hasSpanDuration) {
+          return 'span';
+        }
+      } else if (processorEvent === 'transaction') {
+        // Check for required transaction fields
+        const hasTransactionId = source?.transaction?.id || fields?.['transaction.id']?.[0];
+        const hasTransactionName = source?.transaction?.name || fields?.['transaction.name']?.[0];
+        const hasTransactionType = source?.transaction?.type || fields?.['transaction.type']?.[0];
+        const hasTransactionDuration =
+          source?.transaction?.duration?.us || fields?.['transaction.duration.us']?.[0];
+
+        if (
+          hasTransactionId &&
+          hasTransactionName &&
+          hasTransactionType &&
+          hasTransactionDuration
+        ) {
+          return 'transaction';
+        }
       }
     }
-    
+
+    // Check for log documents
+    if (processorEvent === 'log' || processorEvent === 'error') {
+      // Check for message field (preferred: message, fallback: event.original)
+      const hasMessage =
+        source?.message ||
+        fields?.['message']?.[0] ||
+        source?.event?.original ||
+        fields?.['event.original']?.[0];
+
+      if (!hasMessage) {
+        return null;
+      }
+
+      // Check data stream context
+      const hasLogsDataStream = fields?.['data_stream.type']?.[0] === 'logs';
+      const hasEventDataset = source?.event?.dataset || fields?.['event.dataset']?.[0];
+
+      // For processor.event: "error", allow data_stream.type: "traces" as long as error fields exist
+      let hasValidDataStream = hasLogsDataStream || hasEventDataset;
+
+      if (processorEvent === 'error') {
+        const hasTracesDataStream = fields?.['data_stream.type']?.[0] === 'traces';
+        const hasErrorFields =
+          source?.error?.id ||
+          fields?.['error.id']?.[0] ||
+          source?.error?.message ||
+          fields?.['error.message']?.[0] ||
+          source?.error?.exception?.type ||
+          fields?.['error.exception.type']?.[0] ||
+          source?.error?.exception?.message ||
+          fields?.['error.exception.message']?.[0] ||
+          source?.error?.stack_trace ||
+          fields?.['error.stack_trace']?.[0] ||
+          source?.error?.exception?.stacktrace ||
+          fields?.['error.exception.stacktrace']?.[0];
+
+        if (hasTracesDataStream && hasErrorFields) {
+          hasValidDataStream = true;
+        }
+      }
+
+      if (!hasValidDataStream) {
+        return null;
+      }
+
+      // Check for attribution (any of these): service.name, host.name, container.id, or cloud.provider
+      const hasAttribution =
+        source?.service?.name ||
+        fields?.['service.name']?.[0] ||
+        source?.host?.name ||
+        fields?.['host.name']?.[0] ||
+        source?.container?.id ||
+        fields?.['container.id']?.[0] ||
+        source?.cloud?.provider ||
+        fields?.['cloud.provider']?.[0];
+
+      if (hasAttribution) {
+        return 'log';
+      }
+    }
+
     return null;
   }, [document]);
 
   // Don't render if:
   // - We're in Observability solution (not Classic)
-  // - Not an APM document (span or transaction)
+  // - Not an APM document (span/transaction) or log document
   // - User dismissed the banner
   // - User cannot manage spaces
   const shouldRenderBanner =
-    solutionType !== 'oblt' &&
-    documentType !== null &&
-    !isDismissed &&
-    canManageSpaces;
-
-
+    solutionType !== 'oblt' && documentType !== null && !isDismissed && canManageSpaces;
 
   if (!shouldRenderBanner) {
     return null;
@@ -198,8 +284,17 @@ export const FlyoutCue: React.FC<FlyoutCueProps> = ({ document, className, demoC
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <span>
-                  {/* <strong>{documentType === 'span' ? 'Span' : 'Transaction'} data detected</strong>. {getBannerMessage()} */}
-                  <strong>{documentType === 'span' ? 'Span' : 'Transaction'} data detected</strong>
+                  <strong>
+                    {documentType === 'span'
+                      ? 'Span'
+                      : documentType === 'transaction'
+                      ? 'Transaction'
+                      : documentType === 'log'
+                      ? 'Log'
+                      : 'Unknown'}{' '}
+                    data detected
+                  </strong>
+                  {/* . {getBannerMessage()} */}
                 </span>
               </EuiFlexItem>
             </EuiFlexGroup>

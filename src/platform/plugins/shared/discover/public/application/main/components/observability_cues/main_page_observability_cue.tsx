@@ -90,8 +90,8 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
     }
   }, [solutionType]);
 
-  // Probe for APM data (span OR transaction)
-  const { hasApmData, isLoading } = useMainPageObservabilityProbe();
+  // Probe for APM data (span OR transaction) and logs data
+  const { hasApmData, hasLogsData, isLoading } = useMainPageObservabilityProbe();
 
   // Check if user can manage spaces (with demo override)
   const canManageSpaces =
@@ -103,9 +103,9 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
   // Get conditional callout message based on trial status
   const getCalloutMessage = () => {
     if (isTrial) {
-      return 'Explore APM analytics — See latency, throughput, and error rates with curated views in Observability.';
+      return 'Explore APM analytics — see latency, throughput, and error rates.';
     } else {
-      return 'Unlock APM analytics — Correlate performance and errors across services - for everyone in this space.';
+      return 'Unlock APM analytics for everyone in this space.';
     }
   };
 
@@ -190,14 +190,14 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
 
   // Don't render the callout if:
   // - We're in Observability solution (not Classic)
-  // - No APM data detected
+  // - No APM or logs data detected
   // - Still loading
   // - User dismissed the cue
   // - User cannot manage spaces
   // - Full callout is hidden (for demo purposes)
   const shouldRenderCallout =
     solutionType !== 'oblt' &&
-    hasApmData &&
+    (hasApmData || hasLogsData) &&
     !isLoading &&
     !isDismissed &&
     canManageSpaces &&
@@ -222,7 +222,11 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <span>
-                      <strong>APM data detected</strong>. {getCalloutMessage()}
+                      <strong>
+                        {hasApmData && hasLogsData ? 'APM and logs data detected' :
+                         hasApmData ? 'APM data detected' :
+                         hasLogsData ? 'Logs data detected' : 'Data detected'}
+                      </strong>. {getCalloutMessage()}
                     </span>
                   </EuiFlexItem>
                 </EuiFlexGroup>

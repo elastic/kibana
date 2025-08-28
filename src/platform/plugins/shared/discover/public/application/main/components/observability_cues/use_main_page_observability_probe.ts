@@ -18,6 +18,7 @@ import { useCurrentDataView } from '../../state_management/redux';
 
 interface MainPageObservabilityProbeResult {
   hasApmData: boolean;
+  hasLogsData: boolean;
   isLoading: boolean;
   error?: Error;
 }
@@ -39,6 +40,10 @@ const createCacheKey = (
 
 const isTracesDataStream = (index: string): boolean => {
   return /^(\.ds-)?traces-/.test(index);
+};
+
+const isLogsDataStream = (index: string): boolean => {
+  return /^(\.ds-)?logs-/.test(index);
 };
 
 const validateApmHit = (hit: Record<string, any>): boolean => {
@@ -103,7 +108,64 @@ const validateApmHit = (hit: Record<string, any>): boolean => {
   return true;
 };
 
-const buildProbeQuery = (
+const validateLogsHit = (hit: Record<string, any>): boolean => {
+  // Check if the hit has the required log fields
+  const processorEvent = hit.fields?.['processor.event']?.[0];
+  const timestamp = hit.fields?.['@timestamp'];
+  
+  // Check if it's a valid log event type
+  const isValidEvent = processorEvent === 'log' || processorEvent === 'error';
+  
+  if (!isValidEvent || !timestamp) {
+    return false;
+  }
+
+  // Check for message field (preferred: message, fallback: event.original)
+  const hasMessage = hit.fields?.['message']?.[0] || hit.fields?.['event.original']?.[0];
+  
+  if (!hasMessage) {
+    return false;
+  }
+
+  // Check data stream context
+  const dataStreamType = hit.fields?.['data_stream.type']?.[0];
+  const hasEventDataset = hit.fields?.['event.dataset']?.[0];
+  
+  // For processor.event: "error", allow data_stream.type: "traces" as long as error fields exist
+  let hasValidDataStream = dataStreamType === 'logs' || hasEventDataset;
+  
+  if (processorEvent === 'error') {
+    const hasTracesDataStream = dataStreamType === 'traces';
+    const hasErrorFields = hit.fields?.['error.id']?.[0] ||
+                          hit.fields?.['error.message']?.[0] ||
+                          hit.fields?.['error.exception.type']?.[0] ||
+                          hit.fields?.['error.exception.message']?.[0] ||
+                          hit.fields?.['error.stack_trace']?.[0] ||
+                          hit.fields?.['error.exception.stacktrace']?.[0];
+    
+    if (hasTracesDataStream && hasErrorFields) {
+      hasValidDataStream = true;
+    }
+  }
+  
+  if (!hasValidDataStream) {
+    return false;
+  }
+
+  // Check for attribution (any of these): service.name, host.name, container.id, or cloud.provider
+  const hasAttribution = hit.fields?.['service.name']?.[0] ||
+                        hit.fields?.['host.name']?.[0] ||
+                        hit.fields?.['container.id']?.[0] ||
+                        hit.fields?.['cloud.provider']?.[0];
+
+  if (!hasAttribution) {
+    return false;
+  }
+
+  return true;
+};
+
+const buildApmProbeQuery = (
   dataView: Record<string, any>,
   query: Query,
   filters: Filter[],
@@ -118,9 +180,6 @@ const buildProbeQuery = (
             should: [
               { term: { 'processor.event': 'span' } },
               { term: { 'processor.event': 'transaction' } },
-              // Future: Add more APM event types here
-              // { term: { 'processor.event': 'error' } },
-              // { term: { 'processor.event': 'metric' } },
             ],
             minimum_should_match: 1,
           },
@@ -150,9 +209,66 @@ const buildProbeQuery = (
   return finalQuery;
 };
 
-const validateProbeResponse = (rawResponse: any): boolean => {
+const buildLogsProbeQuery = (
+  dataView: Record<string, any>,
+  query: Query,
+  filters: Filter[],
+  timeRange: TimeRange
+) => {
+  // Build the base probe query for logs data (log OR error)
+  const probeQuery = {
+    bool: {
+      filter: [
+        {
+          bool: {
+            should: [
+              { term: { 'processor.event': 'log' } },
+              { term: { 'processor.event': 'error' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        { exists: { field: '@timestamp' } },
+        {
+          bool: {
+            should: [
+              { exists: { field: 'message' } },
+              { exists: { field: 'event.original' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ],
+    },
+  };
+
+  // Convert KQL to DSL if needed
+  let finalQuery = probeQuery;
+  if (query && typeof query !== 'string') {
+    try {
+      const esQuery = buildEsQuery(dataView, query, filters);
+      finalQuery = {
+        bool: {
+          must: [probeQuery],
+          filter: esQuery.bool?.filter || [],
+        },
+      };
+    } catch (e) {
+      // If KQL parsing fails, fall back to basic query
+    }
+  }
+
+  return finalQuery;
+};
+
+const validateApmProbeResponse = (rawResponse: any): boolean => {
   const hits = rawResponse.hits?.hits || [];
   return hits.length > 0 && validateApmHit(hits[0]);
+};
+
+const validateLogsProbeResponse = (rawResponse: any): boolean => {
+  const hits = rawResponse.hits?.hits || [];
+  return hits.length > 0 && validateLogsHit(hits[0]);
 };
 
 export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResult => {
@@ -165,21 +281,23 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
   const [hasApmData, setHasApmData] = useState(false);
+  const [hasLogsData, setHasLogsData] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const cacheRef = useRef<Map<string, { result: boolean; timestamp: number }>>(new Map());
+  const cacheRef = useRef<Map<string, { apmResult: boolean; logsResult: boolean; timestamp: number }>>(new Map());
 
   const cacheKey = useMemo(() => {
     if (!dataView) return null;
     return createCacheKey(dataView.id, query, filters, timeRange);
   }, [dataView, query, filters, timeRange]);
 
-  const probeForApmData = useCallback(async () => {
+  const probeForObservabilityData = useCallback(async () => {
     if (!dataView || !cacheKey) return;
 
     // Check cache first
     const cached = cacheRef.current.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      setHasApmData(cached.result);
+      setHasApmData(cached.apmResult);
+      setHasLogsData(cached.logsResult);
       return;
     }
 
@@ -194,17 +312,14 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
     abortControllerRef.current = new AbortController();
 
     try {
-      // Create search source for the probe
-      const searchSource = services.data.search.searchSource.createEmpty();
-      
-      // Build the probe query
-      const probeQuery = buildProbeQuery(dataView, query, filters, timeRange);
+      // Probe for APM data
+      const apmSearchSource = services.data.search.searchSource.createEmpty();
+      const apmProbeQuery = buildApmProbeQuery(dataView, query, filters, timeRange);
 
-      // Configure search source
-      searchSource
+      apmSearchSource
         .setField('index', dataView)
         .setField('size', 1)
-        .setField('query', probeQuery)
+        .setField('query', apmProbeQuery)
         .setField('trackTotalHits', false)
         .setField('fields', [
           'data_stream.type', 
@@ -218,15 +333,58 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
           'transaction.duration.us'
         ]);
 
-      const { rawResponse } = await lastValueFrom(
-        searchSource.fetch$({
+      const apmResponse = await lastValueFrom(
+        apmSearchSource.fetch$({
           signal: abortControllerRef.current.signal,
         })
       );
 
-      const hasApmDataResult = validateProbeResponse(rawResponse);
-      cacheRef.current.set(cacheKey, { result: hasApmDataResult, timestamp: Date.now() });
+      const hasApmDataResult = validateApmProbeResponse(apmResponse.rawResponse);
+
+      // Probe for logs data
+      const logsSearchSource = services.data.search.searchSource.createEmpty();
+      const logsProbeQuery = buildLogsProbeQuery(dataView, query, filters, timeRange);
+
+      logsSearchSource
+        .setField('index', dataView)
+        .setField('size', 1)
+        .setField('query', logsProbeQuery)
+        .setField('trackTotalHits', false)
+        .setField('fields', [
+          'data_stream.type',
+          'processor.event',
+          'message',
+          'event.original',
+          'event.dataset',
+          'service.name',
+          'host.name',
+          'container.id',
+          'cloud.provider',
+          'error.id',
+          'error.message',
+          'error.exception.type',
+          'error.exception.message',
+          'error.stack_trace',
+          'error.exception.stacktrace'
+        ]);
+
+      const logsResponse = await lastValueFrom(
+        logsSearchSource.fetch$({
+          signal: abortControllerRef.current.signal,
+        })
+      );
+
+      const hasLogsDataResult = validateLogsProbeResponse(logsResponse.rawResponse);
+
+      // Cache results
+      cacheRef.current.set(cacheKey, { 
+        apmResult: hasApmDataResult, 
+        logsResult: hasLogsDataResult, 
+        timestamp: Date.now() 
+      });
+      
       setHasApmData(hasApmDataResult);
+      setHasLogsData(hasLogsDataResult);
     } catch (err) {
       if (err.name === 'AbortError') {
         return; // Request was cancelled
@@ -238,8 +396,8 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
   }, [dataView, query, filters, timeRange, cacheKey, services]);
 
   useEffect(() => {
-    probeForApmData();
-  }, [probeForApmData]);
+    probeForObservabilityData();
+  }, [probeForObservabilityData]);
 
   useEffect(() => {
     return () => {
@@ -251,6 +409,7 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
 
   return {
     hasApmData,
+    hasLogsData,
     isLoading,
     error,
   };
