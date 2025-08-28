@@ -192,7 +192,7 @@ describe('useAssistantAvailability', () => {
       isAssistantEnabled: false,
       isAssistantVisible: false,
       isAssistantManagementEnabled: false,
-      isAssistantConversationSummarizationEnabled: true,
+      isAssistantConversationSummarizationEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
