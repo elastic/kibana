@@ -29,13 +29,14 @@ export function toToolDefinition(
     tags,
     configuration,
     schema: searchSchema,
-    handler: async ({ nlQuery }, { esClient, modelProvider }) => {
+    handler: async ({ nlQuery }, { esClient, modelProvider, logger }) => {
       const { pattern } = configuration;
       const results = await runSearchTool({
         nlQuery,
         index: pattern,
         esClient: esClient.asCurrentUser,
         model: await modelProvider.getDefaultModel(),
+        logger,
       });
       return { results };
     },

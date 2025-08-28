@@ -93,7 +93,7 @@ export const createNaturalLanguageSearchTool = ({
   return toTool(
     async ({ query, index }) => {
       return withExecuteToolSpan(
-        relevanceSearchToolName,
+        naturalLanguageSearchToolName,
         { tool: { input: { query, index } } },
         async () => {
           const response = await naturalLanguageSearch({

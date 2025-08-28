@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { filter, toArray, firstValueFrom } from 'rxjs';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isChatCompletionMessageEvent, isChatCompletionEvent } from '@kbn/inference-common';
@@ -29,24 +28,13 @@ export const generateEsql = async ({
 }: {
   nlQuery: string;
   context?: string;
-  index?: string; // TODO rename to context
+  index?: string; // TODO rename to target
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<GenerateEsqlResponse> => {
-  let selectedIndex: string | undefined;
-  let mappings: MappingTypeMapping;
+  let selectedTarget = index;
 
-  console.log('**** generate esql', index, nlQuery);
-  // TODO: resolve resource mappings regardless of type.
-
-  if (index) {
-    selectedIndex = index;
-    const targetMapping = await getResourceMappings({
-      resourceName: index,
-      esClient,
-    });
-    mappings = targetMapping.mappings;
-  } else {
+  if (!selectedTarget) {
     const {
       resources: [selectedResource],
     } = await indexExplorer({
@@ -55,19 +43,14 @@ export const generateEsql = async ({
       limit: 1,
       model,
     });
-
-    // TODO: pass the target type too.
-    const targetMapping = await getResourceMappings({
-      resourceName: selectedResource.name,
-      esClient,
-    });
-    mappings = targetMapping.mappings;
+    selectedTarget = selectedResource.name;
   }
 
-  console.log(
-    '**** generate esql - mappings',
-    JSON.stringify(mappings, undefined, 2).substring(0, 100)
-  );
+  const targetMapping = await getResourceMappings({
+    resourceName: selectedTarget,
+    esClient,
+  });
+  const mappings = targetMapping.mappings;
 
   const esqlEvents$ = naturalLanguageToEsql({
     // @ts-expect-error using a scoped inference client
@@ -79,13 +62,13 @@ export const generateEsql = async ({
 
         - Natural language query: "${nlQuery}",
         - Additional context: "${context ?? 'N/A'}
-        - Index to use: "${selectedIndex}"
+        - Index to use: "${selectedTarget}"
         - Mapping of this index:
         \`\`\`json
         ${JSON.stringify(mappings, undefined, 2)}
         \`\`\`
 
-        Given those info, please generate an ES|QL query to address the user request
+        Given those info, please generate an ES|QL query to address the user request.
         `,
   });
 

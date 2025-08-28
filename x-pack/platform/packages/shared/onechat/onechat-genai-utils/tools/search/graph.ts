@@ -11,7 +11,7 @@ import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { ScopedModel } from '@kbn/onechat-server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ToolResult } from '@kbn/onechat-common/tools';
 import { indexExplorer } from '../index_explorer';
 import { createNaturalLanguageSearchTool, createRelevanceSearchTool } from './inner_tools';
@@ -21,7 +21,7 @@ import type { SearchTarget } from './types';
 const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
-  index: Annotation<string | undefined>(),
+  targetPattern: Annotation<string | undefined>(),
   // inner
   indexIsValid: Annotation<boolean>(),
   searchTarget: Annotation<SearchTarget>(),
@@ -42,9 +42,11 @@ export type StateType = typeof StateAnnotation.State;
 export const createSearchToolGraph = ({
   model,
   esClient,
+  logger,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
+  logger: Logger;
 }) => {
   const tools = [
     createRelevanceSearchTool({ model, esClient }),
@@ -56,9 +58,10 @@ export const createSearchToolGraph = ({
   const selectAndValidateIndex = async (state: StateType) => {
     const explorerRes = await indexExplorer({
       nlQuery: state.nlQuery,
-      indexPattern: state.index ?? '*',
+      indexPattern: state.targetPattern ?? '*',
       esClient,
       model,
+      logger,
       limit: 1,
     });
 

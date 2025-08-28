@@ -29,6 +29,7 @@ export const relevanceSearch = async ({
 
   console.log('**** relevance search', index, term);
   // TODO: retrieve mappings regardless of target type
+  // <---
 
   const mappings = await getIndexMappings({
     indices: [index],

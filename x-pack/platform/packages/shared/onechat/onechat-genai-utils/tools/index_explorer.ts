@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { take } from 'lodash';
 import { z } from '@kbn/zod';
+import type { Logger } from '@kbn/logging';
 import type { ScopedModel } from '@kbn/onechat-server';
+import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   AliasSearchSource,
   IndexSearchSource,
   DataStreamSearchSource,
-  EsSearchSource,
 } from './steps/list_search_sources';
 import { listSearchSources } from './steps/list_search_sources';
 import { getIndexMappings, getDatastreamMappings } from './steps/get_mappings';
@@ -32,7 +34,7 @@ interface ResourceDescriptor {
   type: 'index' | 'alias' | 'data_stream';
   name: string;
   description?: string;
-  fields: string[];
+  fields?: string[];
 }
 
 const createIndexSummaries = async ({
@@ -56,6 +58,21 @@ const createIndexSummaries = async ({
       name: indexName,
       description: indexMappings?.mappings._meta?.description,
       fields: flattened.map((field) => field.path),
+    };
+  });
+};
+
+const createAliasSummaries = async ({
+  aliases,
+}: {
+  aliases: AliasSearchSource[];
+}): Promise<ResourceDescriptor[]> => {
+  // for now aliases are only described by the list of indices they target
+  return aliases.map<ResourceDescriptor>(({ name: aliasName, indices }) => {
+    return {
+      type: 'alias',
+      name: aliasName,
+      description: `Point to the following indices: ${indices.join(', ')}`,
     };
   });
 };
@@ -88,20 +105,28 @@ const createDatastreamSummaries = async ({
 export const indexExplorer = async ({
   nlQuery,
   indexPattern = '*',
+  includeAliases = true,
+  includeDatastream = true,
   limit = 1,
   esClient,
   model,
+  logger,
 }: {
   nlQuery: string;
   indexPattern?: string;
+  includeAliases?: boolean;
+  includeDatastream?: boolean;
   limit?: number;
   esClient: ElasticsearchClient;
   model: ScopedModel;
+  logger?: Logger;
 }): Promise<IndexExplorerResponse> => {
-  console.log('indexExplorer - start', indexPattern, nlQuery);
+  logger?.trace(() => `index_explorer - query="${nlQuery}", pattern="${indexPattern}"`);
 
   const sources = await listSearchSources({
     pattern: indexPattern,
+    excludeIndicesRepresentedAsDatastream: true,
+    excludeIndicesRepresentedAsAlias: false,
     esClient,
   });
 
@@ -109,58 +134,40 @@ export const indexExplorer = async ({
   const hasAliases = sources.aliases.length > 0;
   const hasDataStreams = sources.data_streams.length > 0;
 
-  console.log(
-    'indexExplorer - list resources',
-    sources.indices.length,
-    sources.aliases.length,
-    sources.data_streams.length
+  logger?.trace(
+    () =>
+      `index_explorer - found ${sources.indices.length} indices, ${sources.aliases.length} aliases, ${sources.data_streams.length} datastreams for query="${nlQuery}"`
   );
 
   if (!hasAliases && !hasIndices && !hasDataStreams) {
     return { resources: [] };
   }
 
-  // TODO: if only one, return it.
-
   const resources: ResourceDescriptor[] = [];
   if (hasIndices) {
     const indexDescriptors = await createIndexSummaries({ indices: sources.indices, esClient });
     resources.push(...indexDescriptors);
   }
-  if (hasDataStreams) {
+  if (hasDataStreams && includeDatastream) {
     const dsDescriptors = await createDatastreamSummaries({
       datastreams: sources.data_streams,
       esClient,
     });
     resources.push(...dsDescriptors);
   }
-  // TODO: aliases
+  if (hasAliases && includeAliases) {
+    const aliasDescriptors = await createAliasSummaries({ aliases: sources.aliases });
+    resources.push(...aliasDescriptors);
+  }
 
-  // console.log('*** resource descriptors');
-  // console.log(JSON.stringify(resources, null, 2));
-
-  // TODO: FIX
-
-  const selectedIndices = await selectIndices({
+  const selectedResources = await selectResources({
     resources,
     nlQuery,
     model,
     limit,
   });
 
-  console.log('**** selected indices', selectedIndices);
-
-  const relevantResources: RelevantResource[] = selectedIndices.map<RelevantResource>(
-    ({ name, type, reason }) => {
-      return {
-        name,
-        type,
-        reason,
-      };
-    }
-  );
-
-  return { resources: relevantResources };
+  return { resources: selectedResources };
 };
 
 export interface SelectedResource {
@@ -177,41 +184,46 @@ export const createIndexSelectorPrompt = ({
   resources: ResourceDescriptor[];
   nlQuery: string;
   limit?: number;
-}): string => {
-  // TODO: better formatting
+}): BaseMessageLike[] => {
+  // Helper function to format each resource in an XML-like block
+  const formatResource = (res: ResourceDescriptor): string => {
+    const topFields = take(res.fields ?? [], 10)
+      .map((f) => `      <field>${f}</field>`)
+      .join('\n');
 
-  const indicesAndDescriptions = resources
-    .map((resource) => {
-      if (resource.type === 'index') {
-        // TODO
-        return `- Index: ${resource.name} - description: ${resource.description}`;
-      }
-      if (resource.type === 'alias') {
-        // TODO
-      }
-      if (resource.type === 'data_stream') {
-        // TODO
-        return `- DataStream: ${resource.name} - description: ${resource.description}`;
-      }
-      return '';
-    })
-    .join('\n\n');
+    const description = res.description ?? 'No description provided.';
 
-  return `You are an AI assistant for the Elasticsearch company.
-       based on a natural language query from the user, your task is to select up to ${limit} most relevant targets
-       to perform that search, from a list of indices, aliases and datastreams.
+    return `<resource type="${res.type}" name="${res.name}" description="${description}">
+  <sample_fields>
+${topFields || '      (No fields available)'}
+  </sample_fields>
+</resource>`;
+  };
 
-       *The natural language query is:* ${nlQuery}
+  return [
+    [
+      'system',
+      `You are an AI assistant for the Elasticsearch company.
 
-       *List of indices with their descriptions:*
-       ${indicesAndDescriptions}
+       Based on a natural language query provided by the user, your task is to select up to ${limit} most relevant targets
+       to perform that search, from a list of indices, aliases and datastreams.`,
+    ],
+    [
+      'human',
+      `*The natural language query is:* "${nlQuery}"
+
+       ## Available resources
+       <resources>
+        ${resources.map(formatResource).join('\n')}
+       </resources>
 
        Based on the natural language query and the index descriptions, please return the most relevant indices with your reasoning.
-       Remember, you should select at maximum ${limit} targets.
-       `;
+       Remember, you should select at maximum ${limit} targets. If none match, just return an empty list.`,
+    ],
+  ];
 };
 
-const selectIndices = async ({
+const selectResources = async ({
   resources,
   nlQuery,
   model,
@@ -225,6 +237,12 @@ const selectIndices = async ({
   const { chatModel } = model;
   const indexSelectorModel = chatModel.withStructuredOutput(
     z.object({
+      reasoning: z
+        .string()
+        .optional()
+        .describe(
+          'optional brief overall reasoning. Can be used to explain why you did not return any target.'
+        ),
       targets: z.array(
         z.object({
           reason: z.string().describe('brief explanation of why this resource could be relevant'),
