@@ -11,20 +11,22 @@ import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import type {
   BaseStep,
-  IfStep,
   ForEachStep,
-  WorkflowYaml,
+  HttpStep,
+  IfStep,
   WaitStep,
+  WorkflowYaml,
   WorkflowRetry,
 } from '../../spec/schema';
 import type {
-  EnterIfNode,
-  ExitIfNode,
-  EnterForeachNode,
-  ExitForeachNode,
-  EnterConditionBranchNode,
-  ExitConditionBranchNode,
   AtomicGraphNode,
+  EnterConditionBranchNode,
+  EnterForeachNode,
+  EnterIfNode,
+  ExitConditionBranchNode,
+  ExitForeachNode,
+  ExitIfNode,
+  HttpGraphNode,
   WaitGraphNode,
   EnterRetryNode,
   ExitRetryNode,
@@ -69,6 +71,10 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
     return visitWaitStep(graph, previousStep, modifiedCurrentStep);
   }
 
+  if ((modifiedCurrentStep as HttpStep).type === 'http') {
+    return visitHttpStep(graph, previousStep, modifiedCurrentStep);
+  }
+
   if ((modifiedCurrentStep as ContinueStep).type === 'continue') {
     return visitContinueStep(graph, previousStep, modifiedCurrentStep as ContinueStep);
   }
@@ -96,6 +102,23 @@ export function visitWaitStep(graph: graphlib.Graph, previousStep: any, currentS
   }
 
   return waitNode;
+}
+
+export function visitHttpStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+  const httpNode: HttpGraphNode = {
+    id: getNodeId(currentStep),
+    type: 'http',
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(httpNode.id, httpNode);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), httpNode.id);
+  }
+
+  return httpNode;
 }
 
 export function visitAtomicStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
