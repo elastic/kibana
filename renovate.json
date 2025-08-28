@@ -4628,6 +4628,27 @@
       "enabled": true
     },
     {
+      "groupName": "moonrepo",
+      "matchDepNames": [
+        "@moonrepo/cli"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main",
+        "/^[9].*/",
+        "8.19"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "chrome-remote-interface",
       "matchDepNames": [
         "chrome-remote-interface",
