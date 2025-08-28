@@ -17,6 +17,10 @@ import type {
   WaitStep,
   WorkflowYaml,
   WorkflowRetry,
+  StepWithOnFailure,
+  StepWithIfCondition,
+  StepWithForeach,
+  WorkflowOnFailure,
 } from '../../spec/schema';
 import type {
   AtomicGraphNode,
@@ -439,78 +443,85 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
    * The order affects what context will be available in the step if/foreach/etc operation.
    */
 
-  if ((currentStep as any)?.['on-failure']?.continue) {
-    // Wrap the current step in a continue step
-    // and remove the continue from the current step's on-failure to avoid infinite nesting
-    // The continue logic will be handled by the outer continue step
-    // We keep other on-failure properties (like fallback-step, retry) on the inner step
-    // so they can be handled if needed
-    return {
-      name: `continue_${getNodeId(currentStep)}`,
-      type: 'continue',
-      steps: [
-        handleStepLevelOperations({
-          ...currentStep,
-          'on-failure': omit((currentStep as any)['on-failure'], ['continue']) as any,
-        } as any),
-      ],
-    } as ContinueStep;
-  }
+  if ((currentStep as StepWithOnFailure)?.['on-failure']) {
+    const stepWithOnFailure = currentStep as StepWithOnFailure;
+    const onFailureConfig = stepWithOnFailure['on-failure']!;
 
-  if ((currentStep as any)?.['on-failure']?.['fallback-step']) {
-    // Wrap the current step in a fallback step
-    // and remove the fallback-step from the current step's on-failure to avoid infinite nesting
-    const fallbackSteps = (currentStep as any)?.['on-failure']?.['fallback-step'];
-    return {
-      name: `fallback_${getNodeId(currentStep)}`,
-      type: 'fall-back',
-      normalPathSteps: [
-        handleStepLevelOperations({
-          ...currentStep,
-          'on-failure': omit((currentStep as any)['on-failure'], ['fallback-step']) as any,
-        } as any),
-      ],
-      fallbackPathSteps: Array.isArray(fallbackSteps) ? fallbackSteps : [fallbackSteps],
-    } as FallbackStep;
-  }
+    if (onFailureConfig?.continue) {
+      // Wrap the current step in a continue step
+      // and remove the continue from the current step's on-failure to avoid infinite nesting
+      // The continue logic will be handled by the outer continue step
+      // We keep other on-failure properties (like fallback-step, retry) on the inner step
+      // so they can be handled if needed
+      return {
+        name: `continue_${getNodeId(currentStep)}`,
+        type: 'continue',
+        steps: [
+          handleStepLevelOperations({
+            ...currentStep,
+            'on-failure': omit(onFailureConfig, ['continue']) as WorkflowOnFailure,
+          } as BaseStep),
+        ],
+      } as ContinueStep;
+    }
 
-  if ((currentStep as any)?.['on-failure']?.retry) {
-    // Wrap the current step in a retry step
-    // and remove the retry from the current step's on-failure to avoid infinite nesting
-    // The retry logic will be handled by the outer retry step
-    // We keep other on-failure properties (like fallback-step, continue) on the inner step
-    // so they can be handled if the retry attempts are exhausted
-    return {
-      name: `retry_${getNodeId(currentStep)}`,
-      type: 'retry',
-      steps: [
-        handleStepLevelOperations({
-          ...currentStep,
-          'on-failure': omit((currentStep as any)['on-failure'], ['retry']) as any,
-        } as any),
-      ],
-      retry: (currentStep as any)['on-failure']?.retry,
-    } as RetryStep;
+    if (onFailureConfig['fallback-steps']) {
+      // Wrap the current step in a fallback step
+      // and remove the fallback-step from the current step's on-failure to avoid infinite nesting
+      const fallbackSteps = (currentStep as StepWithOnFailure)?.['on-failure']?.['fallback-steps'];
+      return {
+        name: `fallback_${getNodeId(currentStep)}`,
+        type: 'fall-back',
+        normalPathSteps: [
+          handleStepLevelOperations({
+            ...currentStep,
+            'on-failure': omit(onFailureConfig, ['fallback-steps']) as WorkflowOnFailure,
+          } as BaseStep),
+        ],
+        fallbackPathSteps: Array.isArray(fallbackSteps) ? fallbackSteps : [fallbackSteps],
+      } as FallbackStep;
+    }
+
+    if (onFailureConfig?.retry) {
+      // Wrap the current step in a retry step
+      // and remove the retry from the current step's on-failure to avoid infinite nesting
+      // The retry logic will be handled by the outer retry step
+      // We keep other on-failure properties (like fallback-step, continue) on the inner step
+      // so they can be handled if the retry attempts are exhausted
+      return {
+        name: `retry_${getNodeId(currentStep)}`,
+        type: 'retry',
+        steps: [
+          handleStepLevelOperations({
+            ...currentStep,
+            'on-failure': omit(onFailureConfig, ['retry']) as WorkflowOnFailure,
+          } as BaseStep),
+        ],
+        retry: onFailureConfig.retry,
+      } as RetryStep;
+    }
   }
 
   // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
   // when the step is already a foreach step
-  if (currentStep.if) {
-    const modifiedStep = omit(currentStep, ['if']);
+  if ((currentStep as StepWithIfCondition).if) {
+    const stepWithIfCondition = currentStep as StepWithIfCondition;
+    const modifiedStep = omit(stepWithIfCondition, ['if']) as BaseStep;
     return {
       name: `if_${getNodeId(currentStep)}`,
       type: 'if',
-      condition: currentStep.if,
+      condition: stepWithIfCondition.if,
       steps: [handleStepLevelOperations(modifiedStep)],
     } as IfStep;
   }
 
-  if (currentStep.foreach && (currentStep as ForEachStep).type !== 'foreach') {
-    const modifiedStep = omit(currentStep, ['foreach']);
+  if ((currentStep as StepWithForeach).foreach && (currentStep as ForEachStep).type !== 'foreach') {
+    const stepWithForeach = currentStep as StepWithForeach;
+    const modifiedStep = omit(stepWithForeach, ['foreach']) as BaseStep;
     return {
       name: `foreach_${getNodeId(currentStep)}`,
       type: 'foreach',
-      foreach: currentStep.foreach,
+      foreach: stepWithForeach.foreach,
       steps: [handleStepLevelOperations(modifiedStep)],
     } as ForEachStep;
   }

@@ -1018,6 +1018,16 @@ describe('convertToWorkflowGraph', () => {
               'max-attempts': 10,
               delay: '2s',
             },
+            'fallback-steps': [
+              {
+                name: 'innerFallbackStep',
+                type: 'slack',
+                connectorId: 'slack',
+                with: {
+                  message: 'Hello from foreach nested step 1',
+                },
+              } as ConnectorStep,
+            ],
             continue: true,
           },
           with: {
@@ -1032,6 +1042,8 @@ describe('convertToWorkflowGraph', () => {
       const topsort = graphlib.alg.topsort(executionGraph);
       expect(topsort).toEqual([
         'continue_testForeachConnectorStep',
+        'fallback_testForeachConnectorStep',
+        'normalPath_fallback_testForeachConnectorStep',
         'retry_testForeachConnectorStep',
         'if_testForeachConnectorStep',
         'enterThen(if_testForeachConnectorStep)',
@@ -1041,6 +1053,11 @@ describe('convertToWorkflowGraph', () => {
         'exitThen(if_testForeachConnectorStep)',
         'exitCondition(if_testForeachConnectorStep)',
         'exitRetry(retry_testForeachConnectorStep)',
+        'exit_normalPath_fallback_testForeachConnectorStep',
+        'fallbackPath_fallback_testForeachConnectorStep',
+        'innerFallbackStep',
+        'exit_fallbackPath_fallback_testForeachConnectorStep',
+        'exitCondition(fallback_testForeachConnectorStep)',
         'exitContinue(continue_testForeachConnectorStep)',
       ]);
     });
