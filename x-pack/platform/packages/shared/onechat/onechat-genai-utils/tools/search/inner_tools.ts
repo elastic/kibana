@@ -12,6 +12,7 @@ import type { ScopedModel } from '@kbn/onechat-server';
 import type { ResourceResult, ToolResult } from '@kbn/onechat-common/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { getToolResultId } from '@kbn/onechat-common/tools/tool_result';
 import { relevanceSearch } from '../relevance_search';
 import { naturalLanguageSearch } from '../nl_search';
 import type { MatchResult } from '../steps/perform_match_search';
@@ -111,8 +112,13 @@ export const createNaturalLanguageSearchTool = ({
               },
             },
             {
+              toolResultId: getToolResultId(),
               type: ToolResultType.tabularData,
-              data: response.esqlData,
+              data: {
+                source: 'esql',
+                query: response.generatedQuery,
+                result: response.esqlData,
+              },
             },
           ];
 

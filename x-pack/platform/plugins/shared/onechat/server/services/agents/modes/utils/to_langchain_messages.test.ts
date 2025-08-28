@@ -65,7 +65,12 @@ describe('conversationLangchainMessages', () => {
 
   it('handles a round with a tool call step', () => {
     const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
-      { type: ToolResultType.other, data: 'result!' },
+      {
+        type: ToolResultType.other,
+        data: {
+          some: 'data',
+        },
+      },
     ]);
     const previousRounds: ConversationRound[] = [
       {
@@ -120,7 +125,7 @@ describe('conversationLangchainMessages', () => {
         steps: [
           makeToolCallStep(
             makeToolCallWithResult('call-2', 'lookup', { id: 42 }, [
-              { type: ToolResultType.other, data: 'found!' },
+              { type: ToolResultType.other, data: { some: 'data' } },
             ])
           ),
         ],
@@ -161,7 +166,12 @@ describe('conversationLangchainMessages', () => {
 
   it('escapes tool ids', () => {
     const toolCall = makeToolCallWithResult('call-1', '.search', { query: 'foo' }, [
-      { type: ToolResultType.other, data: 'result!' },
+      {
+        type: ToolResultType.other,
+        data: {
+          some: 'data',
+        },
+      },
     ]);
     const previousRounds: ConversationRound[] = [
       {

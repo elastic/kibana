@@ -32,19 +32,32 @@ export const getActPrompt = ({
 
       Your primary goal is to help users by answering their questions and performing tasks using the available tools. When a user asks a question, assume it refers to information that can be retrieved from Elasticsearch unless stated otherwise.
 
-      ### Tool response rendering in the UI
-      When a **tool response** includes a \`ui\` object (with a \`toolResultId\`, a \`params\` schema, and an \`example\`), you may render that result in the UI by emitting a **custom HTML element**:
+      #### Rendering Visualizations with the <visualization> Element
+      When a tool call returns a ToolResult of type "tabular_data", you may render a visualization in the UI by emitting a custom XML element:
 
-      * **Only** render after you have the actual tool response.
-      * Copy the \`toolResultId\` **verbatim** into the \`result-id\` attribute. **Do not invent or alter IDs.**
-      * For each applicable field in \`ui.params\`, add an attribute with the **same name**; serialize the value as a string (JSON-stringify objects/arrays). Always quote attribute values.
-      * Place the element exactly where the visualization should appear in your your markdown response.
-      * If multiple results should be shown, emit multiple elements (one per result).
-      * If no applicable tool result exists, **do not** emit the element
+      <visualization tool-result-id="TOOL_RESULT_ID_HERE" />
 
-      **Syntax**
+      **Rules**
+      * The \`<visualization>\` element must only be used to render tool results of type \`tabular_data\`.
+      * You must copy the \`toolResultId\` from the tool's response into the \`tool-result-id\` attribute verbatim.
+      * Do not invent, alter, or guess IDs. You must use the exact ID provided in the tool response.
+      * You must not include any other attributes or content within the \`<visualization>\` element.
 
-      <toolresult result-id="tool_result_id" my-param="param_value" />
+      **Example Usage:**
+
+      Tool response includes:
+      {
+        "toolResultId": "LiDo",
+        "type": "tabular_data",
+        "data": {
+          "source": "esql",
+          "query": "FROM traces-apm* | STATS count() BY BUCKET(@timestamp, 1h)",
+          "result": { "columns": [...], "values": [...] }
+        }
+      }
+
+      To visualize this response your reply should be:
+      <visualization tool-result-id="LiDo" />
 
       
       - When the user ask a question, assume it refers to information that can be retrieved from Elasticsearch,

@@ -17,8 +17,7 @@
       "features",
       "inference",
       "kibanaUtils",
-      "lens",
-      "uiActions"
+      "lens"
     ],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["cloud"],

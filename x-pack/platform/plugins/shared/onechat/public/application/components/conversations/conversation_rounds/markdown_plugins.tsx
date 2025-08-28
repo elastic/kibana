@@ -16,7 +16,7 @@ import { useEuiTheme } from '@elastic/eui';
 import type { OnechatStartDependencies } from '../../../../types';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 
-export const toolResultPlugin = () => {
+export const visualizationPlugin = () => {
   const visitor = (node: Node) => {
     // Recurse into children first
     if ('children' in node) {
@@ -30,20 +30,17 @@ export const toolResultPlugin = () => {
     }
 
     const value = (node as any).value as string | undefined;
-    if (!value || !value.trim().toLowerCase().startsWith('<toolresult')) {
+    if (!value || !value.trim().toLowerCase().startsWith('<visualization')) {
       return;
     }
 
     // Extract attributes
-    const resultIdMatch = value.match(/result-id="([^"]*)"/i);
-    const chartTypeMatch = value.match(/chart-type="([^"]*)"/i);
-    const resultId = resultIdMatch ? resultIdMatch[1] : undefined;
-    const chartType = chartTypeMatch ? chartTypeMatch[1] : undefined;
+    const toolResultAttrValue = value.match(/tool-result-id="([^"]*)"/i);
+    const toolResultId = toolResultAttrValue ? toolResultAttrValue[1] : undefined;
 
-    // Transform the node from type `html` to custom `toolresult`
-    (node as any).type = 'toolresult';
-    (node as any).resultId = resultId;
-    (node as any).chartType = chartType;
+    // Transform the node from type `html` to custom `visualization`
+    (node as any).type = 'visualization';
+    (node as any).toolResultId = toolResultId;
     delete (node as any).value; // remove the raw HTML value
   };
 
@@ -52,7 +49,7 @@ export const toolResultPlugin = () => {
   };
 };
 
-export function getToolResultHandler({
+export function getVisualizationHandler({
   pluginsStart,
   stepsFromCurrentRound,
   stepsFromPrevRounds,
@@ -62,9 +59,9 @@ export function getToolResultHandler({
   stepsFromPrevRounds: ConversationRoundStep[];
 }) {
   return (props: any) => {
-    const { resultId, chartType } = props;
+    const { toolResultId, chartType } = props;
 
-    if (!resultId) {
+    if (!toolResultId) {
       return <p>Visualization requires a tool result ID.</p>;
     }
 
@@ -73,23 +70,26 @@ export function getToolResultHandler({
     const toolResult = steps
       .filter((s) => s.type === 'tool_call')
       .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
-      .find((r) => r.type === 'tabular_data' && r.ui?.toolResultId === resultId) as
+      .find((r) => r.type === 'tabular_data' && r.toolResultId === toolResultId) as
       | TabularDataResult
       | undefined;
 
     if (!toolResult) {
-      return <p>Unable to find visualization for tool result ID: {resultId}</p>;
+      return <p>Unable to find visualization for tool result ID: {toolResultId}</p>;
     }
 
-    const { esqlQuery, esqlResult } = toolResult.data;
+    const { result, query } = toolResult.data;
+
+    if (!query) {
+      return <p>Unable to find query for tool result ID: {toolResultId}</p>;
+    }
 
     return (
       <VisualizeESQL
         lens={pluginsStart.lens}
         dataViews={pluginsStart.dataViews}
-        uiActions={pluginsStart.uiActions}
-        esqlQuery={esqlQuery}
-        esqlResult={esqlResult}
+        esqlQuery={query}
+        esqlResult={result}
         preferredChartType={(chartType as ChartType | undefined) || ChartType.Line}
       />
     );

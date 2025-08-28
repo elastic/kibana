@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { ChartType } from '@kbn/visualization-utils';
 import { randomInt } from 'crypto';
-
-import type {
-  SearchRequest,
-  EsqlEsqlColumnInfo,
-  FieldValue,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 
 export enum ToolResultType {
   resource = 'resource',
@@ -20,21 +15,6 @@ export enum ToolResultType {
   query = 'query',
   other = 'other',
   error = 'error',
-}
-
-interface ToolResultUI {
-  toolResultId: string;
-  description: string;
-  params: {
-    [key: string]: {
-      description: string;
-      type: string;
-      default: unknown;
-      options?: unknown[];
-      required?: boolean;
-    };
-  };
-  example: string;
 }
 
 export interface ResourceResult {
@@ -52,15 +32,16 @@ export interface ResourceResult {
 }
 
 export interface TabularDataResult {
+  toolResultId: string;
   type: ToolResultType.tabularData;
   data: {
-    esqlQuery: string;
-    esqlResult: {
+    source?: 'esql';
+    query: string;
+    result: {
       columns: EsqlEsqlColumnInfo[];
       values: FieldValue[][];
     };
   };
-  ui?: ToolResultUI;
 }
 
 export interface QueryResult {
@@ -88,25 +69,6 @@ export type ToolResult =
   | QueryResult
   | OtherResult
   | ErrorResult;
-
-export function getTabularDataToolResultUI() {
-  const toolResultId = getToolResultId();
-  return {
-    toolResultId,
-    description:
-      'The result of executing the ESQL query can be visualized. Multiple chart types are available',
-    params: {
-      chartType: {
-        description: `Select the visualization type most suitable for representing the esql result. Choose based on the data structure and the insights you want to highlight.`,
-        type: 'string',
-        default: ChartType.Line,
-        options: Object.values(ChartType),
-        required: false,
-      },
-    },
-    example: `<toolresult result-id="${toolResultId}" chart-type="bar" />`,
-  };
-}
 
 const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 export function getToolResultId(len = 4): string {

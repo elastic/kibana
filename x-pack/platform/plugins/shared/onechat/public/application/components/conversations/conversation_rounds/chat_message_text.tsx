@@ -25,9 +25,9 @@ import { useOnechatServices } from '../../../hooks/use_onechat_service';
 import {
   Cursor,
   esqlLanguagePlugin,
-  getToolResultHandler,
+  getVisualizationHandler,
   loadingCursorPlugin,
-  toolResultPlugin,
+  visualizationPlugin,
 } from './markdown_plugins';
 
 interface Props {
@@ -104,7 +104,7 @@ export function ChatMessageText({ content, stepsFromPrevRounds, stepsFromCurrent
           </EuiTableRowCell>
         );
       },
-      toolresult: getToolResultHandler({
+      visualization: getVisualizationHandler({
         pluginsStart,
         stepsFromCurrentRound,
         stepsFromPrevRounds,
@@ -115,7 +115,7 @@ export function ChatMessageText({ content, stepsFromPrevRounds, stepsFromCurrent
       parsingPluginList: [
         loadingCursorPlugin,
         esqlLanguagePlugin,
-        toolResultPlugin,
+        visualizationPlugin,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,

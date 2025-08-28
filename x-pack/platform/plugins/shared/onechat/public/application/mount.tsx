@@ -15,7 +15,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { OnechatRoutes } from './routes';
 import type { OnechatInternalService } from '../services';
-import type { OnechatStartDependencies } from '../types';
+import type { OnechatPluginStart } from '../types';
 import { OnechatServicesContext } from './context/onechat_services_context';
 
 export const mountApp = async ({
@@ -26,7 +26,7 @@ export const mountApp = async ({
   services,
 }: {
   core: CoreStart;
-  plugins: OnechatStartDependencies;
+  plugins: OnechatPluginStart;
   element: HTMLElement;
   history: ScopedHistory;
   services: OnechatInternalService;

@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/steps/execute_esql';
-import { ToolResultType, getTabularDataToolResultUI } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType, getToolResultId } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 
 const executeEsqlToolSchema = z.object({
@@ -30,18 +30,25 @@ export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolS
     Under no circumstances should you invent, guess, or modify a query yourself for this tool.
     If you need a query, use the \`${builtinToolIds.generateEsql}\` tool first.`,
     schema: executeEsqlToolSchema,
-    handler: async ({ query }, { esClient }) => {
-      const result = await executeEsql({ query, esClient: esClient.asCurrentUser });
+    handler: async ({ query: esqlQuery }, { esClient }) => {
+      const result = await executeEsql({ query: esqlQuery, esClient: esClient.asCurrentUser });
 
       return {
         results: [
           {
+            type: ToolResultType.query,
+            data: {
+              esql: esqlQuery,
+            },
+          },
+          {
+            toolResultId: getToolResultId(),
             type: ToolResultType.tabularData,
             data: {
-              esqlQuery: query,
-              esqlResult: result,
+              source: 'esql',
+              query: esqlQuery,
+              result,
             },
-            ui: getTabularDataToolResultUI(),
           },
         ],
       };
