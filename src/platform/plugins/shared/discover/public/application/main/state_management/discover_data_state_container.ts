@@ -42,6 +42,7 @@ import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabSta
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
+import { calculateQueryRangeSeconds } from '../../../utils/time_range_utils';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -277,12 +278,19 @@ export function getDataStateContainer({
             abortControllerFetchMore = new AbortController();
             const fetchMoreTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchMore');
 
+            // Calculate query range in seconds
+            const timeRange = timefilter.getAbsoluteTime();
+            const queryRangeSeconds = calculateQueryRangeSeconds(timeRange);
+
             await fetchMoreDocuments({
               ...commonFetchParams,
               abortController: abortControllerFetchMore,
             });
 
-            fetchMoreTracker.reportEvent();
+            fetchMoreTracker.reportEvent({
+              key1: 'query_range_secs',
+              value1: queryRangeSeconds,
+            });
 
             return;
           }
@@ -323,6 +331,10 @@ export function getDataStateContainer({
           const prevAutoRefreshDone = autoRefreshDone;
           const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
 
+          // Calculate query range in seconds
+          const timeRange = timefilter.getAbsoluteTime();
+          const queryRangeSeconds = calculateQueryRangeSeconds(timeRange);
+
           await fetchAll({
             ...commonFetchParams,
             reset: options.reset,
@@ -361,7 +373,10 @@ export function getDataStateContainer({
             },
           });
 
-          fetchAllTracker.reportEvent();
+          fetchAllTracker.reportEvent({
+            key1: 'query_range_secs',
+            value1: queryRangeSeconds,
+          });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
           // replacing this current one, call it to make sure we tell that the auto refresh is done
