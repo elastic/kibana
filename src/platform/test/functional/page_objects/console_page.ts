@@ -353,12 +353,9 @@ export class ConsolePageObject extends FtrService {
     return await this.isConsoleTabOpen('consoleHistoryPanel');
   }
 
-  public async toggleA11yOverlaySetting() {
-    // while the settings form opens/loads this may fail, so retry for a while
-    await this.retry.try(async () => {
-      const toggle = await this.testSubjects.find('enableA11yOverlay');
-      await toggle.click();
-    });
+  public async toggleA11yOverlaySetting(enabled: boolean) {
+    await this.testSubjects.waitForEnabled('enableA11yOverlay');
+    await this.testSubjects.setEuiSwitch('enableA11yOverlay', enabled ? 'check' : 'uncheck');
   }
 
   public async addNewVariable({ name, value }: { name: string; value: string }) {
