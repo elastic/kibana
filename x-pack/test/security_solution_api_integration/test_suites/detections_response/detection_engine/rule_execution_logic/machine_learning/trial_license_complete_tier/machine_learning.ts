@@ -90,12 +90,16 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load(auditPath);
       await setupMlModulesWithRetry({ module: siemModule, supertest, retry });
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
+      );
     });
 
     after(async () => {
       await esArchiver.unload(auditPath);
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
+      );
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -109,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
-      expect(alerts.hits.hits.length).toBe(1);
+      expect(alerts.hits.hits).toHaveLength(1);
       const alert = alerts.hits.hits[0];
 
       expect(alert._source).toEqual(
@@ -240,7 +244,7 @@ export default ({ getService }: FtrProviderContext) => {
         rule: { ...rule, anomaly_threshold: 20 },
       });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).toBe(7);
+      expect(previewAlerts).toHaveLength(7);
     });
 
     describe('with non-value list exception', () => {
@@ -264,7 +268,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).toBe(0);
+        expect(previewAlerts).toHaveLength(0);
       });
     });
 
@@ -300,23 +304,23 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).toBe(0);
+        expect(previewAlerts).toHaveLength(0);
       });
     });
 
     describe('alerts should be be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       it('@skipInServerlessMKI should be enriched with host risk score', async () => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts).toHaveLength(1);
         const fullAlert = previewAlerts[0]._source;
 
         expect(fullAlert?.host?.risk?.calculated_level).toBe('Low');
@@ -326,11 +330,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       it('should be enriched alert with criticality_level', async () => {

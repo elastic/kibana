@@ -32,9 +32,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('dashboard time to visualize security', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kbnServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/security/security.json'
       );
 
       await kbnServer.uiSettings.update({
@@ -83,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await securityService.user.delete('dashboard_write_vis_read_user');
 
       await kbnServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     });
 
     describe('lens by value works without library save permissions', () => {

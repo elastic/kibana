@@ -30,10 +30,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('value suggestions', function describeIndexTests() {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
 
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_drilldowns/drilldowns'
       );
       await kibanaServer.uiSettings.update({
         'doc_table:legacy': false,

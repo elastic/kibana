@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Canvas Accessibility', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default'
       );
       await canvas.goToListingPage();
     });

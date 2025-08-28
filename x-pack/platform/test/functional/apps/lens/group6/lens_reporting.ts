@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens reporting', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/reporting'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/reporting'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await security.testUser.setRoles(

@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST ml/index_exists', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote_small');
     });
 
     describe('should correctly check if indices exist ', function () {

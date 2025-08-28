@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
+import expect from '@kbn/expect';
+import originalExpect from 'expect';
 import { DatasetQualityFtrProviderContext } from './config';
 import {
   createFailedLogRecord,
@@ -24,6 +25,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
+    'discover',
   ]);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -48,6 +50,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
 
+      // Disable failure store for logs-*
+      await synthtrace.createIndexTemplate(IndexTemplateName.NoFailureStore);
+
+      // Enable failure store only for logs-synth.2-*
       await synthtrace.createCustomPipeline(processors, 'synth.2@pipeline');
       await synthtrace.createComponentTemplate({
         name: 'synth.2@custom',
@@ -95,6 +101,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     after(async () => {
       await synthtrace.clean();
       await PageObjects.observabilityLogsExplorer.uninstallPackage(pkg);
+      await synthtrace.deleteIndexTemplate(IndexTemplateName.NoFailureStore);
       await synthtrace.deleteIndexTemplate(IndexTemplateName.Synht2);
       await synthtrace.deleteComponentTemplate('synth.2@custom');
       await synthtrace.deleteCustomPipeline('synth.2@pipeline');
@@ -105,9 +112,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       await datasetNameCol.sort('descending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-      expect(datasetNameColCellTexts).to.eql(
-        [apacheAccessDatasetHumanName, ...datasetNames].reverse()
+
+      // This is to accomodate for failure if the integration hasn't been loaded successfully
+      // Dataset name is shown in this case
+      expect([apacheAccessDatasetHumanName, apacheAccessDatasetName]).to.contain(
+        datasetNameColCellTexts[datasetNameColCellTexts.length - 1]
       );
+
+      // Check the rest of the array matches the expected pattern
+      expect(datasetNameColCellTexts.slice(0, -1)).to.eql([...datasetNames].reverse());
 
       const namespaceCol = cols.Namespace;
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
@@ -168,7 +181,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       expect(datasetNameColCellTexts[0]).to.eql(apacheAccessDatasetHumanName);
     });
 
-    it('goes to log explorer page when opened', async () => {
+    it('goes to log discover page when opened', async () => {
       const rowIndexToOpen = 1;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
@@ -177,11 +190,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const datasetName = (await datasetNameCol.getCellTexts())[rowIndexToOpen];
       await (await actionsCol.getCellChildren('a'))[rowIndexToOpen].click(); // Click "Open"
 
-      // Confirm dataset selector text in observability logs explorer
+      // Confirm dataset selector text in discover
       await retry.try(async () => {
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.eql(datasetName);
+        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+        originalExpect(datasetSelectorText).toMatch(`logs-${datasetName}-${defaultNamespace}`);
       });
 
       // Return to Dataset Quality Page

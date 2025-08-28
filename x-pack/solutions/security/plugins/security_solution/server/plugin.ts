@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -106,7 +106,7 @@ import type {
 } from './plugin_contract';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
-import { artifactService } from './lib/telemetry/artifact';
+import { type CdnConfig, artifactService } from './lib/telemetry/artifact';
 import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import {
@@ -132,6 +132,8 @@ import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_ser
 import { registerRiskScoreModulesDeprecation } from './deprecations/register_risk_score_modules_deprecation';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
+import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
+import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -148,6 +150,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
   private readonly asyncTelemetryEventsSender: IAsyncTelemetryEventsSender;
+
+  private readonly healthDiagnosticService: HealthDiagnosticService;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
@@ -202,6 +206,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.logger.debug('plugin initialized');
+
+    this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
   }
 
   public setup(
@@ -559,6 +565,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       endpointContext: this.endpointContext.service,
     });
 
+    if (plugins.taskManager) {
+      this.healthDiagnosticService.setup({
+        taskManager: plugins.taskManager,
+      });
+    } else {
+      this.logger.warn('Task Manager not available, health diagnostic task not registered.');
+    }
+
     return {
       setProductFeaturesConfigurator:
         productFeaturesService.setProductFeaturesConfigurator.bind(productFeaturesService),
@@ -706,7 +720,17 @@ export class Plugin implements ISecuritySolutionPlugin {
       )
       .catch(() => {});
 
-    artifactService.start(this.telemetryReceiver).catch(() => {});
+    if (this.config.cdn?.url && this.config.cdn?.publicKey) {
+      const cdnConfig: CdnConfig = {
+        url: this.config.cdn.url,
+        pubKey: this.config.cdn.publicKey,
+      };
+      this.logger.info('Starting artifact service with custom CDN config');
+      artifactService.start(this.telemetryReceiver, cdnConfig).catch(() => {});
+    } else {
+      this.logger.info('Starting artifact service with default CDN config');
+      artifactService.start(this.telemetryReceiver).catch(() => {});
+    }
 
     this.asyncTelemetryEventsSender.start(plugins.telemetry);
 
@@ -764,6 +788,23 @@ export class Plugin implements ISecuritySolutionPlugin {
           return packagePolicy;
         }
       );
+    }
+
+    if (plugins.taskManager) {
+      const serviceStart = {
+        taskManager: plugins.taskManager,
+        esClient: core.elasticsearch.client.asInternalUser,
+        analytics: core.analytics,
+        receiver: this.telemetryReceiver,
+      };
+
+      this.healthDiagnosticService.start(serviceStart).catch((e) => {
+        this.logger.warn('Error starting health diagnostic task', {
+          error: e.message,
+        } as LogMeta);
+      });
+    } else {
+      this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
 
     return {};

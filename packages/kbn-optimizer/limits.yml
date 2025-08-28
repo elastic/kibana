@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  aiAssistantManagementSelection: 6069
+  aiAssistantManagementSelection: 6917
   aiops: 19890
   alerting: 28395
   apm: 38573
@@ -83,6 +83,7 @@ pageLoadAssetSize:
   inspector: 35060
   integrationAssistant: 21434
   interactiveSetup: 73070
+  intercepts: 26158
   kibanaOverview: 6339
   kibanaReact: 54762
   kibanaUsageCollection: 1736
@@ -110,7 +111,7 @@ pageLoadAssetSize:
   observability: 107869
   observabilityAIAssistant: 46941
   observabilityAIAssistantApp: 18553
-  observabilityAiAssistantManagement: 6438
+  observabilityAiAssistantManagement: 6600
   observabilityLogsExplorer: 25634
   observabilityOnboarding: 12872
   observabilityShared: 115322
@@ -119,6 +120,7 @@ pageLoadAssetSize:
   presentationPanel: 11484
   presentationUtil: 9000
   productDocBase: 3058
+  productIntercept: 23846
   profiling: 20716
   remoteClusters: 10170
   reporting: 58600

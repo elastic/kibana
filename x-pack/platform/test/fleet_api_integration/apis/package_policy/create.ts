@@ -31,7 +31,7 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').load(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+        'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
       );
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
@@ -56,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').unload(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+        'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
       );
       await supertest
         .post(`/api/fleet/agent_policies/delete`)

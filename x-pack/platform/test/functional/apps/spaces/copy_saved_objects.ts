@@ -23,10 +23,10 @@ export default function spaceSelectorFunctionalTests({
       log.debug('Loading test data for the following spaces: default, sales');
       await Promise.all([
         kbnServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/spaces/copy_saved_objects_default_space.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/spaces/copy_saved_objects_default_space.json'
         ),
         kbnServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/spaces/copy_saved_objects_sales_space.json',
+          'x-pack/platform/test/functional/fixtures/kbn_archives/spaces/copy_saved_objects_sales_space.json',
           { space: 'sales' }
         ),
       ]);

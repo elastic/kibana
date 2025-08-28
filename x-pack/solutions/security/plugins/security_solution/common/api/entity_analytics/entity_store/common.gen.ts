@@ -86,7 +86,7 @@ export const EngineComponentStatus = z.object({
   id: z.string(),
   installed: z.boolean(),
   resource: EngineComponentResource,
-  health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
+  health: z.enum(['green', 'yellow', 'red', 'unavailable', 'unknown']).optional(),
   errors: z
     .array(
       z.object({

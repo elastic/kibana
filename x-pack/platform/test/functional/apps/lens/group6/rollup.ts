@@ -18,15 +18,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens rollup tests', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/rollup/data');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/lens/rollup/data');
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/rollup/config.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/rollup/config.json'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/lens/rollup/data');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/lens/rollup/data');
       await kibanaServer.savedObjects.cleanStandardList();
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });

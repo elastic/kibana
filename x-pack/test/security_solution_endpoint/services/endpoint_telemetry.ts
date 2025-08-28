@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../configs/ftr_provider_context';
 const TELEMETRY_API_ROOT = '/api/stats?extended=true';
 const TELEMETRY_DATA_ROOT = Path.join(
   KIBANA_ROOT,
-  'x-pack/test/functional/es_archives/endpoint/telemetry/'
+  'x-pack/solutions/security/test/fixtures/es_archives/endpoint/telemetry/'
 );
 
 interface EndpointTelemetry {

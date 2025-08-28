@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import { orderBy } from 'lodash';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import {
@@ -49,10 +49,10 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_in_seconds'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_in_seconds'
         );
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_5'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_5'
         );
       });
 
@@ -60,10 +60,10 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_in_seconds'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_in_seconds'
         );
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_5'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_5'
         );
       });
 
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForAlertsToBePresent(supertest, log, 1, [id]);
           const alertsOpen = await getAlertsByIds(supertest, log, [id]);
           const hits = alertsOpen.hits.hits.map((hit) => hit._source?.[ALERT_ORIGINAL_TIME]).sort();
-          expect(hits).to.eql(['2021-06-02T23:33:15.000Z']);
+          expect(hits).toEqual(['2021-06-02T23:33:15.000Z']);
         });
 
         it('should still use the @timestamp field even with an override field. It should never use the override field', async () => {
@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForAlertsToBePresent(supertest, log, 1, [id]);
           const alertsOpen = await getAlertsByIds(supertest, log, [id]);
           const hits = alertsOpen.hits.hits.map((hit) => hit._source?.[ALERT_ORIGINAL_TIME]).sort();
-          expect(hits).to.eql(['2020-12-16T15:16:18.000Z']);
+          expect(hits).toEqual(['2020-12-16T15:16:18.000Z']);
         });
       });
 
@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForAlertsToBePresent(supertest, log, 1, [id]);
           const alertsOpen = await getAlertsByIds(supertest, log, [id]);
           const hits = alertsOpen.hits.hits.map((hit) => hit._source?.[ALERT_ORIGINAL_TIME]).sort();
-          expect(hits).to.eql(['2021-06-02T23:33:15.000Z']);
+          expect(hits).toEqual(['2021-06-02T23:33:15.000Z']);
         });
 
         it('should still use the @timestamp field even with an override field. It should never use the override field', async () => {
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForAlertsToBePresent(supertest, log, 1, [id]);
           const alertsOpen = await getAlertsByIds(supertest, log, [id]);
           const hits = alertsOpen.hits.hits.map((hit) => hit._source?.[ALERT_ORIGINAL_TIME]).sort();
-          expect(hits).to.eql(['2020-12-16T15:16:18.000Z']);
+          expect(hits).toEqual(['2020-12-16T15:16:18.000Z']);
         });
       });
     });
@@ -129,16 +129,16 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest, log, es);
         await createAlertsIndex(supertest, log);
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_1'
         );
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_2'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_2'
         );
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_3'
         );
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_4'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_4'
         );
       });
 
@@ -146,16 +146,16 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_1'
         );
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_2'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_2'
         );
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_3'
         );
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_4'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_4'
         );
       });
 
@@ -178,7 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
           const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
           const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(alertsOrderedByEventId.length).equal(3);
+          expect(alertsOrderedByEventId).toHaveLength(3);
         });
 
         it('should generate 2 alerts with event.ingested when timestamp fallback is disabled', async () => {
@@ -201,7 +201,7 @@ export default ({ getService }: FtrProviderContext) => {
           const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
           const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(alertsOrderedByEventId.length).equal(2);
+          expect(alertsOrderedByEventId).toHaveLength(2);
         });
 
         it('should generate 2 alerts with @timestamp', async () => {
@@ -219,7 +219,7 @@ export default ({ getService }: FtrProviderContext) => {
           const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
           const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(alertsOrderedByEventId.length).equal(2);
+          expect(alertsOrderedByEventId).toHaveLength(2);
         });
 
         it('should generate 2 alerts when timestamp override does not exist', async () => {
@@ -239,7 +239,7 @@ export default ({ getService }: FtrProviderContext) => {
           const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
           const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(alertsOrderedByEventId.length).equal(2);
+          expect(alertsOrderedByEventId).toHaveLength(2);
         });
 
         it('should not generate any alerts when timestamp override does not exist and timestamp fallback is disabled', async () => {
@@ -258,7 +258,7 @@ export default ({ getService }: FtrProviderContext) => {
             createdRule,
             RuleExecutionStatusEnum['partial failure']
           );
-          expect(alertsOpen.hits.hits.length).eql(0);
+          expect(alertsOpen.hits.hits).toHaveLength(0);
         });
 
         /**
@@ -280,7 +280,7 @@ export default ({ getService }: FtrProviderContext) => {
           const hits = alertsResponse.hits.hits
             .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
             .sort();
-          expect(hits).to.eql([undefined]);
+          expect(hits).toEqual([undefined]);
         });
       });
 
@@ -300,7 +300,7 @@ export default ({ getService }: FtrProviderContext) => {
           const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
           const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(alertsOrderedByEventId.length).equal(2);
+          expect(alertsOrderedByEventId).toHaveLength(2);
         });
 
         it('should generate 2 alerts when timestamp override does not exist', async () => {
@@ -320,7 +320,7 @@ export default ({ getService }: FtrProviderContext) => {
           const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
           const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(alertsOrderedByEventId.length).equal(2);
+          expect(alertsOrderedByEventId).toHaveLength(2);
         });
 
         it('should not generate any alerts when timestamp override does not exist and timestamp fallback is disabled', async () => {
@@ -337,7 +337,7 @@ export default ({ getService }: FtrProviderContext) => {
             createdRule,
             RuleExecutionStatusEnum['partial failure']
           );
-          expect(alertsOpen.hits.hits.length).eql(0);
+          expect(alertsOpen.hits.hits).toHaveLength(0);
         });
       });
     });
@@ -389,7 +389,7 @@ export default ({ getService }: FtrProviderContext) => {
           const alertsResponse = await getAlertsByIds(supertest, log, [id], 200);
           const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
 
-          expect(alerts.length).equal(200);
+          expect(alerts).toHaveLength(200);
         });
       });
     });

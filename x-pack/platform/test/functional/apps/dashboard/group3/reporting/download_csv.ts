@@ -173,7 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
         await reportingService.initLogs();
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/hugedata');
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       });
 
@@ -192,7 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await reportingService.teardownLogs();
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/reporting/hugedata');
       });
 
       it('Generate CSV export of a saved search panel', async () => {
