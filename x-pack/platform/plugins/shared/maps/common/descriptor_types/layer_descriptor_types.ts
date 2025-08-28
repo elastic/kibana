@@ -19,6 +19,8 @@ import type {
 import type { DataRequestDescriptor } from './data_request_descriptor_types';
 import type { JoinSourceDescriptor } from '.';
 
+export type { Attribution } from '../../server';
+
 export type JoinDescriptor = {
   leftField?: string;
   right: Partial<JoinSourceDescriptor>;
@@ -65,7 +67,9 @@ interface RuntimeLayerState {
   __tileErrors?: TileError[];
 }
 
-export type VectorLayerDescriptor = StoredVectorLayer & RuntimeLayerState;
+export type VectorLayerDescriptor = Omit<StoredVectorLayer, 'joins'> & {
+  joins: JoinDescriptor[];
+} & RuntimeLayerState;
 
 export type HeatmapLayerDescriptor = StoredHeatmapLayer & RuntimeLayerState;
 
