@@ -51,7 +51,7 @@ export type EnterTryBlockNode = z.infer<typeof EnterTryBlockNodeSchema>;
 
 export const ExitTryBlockNodeSchema = z.object({
   id: z.string(),
-  type: z.literal('exit-on-failure-zone'),
+  type: z.literal('exit-try-block'),
   enterNodeId: z.string(),
 });
 export type ExitTryBlockNode = z.infer<typeof ExitTryBlockNodeSchema>;

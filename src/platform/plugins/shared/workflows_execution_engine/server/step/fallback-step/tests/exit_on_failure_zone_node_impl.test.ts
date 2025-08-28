@@ -19,7 +19,7 @@ describe('ExitTryBlockNodeImpl', () => {
   beforeEach(() => {
     step = {
       id: 'exitOnFailureZone1',
-      type: 'exit-on-failure-zone',
+      type: 'exit-try-block',
       enterNodeId: 'onFailureZone1',
     };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
