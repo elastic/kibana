@@ -10,8 +10,8 @@
 import { i18n } from '@kbn/i18n';
 
 import { lazy } from 'react';
+import type { Adapters } from '@kbn/inspector-common';
 import type { InspectorViewDescription } from '../../types';
-import type { Adapters } from '../../../common';
 
 const RequestsViewComponent = lazy(() =>
   import('../../async_services').then((module) => ({ default: module.RequestsViewComponent }))
