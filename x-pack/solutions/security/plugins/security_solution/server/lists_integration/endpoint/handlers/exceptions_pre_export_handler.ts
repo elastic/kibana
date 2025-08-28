@@ -16,6 +16,7 @@ import {
   EventFilterValidator,
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
+  TrustedDeviceValidator,
 } from '../validators';
 
 export const getExceptionsPreExportHandler = (
@@ -44,6 +45,12 @@ export const getExceptionsPreExportHandler = (
     if (TrustedAppValidator.isTrustedApp({ listId })) {
       isEndpointArtifact = true;
       await new TrustedAppValidator(endpointAppContextService, request).validatePreExport();
+    }
+
+    // Validate Trusted Devices
+    if (TrustedDeviceValidator.isTrustedDevice({ listId })) {
+      isEndpointArtifact = true;
+      await new TrustedDeviceValidator(endpointAppContextService, request).validatePreExport();
     }
 
     // Host Isolation Exceptions validations

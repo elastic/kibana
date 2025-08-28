@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { tool as toTool } from '@langchain/core/tools';
 import type { ScopedModel } from '@kbn/onechat-server';
-import type { ResourceResult, TabularDataResult } from '@kbn/onechat-common/tools';
+import type { ResourceResult, ToolResult } from '@kbn/onechat-common/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { relevanceSearch } from '../relevance_search';
@@ -103,13 +103,21 @@ export const createNaturalLanguageSearchTool = ({
             esClient,
           });
 
-          const result: TabularDataResult = {
-            type: ToolResultType.tabularData,
-            data: response,
-          };
+          const results: ToolResult[] = [
+            {
+              type: ToolResultType.query,
+              data: {
+                esql: response.generatedQuery,
+              },
+            },
+            {
+              type: ToolResultType.tabularData,
+              data: response.esqlData,
+            },
+          ];
 
-          const content = JSON.stringify([result]);
-          const artifact = { results: [result] };
+          const content = JSON.stringify(results);
+          const artifact = { results };
           return [content, artifact];
         }
       );
