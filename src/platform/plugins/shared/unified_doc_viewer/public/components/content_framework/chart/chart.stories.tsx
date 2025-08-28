@@ -25,7 +25,7 @@ type Story = StoryObj<Args>;
 export const Basic: Story = {
   args: {
     hit: APMSpanFixture,
-    id: 'basic',
+    'data-test-subj': 'id',
     title: 'Chart Title',
     description: 'This is a description for the chart.',
     esqlQuery: 'test',

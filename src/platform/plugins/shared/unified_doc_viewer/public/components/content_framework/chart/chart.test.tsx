@@ -37,7 +37,7 @@ jest.mock('../../../plugin', () => ({
 
 describe('ContentFrameworkChart', () => {
   const defaultProps: ContentFrameworkChartProps = {
-    id: 'test-chart',
+    'data-test-subj': 'test-chart',
     title: 'Chart Title',
     description: 'Chart description',
     esqlQuery: 'SELECT * FROM test',
@@ -73,6 +73,6 @@ describe('ContentFrameworkChart', () => {
 
   it('sets the correct data-test-subj on the root element', () => {
     render(<ContentFrameworkChart {...defaultProps} />);
-    expect(screen.getByTestId('ContentFrameworkChart-test-chart')).toBeInTheDocument();
+    expect(screen.getByTestId('test-chart')).toBeInTheDocument();
   });
 });

@@ -13,15 +13,15 @@ import { i18n } from '@kbn/i18n';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 
 export interface ContentFrameworkChartProps {
-  id: string;
   title: string;
   description?: string;
   esqlQuery?: string;
   children: React.ReactNode;
+  'data-test-subj': string;
 }
 
 export function ContentFrameworkChart({
-  id,
+  'data-test-subj': contentFrameworkChartDataTestSubj,
   title,
   description,
   esqlQuery,
@@ -55,8 +55,19 @@ export function ContentFrameworkChart({
     return url;
   }, [discoverLocator, esqlQuery, timefilter]);
 
+  const openInDiscoverButtonLabel = i18n.translate(
+    'unifiedDocViewer.contentFramework.chart.openInDiscover',
+    {
+      defaultMessage: 'Open in Discover',
+    }
+  );
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={`ContentFrameworkChart-${id}`}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj={contentFrameworkChartDataTestSubj}
+    >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -70,7 +81,7 @@ export function ContentFrameworkChart({
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
                     content={description}
-                    data-test-subj={`ContentFrameworkChartDescription-${id}`}
+                    data-test-subj="ContentFrameworkChartDescription"
                     size="s"
                     color="subdued"
                     aria-label={description}
@@ -84,13 +95,11 @@ export function ContentFrameworkChart({
               <EuiButtonEmpty
                 iconType="discoverApp"
                 href={discoverUrl}
-                aria-label="OpenInDiscover"
+                aria-label={openInDiscoverButtonLabel}
                 data-test-subj="ContentFrameworkChartOpenInDiscover"
                 size="xs"
               >
-                {i18n.translate('unifiedDocViewer.contentFramework.chart.openInDiscover', {
-                  defaultMessage: 'Open in Discover',
-                })}
+                {openInDiscoverButtonLabel}
               </EuiButtonEmpty>
             </EuiFlexItem>
           )}
