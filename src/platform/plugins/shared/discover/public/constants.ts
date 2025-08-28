@@ -12,3 +12,4 @@ export const ADHOC_DATA_VIEW_RENDER_EVENT = 'ad_hoc_data_view';
 export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
 export const TABS_ENABLED_FEATURE_FLAG_KEY = 'discover.tabsEnabled';
 export const SPAN_OVERVIEW_CUE_FEATURE_FLAG_KEY = 'xpack.discover.spanOverviewCue.enabled';
+export const TRANSACTION_OVERVIEW_CUE_FEATURE_FLAG_KEY = 'xpack.oblt.cues.transactionOverview.enabled';

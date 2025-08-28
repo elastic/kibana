@@ -24,8 +24,8 @@ import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
 import { useProfileAccessor } from '../../context_awareness';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
-import { SPAN_OVERVIEW_CUE_FEATURE_FLAG_KEY } from '../../constants';
-import { SpanOverviewCue } from '../../application/main/components/observability_cues/span_overview_cue';
+import { SPAN_OVERVIEW_CUE_FEATURE_FLAG_KEY, TRANSACTION_OVERVIEW_CUE_FEATURE_FLAG_KEY } from '../../constants';
+import { FlyoutCue } from '../../application/main/components/observability_cues/flyout_cue';
 
 export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 
@@ -45,6 +45,9 @@ export interface DiscoverGridFlyoutProps {
   setExpandedDoc: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void;
   initialTabId?: string;
   docViewerRef?: DocViewerProps['ref'];
+  // Demo state props
+  demoCanManageSpaces?: boolean;
+  demoIsTrial?: boolean;
 }
 
 /**
@@ -66,6 +69,8 @@ export function DiscoverGridFlyout({
   setExpandedDoc,
   initialTabId,
   docViewerRef,
+  demoCanManageSpaces,
+  demoIsTrial,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
@@ -113,9 +118,13 @@ export function DiscoverGridFlyout({
   const activeSpace = useObservable(activeSpace$);
   const solutionType = activeSpace?.solution;
 
-  // Check if feature flag is enabled
-  const isFeatureEnabled = services.core.featureFlags.getBooleanValue(
+  // Check if feature flags are enabled
+  const isSpanFeatureEnabled = services.core.featureFlags.getBooleanValue(
     SPAN_OVERVIEW_CUE_FEATURE_FLAG_KEY,
+    true
+  );
+  const isTransactionFeatureEnabled = services.core.featureFlags.getBooleanValue(
+    TRANSACTION_OVERVIEW_CUE_FEATURE_FLAG_KEY,
     true
   );
 
@@ -125,24 +134,8 @@ export function DiscoverGridFlyout({
   // Check if current license is a trial
   const isTrial = services.licensing?.license?.type === 'trial';
 
-  // Check if current document is a span document
-  const isSpanDocument = useMemo(() => {
-    const source = actualHit.raw._source;
-    const fields = actualHit.raw.fields;
-    
-    // Check for required span fields
-    const hasProcessorEvent = source?.processor?.event === 'span' || fields?.['processor.event']?.[0] === 'span';
-    const hasTimestamp = source?.['@timestamp'] || fields?.['@timestamp']?.[0];
-    const hasTraceId = source?.trace?.id || fields?.['trace.id']?.[0];
-    const hasSpanId = source?.span?.id || fields?.['span.id']?.[0];
-    const hasSpanDuration = source?.span?.duration?.us || fields?.['span.duration.us']?.[0];
-    
-    // Check for traces data stream
-    const hasTracesDataStream = fields?.['data_stream.type']?.[0] === 'traces';
-    const isTracesIndex = actualHit.raw._index?.match(/^(\.ds-)?traces-/);
-    
-    return hasProcessorEvent && hasTimestamp && hasTraceId && hasSpanId && hasSpanDuration && hasTracesDataStream && isTracesIndex;
-  }, [actualHit]);
+  // Check if APM feature is enabled (either span or transaction)
+  const isApmFeatureEnabled = isSpanFeatureEnabled || isTransactionFeatureEnabled;
 
   // Get conditional callout message based on trial status
   const getCalloutMessage = useCallback(() => {
@@ -192,25 +185,13 @@ export function DiscoverGridFlyout({
 
   // Create banner if conditions are met
   const banner = useMemo(() => {
-    if (
-      !isFeatureEnabled ||
-      solutionType === 'oblt' ||
-      !isSpanDocument ||
-      isDismissed ||
-      !canManageSpaces
-    ) {
-      return null;
+    // Show APM banner if feature enabled
+    if (isApmFeatureEnabled) {
+      return <FlyoutCue document={actualHit} demoCanManageSpaces={demoCanManageSpaces} demoIsTrial={demoIsTrial} />;
     }
 
-    return <SpanOverviewCue document={actualHit} variant="compact" />;
-  }, [
-    isFeatureEnabled,
-    solutionType,
-    isSpanDocument,
-    isDismissed,
-    canManageSpaces,
-    actualHit,
-  ]);
+    return null;
+  }, [isApmFeatureEnabled, actualHit, demoCanManageSpaces, demoIsTrial]);
 
   return (
     <UnifiedDocViewerFlyout

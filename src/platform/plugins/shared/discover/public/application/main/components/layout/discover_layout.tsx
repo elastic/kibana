@@ -52,7 +52,8 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
-import { SpanOverviewCue } from '../observability_cues/span_overview_cue';
+import { MainPageObservabilityCue } from '../observability_cues/main_page_observability_cue';
+import { DemoControlsBar } from '../observability_cues/demo_controls_bar';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
@@ -128,6 +129,55 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
   const fetchCounter = useRef<number>(0);
+
+  // Demo state management for observability cues
+  const [demoCanManageSpaces, setDemoCanManageSpaces] = useState(true);
+  const [demoIsTrial, setDemoIsTrial] = useState(false);
+  const [demoHideFullCallout, setDemoHideFullCallout] = useState(false);
+
+  // Handle reset to Classic
+  const handleResetToClassic = useCallback(async () => {
+    try {
+      // Reset demo switches to default state
+      setDemoHideFullCallout(false);
+      setDemoCanManageSpaces(true);
+      setDemoIsTrial(false);
+
+      // Get current active space
+      const currentActiveSpace = await spaces?.getActiveSpace();
+      if (!currentActiveSpace) {
+        console.warn('Could not get active space');
+        return;
+      }
+
+      // Update the space with Classic solution view
+      const updatedSpace = {
+        ...currentActiveSpace,
+        solution: 'classic' as const,
+      };
+
+      // Make API call to update the space
+      await core.http.put(`/api/spaces/space/${encodeURIComponent(currentActiveSpace.id)}`, {
+        query: { overwrite: true },
+        body: JSON.stringify(updatedSpace),
+      });
+
+      // Small delay to ensure the update completes
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Remove URL parameters that trigger tour modals
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.delete('showObservabilityTour');
+      currentUrl.searchParams.delete('showTransactionTour');
+
+      console.log('Resetting to Classic view with default demo state:', currentUrl.toString());
+
+      // Reload the page to apply changes
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to reset to Classic:', error);
+    }
+  }, [spaces, core.http]);
 
   useEffect(() => {
     if (dataState.fetchStatus === FetchStatus.LOADING) {
@@ -356,6 +406,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           onFieldEdited={onFieldEdited}
           onDropFieldToTable={onDropFieldToTable}
           panelsToggle={panelsToggle}
+          demoCanManageSpaces={demoCanManageSpaces}
+          demoIsTrial={demoIsTrial}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -370,6 +422,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     onFieldEdited,
     onDropFieldToTable,
     panelsToggle,
+    demoCanManageSpaces,
+    demoIsTrial,
   ]);
 
   const isLoading =
@@ -447,7 +501,15 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             spaces={spaces}
             history={history}
           />
-          <SpanOverviewCue />
+          <MainPageObservabilityCue 
+            demoCanManageSpaces={demoCanManageSpaces}
+            setDemoCanManageSpaces={setDemoCanManageSpaces}
+            demoIsTrial={demoIsTrial}
+            setDemoIsTrial={setDemoIsTrial}
+            demoHideFullCallout={demoHideFullCallout}
+            setDemoHideFullCallout={setDemoHideFullCallout}
+            onResetToClassic={handleResetToClassic}
+          />
           <DiscoverResizableLayout
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
@@ -520,6 +582,18 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           />
         </div>
       </EuiPageBody>
+      
+      {/* Demo Bar - Floating at bottom for demonstration purposes */}
+      <DemoControlsBar
+        canManageSpaces={demoCanManageSpaces}
+        setCanManageSpaces={setDemoCanManageSpaces}
+        isTrial={demoIsTrial}
+        setIsTrial={setDemoIsTrial}
+        hideFullCallout={demoHideFullCallout}
+        setHideFullCallout={setDemoHideFullCallout}
+        onResetToClassic={handleResetToClassic}
+        showHideFullSwitch={true}
+      />
     </EuiPage>
   );
 }

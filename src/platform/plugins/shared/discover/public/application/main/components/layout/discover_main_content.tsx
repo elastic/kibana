@@ -51,6 +51,9 @@ export interface DiscoverMainContentProps {
   columns: string[];
   panelsToggle: ReactElement<PanelsToggleProps>;
   isChartAvailable?: boolean; // it will be injected by UnifiedHistogram
+  // Demo state props
+  demoCanManageSpaces?: boolean;
+  demoIsTrial?: boolean;
 }
 
 export const DiscoverMainContent = ({
@@ -63,6 +66,8 @@ export const DiscoverMainContent = ({
   onDropFieldToTable,
   panelsToggle,
   isChartAvailable,
+  demoCanManageSpaces,
+  demoIsTrial,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
   const isEsqlMode = useIsEsqlMode();
@@ -153,6 +158,8 @@ export const DiscoverMainContent = ({
               onAddFilter={onAddFilter}
               stateContainer={stateContainer}
               onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
+              demoCanManageSpaces={demoCanManageSpaces}
+              demoIsTrial={demoIsTrial}
             />
           ) : null}
           {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (

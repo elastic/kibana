@@ -104,12 +104,17 @@ function DiscoverDocumentsComponent({
   onAddFilter,
   stateContainer,
   onFieldEdited,
+  demoCanManageSpaces,
+  demoIsTrial,
 }: {
   viewModeToggle: React.ReactElement | undefined;
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
+  // Demo state props
+  demoCanManageSpaces?: boolean;
+  demoIsTrial?: boolean;
 }) {
   const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
@@ -319,6 +324,8 @@ function DiscoverDocumentsComponent({
         query={query}
         initialTabId={initialDocViewerTabId}
         docViewerRef={docViewerRef}
+        demoCanManageSpaces={demoCanManageSpaces}
+        demoIsTrial={demoIsTrial}
       />
     ),
     [
@@ -330,6 +337,8 @@ function DiscoverDocumentsComponent({
       setExpandedDoc,
       query,
       initialDocViewerTabId,
+      demoCanManageSpaces,
+      demoIsTrial,
     ]
   );
 

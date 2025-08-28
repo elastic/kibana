@@ -1,22 +1,25 @@
-# Span Overview Cue - POC
+# Observability Cues - POC
 
-A lightweight cue system in Discover (Classic space view) that detects APM span data and encourages users to switch to the Observability solution view for enhanced trace visualization.
+A lightweight cue system in Discover (Classic space view) that detects APM span and transaction data and encourages users to switch to the Observability solution view for enhanced trace visualization.
 
 ## Overview
 
-This feature detects when the current Discover query returns APM span data and displays a contextual callout offering to switch to Observability view. It includes an onboarding modal that appears after switching to introduce users to trace-focused enhancements.
+This feature detects when the current Discover query returns APM span or transaction data and displays contextual callouts offering to switch to Observability view. It includes onboarding modals that appear after switching to introduce users to trace-focused enhancements.
 
 ## Features
 
 ### Core Functionality
 - **APM Span Detection**: Probes current Discover query for span data using DSL
-- **Contextual Cue**: Shows callout only in Classic view when span data is detected
+- **APM Transaction Detection**: Probes current Discover query for transaction data using DSL
+- **Contextual Cues**: Shows callouts only in Classic view when span or transaction data is detected
 - **Solution Switching**: Seamlessly switches to Observability view preserving query state
-- **Onboarding Modal**: Interactive tour of Observability features after switching
-- **Flyout Banner**: Compact callout appears in document flyout when viewing span documents
+- **Onboarding Modals**: Interactive tours of Observability features after switching
+- **Flyout Banners**: Compact callouts appear in document flyout when viewing span or transaction documents
 
 ### Gating Conditions
 All conditions must be true for the cue to appear:
+
+#### Span Overview Cue
 - Solution view is Classic (not Observability)
 - Current query returns at least 1 hit matching APM span shape:
   - `processor.event: "span"`
@@ -28,9 +31,23 @@ All conditions must be true for the cue to appear:
   - At least one hit has `data_stream.type: "traces"`
   - `_index` matches traces data stream pattern (`^(\.ds-)?traces-`)
 
+#### Transaction Overview Cue
+- Solution view is Classic (not Observability)
+- Current query returns at least 1 hit matching APM transaction shape:
+  - `processor.event: "transaction"`
+  - `@timestamp` present
+  - `trace.id` present
+  - `transaction.id` present
+  - `transaction.name` present
+  - `transaction.type` present
+  - `transaction.duration.us` is numeric
+- Data-stream identity present:
+  - At least one hit has `data_stream.type: "traces"`
+  - `_index` matches traces data stream pattern (`^(\.ds-)?traces-`)
+
 ### User Experience
-- **Main Callout**: Full-featured callout in Discover main view
-- **Compact Callout**: Streamlined banner in document flyout
+- **Main Callouts**: Full-featured callouts in Discover main view
+- **Compact Callouts**: Streamlined banners in document flyout
 - **Conditional Messaging**: Different copy for trial vs. non-trial deployments
 - **Permission Gating**: Only shows for users with space management permissions
 - **Dismissible**: In-memory dismissal for current session
@@ -38,9 +55,11 @@ All conditions must be true for the cue to appear:
 ## Implementation
 
 ### Files
-- `span_overview_cue.tsx` - Main component with callout and modal
+- `span_overview_cue.tsx` - Main component with span callout and modal
 - `use_span_overview_probe.ts` - Hook for detecting span data
-- `discover_grid_flyout.tsx` - Integration for flyout banner
+- `transaction_overview_cue.tsx` - Main component with transaction callout and modal
+- `use_transaction_overview_probe.ts` - Hook for detecting transaction data
+- `discover_grid_flyout.tsx` - Integration for flyout banners
 - `doc_viewer_flyout.tsx` - Enhanced to support banner prop
 
 ### Key Components
@@ -50,12 +69,22 @@ All conditions must be true for the cue to appear:
 - **Variants**: `'full'` (main view), `'compact'` (flyout banner)
 - **Demo Controls**: Floating bar with toggles for testing
 
+#### TransactionOverviewCue
+- **Props**: `document?`, `variant?`, `hideFullCallout?`
+- **Variants**: `'full'` (main view), `'compact'` (flyout banner)
+- **Demo Controls**: Floating bar with toggles for testing
+
 #### useSpanOverviewProbe
 - **Background Query**: Minimal DSL probe for span detection
 - **Performance**: Non-blocking, uses `searchSource.fetch$()`
 - **Caching**: Results cached for current query context
 
-#### Onboarding Modal
+#### useTransactionOverviewProbe
+- **Background Query**: Minimal DSL probe for transaction detection
+- **Performance**: Non-blocking, uses `searchSource.fetch$()`
+- **Caching**: Results cached for current query context
+
+#### Onboarding Modals
 - **Interactive Tour**: 3 highlights with navigation
 - **Persistence**: "Don't show again" preference in localStorage
 - **Responsive**: Stacks on small screens
@@ -68,9 +97,10 @@ All conditions must be true for the cue to appear:
 
 ## Configuration
 
-### Feature Flag
+### Feature Flags
 ```typescript
 xpack.discover.spanOverviewCue.enabled // default: true
+xpack.oblt.cues.transactionOverview.enabled // default: false
 ```
 
 ### Demo Controls

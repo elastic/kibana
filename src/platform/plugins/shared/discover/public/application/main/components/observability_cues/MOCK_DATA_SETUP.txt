@@ -1,21 +1,29 @@
-# Mock Data Setup for Span Overview Cue Testing
+# Mock Data Setup for Observability Cues Testing
 
-Adds mock trace data that will enable the cues to appear.
+Adds mock trace data that will enable the span and transaction cues to appear.
 
 ## Usage
 1. Open Kibana Dev Tools
 2. Copy and paste the requests below
 3. Execute them to create test data
 4. Create a data view with both name and index pattern set to `traces-*`
-4. Navigate to Discover to test the span overview cue
+4. Navigate to Discover to test the observability cues
 
 ## Test Data Description
-[Brief description of what the mock data contains]
+This creates sample APM span and transaction data that will trigger both the span overview cue and transaction overview cue in Discover.
+
+The data includes:
+- Span documents with all required fields (processor.event: "span", trace.id, span.id, span.duration.us, etc.)
+- Transaction documents with all required fields (processor.event: "transaction", trace.id, transaction.id, transaction.name, transaction.type, transaction.duration.us, etc.)
+- Both document types have the required traces data stream structure
 
 ## Requests
 Copy and paste this entire block into Dev Tools.
 Run the commands in the order they appear. 
 Don't forget to create the `traces-*` data view.
+
+### Additional Transaction Data (Optional)
+To test the transaction overview cue specifically, you can also add this transaction data:
 
 PUT _index_template/traces-apm-mock-template
 {
