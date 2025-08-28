@@ -11,18 +11,17 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import { from, where } from '@kbn/esql-composer';
-import { ERROR_GROUP_ID, SERVICE_NAME } from '@kbn/apm-types';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { SPAN_ID } from '@kbn/apm-types';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 export const getEsQlQuery = ({
@@ -30,27 +29,22 @@ export const getEsQlQuery = ({
   apmIndexSettings,
 }: {
   params: {
-    serviceName?: string;
     kuery?: string;
-    errorGroupId?: string;
+    spanId?: string;
   };
   apmIndexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
 }) => {
-  const { serviceName, kuery, errorGroupId } = params;
+  const { kuery, spanId } = params;
 
-  const errorIndices = apmIndexSettings
-    .filter((indexSetting) => ['error'].includes(indexSetting.configurationName))
+  const tracesIndices = apmIndexSettings
+    .filter((indexSetting) => ['span', 'transaction'].includes(indexSetting.configurationName))
     .map((indexSetting) => indexSetting.savedValue ?? indexSetting.defaultValue);
-  const dedupedIndices = Array.from(new Set(errorIndices)).join(',');
+  const dedupedIndices = Array.from(new Set(tracesIndices)).join(',');
 
   const filters = [];
 
-  if (errorGroupId) {
-    filters.push(where(`${ERROR_GROUP_ID} == ?errorGroupId`, { errorGroupId }));
-  }
-
-  if (serviceName) {
-    filters.push(where(`${SERVICE_NAME} == ?serviceName`, { serviceName }));
+  if (spanId) {
+    filters.push(where(`${SPAN_ID} == ?spanId`, { spanId }));
   }
 
   if (kuery) {
@@ -62,15 +56,24 @@ export const getEsQlQuery = ({
     .toString();
 };
 
-export function ViewErrorInDiscoverButton({ dataTestSubj }: { dataTestSubj: string }) {
+export function OpenSpanInDiscoverLink({
+  dataTestSubj,
+  spanId,
+}: {
+  dataTestSubj: string;
+  spanId: string;
+}) {
   const { share } = useApmPluginContext();
-  const { serviceName } = useApmServiceContext();
   const { services } = useKibana<ApmPluginStartDeps>();
 
   const {
     query: { rangeFrom, rangeTo, kuery },
-    path: { groupId },
-  } = useApmParams('/services/{serviceName}/errors/{groupId}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/dependencies/operation',
+    '/traces/explorer/waterfall'
+  );
 
   const { data = { apmIndexSettings: [] } } = useFetcher(
     (_, signal) => services.apmSourcesAccess.getApmIndexSettings({ signal }),
@@ -79,8 +82,7 @@ export function ViewErrorInDiscoverButton({ dataTestSubj }: { dataTestSubj: stri
 
   const params = {
     kuery,
-    errorGroupId: groupId,
-    serviceName,
+    spanId,
   };
 
   const esqlQuery = getEsQlQuery({
@@ -99,17 +101,16 @@ export function ViewErrorInDiscoverButton({ dataTestSubj }: { dataTestSubj: stri
   });
 
   return (
-    <EuiButtonEmpty
-      aria-label={i18n.translate('xpack.apm.viewErrorInDiscoverButton.ariaLabel', {
-        defaultMessage: 'View error in Discover',
+    <EuiLink
+      aria-label={i18n.translate('xpack.apm.openSpanInDiscoverLink.ariaLabel', {
+        defaultMessage: 'Open in Discover',
       })}
       data-test-subj={dataTestSubj}
-      iconType="discoverApp"
       href={discoverHref}
     >
-      {i18n.translate('xpack.apm.viewErrorInDiscoverButton.label', {
-        defaultMessage: 'View error in Discover',
+      {i18n.translate('xpack.apm.openSpanInDiscoverLink.label', {
+        defaultMessage: 'Open in Discover',
       })}
-    </EuiButtonEmpty>
+    </EuiLink>
   );
 }

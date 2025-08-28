@@ -52,7 +52,7 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
 import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
-import { ViewInDiscoverButton } from '../../shared/links/discover_links/view_in_discover_button';
+import { OpenInDiscoverButton } from '../../shared/links/discover_links/open_in_discover_button';
 
 export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => void }) {
   const { euiTheme } = useEuiTheme();
@@ -429,7 +429,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <ViewInDiscoverButton dataTestSubj="apmFailedCorrelationsViewInDiscoverButton" />
+          <OpenInDiscoverButton dataTestSubj="apmFailedCorrelationsViewInDiscoverButton" />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

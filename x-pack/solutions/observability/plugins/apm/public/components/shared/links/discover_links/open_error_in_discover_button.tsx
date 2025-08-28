@@ -11,17 +11,18 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import { from, where } from '@kbn/esql-composer';
-import { SPAN_ID } from '@kbn/apm-types';
+import { ERROR_GROUP_ID, SERVICE_NAME } from '@kbn/apm-types';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 export const getEsQlQuery = ({
@@ -29,22 +30,27 @@ export const getEsQlQuery = ({
   apmIndexSettings,
 }: {
   params: {
+    serviceName?: string;
     kuery?: string;
-    spanId?: string;
+    errorGroupId?: string;
   };
   apmIndexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
 }) => {
-  const { kuery, spanId } = params;
+  const { serviceName, kuery, errorGroupId } = params;
 
-  const tracesIndices = apmIndexSettings
-    .filter((indexSetting) => ['span', 'transaction'].includes(indexSetting.configurationName))
+  const errorIndices = apmIndexSettings
+    .filter((indexSetting) => ['error'].includes(indexSetting.configurationName))
     .map((indexSetting) => indexSetting.savedValue ?? indexSetting.defaultValue);
-  const dedupedIndices = Array.from(new Set(tracesIndices)).join(',');
+  const dedupedIndices = Array.from(new Set(errorIndices)).join(',');
 
   const filters = [];
 
-  if (spanId) {
-    filters.push(where(`${SPAN_ID} == ?spanId`, { spanId }));
+  if (errorGroupId) {
+    filters.push(where(`${ERROR_GROUP_ID} == ?errorGroupId`, { errorGroupId }));
+  }
+
+  if (serviceName) {
+    filters.push(where(`${SERVICE_NAME} == ?serviceName`, { serviceName }));
   }
 
   if (kuery) {
@@ -56,24 +62,15 @@ export const getEsQlQuery = ({
     .toString();
 };
 
-export function ViewSpanInDiscoverLink({
-  dataTestSubj,
-  spanId,
-}: {
-  dataTestSubj: string;
-  spanId: string;
-}) {
+export function OpenErrorInDiscoverButton({ dataTestSubj }: { dataTestSubj: string }) {
   const { share } = useApmPluginContext();
+  const { serviceName } = useApmServiceContext();
   const { services } = useKibana<ApmPluginStartDeps>();
 
   const {
     query: { rangeFrom, rangeTo, kuery },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view',
-    '/dependencies/operation',
-    '/traces/explorer/waterfall'
-  );
+    path: { groupId },
+  } = useApmParams('/services/{serviceName}/errors/{groupId}');
 
   const { data = { apmIndexSettings: [] } } = useFetcher(
     (_, signal) => services.apmSourcesAccess.getApmIndexSettings({ signal }),
@@ -82,7 +79,8 @@ export function ViewSpanInDiscoverLink({
 
   const params = {
     kuery,
-    spanId,
+    errorGroupId: groupId,
+    serviceName,
   };
 
   const esqlQuery = getEsQlQuery({
@@ -101,16 +99,17 @@ export function ViewSpanInDiscoverLink({
   });
 
   return (
-    <EuiLink
-      aria-label={i18n.translate('xpack.apm.viewSpanInDiscoverLink.ariaLabel', {
-        defaultMessage: 'View span in Discover',
+    <EuiButtonEmpty
+      aria-label={i18n.translate('xpack.apm.openErrorInDiscoverButton.ariaLabel', {
+        defaultMessage: 'Open in Discover',
       })}
       data-test-subj={dataTestSubj}
+      iconType="discoverApp"
       href={discoverHref}
     >
-      {i18n.translate('xpack.apm.viewSpanInDiscoverLink.label', {
-        defaultMessage: 'View span in Discover',
+      {i18n.translate('xpack.apm.openErrorInDiscoverButton.label', {
+        defaultMessage: 'Open in Discover',
       })}
-    </EuiLink>
+    </EuiButtonEmpty>
   );
 }

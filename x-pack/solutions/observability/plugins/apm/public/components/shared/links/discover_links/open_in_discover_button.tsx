@@ -120,7 +120,7 @@ const getEsQlQuery = ({
     .toString();
 };
 
-export function ViewInDiscoverButton({ dataTestSubj }: { dataTestSubj: string }) {
+export function OpenInDiscoverButton({ dataTestSubj }: { dataTestSubj: string }) {
   const { share } = useApmPluginContext();
   const { serviceName } = useApmServiceContext();
   const { services } = useKibana<ApmPluginStartDeps>();
@@ -180,15 +180,15 @@ export function ViewInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
 
   return (
     <EuiButtonEmpty
-      aria-label={i18n.translate('xpack.apm.waterfallWithSummary.viewInDiscoverButton.ariaLabel', {
-        defaultMessage: 'View in Discover',
+      aria-label={i18n.translate('xpack.apm.waterfallWithSummary.openInDiscoverButton.ariaLabel', {
+        defaultMessage: 'Open in Discover',
       })}
       data-test-subj={dataTestSubj}
       iconType="discoverApp"
       href={discoverHref}
     >
-      {i18n.translate('xpack.apm.waterfallWithSummary.viewInDiscoverButton.label', {
-        defaultMessage: 'View in Discover',
+      {i18n.translate('xpack.apm.waterfallWithSummary.openInDiscoverButton.label', {
+        defaultMessage: 'Open in Discover',
       })}
     </EuiButtonEmpty>
   );

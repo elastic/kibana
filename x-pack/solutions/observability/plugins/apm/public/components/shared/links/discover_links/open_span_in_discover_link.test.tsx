@@ -7,14 +7,13 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { ERROR_GROUP_ID, SERVICE_NAME } from '@kbn/apm-types';
-import { ViewErrorInDiscoverButton } from './view_error_in_discover_button';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { SPAN_ID } from '@kbn/apm-types';
+import { OpenSpanInDiscoverLink } from './open_span_in_discover_link';
 
-const MOCK_INDEX_PATTERN = 'logs-*';
+const MOCK_INDEX_PATTERN = 'traces-*';
 
 jest.mock('../../../../context/apm_service/use_apm_service_context');
 jest.mock('../../../../hooks/use_apm_params');
@@ -40,14 +39,18 @@ jest.mock('../../../../hooks/use_fetcher', () => {
           data: {
             apmIndexSettings: [
               {
+                configurationName: 'transaction',
+                defaultValue: MOCK_INDEX_PATTERN,
+              },
+              {
+                configurationName: 'span',
+                savedValue: MOCK_INDEX_PATTERN,
+                defaultValue: 'traces-otel-*',
+              },
+              {
                 configurationName: 'test',
                 savedValue: 'fake-index',
                 defaultValue: 'fake-*',
-              },
-              {
-                configurationName: 'error',
-                savedValue: MOCK_INDEX_PATTERN,
-                defaultValue: 'error-*',
               },
             ],
           },
@@ -59,10 +62,7 @@ jest.mock('../../../../hooks/use_fetcher', () => {
   };
 });
 
-const mockUseApmServiceContext = useApmServiceContext as jest.MockedFunction<
-  typeof useApmServiceContext
->;
-const mockUseApmParams = useApmParams as jest.MockedFunction<any>;
+const mockUseAnyOfApmParams = useAnyOfApmParams as jest.MockedFunction<any>;
 const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
   typeof useApmPluginContext
 >;
@@ -72,14 +72,10 @@ const mockLocatorGet = jest.fn().mockReturnValue({
   getRedirectUrl: mockGetRedirectUrl,
 });
 
-const errorGroupId = 'test-error-group-id';
-const serviceName = 'test-service';
+const spanId = 'test-span-id';
 
-describe('ViewErrorInDiscoverButton', () => {
+describe('OpenSpanInDiscoverLink', () => {
   beforeEach(() => {
-    mockUseApmServiceContext.mockReturnValue({
-      serviceName,
-    } as any);
     mockUseApmPluginContext.mockReturnValue({
       share: {
         url: {
@@ -90,7 +86,7 @@ describe('ViewErrorInDiscoverButton', () => {
       },
     } as any);
 
-    mockUseApmParams.mockReturnValue({
+    mockUseAnyOfApmParams.mockReturnValue({
       query: {},
     });
 
@@ -101,22 +97,17 @@ describe('ViewErrorInDiscoverButton', () => {
     jest.clearAllMocks();
   });
 
-  it('should generate ESQL query with error group id filters', () => {
+  it('should generate ESQL query with span id filter', () => {
     const query = {
       rangeFrom: 'now-15m',
       rangeTo: 'now',
     };
 
-    mockUseApmServiceContext.mockReturnValue({
-      serviceName: '',
-    } as any);
-
-    mockUseApmParams.mockReturnValue({
+    mockUseAnyOfApmParams.mockReturnValue({
       query,
-      path: { groupId: errorGroupId },
     });
 
-    render(<ViewErrorInDiscoverButton dataTestSubj="testId" />);
+    render(<OpenSpanInDiscoverLink dataTestSubj="testId" spanId={spanId} />);
     expect(mockLocatorGet).toHaveBeenCalledWith(DISCOVER_APP_LOCATOR);
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       timeRange: {
@@ -124,49 +115,22 @@ describe('ViewErrorInDiscoverButton', () => {
         to: 'now',
       },
       query: {
-        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${ERROR_GROUP_ID} == "${errorGroupId}"`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SPAN_ID} == "${spanId}"`,
       },
     });
   });
 
-  it('should generate ESQL query with error group id and service name filter', () => {
-    const query = {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-    };
-    mockUseApmParams.mockReturnValue({
-      query,
-      path: { groupId: errorGroupId },
-    });
-
-    render(<ViewErrorInDiscoverButton dataTestSubj="testId" />);
-
-    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
-      timeRange: {
-        from: 'now-15m',
-        to: 'now',
-      },
-      query: {
-        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${ERROR_GROUP_ID} == "${errorGroupId}"\n  | WHERE ${SERVICE_NAME} == "${serviceName}"`,
-      },
-    });
-  });
-
-  it('should generate ESQL query with error group id and kuery filter', () => {
+  it('should generate ESQL query with span id and kuery filter', () => {
     const query = {
       kuery: 'user.id: "123" AND status_code: 200',
       rangeFrom: 'now-15m',
       rangeTo: 'now',
     };
-    mockUseApmServiceContext.mockReturnValue({
-      serviceName: '',
-    } as any);
-    mockUseApmParams.mockReturnValue({
+    mockUseAnyOfApmParams.mockReturnValue({
       query,
-      path: { groupId: errorGroupId },
     });
 
-    render(<ViewErrorInDiscoverButton dataTestSubj="testId" />);
+    render(<OpenSpanInDiscoverLink dataTestSubj="testId" spanId={spanId} />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       timeRange: {
@@ -174,22 +138,23 @@ describe('ViewErrorInDiscoverButton', () => {
         to: 'now',
       },
       query: {
-        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${ERROR_GROUP_ID} == "${errorGroupId}"\n  | WHERE KQL("user.id: \\"123\\" AND status_code: 200")`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SPAN_ID} == "${spanId}"\n  | WHERE KQL("user.id: \\"123\\" AND status_code: 200")`,
       },
     });
   });
 
   it('should render button with correct props', () => {
-    mockUseApmParams.mockReturnValue({
+    mockUseAnyOfApmParams.mockReturnValue({
       query: {},
-      path: { groupId: errorGroupId },
     });
 
-    const { getByTestId } = render(<ViewErrorInDiscoverButton dataTestSubj="testId" />);
+    const { getByTestId } = render(
+      <OpenSpanInDiscoverLink dataTestSubj="testId" spanId={spanId} />
+    );
 
     const button = getByTestId('testId');
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('href', 'http://test-discover-url');
-    expect(button).toHaveTextContent('View error in Discover');
+    expect(button).toHaveTextContent('Open in Discover');
   });
 });
