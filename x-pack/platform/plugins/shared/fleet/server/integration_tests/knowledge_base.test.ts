@@ -127,6 +127,7 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     });
 
     // Wait a moment for the index operation to complete after the model deployment finishes up
+    // ES will actually index the failed items here
     await new Promise((resolve) => setTimeout(resolve, 10000));
 
     // Step 2: Retrieve knowledge base content through the API
