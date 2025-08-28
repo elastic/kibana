@@ -63024,7 +63024,7 @@ paths:
                     ]
               schema:
                 items:
-                  - $ref: '#/components/schemas/Synthetics_getParameterResponse'
+                  $ref: '#/components/schemas/Synthetics_getParameterResponse'
                 type: array
           description: A successful response.
       summary: Get parameters
