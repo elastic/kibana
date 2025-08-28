@@ -12,7 +12,7 @@ export const getSharedIcon = (sharedState: ConversationSharedState): string => {
     case ConversationSharedState.SHARED:
       return 'users';
     case ConversationSharedState.RESTRICTED:
-      return 'user';
+      return 'readOnly';
     case ConversationSharedState.PRIVATE:
       return 'lock';
     default:
