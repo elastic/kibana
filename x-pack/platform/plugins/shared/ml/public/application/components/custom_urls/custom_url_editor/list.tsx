@@ -52,6 +52,12 @@ function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   return interval !== null;
 }
 
+/**
+ * Finds the data view ID for a custom URL based on the job configuration.
+ * For dashboard URLs: Searches data views by matching index names from job config.
+ * Uses source index for partial DFA jobs since destination index doesn't exist yet.
+ * For discover URLs: Extracts data view ID directly from the URL state.
+ */
 function findDataViewId(
   job: Job | DataFrameAnalyticsConfig,
   customUrl: MlKibanaUrlConfig,
@@ -62,12 +68,10 @@ function findDataViewId(
   const dfaJob = job as DataFrameAnalyticsConfig;
 
   let dataViewId;
-  // DFA job url - need the timefield to test the URL. Get it from the job config. Use source index when partial job since dest index does not exist yet.
   if (customUrl.url_value.includes('dashboards')) {
     const sourceIndex = Array.isArray(dfaJob.source.index)
       ? dfaJob.source.index.join()
       : dfaJob.source.index;
-    // need to get the dataview from the dashboard to get timefield
     const indexName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
     const backupIndexName = sourceIndex;
     dataViewId = dataViewListItems?.find((item) => item.title === indexName)?.id;
@@ -78,7 +82,7 @@ function findDataViewId(
     const urlState = parseUrlState(customUrl.url_value);
     dataViewId = urlState._a?.index;
   }
-  // should I add try catch error handling for the case that dataViewId was not found?
+
   return dataViewId;
 }
 
@@ -213,6 +217,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
       if (dataViewId) {
         const dataView = await dataViews.get(dataViewId);
+        // DFA job url - need the timefield to test the URL.
         timefieldName = dataView?.timeFieldName ?? null;
       }
     }
