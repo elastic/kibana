@@ -80,4 +80,193 @@ describe('runCiChecksTool', () => {
     // Don't actually call the handler to avoid creating child processes in tests
     expect(handler.constructor.name).toBe('AsyncFunction');
   });
+
+  describe('input validation', () => {
+    it('accepts all valid check types', () => {
+      const schema = runCiChecksTool.inputSchema;
+      const validChecks = [
+        'build',
+        'quick_checks',
+        'checks',
+        'type_check',
+        'linting_with_types',
+        'linting',
+        'oas_snapshot',
+      ];
+
+      validChecks.forEach((check) => {
+        const result = schema.safeParse({ checks: [check] });
+        expect(result.success).toBe(true);
+      });
+    });
+
+    it('rejects invalid check types', () => {
+      const schema = runCiChecksTool.inputSchema;
+      const invalidChecks = ['invalid_check', 'build_test', 'lint', ''];
+
+      invalidChecks.forEach((check) => {
+        const result = schema.safeParse({ checks: [check] });
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error.issues[0].message).toContain('Invalid enum value');
+        }
+      });
+    });
+
+    it('validates parallel parameter as boolean', () => {
+      const schema = runCiChecksTool.inputSchema;
+
+      // Valid boolean values
+      expect(schema.safeParse({ parallel: true }).success).toBe(true);
+      expect(schema.safeParse({ parallel: false }).success).toBe(true);
+
+      // Invalid boolean values
+      expect(schema.safeParse({ parallel: 'true' }).success).toBe(false);
+      expect(schema.safeParse({ parallel: 1 }).success).toBe(false);
+      expect(schema.safeParse({ parallel: null }).success).toBe(false);
+    });
+
+    it('validates clean_cache parameter as boolean', () => {
+      const schema = runCiChecksTool.inputSchema;
+
+      // Valid boolean values
+      expect(schema.safeParse({ clean_cache: true }).success).toBe(true);
+      expect(schema.safeParse({ clean_cache: false }).success).toBe(true);
+
+      // Invalid boolean values
+      expect(schema.safeParse({ clean_cache: 'true' }).success).toBe(false);
+      expect(schema.safeParse({ clean_cache: 1 }).success).toBe(false);
+      expect(schema.safeParse({ clean_cache: null }).success).toBe(false);
+    });
+
+    it('accepts empty checks array', () => {
+      const schema = runCiChecksTool.inputSchema;
+      const result = schema.safeParse({ checks: [] });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts single check', () => {
+      const schema = runCiChecksTool.inputSchema;
+      const result = schema.safeParse({ checks: ['build'] });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts multiple checks', () => {
+      const schema = runCiChecksTool.inputSchema;
+      const result = schema.safeParse({
+        checks: ['build', 'quick_checks', 'type_check'],
+      });
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('default values', () => {
+    it('has correct default values for empty input', () => {
+      const schema = runCiChecksTool.inputSchema;
+      const result = schema.safeParse({});
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.checks).toEqual([
+          'build',
+          'quick_checks',
+          'checks',
+          'type_check',
+          'linting_with_types',
+          'linting',
+          'oas_snapshot',
+        ]);
+        expect(result.data.parallel).toBe(true);
+        expect(result.data.clean_cache).toBe(false);
+      }
+    });
+
+    it('has correct default values for partial input', () => {
+      const schema = runCiChecksTool.inputSchema;
+      const result = schema.safeParse({ checks: ['build'] });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.checks).toEqual(['build']);
+        expect(result.data.parallel).toBe(true);
+        expect(result.data.clean_cache).toBe(false);
+      }
+    });
+
+    it('overrides defaults when explicitly provided', () => {
+      const schema = runCiChecksTool.inputSchema;
+      const result = schema.safeParse({
+        parallel: false,
+        clean_cache: true,
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.parallel).toBe(false);
+        expect(result.data.clean_cache).toBe(true);
+      }
+    });
+  });
+
+  describe('schema structure', () => {
+    it('has the correct schema shape', () => {
+      const schema = runCiChecksTool.inputSchema;
+      const shape = schema.shape;
+
+      expect(shape).toHaveProperty('checks');
+      expect(shape).toHaveProperty('parallel');
+      expect(shape).toHaveProperty('clean_cache');
+
+      // Check that all properties are zod types
+      expect(shape.checks).toBeDefined();
+      expect(shape.parallel).toBeDefined();
+      expect(shape.clean_cache).toBeDefined();
+    });
+
+    it('has the correct enum values for checks', () => {
+      const schema = runCiChecksTool.inputSchema;
+
+      // Test that all expected values are accepted
+      const expectedValues = [
+        'build',
+        'quick_checks',
+        'checks',
+        'type_check',
+        'linting_with_types',
+        'linting',
+        'oas_snapshot',
+      ];
+
+      expectedValues.forEach((value) => {
+        const result = schema.safeParse({ checks: [value] });
+        expect(result.success).toBe(true);
+      });
+    });
+  });
+
+  describe('tool definition', () => {
+    it('has the correct tool structure', () => {
+      expect(runCiChecksTool).toHaveProperty('name');
+      expect(runCiChecksTool).toHaveProperty('description');
+      expect(runCiChecksTool).toHaveProperty('inputSchema');
+      expect(runCiChecksTool).toHaveProperty('handler');
+
+      expect(typeof runCiChecksTool.name).toBe('string');
+      expect(typeof runCiChecksTool.description).toBe('string');
+      expect(typeof runCiChecksTool.handler).toBe('function');
+    });
+
+    it('has a descriptive name', () => {
+      expect(runCiChecksTool.name).toBe('run_ci_checks');
+    });
+
+    it('has a comprehensive description', () => {
+      const description = runCiChecksTool.description;
+      expect(description).toContain('CI checks');
+      expect(description).toContain('BuildKite pipeline');
+      expect(description).toContain('build');
+      expect(description).toContain('linting');
+      expect(description).toContain('type checking');
+    });
+  });
 });
