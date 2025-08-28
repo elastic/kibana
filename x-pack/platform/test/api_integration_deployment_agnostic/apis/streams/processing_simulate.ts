@@ -94,6 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           field: 'resource.attributes.host.name',
           eq: TEST_HOST,
         },
+        status: 'enabled',
       });
     });
 
