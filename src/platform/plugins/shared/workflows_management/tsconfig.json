@@ -42,7 +42,8 @@
     "@kbn/logging-mocks",
     "@kbn/discover-utils",
     "@kbn/field-utils",
-    "@kbn/storybook"
+    "@kbn/storybook",
+    "@kbn/core-security-browser"
   ],
   "exclude": ["target/**/*"]
 }
