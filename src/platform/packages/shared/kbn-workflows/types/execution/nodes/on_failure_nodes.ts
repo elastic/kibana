@@ -42,9 +42,6 @@ export const EnterTryBlockNodeSchema = z.object({
   id: z.string(),
   type: z.literal('enter-try-block'),
   enterNormalPathNodeId: z.string(),
-  exitNormalPathNodeId: z.string(),
-  enterFallbackPathNodeId: z.string(),
-  exitFallbackPathNodeId: z.string(),
   exitNodeId: z.string(),
 });
 export type EnterTryBlockNode = z.infer<typeof EnterTryBlockNodeSchema>;

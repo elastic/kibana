@@ -21,9 +21,6 @@ describe('EnterTryBlockNodeImpl', () => {
       id: 'onFailureZone1',
       type: 'enter-try-block',
       enterNormalPathNodeId: 'enterNormalPath1',
-      exitNormalPathNodeId: 'exitNormalPath1',
-      enterFallbackPathNodeId: 'enterFallbackPath1',
-      exitFallbackPathNodeId: 'exitFallbackPath1',
       exitNodeId: 'exitOnFailureZone1',
     };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;

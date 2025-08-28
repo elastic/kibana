@@ -252,9 +252,6 @@ export function visitFallbackStep(
     exitNodeId: exitTryBlockNodeId,
     type: 'enter-try-block',
     enterNormalPathNodeId,
-    exitNormalPathNodeId,
-    enterFallbackPathNodeId,
-    exitFallbackPathNodeId,
   };
   const exitTryBlockNode: ExitTryBlockNode = {
     type: 'exit-try-block',
@@ -265,7 +262,7 @@ export function visitFallbackStep(
     id: enterTryBlockNode.enterNormalPathNodeId,
     type: 'enter-normal-path',
     enterZoneNodeId: enterTryBlockNode.id,
-    enterFailurePathNodeId: enterTryBlockNode.enterFallbackPathNodeId,
+    enterFailurePathNodeId: enterFallbackPathNodeId,
   };
 
   graph.setNode(enterNormalPathNode.id, enterNormalPathNode);
@@ -276,7 +273,7 @@ export function visitFallbackStep(
       (thenPreviousStep = visitAbstractStep(graph, thenPreviousStep, ifTrueCurrentStep))
   );
   const exitNormalPathNode: ExitNormalPathNode = {
-    id: enterTryBlockNode.exitNormalPathNodeId,
+    id: exitNormalPathNodeId,
     type: 'exit-normal-path',
     enterNodeId: enterTryBlockNode.enterNormalPathNodeId,
     exitOnFailureZoneNodeId: exitTryBlockNode.id,
@@ -287,7 +284,7 @@ export function visitFallbackStep(
 
   if (fallbackPathSteps?.length > 0) {
     const enterFallbackPathNode: EnterFallbackPathNode = {
-      id: enterTryBlockNode.enterFallbackPathNodeId,
+      id: enterFallbackPathNodeId,
       type: 'enter-failure-path',
       enterZoneNodeId: enterTryBlockNode.id,
     };
@@ -299,9 +296,9 @@ export function visitFallbackStep(
         (elsePreviousStep = visitAbstractStep(graph, elsePreviousStep, ifFalseCurrentStep))
     );
     const exitFallbackPathNode: ExitFallbackPathNode = {
-      id: enterTryBlockNode.exitFallbackPathNodeId,
+      id: exitFallbackPathNodeId,
       type: 'exit-failure-path',
-      enterNodeId: enterTryBlockNode.enterFallbackPathNodeId,
+      enterNodeId: enterFallbackPathNodeId,
       exitOnFailureZoneNodeId: exitTryBlockNode.id,
     };
     graph.setNode(exitFallbackPathNode.id, exitFallbackPathNode);
