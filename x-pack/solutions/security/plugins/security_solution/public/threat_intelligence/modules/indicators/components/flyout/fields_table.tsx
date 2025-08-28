@@ -35,12 +35,14 @@ export interface IndicatorFieldsTableProps {
   fields: string[];
   indicator: Indicator;
   ['data-test-subj']?: string;
+  compressed?: boolean;
 }
 
 export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
   fields,
   indicator,
   'data-test-subj': dataTestSubj,
+  compressed,
 }) => {
   const smallFontSize = useEuiFontSize('xs').fontSize;
   const columns = useMemo(
@@ -102,6 +104,7 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
         }
       `}
       search={euiTableSearchOptions}
+      compressed={compressed}
     />
   );
 };

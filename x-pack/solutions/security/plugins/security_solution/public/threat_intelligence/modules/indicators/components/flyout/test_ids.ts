@@ -10,13 +10,6 @@ export const INDICATORS_FLYOUT_TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const INDICATORS_FLYOUT_SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
 export const INDICATORS_FLYOUT_TABS_TEST_ID = 'tiIndicatorFlyoutTabs';
 
-/* Indicator Value Actions */
-export const TIMELINE_BUTTON_TEST_ID = 'TimelineButton';
-export const FILTER_IN_BUTTON_TEST_ID = 'FilterInButton';
-export const FILTER_OUT_BUTTON_TEST_ID = 'FilterOutButton';
-export const COPY_TO_CLIPBOARD_BUTTON_TEST_ID = 'CopyToClipboardButton';
-export const POPOVER_BUTTON_TEST_ID = 'PopoverButton';
-
 /* Take Action */
 export const TAKE_ACTION_BUTTON_TEST_ID = 'tiIndicatorFlyoutTakeActionButton';
 export const INVESTIGATE_IN_TIMELINE_TEST_ID = 'tiIndicatorFlyoutInvestigateInTimelineContextMenu';

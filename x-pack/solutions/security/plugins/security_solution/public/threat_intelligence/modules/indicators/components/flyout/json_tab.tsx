@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorEmptyPrompt } from './empty_prompt';
-import { JsonTab } from '../../../../../flyout/shared/json_tab';
+import { JsonTab } from '../../../../../flyout/shared/components/json_tab';
 
 const FLYOUT_JSON_TEST_ID = 'indicators-flyout';
 

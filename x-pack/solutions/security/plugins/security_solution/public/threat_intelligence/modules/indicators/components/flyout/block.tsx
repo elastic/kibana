@@ -64,22 +64,20 @@ export const IndicatorBlock: FC<IndicatorBlockProps> = ({
   const { key, value } = getIndicatorFieldAndValue(indicator, field);
 
   return (
-    <SecurityCellActions
-      data={{ field: key, value }}
-      mode={CellActionsMode.HOVER_DOWN}
-      triggerId={SecurityCellActionsTrigger.DEFAULT}
-    >
-      <EuiPanel {...panelProps}>
-        <VisibleOnHover data-test-subj={`${dataTestSubj}Item`}>
-          <EuiText>
-            <IndicatorFieldLabel field={field} />
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText size="s">
-            <IndicatorFieldValue indicator={indicator} field={field} />
-          </EuiText>
-        </VisibleOnHover>
-      </EuiPanel>
-    </SecurityCellActions>
+    <EuiPanel {...panelProps}>
+      <SecurityCellActions
+        data={{ field: key, value }}
+        mode={CellActionsMode.HOVER_DOWN}
+        triggerId={SecurityCellActionsTrigger.DEFAULT}
+      >
+        <EuiText>
+          <IndicatorFieldLabel field={field} />
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiText size="s">
+          <IndicatorFieldValue indicator={indicator} field={field} />
+        </EuiText>
+      </SecurityCellActions>
+    </EuiPanel>
   );
 };

@@ -14,7 +14,7 @@ import { DocumentDetailsContext } from '../../../document_details/shared/context
 import { mockContextValue } from '../../../document_details/shared/mocks/mock_context';
 import userEvent from '@testing-library/user-event';
 import { TABLE_TAB_CONTENT_TEST_ID } from '../../../document_details/right/tabs/test_ids';
-import { JSON_TAB_CONTENT_TEST_ID } from '../../../document_details/shared/test_ids';
+import { JSON_TAB_CONTENT_TEST_ID } from '../../../shared/components/json_tab';
 
 describe('AssetDocumentTab', () => {
   it('renders', () => {

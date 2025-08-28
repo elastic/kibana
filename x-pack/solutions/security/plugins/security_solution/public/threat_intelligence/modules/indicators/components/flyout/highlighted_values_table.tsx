@@ -51,6 +51,7 @@ export const HighlightedValuesTable: FC<HighlightedValuesTableProps> = ({
         indicator={indicator}
         fields={highlightedFields}
         data-test-subj={dataTestSubj}
+        compressed
       />
     </EuiPanel>
   );

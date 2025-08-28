@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { JsonTab as SharedJsonTab } from '../../../shared/json_tab';
+import { JsonTab as SharedJsonTab } from '../../../shared/components/json_tab';
 import { PREFIX } from '../../../shared/test_ids';
 
 /**

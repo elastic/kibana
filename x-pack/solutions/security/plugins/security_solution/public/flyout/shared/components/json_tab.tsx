@@ -11,7 +11,7 @@ import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { PREFIX } from './test_ids';
+import { PREFIX } from '../test_ids';
 
 export const JSON_TAB_CONTENT_TEST_ID = 'jsonView' as const;
 export const JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID = `${PREFIX}JsonTabCopyToClipboard` as const;
