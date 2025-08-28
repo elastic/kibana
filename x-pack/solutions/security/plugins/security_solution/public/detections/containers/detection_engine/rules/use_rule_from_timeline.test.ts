@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { useRuleFromTimeline } from './use_rule_from_timeline';
 import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
@@ -104,7 +104,7 @@ const selectedTimeline: ResolveTimelineResponse = {
 // TODO: come back to this test later, no idea why it fails with the new picker, even when I mock all the hooks
 // probably depends on some weird timing or other non-deterministic behavior.
 // https://github.com/elastic/security-team/issues/11959
-describe.skip('useRuleFromTimeline', () => {
+describe('useRuleFromTimeline', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
   const setRuleQuery = jest.fn();
   beforeEach(() => {

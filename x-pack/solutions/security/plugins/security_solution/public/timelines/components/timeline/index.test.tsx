@@ -155,7 +155,7 @@ describe('StatefulTimeline', () => {
 
   // TODO: evaluate if this test is still needed
   // https://github.com/elastic/security-team/issues/11959
-  test.skip('on create timeline and timeline savedObjectId: null, sourcerer does not update timeline', () => {
+  test('on create timeline and timeline savedObjectId: null, sourcerer does not update timeline', () => {
     mount(
       <TestProviders>
         <StatefulTimeline {...props} />
@@ -169,7 +169,7 @@ describe('StatefulTimeline', () => {
 
   // TODO: evaluate if this test is still needed
   // https://github.com/elastic/security-team/issues/11959
-  test.skip('sourcerer data view updates and timeline already matches the data view, no updates', () => {
+  test('sourcerer data view updates and timeline already matches the data view, no updates', () => {
     mount(
       <TestProviders
         store={createMockStore({
@@ -196,7 +196,7 @@ describe('StatefulTimeline', () => {
 
   // TODO: evaluate if this test is still needed
   // https://github.com/elastic/security-team/issues/11959
-  test.skip('sourcerer data view updates, update timeline data view', () => {
+  test('sourcerer data view updates, update timeline data view', () => {
     mount(
       <TestProviders
         store={createMockStore({

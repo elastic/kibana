@@ -23,13 +23,13 @@ import {
   updateNote as dispatchUpdateNote,
 } from '../../../common/store/app/actions';
 import {
-  setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker,
   setRelativeRangeDatePicker as dispatchSetRelativeRangeDatePicker,
+  setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker,
 } from '../../../common/store/inputs/actions';
 import {
-  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
-  addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
+  addTimeline as dispatchAddTimeline,
+  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
 } from '../../store/actions';
 import {
   DEFAULT_FROM_MOMENT,
@@ -72,16 +72,14 @@ export const useUpdateTimeline = () => {
           scope: DataViewManagerScopeName.timeline,
         });
       } else {
-        if (!isEmpty(_timeline.indexNames)) {
-          if (!newDataViewPickerEnabled) {
-            dispatch(
-              sourcererActions.setSelectedDataView({
-                id: SourcererScopeName.timeline,
-                selectedDataViewId: _timeline.dataViewId,
-                selectedPatterns: _timeline.indexNames,
-              })
-            );
-          }
+        if (!isEmpty(_timeline.indexNames) && !newDataViewPickerEnabled) {
+          dispatch(
+            sourcererActions.setSelectedDataView({
+              id: SourcererScopeName.timeline,
+              selectedDataViewId: _timeline.dataViewId,
+              selectedPatterns: _timeline.indexNames,
+            })
+          );
         }
       }
 
