@@ -64,6 +64,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
         bottomBorder
         paddingSize="xl"
         aria-labelledby="homeDataAdd__title"
+        grow={false}
       >
         <EuiFlexGroup alignItems="flexEnd">
           <EuiFlexItem>

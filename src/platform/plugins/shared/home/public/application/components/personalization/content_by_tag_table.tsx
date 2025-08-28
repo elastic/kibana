@@ -99,30 +99,30 @@ export const ContentByTagTable = () => {
                 name: 'Dashboard',
                 getEditUrl: (savedObject) => `/app/dashboards/view/${savedObject.id}`,
               },
-              // {
-              //   type: `search`,
-              //   getIconForSavedObject: () => 'discoverApp',
-              //   name: 'Discover session',
-              //   getEditUrl: (savedObject) => `/app/discover/view/${savedObject.id}`,
-              // },
-              // {
-              //   type: `visualization`,
-              //   getIconForSavedObject: () => 'visualizeApp',
-              //   name: 'Visualization',
-              //   getEditUrl: (savedObject) => `/app/visualize#/edit/${savedObject.id}`,
-              // },
-              // {
-              //   type: 'lens',
-              //   getIconForSavedObject: () => 'lensApp',
-              //   name: 'Lens',
-              //   getEditUrl: (savedObject) => `/app/lens#/edit/${savedObject.id}`,
-              // },
-              // {
-              //   type: 'map',
-              //   getIconForSavedObject: () => 'logoMaps',
-              //   name: 'Map',
-              //   getEditUrl: (savedObject) => `/app/maps/map/${savedObject.id}`,
-              // },
+              {
+                type: `search`,
+                getIconForSavedObject: () => 'discoverApp',
+                name: 'Discover session',
+                getEditUrl: (savedObject) => `/app/discover/view/${savedObject.id}`,
+              },
+              {
+                type: `visualization`,
+                getIconForSavedObject: () => 'visualizeApp',
+                name: 'Visualization',
+                getEditUrl: (savedObject) => `/app/visualize#/edit/${savedObject.id}`,
+              },
+              {
+                type: 'lens',
+                getIconForSavedObject: () => 'lensApp',
+                name: 'Lens',
+                getEditUrl: (savedObject) => `/app/lens#/edit/${savedObject.id}`,
+              },
+              {
+                type: 'map',
+                getIconForSavedObject: () => 'logoMaps',
+                name: 'Map',
+                getEditUrl: (savedObject) => `/app/maps/map/${savedObject.id}`,
+              },
             ]}
           />
         </I18nProvider>
