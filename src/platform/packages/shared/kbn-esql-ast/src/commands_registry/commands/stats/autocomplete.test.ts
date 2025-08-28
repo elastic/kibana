@@ -289,7 +289,7 @@ describe('STATS Autocomplete', () => {
           [
             ...getFieldNamesByType(roundParameterTypes),
             ...getFunctionSignaturesByReturnType(
-              Location.EVAL,
+              Location.STATS,
               ESQL_NUMBER_TYPES,
               { scalar: true },
               undefined,
@@ -306,7 +306,7 @@ describe('STATS Autocomplete', () => {
           'from a | stats avg(',
           [
             ...expectedFieldsAvg,
-            ...getFunctionSignaturesByReturnType(Location.EVAL, AVG_TYPES, {
+            ...getFunctionSignaturesByReturnType(Location.STATS, AVG_TYPES, {
               scalar: true,
             }),
           ],
@@ -314,7 +314,13 @@ describe('STATS Autocomplete', () => {
         );
         await statsExpectSuggestions(
           'TS a | stats avg(',
-          [...expectedFieldsAvg, 'FUNC($0)'],
+          [
+            ...expectedFieldsAvg,
+            ...getFunctionSignaturesByReturnType(Location.STATS_TIMESERIES, AVG_TYPES, {
+              scalar: true,
+            }),
+            'FUNC($0)',
+          ],
           mockCallbacks
         );
         await statsExpectSuggestions(
