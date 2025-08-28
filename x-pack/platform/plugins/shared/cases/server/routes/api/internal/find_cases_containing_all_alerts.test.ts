@@ -13,7 +13,7 @@ describe('findCasesContainingAllAlerts', () => {
     it('returns null when required alert not found', async () => {
       const casesClient = {
         attachments: {
-          getAllAlertsAttachToCase: jest.fn().mockResolvedValue([{ id: 'other-id' }]),
+          getAllAlertsAttachToCase: jest.fn().mockResolvedValue([]),
         },
       } as unknown as CasesClient;
 
@@ -25,27 +25,24 @@ describe('findCasesContainingAllAlerts', () => {
     it('returns case id when all alerts are present', async () => {
       const casesClient = {
         attachments: {
-          getAllAlertsAttachToCase: jest
-            .fn()
-            .mockResolvedValue([{ id: 'alert-id' }, { id: 'another' }]),
+          getAllAlertsAttachToCase: jest.fn().mockResolvedValue([{ id: 'alert-id' }]),
         },
       } as unknown as CasesClient;
 
       const result = await processCase(casesClient, 'case-id', new Set(['alert-id']));
       expect(result).toBe('case-id');
       expect(casesClient.attachments.getAllAlertsAttachToCase).toHaveBeenCalledTimes(1);
-    });
-
-    it('exits fast when there are more alerts selected than attached to case', async () => {
-      const casesClient = {
-        attachments: {
-          getAllAlertsAttachToCase: jest.fn().mockResolvedValue([{ id: 'alert-id' }]),
+      expect(casesClient.attachments.getAllAlertsAttachToCase).toHaveBeenCalledWith({
+        caseId: 'case-id',
+        filter: {
+          arguments: [
+            { isQuoted: false, type: 'literal', value: 'cases-comments.attributes.alertId' },
+            { isQuoted: false, type: 'literal', value: 'alert-id' },
+          ],
+          function: 'is',
+          type: 'function',
         },
-      } as unknown as CasesClient;
-
-      const result = await processCase(casesClient, 'case-id', new Set(['alert-id', 'another']));
-      expect(result).toBeNull();
-      expect(casesClient.attachments.getAllAlertsAttachToCase).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
