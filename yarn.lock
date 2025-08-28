@@ -4224,7 +4224,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-require-transformer@link:packages/kbn-babel-require-transformer":
+"@kbn/babel-require-transformer@link:src/platform/packages/private/kbn-babel-require-transformer":
   version "0.0.0"
   uid ""
 
