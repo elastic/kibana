@@ -11,6 +11,13 @@ import { parse } from '@kbn/esql-ast';
 import { createPipeline } from '../pipeline/create_pipeline';
 import type { QueryPipeline } from '../types';
 
+/**
+ * The entry point for the ESQL composer pipeline. Creates a new query
+ * starting with a `FROM` clause.
+ *
+ * @param patterns The index patterns to query.
+ * @returns A `QueryPipeline` instance to which other composer commands can be chained.
+ */
 export function from(...patterns: Array<string | string[]>): QueryPipeline {
   const allPatterns = patterns.flatMap((pattern) => pattern);
 
