@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate5';
-import { assign, and, enqueueActions, setup } from 'xstate5';
+import { assign, and, enqueueActions, setup, sendTo } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
@@ -132,6 +132,13 @@ export const streamRoutingMachine = setup({
           reenter: true,
         },
       },
+      invoke: {
+        id: 'routingSamplesMachine',
+        src: 'routingSamplesMachine',
+        input: ({ context }) => ({
+          definition: context.definition,
+        }),
+      },
       states: {
         idle: {
           id: 'idle',
@@ -155,16 +162,14 @@ export const streamRoutingMachine = setup({
         creatingNewRule: {
           id: 'creatingNewRule',
           entry: [{ type: 'addNewRoutingRule' }],
-          exit: [{ type: 'resetRoutingChanges' }],
-          initial: 'changing',
-          invoke: {
-            id: 'routingSamplesMachine',
-            src: 'routingSamplesMachine',
-            input: ({ context }) => ({
-              definition: context.definition,
-              condition: selectCurrentRule(context).where,
+          exit: [
+            { type: 'resetRoutingChanges' },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.updateCondition',
+              condition: undefined,
             }),
-          },
+          ],
+          initial: 'changing',
           states: {
             changing: {
               on: {
