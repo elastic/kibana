@@ -62,10 +62,11 @@ export const createDataControlOfType = <
 
   const { dataViewId, fieldName } = state;
   if (!dataViewId || !fieldName) {
-    // this shouldn't happen but, if it does, throw an error
+    // this shouldn't happen due to constraints in the editor UI - however, if it does, throw an error
     throw new Error(
-      i18n.translate('controls.optionsList.creationError', {
-        defaultMessage: 'There was an error when creating this control.',
+      i18n.translate('controls.dataControl.creationError', {
+        defaultMessage:
+          'Both the data view and the field must be defined in order to create a control.',
       })
     );
   }
