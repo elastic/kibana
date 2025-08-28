@@ -15276,8 +15276,6 @@ paths:
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
-                            agent_logging_files_interval:
-                              nullable: true
                             agent_logging_files_keepfiles:
                               nullable: true
                             agent_logging_files_rotateeverybytes:
@@ -15287,6 +15285,8 @@ paths:
                             agent_logging_metrics_period:
                               nullable: true
                             agent_logging_to_files:
+                              nullable: true
+                            agent_monitoring_runtime_experimental:
                               nullable: true
                         agent_features:
                           items:
@@ -15961,8 +15961,6 @@ paths:
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
-                    agent_logging_files_interval:
-                      nullable: true
                     agent_logging_files_keepfiles:
                       nullable: true
                     agent_logging_files_rotateeverybytes:
@@ -15972,6 +15970,8 @@ paths:
                     agent_logging_metrics_period:
                       nullable: true
                     agent_logging_to_files:
+                      nullable: true
+                    agent_monitoring_runtime_experimental:
                       nullable: true
                 agent_features:
                   items:
@@ -16182,8 +16182,6 @@ paths:
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
-                          agent_logging_files_interval:
-                            nullable: true
                           agent_logging_files_keepfiles:
                             nullable: true
                           agent_logging_files_rotateeverybytes:
@@ -16193,6 +16191,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -16886,8 +16886,6 @@ paths:
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
-                            agent_logging_files_interval:
-                              nullable: true
                             agent_logging_files_keepfiles:
                               nullable: true
                             agent_logging_files_rotateeverybytes:
@@ -16897,6 +16895,8 @@ paths:
                             agent_logging_metrics_period:
                               nullable: true
                             agent_logging_to_files:
+                              nullable: true
+                            agent_monitoring_runtime_experimental:
                               nullable: true
                         agent_features:
                           items:
@@ -17569,8 +17569,6 @@ paths:
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
-                          agent_logging_files_interval:
-                            nullable: true
                           agent_logging_files_keepfiles:
                             nullable: true
                           agent_logging_files_rotateeverybytes:
@@ -17580,6 +17578,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -18252,8 +18252,6 @@ paths:
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
-                    agent_logging_files_interval:
-                      nullable: true
                     agent_logging_files_keepfiles:
                       nullable: true
                     agent_logging_files_rotateeverybytes:
@@ -18263,6 +18261,8 @@ paths:
                     agent_logging_metrics_period:
                       nullable: true
                     agent_logging_to_files:
+                      nullable: true
+                    agent_monitoring_runtime_experimental:
                       nullable: true
                 agent_features:
                   items:
@@ -18475,8 +18475,6 @@ paths:
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
-                          agent_logging_files_interval:
-                            nullable: true
                           agent_logging_files_keepfiles:
                             nullable: true
                           agent_logging_files_rotateeverybytes:
@@ -18486,6 +18484,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -19243,8 +19243,6 @@ paths:
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
-                          agent_logging_files_interval:
-                            nullable: true
                           agent_logging_files_keepfiles:
                             nullable: true
                           agent_logging_files_rotateeverybytes:
@@ -19254,6 +19252,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -20083,6 +20083,8 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  _runtime_experimental:
+                                    type: string
                                   apm: {}
                                   enabled:
                                     type: boolean
