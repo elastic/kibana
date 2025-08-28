@@ -251,6 +251,7 @@ describe('transformToUpdateScheme', () => {
       ...conversation,
       messages: [
         {
+          id: 'message-1',
           content: 'Message 3',
           role: 'user',
           timestamp: '2011-10-05T14:48:00.000Z',
@@ -270,6 +271,7 @@ describe('transformToUpdateScheme', () => {
           },
         },
         {
+          id: 'message-2',
           content: 'Message 4',
           role: 'user',
           timestamp: '2011-10-06T14:48:00.000Z',
@@ -292,6 +294,7 @@ describe('transformToUpdateScheme', () => {
       messages: [
         {
           '@timestamp': '2011-10-05T14:48:00.000Z',
+          id: 'message-1',
           content: 'Message 3',
           is_error: undefined,
           reader: undefined,
@@ -313,6 +316,7 @@ describe('transformToUpdateScheme', () => {
         },
         {
           '@timestamp': '2011-10-06T14:48:00.000Z',
+          id: 'message-2',
           content: 'Message 4',
           is_error: undefined,
           reader: undefined,
@@ -334,6 +338,7 @@ describe('transformToUpdateScheme', () => {
       id: conversation.id,
       messages: [
         {
+          id: 'message-3',
           content: 'Message 3',
           role: 'user',
           timestamp: '2011-10-05T14:48:00.000Z',
@@ -350,6 +355,7 @@ describe('transformToUpdateScheme', () => {
       messages: [
         {
           '@timestamp': '2011-10-05T14:48:00.000Z',
+          id: 'message-3',
           content: 'Message 3',
           is_error: undefined,
           reader: undefined,

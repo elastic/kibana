@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import type {
   ConversationResponse,
@@ -26,6 +27,7 @@ export interface UpdateConversationSchema {
   title?: string;
   messages?: Array<{
     '@timestamp': string;
+    id: string;
     content: string;
     reader?: Reader;
     role: MessageRole;
@@ -138,6 +140,7 @@ export const transformToUpdateScheme = (
       ? {
           messages: messages.map((message) => ({
             '@timestamp': message.timestamp,
+            id: message.id ?? uuidv4(),
             content: message.content,
             is_error: message.isError,
             reader: message.reader,

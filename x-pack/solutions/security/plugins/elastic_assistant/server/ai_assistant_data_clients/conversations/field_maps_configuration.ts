@@ -89,6 +89,11 @@ export const conversationsFieldMap: FieldMap = {
     array: true,
     required: false,
   },
+  'messages.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'messages.@timestamp': {
     type: 'date',
     array: false,
