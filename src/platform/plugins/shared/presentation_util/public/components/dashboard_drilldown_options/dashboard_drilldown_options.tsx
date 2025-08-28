@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import type { DashboardDrilldownOptions } from './types';
-import { dashboardDrilldownConfigStrings } from '../../i18n/dashboard_drilldown_config';
+import { dashboardDrilldownConfigStrings } from './dashboard_drilldown_strings';
 
 export interface DashboardDrilldownOptionsProps {
   options: DashboardDrilldownOptions;
