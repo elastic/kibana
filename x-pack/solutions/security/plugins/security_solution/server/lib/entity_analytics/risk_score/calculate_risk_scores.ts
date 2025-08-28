@@ -6,10 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import type {
-  AggregationsAggregationContainer,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ALERT_RISK_SCORE,
@@ -17,10 +14,10 @@ import {
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { toEntries } from 'fp-ts/Record';
-import { EntityDiscoveryAPIKey } from '@kbn/entityManager-plugin/server/lib/auth/api_key/api_key';
+
 import type { Either } from 'fp-ts/Either';
 import * as E from 'fp-ts/Either';
-import { diff } from 'jest-diff';
+
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../common/search_strategy';
@@ -30,7 +27,6 @@ import type {
   RiskScoresPreviewResponse,
 } from '../../../../common/api/entity_analytics';
 import type {
-  AfterKeys,
   EntityAfterKey,
   EntityRiskScoreRecord,
   RiskScoreWeights,
@@ -43,14 +39,9 @@ import {
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import { applyCriticalityToScore, getCriticalityModifier } from '../asset_criticality/helpers';
-import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
-import type {
-  CalculateRiskScoreAggregations,
-  CalculateScoresParams,
-  RiskScoreBucket,
-} from '../types';
-import { RIEMANN_ZETA_VALUE, RIEMANN_ZETA_S_VALUE } from './constants';
-import { getPainlessScripts, type PainlessScripts } from './painless';
+
+import type { CalculateScoresParams, RiskScoreBucket } from '../types';
+import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 
 const formatForResponse = ({
   bucket,
@@ -110,63 +101,63 @@ export const filterFromRange = (range: CalculateScoresParams['range']): QueryDsl
   range: { '@timestamp': { lt: range.end, gte: range.start } },
 });
 
-const buildIdentifierTypeAggregation = ({
-  afterKeys,
-  identifierType,
-  pageSize,
-  weights,
-  alertSampleSizePerShard,
-  scriptedMetricPainless,
-}: {
-  afterKeys: AfterKeys;
-  identifierType: EntityType;
-  pageSize: number;
-  weights?: RiskScoreWeights;
-  alertSampleSizePerShard: number;
-  scriptedMetricPainless: PainlessScripts;
-}): AggregationsAggregationContainer => {
-  const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType(identifierType, weights);
-  const identifierField = getFieldForIdentifier(identifierType);
+// const buildIdentifierTypeAggregation = ({
+//   afterKeys,
+//   identifierType,
+//   pageSize,
+//   weights,
+//   alertSampleSizePerShard,
+//   scriptedMetricPainless,
+// }: {
+//   afterKeys: AfterKeys;
+//   identifierType: EntityType;
+//   pageSize: number;
+//   weights?: RiskScoreWeights;
+//   alertSampleSizePerShard: number;
+//   scriptedMetricPainless: PainlessScripts;
+// }): AggregationsAggregationContainer => {
+//   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType(identifierType, weights);
+//   const identifierField = getFieldForIdentifier(identifierType);
 
-  return {
-    composite: {
-      size: pageSize,
-      sources: [
-        {
-          [identifierField]: {
-            terms: {
-              field: identifierField,
-            },
-          },
-        },
-      ],
-      after: getAfterKeyForIdentifierType({ identifierType, afterKeys }),
-    },
-    aggs: {
-      top_inputs: {
-        sampler: {
-          shard_size: alertSampleSizePerShard,
-        },
+//   return {
+//     composite: {
+//       size: pageSize,
+//       sources: [
+//         {
+//           [identifierField]: {
+//             terms: {
+//               field: identifierField,
+//             },
+//           },
+//         },
+//       ],
+//       after: getAfterKeyForIdentifierType({ identifierType, afterKeys }),
+//     },
+//     aggs: {
+//       top_inputs: {
+//         sampler: {
+//           shard_size: alertSampleSizePerShard,
+//         },
 
-        aggs: {
-          risk_details: {
-            scripted_metric: {
-              init_script: scriptedMetricPainless.init,
-              map_script: scriptedMetricPainless.map,
-              combine_script: scriptedMetricPainless.combine,
-              params: {
-                p: RIEMANN_ZETA_S_VALUE,
-                risk_cap: RIEMANN_ZETA_VALUE,
-                global_identifier_type_weight: globalIdentifierTypeWeight || 1,
-              },
-              reduce_script: scriptedMetricPainless.reduce,
-            },
-          },
-        },
-      },
-    },
-  };
-};
+//         aggs: {
+//           risk_details: {
+//             scripted_metric: {
+//               init_script: scriptedMetricPainless.init,
+//               map_script: scriptedMetricPainless.map,
+//               combine_script: scriptedMetricPainless.combine,
+//               params: {
+//                 p: RIEMANN_ZETA_S_VALUE,
+//                 risk_cap: RIEMANN_ZETA_VALUE,
+//                 global_identifier_type_weight: globalIdentifierTypeWeight || 1,
+//               },
+//               reduce_script: scriptedMetricPainless.reduce,
+//             },
+//           },
+//         },
+//       },
+//     },
+//   };
+// };
 
 const processScores = async ({
   assetCriticalityService,
@@ -257,9 +248,25 @@ const calculateWithESQL = async (
       const query = getESQL(entityType as EntityType, entities);
       return esClient.esql
         .query({ query })
-        .then((rs) => {
-          const legacyBuckets = rs.values.map((row): RiskScoreBucket => {
-            const [count, score, inputs, entity] = row as [number, number, string[], string];
+        .then((rs) =>
+          rs.values.map((row): RiskScoreBucket => {
+            const [count, score, _inputs, entity] = row as [
+              number,
+              number,
+              string | string[], // ES Multivalue nonsense: if it's just one value we get the value, if it's multiple we get an array
+              string
+            ];
+
+            const inputs = (Array.isArray(_inputs) ? _inputs : [_inputs]).map((input, i) => {
+              const parsed = JSON.parse(input);
+              const value = parseFloat(parsed.risk_score);
+              const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
+              return {
+                ...parsed,
+                risk_score: value,
+                contribution: currentScore / RIEMANN_ZETA_VALUE,
+              };
+            });
 
             return {
               key: { [EntityTypeToIdentifierField[entityType]]: entity },
@@ -273,30 +280,35 @@ const calculateWithESQL = async (
                     notes: [],
                     category_1_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
                     category_1_count: 1,
-                    risk_inputs: inputs.map((input) => JSON.parse(input)),
+                    risk_inputs: inputs,
                   },
                 },
               },
             };
-          });
+          })
+        )
 
+        .then((legacyBuckets) => {
           return processScores({
             assetCriticalityService: params.assetCriticalityService,
             buckets: legacyBuckets,
             identifierField: EntityTypeToIdentifierField[entityType],
             logger,
             now,
-          }).then((scores: EntityRiskScoreRecord[]): ESQLResults[number] => {
-            return [
-              entityType as EntityType,
-              {
-                scores,
-                afterKey: afterKey as EntityAfterKey,
-              },
-            ];
           });
         })
+        .then((scores: EntityRiskScoreRecord[]): ESQLResults[number] => {
+          return [
+            entityType as EntityType,
+            {
+              scores,
+              afterKey: afterKey as EntityAfterKey,
+            },
+          ];
+        })
+
         .catch((error) => {
+          // logger.error(`SOMETHING CRAZY HAPPENED IN ${entityType}: ${error.message}`);
           logger.error(
             `Error executing ESQL query for entity type ${entityType}: ${error.message}`
           );
@@ -382,8 +394,9 @@ export const getCompositeQuery = (
         ...aggs,
         [entityType]: {
           composite: {
-            size: 100,
+            size: params.pageSize,
             sources: [{ [idField]: { terms: { field: idField } } }],
+            after: params.afterKeys[entityType],
           },
         },
       };
