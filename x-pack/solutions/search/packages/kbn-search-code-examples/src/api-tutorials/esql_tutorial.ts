@@ -6,13 +6,11 @@
  */
 
 // TODO: get docs team approval on the copy
-export const esqlTutorialCommands: string = `# Welcome to the Elasticsearch ES|QL Tutorial!
-# This tutorial will guide you through basic ES|QL queries in Elasticsearch using API calls from within the Kibana Console.
-
-# After selecting a command, execute it by clicking the "Send Request" button or pressing Ctrl+Enter or Cmd+Enter.
-
+export const esqlTutorialCommands: string = `# Welcome to the Elasticsearch ES|QL Tutorial! 🎉
+# 🚀 This tutorial will guide you through basic ES|QL queries in Elasticsearch using API calls from within the Kibana Console.
+# After selecting a command, execute it by clicking the ▶️ button or pressing Ctrl+Enter or Cmd+Enter.
 # -----------------------------------------------
-# Step 1: Create the 'kibana_sample_data_esql' index and mapping.
+# Step 1: Create the 'kibana_sample_data_esql' index and mapping. 📝
 # -----------------------------------------------
 
 PUT /kibana_sample_data_esql
@@ -30,10 +28,10 @@ PUT /kibana_sample_data_esql
   }
 }
 
-# The response includes a confirmation that the index and mapping were created.
+# ✅ The response includes a confirmation that the index and mapping were created.
 
 # -----------------------------------------------
-# Step 2: Add sample blog posts to your index.
+# Step 2: Add sample blog posts to your index. ✍️
 # -----------------------------------------------
 
 POST /kibana_sample_data_esql/_bulk?refresh=wait_for
@@ -48,10 +46,10 @@ POST /kibana_sample_data_esql/_bulk?refresh=wait_for
 {"index":{"_id":"5"}}
 {"title":"Crispy Oven-Fried Chicken","description":"Get that perfect crunch without the deep fryer! This oven-fried chicken recipe delivers crispy, juicy results every time. A healthier take on the classic comfort food.","author":"Maria Rodriguez","date":"2023-05-20","category":"Main Course","tags":["chicken","oven-fried","healthy"],"rating":4.9}
 
-# The response includes a summary of successes and errors for each operation.
+# ✅ The response includes a summary of successes and errors for each operation.
 
 # -----------------------------------------------
-# Step 3: Run a basic full-text search.
+# Step 3: Run a basic full-text search. 🔎
 # -----------------------------------------------
 # Note: when ES|QL queries are run from within the Kibana Console, they must be wrapped in triple quotes syntax.
 
@@ -64,11 +62,11 @@ POST /_query
   """
 }
 
-# The response includes 'columns' and 'values' to represent the column headers and the rows included in the result set.
+# ✅ The response includes 'columns' and 'values' to represent the column headers and the rows included in the result set.
 # By default, ES|QL uses OR logic between search terms, so it matches documents that contain any of the specified words.
 
 # -----------------------------------------------
-# Step 4: Show specific fields in results.
+# Step 4: Show specific fields in results. 📋
 # -----------------------------------------------
 # You can specify the exact fields to include in your results using the KEEP command.
 
@@ -82,10 +80,10 @@ POST /_query
   """
 }
 
-# The response includes only the title, description, and rating fields.
+# ✅ The response includes only the title, description, and rating fields.
 
 # -----------------------------------------------
-# Step 5: Sort by relevance score.
+# Step 5: Sort by relevance score. 📊
 # -----------------------------------------------
 # 'METADATA _score' tells ES|QL to include relevance scores in the results.
 # Without explicit sorting, results aren't ordered by relevance even when scores are calculated.
@@ -101,10 +99,10 @@ POST /_query
   """
 }
 
-# The response includes documents sorted by relevance score.
+# ✅ The response includes documents sorted by relevance score.
 
 # -----------------------------------------------
-# Step 6: Exact match filtering.
+# Step 6: Exact match filtering. 🎯
 # -----------------------------------------------
 # This is fundamentally different from full-text search - it's a binary yes/no filter that doesn't affect relevance scoring.
 
@@ -119,10 +117,10 @@ POST /_query
   """
 }
 
-# The response includes documents with category exactly 'Breakfast'.
+# ✅ The response includes documents with category exactly 'Breakfast'.
 
 # -----------------------------------------------
-# Step 7: Require all search terms (AND logic).
+# Step 7: Require all search terms (AND logic). 🧠
 # -----------------------------------------------
 # The MATCH function with AND logic doesn't require terms to be adjacent or in order.
 
@@ -135,10 +133,10 @@ POST /_query
   """
 }
 
-# This will return zero hits, as no document contains both "fluffy" and "pancakes" in the description.
+# ❌ This will return zero hits, as no document contains both "fluffy" and "pancakes" in the description.
 
 # -----------------------------------------------
-# Step 8: Minimum number of terms to match
+# Step 8: Minimum number of terms to match 🧮
 # -----------------------------------------------
 
 POST /_query
@@ -150,10 +148,10 @@ POST /_query
   """
 }
 
-# The response includes documents matching at least 2 of the 3 terms.
+# ✅ The response includes documents matching at least 2 of the 3 terms.
 
 # -----------------------------------------------
-# Step 9: Search for exact phrases
+# Step 9: Search for exact phrases 🔤
 # -----------------------------------------------
 
 POST /_query
@@ -166,10 +164,10 @@ POST /_query
   """
 }
 
-# The response includes documents where 'rich and creamy' appears as a phrase.
+# ✅ The response includes documents where 'rich and creamy' appears as a phrase.
 
 # -----------------------------------------------
-# Step 10: Date range filtering
+# Step 10: Date range filtering 📅
 # -----------------------------------------------
 
 POST /_query
@@ -182,10 +180,10 @@ POST /_query
   """
 }
 
-# The response includes documents published in May 2023.
+# ✅ The response includes documents published in May 2023.
 
 # -----------------------------------------------
-# Step 11: Numerical range filtering
+# Step 11: Numerical range filtering 🔢
 # -----------------------------------------------
 
 POST /_query
@@ -199,10 +197,10 @@ POST /_query
   """
 }
 
-# The response includes highly-rated recipes.
+# ✅ The response includes highly-rated recipes.
 
 # -----------------------------------------------
-# Step 12: Search across multiple fields
+# Step 12: Search across multiple fields 🔦
 # -----------------------------------------------
 
 POST /_query
@@ -214,10 +212,10 @@ POST /_query
   """
 }
 
-# The response includes documents matching 'vegetarian curry' in any field.
+# ✅ The response includes documents matching 'vegetarian curry' in any field.
 
 # -----------------------------------------------
-# Step 13: Weight different fields
+# Step 13: Weight different fields ⚖️
 # -----------------------------------------------
 
 POST /_query
@@ -231,10 +229,10 @@ POST /_query
   """
 }
 
-# The response includes documents with title matches ranked higher.
+# ✅ The response includes documents with title matches ranked higher.
 
 # -----------------------------------------------
-# Step 14: Use query string for complex patterns
+# Step 14: Use query string for complex patterns 🧩
 # -----------------------------------------------
 # The QSTR function enables powerful search patterns using a compact query language.
 # It's ideal for when you need wildcards, fuzzy matching, and boolean logic in a single expression
@@ -249,10 +247,10 @@ POST /_query
   """
 }
 
-# The response includes documents matching the query string pattern.
+# ✅ The response includes documents matching the query string pattern.
 
 # -----------------------------------------------
-# Step 15: Advanced relevance scoring (custom score)
+# Step 15: Advanced relevance scoring (custom score) 🏆
 # -----------------------------------------------
 
 POST /_query
@@ -272,26 +270,26 @@ POST /_query
   """
 }
 
-# The response includes documents scored and filtered by custom logic.
+# ✅ The response includes documents scored and filtered by custom logic.
 # Notice how EVAL expressions will append new columns to the result set.
 
 # Visit the "Discover" page in Kibana to experiment with ES|QL queries against your own data!
-# Easily ingest data from many sources: https://www.elastic.co/docs/solutions/search/ingest-for-search
+# 📖 Easily ingest data from many sources: https://www.elastic.co/docs/solutions/search/ingest-for-search
 
 # -----------------------------------------------
-# Step 16: Delete your index (optional)
+# Step 16: Delete your index (optional) 🗑️
 # -----------------------------------------------
 # Delete the index to clean up or start from scratch.
 # Warning: Deleting an index permanently deletes its documents, shards, and metadata.
 
 DELETE /kibana_sample_data_esql
 
-# The response includes a confirmation that the index was deleted.
+# ✅ The response includes a confirmation that the index was deleted.
 
 # -----------------------------------------------
-# Conclusion
+# Conclusion 🎓
 # -----------------------------------------------
-# In this tutorial, you learned the basics of running ES|QL queries in Elasticsearch using the Kibana Console.
+# In this tutorial, you learned the basics of running ES|QL queries in Elasticsearch using the Kibana Console. 🥳
 # You covered creating an index, indexing documents, searching, filtering, and advanced scoring.
-# For more, see: https://www.elastic.co/docs/solutions/search/esql-for-search
+# 📖 For more, see: https://www.elastic.co/docs/solutions/search/esql-for-search
 `;
