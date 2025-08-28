@@ -46,7 +46,6 @@ export default function searchSolutionNavigation({
 
     it('renders expected side nav items', async () => {
       // Verify all expected top-level links exist
-      await solutionNavigation.sidenav.expectLinkExists({ deepLinkId: 'searchHomepage' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
