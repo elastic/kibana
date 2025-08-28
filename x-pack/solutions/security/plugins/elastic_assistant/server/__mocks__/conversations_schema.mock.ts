@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
   AppendConversationMessageRequestBody,
   PerformBulkActionRequestBody,
   ConversationCreateProps,
   ConversationResponse,
-  ConversationUpdateProps,
   DeleteAllConversationsRequestBody,
+  ConversationUpdateProps,
+  ConversationSummary,
 } from '@kbn/elastic-assistant-common';
 import type {
   CreateMessageSchema,
@@ -95,7 +97,7 @@ export const getDeleteAllConversationsSchemaMock = (): DeleteAllConversationsReq
 
 export const getUpdateConversationSchemaMock = (
   conversationId = 'conversation-1'
-): ConversationUpdateProps => ({
+): ConversationUpdateProps & { summary?: ConversationSummary } => ({
   title: 'Welcome 2',
   apiConfig: {
     actionTypeId: '.gen-ai',
@@ -133,9 +135,11 @@ export const getAppendConversationMessagesSchemaMock =
     ],
   });
 
-export const getConversationMock = (
-  params: ConversationCreateProps | ConversationUpdateProps
-): ConversationResponse => ({
+export type ConversationMockParams = (ConversationCreateProps | ConversationUpdateProps) & {
+  summary?: ConversationSummary;
+};
+
+export const getConversationMock = (params: ConversationMockParams): ConversationResponse => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   apiConfig: {
     actionTypeId: '.gen-ai',
@@ -155,9 +159,7 @@ export const getConversationMock = (
   ],
 });
 
-export const getQueryConversationParams = (
-  isUpdate?: boolean
-): ConversationCreateProps | ConversationUpdateProps => {
+export const getQueryConversationParams = (isUpdate?: boolean): ConversationMockParams => {
   return isUpdate
     ? {
         title: 'Welcome 2',
@@ -230,6 +232,7 @@ export const getEsCreateConversationSchemaMock = (
   exclude_from_last_conversation_storage: false,
   messages: [
     {
+      id: uuidv4(),
       content: 'test content',
       role: 'user',
       '@timestamp': '2019-12-13T16:40:33.400Z',
