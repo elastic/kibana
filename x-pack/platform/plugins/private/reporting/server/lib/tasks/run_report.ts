@@ -205,7 +205,14 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   }
 
   protected getQueueTimeout() {
-    return numberToDuration(this.opts.config.queue.timeout);
+    const maxAttempts = this.getMaxAttempts();
+    const configuredTimeoutDuration: moment.Duration = numberToDuration(
+      this.opts.config.queue.timeout
+    );
+    // round up from ms to the nearest second
+    return moment.duration({
+      milliseconds: configuredTimeoutDuration.asMilliseconds() * (maxAttempts.maxRetries + 1),
+    });
   }
 
   protected getQueueTimeoutAsInterval() {

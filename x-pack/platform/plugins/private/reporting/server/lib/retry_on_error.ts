@@ -24,10 +24,17 @@ export const retryOnError = async ({
   retries,
   report,
   logger,
-  attempt = 1,
+  attempt = 0,
 }: RetryOpts): Promise<void> => {
   try {
-    return await operation(report);
+    const result = await operation(report);
+
+    if (attempt > 0) {
+      logger.info(
+        `Report generation for report[${report._id}] succeeded on attempt ${attempt + 1}.`
+      );
+    }
+    return result;
   } catch (err) {
     // skip retry on certain errors
     if (err instanceof KibanaShuttingDownError) {
@@ -39,17 +46,29 @@ export const retryOnError = async ({
       const retryDelaySec: number = Math.min(Math.pow(2, retryCount), 30); // 2s, 4s, 8s, 16s, 30s, 30s, 30s...
 
       logger.warn(
-        `Retrying generate report operation after [${retryDelaySec}s] due to error: ${err.toString()} ${
+        `Retrying report generation for report[${
+          report._id
+        }] after [${retryDelaySec}s] due to error: ${err.toString()} ${
           err.stack
-        }`
+        } - attempt ${retryCount} of ${retries + 1} failed.`
       );
 
       // delay with some randomness
-      await delay(retryDelaySec * 1000 * Math.random());
+      await delay(retryDelaySec + 1000 * Math.random());
       return retryOnError({ operation, logger, report, retries, attempt: retryCount });
     }
 
-    // no retries left
+    if (retries > 0) {
+      // no retries left
+      logger.error(
+        `No retries left for report generation for report[${
+          report._id
+        }]. No report generated after ${retries + 1} attempts due to error: ${err.toString()} ${
+          err.stack
+        }`
+      );
+    }
+
     throw err;
   }
 };

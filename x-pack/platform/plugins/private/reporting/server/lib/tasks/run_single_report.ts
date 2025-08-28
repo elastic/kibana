@@ -102,7 +102,7 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
   protected getMaxAttempts() {
     return {
       maxTaskAttempts: this.opts.config.capture.maxAttempts ?? 1,
-      maxRetries: 1,
+      maxRetries: 0, // no retries within a single task run
     };
   }
 
