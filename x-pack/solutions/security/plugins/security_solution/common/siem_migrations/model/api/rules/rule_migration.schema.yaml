@@ -623,7 +623,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
+                $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResourceData'
       responses:
         200:
           description: Indicates migration resources have been created or updated correctly.
@@ -658,7 +658,8 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceType'
+            $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResourceType'
+
         - name: names
           in: query
           required: false
@@ -685,7 +686,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResource'
+                  $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResource'
 
   /internal/siem_migrations/rules/{migration_id}/resources/missing:
     get:
@@ -713,7 +714,7 @@ paths:
                 type: array
                 description: The identified resources missing
                 items:
-                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceBase'
+                  $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResourceBase'
 
   /internal/siem_migrations/rules/missing_privileges:
     get:
