@@ -44,6 +44,10 @@ const getExecutionStatusColorsMap = (
       color: euiTheme.colors.textSubdued,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     },
+    [ExecutionStatus.WAITING]: {
+      color: euiTheme.colors.warning,
+      backgroundColor: euiTheme.colors.backgroundBaseWarning,
+    },
     [ExecutionStatus.WAITING_FOR_INPUT]: {
       color: euiTheme.colors.warning,
       backgroundColor: euiTheme.colors.backgroundBaseWarning,
@@ -68,6 +72,7 @@ const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
   [ExecutionStatus.FAILED]: 'errorFilled',
   [ExecutionStatus.PENDING]: 'clock',
   [ExecutionStatus.RUNNING]: 'play',
+  [ExecutionStatus.WAITING]: 'clock',
   [ExecutionStatus.WAITING_FOR_INPUT]: 'dot',
   [ExecutionStatus.CANCELLED]: 'crossInCircle',
   [ExecutionStatus.SKIPPED]: 'minusInCircleFilled',
