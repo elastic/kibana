@@ -173,7 +173,7 @@ export class Home extends Component<HomeProps, State> {
                 padding-left: 24px;
               `}
             >
-              {tabs.map((tab, index) => (
+              {tabs.map((tab) => (
                 <EuiTab
                   key={tab.id}
                   onClick={() => this.onSelectedTabChanged(tab.id)}
