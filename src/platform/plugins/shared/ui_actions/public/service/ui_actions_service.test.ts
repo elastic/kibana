@@ -13,7 +13,7 @@ import { ActionInternal } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
 import type { TriggerRegistry, ActionRegistry } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 
 const FOO_TRIGGER = 'FOO_TRIGGER';
 const BAR_TRIGGER = 'BAR_TRIGGER';
