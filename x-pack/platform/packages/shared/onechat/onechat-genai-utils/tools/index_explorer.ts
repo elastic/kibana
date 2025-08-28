@@ -30,7 +30,7 @@ export interface IndexExplorerResponse {
   resources: RelevantResource[];
 }
 
-interface ResourceDescriptor {
+export interface ResourceDescriptor {
   type: 'index' | 'alias' | 'data_stream';
   name: string;
   description?: string;
@@ -176,6 +176,21 @@ export interface SelectedResource {
   reason: string;
 }
 
+// Helper function to format each resource in an XML-like block
+export const formatResource = (res: ResourceDescriptor): string => {
+  const topFields = take(res.fields ?? [], 10)
+    .map((f) => `      <field>${f}</field>`)
+    .join('\n');
+
+  const description = res.description ?? 'No description provided.';
+
+  return `<resource type="${res.type}" name="${res.name}" description="${description}">
+  <sample_fields>
+${topFields || '      (No fields available)'}
+  </sample_fields>
+</resource>`;
+};
+
 export const createIndexSelectorPrompt = ({
   resources,
   nlQuery,
@@ -185,21 +200,6 @@ export const createIndexSelectorPrompt = ({
   nlQuery: string;
   limit?: number;
 }): BaseMessageLike[] => {
-  // Helper function to format each resource in an XML-like block
-  const formatResource = (res: ResourceDescriptor): string => {
-    const topFields = take(res.fields ?? [], 10)
-      .map((f) => `      <field>${f}</field>`)
-      .join('\n');
-
-    const description = res.description ?? 'No description provided.';
-
-    return `<resource type="${res.type}" name="${res.name}" description="${description}">
-  <sample_fields>
-${topFields || '      (No fields available)'}
-  </sample_fields>
-</resource>`;
-  };
-
   return [
     [
       'system',
