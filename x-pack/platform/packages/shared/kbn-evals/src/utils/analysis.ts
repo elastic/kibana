@@ -14,6 +14,7 @@ export class EvaluationAnalysisService {
     private readonly log: SomeDevLog
   ) {}
 
+  // This is the first pass (POC) for comparison and more detailed analysis (such as t-tests) can be added here.
   async compareEvaluationRuns({
     currentRunId,
     referenceRunId,
