@@ -164,43 +164,42 @@ FROM index
     });
   });
 
-  /**
-   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
-   * get back to it after 9.1 release.
-   */
-  describe.skip('RERANK', () => {
+  describe('RERANK', () => {
     test('default example', () => {
-      const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+      const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH {"inference_id": "model"}`);
 
-      expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+      expect(text).toBe('FROM a | RERANK "query" ON field1 WITH {"inference_id": "model"}');
     });
 
     test('wraps long query', () => {
       const { text } = reprint(
-        `FROM a | RERANK "asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf" ON field1 WITH some_id`
+        `FROM a | RERANK "this is a very long long long long long long long long long long long long text" ON field1 WITH {"inference_id": "model"}`
       );
 
       expect(text).toBe(`FROM a
-  | RERANK "asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf"
+  | RERANK
+      "this is a very long long long long long long long long long long long long text"
         ON field1
-        WITH some_id`);
+        WITH {"inference_id": "model"}`);
     });
 
     test('two fields', () => {
-      const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+      const { text } = reprint(
+        `FROM a | RERANK "query" ON field1,field2 WITH {"inference_id": "model"}`
+      );
 
-      expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+      expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH {"inference_id": "model"}');
     });
 
     test('wraps many fields', () => {
       const { text } = reprint(
-        `FROM a | RERANK "query" ON field1,field2,field3,field4,field5,field6,field7,field8,field9,field10,field11,field12 WITH some_id`
+        `FROM a | RERANK "query" ON field1,field2,field3,field4,field5,field6,field7,field8,field9,field10,field11,field12 WITH {"inference_id": "model"}`
       );
       expect(text).toBe(`FROM a
   | RERANK "query"
         ON field1, field2, field3, field4, field5, field6, field7, field8, field9,
           field10, field11, field12
-        WITH some_id`);
+        WITH {"inference_id": "model"}`);
     });
   });
 });
