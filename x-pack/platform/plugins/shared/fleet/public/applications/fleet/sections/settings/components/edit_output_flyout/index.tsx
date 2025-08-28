@@ -453,7 +453,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             helpText={
               <FormattedMessage
                 id="xpack.fleet.settings.editOutputFlyout.writeToStreamsHelpText"
-                defaultMessage="When enabled, adds logs and logs* to the output streams configuration in the agent policy."
+                defaultMessage="When enabled, adds logs and logs.* to the output streams configuration in the agent policy."
               />
             }
           >
