@@ -80,6 +80,7 @@ export const createDataControlOfType = <
       },
     });
   } else {
+    // otherwise, add a new control
     embeddable.addNewPanel(
       {
         panelType: type,
