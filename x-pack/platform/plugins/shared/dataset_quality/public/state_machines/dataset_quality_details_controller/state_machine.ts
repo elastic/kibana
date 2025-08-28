@@ -699,8 +699,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         }),
         updateSelectedIssueTypes: assign((_context, event) => {
           return {
-            selectedIssueTypes:
-              'selectedIssueTypes' in event ? event.selectedIssueTypes : ['degraded', 'failed'],
+            selectedIssueTypes: 'selectedIssueTypes' in event ? event.selectedIssueTypes : [],
           };
         }),
         updateSelectedFields: assign((_context, event) => {
