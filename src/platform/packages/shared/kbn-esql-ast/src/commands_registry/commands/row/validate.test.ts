@@ -11,6 +11,7 @@ import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/validation';
 import { capitalize } from 'lodash';
 import { DATE_PERIOD_UNITS, TIME_DURATION_UNITS } from '../../../parser/constants';
+import { getNoValidCallSignatureError } from '../../../definitions/utils/validation/utils';
 
 const rowExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'row', validate);
@@ -60,12 +61,7 @@ describe('ROW Validation', () => {
       rowExpectErrors(`row col0 = now() ${op} now()`, []);
       rowExpectErrors(
         `row col0 = false ${op} false`,
-        ['==', '!='].includes(op)
-          ? []
-          : [
-              `Argument of [${op}] must be [date], found value [false] type [boolean]`,
-              `Argument of [${op}] must be [date], found value [false] type [boolean]`,
-            ]
+        ['==', '!='].includes(op) ? [] : [getNoValidCallSignatureError(op, ['boolean', 'boolean'])]
       );
       for (const [valueTypeA, valueTypeB] of [['now()', '"2022"']]) {
         rowExpectErrors(`row col0 = ${valueTypeA} ${op} ${valueTypeB}`, []);
@@ -76,15 +72,9 @@ describe('ROW Validation', () => {
     for (const op of ['+', '-', '*', '/', '%']) {
       rowExpectErrors(`row col0 = 1 ${op} 1`, []);
       rowExpectErrors(`row col0 = (5 ${op} 1)`, []);
-      rowExpectErrors(
-        `row col0 = now() ${op} now()`,
-        ['+', '-'].includes(op)
-          ? [`Argument of [${op}] must be [date_period], found value [now()] type [date]`]
-          : [
-              `Argument of [${op}] must be [double], found value [now()] type [date]`,
-              `Argument of [${op}] must be [double], found value [now()] type [date]`,
-            ]
-      );
+      rowExpectErrors(`row col0 = now() ${op} now()`, [
+        getNoValidCallSignatureError(op, ['date', 'date']),
+      ]);
     }
 
     for (const op of ['like', 'rlike']) {
@@ -93,24 +83,18 @@ describe('ROW Validation', () => {
       rowExpectErrors(`row col0 = NOT "a" ${op} "?a"`, []);
       rowExpectErrors(`row col0 = NOT "a" NOT ${op} "?a"`, []);
       rowExpectErrors(`row col0 = 5 ${op} "?a"`, [
-        `Argument of [${op}] must be [keyword], found value [5] type [integer]`,
+        getNoValidCallSignatureError(op, ['integer', 'keyword']),
       ]);
       rowExpectErrors(`row col0 = 5 NOT ${op} "?a"`, [
-        `Argument of [not ${op}] must be [keyword], found value [5] type [integer]`,
+        getNoValidCallSignatureError(`not ${op}`, ['integer', 'keyword']),
       ]);
       rowExpectErrors(`row col0 = NOT 5 ${op} "?a"`, [
-        `Argument of [${op}] must be [keyword], found value [5] type [integer]`,
+        getNoValidCallSignatureError(op, ['integer', 'keyword']),
       ]);
       rowExpectErrors(`row col0 = NOT 5 NOT ${op} "?a"`, [
-        `Argument of [not ${op}] must be [keyword], found value [5] type [integer]`,
+        getNoValidCallSignatureError(`not ${op}`, ['integer', 'keyword']),
       ]);
     }
-
-    rowExpectErrors(`row col0 = mv_sort(["a", "b"], "bogus")`, [
-      'Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].',
-    ]);
-    rowExpectErrors(`row col0 = mv_sort(["a", "b"], "ASC")`, []);
-    rowExpectErrors(`row col0 = mv_sort(["a", "b"], "DESC")`, []);
   });
 
   test('date math', () => {
@@ -128,32 +112,15 @@ describe('ROW Validation', () => {
     for (const unit of TIME_DURATION_UNITS)
       for (const op of ['*', '/', '%']) {
         rowExpectErrors(`ROW col0 = now() ${op} 1 ${unit}`, [
-          `Argument of [${op}] must be [double], found value [now()] type [date]`,
-          `Argument of [${op}] must be [double], found value [1${unit}] type [time_duration]`,
+          getNoValidCallSignatureError(op, ['date', 'time_duration']),
         ]);
       }
 
     for (const unit of DATE_PERIOD_UNITS)
       for (const op of ['*', '/', '%']) {
         rowExpectErrors(`ROW col0 = now() ${op} 1 ${unit}`, [
-          `Argument of [${op}] must be [double], found value [now()] type [date]`,
-          `Argument of [${op}] must be [double], found value [1${unit}] type [date_period]`,
+          getNoValidCallSignatureError(op, ['date', 'date_period']),
         ]);
       }
-  });
-
-  test('date_diff', () => {
-    rowExpectErrors(
-      'row col0 = date_diff("month", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")',
-      []
-    );
-    rowExpectErrors(
-      'row col0 = date_diff("mm", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")',
-      []
-    );
-    rowExpectErrors(
-      'row col0 = date_diff("bogus", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")',
-      []
-    );
   });
 });

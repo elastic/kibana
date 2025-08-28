@@ -16,6 +16,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiFilterGroup,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,6 +46,7 @@ steps:
 export function WorkflowsPage() {
   const { application, chrome, notifications } = useKibana().services;
   const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
+  const { euiTheme } = useEuiTheme();
   const { createWorkflow } = useWorkflowActions();
   const [search, setSearch] = useState<WorkflowsSearchParams>({
     limit: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
@@ -89,8 +91,9 @@ export function WorkflowsPage() {
   };
 
   return (
-    <EuiPageTemplate offset={0}>
-      <EuiPageTemplate.Header>
+    <EuiPageTemplate offset={0} css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}>
+      {/* negative margin to compensate for header's bottom padding and reduce space between header and content */}
+      <EuiPageTemplate.Header bottomBorder={false} css={{ marginBottom: `-${euiTheme.size.l}` }}>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem>
             <EuiPageHeader
@@ -102,7 +105,12 @@ export function WorkflowsPage() {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
               {canCreateWorkflow && (
-                <EuiButton color="text" size="s" onClick={handleCreateWorkflow}>
+                <EuiButton
+                  iconType="plusInCircle"
+                  color="primary"
+                  size="s"
+                  onClick={handleCreateWorkflow}
+                >
                   <FormattedMessage
                     id="workflows.createWorkflowButton"
                     defaultMessage="Create workflow"
