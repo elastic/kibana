@@ -26,6 +26,7 @@ type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
   conversationId?: string;
   messages: Messages;
   errors: any[];
+  steps?: any[];
 }>;
 
 export class OnechatEvaluationChatClient {
@@ -44,6 +45,7 @@ export class OnechatEvaluationChatClient {
       conversationId?: string;
       messages: { message: string }[];
       errors: any[];
+      steps?: any[];
     }> => {
       // Use the non-async OneChat API endpoint
       const response = await this.fetch('/api/chat/converse', {
@@ -64,12 +66,16 @@ export class OnechatEvaluationChatClient {
         steps: any[];
         response: { message: string };
       };
-      const { conversation_id: conversationIdFromResponse, response: latestResponse } =
-        chatResponse;
+      const {
+        conversation_id: conversationIdFromResponse,
+        response: latestResponse,
+        steps,
+      } = chatResponse;
 
       return {
         conversationId: conversationIdFromResponse,
         messages: [...messages, latestResponse],
+        steps,
         errors: [],
       };
     };
@@ -101,6 +107,7 @@ export class OnechatEvaluationChatClient {
       this.log.error('Error occurred while calling converse API');
       return {
         conversationId,
+        steps: [],
         messages: [
           ...messages,
           {
