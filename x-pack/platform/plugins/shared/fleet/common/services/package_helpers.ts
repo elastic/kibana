@@ -52,3 +52,24 @@ export function hasInstallServersInputs(packagePolicies: PackagePolicy[]): boole
     )
   );
 }
+/**
+ * Return true if a package is fips compatible.
+ * Policy templates that have fips_compatible not defined are considered compatible.
+ * Only `fips_compatible: false` is considered not compatible
+ */
+export const checkIntegrationFipsLooseCompatibility = (
+  packageInfo?: Pick<PackageInfo, 'policy_templates'>,
+  integrationName?: string
+) => {
+  if (!packageInfo?.policy_templates || packageInfo.policy_templates?.length === 0) {
+    return true;
+  }
+  if (
+    packageInfo.policy_templates.find(
+      (p) => p.name === integrationName && p.fips_compatible !== false
+    )
+  ) {
+    return true;
+  }
+  return false;
+};

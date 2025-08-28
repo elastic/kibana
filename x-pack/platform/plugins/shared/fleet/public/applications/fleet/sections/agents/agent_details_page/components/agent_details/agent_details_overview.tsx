@@ -323,6 +323,23 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               }),
               description: (agent.tags ?? []).length > 0 ? <Tags tags={agent.tags ?? []} /> : '-',
             },
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
+                defaultMessage: 'FIPS compliance',
+              }),
+              description:
+                agent.local_metadata.elastic.agent.fips === true ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModeUnprivilegedText"
+                    defaultMessage="Compliant"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
+                    defaultMessage="Not compliant"
+                  />
+                ),
+            },
           ].map(({ title, description }) => {
             const tooltip =
               typeof description === 'string' && description.length > 20 ? description : '';

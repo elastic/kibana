@@ -6,7 +6,7 @@
  */
 import { sendGetAgents } from '../../../hooks';
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../constants';
-import type { Agent, PackageInfo, RegistryPolicyTemplate } from '../types';
+import type { Agent } from '../types';
 
 export const hasFipsAgents = (agents: Agent[]) =>
   agents.some((agent) => agent.local_metadata?.elastic?.agent?.fips === true);
@@ -20,29 +20,11 @@ export const agentPoliciesWithFipsAgents = async (policyIds: string[]) => {
     kuery: `${policiesKuery} and not status: unenrolled`,
     perPage: SO_SEARCH_LIMIT,
   });
+  if (res.error) {
+    throw new Error(res.error.message);
+  }
+
   if (!res.data?.items || res.data?.items.length === 0) return false;
 
   return hasFipsAgents(res.data?.items);
-};
-
-export const checkFipsCompatibleIntegration = (
-  packageInfo?: Pick<PackageInfo, 'policy_templates'>,
-  integrationName?: string
-) => {
-  if (!packageInfo?.policy_templates || packageInfo.policy_templates?.length === 0) {
-    return true;
-  }
-  if (
-    packageInfo.policy_templates.find(
-      (p) => p.name === integrationName && policyTemplateFipsCompatible(p)
-    )
-  )
-    return true;
-  return false;
-};
-
-// assuming that policy templates that have fips_compatible not defined are still compatible
-// only `fips_compatible: false` is considered not compatible
-const policyTemplateFipsCompatible = (policyTemplate: RegistryPolicyTemplate) => {
-  return policyTemplate.fips_compatible !== false;
 };
