@@ -51,14 +51,19 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
     [caseData.comments]
   );
 
-  const indexPattern = events.map((event) => event.index).join(',');
+  const indexPattern = useMemo(() => events.map((event) => event.index).join(','), [events]);
+
   const { dataView: eventsDataView } = useEventsDataView(indexPattern);
 
-  const eventsResponse = useGetEvents(eventsDataView, {
-    caseId: caseData.id,
-    columns,
-    eventIds: events.flatMap((event) => event.eventId),
-  });
+  const eventsParameters = useMemo(() => {
+    return {
+      caseId: caseData.id,
+      columns,
+      eventIds: events.flatMap((event) => event.eventId),
+    };
+  }, [caseData.id, columns, events]);
+
+  const eventsResponse = useGetEvents(eventsDataView, eventsParameters);
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord>();
 
