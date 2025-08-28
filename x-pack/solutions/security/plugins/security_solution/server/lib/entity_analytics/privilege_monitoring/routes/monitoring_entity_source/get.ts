@@ -1,3 +1,5 @@
+/* eslint-disable @kbn/eslint/require-license-header */
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,28 +10,28 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
-  MONITORING_ENTITY_LIST_SOURCES_URL,
+  MONITORING_ENTITY_SOURCE_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import {
-  ListEntitySourcesRequestQuery,
-  type ListEntitySourcesResponse,
+  type GetEntitySourceResponse,
+  GetEntitySourceRequestParams,
 } from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 
-export const listMonitoringEntitySourceRoute = (
+export const getMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  config: EntityAnalyticsRoutesDeps['config']
 ) => {
   router.versioned
     .get({
       access: 'public',
-      path: MONITORING_ENTITY_LIST_SOURCES_URL,
+      path: `${MONITORING_ENTITY_SOURCE_URL}/{id}`,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -41,11 +43,11 @@ export const listMonitoringEntitySourceRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(ListEntitySourcesRequestQuery),
+            params: GetEntitySourceRequestParams,
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<ListEntitySourcesResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<GetEntitySourceResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -53,15 +55,13 @@ export const listMonitoringEntitySourceRoute = (
             await context.core,
             ENABLE_PRIVILEGED_USER_MONITORING_SETTING
           );
-
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.list(request.query);
-
+          const body = await client.get(request.params.id);
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
-          logger.error(`Error listing monitoring entity sources: ${error.message}`);
+          logger.error(`Error getting monitoring entity source sync config: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
