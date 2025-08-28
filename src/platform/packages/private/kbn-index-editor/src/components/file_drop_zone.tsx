@@ -56,7 +56,6 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   const { services } = useKibana<KibanaContextExtra>();
   const { indexUpdateService } = services;
   const { fileUploadManager, filesStatus, uploadStatus, indexName } = useFileUploadContext();
-
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
 
   const isAnalyzing =
@@ -103,21 +102,19 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
           }
         });
       }
-
-      // Generic errors
-      if (uploadStatus.overallImportStatus === STATUS.FAILED) {
-        const errorDetail = uploadStatus.errors.map((error) => `- ${error.title}`).join('\n');
-        indexUpdateService.setError(IndexEditorErrors.FILE_UPLOAD_ERROR, errorDetail);
-      }
     },
-    [
-      fileUploadManager,
-      filesStatus,
-      indexUpdateService,
-      uploadStatus.errors,
-      uploadStatus.overallImportStatus,
-    ]
+    [fileUploadManager, filesStatus, indexUpdateService]
   );
+
+  useEffect(() => {
+    // Generic errors
+    if (uploadStatus.errors.length) {
+      const errorDetail = uploadStatus.errors
+        .map((error) => `- ${error.title}: \n ${JSON.stringify(error.error)}`)
+        .join('\n');
+      indexUpdateService.setError(IndexEditorErrors.FILE_UPLOAD_ERROR, errorDetail);
+    }
+  }, [indexUpdateService, uploadStatus.errors]);
 
   const onFilesSelected = useCallback(
     async (files: File[]) => {
@@ -228,12 +225,10 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     </div>
   );
 
-  const successfulPreviews = filesStatus.filter((f) => f.analysisStatus === STATUS.COMPLETED);
-  const showFilePreview =
-    isSaving ||
-    (!isDragActive &&
-      successfulPreviews.length > 0 &&
-      uploadStatus.overallImportStatus !== STATUS.COMPLETED);
+  const successfulPreviews = filesStatus.filter(
+    (f) => f.analysisStatus === STATUS.COMPLETED && f.importStatus !== STATUS.COMPLETED
+  );
+  const showFilePreview = isSaving || (!isDragActive && successfulPreviews.length > 0);
 
   let content: React.ReactNode = children;
 
