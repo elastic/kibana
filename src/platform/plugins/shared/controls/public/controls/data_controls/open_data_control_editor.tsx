@@ -20,17 +20,18 @@ export const openDataControlEditor = <
   State extends DefaultDataControlState = DefaultDataControlState
 >({
   initialState,
-  controlType,
-  controlId,
-  initialDefaultPanelTitle,
   parentApi,
+  controlId,
+  controlType,
+  initialDefaultPanelTitle,
   onUpdate,
 }: {
   initialState: Partial<State>;
-  controlType?: string;
-  controlId?: string;
-  initialDefaultPanelTitle?: string;
   parentApi: unknown;
+  // these props are only provided when the control already exists and is being edited
+  controlId?: string;
+  controlType?: string;
+  initialDefaultPanelTitle?: string;
   onUpdate?: (newState: Partial<State & SerializedTitles>) => void;
 }) => {
   const onCancel = (newState: Partial<State>, closeFlyout: () => void) => {
