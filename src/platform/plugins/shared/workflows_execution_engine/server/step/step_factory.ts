@@ -28,7 +28,7 @@ import {
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './retry_step';
 import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './continue_step';
 import {
-  EnterOnFailureZoneNodeImpl,
+  EnterTryBlockNodeImpl,
   ExitOnFailureZoneNodeImpl,
   EnterNormalPathNodeImpl,
   ExitNormalPathNodeImpl,
@@ -80,7 +80,7 @@ export class StepFactory {
       case 'exit-continue':
         return new ExitContinueNodeImpl(this.workflowRuntime);
       case 'enter-on-failure-zone':
-        return new EnterOnFailureZoneNodeImpl(step as any, this.workflowRuntime);
+        return new EnterTryBlockNodeImpl(step as any, this.workflowRuntime);
       case 'exit-on-failure-zone':
         return new ExitOnFailureZoneNodeImpl(step as any, this.workflowRuntime);
       case 'enter-normal-path':

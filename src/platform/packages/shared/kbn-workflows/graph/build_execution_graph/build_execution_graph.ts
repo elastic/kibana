@@ -32,7 +32,7 @@ import type {
   ExitRetryNode,
   EnterContinueNode,
   ExitContinueNode,
-  EnterOnFailureZoneNode,
+  EnterTryBlockNode,
   ExitOnFailureZoneNode,
   EnterPathNode,
   ExitPathNode,
@@ -247,7 +247,7 @@ export function visitFallbackStep(
   const enterFallbackPathNodeId = `fallbackPath_${enterFallbackNodeId}`;
   const exitFallbackPathNodeId = `exit_${enterFallbackPathNodeId}`;
 
-  const enterFallbackNode: EnterOnFailureZoneNode = {
+  const enterFallbackNode: EnterTryBlockNode = {
     id: enterFallbackNodeId,
     exitNodeId: exitFallbackNodeId,
     type: 'enter-on-failure-zone',

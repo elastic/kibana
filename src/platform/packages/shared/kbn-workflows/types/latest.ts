@@ -60,7 +60,7 @@ export type {
   HttpGraphNode,
   HttpGraphNodeSchema,
   WaitGraphNode,
-  EnterOnFailureZoneNode,
+  EnterTryBlockNode,
   ExitOnFailureZoneNode,
   EnterPathNode,
   ExitPathNode,

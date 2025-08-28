@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EnterOnFailureZoneNodeImpl } from './enter_on_failure_zone_node_impl';
+export { EnterTryBlockNodeImpl } from './enter_on_failure_zone_node_impl';
 export { ExitOnFailureZoneNodeImpl } from './exit_on_failure_zone_node_impl';
 export { EnterNormalPathNodeImpl } from './enter_normal_path_node_impl';
 export { ExitNormalPathNodeImpl } from './exit_normal_path_node_impl';

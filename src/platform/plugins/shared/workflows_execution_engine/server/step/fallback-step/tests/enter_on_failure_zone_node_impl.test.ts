@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterOnFailureZoneNode } from '@kbn/workflows';
+import type { EnterTryBlockNode } from '@kbn/workflows';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterOnFailureZoneNodeImpl } from '../enter_on_failure_zone_node_impl';
+import { EnterTryBlockNodeImpl } from '../enter_on_failure_zone_node_impl';
 
-describe('EnterOnFailureZoneNodeImpl', () => {
-  let underTest: EnterOnFailureZoneNodeImpl;
-  let step: EnterOnFailureZoneNode;
+describe('EnterTryBlockNodeImpl', () => {
+  let underTest: EnterTryBlockNodeImpl;
+  let step: EnterTryBlockNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
 
   beforeEach(() => {
@@ -30,8 +30,8 @@ describe('EnterOnFailureZoneNodeImpl', () => {
     workflowRuntime.startStep = jest.fn();
     workflowRuntime.enterScope = jest.fn();
     workflowRuntime.goToStep = jest.fn();
-    
-    underTest = new EnterOnFailureZoneNodeImpl(step, workflowRuntime);
+
+    underTest = new EnterTryBlockNodeImpl(step, workflowRuntime);
   });
 
   describe('run', () => {
