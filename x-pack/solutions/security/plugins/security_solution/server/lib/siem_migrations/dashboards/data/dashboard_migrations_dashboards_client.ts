@@ -20,10 +20,16 @@ import {
   type DashboardMigrationDashboard,
   type DashboardMigrationTaskStats,
 } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
+import type { StoredDashboardMigration } from '../types';
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed. */
 const BULK_MAX_SIZE = 500 as const;
+
+interface SearchFilters {
+  ids?: string[];
+  installable?: boolean;
+}
 
 export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataBaseClient {
   /** Indexes an array of dashboards to be processed as a part of single migration */
@@ -57,6 +63,61 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataB
           throw error;
         });
     }
+  }
+
+  /** Returns functions to iterate over all the search results in batches */
+  async searchBatches(migrationId: string, filters: SearchFilters = {}) {
+    const index = await this.getIndexName();
+    const query: QueryDslQueryContainer = {
+      bool: {
+        filter: [
+          { term: { migration_id: migrationId } },
+          ...(filters.ids ? [{ terms: { _id: filters.ids } }] : []),
+          ...(filters.installable ? [{ term: { status: SiemMigrationStatus.COMPLETED } }] : []),
+        ],
+      },
+    };
+
+    const search = {
+      index,
+      query,
+      sort: [{ '@timestamp': 'asc' }],
+      size: 100,
+    };
+
+    return this.getSearchBatches<DashboardMigrationDashboard>(search);
+  }
+
+  /** Updates dashboard migration documents */
+  async update(updates: Array<{ id: string; elastic_dashboard: { id: string } }>): Promise<void> {
+    if (updates.length === 0) {
+      return;
+    }
+
+    const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
+    const updatedAt = new Date().toISOString();
+
+    const operations = updates.flatMap((update) => [
+      { update: { _index: index, _id: update.id } },
+      {
+        doc: {
+          elastic_dashboard: update.elastic_dashboard,
+          updated_by: profileId,
+          updated_at: updatedAt,
+        },
+      },
+    ]);
+
+    await this.esClient
+      .bulk({
+        refresh: 'wait_for',
+        operations,
+      })
+      .catch((error) => {
+        this.logger.error(`Error updating dashboards: ${error.message}`);
+        throw error;
+      });
   }
 
   async getStats(migrationId: string): Promise<Omit<DashboardMigrationTaskStats, 'name'>> {

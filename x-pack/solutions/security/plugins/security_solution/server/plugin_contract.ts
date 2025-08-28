@@ -68,6 +68,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   osquery: OsqueryPluginSetup;
   unifiedSearch: UnifiedSearchServerPluginSetup;
+  contentManagement: ContentManagementServerSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {
