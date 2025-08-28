@@ -12,7 +12,6 @@ import { render, screen } from '@testing-library/react';
 import type { ContentFrameworkChartProps } from '.';
 import { ContentFrameworkChart } from '.';
 
-// Mock plugin services
 jest.mock('../../../plugin', () => ({
   getUnifiedDocViewerServices: () => ({
     share: {
