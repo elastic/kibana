@@ -62,7 +62,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
   titlesManager,
   willHaveInitialFilter,
   getInitialFilter,
-  getLatestState,
 }: {
   controlId: string;
   controlType: string;
@@ -71,7 +70,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
   parentApi: unknown;
   editorStateManager: ReturnType<typeof initializeStateManager<EditorState>>;
   titlesManager: ReturnType<typeof initializeTitleManager>;
-  getLatestState: () => SerializedPanelState<EditorState>;
   willHaveInitialFilter?: boolean;
   getInitialFilter?: (dataView: DataView) => Filter | undefined;
 }): Promise<DataControlStateManager> => {

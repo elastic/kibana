@@ -87,7 +87,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           parentApi,
           willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
           getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
-          getLatestState: serializeState,
           editorStateManager,
           titlesManager,
         });
