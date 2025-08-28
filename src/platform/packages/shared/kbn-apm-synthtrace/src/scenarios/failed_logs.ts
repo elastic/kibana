@@ -71,23 +71,14 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     bootstrap: async ({ logsEsClient }) => {
       if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
 
+      await logsEsClient.createIndexTemplate(IndexTemplateName.NoFailureStore);
       await logsEsClient.createCustomPipeline(
         processors,
         `${IndexTemplateName.SomeFailureStore}@pipeline`
       );
-      await logsEsClient.createComponentTemplate({
-        name: `${IndexTemplateName.SomeFailureStore}@custom`,
-        dataStreamOptions: {
-          failure_store: {
-            enabled: true,
-          },
-        },
-      });
       await logsEsClient.createIndexTemplate(IndexTemplateName.SomeFailureStore);
     },
     teardown: async ({ logsEsClient }) => {
-      await logsEsClient.deleteIndexTemplate(IndexTemplateName.SomeFailureStore);
-      await logsEsClient.deleteComponentTemplate(`${IndexTemplateName.SomeFailureStore}@custom`);
       if (isLogsDb) await logsEsClient.deleteIndexTemplate(IndexTemplateName.LogsDb);
     },
     generate: ({ range, clients: { logsEsClient } }) => {
