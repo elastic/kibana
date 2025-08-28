@@ -6,7 +6,14 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCheckbox, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import {
+  EuiCheckbox,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -189,12 +196,13 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
 
           <EuiFlexItem grow={false}>
             <EuiIconTip
-              content={
-                i18n.translate(
-                  'xpack.gen_ai_settings.settings.defaultLLmOnly.checkbox.tooltip',
-                  { defaultMessage: 'Only the chosen default connector will be shown to users of this space.' }
-                )
-              }
+              content={i18n.translate(
+                'xpack.gen_ai_settings.settings.defaultLLmOnly.checkbox.tooltip',
+                {
+                  defaultMessage:
+                    'Only the chosen default connector will be shown to users of this space.',
+                }
+              )}
               position="top"
             />
           </EuiFlexItem>
