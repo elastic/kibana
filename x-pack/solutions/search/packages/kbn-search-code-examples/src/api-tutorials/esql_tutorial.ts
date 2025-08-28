@@ -59,7 +59,7 @@ POST /_query
 {
   "query": """
     FROM kibana_sample_data_esql
-    | WHERE description:"fluffy pancakes"
+    | WHERE description:"comfort food"
     | LIMIT 1000
   """
 }
@@ -76,7 +76,7 @@ POST /_query
 {
   "query": """
     FROM kibana_sample_data_esql
-    | WHERE description:"fluffy pancakes"
+    | WHERE description:"comfort food"
     | KEEP title, description, rating
     | LIMIT 1000
   """
@@ -94,7 +94,7 @@ POST /_query
 {
   "query": """
     FROM kibana_sample_data_esql METADATA _score
-    | WHERE description:"fluffy pancakes"
+    | WHERE description:"comfort food"
     | KEEP title, description, _score
     | SORT _score DESC
     | LIMIT 1000
