@@ -104,12 +104,16 @@ export class Plugin implements PluginType {
       this.syntheticsMonitorClient
     );
 
-    core.getStartServices().then(([coreStart]) => {
-      plugins.cases.attachmentFramework.registerSuggestion<SyntheticsSuggestion>(
-        getMonitorByServiceName(coreStart, this.logger, plugins.share.url.locators)
-      );
-    });
-
+    core
+      .getStartServices()
+      .then(([coreStart]) => {
+        plugins.cases.attachmentFramework.registerSuggestion<SyntheticsSuggestion>(
+          getMonitorByServiceName(coreStart, this.logger, plugins.share.url.locators)
+        );
+      })
+      .catch((error) => {
+        this.logger.error('Failed to register synthetics suggestion', error);
+      });
     return {};
   }
 
