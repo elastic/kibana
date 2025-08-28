@@ -10,6 +10,7 @@ export * from './risk_engine/constants';
 export * from './risk_score/constants';
 export * from './migrations/constants';
 export * from './privileged_user_monitoring/constants';
+export * from './entity_store/constants';
 
 export const API_VERSIONS = {
   public: {

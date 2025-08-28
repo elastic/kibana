@@ -8,7 +8,7 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { DisableMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/disable.gen';
+import type { DisableMonitoringEngineResponse } from '../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,

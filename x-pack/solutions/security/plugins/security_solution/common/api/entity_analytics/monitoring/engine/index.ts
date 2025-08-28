@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export * from './asset_criticality';
-export * from './risk_engine';
-export * from './entity_store';
-export * from './monitoring';
-export type { EntityAnalyticsPrivileges } from './common';
+export * from './delete.gen';
+export * from './disable.gen';
+export * from './init.gen';
+export * from './schedule_now.gen';

@@ -16,7 +16,7 @@ import {
 } from '../../../../../../common/entity_analytics/privileged_user_monitoring/constants';
 import type { HapiReadableStream } from '../../../../../types';
 import type { ConfigType } from '../../../../../config';
-import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
+import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,
@@ -88,7 +88,6 @@ export const uploadUsersCSVRoute = (
 
           return response.ok({ body });
         } catch (e) {
-          // TODO TEST THIS ERROR SCENARIO
           const error = transformError(e);
           logger.error(`Error uploading users via CSV: ${error.message}`);
           return siemResponse.error({

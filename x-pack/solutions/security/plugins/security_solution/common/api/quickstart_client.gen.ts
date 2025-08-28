@@ -264,17 +264,13 @@ import type {
   CreatePrivilegesImportIndexResponse,
 } from './entity_analytics/monitoring/create_index.gen';
 import type {
-  SearchPrivilegesIndicesRequestQueryInput,
-  SearchPrivilegesIndicesResponse,
-} from './entity_analytics/monitoring/search_indices.gen';
-import type {
   DeleteMonitoringEngineRequestQueryInput,
   DeleteMonitoringEngineResponse,
-} from './entity_analytics/privilege_monitoring/engine/delete.gen';
-import type { DisableMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/disable.gen';
-import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
-import type { ScheduleMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/schedule_now.gen';
-import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
+} from './entity_analytics/monitoring/engine/delete.gen';
+import type { DisableMonitoringEngineResponse } from './entity_analytics/monitoring/engine/disable.gen';
+import type { InitMonitoringEngineResponse } from './entity_analytics/monitoring/engine/init.gen';
+import type { ScheduleMonitoringEngineResponse } from './entity_analytics/monitoring/engine/schedule_now.gen';
+import type { PrivMonHealthResponse } from './entity_analytics/monitoring/health.gen';
 import type {
   CreateEntitySourceRequestBodyInput,
   CreateEntitySourceResponse,
@@ -286,28 +282,32 @@ import type {
   UpdateEntitySourceRequestParamsInput,
   UpdateEntitySourceRequestBodyInput,
   UpdateEntitySourceResponse,
-} from './entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/install.gen';
-import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
-import type { PrivMonPrivilegesResponse } from './entity_analytics/privilege_monitoring/privileges.gen';
+} from './entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/monitoring/privileged_access_detection/install.gen';
+import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/monitoring/privileged_access_detection/status.gen';
+import type { PrivMonPrivilegesResponse } from './entity_analytics/monitoring/privileges.gen';
+import type {
+  SearchPrivilegesIndicesRequestQueryInput,
+  SearchPrivilegesIndicesResponse,
+} from './entity_analytics/monitoring/search_indices.gen';
 import type {
   CreatePrivMonUserRequestBodyInput,
   CreatePrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/create.gen';
+} from './entity_analytics/monitoring/users/create.gen';
 import type {
   DeletePrivMonUserRequestParamsInput,
   DeletePrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/delete.gen';
+} from './entity_analytics/monitoring/users/delete.gen';
 import type {
   ListPrivMonUsersRequestQueryInput,
   ListPrivMonUsersResponse,
-} from './entity_analytics/privilege_monitoring/users/list.gen';
+} from './entity_analytics/monitoring/users/list.gen';
 import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,
   UpdatePrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/update.gen';
-import type { PrivmonBulkUploadUsersCSVResponse } from './entity_analytics/privilege_monitoring/users/upload_csv.gen';
+} from './entity_analytics/monitoring/users/update.gen';
+import type { PrivmonBulkUploadUsersCSVResponse } from './entity_analytics/monitoring/users/upload_csv.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,

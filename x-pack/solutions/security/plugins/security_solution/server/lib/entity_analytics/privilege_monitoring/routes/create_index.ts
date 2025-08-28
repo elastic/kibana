@@ -9,7 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { CreatePrivilegesImportIndexRequestBody } from '../../../../../common/api/entity_analytics/monitoring/create_index.gen';
+import { CreatePrivilegesImportIndexRequestBody } from '../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,

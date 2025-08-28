@@ -20,7 +20,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import {
   CreateEntitySourceRequestBody,
   type CreateEntitySourceResponse,
-} from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+} from '../../../../../../common/api/entity_analytics';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createEngineStatusService } from '../../engine/status_service';
 import { PrivilegeMonitoringApiKeyType } from '../../auth/saved_object';

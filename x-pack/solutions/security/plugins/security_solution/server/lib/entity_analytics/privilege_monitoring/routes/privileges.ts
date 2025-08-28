@@ -8,7 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { PrivMonPrivilegesResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/privileges.gen';
+import type { PrivMonPrivilegesResponse } from '../../../../../common/api/entity_analytics';
 import { API_VERSIONS, APP_ID, PRIVMON_PRIVILEGE_CHECK_API } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { getReadPrivilegeUserMonitoringPrivileges } from '../privilege_monitoring_privileges';

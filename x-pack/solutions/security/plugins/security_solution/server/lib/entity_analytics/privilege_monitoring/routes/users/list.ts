@@ -9,8 +9,10 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { ListPrivMonUsersRequestQuery } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/list.gen';
-import type { ListPrivMonUsersResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/list.gen';
+import {
+  ListPrivMonUsersRequestQuery,
+  type ListPrivMonUsersResponse,
+} from '../../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,

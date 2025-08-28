@@ -10,8 +10,10 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { DeleteEntityEngineRequestQuery } from '../../../../../common/api/entity_analytics';
-import type { DeleteMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/delete.gen';
+import {
+  DeleteEntityEngineRequestQuery,
+  type DeleteMonitoringEngineResponse,
+} from '../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,

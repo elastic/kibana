@@ -8,9 +8,10 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import { DeletePrivMonUserRequestParams } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/delete.gen';
-import type { DeletePrivMonUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/delete.gen';
+import {
+  DeletePrivMonUserRequestParams,
+  type DeletePrivMonUserResponse,
+} from '../../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,

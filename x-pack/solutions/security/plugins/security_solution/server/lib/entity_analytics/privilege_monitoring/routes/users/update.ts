@@ -12,7 +12,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   UpdatePrivMonUserRequestParams,
   UpdatePrivMonUserRequestBody,
-} from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
+} from '../../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,

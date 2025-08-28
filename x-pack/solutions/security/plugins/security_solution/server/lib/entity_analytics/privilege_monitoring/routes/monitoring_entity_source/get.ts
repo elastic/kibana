@@ -20,7 +20,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import {
   type GetEntitySourceResponse,
   GetEntitySourceRequestParams,
-} from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+} from '../../../../../../common/api/entity_analytics';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 
 export const getMonitoringEntitySourceRoute = (
