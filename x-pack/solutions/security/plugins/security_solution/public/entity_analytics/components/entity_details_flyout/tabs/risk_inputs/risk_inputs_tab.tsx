@@ -6,13 +6,15 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut, EuiButtonEmpty } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
+import useToggle from 'react-use/lib/useToggle';
+import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { AlertPreviewButton } from '../../../../../flyout/shared/components/alert_preview_button';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
@@ -30,6 +32,7 @@ import { buildEntityNameFilter } from '../../../../../../common/search_strategy'
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
+import { ExplainWithAI } from './explain_with_ai';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -79,6 +82,8 @@ export const RiskInputsTab = <T extends EntityType>({
     refetch,
     setQuery,
   });
+
+  const [isExplainWithAiOpen, toggleExplainWithAiOpen] = useToggle(false);
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
 
@@ -220,6 +225,24 @@ export const RiskInputsTab = <T extends EntityType>({
       />
       <EuiSpacer size="m" />
       {riskInputsAlertSection}
+      <EuiSpacer size="m" />
+      <EuiButtonEmpty
+        data-test-subj="explain-with-ai-button"
+        flush="left"
+        iconType="sparkles"
+        iconSide="right"
+        onClick={() => {
+          toggleExplainWithAiOpen();
+        }}
+      >
+        <>{'Explain with AI'}</>
+      </EuiButtonEmpty>
+      {isExplainWithAiOpen && (
+        <ExplainWithAI
+          identifier={entityName}
+          identifierKey={EntityTypeToIdentifierField[entityType]}
+        />
+      )}
     </>
   );
 };

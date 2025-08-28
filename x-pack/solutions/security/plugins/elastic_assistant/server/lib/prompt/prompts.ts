@@ -75,7 +75,7 @@ FORMAT REQUIREMENTS:
 Your continuation should seamlessly connect with the previous output to form a complete, valid JSON document.
 `;
 
-const SYNTAX = '{{ field.name fieldValue1 fieldValue2 fieldValueN }}';
+export const SYNTAX = '{{ field.name fieldValue1 fieldValue2 fieldValueN }}';
 const GOOD_SYNTAX_EXAMPLES =
   'Examples of CORRECT syntax (includes field names and values): {{ host.name hostNameValue }} {{ user.name userNameValue }} {{ source.ip sourceIpValue }}';
 
