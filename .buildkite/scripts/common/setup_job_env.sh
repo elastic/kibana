@@ -195,14 +195,9 @@ EOF
 
 # Acquire credentials for legacy vault if needed
 {
-  if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-    VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
-    VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
-  else
-    VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
-    VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
-  fi
+  VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
   export VAULT_ROLE_ID
+  VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
   export VAULT_SECRET_ID
 }
 
