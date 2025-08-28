@@ -1022,7 +1022,6 @@ describe('SentinelOneActionsClient class', () => {
       let actionRequestsSearchResponse: SearchResponse<LogsEndpointAction>;
 
       beforeEach(() => {
-        // { command: 'kill-process', parameters: { process_name: 'foo' } }
         const s1DataGenerator = new SentinelOneDataGenerator('seed');
 
         actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
