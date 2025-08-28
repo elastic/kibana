@@ -2,7 +2,7 @@
 
 ## Overview
 
-The fallback-step mechanism provides robust error handling in workflow execution by implementing a try-catch pattern that allows alternative execution paths when the primary path fails. This implementation creates a structured approach to handle failures gracefully without terminating the entire workflow.
+The fallback-step mechanism provides robust error handling in workflow execution by implementing a try-catch pattern that allows alternative execution paths when the primary path fails. This implementation creates a structured approach to execute fallback logic while preserving original error information for proper error handling.
 
 ## Algorithm and Logic
 
@@ -61,7 +61,7 @@ The EnterNormalPathNode implements sophisticated error catching:
 ### ExitFallbackPathNode
 - **Role**: Completion of fallback execution path
 - **Behavior**: Exits fallback scope and navigates to try-block exit
-- **Error Propagation**: Maintains error state while allowing workflow continuation
+- **Error Preservation**: Maintains original error state for proper workflow error handling
 
 ### ExitTryBlockNode
 - **Role**: Final consolidation point for both execution paths
@@ -80,19 +80,33 @@ The handleStepLevelOperations function processes on-failure options in specific 
 When both `continue` and `fallback-step` are specified:
 - Continue wrapper becomes outermost layer
 - Fallback logic executes within continue scope
-- Error suppression occurs at continue level after fallback completion
+- Even if fallback succeeds, original error is preserved
+- Continue suppresses the preserved error to allow workflow continuation
 
 ### With Retry
 When both `retry` and `fallback-step` are specified:
-- Retry wrapper becomes outermost layer
-- Fallback logic executes within each retry attempt
-- Retry mechanism triggers if fallback path also fails
+- Fallback wrapper becomes outermost layer
+- Retry logic executes within the normal path of fallback
+- Fallback steps execute only when all retry attempts are exhausted
 
 ### Nested Combinations
 Complex combinations create nested execution structures:
 - `continue + fallback-step + retry`: Continue(Fallback(Retry(OriginalStep)))
 - Each layer handles its specific failure recovery mechanism
 - Inner layers execute before outer layers process remaining errors
+
+#### Execution Flow for `continue + fallback-step + retry`:
+1. **Continue wrapper** (outermost) - Suppresses all errors after inner mechanisms complete
+2. **Fallback wrapper** (middle) - Provides alternative execution path if normal path fails
+3. **Retry wrapper** (innermost) - Attempts multiple executions of original step
+4. **Original step** - The actual step being executed
+
+**Scenario execution:**
+- Original step executes within retry mechanism (up to configured retry attempts)
+- If all retry attempts fail, fallback steps execute (also with their own retry if configured)
+- **Important**: Even if fallback steps succeed, the original error from normal path is preserved
+- Continue mechanism suppresses the preserved error and allows workflow to proceed
+- **Without continue**: Workflow fails even if fallback path succeeds, due to preserved original error
 
 ## Key Design Principles
 
@@ -103,7 +117,7 @@ Each execution path maintains isolated scope to prevent state interference betwe
 Original error information is preserved throughout fallback execution to maintain debugging capabilities and proper error reporting.
 
 ### Non-Destructive Recovery
-Fallback execution provides alternative results without losing information about the original failure, enabling comprehensive error analysis.
+Fallback execution provides alternative results without losing information about the original failure, enabling comprehensive error analysis. The original error is always preserved and will cause workflow failure unless explicitly suppressed by the continue mechanism.
 
 ### Composability
 The fallback mechanism integrates seamlessly with other on-failure options (retry, continue) through ordered wrapper composition.
