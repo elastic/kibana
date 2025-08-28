@@ -40,6 +40,15 @@ const WORKFLOW_DEFINITION_KEYS_ORDER: Array<keyof WorkflowYaml> = [
   'steps',
 ];
 
+function _getDiagnosticMessage(workflowDefinition: Record<string, any>) {
+  try {
+    const serialized = JSON.stringify(workflowDefinition);
+    return serialized.length > 300 ? serialized.substring(0, 300) + '...' : serialized;
+  } catch {
+    return `[object ${workflowDefinition?.constructor?.name ?? typeof workflowDefinition}]`;
+  }
+}
+
 /**
  * Stringify the workflow definition to a YAML string.
  * @param workflowDefinition - The workflow definition as a JSON object.
@@ -52,11 +61,13 @@ export function stringifyWorkflowDefinition(
 ) {
   const doc = new Document(workflowDefinition);
   if (sortKeys) {
-    if (!doc.contents) {
-      throw new Error('doc.contents is null');
-    }
-    if (!isMap(doc.contents)) {
-      throw new Error('doc.contents should be a map');
+    if (!doc.contents || !isMap(doc.contents)) {
+      throw new Error(
+        `Expected doc.contents to be a YAML map when sorting keys, but got type '${typeof doc.contents}'. ` +
+          `This usually means the input workflowDefinition is not a plain object. Received: ${_getDiagnosticMessage(
+            workflowDefinition
+          )}`
+      );
     }
     const map = doc.contents as YAMLMap;
     map.items.sort((a, b) => {

@@ -142,4 +142,9 @@ steps:
       message: Hello, world!
 `);
   });
+
+  it('it should throw an error if the input is not a plain object', () => {
+    const json: any = [1, 2, 3];
+    expect(() => stringifyWorkflowDefinition(json)).toThrow();
+  });
 });
