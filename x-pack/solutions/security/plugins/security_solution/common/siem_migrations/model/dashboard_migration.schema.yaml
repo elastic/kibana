@@ -114,6 +114,7 @@ components:
           type: string
           description: The unique identifier for the dashboard
         vendor:
+          description: The original dashboard vendor identifier.
           $ref: '#/components/schemas/OriginalDashboardVendor'
         title:
           type: string
