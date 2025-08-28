@@ -7,8 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiBadge,
-  EuiBadgeGroup,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -16,14 +14,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiBadgeGroup,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { APIReturnType } from '@kbn/streams-plugin/public/api';
-import type { ValuesType } from 'utility-types';
 import type { GrokCollection } from '@kbn/grok-ui';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import type { UseFormSetValue, FieldValues } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
+import type { GrokProcessorResult } from '@kbn/grok-heuristics';
+import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
@@ -63,16 +63,16 @@ export const GrokPatternAISuggestions = ({
     );
   }, [previewDocuments, fieldValue]);
 
-  if (suggestionsState.value && suggestionsState.value[0]) {
+  if (suggestionsState.value) {
     return (
       <GrokPatternSuggestion
-        suggestion={suggestionsState.value[0]}
+        grokProcessor={suggestionsState.value.grokProcessor}
+        simulationResult={suggestionsState.value.simulationResult}
         onAccept={() => {
-          const [suggestion] = suggestionsState.value ?? [];
-          if (suggestion) {
+          if (suggestionsState.value) {
             setValue(
               'patterns',
-              suggestion.grokProcessor.patterns.map(
+              suggestionsState.value.grokProcessor.patterns.map(
                 (value) => new DraftGrokExpression(grokCollection, value)
               ),
               { shouldValidate: true }
@@ -132,26 +132,28 @@ export const GrokPatternAISuggestions = ({
 };
 
 export interface GrokPatternSuggestionProps {
-  suggestion: ValuesType<APIReturnType<'POST /internal/streams/{name}/processing/_suggestions'>>;
+  grokProcessor: GrokProcessorResult;
+  simulationResult: APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
   onAccept(): void;
   onDismiss(): void;
 }
 
 export function GrokPatternSuggestion({
-  suggestion,
+  grokProcessor,
+  simulationResult,
   onAccept,
   onDismiss,
 }: GrokPatternSuggestionProps) {
-  const processorMetrics = suggestion.simulationResult.processors_metrics['grok-processor'];
+  const processorMetrics = simulationResult.processors_metrics['grok-processor'];
   return (
     <EuiCallOut
       iconType="sparkles"
-      title={suggestion.description}
+      title={grokProcessor.description}
       color="primary"
       size="s"
       onDismiss={onDismiss}
     >
-      {suggestion.grokProcessor.patterns.map((pattern, index) => (
+      {grokProcessor.patterns.map((pattern, index) => (
         <EuiCodeBlock key={pattern} paddingSize="none" language="regex" transparentBackground>
           {pattern}
         </EuiCodeBlock>
