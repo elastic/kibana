@@ -18,6 +18,7 @@ import type {
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowStepExecution,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -25,7 +26,11 @@ import type {
   WorkflowExecutionListDto,
   WorkflowListDto,
 } from '@kbn/workflows';
+import type { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
+import { EsWorkflowSchema } from '@kbn/workflows/types/v1';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import type { estypes } from '@elastic/elasticsearch';
+import { parseDocument } from 'yaml';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
@@ -41,7 +46,16 @@ import {
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
 import { SimpleWorkflowLogger } from './lib/workflow_logger';
-import type { GetWorkflowsParams } from './workflows_management_api';
+import type {
+  GetExecutionLogsParams,
+  GetStepExecutionParams,
+  GetStepLogsParams,
+  GetWorkflowsParams,
+} from './workflows_management_api';
+import { searchStepExecutions } from './lib/search_step_executions';
+
+const SO_ATTRIBUTES_PREFIX = `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes`;
+const WORKFLOW_EXECUTION_STATUS_STATS_BUCKET = 50;
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
@@ -115,15 +129,43 @@ export class WorkflowsService {
     params: GetWorkflowsParams,
     spaceId: string
   ): Promise<WorkflowListDto> {
+    const { limit, page, query, createdBy, enabled } = params;
     const baseSavedObjectsClient = await this.getSavedObjectsClient();
     const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
+
+    const filters: string[] = [`not ${SO_ATTRIBUTES_PREFIX}.deleted_at: *`];
+
+    if (createdBy && createdBy.length > 0) {
+      const createdByFilter = createdBy
+        .map((user) => `${SO_ATTRIBUTES_PREFIX}.createdBy:"${user}"`)
+        .join(' OR ');
+      filters.push(`(${createdByFilter})`);
+    }
+
+    if (enabled !== undefined && enabled.length > 0) {
+      const stateFilter = enabled
+        .map((state) => `${SO_ATTRIBUTES_PREFIX}.enabled:"${state}"`)
+        .join(' OR ');
+      filters.push(`(${stateFilter})`);
+    }
+
+    if (query) {
+      filters.push(
+        `(${SO_ATTRIBUTES_PREFIX}.name:"*${query}*" OR ${SO_ATTRIBUTES_PREFIX}.description:"*${query}*")`
+      );
+    }
+
+    const filterQuery = filters.join(' AND ');
+
     const response = await savedObjectsClient.find<WorkflowSavedObjectAttributes>({
       type: WORKFLOW_SAVED_OBJECT_TYPE,
       // Exclude deleted workflows (by checking for null/undefined deleted_at) and workflows from other spaces
-      filter: `not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted_at: *`,
-      perPage: 100,
+      perPage: limit,
+      page,
       sortField: 'updated_at',
       sortOrder: 'desc',
+      // Exclude deleted workflows by checking for null/undefined deleted_at
+      filter: filterQuery || undefined,
     });
 
     // Get workflow IDs to fetch execution history
@@ -178,7 +220,7 @@ export class WorkflowsService {
         id: so.id,
         name: so.attributes.name,
         description: so.attributes.description || '',
-        status: so.attributes.status,
+        enabled: so.attributes.enabled,
         tags: so.attributes.tags,
         createdAt: new Date(so.created_at!),
         createdBy: so.attributes.createdBy,
@@ -192,11 +234,33 @@ export class WorkflowsService {
     return {
       results,
       _pagination: {
-        offset: 0,
-        limit: 100,
+        page,
+        limit,
         total: response.total,
       },
     };
+  }
+
+  public async getStepExecution(
+    params: GetStepExecutionParams,
+    spaceId: string
+  ): Promise<EsWorkflowStepExecution | null> {
+    if (!this.esClient) {
+      throw new Error('Elasticsearch client not initialized');
+    }
+    const stepExecutions = await searchStepExecutions({
+      esClient: this.esClient,
+      logger: this.logger,
+      stepsExecutionIndex: this.stepsExecutionIndex,
+      workflowExecutionId: params.executionId,
+      additionalQuery: {
+        match: {
+          stepId: params.stepId,
+        },
+      },
+      spaceId,
+    });
+    return stepExecutions[0] ?? null;
   }
 
   public async getWorkflowExecution(
@@ -229,7 +293,7 @@ export class WorkflowsService {
         id: response.id,
         name: response.attributes.name,
         description: response.attributes.description,
-        status: response.attributes.status,
+        enabled: response.attributes.enabled,
         createdAt: new Date(response.created_at!),
         createdBy: response.attributes.createdBy,
         lastUpdatedAt: new Date(response.updated_at!),
@@ -263,7 +327,7 @@ export class WorkflowsService {
     const savedObjectData: WorkflowSavedObjectAttributes = {
       name: workflowToCreate.name,
       description: workflowToCreate.description,
-      status: workflowToCreate.status,
+      enabled: workflowToCreate.enabled,
       tags: workflowToCreate.tags || [],
       yaml: workflow.yaml,
       definition: workflowToCreate.definition,
@@ -290,7 +354,7 @@ export class WorkflowsService {
       id: response.id,
       name: response.attributes.name,
       description: response.attributes.description,
-      status: response.attributes.status,
+      enabled: response.attributes.enabled,
       createdAt: new Date(response.created_at!),
       createdBy: response.attributes.createdBy,
       lastUpdatedAt: new Date(response.updated_at!),
@@ -303,6 +367,7 @@ export class WorkflowsService {
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
+    originalWorkflow: WorkflowDetailDto,
     spaceId: string,
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto | null> {
@@ -335,7 +400,7 @@ export class WorkflowsService {
       updateData = {
         name: updatedWorkflow.name,
         description: updatedWorkflow.description,
-        status: updatedWorkflow.status,
+        enabled: updatedWorkflow.enabled,
         tags: updatedWorkflow.tags || [],
         yaml,
         definition: updatedWorkflow.definition,
@@ -355,9 +420,12 @@ export class WorkflowsService {
         }
       }
     } else {
+      const updatedYAML = this.updateYAMLFields(originalWorkflow.yaml, rest);
+
       updateData = {
         ...rest,
         lastUpdatedBy: getAuthenticatedUser(request, this.security),
+        yaml: updatedYAML,
       };
     }
 
@@ -372,6 +440,21 @@ export class WorkflowsService {
       lastUpdatedAt: new Date(response.updated_at!),
       lastUpdatedBy: response.attributes.lastUpdatedBy,
     };
+  }
+
+  public updateYAMLFields(yaml: string, fields: Record<string, any>) {
+    const doc = parseDocument(yaml);
+
+    Object.entries(fields).forEach(([key, value]) => {
+      if (doc.hasIn([key])) {
+        const currentValue: any = doc.getIn([key as string]);
+        if (currentValue !== value) {
+          doc.setIn([key], value);
+        }
+      }
+    });
+
+    return doc.toString();
   }
 
   public async deleteWorkflows(
@@ -484,7 +567,10 @@ export class WorkflowsService {
   }
 
   // Direct log search methods - query ES logs index directly
-  private async searchWorkflowLogs(query: any): Promise<LogSearchResult> {
+  private async searchWorkflowLogs(
+    query: estypes.QueryDslQueryContainer,
+    sortOrder: estypes.SortOrder = 'desc'
+  ): Promise<LogSearchResult> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
@@ -493,7 +579,7 @@ export class WorkflowsService {
       const response = await this.esClient.search({
         index: this.workflowExecutionLogsIndex,
         query,
-        sort: [{ '@timestamp': { order: 'desc' } }],
+        sort: [{ '@timestamp': { order: sortOrder } }],
         size: 1000,
       });
 
@@ -516,56 +602,248 @@ export class WorkflowsService {
     }
   }
 
-  public async getExecutionLogs(executionId: string, spaceId: string): Promise<LogSearchResult> {
+  public async getExecutionLogs(
+    params: GetExecutionLogsParams,
+    spaceId: string
+  ): Promise<LogSearchResult> {
     const query = {
       bool: {
         must: [
           {
             match: {
-              'workflow.execution_id': executionId,
+              'workflow.execution_id': params.executionId,
+            },
+          },
+          {
+            bool: {
+              should: [
+                { term: { spaceId } },
+                // Backward compatibility for objects without spaceId
+                { bool: { must_not: { exists: { field: 'spaceId' } } } },
+              ],
+              minimum_should_match: 1,
             },
           },
         ],
       },
     };
 
-    return this.searchWorkflowLogs(query);
+    return this.searchWorkflowLogs(query, params.sortOrder);
   }
 
-  public async getStepLogs(executionId: string, stepId: string): Promise<LogSearchResult> {
+  public async getStepLogs(params: GetStepLogsParams, spaceId: string): Promise<LogSearchResult> {
     const query = {
       bool: {
         must: [
           {
             match: {
-              'workflow.execution_id': executionId,
+              'workflow.execution_id': params.executionId,
             },
           },
           {
             match: {
-              'workflow.step_id': stepId,
+              'workflow.step_id.keyword': params.stepId,
+            },
+          },
+          {
+            bool: {
+              should: [
+                { term: { spaceId } },
+                // Backward compatibility for objects without spaceId
+                { bool: { must_not: { exists: { field: 'spaceId' } } } },
+              ],
+              minimum_should_match: 1,
             },
           },
         ],
       },
     };
 
-    return this.searchWorkflowLogs(query);
+    return this.searchWorkflowLogs(query, params.sortOrder);
   }
 
-  public async getWorkflowLogs(workflowId: string): Promise<LogSearchResult> {
-    const query = {
-      bool: {
-        must: [
-          {
-            term: {
-              'workflow.id': workflowId,
-            },
+  public async getWorkflowStats(spaceId: string): Promise<WorkflowStatsDto | null> {
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
+    try {
+      const [workflowStatusStats, workflowExecutionStatusStats] = await Promise.all([
+        this.getWorkflowStatusStats(savedObjectsClient),
+        this.getWorkflowExecutionStatusStats(spaceId),
+      ]);
+
+      return {
+        workflows: {
+          enabled: workflowStatusStats.enabled,
+          disabled: workflowStatusStats.disabled,
+        },
+        executions: workflowExecutionStatusStats,
+      };
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  public async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto | null> {
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
+    try {
+      const aggs = fields.reduce<Record<string, object>>((acc, field) => {
+        acc[field] = {
+          terms: {
+            field: `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.${field}`,
+            size: 100,
           },
-        ],
+        };
+        return acc;
+      }, {});
+
+      const response = await savedObjectsClient.find({
+        type: WORKFLOW_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        aggs,
+      });
+
+      const aggregations = response.aggregations as any;
+
+      type Keys = keyof typeof EsWorkflowSchema.shape; // "id" | "name" | ...
+      function fieldKind<K extends Keys>(key: K): string {
+        return EsWorkflowSchema.shape[key]._def.typeName;
+      }
+
+      return fields.reduce<WorkflowAggsDto>((acc, field) => {
+        acc[field] = aggregations[field].buckets.map(
+          ({ key }: { key: string | boolean | number }) => {
+            const typeName = fieldKind(field as Keys);
+            let label: string;
+            if (typeName === 'ZodBoolean') {
+              label = key ? 'Enabled' : 'Disabled';
+              key = Boolean(key);
+            } else if (typeName === 'ZodNumber') {
+              label = key.toString();
+            } else {
+              label = key.toString().charAt(0).toUpperCase() + key.toString().slice(1);
+            }
+            return {
+              key,
+              label,
+            };
+          }
+        );
+        return acc;
+      }, {});
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  private async getWorkflowStatusStats(savedObjectsClient: SavedObjectsClientContract) {
+    const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
+      by_enabled: {
+        terms: {
+          field: 'workflow.attributes.enabled',
+        },
       },
     };
 
-    return this.searchWorkflowLogs(query);
+    const response = await savedObjectsClient.find<WorkflowSavedObjectAttributes>({
+      type: WORKFLOW_SAVED_OBJECT_TYPE,
+      perPage: 0, // we only want aggregations, no hits
+
+      // workflow SO does not have createdAt in mappings =(
+      // filter: `workflow.attributes.createdAt >= "now-30d/d" and workflow.attributes.createdAt <= "now/d"`,
+      aggs,
+    });
+
+    const { by_enabled: byEnabled } = response.aggregations as any;
+
+    return byEnabled.buckets.reduce(
+      (
+        acc: Record<string, number>,
+        { key, doc_count: count }: { key: string; doc_count: number }
+      ) => {
+        acc[key] = count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+  }
+
+  private async getWorkflowExecutionStatusStats(spaceId: string) {
+    if (!this.esClient) {
+      throw new Error('Elasticsearch client not initialized');
+    }
+
+    const query: estypes.SearchRequest = {
+      index: this.workflowsExecutionIndex,
+      size: 0, // no hits, just aggregations
+      query: {
+        bool: {
+          filter: [
+            { term: { spaceId } },
+            {
+              range: {
+                startedAt: {
+                  gte: 'now-30d/d',
+                  lt: 'now+1d/d',
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        by_time: {
+          auto_date_histogram: {
+            field: 'finishedAt',
+            buckets: WORKFLOW_EXECUTION_STATUS_STATS_BUCKET,
+          },
+          aggs: {
+            by_status: {
+              terms: {
+                field: 'status',
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const response = await this.esClient.search(query);
+    const { by_time: byTime } = response.aggregations as any;
+
+    return byTime.buckets.map((interval: any) => {
+      // Default values
+      let completed = 0;
+      let failed = 0;
+      let cancelled = 0;
+
+      for (const statusBucket of interval.by_status.buckets) {
+        switch (statusBucket.key) {
+          case 'completed':
+            completed = statusBucket.doc_count;
+            break;
+          case 'failed':
+            failed = statusBucket.doc_count;
+            break;
+          case 'cancelled':
+            cancelled = statusBucket.doc_count;
+            break;
+        }
+      }
+
+      return {
+        date: interval.key_as_string,
+        timestamp: interval.key,
+        completed,
+        failed,
+        cancelled,
+      };
+    });
   }
 }

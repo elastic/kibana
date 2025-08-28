@@ -8,22 +8,23 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import pRetry from 'p-retry';
 
-type StringOrMessageList = string;
+type Messages = { message: string }[];
 
 interface Options {
   agentId?: string;
 }
 
 interface ConverseFunctionParams {
-  messages: StringOrMessageList;
+  messages: Messages;
   conversationId?: string;
   options?: Options;
 }
 
 type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
   conversationId?: string;
-  messages: string[];
+  messages: Messages;
   errors: any[];
 }>;
 
@@ -39,7 +40,11 @@ export class OnechatEvaluationChatClient {
 
     const { agentId = oneChatDefaultAgentId } = options;
 
-    try {
+    const callConverseApi = async (): Promise<{
+      conversationId?: string;
+      messages: { message: string }[];
+      errors: any[];
+    }> => {
       // Use the non-async OneChat API endpoint
       const response = await this.fetch('/api/chat/converse', {
         method: 'POST',
@@ -48,7 +53,7 @@ export class OnechatEvaluationChatClient {
           agent_id: agentId,
           connector_id: this.connectorId,
           conversation_id: conversationId,
-          input: messages,
+          input: messages[messages.length - 1].message,
         }),
       });
 
@@ -57,21 +62,52 @@ export class OnechatEvaluationChatClient {
         conversation_id: string;
         trace_id?: string;
         steps: any[];
-        response: string;
+        response: { message: string };
       };
       const { conversation_id: conversationIdFromResponse, response: latestResponse } =
         chatResponse;
 
       return {
         conversationId: conversationIdFromResponse,
-        messages: [messages, latestResponse],
+        messages: [...messages, latestResponse],
         errors: [],
       };
+    };
+
+    try {
+      return await pRetry(callConverseApi, {
+        retries: 2,
+        minTimeout: 2000,
+        onFailedAttempt: (error) => {
+          const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
+
+          if (isLastAttempt) {
+            this.log.error(
+              new Error(`Failed to call converse API after ${error.attemptNumber} attempts`, {
+                cause: error,
+              })
+            );
+            throw error;
+          } else {
+            this.log.warning(
+              new Error(`Converse API call failed on attempt ${error.attemptNumber}; retrying...`, {
+                cause: error,
+              })
+            );
+          }
+        },
+      });
     } catch (error) {
       this.log.error('Error occurred while calling converse API');
       return {
         conversationId,
-        messages: [messages],
+        messages: [
+          ...messages,
+          {
+            message:
+              'This question could not be answered as an internal error occurred. Please try again.',
+          },
+        ],
         errors: [
           {
             error: {

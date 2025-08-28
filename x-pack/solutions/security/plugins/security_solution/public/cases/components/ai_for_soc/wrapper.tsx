@@ -10,12 +10,12 @@ import { EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AlertsTableOnLoadedProps } from '@kbn/response-ops-alerts-table/types';
 import React, { memo, useMemo } from 'react';
+import { RUNTIME_FIELD_MAP } from '../../../detections/components/alert_summary/wrapper';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { Table } from './table';
@@ -48,14 +48,20 @@ interface AiForSOCAlertsTableProps {
 
 /**
  * Component used in the Cases page under the Alerts tab, only in the AI4DSOC tier.
- * It fetches rules, packages (integrations) and creates a local dataView.
+ * It fetches packages (integrations) and creates a local dataView.
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
 export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlertsTableProps) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const spaceId = useSpaceId();
-  const dataViewSpec = useMemo(() => ({ title: `${DEFAULT_ALERTS_INDEX}-${spaceId}` }), [spaceId]);
+  const dataViewSpec = useMemo(
+    () => ({
+      title: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+      runtimeFieldMap: RUNTIME_FIELD_MAP,
+    }),
+    [spaceId]
+  );
 
   const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
     dataViewSpec,
@@ -68,16 +74,6 @@ export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlerts
 
   // Fetch all integrations
   const { installedPackages, isLoading: integrationIsLoading } = useFetchIntegrations();
-
-  // Fetch all rules. For the AI for SOC effort, there should only be one rule per integration (which means for now 5-6 rules total)
-  const { data: ruleData, isLoading: ruleIsLoading } = useFindRulesQuery({});
-  const ruleResponse = useMemo(
-    () => ({
-      rules: ruleData?.rules || [],
-      isLoading: ruleIsLoading,
-    }),
-    [ruleData, ruleIsLoading]
-  );
 
   return (
     <EuiSkeletonRectangle
@@ -102,7 +98,6 @@ export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlerts
               onLoaded={onLoaded}
               packages={installedPackages}
               query={query}
-              ruleResponse={ruleResponse}
             />
           </div>
         )}
