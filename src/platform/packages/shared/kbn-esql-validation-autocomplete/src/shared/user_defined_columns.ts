@@ -141,9 +141,7 @@ export function collectUserDefinedColumns(
       }
     })
     .on('visitCommandOption', (ctx) => {
-      if (ctx.node.name === 'by') {
-        return [...ctx.visitArguments()];
-      } else if (ctx.node.name === 'with') {
+      if (ctx.node.name === 'with') {
         for (const assignFn of ctx.node.args) {
           if (isFunctionExpression(assignFn)) {
             const [newArg, oldArg] = assignFn?.args || [];
@@ -157,7 +155,7 @@ export function collectUserDefinedColumns(
     })
     .on('visitCommand', (ctx) => {
       const ret = [];
-      if (['row', 'stats', 'inlinestats', 'ts', 'rename'].includes(ctx.node.name)) {
+      if (['row', 'ts', 'rename'].includes(ctx.node.name)) {
         ret.push(...ctx.visitArgs());
       }
       if (['stats', 'inlinestats', 'enrich'].includes(ctx.node.name)) {

@@ -7,40 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import uniqBy from 'lodash/uniqBy';
-import type { ESQLCommand } from '../../../types';
-import type { ESQLColumnData, ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
-import type { ICommandContext } from '../../types';
-import type { FieldType } from '../../../definitions/types';
+import type { SupportedDataType } from '../../../definitions/types';
+import { getExpressionType } from '../../../definitions/utils';
+import type { ESQLAstItem, ESQLCommand, ESQLCommandOption } from '../../../types';
+import type { ESQLColumnData, ESQLUserDefinedColumn, ICommandContext } from '../../types';
+import { isAssignment, isColumn, isOptionNode } from '../../../..';
 
-function transformMapToESQLFields(
-  inputMap: Map<string, ESQLUserDefinedColumn[]>
-): ESQLFieldWithMetadata[] {
-  const esqlFields: ESQLFieldWithMetadata[] = [];
+const getUserDefinedColumns = (
+  command: ESQLCommand | ESQLCommandOption,
+  typeOf: (thing: ESQLAstItem) => SupportedDataType | 'unknown'
+): ESQLUserDefinedColumn[] => {
+  const columns = [];
 
-  for (const [, userDefinedColumns] of inputMap) {
-    for (const userDefinedColumn of userDefinedColumns) {
-      if (userDefinedColumn.type) {
-        esqlFields.push({
-          name: userDefinedColumn.name,
-          type: userDefinedColumn.type as FieldType,
-        });
-      }
+  for (const expression of command.args) {
+    if (isAssignment(expression) && isColumn(expression.args[0])) {
+      const name = expression.args[0].parts.join('.');
+      const newColumn: ESQLUserDefinedColumn = {
+        name,
+        type: typeOf(expression.args[1]),
+        location: expression.args[0].location,
+        userDefined: true,
+      };
+      columns.push(newColumn);
+      continue;
+    }
+
+    if (isOptionNode(expression) && expression.name === 'by') {
+      columns.push(...getUserDefinedColumns(expression, typeOf));
+      continue;
+    }
+
+    if (!isOptionNode(expression) && !Array.isArray(expression)) {
+      const newColumn: ESQLUserDefinedColumn = {
+        name: expression.text,
+        type: typeOf(expression),
+        location: expression.location,
+        userDefined: true,
+      };
+      columns.push(newColumn);
+      continue;
     }
   }
 
-  return esqlFields;
-}
+  return columns;
+};
 
 export const columnsAfter = (
   _command: ESQLCommand,
   previousColumns: ESQLColumnData[],
   context?: ICommandContext
 ) => {
-  const userDefinedColumns =
-    context?.userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>();
+  const columnMap = new Map<string, ESQLColumnData>();
+  previousColumns.forEach((col) => columnMap.set(col.name, col)); // TODO make this more efficient
 
-  const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] =
-    transformMapToESQLFields(userDefinedColumns);
+  const typeOf = (thing: ESQLAstItem) =>
+    getExpressionType(thing, columnMap, context?.userDefinedColumns);
 
-  return uniqBy([...previousColumns, ...arrayOfUserDefinedColumns], 'name');
+  // TODO - is this uniqby helpful? Does it do what we expect?
+  return uniqBy([...previousColumns, ...getUserDefinedColumns(_command, typeOf)], 'name');
 };
