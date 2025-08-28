@@ -6,17 +6,13 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useMemo } from 'react';
 import { useSendMessage } from '../context/send_message_context';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
-import { searchParamNames } from '../search_param_names';
-import { useOnechatAgents } from './agents/use_agents';
-import { useConversationActions } from './use_conversation_actions';
 
 const useConversation = () => {
   const conversationId = useConversationId();
@@ -41,25 +37,7 @@ const useConversation = () => {
 
 export const useAgentId = () => {
   const { conversation } = useConversation();
-  const agentId = conversation?.agent_id;
-  const { setAgentId } = useConversationActions();
-  const [searchParams] = useSearchParams();
-  const { agents } = useOnechatAgents();
-
-  useEffect(() => {
-    if (agentId) {
-      return;
-    }
-
-    // If we don't have a selected agent id, check for a valid agent id in the search params
-    // This is used for the "chat with agent" action on the Agent pages
-    const agentIdParam = searchParams.get(searchParamNames.agentId);
-    if (agentIdParam && agents.some((agent) => agent.id === agentIdParam)) {
-      setAgentId(agentIdParam);
-    }
-  }, [agentId, searchParams, setAgentId, agents]);
-
-  return agentId;
+  return conversation?.agent_id;
 };
 
 export const useConversationTitle = () => {
