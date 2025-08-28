@@ -17092,7 +17092,8 @@
                               "UPDATE_TAGS",
                               "POLICY_CHANGE",
                               "INPUT_ACTION",
-                              "MIGRATE"
+                              "MIGRATE",
+                              "PRIVILEGE_LEVEL_CHANGE"
                             ],
                             "type": "string"
                           },
@@ -19618,6 +19619,119 @@
         "summary": "Create an agent action",
         "tags": [
           "Elastic Agent actions"
+        ]
+      }
+    },
+    "/api/fleet/agents/{agentId}/privilege_level_change": {
+      "post": {
+        "description": "Change the privilege level of a single agent.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.",
+        "operationId": "post-fleet-agents-agentid-privilege-level-change",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "agentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "unprivileged": {
+                    "type": "boolean"
+                  },
+                  "user_info": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "groupname": {
+                        "type": "string"
+                      },
+                      "password": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "unprivileged"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "actionId"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Change agent privilege level",
+        "tags": [
+          "Elastic Agents"
         ]
       }
     },
