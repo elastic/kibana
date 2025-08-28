@@ -25,6 +25,7 @@ import type { AlertClosingReason } from '../../../../../common/constants';
 const closingReasons: EuiSelectableOption<{
   key?: AlertClosingReason;
 }>[] = [
+  { label: CLOSING_REASON_CLOSE_WITHOUT_REASON, key: undefined },
   { label: CLOSING_REASON_ISSUE_RESOLVED, key: AlertClosingReasonValues.issue_resolved },
   { label: CLOSING_REASON_ACCEPTABLE_RISK, key: AlertClosingReasonValues.acceptable_risk },
   { label: CLOSING_REASON_EXPECTED_ACTIVITY, key: AlertClosingReasonValues.expected_activity },
@@ -35,7 +36,6 @@ const closingReasons: EuiSelectableOption<{
     label: CLOSING_REASON_FURTHER_INVESTIGATION_REQUIRED,
     key: AlertClosingReasonValues.investigation_required,
   },
-  { label: CLOSING_REASON_CLOSE_WITHOUT_REASON, key: undefined },
 ];
 
 interface BulkAlertClosingReasonComponentProps {
