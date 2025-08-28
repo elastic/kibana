@@ -200,13 +200,14 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           _id: document.id,
           _index: responseToUpdate?.hits.hits.find((c) => c._id === document.id)?._index,
           _source: true,
+          retry_on_conflict: 3,
         },
       },
       getUpdateScript(document, updatedAt),
     ]);
   };
 
-  private getDeletedocumentsQuery = async (
+  private getDeleteDocumentsQuery = async (
     documentsToDelete: string[],
     authenticatedUser?: AuthenticatedUser
   ) => {
@@ -259,7 +260,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
 
     const documentDeletedBody =
       params.documentsToDelete && params.documentsToDelete.length > 0
-        ? await this.getDeletedocumentsQuery(params.documentsToDelete, params.authenticatedUser)
+        ? await this.getDeleteDocumentsQuery(params.documentsToDelete, params.authenticatedUser)
         : [];
 
     const documentUpdatedBody =
