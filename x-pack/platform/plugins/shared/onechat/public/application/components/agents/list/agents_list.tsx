@@ -29,6 +29,7 @@ import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
+import { AgentAvatar } from '../agent_avatar';
 
 const columnNames = {
   name: i18n.translate('xpack.onechat.agents.nameColumn', { defaultMessage: 'Name' }),
@@ -64,8 +65,11 @@ export const AgentsList: React.FC = () => {
       width: '48px',
       align: 'center',
       render: (agent) =>
-        // TODO: Add avatar for custom agents
-        agent.id === oneChatDefaultAgentId ? <EuiIcon type="logoElastic" size="xl" /> : null,
+        agent.id === oneChatDefaultAgentId ? (
+          <EuiIcon type="logoElastic" size="xl" />
+        ) : (
+          <AgentAvatar agent={agent} size="m" />
+        ),
     };
 
     const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinition> = {
