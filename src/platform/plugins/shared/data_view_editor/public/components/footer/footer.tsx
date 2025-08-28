@@ -148,7 +148,7 @@ export const Footer = ({
             )}
             {showDuplicateButton && (
               <EuiFlexItem grow={false}>
-                <EuiButton color="primary" onClick={onDuplicate}>
+                <EuiButton color="primary" onClick={onDuplicate} data-test-subj="duplicateButton">
                   {duplicateButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
