@@ -127,6 +127,10 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
         'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks',
         { defaultMessage: 'Span links' }
       )}
+      description={i18n.translate(
+        'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks.description',
+        { defaultMessage: 'Links to spans or transactions that are causally related' }
+      )}
       actions={
         openInDiscoverLink
           ? [
