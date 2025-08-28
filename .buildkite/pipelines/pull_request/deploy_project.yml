@@ -5,7 +5,7 @@ steps:
     agents:
       machineType: n2-standard-16
       preemptible: true
-      diskSizeGb: 95
+      diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
       automatic:
