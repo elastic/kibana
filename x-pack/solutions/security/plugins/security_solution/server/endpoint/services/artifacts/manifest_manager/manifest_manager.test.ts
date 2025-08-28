@@ -1130,6 +1130,15 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({
         experimentalFeatures: ['trustedDevices'],
       });
+      // Set up licensing to allow trusted devices (both PLI and enterprise)
+      context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+        return (
+          key === ProductFeatureKey.endpointTrustedDevices ||
+          key === ProductFeatureKey.endpointArtifactManagement
+        );
+      });
+      context.licenseService = createLicenseServiceMock();
+      context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
@@ -2584,65 +2593,6 @@ describe('ManifestManager', () => {
         expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
           ProductFeatureKey.endpointHostIsolationExceptions
         );
-      });
-    });
-
-    describe('error handling', () => {
-      beforeEach(() => {
-        context = buildManifestManagerContextMock({
-          experimentalFeatures: ['trustedDevices'],
-        });
-        context.licenseService = createLicenseServiceMock();
-        manifestManager = new ManifestManager(context);
-      });
-
-      test('should return false and log error when productFeaturesService throws', () => {
-        const loggerSpy = jest.spyOn(context.logger, 'warn').mockImplementation();
-        context.productFeaturesService.isEnabled = jest.fn().mockImplementation(() => {
-          throw new Error('Product features service error');
-        });
-
-        const shouldRetrieve = (
-          manifestManager as unknown as ManifestManagerWithPrivateMethods
-        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
-
-        expect(shouldRetrieve).toBe(false);
-        expect(loggerSpy).toHaveBeenCalledWith(
-          `Error checking licensing or feature conditions for artifact list [${ENDPOINT_ARTIFACT_LISTS.trustedDevices.id}]: Product features service error. Defaulting to deny access.`
-        );
-      });
-
-      test('should return false and log error when licenseService throws', () => {
-        const loggerSpy = jest.spyOn(context.logger, 'warn').mockImplementation();
-        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
-          return key === ProductFeatureKey.endpointTrustedDevices; // Return true to reach licenseService
-        });
-        context.licenseService.isEnterprise = jest.fn().mockImplementation(() => {
-          throw new Error('License service error');
-        });
-
-        const shouldRetrieve = (
-          manifestManager as unknown as ManifestManagerWithPrivateMethods
-        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
-
-        expect(shouldRetrieve).toBe(false);
-        expect(loggerSpy).toHaveBeenCalledWith(
-          `Error checking licensing or feature conditions for artifact list [${ENDPOINT_ARTIFACT_LISTS.trustedDevices.id}]: License service error. Defaulting to deny access.`
-        );
-      });
-
-      test('should return true for non-licensed artifact types even when services throw', () => {
-        const loggerSpy = jest.spyOn(context.logger, 'warn').mockImplementation();
-        context.productFeaturesService.isEnabled = jest.fn().mockImplementation(() => {
-          throw new Error('Service error');
-        });
-
-        const shouldRetrieveExceptions = (
-          manifestManager as unknown as ManifestManagerWithPrivateMethods
-        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id);
-
-        expect(shouldRetrieveExceptions).toBe(true);
-        expect(loggerSpy).not.toHaveBeenCalled();
       });
     });
 

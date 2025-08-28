@@ -156,69 +156,26 @@ export class ManifestManager {
    * @private
    */
   private shouldRetrieveExceptions(listId: ArtifactListId): boolean {
-    if (listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id) {
-      try {
-        const isEnabled = this.productFeaturesService.isEnabled(
-          ProductFeatureKey.endpointHostIsolationExceptions
-        );
-        if (!isEnabled) {
-          this.logger.debug(
-            `Serving empty array for artifact list [${listId}] due to licensing or feature restrictions`
-          );
-        }
-        return isEnabled;
-      } catch (error) {
-        this.logger.warn(
-          `Error checking licensing or feature conditions for artifact list [${listId}]: ${error.message}. Defaulting to deny access.`
-        );
-        return false;
-      }
-    }
+    const isHostIsolationWithFeatureEnabled =
+      listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
+      this.productFeaturesService.isEnabled(ProductFeatureKey.endpointHostIsolationExceptions);
 
-    if (listId === ENDPOINT_ARTIFACT_LISTS.trustedDevices.id) {
-      if (!this.experimentalFeatures.trustedDevices) {
-        this.logger.debug(
-          `Serving empty array for artifact list [${listId}] due to licensing or feature restrictions`
-        );
-        return false;
-      }
+    const isTrustedDevicesWithFeatureAndEnterpriseLicense =
+      listId === ENDPOINT_ARTIFACT_LISTS.trustedDevices.id &&
+      this.experimentalFeatures.trustedDevices &&
+      this.productFeaturesService.isEnabled(ProductFeatureKey.endpointTrustedDevices) &&
+      this.licenseService.isEnterprise();
 
-      try {
-        const isEnabled =
-          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointTrustedDevices) &&
-          this.licenseService.isEnterprise();
+    const isOtherArtifactWithFeatureEnabled =
+      listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
+      listId !== ENDPOINT_ARTIFACT_LISTS.trustedDevices.id &&
+      this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement);
 
-        if (!isEnabled) {
-          this.logger.debug(
-            `Serving empty array for artifact list [${listId}] due to licensing or feature restrictions`
-          );
-        }
-        return isEnabled;
-      } catch (error) {
-        this.logger.warn(
-          `Error checking licensing or feature conditions for artifact list [${listId}]: ${error.message}. Defaulting to deny access.`
-        );
-        return false;
-      }
-    }
-
-    try {
-      const isEnabled = this.productFeaturesService.isEnabled(
-        ProductFeatureKey.endpointArtifactManagement
-      );
-      this.logger.debug(
-        `License or feature check for artifact list [${listId}]: ${
-          isEnabled ? 'allowed' : 'denied'
-        }`
-      );
-      return isEnabled;
-    } catch (error) {
-      // For other artifacts, default to allow access if service fails
-      this.logger.debug(
-        `License or feature check for artifact list [${listId}]: allowed (service error, defaulting to allow)`
-      );
-      return true;
-    }
+    return (
+      isHostIsolationWithFeatureEnabled ||
+      isTrustedDevicesWithFeatureAndEnterpriseLicense ||
+      isOtherArtifactWithFeatureEnabled
+    );
   }
 
   /**
