@@ -41,6 +41,7 @@ import { getTestUrl } from './utils';
 
 import { TIME_RANGE_TYPE } from './constants';
 import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
+import { CustomUrls } from '../custom_urls';
 
 function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
@@ -141,7 +142,8 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
           const kibanaUrl = customUrl as MlKibanaUrlConfig;
           const dataViewId = findDataViewId(job, kibanaUrl, dataViewListItems, isPartialDFAJob);
 
-          if (!dataViewId) return false;
+          // Can't determine data view id - show time range field by default
+          if (!dataViewId) return true;
 
           try {
             const dataView = await dataViews.get(dataViewId);
