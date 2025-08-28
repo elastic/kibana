@@ -1044,6 +1044,38 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isRoutingEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "isRoutingEnabled",
+        "description": [],
+        "signature": [
+          "<TValue extends \"enabled\" | \"disabled\">(value: TValue) => value is Extract<TValue, \"enabled\">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isRoutingEnabled.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "TValue"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.isSchema",
         "type": "Function",
         "tags": [],
@@ -1798,6 +1830,20 @@
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.RoutingDefinition.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"enabled\" | \"disabled\" | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2187,6 +2233,21 @@
           "\"delete\" | \"warm\" | \"hot\" | \"frozen\" | \"cold\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.RoutingStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "RoutingStatus",
+        "description": [],
+        "signature": [
+          "\"enabled\" | \"disabled\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2653,6 +2714,21 @@
             "text": "RoutingDefinition"
           },
           "[]>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.routingStatus",
+        "type": "Object",
+        "tags": [],
+        "label": "routingStatus",
+        "description": [],
+        "signature": [
+          "Zod.ZodEnum<[\"enabled\", \"disabled\"]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
         "deprecated": false,
