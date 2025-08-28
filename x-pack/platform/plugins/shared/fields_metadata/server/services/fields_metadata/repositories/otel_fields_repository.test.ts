@@ -7,10 +7,10 @@
 
 import type { OtelFieldsRepositoryDeps } from './otel_fields_repository';
 import { OtelFieldsRepository } from './otel_fields_repository';
-import type { TOtelFields } from '../../../../common/fields_metadata/types';
+import type { OtelFieldName, TOtelFields } from '../../../../common/fields_metadata/types';
 
 // Mock OTel semantic conventions data in the new structured format
-const mockOtelFields: TOtelFields = {
+const mockOtelFields = {
   'service.name': {
     name: 'service.name',
     description: 'Logical name of the service.',
@@ -19,7 +19,8 @@ const mockOtelFields: TOtelFields = {
   },
   'service.version': {
     name: 'service.version',
-    description: 'The version string of the service API or implementation.',
+    description:
+      'The version string of the service API or implementation. The format is not defined by these conventions.',
     type: 'keyword',
     example: '2.0.0',
   },
@@ -37,7 +38,7 @@ const mockOtelFields: TOtelFields = {
   },
   'cloud.account.id': {
     name: 'cloud.account.id',
-    description: 'The cloud account id the resource is assigned to.',
+    description: 'The cloud account ID the resource is assigned to.',
     type: 'keyword',
     example: '111111111111',
   },
@@ -47,7 +48,7 @@ const mockOtelFields: TOtelFields = {
     type: 'keyword',
     example: 'aws',
   },
-} as const;
+} as Partial<TOtelFields>;
 
 describe('OtelFieldsRepository', () => {
   let otelFieldsRepository: OtelFieldsRepository;
@@ -72,7 +73,7 @@ describe('OtelFieldsRepository', () => {
         OtelFieldsRepository.create({
           otelFields: invalidOtelFields as any,
         });
-      }).toThrow(/could not validate data/);
+      }).toThrow(/Invalid field data/);
     });
 
     it('should handle empty otel fields object', () => {
@@ -177,7 +178,10 @@ describe('OtelFieldsRepository', () => {
 
     it('should return empty dictionary when no matching fields found', () => {
       const fieldsDict = otelFieldsRepository.find({
-        fieldNames: ['non.existing.field', 'another.missing.field'],
+        fieldNames: [
+          'non.existing.field' as OtelFieldName,
+          'another.missing.field' as OtelFieldName,
+        ],
       });
       const fields = fieldsDict.getFields();
 
@@ -186,7 +190,7 @@ describe('OtelFieldsRepository', () => {
 
     it('should return partial results when some fields exist and others do not', () => {
       const fieldsDict = otelFieldsRepository.find({
-        fieldNames: ['service.name', 'non.existing.field', 'http.request.method'],
+        fieldNames: ['service.name', 'non.existing.field' as OtelFieldName, 'http.request.method'],
       });
       const fields = fieldsDict.getFields();
 
@@ -243,7 +247,9 @@ describe('OtelFieldsRepository', () => {
       const field = otelFieldsRepository.getByName('service.version');
 
       expect(field!.name).toBe('service.version');
-      expect(field!.description).toBe('The version string of the service API or implementation.');
+      expect(field!.description).toBe(
+        'The version string of the service API or implementation. The format is not defined by these conventions.'
+      );
       expect(field!.type).toBe('keyword');
       expect(field!.example).toBe('2.0.0');
       expect(field!.source).toBe('otel');
@@ -269,7 +275,7 @@ describe('OtelFieldsRepository', () => {
 
         expect(field).toBeDefined();
         expect(field!.name).toBe('cloud.account.id');
-        expect(field!.description).toBe('The cloud account id the resource is assigned to.');
+        expect(field!.description).toBe('The cloud account ID the resource is assigned to.');
         expect(field!.type).toBe('keyword');
         expect(field!.example).toBe('111111111111');
         expect(field!.source).toBe('otel');
@@ -280,7 +286,7 @@ describe('OtelFieldsRepository', () => {
 
         expect(field).toBeDefined();
         expect(field!.name).toBe('cloud.account.id');
-        expect(field!.description).toBe('The cloud account id the resource is assigned to.');
+        expect(field!.description).toBe('The cloud account ID the resource is assigned to.');
         expect(field!.type).toBe('keyword');
         expect(field!.example).toBe('111111111111');
         expect(field!.source).toBe('otel');
@@ -349,9 +355,9 @@ describe('OtelFieldsRepository', () => {
       it('should strip prefixes internally but return fields with original requested names as keys', () => {
         const fieldsDict = otelFieldsRepository.find({
           fieldNames: [
-            'resource.attributes.cloud.account.id',
-            'scope.attributes.service.name',
-            'attributes.http.request.method',
+            'resource.attributes.cloud.account.id' as OtelFieldName,
+            'scope.attributes.service.name' as OtelFieldName,
+            'attributes.http.request.method' as OtelFieldName,
             'cloud.provider', // no prefix
           ],
         });
@@ -375,9 +381,9 @@ describe('OtelFieldsRepository', () => {
       it('should handle mixed existing and non-existing fields with prefixes', () => {
         const fieldsDict = otelFieldsRepository.find({
           fieldNames: [
-            'resource.attributes.cloud.account.id', // exists
-            'scope.attributes.non.existing.field', // doesn't exist
-            'attributes.service.name', // exists
+            'resource.attributes.cloud.account.id' as OtelFieldName, // exists
+            'scope.attributes.non.existing.field' as OtelFieldName, // doesn't exist
+            'attributes.service.name' as OtelFieldName, // exists
           ],
         });
         const fields = fieldsDict.getFields();
@@ -391,9 +397,9 @@ describe('OtelFieldsRepository', () => {
       it('should return separate entries for different prefixed requests of the same field', () => {
         const fieldsDict = otelFieldsRepository.find({
           fieldNames: [
-            'resource.attributes.service.name',
-            'scope.attributes.service.name',
-            'attributes.service.name',
+            'resource.attributes.service.name' as OtelFieldName,
+            'scope.attributes.service.name' as OtelFieldName,
+            'attributes.service.name' as OtelFieldName,
             'service.name', // all resolve to the same field
           ],
         });
@@ -416,9 +422,9 @@ describe('OtelFieldsRepository', () => {
       it('should handle complex field names with prefixes', () => {
         const fieldsDict = otelFieldsRepository.find({
           fieldNames: [
-            'resource.attributes.http.request.method',
-            'scope.attributes.cloud.account.id',
-            'attributes.system.cpu.utilization',
+            'resource.attributes.http.request.method' as OtelFieldName,
+            'scope.attributes.cloud.account.id' as OtelFieldName,
+            'attributes.system.cpu.utilization' as OtelFieldName,
           ],
         });
         const fields = fieldsDict.getFields();
@@ -432,9 +438,9 @@ describe('OtelFieldsRepository', () => {
       it('should return empty results when all prefixed fields are non-existing', () => {
         const fieldsDict = otelFieldsRepository.find({
           fieldNames: [
-            'resource.attributes.non.existing.field',
-            'scope.attributes.missing.field',
-            'attributes.another.missing.field',
+            'resource.attributes.non.existing.field' as OtelFieldName,
+            'scope.attributes.missing.field' as OtelFieldName,
+            'attributes.another.missing.field' as OtelFieldName,
           ],
         });
         const fields = fieldsDict.getFields();

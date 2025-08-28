@@ -21,6 +21,13 @@ function convertSemconvToFieldMetadata(
   const result: Record<string, FieldMetadataPlain> = {};
 
   for (const [fieldName, fieldData] of Object.entries(semconvFields)) {
+    // Ensure fieldData is an object before proceeding
+    if (typeof fieldData !== 'object' || fieldData === null) {
+      throw new Error(
+        `Invalid field data for ${fieldName}: expected object, got ${typeof fieldData}`
+      );
+    }
+
     result[fieldName] = {
       name: fieldData.name,
       description: fieldData.description,
