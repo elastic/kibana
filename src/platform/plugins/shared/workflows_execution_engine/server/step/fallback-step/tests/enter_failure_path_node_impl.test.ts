@@ -8,10 +8,10 @@
  */
 
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterFailurePathNodeImpl } from '../enter_failure_path_node_impl';
+import { EnterFallbackPathNodeImpl } from '../enter_failure_path_node_impl';
 
-describe('EnterFailurePathNodeImpl', () => {
-  let underTest: EnterFailurePathNodeImpl;
+describe('EnterFallbackPathNodeImpl', () => {
+  let underTest: EnterFallbackPathNodeImpl;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
 
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('EnterFailurePathNodeImpl', () => {
     workflowRuntime.enterScope = jest.fn();
     workflowRuntime.goToNextStep = jest.fn();
 
-    underTest = new EnterFailurePathNodeImpl(workflowRuntime);
+    underTest = new EnterFallbackPathNodeImpl(workflowRuntime);
   });
 
   describe('run', () => {

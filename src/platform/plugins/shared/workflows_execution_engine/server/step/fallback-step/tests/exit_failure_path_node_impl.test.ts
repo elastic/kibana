@@ -9,10 +9,10 @@
 
 import type { ExitPathNode } from '@kbn/workflows';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { ExitFailurePathNodeImpl } from '../exit_failure_path_node_impl';
+import { ExitFallbackPathNodeImpl } from '../exit_failure_path_node_impl';
 
-describe('ExitFailurePathNodeImpl', () => {
-  let underTest: ExitFailurePathNodeImpl;
+describe('ExitFallbackPathNodeImpl', () => {
+  let underTest: ExitFallbackPathNodeImpl;
   let step: ExitPathNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
 
@@ -26,8 +26,8 @@ describe('ExitFailurePathNodeImpl', () => {
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
     workflowRuntime.exitScope = jest.fn();
     workflowRuntime.goToStep = jest.fn();
-    
-    underTest = new ExitFailurePathNodeImpl(step, workflowRuntime);
+
+    underTest = new ExitFallbackPathNodeImpl(step, workflowRuntime);
   });
 
   describe('run', () => {

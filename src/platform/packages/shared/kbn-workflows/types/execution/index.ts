@@ -36,8 +36,8 @@ export type {
   EnterPathNode,
   ExitPathNodeSchema,
   ExitPathNode,
-  EnterFailurePathNodeSchema,
-  EnterFailurePathNode,
-  ExitFailurePathNodeSchema,
-  ExitFailurePathNode,
+  EnterFallbackPathNodeSchema,
+  EnterFallbackPathNode,
+  ExitFallbackPathNodeSchema,
+  ExitFallbackPathNode,
 } from './nodes/on_failure_nodes';

@@ -72,17 +72,17 @@ export const ExitPathNodeSchema = z.object({
 });
 export type ExitPathNode = z.infer<typeof ExitPathNodeSchema>;
 
-export const EnterFailurePathNodeSchema = z.object({
+export const EnterFallbackPathNodeSchema = z.object({
   id: z.string(),
   type: z.literal('enter-failure-path'),
   enterZoneNodeId: z.string(),
 });
-export type EnterFailurePathNode = z.infer<typeof EnterPathNodeSchema>;
+export type EnterFallbackPathNode = z.infer<typeof EnterPathNodeSchema>;
 
-export const ExitFailurePathNodeSchema = z.object({
+export const ExitFallbackPathNodeSchema = z.object({
   id: z.string(),
   type: z.literal('exit-failure-path'),
   exitOnFailureZoneNodeId: z.string(),
   enterNodeId: z.string(),
 });
-export type ExitFailurePathNode = z.infer<typeof ExitPathNodeSchema>;
+export type ExitFallbackPathNode = z.infer<typeof ExitPathNodeSchema>;

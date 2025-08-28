@@ -11,7 +11,7 @@ import type { ExitPathNode } from '@kbn/workflows';
 import type { StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
-export class ExitFailurePathNodeImpl implements StepImplementation {
+export class ExitFallbackPathNodeImpl implements StepImplementation {
   constructor(
     private node: ExitPathNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager

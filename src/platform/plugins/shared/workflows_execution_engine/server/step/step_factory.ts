@@ -32,8 +32,8 @@ import {
   ExitTryBlockNodeImpl,
   EnterNormalPathNodeImpl,
   ExitNormalPathNodeImpl,
-  EnterFailurePathNodeImpl,
-  ExitFailurePathNodeImpl,
+  EnterFallbackPathNodeImpl,
+  ExitFallbackPathNodeImpl,
 } from './fallback-step';
 import { WaitStepImpl } from './wait_step/wait_step';
 
@@ -86,11 +86,11 @@ export class StepFactory {
       case 'enter-normal-path':
         return new EnterNormalPathNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
       case 'enter-failure-path':
-        return new EnterFailurePathNodeImpl(this.workflowRuntime);
+        return new EnterFallbackPathNodeImpl(this.workflowRuntime);
       case 'exit-normal-path':
         return new ExitNormalPathNodeImpl(step as any, this.workflowRuntime);
       case 'exit-failure-path':
-        return new ExitFailurePathNodeImpl(step as any, this.workflowRuntime);
+        return new ExitFallbackPathNodeImpl(step as any, this.workflowRuntime);
       case 'enter-if':
         return new EnterIfNodeImpl(
           step as any,

@@ -64,6 +64,6 @@ export type {
   ExitTryBlockNode,
   EnterPathNode,
   ExitPathNode,
-  EnterFailurePathNode,
-  ExitFailurePathNode,
+  EnterFallbackPathNode,
+  ExitFallbackPathNode,
 } from './execution';

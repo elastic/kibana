@@ -36,8 +36,8 @@ import type {
   ExitTryBlockNode,
   EnterPathNode,
   ExitPathNode,
-  EnterFailurePathNode,
-  ExitFailurePathNode,
+  EnterFallbackPathNode,
+  ExitFallbackPathNode,
 } from '../../types/execution';
 
 /**
@@ -286,7 +286,7 @@ export function visitFallbackStep(
   graph.setEdge(exitNormalPathNode.id, exitTryBlockNode.id);
 
   if (fallbackPathSteps?.length > 0) {
-    const enterFallbackPathNode: EnterFailurePathNode = {
+    const enterFallbackPathNode: EnterFallbackPathNode = {
       id: enterTryBlockNode.enterFallbackPathNodeId,
       type: 'enter-failure-path',
       enterZoneNodeId: enterTryBlockNode.id,
@@ -298,7 +298,7 @@ export function visitFallbackStep(
       (ifFalseCurrentStep: any) =>
         (elsePreviousStep = visitAbstractStep(graph, elsePreviousStep, ifFalseCurrentStep))
     );
-    const exitFallbackPathNode: ExitFailurePathNode = {
+    const exitFallbackPathNode: ExitFallbackPathNode = {
       id: enterTryBlockNode.exitFallbackPathNodeId,
       type: 'exit-failure-path',
       enterNodeId: enterTryBlockNode.enterFallbackPathNodeId,
