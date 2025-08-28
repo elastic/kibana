@@ -6722,6 +6722,9 @@ paths:
             -F 'service_version="1.0.0"' \
             -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
             -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/apm/sourcemaps/{id}:
     delete:
       description: |
@@ -12229,6 +12232,12 @@ paths:
   /api/detection_engine/rules/prepackaged/_status:
     get:
       description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules/prepackaged/_status</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
         Retrieve the status of all Elastic prebuilt detection rules and Timelines. 
 
         This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
@@ -13937,7 +13946,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Download a file from an endpoint.
+        Download a file from an endpoint. 
         > info
         > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
         > {`file_id`} = {`action_id`}`.`{`agent_id`}
@@ -47034,6 +47043,12 @@ paths:
   /api/observability_ai_assistant/chat/complete:
     post:
       description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/observability_ai_assistant/chat/complete</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
         Create a new chat completion by using the Observability AI Assistant. 
 
         The API returns the model's response based on the current conversation context. 
@@ -79406,6 +79421,10 @@ components:
       description: The reason for closing the alerts
       enum:
         - false_positive
+        - issue_resolved
+        - acceptable_risk
+        - expected_activity
+        - low_severity
         - duplicate
         - investigation_required
       type: string
@@ -79639,7 +79658,6 @@ components:
         - `query` (object, optional): Object containing a query filter which gets applied to an action and determines whether the action should run.
             - `kql` (string, required): A KQL string.
             - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
-              
       type: object
     Security_Detections_API_RuleActionFrequency:
       description: The action frequency defines when the action runs (for example, only on rule execution or at specific time intervals).
