@@ -11,6 +11,7 @@ import {
 } from '@kbn/core-http-common/src/constants';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/list.gen';
+import type { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -70,16 +71,42 @@ export const PrivMonUtils = (
       .expect(expectStatusCode);
   };
 
-  const scheduleMonitoringEngineNowIgnoreConflict = async () => {
-    log.info(`Scheduling Privilege Monitoring engine in namespace ${namespace || 'default'}`);
+  const scheduleMonitoringEngineNow = async (
+    {
+      ignoreConflict,
+      expectStatusCode,
+    }: { ignoreConflict?: boolean; expectStatusCode?: number } = { ignoreConflict: false }
+  ) => {
+    log.info(
+      `Scheduling Privilege Monitoring engine in namespace ${
+        namespace || 'default'
+      }, ignoreConflict: ${!!ignoreConflict}`
+    );
     return supertest
       .post(routeWithNamespace('/api/entity_analytics/monitoring/engine/schedule_now', namespace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect((res: { status: number }) => {
-        return res.status === 200 || res.status === 409;
+        if (expectStatusCode) {
+          return res.status === expectStatusCode;
+        }
+        return res.status === 200 || (ignoreConflict && res.status === 409);
       });
+  };
+
+  const setPrivmonTaskStatus = async (status: TaskStatus) => {
+    log.info(
+      `Setting Privilege Monitoring task to ${status} in namespace ${namespace || 'default'}`
+    );
+
+    const taskId = `task:entity_analytics:monitoring:privileges:engine:${namespace}:1.0.0`;
+    await es.update({
+      refresh: 'wait_for',
+      index: '.kibana_task_manager',
+      id: taskId,
+      script: `ctx._source.task.status = "${status}";`,
+    });
   };
 
   const retry = async <T>(fn: () => Promise<T>, retries: number = 5, delay: number = 1000) => {
@@ -154,6 +181,7 @@ export const PrivMonUtils = (
     findUser,
     createSourceIndex,
     assertIsPrivileged,
-    scheduleMonitoringEngineNowIgnoreConflict,
+    scheduleMonitoringEngineNow,
+    setPrivmonTaskStatus,
   };
 };

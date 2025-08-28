@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
@@ -338,6 +339,21 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('schedule now', () => {
+      beforeEach(async () => {
+        await enablePrivmonSetting(kibanaServer);
+        await api.initMonitoringEngine();
+      });
+      afterEach(async () => {
+        await disablePrivmonSetting(kibanaServer);
+        await api.deleteMonitoringEngine({ query: { data: true } });
+      });
+      it('should return a 409 if the task is already running', async () => {
+        await privMonUtils.setPrivmonTaskStatus(TaskStatus.Running);
+        await privMonUtils.scheduleMonitoringEngineNow({ expectStatusCode: 409 });
+      });
+    });
+
     describe('plain index sync', () => {
       const indexName = 'tatooine-privileged-users';
       const entitySource = {
@@ -367,6 +383,7 @@ export default ({ getService }: FtrProviderContext) => {
         } catch (err) {
           log.warning(`Failed to clean up in afterEach: ${err.message}`);
         }
+        await api.deleteMonitoringEngine({ query: { data: true } });
         await disablePrivmonSetting(kibanaServer);
       });
 
@@ -402,7 +419,7 @@ export default ({ getService }: FtrProviderContext) => {
         const sources = await api.listEntitySources({ query: {} });
         const names = sources.body.map((s: any) => s.name);
         expect(names).toContain('StarWars');
-        await privMonUtils.scheduleMonitoringEngineNowIgnoreConflict();
+        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
         await privMonUtils.waitForSyncTaskRun();
         await waitForPrivMonUsersToBeSynced(uniqueUsernames.length);
         // Check if the users are indexed

@@ -63,9 +63,14 @@ interface StartParams {
   taskManager: TaskManagerStartContract;
 }
 
-export const isTaskAlreadyRunningError = (error: Error): boolean => {
-  return error.name === 'TaskAlreadyRunningError';
-};
+class EngineAlreadyRunningError extends Error {
+  statusCode: number;
+
+  constructor() {
+    super('The monitoring engine is already running');
+    this.statusCode = 409;
+  }
+}
 
 const getTaskName = (): string => TYPE;
 
@@ -240,18 +245,14 @@ export const removePrivilegeMonitoringTask = async ({
   taskManager,
   namespace,
   logger,
-}: {
-  taskManager: TaskManagerStartContract;
-  namespace: string;
-  logger: Logger;
-}) => {
+}: StartParams) => {
   const taskId = getTaskId(namespace);
   try {
     await taskManager.removeIfExists(taskId);
     logger.info(`Removed privilege monitoring task with id ${taskId}`);
   } catch (e) {
     logger.warn(
-      `[Privilege Monitoring]  [task ${taskId}]: error removing task, received ${e.message}`
+      `[Privilege Monitoring][task ${taskId}]: error removing task, received ${e.message}`
     );
     throw e;
   }
@@ -261,25 +262,20 @@ export const scheduleNow = async ({
   logger,
   namespace,
   taskManager,
-}: {
-  logger: Logger;
-  namespace: string;
-  taskManager: TaskManagerStartContract;
-}): Promise<RunSoonResult> => {
+}: StartParams): Promise<RunSoonResult> => {
   const taskId = getTaskId(namespace);
 
-  logger.info('[Privilege Monitoring] Attempting to schedule task to run now');
+  logger.info(`[Privilege Monitoring][task ${taskId}]: Attempting to schedule task to run now`);
   try {
     return taskManager.runSoon(taskId);
   } catch (e) {
-    if (e.message.contains('as it is currently running')) {
-      logger.warn(`[task ${taskId}]: task is already running`);
-      const newError = new Error(`Monitoring engine is already running`);
-      newError.name = 'TaskAlreadyRunningError';
-      throw newError;
-    }
-    logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
+    logger.warn(
+      `[Privilege Monitoring][task ${taskId}]: error scheduling task now, received '${e.message}'`
+    );
 
+    if (e.message.contains('as it is currently running')) {
+      throw new EngineAlreadyRunningError();
+    }
     throw e;
   }
 };
