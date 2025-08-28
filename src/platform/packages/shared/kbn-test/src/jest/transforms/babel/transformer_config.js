@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
+module.exports = () => ({
+  plugins: [
+    [require.resolve('babel-plugin-transform-react-remove-prop-types'), { removeImport: true }],
+  ],
   presets: [
     [
       require.resolve('@kbn/babel-preset/node_preset'),
@@ -35,4 +38,4 @@ module.exports = {
       ],
     },
   ],
-};
+});
