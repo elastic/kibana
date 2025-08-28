@@ -5,6 +5,7 @@
  * 2.0.
  */
 import Path from 'path';
+import type { PlaywrightTestConfig } from '@playwright/test';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 // Using evals config to get all the right fixtures, such as EvaluationAnalysisService
@@ -22,4 +23,4 @@ export default {
       use: baseConfig.projects?.[0]?.use || {},
     },
   ],
-};
+} as PlaywrightTestConfig;
