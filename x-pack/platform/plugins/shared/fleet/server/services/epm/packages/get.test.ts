@@ -1461,14 +1461,12 @@ owner: elastic`,
           pkgVersion: '1.0.0',
         });
 
-        // Verify that groupPathsByService was called with paths including transformed knowledge base assets
+        // Verify that groupPathsByService was called with original paths only (KB paths kept intact)
         expect(MockRegistry.groupPathsByService).toHaveBeenCalledWith(
           expect.arrayContaining([
             'my-package-1.0.0/manifest.yml',
             'my-package-1.0.0/docs/knowledge_base/knowledge.md',
             'my-package-1.0.0/docs/knowledge_base/troubleshooting.md',
-            'my-package-1.0.0/elasticsearch/knowledge_base/knowledge.md',
-            'my-package-1.0.0/elasticsearch/knowledge_base/troubleshooting.md',
           ])
         );
 
@@ -1478,16 +1476,14 @@ owner: elastic`,
             type: 'knowledge_base',
             file: 'knowledge.md',
             pkgkey: 'my-package-1.0.0',
-            dataset: undefined,
-            path: 'my-package-1.0.0/elasticsearch/knowledge_base/knowledge.md',
+            path: 'my-package-1.0.0/docs/knowledge_base/knowledge.md',
           },
           {
             service: 'elasticsearch',
             type: 'knowledge_base',
             file: 'troubleshooting.md',
             pkgkey: 'my-package-1.0.0',
-            dataset: undefined,
-            path: 'my-package-1.0.0/elasticsearch/knowledge_base/troubleshooting.md',
+            path: 'my-package-1.0.0/docs/knowledge_base/troubleshooting.md',
           },
         ]);
       });

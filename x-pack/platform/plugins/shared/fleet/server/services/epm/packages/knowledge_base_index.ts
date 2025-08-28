@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { KnowledgeBaseItem } from '../../../../common/types';
 import { appContextService } from '../../app_context';
@@ -39,11 +40,18 @@ export async function saveKnowledgeBaseContentToIndex({
   // Index each knowledge base file as a separate document
   const operations: estypes.BulkRequest['operations'] = [];
   const installedAt = new Date().toISOString();
+  const documentIds: string[] = [];
 
   for (const item of knowledgeBaseContent) {
-    // Let Elasticsearch generate the document ID automatically
+    // Generate document ID upfront for consistent retries. This stops
+    // the creation of new IDs for retried documents, ensuring the same
+    // ID is used and avoids an issue where retries could timeout but still cause
+    // docs to get indexed resulting in duplicated documents.
+    const documentId = uuidv4();
+    documentIds.push(documentId);
+
     operations.push(
-      { index: { _index: INTEGRATION_KNOWLEDGE_INDEX } },
+      { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: documentId } },
       {
         package_name: pkgName,
         filename: item.fileName,
@@ -68,17 +76,34 @@ export async function saveKnowledgeBaseContentToIndex({
       throw error;
     });
 
-    // Extract document IDs from the bulk response
-    const documentIds: string[] = [];
+    // Extract successfully indexed document IDs from the bulk response
+    const successfullyIndexedIds: string[] = [];
     if (bulkResponse?.items) {
       for (const item of bulkResponse.items) {
-        if (item.index && item.index._id) {
-          documentIds.push(item.index._id);
+        if (item.index && item.index._id && !item.index.error) {
+          successfullyIndexedIds.push(item.index._id);
         }
       }
     }
 
-    return documentIds;
+    const logger = appContextService.getLogger();
+    const failedCount = documentIds.length - successfullyIndexedIds.length;
+
+    if (failedCount > 0) {
+      logger.error(
+        `${failedCount} out of ${documentIds.length} documents failed to index for package ${pkgName}`
+      );
+    }
+
+    logger.debug(
+      `Successfully indexed ${
+        successfullyIndexedIds.length
+      } knowledge base documents for package ${pkgName}. Document IDs: ${successfullyIndexedIds.join(
+        ', '
+      )}`
+    );
+
+    return successfullyIndexedIds;
   }
 
   return [];

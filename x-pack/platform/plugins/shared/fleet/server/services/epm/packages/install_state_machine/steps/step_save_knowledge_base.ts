@@ -58,10 +58,14 @@ async function extractKnowledgeBaseFromArchive(
 }
 
 export async function stepSaveKnowledgeBase(context: InstallContext): Promise<void> {
-  const { packageInstallContext, esClient, savedObjectsClient } = context;
+  const { packageInstallContext, esClient, savedObjectsClient, logger } = context;
   const { packageInfo, archiveIterator } = packageInstallContext;
 
   let esReferences = context.esReferences ?? [];
+
+  logger.debug(
+    `Knowledge base step: Starting for package ${packageInfo.name}@${packageInfo.version}`
+  );
 
   // Extract knowledge base content directly from the archive
   const knowledgeBaseItems = await extractKnowledgeBaseFromArchive(
@@ -69,6 +73,8 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
     packageInfo.name,
     packageInfo.version
   );
+
+  logger.debug(`Knowledge base step: Found ${knowledgeBaseItems.length} items to process`);
 
   // Save knowledge base content if present
   if (knowledgeBaseItems && knowledgeBaseItems.length > 0) {
@@ -81,6 +87,8 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
         pkgVersion: packageInfo.version,
         knowledgeBaseContent: knowledgeBaseItems,
       });
+
+      logger.debug(`Knowledge base step: Saved ${documentIds.length} documents to index`);
 
       // Add knowledge base asset references using the ES-generated document IDs
       const knowledgeBaseAssetRefs = documentIds.map((docId) => ({

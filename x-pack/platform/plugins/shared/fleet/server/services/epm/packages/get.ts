@@ -559,35 +559,13 @@ export async function getPackageInfo({
     }));
   }
 
-  // add properties that aren't (or aren't yet) on the package
-  let allPaths = paths || [];
-
-  // Always include knowledge base assets from package structure if they exist
-  const knowledgeBasePaths = allPaths
-    .filter((path) => path.includes('docs/knowledge_base/'))
-    .map((path) => {
-      // Extract filename from docs/knowledge_base/ path
-      const knowledgeBaseIndex = path.indexOf('docs/knowledge_base/');
-      const fileName =
-        knowledgeBaseIndex >= 0
-          ? path.substring(knowledgeBaseIndex + 'docs/knowledge_base/'.length)
-          : path.split('/').pop() || '';
-
-      // Transform to elasticsearch knowledge_base asset path format
-      return `${pkgName}-${resolvedPkgVersion}/elasticsearch/knowledge_base/${fileName}`;
-    });
-
-  if (knowledgeBasePaths.length > 0) {
-    allPaths = [...allPaths, ...knowledgeBasePaths];
-  }
-
   const additions: EpmPackageAdditions = {
     latestVersion:
       latestPackage?.version && semverGte(latestPackage.version, resolvedPkgVersion)
         ? latestPackage.version
         : resolvedPkgVersion,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
-    assets: Registry.groupPathsByService(allPaths),
+    assets: Registry.groupPathsByService(paths || []),
     notice: Registry.getNoticePath(paths || []),
     licensePath: Registry.getLicensePath(paths || []),
     keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
