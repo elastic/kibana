@@ -192,7 +192,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_monitoring_runtime_experimental',
     },
-    schema: z.enum(['', 'process', 'runtime']).default(''),
+    schema: z.enum(['', 'process', 'otel']).default(''),
     options: [
       {
         value: '',
@@ -213,7 +213,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
         ),
       },
       {
-        value: 'runtime',
+        value: 'otel',
         text: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeLabel', {
           defaultMessage: 'OTel',
         }),
