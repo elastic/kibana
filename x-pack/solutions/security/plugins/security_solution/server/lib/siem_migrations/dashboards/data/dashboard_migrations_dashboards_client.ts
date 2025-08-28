@@ -20,7 +20,6 @@ import {
   type DashboardMigrationDashboard,
   type DashboardMigrationTaskStats,
 } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import type { StoredDashboardMigration } from '../types';
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed. */
