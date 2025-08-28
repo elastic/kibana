@@ -60,10 +60,12 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     coreStart.notifications,
     // onUploadComplete
     (results: FileUploadResults | null) => {
-      fileUploadContextValue.setExistingIndexName(results.index);
-      results?.files.forEach((_, index) => {
-        deps.fileManager.removeFile(index);
-      });
+      if (results) {
+        fileUploadContextValue.setExistingIndexName(results.index);
+        results.files.forEach((_, index) => {
+          deps.fileManager.removeFile(index);
+        });
+      }
     }
   );
 
