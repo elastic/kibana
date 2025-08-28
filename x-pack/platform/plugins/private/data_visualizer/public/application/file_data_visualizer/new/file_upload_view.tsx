@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
@@ -58,25 +58,40 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
       <>
         {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
           <>
-            <EuiText>
+            <IndexSelection />
+
+            <EuiSpacer />
+
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
+                  defaultMessage="Upload files"
+                />
+              </h3>
+            </EuiTitle>
+
+            <EuiSpacer size="xs" />
+
+            <EuiText size="s">
               <p>
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
-                  defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index. The data can also be automatically vectorized using semantic text."
+                  defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
                 />
               </p>
             </EuiText>
 
+            <EuiSpacer size="xs" />
+
+            <FilePicker
+              fileUploadManager={fileUploadManager}
+              fullWidth={true}
+              large={filesStatus.length === 0}
+            />
+
             <EuiSpacer />
 
-            <FilePicker fileUploadManager={fileUploadManager} fullWidth={false} />
-
-            <EuiSpacer />
-          </>
-        ) : null}
-
-        {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
-          <>
             {filesStatus.map((status, i) => (
               <FileStatus key={i} index={i} lite={false} showOverrideButton={true} />
             ))}
@@ -89,10 +104,6 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
         {showImportControls ? (
           <>
             <AdvancedSection />
-
-            <EuiSpacer />
-
-            <IndexSelection />
           </>
         ) : null}
         {uploadStarted ? (

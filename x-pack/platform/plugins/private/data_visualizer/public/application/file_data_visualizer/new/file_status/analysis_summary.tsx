@@ -25,17 +25,18 @@ export const AnalysisSummary: FC<Props> = ({ results, showTitle = true }) => {
   return (
     <>
       {showTitle ? (
-        <EuiTitle size="s">
-          <h2>
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.analysisSummary.summaryTitle"
-              defaultMessage="Summary"
-            />
-          </h2>
-        </EuiTitle>
+        <>
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.analysisSummary.summaryTitle"
+                defaultMessage="Summary"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+        </>
       ) : null}
-
-      <EuiSpacer size="m" />
 
       <EuiDescriptionList
         type="column"

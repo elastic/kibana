@@ -5,37 +5,89 @@
  * 2.0.
  */
 
+import {
+  EuiButtonIcon,
+  EuiIcon,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiSubSteps,
+  EuiText,
+  useGeneratedHtmlId,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import type { FC } from 'react';
-import React from 'react';
-import { EuiText, EuiSpacer, EuiSubSteps } from '@elastic/eui';
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FileAnalysis } from '@kbn/file-upload';
+import { AnalysisSummary } from './analysis_summary';
 
 interface Props {
-  results: FindFileStructureResponse;
+  fileStatus: FileAnalysis;
 }
-
-export const AnalysisExplanation: FC<Props> = ({ results }) => {
-  const explanation = results.explanation!;
+export const AnalysisExplanation: FC<Props> = ({ fileStatus }) => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
+  const results = fileStatus.results;
 
   return (
-    <EuiText size={'s'}>
-      <FormattedMessage
-        id="xpack.dataVisualizer.file.explanationFlyout.content"
-        defaultMessage="The logical steps that have produced the analysis results."
+    <>
+      <EuiButtonIcon
+        onClick={() => setIsModalVisible(true)}
+        iconType="inspect"
+        size="xs"
+        color="text"
+        disabled={results === null}
+        aria-label={i18n.translate('xpack.dataVisualizer.file.analysisSummary.editButtonLabel', {
+          defaultMessage: 'Override settings',
+        })}
       />
 
-      <EuiSpacer size="l" />
-      <EuiSubSteps>
-        <ul style={{ wordBreak: 'break-word' }}>
-          {explanation.map((e, i) => (
-            <li key={i}>
-              {e}
-              <EuiSpacer size="s" />
-            </li>
-          ))}
-        </ul>
-      </EuiSubSteps>
-    </EuiText>
+      {isModalVisible && results?.explanation ? (
+        <EuiModal aria-labelledby={modalTitleId} onClose={() => setIsModalVisible(false)}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle id={modalTitleId}>
+              <EuiIcon type="inspect" size={'l'} />{' '}
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.explanationFlyout.title"
+                defaultMessage="Analysis explanation"
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            <b>{fileStatus.fileName}</b>
+
+            <EuiSpacer size="s" />
+
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.explanationFlyout.content"
+              defaultMessage="The logical steps that have produced the analysis results."
+            />
+
+            <EuiHorizontalRule />
+
+            <AnalysisSummary results={results} showTitle={false} />
+
+            <EuiText size={'s'}>
+              <EuiSpacer size="l" />
+              <EuiSubSteps>
+                <ul style={{ wordBreak: 'break-word' }}>
+                  {results.explanation.map((e, i) => (
+                    <li key={i}>
+                      {e}
+                      <EuiSpacer size="s" />
+                    </li>
+                  ))}
+                </ul>
+              </EuiSubSteps>
+            </EuiText>
+          </EuiModalBody>
+        </EuiModal>
+      ) : null}
+    </>
   );
 };

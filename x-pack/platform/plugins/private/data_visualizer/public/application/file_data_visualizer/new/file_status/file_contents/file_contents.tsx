@@ -96,11 +96,11 @@ export const FileContents: FC<Props> = ({
   const [showHighlights, setShowHighlights] = useState<boolean>(isSemiStructureTextData);
 
   useEffect(() => {
-    if (isSemiStructureTextData === false) {
+    if (isSemiStructureTextData === false || semiStructureTextData === null) {
       return;
     }
     const { grokPattern, multilineStartPattern, excludeLinesPattern, mappings, ecsCompatibility } =
-      semiStructureTextData!;
+      semiStructureTextData;
 
     grokHighlighter(
       fileContents,

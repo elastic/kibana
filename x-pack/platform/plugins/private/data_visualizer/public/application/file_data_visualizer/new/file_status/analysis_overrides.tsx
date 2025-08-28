@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import type { FC } from 'react';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
 import type { InputOverrides } from '@kbn/file-upload-plugin/common';
 import type { FileAnalysis } from '@kbn/file-upload';
+import { i18n } from '@kbn/i18n';
 import { EditFlyout } from './edit_flyout';
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
   analyzeFileWithOverrides: (overrides: InputOverrides) => void;
 }
 export const AnalysisOverrides: FC<Props> = ({ fileStatus, analyzeFileWithOverrides }) => {
-  const [isEditFlyoutVisible, setIsEditFlyoutVisible] = React.useState(false);
+  const [isEditFlyoutVisible, setIsEditFlyoutVisible] = useState(false);
   const fields = Object.keys(fileStatus.results?.field_stats ?? {});
 
   if (fileStatus.serverSettings === null) {
@@ -27,14 +27,16 @@ export const AnalysisOverrides: FC<Props> = ({ fileStatus, analyzeFileWithOverri
 
   return (
     <>
-      <EuiSpacer />
+      <EuiButtonIcon
+        onClick={() => setIsEditFlyoutVisible(true)}
+        iconType="gear"
+        size="xs"
+        color="text"
+        aria-label={i18n.translate('xpack.dataVisualizer.file.analysisSummary.editButtonLabel', {
+          defaultMessage: 'Override settings',
+        })}
+      />
 
-      <EuiButton onClick={() => setIsEditFlyoutVisible(true)}>
-        <FormattedMessage
-          id="xpack.dataVisualizer.file.analysisSummary.editButtonLabel"
-          defaultMessage="Override settings"
-        />
-      </EuiButton>
       <EditFlyout
         setOverrides={analyzeFileWithOverrides}
         closeEditFlyout={() => setIsEditFlyoutVisible(false)}

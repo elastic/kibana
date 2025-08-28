@@ -16,28 +16,30 @@ import {
   EuiTabs,
   EuiTab,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-plugin/common';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
-import { FileClashResult } from './file_clash';
+import { FileClashIcon, FileClashResult } from './file_clash';
 import { Mappings } from './mappings';
 import { IngestPipeline } from './pipeline';
 import { UploadProgress } from './progress';
-import { AnalysisExplanation } from './analysis_explanation';
 import { AnalysisOverrides } from './analysis_overrides';
 import { FieldsStatsGrid } from '../../../common/components/fields_stats_grid';
 import { FileContents } from './file_contents';
 import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
-import { AnalysisSummary } from './analysis_summary';
 import { Failures } from './failures';
+import { AnalysisExplanation } from './analysis_explanation';
 
 enum TAB {
   SUMMARY,
   STATS,
   CONTENT,
+  PREVIEW,
   MAPPINGS,
   PIPELINE,
   EXPLANATION,
@@ -66,7 +68,7 @@ export const FileStatus: FC<Props> = ({
     clash: false,
   };
 
-  const [selectedTab, setSelectedTab] = useState<TAB>(TAB.SUMMARY);
+  const [selectedTab, setSelectedTab] = useState<TAB>(TAB.PREVIEW);
   const [expanded, setExpanded] = useState<boolean>(false);
 
   const importStarted =
@@ -119,38 +121,55 @@ export const FileStatus: FC<Props> = ({
               buttonContent={
                 <>
                   <EuiText size="xs">
-                    <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>{' '}
-                    <span>{fileStatus.fileSizeInfo.fileSize}</span>
+                    <EuiFlexGroup gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <span>{fileStatus.fileSizeInfo.fileSizeFormatted}</span>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <FileClashIcon fileClash={fileClash} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiText>
-
-                  <FileClashResult fileClash={fileClash} />
                 </>
               }
               extraAction={
-                <EuiButtonIcon
-                  onClick={() => deleteFile(index)}
-                  iconType="trash"
-                  size="xs"
-                  color="danger"
-                  aria-label={i18n.translate('xpack.dataVisualizer.file.fileStatus.deleteFile', {
-                    defaultMessage: 'Remove file',
-                  })}
-                />
+                <>
+                  <AnalysisExplanation fileStatus={fileStatus} />
+
+                  <AnalysisOverrides
+                    fileStatus={fileStatus}
+                    analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(index)}
+                  />
+                  <EuiButtonIcon
+                    onClick={() => deleteFile(index)}
+                    iconType="trash"
+                    size="xs"
+                    color="danger"
+                    aria-label={i18n.translate('xpack.dataVisualizer.file.fileStatus.deleteFile', {
+                      defaultMessage: 'Remove file',
+                    })}
+                  />
+                </>
               }
               paddingSize="s"
             >
               {showResults ? (
                 <>
+                  <FileClashResult fileClash={fileClash} />
+
                   <EuiTabs size="s">
-                    {(lite && showFileSummary) || lite === false ? (
+                    {(lite && showFileContentPreview) || lite === false ? (
                       <EuiTab
-                        isSelected={selectedTab === TAB.SUMMARY}
-                        onClick={() => setSelectedTab(TAB.SUMMARY)}
-                        data-test-subj="mlFileUploadFileStatusSummaryTab"
+                        isSelected={selectedTab === TAB.PREVIEW}
+                        onClick={() => setSelectedTab(TAB.PREVIEW)}
+                        data-test-subj="mlFileUploadFileStatusPreviewTab"
                       >
                         <FormattedMessage
-                          id="xpack.dataVisualizer.file.fileStatus.summaryTabTitle"
-                          defaultMessage="Summary"
+                          id="xpack.dataVisualizer.file.fileStatus.previewTabTitle"
+                          defaultMessage="Preview"
                         />
                       </EuiTab>
                     ) : null}
@@ -163,33 +182,7 @@ export const FileStatus: FC<Props> = ({
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.statsTabTitle"
-                          defaultMessage="Stats"
-                        />
-                      </EuiTab>
-                    ) : null}
-
-                    {(lite && showFileContentPreview) || lite === false ? (
-                      <EuiTab
-                        isSelected={selectedTab === TAB.CONTENT}
-                        onClick={() => setSelectedTab(TAB.CONTENT)}
-                        data-test-subj="mlFileUploadFileStatusContentTab"
-                      >
-                        <FormattedMessage
-                          id="xpack.dataVisualizer.file.fileStatus.contentTabTitle"
-                          defaultMessage="Content"
-                        />
-                      </EuiTab>
-                    ) : null}
-
-                    {lite === false ? (
-                      <EuiTab
-                        isSelected={selectedTab === TAB.EXPLANATION}
-                        onClick={() => setSelectedTab(TAB.EXPLANATION)}
-                        data-test-subj="MLfileUploadFileStatusExplanationTab"
-                      >
-                        <FormattedMessage
-                          id="xpack.dataVisualizer.file.fileStatus.contentTabTitle"
-                          defaultMessage="Analysis explanation"
+                          defaultMessage="Field statistics"
                         />
                       </EuiTab>
                     ) : null}
@@ -221,26 +214,7 @@ export const FileStatus: FC<Props> = ({
                   </EuiTabs>
                   <EuiSpacer size="s" />
 
-                  {selectedTab === TAB.SUMMARY ? (
-                    <>
-                      <AnalysisSummary results={fileStatus.results!} showTitle={false} />
-
-                      {showOverrideButton ? (
-                        <AnalysisOverrides
-                          fileStatus={fileStatus}
-                          analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(
-                            index
-                          )}
-                        />
-                      ) : null}
-                    </>
-                  ) : null}
-
-                  {selectedTab === TAB.STATS ? (
-                    <FieldsStatsGrid results={fileStatus.results!} />
-                  ) : null}
-
-                  {selectedTab === TAB.CONTENT ? (
+                  {selectedTab === TAB.PREVIEW ? (
                     <FileContents
                       fileContents={fileStatus.fileContents}
                       results={fileStatus.results!}
@@ -248,8 +222,8 @@ export const FileStatus: FC<Props> = ({
                     />
                   ) : null}
 
-                  {selectedTab === TAB.EXPLANATION ? (
-                    <AnalysisExplanation results={fileStatus.results!} />
+                  {selectedTab === TAB.STATS ? (
+                    <FieldsStatsGrid results={fileStatus.results!} />
                   ) : null}
 
                   {selectedTab === TAB.MAPPINGS ? (

@@ -52,12 +52,15 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
           <Mappings
             mappings={mappings?.json ?? {}}
             setMappings={(m) => fileUploadManager.updateMappings(m)}
+            showTitle={true}
+            fileCount={filesStatus.length}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <Settings
             settings={settings?.json ?? {}}
             setSettings={(s) => fileUploadManager.updateSettings(s)}
+            showTitle={true}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

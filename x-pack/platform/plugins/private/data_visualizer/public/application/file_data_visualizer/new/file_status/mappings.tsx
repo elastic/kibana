@@ -19,9 +19,16 @@ interface Props {
   setMappings?: (mappings: string) => void;
   readonly?: boolean;
   showTitle?: boolean;
+  fileCount?: number;
 }
 
-export const Mappings: FC<Props> = ({ mappings, setMappings, showTitle, readonly = false }) => {
+export const Mappings: FC<Props> = ({
+  mappings,
+  setMappings,
+  showTitle,
+  readonly = false,
+  fileCount = 1,
+}) => {
   const [localMappings, setLocalMappings] = useState(JSON.stringify(mappings, null, 2));
 
   useEffect(() => {
@@ -53,28 +60,38 @@ export const Mappings: FC<Props> = ({ mappings, setMappings, showTitle, readonly
     />
   );
 
+  const title =
+    fileCount > 1 ? (
+      <FormattedMessage
+        id="xpack.dataVisualizer.file.advancedImportSettings.mappingsLabel"
+        defaultMessage="Combined mappings"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.dataVisualizer.file.advancedImportSettings.singleFileMappingLabel"
+        defaultMessage="Mappings"
+      />
+    );
+
   return (
     <>
       {readonly ? (
         <EuiCallOut
           size="s"
           color="primary"
+          iconType="readOnly"
           title={i18n.translate('xpack.dataVisualizer.file.mappingsReadonlyWarning', {
-            defaultMessage:
-              'Mappings for individual files are not editable. You can only edit the common mappings in the advanced section below.',
+            defaultMessage: 'Mappings for individual files are not editable.',
           })}
-        />
+        >
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.advancedImportSettings.mappingsWarning"
+            defaultMessage="You can only edit combined mappings under advanced options. Go to advanced options"
+          />
+        </EuiCallOut>
       ) : null}
       {showTitle ? (
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.advancedImportSettings.ingestPipelineLabel"
-              defaultMessage="Ingest pipeline"
-            />
-          }
-          fullWidth
-        >
+        <EuiFormRow label={title} fullWidth>
           {editor}
         </EuiFormRow>
       ) : (

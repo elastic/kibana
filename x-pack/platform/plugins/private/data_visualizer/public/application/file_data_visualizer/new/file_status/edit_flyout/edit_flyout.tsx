@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ServerSettings } from '@kbn/file-upload/src/utils';
@@ -41,6 +42,7 @@ export const EditFlyout: FC<Props> = ({
   originalSettings,
   fields,
 }) => {
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'editFlyoutTitle' });
   const [overridesValid, setOverridesValid] = useState<boolean>(true);
   const [applyOverrides, setApplyOverrides] = useState<undefined | (() => void)>(undefined);
 
@@ -58,13 +60,13 @@ export const EditFlyout: FC<Props> = ({
   }
 
   return (
-    <EuiFlyout onClose={closeEditFlyout} size="m">
+    <EuiFlyout onClose={closeEditFlyout} size="m" aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
-        <EuiTitle>
+        <EuiTitle id={flyoutTitleId}>
           <h2>
             <FormattedMessage
               id="xpack.dataVisualizer.file.editFlyout.overrideSettingsTitle"
-              defaultMessage="Override settings!"
+              defaultMessage="Override settings"
             />
           </h2>
         </EuiTitle>

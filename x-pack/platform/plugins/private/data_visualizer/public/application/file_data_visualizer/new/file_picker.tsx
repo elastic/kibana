@@ -15,9 +15,10 @@ import React, { useCallback, useRef } from 'react';
 interface Props {
   fileUploadManager: FileUploadManager;
   fullWidth?: boolean;
+  large?: boolean;
 }
 
-export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth }) => {
+export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth, large = false }) => {
   const filePickerRef = useRef<EuiFilePickerClass>(null);
 
   const onFilePickerChange = useCallback(
@@ -48,8 +49,8 @@ export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth }) => {
             ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
             id="filePicker"
             fullWidth
-            display="large"
-            compressed
+            display={large ? 'large' : 'default'}
+            compressed={true}
             multiple
             initialPromptText={i18n.translate(
               'xpack.dataVisualizer.file.filePicker.selectOrDragAndDropFiles',
