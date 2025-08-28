@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OnechatStartDependencies } from '../types';
+import type { OnechatStartDependencies } from '../types';
 import type { AgentService } from './agents';
 import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
