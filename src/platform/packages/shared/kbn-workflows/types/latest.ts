@@ -62,8 +62,8 @@ export type {
   WaitGraphNode,
   EnterTryBlockNode,
   ExitTryBlockNode,
-  EnterPathNode,
-  ExitPathNode,
+  EnterNormalPathNode,
+  ExitNormalPathNode,
   EnterFallbackPathNode,
   ExitFallbackPathNode,
 } from './execution';

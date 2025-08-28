@@ -34,8 +34,8 @@ import type {
   ExitContinueNode,
   EnterTryBlockNode,
   ExitTryBlockNode,
-  EnterPathNode,
-  ExitPathNode,
+  EnterNormalPathNode,
+  ExitNormalPathNode,
   EnterFallbackPathNode,
   ExitFallbackPathNode,
 } from '../../types/execution';
@@ -261,7 +261,7 @@ export function visitFallbackStep(
     id: exitTryBlockNodeId,
     enterNodeId: enterTryBlockNodeId,
   };
-  const enterNormalPathNode: EnterPathNode = {
+  const enterNormalPathNode: EnterNormalPathNode = {
     id: enterTryBlockNode.enterNormalPathNodeId,
     type: 'enter-normal-path',
     enterZoneNodeId: enterTryBlockNode.id,
@@ -275,7 +275,7 @@ export function visitFallbackStep(
     (ifTrueCurrentStep: any) =>
       (thenPreviousStep = visitAbstractStep(graph, thenPreviousStep, ifTrueCurrentStep))
   );
-  const exitNormalPathNode: ExitPathNode = {
+  const exitNormalPathNode: ExitNormalPathNode = {
     id: enterTryBlockNode.exitNormalPathNodeId,
     type: 'exit-normal-path',
     enterNodeId: enterTryBlockNode.enterNormalPathNodeId,

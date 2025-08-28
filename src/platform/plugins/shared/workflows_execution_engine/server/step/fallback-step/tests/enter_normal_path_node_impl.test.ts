@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterPathNode } from '@kbn/workflows';
+import type { EnterNormalPathNode } from '@kbn/workflows';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
 import { EnterNormalPathNodeImpl } from '../enter_normal_path_node_impl';
 
 describe('EnterNormalPathNodeImpl', () => {
   let underTest: EnterNormalPathNodeImpl;
-  let step: EnterPathNode;
+  let step: EnterNormalPathNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
 
