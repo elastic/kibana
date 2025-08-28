@@ -38,6 +38,7 @@ describe(
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'endpointManagementSpaceAwarenessEnabled',
+            'trustedDevices',
           ])}`,
         ],
       },
@@ -107,6 +108,7 @@ describe(
           'Automatic TroubleshootingNone',
           'Global Artifact ManagementNone',
           'Trusted ApplicationsNone',
+          'Trusted DevicesNone',
           'Host Isolation ExceptionsNone',
           'BlocklistNone',
           'Event FiltersNone',
