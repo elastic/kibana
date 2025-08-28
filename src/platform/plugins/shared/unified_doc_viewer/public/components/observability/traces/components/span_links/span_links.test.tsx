@@ -188,9 +188,11 @@ describe('getOutgoingSpanLinksESQL', () => {
 
     getOutgoingSpanLinksESQL(spanLinks);
 
-    expect(where).toHaveBeenCalledWith('trace.id in (?trace_id) and span.id in (?span_id)', [
-      { trace_id: [['trace1', 'trace2']] },
-      { span_id: [['span1', 'span2']] },
+    expect(where).toHaveBeenCalledWith('trace.id IN (?,?) AND span.id IN (?,?)', [
+      'trace1',
+      'trace2',
+      'span1',
+      'span2',
     ]);
   });
 
@@ -199,19 +201,13 @@ describe('getOutgoingSpanLinksESQL', () => {
 
     getOutgoingSpanLinksESQL(spanLinks);
 
-    expect(where).toHaveBeenCalledWith('trace.id in (?trace_id) and span.id in (?span_id)', [
-      { trace_id: [['traceX']] },
-      { span_id: [['spanX']] },
-    ]);
+    expect(where).toHaveBeenCalledWith('trace.id IN (?) AND span.id IN (?)', ['traceX', 'spanX']);
   });
 
   it('calls where with empty arrays if no links are provided', () => {
     getOutgoingSpanLinksESQL([]);
 
-    expect(where).toHaveBeenCalledWith('trace.id in (?trace_id) and span.id in (?span_id)', [
-      { trace_id: [] },
-      { span_id: [] },
-    ]);
+    expect(where).toHaveBeenCalledWith('trace.id IN () AND span.id IN ()', []);
   });
 });
 

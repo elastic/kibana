@@ -110,7 +110,9 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
       return generateDiscoverLink(getIncomingSpanLinksESQL(traceId, docId));
     }
 
-    return generateDiscoverLink(getOutgoingSpanLinksESQL(spanLinks));
+    if (spanLinks.length) {
+      return generateDiscoverLink(getOutgoingSpanLinksESQL(spanLinks));
+    }
   }, [docId, generateDiscoverLink, spanLinks, traceId, type]);
 
   if (
@@ -209,22 +211,18 @@ export function getIncomingSpanLinksESQL(
 }
 
 export function getOutgoingSpanLinksESQL(spanLinks: SpanLinkDetails[]) {
-  const traceIdParamName = toESQLParamName(TRACE_ID_FIELD);
-  const spanIdParamName = toESQLParamName(SPAN_ID_FIELD);
+  const traceIds: string[] = [];
+  const spanIds: string[] = [];
 
-  const traceIdsParams: Record<string, string[]> = {};
-  const spanIdsParams: Record<string, string[]> = {};
-
-  spanLinks.forEach((link) => {
-    (traceIdsParams[traceIdParamName] ??= []).push(link.traceId);
-    (spanIdsParams[spanIdParamName] ??= []).push(link.spanId);
+  spanLinks.forEach(({ traceId, spanId }) => {
+    traceIds.push(traceId);
+    spanIds.push(spanId);
   });
 
   return where(
-    `${TRACE_ID_FIELD} in (?${traceIdParamName}) and ${SPAN_ID_FIELD} in (?${spanIdParamName})`,
-    [
-      { [traceIdParamName]: Object.values(traceIdsParams) },
-      { [spanIdParamName]: Object.values(spanIdsParams) },
-    ]
+    `${TRACE_ID_FIELD} IN (${traceIds.map(() => '?').join()}) AND ${SPAN_ID_FIELD} IN (${spanIds
+      .map(() => '?')
+      .join()})`,
+    [...traceIds, ...spanIds]
   );
 }
