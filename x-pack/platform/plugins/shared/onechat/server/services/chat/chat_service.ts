@@ -20,7 +20,6 @@ import {
 } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
   type RoundInput,
   type ChatEvent,
@@ -46,7 +45,6 @@ import {
 interface ChatServiceOptions {
   logger: Logger;
   inference: InferenceServerStart;
-  actions: ActionsPluginStart;
   conversationService: ConversationService;
   agentService: AgentsServiceStart;
 }
@@ -100,20 +98,12 @@ export const createChatService = (options: ChatServiceOptions): ChatService => {
 
 class ChatServiceImpl implements ChatService {
   private readonly inference: InferenceServerStart;
-  private readonly actions: ActionsPluginStart;
   private readonly logger: Logger;
   private readonly conversationService: ConversationService;
   private readonly agentService: AgentsServiceStart;
 
-  constructor({
-    inference,
-    actions,
-    logger,
-    conversationService,
-    agentService,
-  }: ChatServiceOptions) {
+  constructor({ inference, logger, conversationService, agentService }: ChatServiceOptions) {
     this.inference = inference;
-    this.actions = actions;
     this.logger = logger;
     this.conversationService = conversationService;
     this.agentService = agentService;
@@ -128,7 +118,7 @@ class ChatServiceImpl implements ChatService {
     nextInput,
     autoCreateConversationWithId = false,
   }: ChatConverseParams): Observable<ChatEvent> {
-    const { inference, actions } = this;
+    const { inference } = this;
     const isNewConversation = !conversationId;
 
     return withConverseSpan({ agentId, conversationId }, (span) => {
@@ -140,7 +130,7 @@ class ChatServiceImpl implements ChatService {
           const agentClient = await this.agentService.getScopedClient({ request });
           return agentClient.get(agentId);
         }),
-        chatModel: getChatModel$({ connectorId, request, inference, actions, span }),
+        chatModel: getChatModel$({ connectorId, request, inference, span }),
       }).pipe(
         switchMap(({ conversationClient, chatModel, agent }) => {
           const shouldCreateNewConversation$ = isNewConversation

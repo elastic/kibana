@@ -195,5 +195,10 @@ export const labels = {
     createAgent: i18n.translate('xpack.onechat.agents.create.title', {
       defaultMessage: 'Create Agent',
     }),
+    settings: {
+      optionalLabel: i18n.translate('xpack.onechat.agents.form.settings.optionalLabel', {
+        defaultMessage: 'Optional',
+      }),
+    },
   },
 };

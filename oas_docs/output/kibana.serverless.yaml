@@ -90,7 +90,6 @@ tags:
   - name: Fleet package policies
   - name: Fleet proxies
   - name: Fleet Server hosts
-  - name: Fleet service tokens
   - name: Fleet uninstall tokens
   - name: maintenance-window
     description: |
@@ -10930,7 +10929,11 @@ paths:
           name: product_name
   /api/endpoint/action/{action_id}/file/{file_id}:
     get:
-      description: Get information for the specified file using the file ID.
+      description: |
+        Get information for the specified file using the file ID.
+        > info
+        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileInfo
       parameters:
         - in: path
@@ -10958,7 +10961,11 @@ paths:
           name: product_name
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
-      description: Download a file from an endpoint.
+      description: |
+        Download a file from an endpoint. 
+        > info
+        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileDownload
       parameters:
         - in: path
@@ -27214,8 +27221,11 @@ paths:
                     properties:
                       agent_policy_count:
                         type: number
+                      package_policy_count:
+                        type: number
                     required:
                       - agent_policy_count
+                      - package_policy_count
                 required:
                   - response
         '400':
@@ -38310,70 +38320,6 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/fleet/service_tokens:
-    post:
-      description: '[Required authorization] Route required privileges: fleet-agents-all.'
-      operationId: post-fleet-service-tokens
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              additionalProperties: false
-              nullable: true
-              type: object
-              properties:
-                remote:
-                  default: false
-                  type: boolean
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  name:
-                    type: string
-                  value:
-                    type: string
-                required:
-                  - name
-                  - value
-        '400':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-      summary: Create a service token
-      tags:
-        - Fleet service tokens
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
   /api/fleet/settings:
     get:
       description: '[Required authorization] Route required privileges: fleet-settings-read.'
@@ -47352,6 +47298,11 @@ paths:
                                                       destination:
                                                         minLength: 1
                                                         type: string
+                                                      status:
+                                                        enum:
+                                                          - enabled
+                                                          - disabled
+                                                        type: string
                                                       where:
                                                         anyOf:
                                                           - anyOf:
@@ -52080,6 +52031,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                status:
+                  enum:
+                    - enabled
+                    - disabled
+                  type: string
                 stream:
                   additionalProperties: false
                   type: object
@@ -53825,6 +53781,11 @@ paths:
                                     properties:
                                       destination:
                                         minLength: 1
+                                        type: string
+                                      status:
+                                        enum:
+                                          - enabled
+                                          - disabled
                                         type: string
                                       where:
                                         anyOf:
@@ -61598,14 +61559,6 @@ components:
         - insights
       example: assistant
       type: string
-    Security_AI_Assistant_API_ConversationConfidence:
-      description: The conversation confidence.
-      enum:
-        - low
-        - medium
-        - high
-      example: high
-      type: string
     Security_AI_Assistant_API_ConversationCreateProps:
       type: object
       properties:
@@ -61690,24 +61643,28 @@ components:
         - namespace
         - category
     Security_AI_Assistant_API_ConversationSummary:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummaryBase'
+        - type: object
+          properties:
+            timestamp:
+              $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
+              description: The timestamp summary was updated.
+              example: '2025-04-30T16:00:00Z'
+          required:
+            - timestamp
+    Security_AI_Assistant_API_ConversationSummaryBase:
       type: object
       properties:
-        confidence:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationConfidence'
-          description: How confident you are about this being a correct and useful learning.
-          example: high
-        content:
+        semanticContent:
           description: Summary text of the conversation over time.
           example: This conversation covered how to configure the Security AI Assistant.
           type: string
-        public:
-          description: Define if summary is marked as publicly available.
-          example: true
-          type: boolean
-        timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
-          description: The timestamp summary was updated.
-          example: '2025-04-30T16:00:00Z'
+        summarizedMessageIds:
+          description: The list of summarized messages.
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          type: array
     Security_AI_Assistant_API_ConversationUpdateProps:
       type: object
       properties:
@@ -61731,7 +61688,7 @@ components:
         replacements:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
         summary:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummary'
+          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummaryBase'
         title:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
@@ -69101,6 +69058,7 @@ components:
         - rule_default
         - endpoint
         - endpoint_trusted_apps
+        - endpoint_trusted_devices
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
@@ -71753,6 +71711,7 @@ components:
         - rule_default
         - endpoint
         - endpoint_trusted_apps
+        - endpoint_trusted_devices
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
