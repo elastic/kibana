@@ -86,10 +86,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
             // prevents the agent from retrying on failure
             // failure could be due to bad connector, we should deliver that result to the client asap
             maxRetries: 0,
-            metadata: {
-              connectorTelemetry: {
-                pluginId: 'security_ai_assistant',
-              },
+            telemetryMetadata: {
+              pluginId: 'security_ai_assistant',
             },
             // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
             // timeout,
