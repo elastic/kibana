@@ -26,7 +26,7 @@ export const StatelessHeaderPromo = () => {
           href="https://www.elastic.co/search-labs/blog/elasticsearch-exclude-vectors-from-source"
         >
           {i18n.translate('xpack.searchHomepage.statelessPromo.9.content', {
-            defaultMessage: 'Read more',
+            defaultMessage: 'View on Elasticsearch Labs',
           })}
         </HeaderCTALink>
       }
