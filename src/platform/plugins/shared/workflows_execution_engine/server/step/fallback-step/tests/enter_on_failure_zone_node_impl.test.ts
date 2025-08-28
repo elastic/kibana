@@ -19,7 +19,7 @@ describe('EnterTryBlockNodeImpl', () => {
   beforeEach(() => {
     step = {
       id: 'onFailureZone1',
-      type: 'enter-on-failure-zone',
+      type: 'enter-try-block',
       enterNormalPathNodeId: 'enterNormalPath1',
       exitNormalPathNodeId: 'exitNormalPath1',
       enterFallbackPathNodeId: 'enterFallbackPath1',

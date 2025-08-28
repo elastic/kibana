@@ -250,7 +250,7 @@ export function visitFallbackStep(
   const enterFallbackNode: EnterTryBlockNode = {
     id: enterFallbackNodeId,
     exitNodeId: exitFallbackNodeId,
-    type: 'enter-on-failure-zone',
+    type: 'enter-try-block',
     enterNormalPathNodeId,
     exitNormalPathNodeId,
     enterFallbackPathNodeId,

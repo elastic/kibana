@@ -79,7 +79,7 @@ export class StepFactory {
         return new EnterContinueNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
       case 'exit-continue':
         return new ExitContinueNodeImpl(this.workflowRuntime);
-      case 'enter-on-failure-zone':
+      case 'enter-try-block':
         return new EnterTryBlockNodeImpl(step as any, this.workflowRuntime);
       case 'exit-on-failure-zone':
         return new ExitTryBlockNodeImpl(step as any, this.workflowRuntime);
