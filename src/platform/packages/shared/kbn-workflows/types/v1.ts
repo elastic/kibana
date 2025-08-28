@@ -14,6 +14,7 @@ import { WorkflowSchema } from '../spec/schema';
 export enum ExecutionStatus {
   // In progress
   PENDING = 'pending',
+  WAITING = 'waiting',
   WAITING_FOR_INPUT = 'waiting_for_input',
   RUNNING = 'running',
 
@@ -28,11 +29,10 @@ export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
   workflowId: string;
+  isTestRun: boolean;
   status: ExecutionStatus;
-  context: Record<string, string>;
+  context: Record<string, any>;
   workflowDefinition: WorkflowYaml;
-  /** Serialized graphlib.Graph */
-  executionGraph?: any;
   currentNodeId?: string; // The node currently being executed
   stack: string[];
   createdAt: string;
@@ -72,6 +72,7 @@ export interface EsWorkflowStepExecution {
   executionIndex: number;
   error?: string | null;
   output?: Record<string, any> | null;
+  input?: Record<string, any> | null;
   state?: Record<string, any>;
 }
 
@@ -159,6 +160,16 @@ export const SearchWorkflowCommandSchema = z.object({
   _full: z.boolean().default(false),
 });
 
+export const RunWorkflowCommandSchema = z.object({
+  inputs: z.record(z.any()),
+});
+export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
+
+export const RunWorkflowResponseSchema = z.object({
+  workflowExecutionId: z.string(),
+});
+export type RunWorkflowResponseDto = z.infer<typeof RunWorkflowResponseSchema>;
+
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export interface UpdatedWorkflowResponseDto {
@@ -203,8 +214,7 @@ export interface WorkflowListDto {
 }
 export interface WorkflowExecutionEngineModel
   extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition'> {
-  /** Serialized graphlib.Graph */
-  executionGraph?: any;
+  isTestRun?: boolean;
 }
 
 export interface WorkflowListItemAction {
