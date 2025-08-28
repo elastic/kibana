@@ -21,7 +21,6 @@ import type { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
 
 export interface IRequestContextFactory {
-  setup(adhocAttackDiscoveryDataClient: IRuleDataClient | undefined): void;
   create(
     context: RequestHandlerContext,
     request: KibanaRequest,
@@ -36,20 +35,18 @@ interface ConstructorOptions {
   plugins: ElasticAssistantPluginSetupDependencies;
   kibanaVersion: string;
   assistantService: AIAssistantService;
+  adhocAttackDiscoveryDataClient: IRuleDataClient;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
   private readonly logger: Logger;
   private readonly assistantService: AIAssistantService;
-  private adhocAttackDiscoveryDataClient: IRuleDataClient | undefined;
+  private adhocAttackDiscoveryDataClient: IRuleDataClient;
 
   constructor(private readonly options: ConstructorOptions) {
     this.logger = options.logger;
     this.assistantService = options.assistantService;
-  }
-
-  public setup(adhocAttackDiscoveryDataClient: IRuleDataClient | undefined) {
-    this.adhocAttackDiscoveryDataClient = adhocAttackDiscoveryDataClient;
+    this.adhocAttackDiscoveryDataClient = options.adhocAttackDiscoveryDataClient;
   }
 
   public async create(

@@ -18,14 +18,13 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiImage,
   EuiLink,
-  EuiPageHeader,
   EuiPageBody,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiHorizontalRule,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -146,63 +145,59 @@ export const OverviewPage: FC = () => {
 
   return (
     <>
-      <MlPageHeader>
-        <EuiPageHeader
-          alignItems="center"
-          restrictWidth={1200}
-          pageTitle={
-            <EuiFlexGroup direction="column" gutterSize="s">
-              {Boolean(user) ? (
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued">
-                    <h4>
-                      {user
-                        ? i18n.translate(
-                            'xpack.ml.overview.welcomeBanner.header.greeting.customTitle',
-                            {
-                              defaultMessage: '👋 Hi {name}!',
-                              values: { name: user.user.username ?? '' },
-                            }
-                          )
-                        : i18n.translate(
-                            'xpack.ml.overview.welcomeBanner.header.greeting.defaultTitle',
-                            {
-                              defaultMessage: '👋 Hi',
-                            }
-                          )}
-                    </h4>
-                  </EuiText>
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.ml.overview.welcomeBanner.header.title"
-                      defaultMessage="Welcome to the Machine Learning Hub"
-                    />
-                  </h1>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiText color="subdued">
-                  {i18n.translate('xpack.ml.overview.welcomeBanner.header.titleDescription', {
-                    defaultMessage:
-                      'Analyze your data and generate models for its patterns of behavior.',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          rightSideItems={[
-            <EuiImage
-              alt={i18n.translate('xpack.ml.overview.welcomeBanner.header.imageAlt', {
-                defaultMessage: 'Welcome to the Machine Learning Hub',
+      <MlPageHeader
+        restrictWidth={1200}
+        rightSideItems={[
+          <EuiImage
+            alt={i18n.translate('xpack.ml.overview.welcomeBanner.header.imageAlt', {
+              defaultMessage: 'Welcome to the Machine Learning Hub',
+            })}
+            src={isDarkTheme ? bannerImageDark : bannerImageLight}
+            size="l"
+          />,
+        ]}
+      >
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {Boolean(user) ? (
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued">
+                <h4>
+                  {user
+                    ? i18n.translate(
+                        'xpack.ml.overview.welcomeBanner.header.greeting.customTitle',
+                        {
+                          defaultMessage: '👋 Hi {name}!',
+                          values: { name: user.user.username ?? '' },
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.ml.overview.welcomeBanner.header.greeting.defaultTitle',
+                        {
+                          defaultMessage: '👋 Hi',
+                        }
+                      )}
+                </h4>
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage
+                  id="xpack.ml.overview.welcomeBanner.header.title"
+                  defaultMessage="Welcome to the Machine Learning Hub"
+                />
+              </h1>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText color="subdued">
+              {i18n.translate('xpack.ml.overview.welcomeBanner.header.titleDescription', {
+                defaultMessage:
+                  'Analyze your data and generate models for its patterns of behavior.',
               })}
-              src={isDarkTheme ? bannerImageDark : bannerImageLight}
-              size="l"
-            />,
-          ]}
-        />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </MlPageHeader>
       <EuiPageBody restrictWidth={1200}>
         <UpgradeWarning />
