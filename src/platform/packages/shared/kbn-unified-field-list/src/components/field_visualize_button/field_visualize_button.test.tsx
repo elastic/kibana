@@ -12,10 +12,10 @@ import type { ReactWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { ActionInternal } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { getFieldVisualizeButton } from './field_visualize_button';
-import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { Action, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
   ACTION_VISUALIZE_LENS_FIELD,
   VISUALIZE_FIELD_TRIGGER,
@@ -26,7 +26,7 @@ import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 const ORIGINATING_APP = 'test';
 const mockExecuteAction = jest.fn();
 const uiActions = uiActionsPluginMock.createStartContract();
-const visualizeAction = new ActionInternal({
+const visualizeAction = createAction({
   type: ACTION_VISUALIZE_LENS_FIELD,
   id: ACTION_VISUALIZE_LENS_FIELD,
   getDisplayName: () => 'test',
@@ -39,7 +39,7 @@ const visualizeAction = new ActionInternal({
 
 jest
   .spyOn(uiActions, 'getTriggerCompatibleActions')
-  .mockResolvedValue([visualizeAction as ActionInternal<object>]);
+  .mockResolvedValue([visualizeAction as Action<object>]);
 jest.spyOn(uiActions, 'getTrigger').mockReturnValue({
   id: ACTION_VISUALIZE_LENS_FIELD,
   exec: mockExecuteAction,

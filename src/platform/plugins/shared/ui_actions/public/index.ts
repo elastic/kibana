@@ -19,7 +19,7 @@ export type {
   UiActionsPublicStart as UiActionsStart,
 } from './plugin';
 export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
-export { ActionInternal, createAction, IncompatibleActionError } from './actions';
+export { createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
 export type { Trigger, RowClickContext } from '@kbn/ui-actions-triggers';
 export {
