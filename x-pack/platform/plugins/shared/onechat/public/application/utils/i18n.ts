@@ -21,12 +21,8 @@ export const labels = {
     newToolButton: i18n.translate('xpack.onechat.tools.newToolButton', {
       defaultMessage: 'New tool',
     }),
-
-    newEsqlToolTitle: i18n.translate('xpack.onechat.tools.newEsqlTool.title', {
-      defaultMessage: 'New ES|QL tool',
-    }),
-    editEsqlToolTitle: i18n.translate('xpack.onechat.tools.editEsqlTool.title', {
-      defaultMessage: 'Edit ES|QL tool',
+    newToolTitle: i18n.translate('xpack.onechat.tools.newToolTitle', {
+      defaultMessage: 'Create a new tool',
     }),
 
     saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {

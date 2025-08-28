@@ -18,7 +18,7 @@ export const OnechatToolCreatePage = () => {
       path: appPaths.tools.list,
     },
     {
-      text: labels.tools.newEsqlToolTitle,
+      text: labels.tools.newToolTitle,
       path: appPaths.tools.new,
     },
   ]);

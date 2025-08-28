@@ -150,11 +150,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     <FormProvider {...form}>
       <KibanaPageTemplate>
         <KibanaPageTemplate.Header
-          pageTitle={
-            mode === ToolFormMode.Edit
-              ? labels.tools.editEsqlToolTitle
-              : labels.tools.newEsqlToolTitle
-          }
+          pageTitle={mode === ToolFormMode.Edit ? tool?.id : labels.tools.newToolTitle}
           css={css`
             background-color: ${euiTheme.colors.backgroundBasePlain};
             border-block-end: none;
