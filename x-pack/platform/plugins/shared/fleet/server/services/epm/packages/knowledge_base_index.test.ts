@@ -83,7 +83,7 @@ describe('knowledge_base_index', () => {
 
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
         operations: [
-          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX } },
+          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: expect.any(String) } },
           {
             package_name: 'test-package',
             filename: 'test1.md',
@@ -91,7 +91,7 @@ describe('knowledge_base_index', () => {
             version: '1.0.0',
             installed_at: expect.any(String),
           },
-          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX } },
+          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: expect.any(String) } },
           {
             package_name: 'test-package',
             filename: 'test2.md',
@@ -106,8 +106,18 @@ describe('knowledge_base_index', () => {
       // Verify the function returns the document IDs
       expect(result).toEqual(['generated-id-1', 'generated-id-2']);
 
-      // Verify the installed_at timestamp is reasonable (between before and after the call)
+      // Verify the document IDs used in bulk operation are generated
       const bulkCall = (mockEsClient.bulk as jest.Mock).mock.calls[0][0];
+      const bulkId1 = bulkCall.operations[0].index._id;
+      const bulkId2 = bulkCall.operations[2].index._id;
+      
+      expect(bulkId1).toBeDefined();
+      expect(bulkId2).toBeDefined();
+      expect(typeof bulkId1).toBe('string');
+      expect(typeof bulkId2).toBe('string');
+      expect(bulkId1).not.toBe(bulkId2); // Should be different UUIDs
+      
+      // Verify the installed_at timestamp is reasonable (between before and after the call)
       const installedAt1 = bulkCall.operations[1].installed_at;
       const installedAt2 = bulkCall.operations[3].installed_at;
 
