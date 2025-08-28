@@ -7,7 +7,6 @@
 
 import type { ResourceDescriptor } from './index_explorer';
 import { createIndexSelectorPrompt, formatResource } from './index_explorer';
-import { expect } from '@kbn/scout';
 
 describe('createIndexSelectorPrompt', () => {
   const nlQuery = 'some NL query';
