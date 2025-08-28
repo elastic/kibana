@@ -51,7 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('after linking a rule', () => {
       before(async () => {
         for (const archive of ARCHIVES) {
-          await kibanaServer.importExport.load(archive);
+          await kibanaServer.importExport.load(archive, { space: SPACE_ID });
         }
 
         await linkRule(apiClient, 'logs', RULE_ID);
@@ -59,6 +59,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await unlinkRule(apiClient, 'logs', RULE_ID);
+        for (const archive of ARCHIVES) {
+          await kibanaServer.importExport.unload(archive, { space: SPACE_ID });
+        }
       });
 
       it('lists the rule in the stream response', async () => {
@@ -111,23 +114,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      describe('after deleting the rule', () => {
-        before(async () => {
-          await kibanaServer.importExport.unload(
-            'x-pack/platform/test/api_integration/fixtures/kbn_archives/streams/rule.json',
-            { space: SPACE_ID }
-          );
+      it('after deleting the rule no longer lists the rule as a linked asset', async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/platform/test/api_integration/fixtures/kbn_archives/streams/rule.json',
+          { space: SPACE_ID }
+        );
+        const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
+          params: { path: { name: 'logs' } },
         });
 
-        it('no longer lists the rule as a linked asset', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+        expect(response.status).to.eql(200);
 
-          expect(response.status).to.eql(200);
-
-          expect(response.body.rules.length).to.eql(0);
-        });
+        expect(response.body.rules.length).to.eql(0);
       });
     });
 
