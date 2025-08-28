@@ -9,7 +9,12 @@
 
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
-import { getKqlFieldNamesFromExpression, type AggregateQuery, type Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import {
+  getKqlFieldNamesFromExpression,
+  isOfAggregateQueryType,
+  isOfQueryType,
+} from '@kbn/es-query';
 import { getQueryColumnsFromESQLQuery } from '@kbn/esql-utils';
 import {
   CONTEXTUAL_PROFILE_ID,
@@ -42,8 +47,9 @@ enum FieldUsageEventName {
 }
 
 enum FieldUsageInQueryEventName {
-  kqlQueryUpdate = 'kqlQueryUpdate',
-  esqlQueryUpdate = 'esqlQueryUpdate',
+  kqlQuery = 'kqlQuery',
+  luceneQuery = 'luceneQuery',
+  esqlQuery = 'esqlQuery',
 }
 interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
@@ -217,52 +223,60 @@ export class ScopedDiscoverEBTManager {
       eventData[FIELD_USAGE_IN_QUERY_FIELD_NAMES] = categorizedFields;
     }
 
+    console.log({ eventData });
     this.reportEvent(FIELD_USAGE_IN_QUERY_EVENT_TYPE, eventData);
   }
 
-  public async trackSubmittingKQLQuery({
+  public async trackSubmittingQuery({
     query,
     fieldsMetadata,
   }: {
-    query: Query;
+    query: Query | AggregateQuery | undefined;
     fieldsMetadata: FieldsMetadataPublicStart | undefined;
   }) {
-    if (typeof query.query !== 'string' || query.query === '') {
+    if (!query) {
       return;
     }
 
-    const extractedFieldNames = [...new Set(getKqlFieldNamesFromExpression(query.query))];
+    if (isOfAggregateQueryType(query)) {
+      // ES|QL query
 
-    // we discarded an empty query earlier, so if we're getting an empty array here it's a full text search
-    const fieldNames = extractedFieldNames.length === 0 ? [FREE_TEXT] : extractedFieldNames;
+      if (query.esql === '') {
+        return;
+      }
 
-    await this.trackFieldUsageInQueryEvent({
-      eventName: FieldUsageInQueryEventName.kqlQueryUpdate,
-      fieldNames,
-      fieldsMetadata,
-    });
-  }
+      const fieldNames = [...new Set(getQueryColumnsFromESQLQuery(query.esql))];
 
-  public async trackSubmittingESQLQuery({
-    query,
-    fieldsMetadata,
-  }: {
-    query: AggregateQuery;
-    fieldsMetadata: FieldsMetadataPublicStart | undefined;
-  }) {
-    if (query.esql === '') {
-      return;
+      if (fieldNames.length === 0) {
+        return;
+      }
+
+      await this.trackFieldUsageInQueryEvent({
+        eventName: FieldUsageInQueryEventName.esqlQuery,
+        fieldNames,
+        fieldsMetadata,
+      });
+    } else if (isOfQueryType(query)) {
+      // KQL or Lucene query
+
+      if (typeof query.query !== 'string' || query.query === '') {
+        return;
+      }
+
+      const extractedFieldNames = [...new Set(getKqlFieldNamesFromExpression(query.query))];
+
+      // we discarded an empty query earlier, so if we're getting an empty array here it's a full text search
+      const fieldNames = extractedFieldNames.length === 0 ? [FREE_TEXT] : extractedFieldNames;
+
+      await this.trackFieldUsageInQueryEvent({
+        eventName:
+          query.language === 'lucene'
+            ? FieldUsageInQueryEventName.luceneQuery
+            : FieldUsageInQueryEventName.kqlQuery,
+        fieldNames,
+        fieldsMetadata,
+      });
     }
-
-    const extractedFieldNames = [...new Set(getQueryColumnsFromESQLQuery(query.esql))];
-
-    const fieldNames = extractedFieldNames.length === 0 ? [FREE_TEXT] : extractedFieldNames;
-
-    await this.trackFieldUsageInQueryEvent({
-      eventName: FieldUsageInQueryEventName.esqlQueryUpdate,
-      fieldNames,
-      fieldsMetadata,
-    });
   }
 
   public trackContextualProfileResolvedEvent({

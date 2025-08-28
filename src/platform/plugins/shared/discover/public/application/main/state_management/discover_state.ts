@@ -524,22 +524,15 @@ export function getDiscoverStateContainer({
     return newDataView;
   };
 
-  const trackQueryFieldUsage = (query: Query | AggregateQuery | undefined) => {
+  const trackQueryFields = (query: Query | AggregateQuery | undefined) => {
     const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     const scopedEbtManager = scopedEbtManager$.getValue();
     const { fieldsMetadata } = services;
 
-    if (isOfAggregateQueryType(query)) {
-      scopedEbtManager.trackSubmittingESQLQuery({
-        query,
-        fieldsMetadata,
-      });
-    } else if (isOfQueryType(query)) {
-      scopedEbtManager.trackSubmittingKQLQuery({
-        query,
-        fieldsMetadata,
-      });
-    }
+    scopedEbtManager.trackSubmittingQuery({
+      query,
+      fieldsMetadata,
+    });
   };
 
   /**
@@ -549,7 +542,7 @@ export function getDiscoverStateContainer({
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => {
-    trackQueryFieldUsage(payload.query);
+    trackQueryFields(payload.query);
 
     if (isUpdate === false) {
       // remove the search session if the given query is not just updated
