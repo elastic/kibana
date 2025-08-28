@@ -46,7 +46,7 @@ export const useAssetDetailsRedirect = () => {
       entityType: InventoryItemType;
       entityId: string;
       search: QueryParams;
-      preferredSchema: DataSchemaFormat | null;
+      preferredSchema?: DataSchemaFormat;
     }): RouterLinkProps => {
       const { to, from, ...rest } = search;
       const queryParams = {
@@ -58,7 +58,7 @@ export const useAssetDetailsRedirect = () => {
                   from: from ? new Date(from).toISOString() : undefined,
                   to: to ? new Date(to).toISOString() : undefined,
                 },
-                preferredSchema: preferredSchema ?? undefined,
+                preferredSchema: preferredSchema ?? 'semconv',
               }
             : {},
         _a: {

@@ -100,7 +100,7 @@ const AssetDetailsUrlStateRT = rt.partial({
   alertStatus: AlertStatusRT,
   dashboardId: rt.string,
   alertMetric: rt.string,
-  preferredSchema: rt.union([DataSchemaFormatRT, rt.null]),
+  preferredSchema: DataSchemaFormatRT,
 });
 
 const AssetDetailsUrlRT = rt.union([AssetDetailsUrlStateRT, rt.null]);
