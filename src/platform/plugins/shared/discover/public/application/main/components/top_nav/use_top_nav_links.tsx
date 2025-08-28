@@ -58,6 +58,7 @@ export const useTopNavLinks = ({
   adHocDataViews,
   topNavCustomization,
   shouldShowESQLToDataViewTransitionModal,
+  hasShareIntegration,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -67,6 +68,7 @@ export const useTopNavLinks = ({
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
+  hasShareIntegration: boolean;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
@@ -158,6 +160,7 @@ export const useTopNavLinks = ({
           discoverParams,
           services,
           stateContainer: state,
+          hasIntegrations: hasShareIntegration,
         });
         items.push(...shareAppMenuItem);
       }
@@ -171,6 +174,7 @@ export const useTopNavLinks = ({
       state,
       isEsqlMode,
       currentDataView,
+      hasShareIntegration,
     ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
