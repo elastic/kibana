@@ -753,6 +753,13 @@
     "use_space_awareness_migration_started_at",
     "use_space_awareness_migration_status"
   ],
+  "intercept_interaction_record": [],
+  "intercept_trigger_record": [
+    "firstRegisteredAt",
+    "installedOn",
+    "recurrent",
+    "triggerAfter"
+  ],
   "inventory-view": [],
   "kql-telemetry": [],
   "legacy-url-alias": [
