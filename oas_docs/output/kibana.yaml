@@ -14165,11 +14165,21 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Run a shell command on an endpoint.
+        Run a script on a host. Currently supported only for some agent types
       operationId: RunScriptAction
       requestBody:
         content:
           application/json:
+            examples:
+              SentinelOne:
+                summary: Run a script against a SentinelOne agent
+                value:
+                  agent_type: sentinel_one
+                  endpoint_ids:
+                    - endpoint-id-1
+                  parameters:
+                    inputParams: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+                    script: 1111-2222-3333-4444-5555-6666-7777-8888
             schema:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_RunScriptRouteRequestBody'
         required: true
@@ -82775,16 +82785,35 @@ components:
       required:
         - raw
     Security_Endpoint_Management_API_RunScriptRouteRequestBody:
-      type: object
-      properties:
-        parameters:
-          description: Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided. CommandLine and Timeout are optional for all.
-          oneOf:
-            - $ref: '#/components/schemas/Security_Endpoint_Management_API_RawScriptParameters'
-            - $ref: '#/components/schemas/Security_Endpoint_Management_API_HostPathScriptParameters'
-            - $ref: '#/components/schemas/Security_Endpoint_Management_API_CloudFileScriptParameters'
-      required:
-        - parameters
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+            comment:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              description: |
+                One of the following set of parameters must be provided
+              oneOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_RawScriptParameters'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_HostPathScriptParameters'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_CloudFileScriptParameters'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_SentinelOneRunScriptParameters'
+          required:
+            - parameters
     Security_Endpoint_Management_API_ScanRouteRequestBody:
       allOf:
         - type: object
@@ -82848,6 +82877,28 @@ components:
           wasSuccessful: false
       type: object
       properties: {}
+    Security_Endpoint_Management_API_SentinelOneRunScriptParameters:
+      description: Parameters for Run Script response action against SentinelOne agent type.
+      example:
+        agent_type: sentinel_one
+        endpoint_ids:
+          - endpoint-id-1
+        parameters:
+          inputParams: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+          script: 1111-2222-3333-4444-5555-6666-7777-8888
+      properties:
+        inputParams:
+          description: The input parameter arguments for the script that was selected
+          minLength: 1
+          type: string
+        script:
+          description: The script ID from SentinelOne scripts library that will be executed.
+          minLength: 1
+          type: string
+      required:
+        - script
+      title: SentinelOne Run Script Parameters
+      type: object
     Security_Endpoint_Management_API_SortDirection:
       description: Determines the sort order.
       enum:
