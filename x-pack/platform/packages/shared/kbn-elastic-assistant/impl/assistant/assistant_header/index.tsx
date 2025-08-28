@@ -23,7 +23,7 @@ import { css } from '@emotion/react';
 import type { ApiConfig, ConversationSharedState } from '@kbn/elastic-assistant-common';
 import type { ConversationWithOwner } from '../api';
 import { ConversationSettingsMenu } from '../settings/settings_context_menu/conversation_settings_menu';
-import { ShareBadge } from '../share_conversation/share_badge';
+import { ShareSelectModal } from '../share_conversation/share_select_modal';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import type { DataStreamApis } from '../use_data_stream_apis';
 import type { Conversation } from '../../..';
@@ -225,7 +225,7 @@ export const AssistantHeader: React.FC<Props> = ({
 
               {!isNewConversation && isAssistantSharingEnabled && (
                 <EuiFlexItem grow={false}>
-                  <ShareBadge
+                  <ShareSelectModal
                     conversationSharedState={conversationSharedState}
                     isConversationOwner={isConversationOwner}
                     selectedConversation={selectedConversation}

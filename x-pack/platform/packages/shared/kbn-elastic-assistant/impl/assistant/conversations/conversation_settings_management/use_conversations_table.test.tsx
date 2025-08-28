@@ -51,10 +51,10 @@ describe('useConversationsTable', () => {
     expect(columns).toHaveLength(7);
 
     // column 0 is the checkbox column
-    // column 1 is the share icon column
-    expect(columns[2].name).toBe('Title');
-    expect(columns[3].name).toBe('System prompt');
-    expect(columns[4].name).toBe('Connector');
+    expect(columns[1].name).toBe('Title');
+    expect(columns[2].name).toBe('System prompt');
+    expect(columns[3].name).toBe('Connector');
+    expect(columns[4].name).toBe('Sharing');
     expect(columns[5].name).toBe('Date updated');
     expect(columns[6].name).toBe('Actions');
   });
