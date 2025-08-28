@@ -7,6 +7,7 @@
 
 import type { UseAssistantAvailability } from '@kbn/elastic-assistant';
 import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-features/constants';
+import { ELASTIC_AI_ASSISTANT_SUMMARIZATION_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 
@@ -18,7 +19,13 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
   const isEnterprise = useLicense().isEnterprise();
   const {
     application: { capabilities },
+    featureFlags,
   } = useKibana().services;
+
+  const isAssistantConversationSummarizationEnabled = featureFlags.getBooleanValue(
+    ELASTIC_AI_ASSISTANT_SUMMARIZATION_ENABLED_FEATURE_FLAG,
+    false
+  );
 
   const hasAssistantPrivilege = capabilities[ASSISTANT_FEATURE_ID]?.['ai-assistant'] === true;
   const hasUpdateAIAssistantAnonymization =
@@ -47,6 +54,7 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     isAssistantEnabled: isEnterprise,
     isAssistantVisible: isEnterprise && isVisible,
     isAssistantManagementEnabled: isEnterprise && hasManageAssistantPrivilege,
+    isAssistantConversationSummarizationEnabled,
     hasUpdateAIAssistantAnonymization,
     hasManageGlobalKnowledgeBase,
   };

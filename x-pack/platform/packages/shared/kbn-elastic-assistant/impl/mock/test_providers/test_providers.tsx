@@ -41,6 +41,7 @@ export const mockAssistantAvailability: AssistantAvailability = {
   isAssistantEnabled: true,
   isAssistantVisible: true,
   isAssistantManagementEnabled: true,
+  isAssistantConversationSummarizationEnabled: true,
 };
 
 /** A utility for wrapping children in the providers required to run tests */

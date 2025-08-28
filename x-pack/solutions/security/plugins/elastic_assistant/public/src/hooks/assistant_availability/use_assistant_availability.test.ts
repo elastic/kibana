@@ -81,6 +81,7 @@ describe('useAssistantAvailability', () => {
       isAssistantEnabled: true,
       isAssistantVisible: true,
       isAssistantManagementEnabled: true,
+      isAssistantConversationSummarizationEnabled: true,
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
     });
@@ -139,6 +140,7 @@ describe('useAssistantAvailability', () => {
       isAssistantEnabled: true,
       isAssistantVisible: false,
       isAssistantManagementEnabled: true,
+      isAssistantConversationSummarizationEnabled: true,
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
     });
@@ -190,6 +192,7 @@ describe('useAssistantAvailability', () => {
       isAssistantEnabled: false,
       isAssistantVisible: false,
       isAssistantManagementEnabled: false,
+      isAssistantConversationSummarizationEnabled: true,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
@@ -241,6 +244,7 @@ describe('useAssistantAvailability', () => {
       isAssistantEnabled: true,
       isAssistantVisible: true,
       isAssistantManagementEnabled: false,
+      isAssistantConversationSummarizationEnabled: true,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
@@ -272,6 +276,7 @@ describe('useAssistantAvailability', () => {
       isAssistantEnabled: true,
       isAssistantVisible: true,
       isAssistantManagementEnabled: false,
+      isAssistantConversationSummarizationEnabled: true,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
