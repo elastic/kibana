@@ -153,10 +153,10 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
   const handleInputCapture = useCallback<InputCaptureProps['onCapture']>(
     ({ value, selection, eventDetails }) => {
-      const keyCode = eventDetails.keyCode;
+      const key = eventDetails.code;
 
       // UP arrow key
-      if (keyCode === 38) {
+      if (key === 'ArrowUp') {
         dispatch({ type: 'removeFocusFromKeyCapture' });
         dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
 
@@ -193,19 +193,19 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
           inputText.addValue(processedValue ?? '', selection);
 
-          switch (keyCode) {
+          switch (key) {
             // BACKSPACE
-            case 8:
+            case 'Backspace':
               inputText.backspaceChar(selection);
               break;
 
             // DELETE
-            case 46:
+            case 'Delete':
               inputText.deleteChar(selection);
               break;
 
-            // ENTER  = Execute command and blank out the input area
-            case 13:
+            // ENTER = Execute command and blank out the input area
+            case 'Enter':
               setCommandToExecute({
                 input: inputText.getFullText(true),
                 enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
@@ -215,22 +215,22 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               break;
 
             // ARROW LEFT
-            case 37:
+            case 'ArrowLeft':
               inputText.moveCursorTo('left');
               break;
 
             // ARROW RIGHT
-            case 39:
+            case 'ArrowRight':
               inputText.moveCursorTo('right');
               break;
 
             // HOME
-            case 36:
+            case 'Home':
               inputText.moveCursorTo('home');
               break;
 
             // END
-            case 35:
+            case 'End':
               inputText.moveCursorTo('end');
               break;
           }
