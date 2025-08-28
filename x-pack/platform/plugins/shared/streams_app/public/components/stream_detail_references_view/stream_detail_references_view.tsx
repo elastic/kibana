@@ -56,7 +56,7 @@ export function StreamDetailReferencesView({
   const streams = streamsListFetch.value;
 
   const notMemberOfAnyGroupsMessage = i18n.translate(
-    'streamsApp.streamDetailReferencesView.notMemberOfAnyGroups',
+    'xpack.streams.streamDetailReferencesView.notMemberOfAnyGroups',
     {
       defaultMessage: 'Not a member of any Group streams',
     }
@@ -75,7 +75,7 @@ export function StreamDetailReferencesView({
       notMemberOfAnyGroupsMessage
     ) : (
       <>
-        {i18n.translate('streamsApp.streamDetailReferencesView.memberOfHeader', {
+        {i18n.translate('xpack.streams.streamDetailReferencesView.memberOfHeader', {
           defaultMessage: 'Member of:',
         })}
         <EuiSpacer size="s" />
@@ -109,12 +109,12 @@ export function StreamDetailReferencesView({
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem>
           {definition.stream.group.members.length === 0 ? (
-            i18n.translate('streamsApp.streamDetailReferencesView.noMembers', {
+            i18n.translate('xpack.streams.streamDetailReferencesView.noMembers', {
               defaultMessage: 'No members',
             })
           ) : (
             <>
-              {i18n.translate('streamsApp.streamDetailReferencesView.membersHeader', {
+              {i18n.translate('xpack.streams.streamDetailReferencesView.membersHeader', {
                 defaultMessage: 'Members:',
               })}
               <EuiSpacer size="s" />
@@ -139,7 +139,7 @@ export function StreamDetailReferencesView({
             notMemberOfAnyGroupsMessage
           ) : (
             <>
-              {i18n.translate('streamsApp.streamDetailReferencesView.memberOfHeader', {
+              {i18n.translate('xpack.streams.streamDetailReferencesView.memberOfHeader', {
                 defaultMessage: 'Member of:',
               })}
               <EuiSpacer size="s" />
