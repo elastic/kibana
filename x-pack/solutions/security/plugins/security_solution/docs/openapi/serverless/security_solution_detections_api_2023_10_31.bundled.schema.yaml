@@ -347,7 +347,7 @@ paths:
                     | STATS count = COUNT(*), min_timestamp = MIN(@timestamp)
 
                     | EVAL event_rate = count / DATE_DIFF("seconds",
-                    min_timestamp, NOW())
+                    min_timestamp, NOW()) 
 
                     | KEEP event_rate
               example6:
@@ -1480,7 +1480,7 @@ paths:
 
         The edit action allows you to add, delete, or set tags, index patterns,
         investigation fields, rule actions and schedules for multiple rules at
-        once.
+        once. 
 
         The edit action is idempotent, meaning that if you add a tag to a rule
         that already has that tag, no changes are made. The same is true for
@@ -3980,7 +3980,7 @@ components:
         - value
     BulkActionEditPayloadSchedule:
       description: >
-        Overwrites schedule of rules.
+        Overwrites schedule of rules. 
 
 
         - `set_schedule` sets a schedule for rules. If the same schedule already
@@ -7743,7 +7743,6 @@ components:
         gets applied to an action and determines whether the action should run.
             - `kql` (string, required): A KQL string.
             - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
-
       type: object
     RuleActionFrequency:
       description: >-
@@ -8216,9 +8215,9 @@ components:
         - For prebuilt rules it represents the version of the rule's content in
         the source [detection-rules](https://github.com/elastic/detection-rules)
         repository (and the corresponding `security_detection_engine` Fleet
-        package that is used for distributing prebuilt rules).
+        package that is used for distributing prebuilt rules). 
 
-        - For custom rules it is set to `1` when the rule is created.
+        - For custom rules it is set to `1` when the rule is created. 
 
         > info
 
@@ -8934,7 +8933,7 @@ components:
         - type: must be mapping
 
         - value: field from the Elasticsearch threat index
-
+          
         You can use Boolean and and or logic to define the conditions for when
         matching fields and values generate alerts. Sibling entries objects are
         evaluated using or logic, whereas multiple entries in a single entries
