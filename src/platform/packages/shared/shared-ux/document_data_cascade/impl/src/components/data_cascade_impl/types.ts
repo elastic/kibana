@@ -36,6 +36,9 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
    * Callback invoked when a leaf node gets expanded, which can be used to fetch data for leaf nodes.
    */
   onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>;
+  /**
+   * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
+   */
   children: (args: { data: L[] | null }) => React.ReactNode;
 }
 
@@ -62,6 +65,10 @@ export interface CascadeRowActionProps<G extends GroupNode> {
  * @description Internal cascade row primitive component props.
  */
 export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNode> {
+  /**
+   * Whether to enable row selection. Default is false.
+   */
+  enableRowSelection?: boolean;
   isActiveSticky: boolean;
   innerRef: React.LegacyRef<HTMLDivElement>;
   /**
@@ -114,7 +121,8 @@ export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
 };
 
 export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
-  extends Pick<VirtualizerHelperProps<G>, 'overscan'> {
+  extends Pick<VirtualizerHelperProps<G>, 'overscan'>,
+    Pick<CascadeRowPrimitiveProps<G, L>, 'enableRowSelection'> {
   /**
    * The data to be displayed in the cascade. It should be an array of group nodes.
    */
@@ -135,10 +143,6 @@ export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
    * Enabling this options causes the group header to stick to the top of the table when toggled and scrolling. Default is true.
    */
   enableStickyGroupHeader?: boolean;
-  /**
-   * Whether to enable row selection. Default is false.
-   */
-  enableRowSelection?: boolean;
   /**
    * Whether to allow multiple group rows to be expanded at the same time, default is false.
    */
