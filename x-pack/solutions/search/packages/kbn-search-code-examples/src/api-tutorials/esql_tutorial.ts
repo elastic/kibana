@@ -12,7 +12,7 @@ export const esqlTutorialCommands: string = `# Welcome to the Elasticsearch ES|Q
 # After selecting a command, execute it by clicking the "Send Request" button or pressing Ctrl+Enter or Cmd+Enter.
 
 # -----------------------------------------------
-# Step 1: Create the 'kibana_sample_data_esql' index and mapping
+# Step 1: Create the 'kibana_sample_data_esql' index and mapping.
 # -----------------------------------------------
 
 PUT /kibana_sample_data_esql
@@ -33,7 +33,7 @@ PUT /kibana_sample_data_esql
 # The response includes a confirmation that the index and mapping were created.
 
 # -----------------------------------------------
-# Step 2: Add sample blog posts to your index
+# Step 2: Add sample blog posts to your index.
 # -----------------------------------------------
 
 POST /kibana_sample_data_esql/_bulk?refresh=wait_for
@@ -51,9 +51,9 @@ POST /kibana_sample_data_esql/_bulk?refresh=wait_for
 # The response includes a summary of successes and errors for each operation.
 
 # -----------------------------------------------
-# Step 3: Run a basic full-text search
+# Step 3: Run a basic full-text search.
 # -----------------------------------------------
-# Note: when ES|QL queries are run from within the Kibana Console, they must be wrapped in triple quotes syntax:
+# Note: when ES|QL queries are run from within the Kibana Console, they must be wrapped in triple quotes syntax.
 
 POST /_query
 {
@@ -68,9 +68,9 @@ POST /_query
 # By default, ES|QL uses OR logic between search terms, so it matches documents that contain any of the specified words.
 
 # -----------------------------------------------
-# Step 4: Show specific fields in results
+# Step 4: Show specific fields in results.
 # -----------------------------------------------
-# You can specify the exact fields to include in your results using the KEEP command
+# You can specify the exact fields to include in your results using the KEEP command.
 
 POST /_query
 {
@@ -85,9 +85,9 @@ POST /_query
 # The response includes only the title, description, and rating fields.
 
 # -----------------------------------------------
-# Step 5: Sort by relevance score
+# Step 5: Sort by relevance score.
 # -----------------------------------------------
-# METADATA _score tells ES|QL to include relevance scores in the results
+# 'METADATA _score' tells ES|QL to include relevance scores in the results.
 # Without explicit sorting, results aren't ordered by relevance even when scores are calculated.
 
 POST /_query
@@ -104,7 +104,7 @@ POST /_query
 # The response includes documents sorted by relevance score.
 
 # -----------------------------------------------
-# Step 6: Exact match filtering
+# Step 6: Exact match filtering.
 # -----------------------------------------------
 # This is fundamentally different from full-text search - it's a binary yes/no filter that doesn't affect relevance scoring.
 
@@ -122,9 +122,9 @@ POST /_query
 # The response includes documents with category exactly 'Breakfast'.
 
 # -----------------------------------------------
-# Step 7: Require all search terms (AND logic)
+# Step 7: Require all search terms (AND logic).
 # -----------------------------------------------
-# The MATCH function with AND logic doesn't require terms to be adjacent or in order
+# The MATCH function with AND logic doesn't require terms to be adjacent or in order.
 
 POST /_query
 {
