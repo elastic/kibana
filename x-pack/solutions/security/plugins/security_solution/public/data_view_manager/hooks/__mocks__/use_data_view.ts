@@ -17,11 +17,21 @@ export const defaultImplementation = () =>
   } as UseDataViewReturnValue);
 
 const dataViewWithMatchedIndices = getMockDataViewWithMatchedIndices();
-// TODO: consider if this should be the default mock implementation?
+
 export const withMatchedIndices = () =>
   ({
     dataView: dataViewWithMatchedIndices,
     status: 'ready',
   } as UseDataViewReturnValue);
+
+export const withIdAndIndices = (id: string, indices: string[]) => {
+  const dataView = getMockDataViewWithMatchedIndices(indices);
+  dataView.id = id;
+
+  return {
+    dataView,
+    status: 'ready',
+  } as UseDataViewReturnValue;
+};
 
 export const useDataView = jest.fn(defaultImplementation);
