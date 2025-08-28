@@ -5,7 +5,7 @@
 
 // The handlebars module uses `export =`, so we should technically use `import Handlebars = require('handlebars')`, but Babel will not allow this:
 // https://www.typescriptlang.org/docs/handbook/modules.html#export--and-import--require
-import Handlebars from 'handlebars';
+import Handlebars from '..';
 
 import type { CompileOptions, RuntimeOptions, TemplateDelegate } from './types';
 import { ElasticHandlebarsVisitor } from './visitor';

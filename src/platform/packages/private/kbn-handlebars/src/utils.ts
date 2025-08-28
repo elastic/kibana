@@ -4,7 +4,7 @@
  */
 
 // @ts-expect-error: Could not find a declaration file for module
-import { createFrame } from 'handlebars/dist/cjs/handlebars/utils';
+import { createFrame } from '@kbn/handlebars/dist/cjs/handlebars/utils';
 
 import type { AmbiguousHelperOptions, DecoratorOptions } from './types';
 

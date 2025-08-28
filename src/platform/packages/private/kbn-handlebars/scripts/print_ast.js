@@ -8,7 +8,7 @@
 const { relative } = require('path');
 const { inspect } = require('util');
 
-const { parse } = require('handlebars');
+const { parse } = require('..');
 const argv = require('minimist')(process.argv.slice(2));
 
 const DEFAULT_FILTER = 'loc,strip,openStrip,inverseStrip,closeStrip';
