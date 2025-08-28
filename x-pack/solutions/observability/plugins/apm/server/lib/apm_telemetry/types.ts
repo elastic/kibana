@@ -102,14 +102,7 @@ export interface APMUsage {
     error: TimeframeMap;
     metric: TimeframeMap;
     onboarding: TimeframeMap;
-    agent_configuration: TimeframeMapAll & {
-      agents: Array<{
-        agent_name: string;
-        has_error: boolean;
-        settings: string[];
-        advanced_settings: string[];
-      }>;
-    };
+    agent_configuration: TimeframeMapAll;
     max_transaction_groups_per_service: TimeframeMap1d;
     max_error_groups_per_service: TimeframeMap1d;
     traces: TimeframeMap;
@@ -220,6 +213,12 @@ export interface APMUsage {
     total: number;
   };
   per_service: APMPerService[];
+  per_agent_config_settings: Array<{
+    agent_name: string;
+    has_error: boolean;
+    settings: string[];
+    advanced_settings: string[];
+  }>;
   top_traces: {
     max: number;
     median: number;

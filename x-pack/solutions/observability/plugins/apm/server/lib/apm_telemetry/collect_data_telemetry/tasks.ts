@@ -548,6 +548,25 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'agent_configuration',
     executor: async ({ telemetryClient }) => {
+      const agentConfigurationCount = await telemetryClient.search({
+        index: APM_AGENT_CONFIGURATION_INDEX,
+        size: 0,
+        timeout,
+        track_total_hits: true,
+      });
+
+      return {
+        counts: {
+          agent_configuration: {
+            all: agentConfigurationCount.hits.total.value,
+          },
+        },
+      };
+    },
+  },
+  {
+    name: 'per_agent_config_settings',
+    executor: async ({ telemetryClient }) => {
       const agentConfigurations = await telemetryClient.search({
         index: APM_AGENT_CONFIGURATION_INDEX,
         size: 1000,
@@ -556,36 +575,31 @@ export const tasks: TelemetryTask[] = [
       });
 
       return {
-        counts: {
-          agent_configuration: {
-            all: agentConfigurations.hits.total.value,
-            agents: agentConfigurations.hits.hits.map((hit) => {
-              const agentConfig = hit._source as AgentConfiguration;
-              const settingsDefinitionByAgent = settingDefinitions.filter(
-                filterByAgent(agentConfig.agent_name as AgentName)
-              );
-              const predefinedSettingsKeys = new Set();
-              settingsDefinitionByAgent.forEach((setting) => {
-                predefinedSettingsKeys.add(setting.key);
-              });
-              const predefinedSettings: string[] = [];
-              const advancedSettings: string[] = [];
-              Object.keys(agentConfig.settings).forEach((key) => {
-                if (predefinedSettingsKeys.has(key)) {
-                  predefinedSettings.push(key);
-                } else {
-                  advancedSettings.push(key);
-                }
-              });
-              return {
-                agent_name: agentConfig.agent_name,
-                has_error: !!agentConfig.error,
-                settings: predefinedSettings,
-                advanced_settings: advancedSettings,
-              };
-            }),
-          },
-        },
+        per_agent_config_settings: agentConfigurations.hits.hits.map((hit) => {
+          const agentConfig = hit._source as AgentConfiguration;
+          const settingsDefinitionByAgent = settingDefinitions.filter(
+            filterByAgent(agentConfig.agent_name as AgentName)
+          );
+          const predefinedSettingsKeys = new Set();
+          settingsDefinitionByAgent.forEach((setting) => {
+            predefinedSettingsKeys.add(setting.key);
+          });
+          const predefinedSettings: string[] = [];
+          const advancedSettings: string[] = [];
+          Object.keys(agentConfig.settings).forEach((key) => {
+            if (predefinedSettingsKeys.has(key)) {
+              predefinedSettings.push(key);
+            } else {
+              advancedSettings.push(key);
+            }
+          });
+          return {
+            agent_name: agentConfig.agent_name,
+            has_error: !!agentConfig.error,
+            settings: predefinedSettings,
+            advanced_settings: advancedSettings,
+          };
+        }),
       };
     },
   },
