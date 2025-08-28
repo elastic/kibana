@@ -5,20 +5,21 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
+import type { RasterTileSource } from 'maplibre-gl';
 import { AbstractSource } from '../source';
 import { getKibanaTileMap } from '../../../util';
-import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import _ from 'lodash';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { extractAttributions } from './extract_attributions';
+import type { IRasterSource, RasterTileSourceData } from '../raster_source';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.kbnTMSTitle', {
   defaultMessage: 'Configured Tile Map Service',
 });
 
-// TODO extend TMSSource or RasterSource
-export class KibanaTilemapSource extends AbstractSource {
+export class KibanaTilemapSource extends AbstractSource implements IRasterSource {
   static type = SOURCE_TYPES.KIBANA_TILEMAP;
 
   static createDescriptor() {
@@ -48,7 +49,8 @@ export class KibanaTilemapSource extends AbstractSource {
   renderLegendDetails() {
     return null;
   }
-  isSourceStale(mbSource, sourceData) {
+
+  isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData) {
     if (!sourceData.url) {
       return false;
     }
