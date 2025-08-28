@@ -46,6 +46,56 @@ describe('commands.rerank', () => {
     });
   });
 
+  it('can change query on a command with a target assignment', () => {
+    const src =
+      'FROM index | RERANK my_target = "star wars" ON field WITH { "inference_id": "model_id" }';
+    const query = EsqlQuery.fromSrc(src);
+
+    const cmd = [...commands.rerank.list(query.ast)][0];
+    commands.rerank.setQuery(cmd, 'new query');
+
+    expect(BasicPrettyPrinter.expression(cmd.query)).toBe('"new query"');
+    expect(query.print({ wrap: Infinity })).toBe(
+      'FROM index | RERANK my_target = "new query" ON field WITH {"inference_id": "model_id"}'
+    );
+  });
+});
+
+describe('.setTargetField()', () => {
+  it('can add a target field to a simple command', () => {
+    const src = 'FROM index | RERANK "star wars" ON field';
+    const query = EsqlQuery.fromSrc(src);
+
+    const cmd = [...commands.rerank.list(query.ast)][0];
+    commands.rerank.setTargetField(cmd, 'my_target');
+
+    expect(query.print({ wrap: Infinity })).toBe(
+      'FROM index | RERANK my_target = "star wars" ON field'
+    );
+  });
+
+  it('can change an existing target field', () => {
+    const src = 'FROM index | RERANK old_target = "star wars" ON field';
+    const query = EsqlQuery.fromSrc(src);
+
+    const cmd = [...commands.rerank.list(query.ast)][0];
+    commands.rerank.setTargetField(cmd, 'new_target');
+
+    expect(query.print({ wrap: Infinity })).toBe(
+      'FROM index | RERANK new_target = "star wars" ON field'
+    );
+  });
+
+  it('can remove an existing target field', () => {
+    const src = 'FROM index | RERANK my_target = "star wars" ON field';
+    const query = EsqlQuery.fromSrc(src);
+
+    const cmd = [...commands.rerank.list(query.ast)][0];
+    commands.rerank.setTargetField(cmd, null);
+
+    expect(query.print({ wrap: Infinity })).toBe('FROM index | RERANK "star wars" ON field');
+  });
+
   describe('.setFields()', () => {
     it('can change query', () => {
       const src =

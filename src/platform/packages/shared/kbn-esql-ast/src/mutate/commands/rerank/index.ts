@@ -34,15 +34,79 @@ export const list = (ast: ESQLAstQueryExpression): IterableIterator<ESQLAstReran
   ) as IterableIterator<ESQLAstRerankCommand>;
 };
 
+/**
+ * Sets or updates the query text for the RERANK command.
+ *
+ * @param cmd The RERANK command AST node to modify.
+ * @param query The query text to set.
+ */
 export const setQuery = (cmd: ESQLAstRerankCommand, query: string | ESQLStringLiteral) => {
-  if (typeof query === 'string') {
-    query = Builder.expression.literal.string(query);
-  }
+  const queryLiteral = typeof query === 'string' ? Builder.expression.literal.string(query) : query;
+  const firstArg = cmd.args[0];
 
-  cmd.query = query;
-  cmd.args[0] = query;
+  cmd.query = queryLiteral;
+
+  if (
+    firstArg &&
+    !Array.isArray(firstArg) &&
+    firstArg.type === 'function' &&
+    firstArg.name === '='
+  ) {
+    // It's an assignment, update the right side of the expression
+    firstArg.args[1] = queryLiteral;
+  } else {
+    // It's a simple query, replace the first argument
+    cmd.args[0] = queryLiteral;
+  }
 };
 
+/**
+ * Sets, updates, or removes the target field for the RERANK command.
+ * This refers to the `targetField =` portion of the command, which specifies                                  │
+ * the new column where the rerank score will be stored.                                                       │
+ *
+ * @param cmd The RERANK command AST node to modify.
+ * @param target The name of the target field to set. If `null` the assignment is removed.
+ */
+export const setTargetField = (cmd: ESQLAstRerankCommand, target: string | null) => {
+  const firstArg = cmd.args[0];
+  const isAssignment =
+    firstArg && !Array.isArray(firstArg) && firstArg.type === 'function' && firstArg.name === '=';
+
+  // Case 1: Set a new target field
+  if (target !== null) {
+    const newTargetColumn = Builder.expression.column(target);
+
+    if (isAssignment) {
+      // An assignment already exists => update the target field
+      firstArg.args[0] = newTargetColumn;
+    } else {
+      // No assignment exists => create one
+      const queryLiteral = cmd.query;
+      const assignment = Builder.expression.func.binary('=', [newTargetColumn, queryLiteral]);
+      cmd.args[0] = assignment;
+    }
+
+    cmd.targetField = newTargetColumn;
+  }
+  // Case 2: Remove the target field
+  else {
+    if (isAssignment) {
+      // An assignment exists, keep only the query
+      const queryLiteral = cmd.query;
+      cmd.args[0] = queryLiteral;
+    }
+    // If no assignment exists, do nothing
+    cmd.targetField = undefined;
+  }
+};
+
+/**
+ * Sets or updates the fields to be used for reranking in the ON clause.
+ *
+ * @param cmd The RERANK command AST node to modify.
+ * @param fields An array of field names or field nodes.
+ */
 export const setFields = (
   cmd: ESQLAstRerankCommand,
   fields: string[] | ESQLAstRerankCommand['fields']
@@ -71,6 +135,14 @@ export const setFields = (
   onOption.args.push(...(fields as ESQLAstRerankCommand['fields']));
 };
 
+/**
+ * Sets a parameter in the WITH clause of the RERANK command (e.g., 'inference_id').
+ * If the parameter already exists, its value is updated. Otherwise, it is added.
+ *
+ * @param cmd The RERANK command AST node to modify.
+ * @param key The name of the parameter to set.
+ * @param value The value of the parameter.
+ */
 export const setWithParameter = (
   cmd: ESQLAstRerankCommand,
   key: string,
@@ -86,7 +158,6 @@ export const setWithParameter = (
     return val;
   };
 
-  // Type guard to check if an AST item is a WITH option
   const isWithOption = (arg: ESQLAstItem): arg is ESQLCommandOption =>
     !!arg && !Array.isArray(arg) && arg.type === 'option' && arg.name === 'with';
 
@@ -122,16 +193,13 @@ export const setWithParameter = (
     incomplete: false,
   });
 
-  // Find the WITH option in the command arguments
   const withOption = cmd.args.find(isWithOption);
 
   if (!withOption) {
     throw new Error('RERANK command must have a WITH option');
   }
 
-  // Get and validate the map from the WITH option
   const valueExpression = toExpression(value);
-  // Look for existing entry with the same key
   const map = getWithOptionMap(withOption);
   const existingEntry = map.entries.find(getExistingEntry);
 
