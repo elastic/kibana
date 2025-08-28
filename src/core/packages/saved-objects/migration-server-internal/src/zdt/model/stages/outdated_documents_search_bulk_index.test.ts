@@ -39,8 +39,9 @@ describe('Stage: outdatedDocumentsSearchBulkIndex', () => {
       currentBatch: 0,
       bulkOperationBatches: [[{ create: {} }], [{ create: {} }]],
     });
-    const res: StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX'> =
-      Either.right('bulk_index_succeeded');
+    const res: StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX'> = Either.right(
+      'bulk_index_succeeded'
+    ) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX'>;
 
     const newState = outdatedDocumentsSearchBulkIndex(state, res, context);
 
