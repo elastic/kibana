@@ -34,6 +34,132 @@ export const TraceData = z.object({
 });
 
 /**
+ * The basis of a typed LangGraph interrupt
+ */
+export type BaseTypedInterrupt = z.infer<typeof BaseTypedInterrupt>;
+export const BaseTypedInterrupt = z.object({
+  /**
+   * Type of the interrupt
+   */
+  type: z.string(),
+  /**
+   * Whether the interrupt has expired and can no longer be resumed.
+   */
+  expired: z.boolean().optional(),
+  /**
+   * Thread ID of the graph execution that produced this message
+   */
+  threadId: z.string(),
+});
+
+/**
+ * A request approval interrupt
+ */
+export type RequestApprovalTypedInterruptValue = z.infer<typeof RequestApprovalTypedInterruptValue>;
+export const RequestApprovalTypedInterruptValue = BaseTypedInterrupt.merge(
+  z.object({
+    type: z.literal('REQUEST_APPROVAL'),
+    /**
+     * Content of the approval request
+     */
+    content: z.string(),
+  })
+);
+
+/**
+ * A request approval resume schema
+ */
+export type RequestApprovalResumeSchema = z.infer<typeof RequestApprovalResumeSchema>;
+export const RequestApprovalResumeSchema = z.object({
+  /**
+   * Whether the request was approved
+   */
+  approved: z.boolean(),
+});
+
+/**
+ * A request approval interrupt
+ */
+export type RequestApprovalTypedInterrupt = z.infer<typeof RequestApprovalTypedInterrupt>;
+export const RequestApprovalTypedInterrupt = z.object({
+  /**
+   * The interrupt value
+   */
+  interruptValue: RequestApprovalTypedInterruptValue,
+  /**
+   * The resume value
+   */
+  resumeValue: RequestApprovalResumeSchema,
+});
+
+/**
+ * A request text interrupt
+ */
+export type RequestTextTypedInterruptValue = z.infer<typeof RequestTextTypedInterruptValue>;
+export const RequestTextTypedInterruptValue = BaseTypedInterrupt.merge(
+  z.object({
+    type: z.literal('REQUEST_TEXT'),
+    /**
+     * Content of the text request
+     */
+    content: z.string(),
+  })
+);
+
+/**
+ * A request text resume schema
+ */
+export type RequestTextResumeSchema = z.infer<typeof RequestTextResumeSchema>;
+export const RequestTextResumeSchema = z.object({
+  /**
+   * Text value used to resume the graph execution with
+   */
+  content: z.string(),
+});
+
+/**
+ * A request text interrupt
+ */
+export type RequestTextTypedInterrupt = z.infer<typeof RequestTextTypedInterrupt>;
+export const RequestTextTypedInterrupt = z.object({
+  /**
+   * The interrupt value
+   */
+  interruptValue: RequestTextTypedInterruptValue,
+  /**
+   * The resume value
+   */
+  resumeValue: RequestTextResumeSchema,
+});
+
+/**
+ * A typed LangGraph interrupt
+ */
+export type TypedInterruptValue = z.infer<typeof TypedInterruptValue>;
+export const TypedInterruptValue = z.union([
+  RequestApprovalTypedInterruptValue,
+  RequestTextTypedInterruptValue,
+]);
+
+/**
+ * A typed LangGraph interrupt
+ */
+export type TypedInterruptResumeValue = z.infer<typeof TypedInterruptResumeValue>;
+export const TypedInterruptResumeValue = z.union([
+  RequestApprovalResumeSchema,
+  RequestTextResumeSchema,
+]);
+
+/**
+ * A typed LangGraph interrupt
+ */
+export type TypedInterrupts = z.infer<typeof TypedInterrupts>;
+export const TypedInterrupts = z.object({
+  REQUEST_APPROVAL: RequestApprovalTypedInterrupt,
+  REQUEST_TEXT: RequestTextTypedInterrupt,
+});
+
+/**
  * The basis of a content reference
  */
 export type BaseContentReference = z.infer<typeof BaseContentReference>;
@@ -196,6 +322,14 @@ export const MessageMetadata = z.object({
    * Data referred to by the message content.
    */
   contentReferences: ContentReferences.optional(),
+  /**
+   * Graph interrupt value
+   */
+  typedInterrupt: TypedInterruptValue.optional(),
+  /**
+   * Graph interrupt resume value
+   */
+  typedInterruptResumeValue: TypedInterruptResumeValue.optional(),
 });
 
 /**

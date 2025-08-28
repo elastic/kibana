@@ -39,6 +39,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   connectorId,
   contentReferencesStore,
   conversationId,
+  threadId,
+  resumeValue,
   core,
   dataClients,
   esClient,
@@ -244,6 +246,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     conversationId,
     replacements,
     newMessages,
+    threadId,
+    resumeValue
   });
 
   const chatPrompt = await chatPromptFactory(DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, {
@@ -267,6 +271,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     responseLanguage,
     conversationId,
     connectorId,
+    threadId,
     llmType,
     isStream,
     isOssModel,
@@ -302,6 +307,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       inputs,
       isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
       logger,
+      resumeValue: resumeValue,
       onLlmResponse,
       request,
       telemetry,

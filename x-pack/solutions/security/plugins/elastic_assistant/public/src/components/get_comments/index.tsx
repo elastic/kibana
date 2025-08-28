@@ -67,6 +67,7 @@ export const getComments: GetComments =
     setIsStreaming,
     systemPromptContent,
     contentReferencesVisible,
+    resumeGraph
   }) => {
     if (!currentConversation) return [];
 
@@ -90,9 +91,11 @@ export const getComments: GetComments =
                 content=""
                 refetchCurrentConversation={refetchCurrentConversation}
                 regenerateMessage={regenerateMessageOfConversation}
+                resumeGraph={resumeGraph}
                 setIsStreaming={setIsStreaming}
                 contentReferencesVisible={contentReferencesVisible}
                 transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+                isLastMessage={true}
                 contentReferences={null}
                 messageRole="assistant"
                 isFetching
@@ -137,6 +140,7 @@ export const getComments: GetComments =
                   content={systemPromptContent}
                   refetchCurrentConversation={refetchCurrentConversation}
                   regenerateMessage={regenerateMessageOfConversation}
+                  resumeGraph={resumeGraph}
                   setIsStreaming={setIsStreaming}
                   contentReferences={null}
                   contentReferencesVisible={contentReferencesVisible}
@@ -144,12 +148,13 @@ export const getComments: GetComments =
                   messageRole={'assistant'}
                   // we never need to append to a code block in the system comment, which is what this index is used for
                   index={999}
+                  isLastMessage={currentConversation.messages.length === 0}
                 />
               ),
             },
           ]
         : []),
-      ...currentConversation.messages.map((message, index) => {
+      ...currentConversation.messages.map((message, index, total) => {
         const isLastComment = index === currentConversation.messages.length - 1;
         const isUser = message.role === 'user';
         const replacements = currentConversation.replacements;
@@ -189,11 +194,13 @@ export const getComments: GetComments =
                 contentReferences={null}
                 contentReferencesVisible={contentReferencesVisible}
                 index={index}
+                isLastMessage={total.length === index + 1 && extraLoadingComment.length === 0}
                 isControlsEnabled={isControlsEnabled}
                 isError={message.isError}
                 reader={message.reader}
                 refetchCurrentConversation={refetchCurrentConversation}
                 regenerateMessage={regenerateMessageOfConversation}
+                resumeGraph={resumeGraph}
                 setIsStreaming={setIsStreaming}
                 transformMessage={transformMessage}
                 messageRole={message.role}
@@ -214,12 +221,16 @@ export const getComments: GetComments =
               content={transformedMessage.content}
               contentReferences={message.metadata?.contentReferences}
               contentReferencesVisible={contentReferencesVisible}
+              typedInterrupt={message.metadata?.typedInterrupt}
+              resumedValue={message.metadata?.typedInterruptResumeValue}
               index={index}
+              isLastMessage={total.length === index + 1 && extraLoadingComment.length === 0}
               isControlsEnabled={isControlsEnabled}
               isError={message.isError}
               // reader is used to determine if streaming controls are shown
               reader={transformedMessage.reader}
               regenerateMessage={regenerateMessageOfConversation}
+              resumeGraph={resumeGraph}
               refetchCurrentConversation={refetchCurrentConversation}
               setIsStreaming={setIsStreaming}
               transformMessage={transformMessage}

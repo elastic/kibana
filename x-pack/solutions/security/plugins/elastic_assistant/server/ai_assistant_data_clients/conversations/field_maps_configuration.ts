@@ -102,6 +102,16 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
+  'messages.metadata.typed_interrupt': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'messages.metadata.typed_interrupt_resume_value': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
   replacements: {
     type: 'object',
     array: false,

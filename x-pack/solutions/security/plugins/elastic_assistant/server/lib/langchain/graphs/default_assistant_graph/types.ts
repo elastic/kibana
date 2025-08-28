@@ -25,6 +25,8 @@ export interface GraphInputs {
   messages: BaseMessage[];
   isRegeneration: boolean;
   responseLanguage?: string;
+  threadId: string;
+  [key: string]: unknown;
 }
 
 export type AgentState = typeof AssistantStateAnnotation.State;

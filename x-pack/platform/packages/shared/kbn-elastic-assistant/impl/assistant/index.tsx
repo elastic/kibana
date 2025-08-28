@@ -290,6 +290,7 @@ const AssistantComponent: React.FC<Props> = ({
     isLoading: isLoadingChatSend,
     setUserPrompt,
     userPrompt,
+    handleResumeGraph
   } = useChatSend({
     currentConversation,
     http,
@@ -379,6 +380,7 @@ const AssistantComponent: React.FC<Props> = ({
             currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
             contentReferencesVisible,
+            resumeGraph: handleResumeGraph
           })}
           // Avoid comments going off the flyout
           css={css`
@@ -591,6 +593,7 @@ const AssistantComponent: React.FC<Props> = ({
                           isLoading={isLoadingChatSend}
                           shouldRefocusPrompt={shouldRefocusPrompt}
                           userPrompt={userPrompt}
+                          handleResumeGraph={handleResumeGraph}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

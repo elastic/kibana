@@ -11,6 +11,7 @@ import { FailedToLoadResponse } from './failed_to_load_response';
 interface Props {
   error?: Error;
   body?: React.ReactNode;
+  footer?: React.ReactNode;
   controls?: React.ReactNode;
 }
 
@@ -24,6 +25,9 @@ export function MessagePanel(props: Props) {
           <FailedToLoadResponse />
         </span>
       ) : null}
+      {props.footer && <>          
+      <EuiSpacer size="m" />
+        {props.footer}</>}
       {props.controls ? (
         <>
           <EuiSpacer size="m" />

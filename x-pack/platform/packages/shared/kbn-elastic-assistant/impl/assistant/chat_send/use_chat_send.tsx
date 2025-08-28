@@ -9,10 +9,10 @@ import type React from 'react';
 import { useCallback, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements, TypedInterruptValue } from '@kbn/elastic-assistant-common';
 import { useKnowledgeBaseStatus } from '../api/knowledge_base/use_knowledge_base_status';
 import type { DataStreamApis } from '../use_data_stream_apis';
-import type { ClientMessage } from '../../assistant_context/types';
+import type { ClientMessage, ResumeGraphFunction } from '../../assistant_context/types';
 import type { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
@@ -38,6 +38,7 @@ export interface UseChatSend {
   handleOnChatCleared: () => Promise<void>;
   handleRegenerateResponse: () => void;
   handleChatSend: (promptText: string) => Promise<void>;
+  handleResumeGraph: ResumeGraphFunction;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
   isLoading: boolean;
   userPrompt: string | null;
@@ -68,6 +69,69 @@ export const useChatSend = ({
     useConversation();
   const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
   const isSetupComplete = kbStatus?.elser_exists && kbStatus?.security_labs_exists;
+
+  const handleResumeGraph: ResumeGraphFunction = useCallback(async (threadId, resumeValue) => {
+    if (!currentConversation?.apiConfig) {
+        toasts?.addError(
+          new Error('The conversation needs a connector configured in order to send a message.'),
+          {
+            title: i18n.translate('xpack.elasticAssistant.knowledgeBase.setupError', {
+              defaultMessage: 'Error setting up Knowledge Base',
+            }),
+          }
+        );
+        return;
+      }
+      const apiConfig = currentConversation.apiConfig;
+      debugger
+
+      const rawResponse = await sendMessage({
+        apiConfig,
+        http,
+        conversationId: currentConversation.id,
+        replacements: currentConversation.replacements,
+        threadId,
+        resumeValue
+      });
+
+      assistantTelemetry?.reportAssistantMessageSent({
+        role: "user",
+        actionTypeId: apiConfig.actionTypeId,
+        model: apiConfig.model,
+        provider: apiConfig.provider,
+        isEnabledKnowledgeBase: isSetupComplete ?? false,
+      });
+
+      const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
+
+      setCurrentConversation({
+        ...currentConversation,
+        messages: [...currentConversation.messages, responseMessage],
+      });
+      
+      assistantTelemetry?.reportAssistantMessageSent({
+        role: responseMessage.role,
+        actionTypeId: apiConfig.actionTypeId,
+        model: apiConfig.model,
+        provider: apiConfig.provider,
+        isEnabledKnowledgeBase: isSetupComplete ?? false,
+      });
+    },
+    [
+      assistantTelemetry,
+      createConversation,
+      currentConversation,
+      getConversation,
+      http,
+      isSetupComplete,
+      selectedPromptContexts,
+      sendMessage,
+      setCurrentConversation,
+      setLastConversation,
+      setSelectedPromptContexts,
+      toasts,
+    ]
+  );
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
@@ -246,5 +310,6 @@ export const useChatSend = ({
     isLoading,
     userPrompt,
     setUserPrompt,
+    handleResumeGraph,
   };
 };

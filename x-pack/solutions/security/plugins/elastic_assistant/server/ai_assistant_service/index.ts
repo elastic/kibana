@@ -72,6 +72,7 @@ import {
   ANONYMIZATION_FIELDS_RESOURCE,
 } from './constants';
 import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
+import { IndexPatternAdapter } from '@kbn/index-adapter';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -107,6 +108,15 @@ export type CreateDataStream = (params: {
     | 'attackDiscovery'
     | 'defendInsights'
     | 'alertSummary'
+  fieldMap: FieldMap;
+  kibanaVersion: string;
+  spaceId?: string;
+  settings?: IndicesIndexSettings;
+  writeIndexOnly?: boolean;
+}) => DataStreamSpacesAdapter;
+
+export type CreateIndexPattern = (params: {
+  resource:
     | 'checkpoints'
     | 'checkpointWrites';
   fieldMap: FieldMap;
@@ -114,7 +124,7 @@ export type CreateDataStream = (params: {
   spaceId?: string;
   settings?: IndicesIndexSettings;
   writeIndexOnly?: boolean;
-}) => DataStreamSpacesAdapter;
+}) => IndexPatternAdapter;
 
 export class AIAssistantService {
   private initialized: boolean;
@@ -128,8 +138,8 @@ export class AIAssistantService {
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private attackDiscoveryDataStream: DataStreamSpacesAdapter;
   private defendInsightsDataStream: DataStreamSpacesAdapter;
-  private checkpointsDataStream: DataStreamSpacesAdapter;
-  private checkpointWritesDataStream: DataStreamSpacesAdapter;
+  private checkpointsDataStream: IndexPatternAdapter;
+  private checkpointWritesDataStream: IndexPatternAdapter;
 
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
@@ -179,12 +189,12 @@ export class AIAssistantService {
       kibanaVersion: options.kibanaVersion,
       fieldMap: alertSummaryFieldsFieldMap,
     });
-    this.checkpointsDataStream = this.createDataStream({
+    this.checkpointsDataStream = this.createIndexPattern({
       resource: 'checkpoints',
       kibanaVersion: options.kibanaVersion,
       fieldMap: ElasticSearchSaver.checkpointsFieldMap,
     });
-    this.checkpointWritesDataStream = this.createDataStream({
+    this.checkpointWritesDataStream = this.createIndexPattern({
       resource: 'checkpointWrites',
       kibanaVersion: options.kibanaVersion,
       fieldMap: ElasticSearchSaver.checkpointWritesFieldMap,
@@ -224,6 +234,44 @@ export class AIAssistantService {
 
   public setIsProductDocumentationInProgress(isInProgress: boolean) {
     this.isProductDocumentationInProgress = isInProgress;
+  }
+
+  private createIndexPattern: CreateIndexPattern = ({
+    resource,
+    kibanaVersion,
+    fieldMap,
+    settings,
+    writeIndexOnly,
+  }) => {
+    const newIndexPattern = new IndexPatternAdapter(this.resourceNames.aliases[resource], {
+      kibanaVersion,
+      totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+      writeIndexOnly,
+    });
+
+    newIndexPattern.setComponentTemplate({
+      name: this.resourceNames.componentTemplate[resource],
+      fieldMap,
+      settings,
+    });
+
+    newIndexPattern.setIndexTemplate({
+      name: this.resourceNames.indexTemplate[resource],
+      componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
+      // Apply `default_pipeline` if pipeline exists for resource
+      ...(resource in this.resourceNames.pipelines && {
+            template: {
+              settings: {
+                'index.default_pipeline':
+                  this.resourceNames.pipelines[
+                    resource as keyof typeof this.resourceNames.pipelines
+                  ],
+              },
+            },
+          }),
+    });
+
+    return newIndexPattern;
   }
 
   private createDataStream: CreateDataStream = ({
@@ -831,16 +879,16 @@ export class AIAssistantService {
         await this.alertSummaryDataStream.installSpace(spaceId);
       }
 
-      const checkpointsIndexName = await this.checkpointsDataStream.getInstalledSpaceName(spaceId);
+      const checkpointsIndexName = await this.checkpointsDataStream.getInstalledIndexName(spaceId);
       if (!checkpointsIndexName) {
-        await this.checkpointsDataStream.installSpace(spaceId);
+        await this.checkpointsDataStream.createIndex(spaceId);
       }
 
-      const checkpointWritesIndexName = await this.checkpointWritesDataStream.getInstalledSpaceName(
+      const checkpointWritesIndexName = await this.checkpointWritesDataStream.getInstalledIndexName(
         spaceId
       );
       if (!checkpointWritesIndexName) {
-        await this.checkpointWritesDataStream.installSpace(spaceId);
+        await this.checkpointWritesDataStream.createIndex(spaceId);
       }
     } catch (error) {
       this.options.logger.warn(

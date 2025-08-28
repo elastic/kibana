@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements, TypedInterruptResumeValue } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import type { BaseMessage } from '@langchain/core/messages';
 import { _isMessageFieldWithRole } from '@langchain/core/messages';
@@ -19,6 +19,8 @@ interface Params {
   conversationId?: string;
   replacements?: Replacements;
   newMessages: BaseMessage[];
+  threadId: string;
+  resumeValue?: TypedInterruptResumeValue 
 }
 
 /**
@@ -44,7 +46,35 @@ export const getConversationWithNewMessage = async (params: Params) => {
   }
 
   const updatedConversation = await conversationsDataClient.appendConversationMessages({
-    existingConversation,
+    existingConversation: {
+      ...existingConversation,
+      messages: existingConversation.messages?.map((message) => {
+        if(message.metadata?.typedInterrupt && message.metadata?.typedInterrupt.expired !== true && message.metadata.typedInterrupt.threadId === params.threadId && params.resumeValue) {
+          return {
+            ...message,
+            metadata:{
+              ...message.metadata,
+              typedInterruptResumeValue: params.resumeValue
+            }
+          }
+        }
+
+        if(message.metadata?.typedInterrupt !== undefined && message.metadata.typedInterrupt.threadId !== params.threadId &&  message.metadata.typedInterruptResumeValue === undefined){
+          // This is an old interrupt
+          return {
+            ...message,
+            metadata: {
+              ...message.metadata,
+              typedInterrupt: {
+                ...message.metadata.typedInterrupt,
+                expired: true
+              }
+            }
+          }
+        }
+        return message
+      })
+    },
     messages: params.newMessages.map((newMessage) => {
       const role = _isMessageFieldWithRole(newMessage)
         ? (newMessage.role as 'assistant' | 'user')
@@ -64,8 +94,12 @@ export const getConversationWithNewMessage = async (params: Params) => {
     params.logger.debug('Conversation was not updated with new messages');
   }
 
+  const filtered = existingConversation.messages?.filter((message) => {
+    return message.metadata?.typedInterrupt === undefined;
+  });
+
   // Anonymized conversation
-  const conversationLangChainMessages = getLangChainMessages(existingConversation.messages ?? []);
+  const conversationLangChainMessages = getLangChainMessages(filtered ?? []);
   // Anonymized new messages
   const newLangChainMessages = params.newMessages;
 

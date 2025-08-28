@@ -11,6 +11,7 @@ import type {
   Replacements,
   ScreenContext,
   MessageMetadata,
+  TypedInterrupts,
 } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
@@ -26,6 +27,8 @@ export interface FetchConnectorExecuteAction {
   apiConfig: ApiConfig;
   http: HttpSetup;
   message?: string;
+  threadId?: string;
+  resumeValue?: TypedInterrupts[keyof TypedInterrupts]["resumeValue"];
   replacements: Replacements;
   signal?: AbortSignal | undefined;
   size?: number;
@@ -56,6 +59,8 @@ export const fetchConnectorExecuteAction = async ({
   size,
   traceOptions,
   screenContext,
+  threadId,
+  resumeValue
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
   const isStream = assistantStreamingEnabled;
 
@@ -76,6 +81,8 @@ export const fetchConnectorExecuteAction = async ({
     langSmithApiKey:
       traceOptions?.langSmithApiKey === '' ? undefined : traceOptions?.langSmithApiKey,
     screenContext,
+    threadId,
+    resumeValue,
     ...optionalRequestParams,
   };
 

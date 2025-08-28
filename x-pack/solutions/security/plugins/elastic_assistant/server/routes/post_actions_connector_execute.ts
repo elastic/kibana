@@ -8,6 +8,7 @@
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { v4 as uuidv4 } from 'uuid';
 
 import { schema } from '@kbn/config-schema';
 import type { Message, Replacements } from '@kbn/elastic-assistant-common';
@@ -35,6 +36,7 @@ import {
 } from './helpers';
 import { isOpenSourceModel } from './utils';
 import type { ConfigSchema } from '../config_schema';
+import { OnLlmResponse } from '../lib/langchain/executors/types';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -79,7 +81,7 @@ export const postActionsConnectorExecuteRoute = (
         const assistantContext = ctx.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
-        let onLlmResponse;
+        let onLlmResponse : OnLlmResponse | undefined;
 
         const coreContext = await context.core;
         const inferenceChatModelDisabled =
@@ -103,6 +105,12 @@ export const postActionsConnectorExecuteRoute = (
           const onNewReplacements = (newReplacements: Replacements) => {
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
+
+          if(request.body.resumeValue && request.body.threadId === undefined) {
+            throw new Error('threadId is required when resumeValue is provided');
+          }
+
+          const threadId = request.body.threadId || uuidv4();
 
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
@@ -139,9 +147,7 @@ export const postActionsConnectorExecuteRoute = (
           });
 
           onLlmResponse = async (
-            content: string,
-            traceData: Message['traceData'] = {},
-            isError = false
+            {content, traceData = {} , isError = false, typedInterrupt  }
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
@@ -152,6 +158,7 @@ export const postActionsConnectorExecuteRoute = (
               await appendAssistantMessageToConversation({
                 conversationId,
                 conversationsDataClient,
+                typedInterrupt,
                 messageContent: prunedContent,
                 replacements: latestReplacements,
                 isError,
@@ -199,6 +206,8 @@ export const postActionsConnectorExecuteRoute = (
               actionsClient,
               actionTypeId,
               connectorId,
+              threadId,
+              resumeValue: request.body.resumeValue,
               contentReferencesStore,
               isOssModel,
               inferenceChatModelDisabled,
@@ -224,7 +233,11 @@ export const postActionsConnectorExecuteRoute = (
           logger.error(err);
           const error = transformError(err);
           if (onLlmResponse) {
-            await onLlmResponse(error.message, {}, true);
+            await onLlmResponse({
+              content: error.message,
+              traceData: {},
+              isError: true
+            });
           }
 
           const kbDataClient =

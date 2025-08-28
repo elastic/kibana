@@ -16,7 +16,7 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 export const getLangChainMessage = (
-  assistantMessage: Pick<Message, 'content' | 'role'>
+  assistantMessage: Pick<Message, 'content' | 'role' | 'metadata'>
 ): BaseMessage => {
   switch (assistantMessage.role) {
     case 'system':

@@ -37,6 +37,10 @@ export {
   sanitizeMessages,
 } from './impl/content_references';
 
+export 
+  *
+ from './impl/interrupt/interrupt'
+
 export type {
   ContentReferencesStore,
   ContentReferenceBlock,

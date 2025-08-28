@@ -11,10 +11,10 @@ import { Client as ESClient } from '@elastic/elasticsearch';
 import { ElasticSearchSaver } from '..';
 import type { Checkpoint, CheckpointTuple } from '@langchain/langgraph-checkpoint';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import { Subject } from 'rxjs';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { uuid6 } from '@langchain/langgraph-checkpoint';
+import { IndexPatternAdapter } from '@kbn/index-adapter';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
@@ -81,84 +81,92 @@ describe('ElasticSearchSaver', () => {
   });
 
   async function setupIndices(esClient: ESClient): Promise<void> {
-    // Set up checkpoints data stream
-    const defaultCheckpointDatastream = new DataStreamSpacesAdapter("checkpoints", {
-      kibanaVersion: '9.1.0',
+    // Set up checkpoints index
+    const defaultCheckpointIndex = new IndexPatternAdapter("checkpoints", {
+      kibanaVersion: '9.2.0',
       totalFieldsLimit: 2500,
     });
 
-    defaultCheckpointDatastream.setComponentTemplate({
+    defaultCheckpointIndex.setComponentTemplate({
       name: `component-template-checkpoints`,
       fieldMap: ElasticSearchSaver.checkpointsFieldMap,
     });
 
-    defaultCheckpointDatastream.setIndexTemplate({
+    defaultCheckpointIndex.setIndexTemplate({
       name: `checkpoints`,
       componentTemplateRefs: [`component-template-checkpoints`],
     });
 
-    defaultCheckpointDatastream.install({
+    defaultCheckpointIndex.install({
       esClient,
       logger: mockLogger,
       "pluginStop$": new Subject<void>()
     });
 
-    await defaultCheckpointDatastream.installSpace(DEFAULT_NAMESPACE_STRING);
+    await defaultCheckpointIndex.createIndex(DEFAULT_NAMESPACE_STRING);
 
-    // Set up checkpoints-writes data stream
-    const defaultCheckpointWritesDataStream = new DataStreamSpacesAdapter("checkpoints-writes", {
-      kibanaVersion: '9.1.0',
+    // Set up checkpoint-writes index
+    const defaultCheckpointWritesIndex = new IndexPatternAdapter("checkpoint-writes", {
+      kibanaVersion: '9.2.0',
       totalFieldsLimit: 2500,
     });
 
-    defaultCheckpointWritesDataStream.setComponentTemplate({
-      name: `component-template-checkpoints-writes`,
+    defaultCheckpointWritesIndex.setComponentTemplate({
+      name: `component-template-checkpoint-writes`,
       fieldMap: ElasticSearchSaver.checkpointWritesFieldMap,
     });
 
-    defaultCheckpointWritesDataStream.setIndexTemplate({
-      name: `checkpoints-writes`,
-      componentTemplateRefs: [`component-template-checkpoints-writes`],
+    defaultCheckpointWritesIndex.setIndexTemplate({
+      name: `checkpoint-writes`,
+      componentTemplateRefs: [`component-template-checkpoint-writes`],
     });
 
-    defaultCheckpointWritesDataStream.install({
+    defaultCheckpointWritesIndex.install({
       esClient,
       logger: mockLogger,
       "pluginStop$": new Subject<void>()
     });
 
-    await defaultCheckpointWritesDataStream.installSpace(DEFAULT_NAMESPACE_STRING);
+    await defaultCheckpointWritesIndex.createIndex(DEFAULT_NAMESPACE_STRING);
   }
 
-  async function deleteDataStream(dataStreamName: string) {
+  async function deleteIndices(indexPattern: string) {
     try {
-      // Check if the data stream exists using a safe approach
-      const exists = await client.indices.getDataStream({
-        name: dataStreamName,
-        error_trace: false,
-      }).then(() => true).catch(() => false);
+      // Use indices.get to find indices matching the pattern
+      const response = await client.indices.get({
+        index: indexPattern,
+        allow_no_indices: true,
+        expand_wildcards: 'all'
+      }).catch(() => ({}));
       
-      if (!exists) {
-        console.log(`Data stream ${dataStreamName} not found`);
+      const indexNames = Object.keys(response);
+      
+      if (indexNames.length === 0) {
+        console.log(`No indices matching pattern ${indexPattern} found`);
         return;
       }
       
-      // Delete the entire data stream (which also deletes all backing indices)
-      await client.indices.deleteDataStream({
-        name: dataStreamName,
-        expand_wildcards: 'all'
+      // Delete indices by their specific names
+      await client.indices.delete({
+        index: indexNames.join(','),
+        allow_no_indices: true
       });
       
-      console.log(`Data stream ${dataStreamName} deleted successfully`);
+      console.log(`Indices ${indexNames.join(', ')} deleted successfully`);
     } catch (err) {
-      console.error(`Error deleting data stream ${dataStreamName}:`, err);
+      // If the error is about no indices found, that's okay
+      if (err.message?.includes('index_not_found_exception') || err.message?.includes('404')) {
+        console.log(`No indices matching pattern ${indexPattern} found`);
+        return;
+      }
+      console.error(`Error deleting indices matching pattern ${indexPattern}:`, err);
     }
   }
 
   beforeEach(async () => {
     // Clean up indices before each test
-    await deleteDataStream('checkpoints*');
-    await deleteDataStream('checkpoints-writes*');
+    await deleteIndices('checkpoints*');
+    await deleteIndices('checkpoint-writes*');
     
     // Re-setup indices for each test
     await setupIndices(client);
@@ -175,7 +183,7 @@ describe('ElasticSearchSaver', () => {
 
   afterAll(async () => {
     // Stop the ES server
-    await esServer.stop();
+    // await esServer.stop();
   });
 
   it.each([
@@ -227,6 +235,18 @@ describe('ElasticSearchSaver', () => {
     expect(firstCheckpointTuple?.checkpoint).toEqual(checkpoint1);
     expect(firstCheckpointTuple?.parentConfig).toBeUndefined();
     expect(firstCheckpointTuple?.pendingWrites).toEqual([['test1', 'test2', 'test3']]);
+
+    await saver.put(
+      {
+        configurable: {
+          thread_id: THREAD_ID,
+          checkpoint_id: '2025-07-22T17:41:26.732Z',
+          checkpoint_ns: checkpointNs,
+        },
+      },
+      checkpoint2,
+      { source: 'update', step: -1, writes: null, parents: {} }
+    );
 
     await saver.put(
       {

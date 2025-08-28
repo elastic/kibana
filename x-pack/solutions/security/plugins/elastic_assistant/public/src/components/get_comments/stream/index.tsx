@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { MessageRole } from '@kbn/elastic-assistant-common';
+import type { MessageRole, TypedInterruptResumeValue, TypedInterruptValue } from '@kbn/elastic-assistant-common';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
@@ -15,6 +15,8 @@ import { RegenerateResponseButton } from './buttons/regenerate_response_button';
 import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
 import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
+import { TypedInterruptFactory } from '../typed_interrupt';
+import { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
 
 interface Props {
   abortStream: () => void;
@@ -25,12 +27,16 @@ interface Props {
   isFetching?: boolean;
   isControlsEnabled?: boolean;
   index: number;
+  isLastMessage: boolean;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   regenerateMessage: () => void;
   setIsStreaming: (isStreaming: boolean) => void;
   transformMessage: (message: string) => ContentMessage;
   messageRole: MessageRole;
+  typedInterrupt?: TypedInterruptValue
+  resumedValue?: TypedInterruptResumeValue
+  resumeGraph: ResumeGraphFunction;
 }
 
 export const StreamComment = ({
@@ -39,6 +45,7 @@ export const StreamComment = ({
   contentReferences,
   contentReferencesVisible,
   index,
+  isLastMessage,
   isControlsEnabled = false,
   isError = false,
   isFetching = false,
@@ -48,6 +55,9 @@ export const StreamComment = ({
   setIsStreaming,
   transformMessage,
   messageRole,
+  typedInterrupt,
+  resumedValue,
+  resumeGraph
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     refetchCurrentConversation,
@@ -101,6 +111,9 @@ export const StreamComment = ({
     if (!isControlsEnabled) {
       return;
     }
+    if(!isLastMessage){
+      return
+    }
     if (isAnythingLoading && reader) {
       return <StopGeneratingButton onClick={stopStream} />;
     }
@@ -111,7 +124,9 @@ export const StreamComment = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [isAnythingLoading, isControlsEnabled, reader, regenerateMessage, stopStream]);
+  }, [isAnythingLoading, isControlsEnabled, reader, regenerateMessage, stopStream, isLastMessage]);
+
+  const footer = <TypedInterruptFactory interrupt={typedInterrupt} resumeGraph={resumeGraph} resumedValue={resumedValue} isLastMessage={isLastMessage} />;
 
   return (
     <MessagePanel
@@ -126,6 +141,7 @@ export const StreamComment = ({
           loading={isAnythingLoading}
         />
       }
+      footer={footer}
       error={error ? new Error(error) : undefined}
       controls={controls}
     />

@@ -12,7 +12,7 @@ import type { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
+import { TypedInterruptResumeValue, TypedInterruptValue, type ExecuteConnectorRequestBody, type TraceData } from '@kbn/elastic-assistant-common';
 import type { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
@@ -23,10 +23,12 @@ import type { DefaultAssistantGraph } from './graph';
 import { DEFAULT_ASSISTANT_GRAPH_ID } from './graph';
 import type { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
+import { Command } from '@langchain/langgraph';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
+  resumeValue?: TypedInterruptResumeValue
   inputs: GraphInputs;
   isEnabledKnowledgeBase: boolean;
   logger: Logger;
@@ -55,6 +57,7 @@ export const streamGraph = async ({
   apmTracer,
   assistantGraph,
   inputs,
+  resumeValue,
   isEnabledKnowledgeBase,
   logger,
   onLlmResponse,
@@ -74,39 +77,52 @@ export const streamGraph = async ({
   } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
 
   let didEnd = false;
-  const handleStreamEnd = (finalResponse: string, isError = false) => {
+
+  const closeStream = (args: { errorMessage: string, isError: true } | { isError: false }) => {
     if (didEnd) {
       return;
     }
-    if (isError) {
+
+    if (args.isError) {
       telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
         actionTypeId: request.body.actionTypeId,
         model: request.body.model,
-        errorMessage: finalResponse,
+        errorMessage: args.errorMessage,
         assistantStreamingEnabled: true,
         isEnabledKnowledgeBase,
         errorLocation: 'handleStreamEnd',
       });
     }
-    if (onLlmResponse) {
-      onLlmResponse(
-        finalResponse,
-        {
-          transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
-          traceId: streamingSpan?.ids?.['trace.id'],
-        },
-        isError
-      ).catch(() => {});
-    }
+
     streamEnd();
     didEnd = true;
+
     if ((streamingSpan && !streamingSpan?.outcome) || streamingSpan?.outcome === 'unknown') {
-      streamingSpan.outcome = isError ? 'failure' : 'success';
+      streamingSpan.outcome = args.isError ? 'failure' : 'success';
     }
     streamingSpan?.end();
+  }
+
+  const handleFinalContent = (args: { finalResponse: string, isError: boolean, typedInterrupt?: TypedInterruptValue }) => {
+    if (onLlmResponse) {
+
+      onLlmResponse(
+        {
+          content: args.finalResponse,
+          typedInterrupt: args.typedInterrupt,
+          traceData: {
+            transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
+            traceId: streamingSpan?.ids?.['trace.id'],
+          },
+          isError: args.isError
+        }
+      ).catch(() => { });
+    }
   };
 
-  const stream = await assistantGraph.streamEvents(inputs, {
+  const streamEventsInput = resumeValue ? new Command({ resume: resumeValue }) : inputs
+
+  const stream = await assistantGraph.streamEvents(streamEventsInput, {
     callbacks: [
       apmTracer,
       ...(traceOptions?.tracers ?? []),
@@ -118,7 +134,7 @@ export const streamGraph = async ({
     streamMode: ['values', 'debug'],
     recursionLimit: inputs?.isOssModel ? 50 : 25,
     configurable: {
-      thread_id: inputs.conversationId,
+      thread_id: inputs.threadId,
     },
   });
 
@@ -135,7 +151,10 @@ export const streamGraph = async ({
           !data.output.lc_kwargs?.tool_calls?.length &&
           !didEnd
         ) {
-          handleStreamEnd(data.output.content);
+          handleFinalContent({
+            finalResponse: data.output.content,
+            isError: false,
+          });
         } else if (
           // This is the end of one model invocation but more message will follow as there are tool calls. If this chunk contains text content, add a newline separator to the stream to visually separate the chunks.
           event === 'on_chat_model_end' &&
@@ -147,11 +166,41 @@ export const streamGraph = async ({
         }
       }
     }
+
+    const state = await assistantGraph.getState({ configurable: { thread_id: inputs.threadId } })
+
+    if (state.tasks.length > 0) {
+      // The graph contains tasks, graph must have been interrupted
+      if (state.tasks.length > 1) {
+        logger.warn("Expected only one task to be active");
+      }
+      const task = state.tasks.at(0);
+      if (!task) {
+        throw new Error(`No task found in state: ${JSON.stringify(state, null, 2)}`);
+      }
+      if (task.interrupts.length < 1 || task.interrupts.length > 1) {
+        throw new Error(`Expected exactly one interrupt in task, found ${task.interrupts.length}`);
+      }
+      const interrupt = task.interrupts[0];
+      const interruptValue = interrupt.value;
+      const parsedInterruptValue = TypedInterruptValue.safeParse(interruptValue);
+      if (!parsedInterruptValue.success) {
+        throw new Error(`Interrupt did not match schema. You must use typedInterrupt(...). ${JSON.stringify(parsedInterruptValue.error)}`);
+      }
+
+      handleFinalContent({
+        finalResponse: "#### ⏳ Pending user input",
+        typedInterrupt: parsedInterruptValue.data,
+        isError: false,
+      });
+    }
+
+    closeStream({ isError: false });
   };
 
   pushStreamUpdate().catch((err) => {
     logger.error(`Error streaming graph: ${err}`);
-    handleStreamEnd(err.message, true);
+    handleFinalContent({ finalResponse: err.message, isError: true });
   });
 
   return responseWithHeaders;
@@ -208,13 +257,23 @@ export const invokeGraph = async ({
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
       recursionLimit: inputs?.isOssModel ? 50 : 25,
+      configurable: {
+        thread_id: inputs.threadId,
+      },
     });
     const lastMessage = result.messages[result.messages.length - 1];
     const output = lastMessage.text;
     const conversationId = result.conversationId;
+
     if (onLlmResponse) {
-      await onLlmResponse(output, traceData);
+      await onLlmResponse({
+        content: output,
+        traceData,
+      });
     }
+
+    const state = await assistantGraph.getState({ configurable: { thread_id: inputs.threadId } })
+    console.log(JSON.stringify(state, null, 2))
 
     return { output, traceData, conversationId };
   });

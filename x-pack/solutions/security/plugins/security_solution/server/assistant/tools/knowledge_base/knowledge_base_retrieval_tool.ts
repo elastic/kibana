@@ -10,7 +10,7 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { Document } from 'langchain/document';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import { knowledgeBaseReference, contentReferenceBlock } from '@kbn/elastic-assistant-common';
+import { knowledgeBaseReference, contentReferenceBlock, typedInterrupt } from '@kbn/elastic-assistant-common';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 
@@ -78,7 +78,19 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
     if (kbDataClient == null) return null;
 
     return tool(
-      async (input) => {
+      async (input, {configurable}) => {
+         const result = typedInterrupt(
+          {
+            type: "REQUEST_APPROVAL",
+            content: `Trying to access user knowledge base`,
+            threadId: configurable.thread_id
+          }
+        )
+        if (result.approved) {
+          // proceed to execute the tool logic
+        } else {
+          throw new Error(`User did not give permission to access their knowledge base`)
+        }
         logger.debug(
           () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
         );

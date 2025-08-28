@@ -20,6 +20,146 @@ components:
           description: Could be any string, not necessarily a UUID
           example: 'd9876543-f0a1-2345-6789-abcdef123456'
 
+    BaseTypedInterrupt:
+      type: object
+      description: The basis of a typed LangGraph interrupt
+      required:
+        - 'type'
+        - 'threadId'
+      properties:
+        type:
+          type: string
+          description: Type of the interrupt
+          example: 'REQUEST_APPROVAL'
+        expired:
+          type: boolean
+          description: Whether the interrupt has expired and can no longer be resumed.
+          example: false
+        threadId:
+          type: string
+          description: Thread ID of the graph execution that produced this message
+          example: '<UUID>'
+
+    RequestApprovalTypedInterruptValue:
+      description: A request approval interrupt
+      allOf:
+        - $ref: '#/components/schemas/BaseTypedInterrupt'
+        - type: object
+          required:
+            - 'type'
+            - 'content'
+          properties:
+            type:
+              type: string
+              enum: [REQUEST_APPROVAL]
+              example: 'REQUEST_APPROVAL'
+            content:
+              type: string
+              description: Content of the approval request
+              example: 'Requesting approval to access sensitive data.'
+
+    RequestApprovalResumeSchema:
+      description: A request approval resume schema
+      allOf:
+        - type: object
+          required:
+            - 'approved'
+          properties:
+            approved:
+              type: boolean
+              example: true
+              description: Whether the request was approved
+
+    RequestApprovalTypedInterrupt:
+      description: A request approval interrupt
+      allOf:
+        - type: object
+          required:
+            - 'interruptValue'
+            - 'resumeValue'
+          properties:
+            interruptValue:
+              $ref: '#/components/schemas/RequestApprovalTypedInterruptValue'
+              description: The interrupt value
+            resumeValue:
+              $ref: '#/components/schemas/RequestApprovalResumeSchema'
+              description: The resume value
+    
+
+    RequestTextTypedInterruptValue:
+      description: A request text interrupt
+      allOf:
+        - $ref: '#/components/schemas/BaseTypedInterrupt'
+        - type: object
+          required:
+            - 'type'
+            - 'content'
+          properties:
+            type:
+              type: string
+              enum: [REQUEST_TEXT]
+              example: 'REQUEST_TEXT'
+            content:
+              type: string
+              description: Content of the text request
+              example: 'What is the index you would like to use for the query'
+
+    RequestTextResumeSchema:
+      description: A request text resume schema
+      allOf:
+        - type: object
+          required:
+            - 'content'
+          properties:
+            content:
+              type: string
+              description: Text value used to resume the graph execution with
+              example: '.logs*'
+
+    RequestTextTypedInterrupt:
+      description: A request text interrupt
+      allOf:
+        - type: object
+          required:
+            - 'interruptValue'
+            - 'resumeValue'
+          properties:
+            interruptValue:
+              $ref: '#/components/schemas/RequestTextTypedInterruptValue'
+              description: The interrupt value
+            resumeValue:
+              $ref: '#/components/schemas/RequestTextResumeSchema'
+              description: The resume value
+
+    TypedInterruptValue:
+      description: A typed LangGraph interrupt
+      oneOf:
+        - $ref: '#/components/schemas/RequestApprovalTypedInterruptValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/RequestTextTypedInterruptValue'
+          additionalProperties: false
+
+    TypedInterruptResumeValue:
+      description: A typed LangGraph interrupt
+      oneOf:
+        - $ref: '#/components/schemas/RequestApprovalResumeSchema'
+          additionalProperties: false
+        - $ref: '#/components/schemas/RequestTextResumeSchema'
+          additionalProperties: false
+
+    TypedInterrupts:
+      description: A typed LangGraph interrupt
+      allOf:
+        - type: object
+          required:
+            - 'REQUEST_APPROVAL'
+            - 'REQUEST_TEXT'
+          properties:
+            REQUEST_APPROVAL:
+              $ref: '#/components/schemas/RequestApprovalTypedInterrupt'
+            REQUEST_TEXT:
+              $ref: '#/components/schemas/RequestTextTypedInterrupt'
+
     BaseContentReference:
       type: object
       description: The basis of a content reference
@@ -35,6 +175,7 @@ components:
           type: string
           description: Type of the content reference
           example: 'SecurityAlert'
+          
 
     KnowledgeBaseEntryContentReference:
       description: References a knowledge base entry
@@ -199,6 +340,12 @@ components:
         contentReferences:
           $ref: '#/components/schemas/ContentReferences'
           description: Data referred to by the message content.
+        typedInterrupt:
+          $ref: '#/components/schemas/TypedInterruptValue'
+          description: Graph interrupt value
+        typedInterruptResumeValue:
+          $ref: '#/components/schemas/TypedInterruptResumeValue'
+          description: Graph interrupt resume value
 
     Replacements:
       type: object

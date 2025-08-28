@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import type { ContentReference } from '@kbn/elastic-assistant-common';
-import { contentReferenceString } from '@kbn/elastic-assistant-common';
+import { contentReferenceString, typedInterrupt } from '@kbn/elastic-assistant-common';
 import yaml from 'js-yaml';
 import {
   hrefReference,
@@ -21,6 +21,8 @@ import { Document } from 'langchain/document';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { getIsKnowledgeBaseInstalled } from '@kbn/elastic-assistant-plugin/server/routes/helpers';
 import { APP_UI_ID } from '../../../../common';
+import { Command } from '@langchain/langgraph';
+import { ToolMessage } from '@langchain/core/messages';
 
 export type SecurityLabsKnowledgeBaseToolParams = Require<AssistantToolParams, 'kbDataClient'>;
 
@@ -49,10 +51,29 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
     const { kbDataClient, contentReferencesStore } = params as SecurityLabsKnowledgeBaseToolParams;
 
     return tool(
-      async (input) => {
+      async (input, { configurable, toolCall }) => {
+
+        let adjustedQuestion = undefined;
+        const isApproved = typedInterrupt(
+          {
+            type: "REQUEST_APPROVAL",
+            content: `Searching security labs content for the term ${input.question}. Would you like to change it?`,
+            threadId: configurable.thread_id
+          }
+        )
+        if (!isApproved.approved) {
+          adjustedQuestion = typedInterrupt(
+            {
+              type: "REQUEST_TEXT",
+              content: `Which term would you like to use instead?`,
+              threadId: configurable.thread_id
+            }
+          ).content
+        }
+
         const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
           kbResource: SECURITY_LABS_RESOURCE,
-          query: input.question,
+          query: adjustedQuestion ?? input.question,
         });
 
         if (docs.length === 0) {
@@ -96,7 +117,8 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
         // TODO: Token pruning
         const result = JSON.stringify(citedDocs).substring(0, 20000);
 
-        return result;
+
+        return result
       },
       {
         name: toolDetails.name,

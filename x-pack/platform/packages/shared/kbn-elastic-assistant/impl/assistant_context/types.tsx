@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, Message, Replacements, TypedInterrupts } from '@kbn/elastic-assistant-common';
 import type { EuiCommentProps } from '@elastic/eui';
 import type { UserAvatar } from '.';
 
@@ -87,9 +87,12 @@ export type GetAssistantMessages = (commentArgs: {
   isFetchingResponse: boolean;
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   regenerateMessage: (conversationId: string) => void;
+  resumeGraph: ResumeGraphFunction;
   showAnonymizedValues: boolean;
   currentUserAvatar?: UserAvatar;
   setIsStreaming: (isStreaming: boolean) => void;
   systemPromptContent?: string;
   contentReferencesVisible: boolean;
 }) => EuiCommentProps[];
+
+export type ResumeGraphFunction = (threadId: string, resumeValue: TypedInterrupts[keyof TypedInterrupts]["resumeValue"]) => Promise<void>

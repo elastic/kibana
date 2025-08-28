@@ -63,6 +63,10 @@ paths:
                     type: string
                 replacements:
                   $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+                threadId:
+                  type: string
+                resumeValue:
+                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/TypedInterruptResumeValue'
                 size:
                   type: number
                 langSmithProject:
