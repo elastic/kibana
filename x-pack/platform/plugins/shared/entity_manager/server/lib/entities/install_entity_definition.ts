@@ -10,26 +10,25 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import type { Logger } from '@kbn/logging';
-import { generateLatestIndexTemplateId } from './helpers/generate_component_id';
 import { createAndInstallIngestPipelines } from './create_and_install_ingest_pipeline';
 import { createAndInstallTransforms } from './create_and_install_transform';
 import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
 import { deleteEntityDefinition } from './delete_entity_definition';
-import { deleteLatestIngestPipeline } from './delete_ingest_pipeline';
 import { findEntityDefinitionById } from './find_entity_definition';
 import {
   entityDefinitionExists,
   saveEntityDefinition,
   updateEntityDefinition,
 } from './save_entity_definition';
-import { createAndInstallTemplates, deleteTemplate } from '../manage_index_templates';
+import { createAndInstallTemplates } from '../manage_index_templates';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
 import type { EntityDefinitionWithState } from './types';
-import { stopLatestTransform, stopTransforms } from './stop_transforms';
-import { deleteLatestTransform, deleteTransforms } from './delete_transforms';
-import { deleteIndices } from './delete_index';
+import { stopTransforms } from './stop_transforms';
+import { deleteTransforms } from './delete_transforms';
+import { deleteAllData, deleteAllComponents } from './delete_entity_definition';
+import {startTransforms} from './start_transforms';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -61,21 +60,10 @@ export async function installEntityDefinition({
       installedComponents: [],
     });
 
-    return await install({ esClient, soClient, logger, definition: entityDefinition });
+    return await installAllComponents({ esClient, soClient, logger, definition: entityDefinition });
   } catch (e) {
     logger.error(`Failed to install entity definition [${definition.id}]: ${e}`);
-
-    await stopLatestTransform(esClient, definition, logger);
-    await deleteLatestTransform(esClient, definition, logger);
-
-    await deleteLatestIngestPipeline(esClient, definition, logger);
-
-    await deleteTemplate({
-      esClient,
-      logger,
-      name: generateLatestIndexTemplateId(definition),
-    });
-
+    await deleteAllComponents(esClient, definition, logger);
     await deleteEntityDefinition(soClient, definition).catch((err) => {
       if (err instanceof EntityDefinitionNotFound) {
         return;
@@ -109,7 +97,7 @@ export async function installBuiltInEntityDefinitions({
 
     if (!installedDefinition) {
       // clean data from previous installation
-      await deleteIndices(esClient, builtInDefinition, logger);
+      await deleteAllData(esClient, builtInDefinition, logger);
 
       return await installEntityDefinition({
         definition: builtInDefinition,
@@ -147,7 +135,7 @@ export async function installBuiltInEntityDefinitions({
 
 // perform installation of an entity definition components.
 // assume definition saved object is already persisted
-async function install({
+async function installAllComponents({
   esClient,
   soClient,
   definition,
@@ -158,19 +146,37 @@ async function install({
 
   logger.debug(`Installing index templates for definition [${definition.id}]`);
   const templates = await createAndInstallTemplates(esClient, definition, logger);
+  await updateEntityDefinition(soClient, definition.id, {
+    installedComponents: [...templates],
+  });
 
   logger.debug(`Installing ingest pipelines for definition [${definition.id}]`);
   const pipelines = await createAndInstallIngestPipelines(esClient, definition, logger);
+  await updateEntityDefinition(soClient, definition.id, {
+    installedComponents: [...templates, ...pipelines],
+  });
 
   logger.debug(`Installing transforms for definition [${definition.id}]`);
   const transforms = await createAndInstallTransforms(esClient, definition, logger);
-
   const updatedProps = await updateEntityDefinition(soClient, definition.id, {
     installStatus: 'installed',
     installedComponents: [...templates, ...pipelines, ...transforms],
   });
   return { ...definition, ...updatedProps.attributes };
 }
+
+export async function resetAllComponents(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger,
+) {
+  await deleteAllComponents(esClient, definition, logger, true);
+  await createAndInstallTemplates(esClient, definition, logger);
+  await createAndInstallIngestPipelines(esClient, definition, logger);
+  await createAndInstallTransforms(esClient, definition, logger);
+  await startTransforms(esClient, definition, logger);
+}
+
 
 // stop and delete the current transforms and reinstall all the components
 export async function reinstallEntityDefinition({
@@ -202,13 +208,13 @@ export async function reinstallEntityDefinition({
     });
 
     logger.debug(`Deleting transforms for definition [${definition.id}] v${definition.version}`);
-    await stopAndDeleteTransforms(esClient, definition, logger);
-
+    await stopTransforms(esClient, definition, logger);
+    await deleteTransforms(esClient, definition, logger);
     if (deleteData) {
-      await deleteIndices(esClient, definition, logger);
+      await deleteAllData(esClient, definition, logger);
     }
 
-    return await install({
+    return await installAllComponents({
       soClient,
       logger,
       esClient,
@@ -256,11 +262,3 @@ const shouldReinstallBuiltinDefinition = (
   return timedOut || outdated || failed || partial;
 };
 
-const stopAndDeleteTransforms = async (
-  esClient: ElasticsearchClient,
-  definition: EntityDefinition,
-  logger: Logger
-) => {
-  await stopTransforms(esClient, definition, logger);
-  await deleteTransforms(esClient, definition, logger);
-};

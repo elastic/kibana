@@ -4,12 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { EntityDefinition } from '@kbn/entities-schema';
-import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
+import type { Logger } from '@kbn/logging';
+import { generateLatestIndexTemplateId } from './helpers/generate_component_id';
+import { deleteIngestPipelines, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
+import { deleteTemplate, deleteTemplates } from '../manage_index_templates';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
+import { stopLatestTransform, stopTransforms } from './stop_transforms';
+import { deleteLatestTransform, deleteTransforms } from './delete_transforms';
+import { deleteIndices } from './delete_index';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
+
+export async function deleteAllData(esClient: ElasticsearchClient, definition: EntityDefinition, logger: Logger) {
+  await deleteIndices(esClient, definition, logger)
+}
+
+export async function deleteAllComponents(esClient: ElasticsearchClient, definition: EntityDefinition, logger: Logger, deleteData?: boolean) {
+  await stopLatestTransform(esClient, definition, logger);
+  await stopTransforms(esClient, definition, logger);
+  await deleteLatestTransform(esClient, definition, logger);
+  await deleteTransforms(esClient, definition, logger);
+
+  await deleteLatestIngestPipeline(esClient, definition, logger);
+  await deleteIngestPipelines(esClient, definition, logger);
+
+  await deleteTemplate({
+    esClient,
+    logger,
+    name: generateLatestIndexTemplateId(definition),
+  });
+  await deleteTemplates(esClient, definition, logger);
+
+  if (deleteData) {
+    await deleteAllData(esClient, definition, logger);
+  }
+}
 
 export async function deleteEntityDefinition(
   soClient: SavedObjectsClientContract,

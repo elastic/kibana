@@ -17,9 +17,9 @@ import {
 import { startTransforms } from './entities/start_transforms';
 import { findEntityDefinitionById, findEntityDefinitions } from './entities/find_entity_definition';
 import { uninstallEntityDefinition } from './entities/uninstall_entity_definition';
+import { deleteAllData } from './entities/delete_entity_definition';
 import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 import { stopTransforms } from './entities/stop_transforms';
-import { deleteIndices } from './entities/delete_index';
 import type { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
 
@@ -133,7 +133,7 @@ export class EntityClient {
     });
 
     if (deleteData) {
-      await deleteIndices(
+      await deleteAllData(
         this.options.clusterClient.asCurrentUser,
         definition,
         this.options.logger

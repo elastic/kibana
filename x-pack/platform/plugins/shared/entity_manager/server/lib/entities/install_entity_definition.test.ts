@@ -56,7 +56,7 @@ const assertHasCreatedDefinition = (
       managed: definition.managed,
     }
   );
-  expect(soClient.update).toBeCalledTimes(1);
+  expect(soClient.update).toBeCalledTimes(3);
   expect(soClient.update).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition.id, {
     installStatus: 'installed',
     installedComponents: getExpectedInstalledComponents(definition),
@@ -88,7 +88,7 @@ const assertHasUpgradedDefinition = (
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) => {
-  expect(soClient.update).toBeCalledTimes(2);
+  expect(soClient.update).toBeCalledTimes(4);
   expect(soClient.update).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition.id, {
     ...definition,
     installStatus: 'upgrading',

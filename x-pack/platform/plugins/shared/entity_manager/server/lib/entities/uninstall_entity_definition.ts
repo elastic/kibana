@@ -9,14 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { Logger } from '@kbn/logging';
-import { deleteEntityDefinition } from './delete_entity_definition';
-import { deleteIngestPipelines } from './delete_ingest_pipeline';
-
-import { deleteTemplates } from '../manage_index_templates';
-
-import { stopTransforms } from './stop_transforms';
-
-import { deleteTransforms } from './delete_transforms';
+import { deleteAllComponents, deleteEntityDefinition } from './delete_entity_definition';
 import { EntityClient } from '../entity_client';
 import type { EntityManagerServerSetup } from '../../types';
 import { deleteEntityDiscoveryAPIKey, readEntityDiscoveryAPIKey } from '../auth';
@@ -33,13 +26,7 @@ export async function uninstallEntityDefinition({
   soClient: SavedObjectsClientContract;
   logger: Logger;
 }) {
-  await stopTransforms(esClient, definition, logger);
-  await deleteTransforms(esClient, definition, logger);
-
-  await deleteIngestPipelines(esClient, definition, logger);
-
-  await deleteTemplates(esClient, definition, logger);
-
+  await deleteAllComponents(esClient, definition, logger);
   await deleteEntityDefinition(soClient, definition);
 }
 
