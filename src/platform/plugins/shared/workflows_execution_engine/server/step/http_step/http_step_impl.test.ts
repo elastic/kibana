@@ -64,9 +64,9 @@ describe('HttpStepImpl', () => {
     httpStep = new HttpStepImpl(
       mockStep,
       mockContextManager,
-      mockWorkflowRuntime,
       mockWorkflowLogger,
-      mockUrlValidator
+      mockUrlValidator,
+      mockWorkflowRuntime
     );
 
     jest.clearAllMocks();
@@ -167,7 +167,7 @@ describe('HttpStepImpl', () => {
         timeout: 30000,
       };
 
-      const result = await (httpStep as any).executeHttpRequest(input);
+      const result = await (httpStep as any)._run(input);
 
       expect(mockedAxios).toHaveBeenCalledWith({
         url: 'https://api.example.com/data',
@@ -205,7 +205,7 @@ describe('HttpStepImpl', () => {
         timeout: 30000,
       };
 
-      const result = await (httpStep as any).executeHttpRequest(input);
+      const result = await (httpStep as any)._run(input);
 
       expect(mockedAxios).toHaveBeenCalledWith({
         url: 'https://api.example.com/users',
@@ -251,9 +251,9 @@ describe('HttpStepImpl', () => {
       httpStep = new HttpStepImpl(
         mockStep,
         mockContextManager,
-        mockWorkflowRuntime,
         mockWorkflowLogger,
-        mockUrlValidator
+        mockUrlValidator,
+        mockWorkflowRuntime
       );
 
       mockContextManager.getContext.mockReturnValue({
@@ -290,9 +290,9 @@ describe('HttpStepImpl', () => {
           },
         },
         mockContextManager,
-        mockWorkflowRuntime,
         mockWorkflowLogger,
-        mockUrlValidator
+        mockUrlValidator,
+        mockWorkflowRuntime
       );
 
       mockContextManager.getContext.mockReturnValue({
@@ -301,9 +301,7 @@ describe('HttpStepImpl', () => {
         steps: {},
       } as any);
 
-      await expect(httpStep.run()).rejects.toThrow(
-        'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts'
-      );
+      await httpStep.run();
 
       // Should not make any HTTP request
       expect(mockedAxios).not.toHaveBeenCalled();
@@ -332,7 +330,7 @@ describe('HttpStepImpl', () => {
           'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts',
       });
       expect(mockWorkflowRuntime.finishStep).toHaveBeenCalled();
-      expect(mockWorkflowRuntime.goToNextStep).not.toHaveBeenCalled();
+      expect(mockWorkflowRuntime.goToNextStep).toHaveBeenCalled();
     });
 
     it('should allow all hosts when wildcard is configured', async () => {
@@ -351,9 +349,9 @@ describe('HttpStepImpl', () => {
           },
         },
         mockContextManager,
-        mockWorkflowRuntime,
         mockWorkflowLogger,
-        mockUrlValidator
+        mockUrlValidator,
+        mockWorkflowRuntime
       );
 
       mockContextManager.getContext.mockReturnValue({
@@ -392,9 +390,9 @@ describe('HttpStepImpl', () => {
         const httpStepInstance = new HttpStepImpl(
           mockStep,
           mockContextManager,
-          mockWorkflowRuntime,
           mockWorkflowLogger,
-          mockUrlValidator
+          mockUrlValidator,
+          mockWorkflowRuntime
         );
 
         const result = httpStepInstance.getInput();
@@ -417,9 +415,9 @@ describe('HttpStepImpl', () => {
       const httpStepInstance = new HttpStepImpl(
         stepWithoutTimeout,
         mockContextManager,
-        mockWorkflowRuntime,
         mockWorkflowLogger,
-        mockUrlValidator
+        mockUrlValidator,
+        mockWorkflowRuntime
       );
 
       const result = httpStepInstance.getInput();
@@ -431,9 +429,9 @@ describe('HttpStepImpl', () => {
       const httpStepInstance = new HttpStepImpl(
         mockStep,
         mockContextManager,
-        mockWorkflowRuntime,
         mockWorkflowLogger,
-        mockUrlValidator
+        mockUrlValidator,
+        mockWorkflowRuntime
       );
 
       expect(() => httpStepInstance.getInput()).toThrow(/Invalid duration format/);

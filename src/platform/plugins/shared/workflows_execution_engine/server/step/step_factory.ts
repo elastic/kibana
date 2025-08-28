@@ -25,8 +25,8 @@ import {
   ExitConditionBranchNodeImpl,
   ExitIfNodeImpl,
 } from './if_step';
-import { WaitStepImpl } from './wait_step/wait_step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './retry_step';
+import { WaitStepImpl } from './wait_step/wait_step';
 
 export class StepFactory {
   constructor(
@@ -98,9 +98,9 @@ export class StepFactory {
         return new HttpStepImpl(
           step as any,
           this.contextManager,
-          this.workflowRuntime,
           this.workflowLogger,
-          this.urlValidator
+          this.urlValidator,
+          this.workflowRuntime
         );
       case 'parallel':
       // return new ParallelStepImpl(step as ParallelStep, contextManager);

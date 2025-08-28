@@ -10,37 +10,51 @@
 import type { HttpGraphNode } from '@kbn/workflows';
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import type { UrlValidator } from '../../lib/url_validator';
-import { WorkflowTemplatingEngine } from '../../templating_engine';
 import { parseDuration } from '../../utils/parse-duration/parse-duration';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import type { StepImplementation } from '../step_base';
+import type { BaseStep, RunStepResult } from '../step_base';
+import { StepBase } from '../step_base';
 
 type HttpHeaders = Record<string, string | number | boolean>;
 
-export class HttpStepImpl implements StepImplementation {
-  private templatingEngine: WorkflowTemplatingEngine;
+// Extend BaseStep for HTTP-specific properties
+export interface HttpStep extends BaseStep {
+  with: {
+    url: string;
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+    headers?: HttpHeaders;
+    body?: any;
+    timeout?: string;
+  };
+}
 
+export class HttpStepImpl extends StepBase<HttpStep> {
   constructor(
-    private node: HttpGraphNode,
-    private contextManager: WorkflowContextManager,
-    private workflowRuntime: WorkflowExecutionRuntimeManager,
+    node: HttpGraphNode,
+    contextManager: WorkflowContextManager,
     private workflowLogger: IWorkflowEventLogger,
-    private urlValidator: UrlValidator
+    private urlValidator: UrlValidator,
+    workflowRuntime: WorkflowExecutionRuntimeManager
   ) {
-    this.templatingEngine = new WorkflowTemplatingEngine();
+    const httpStep: HttpStep = {
+      name: node.configuration.name,
+      type: node.type,
+      spaceId: '', // TODO: get from context or node
+      with: node.configuration.with,
+    };
+    super(
+      httpStep,
+      contextManager,
+      undefined, // no connector executor needed for HTTP
+      workflowRuntime
+    );
   }
 
   public getInput() {
     const context = this.contextManager.getContext();
-    const {
-      url,
-      method = 'GET',
-      headers = {},
-      body,
-      timeout = '30s',
-    } = this.node.configuration.with;
+    const { url, method = 'GET', headers = {}, body, timeout = '30s' } = this.step.with;
 
     return {
       url: typeof url === 'string' ? this.templatingEngine.render(url, context) : url,
@@ -90,25 +104,15 @@ export class HttpStepImpl implements StepImplementation {
     return obj;
   }
 
-  async run(): Promise<void> {
-    await this.workflowRuntime.startStep(this.node.id);
-
-    const input = this.getInput();
-
+  protected async _run(input: any): Promise<RunStepResult> {
     try {
-      const result = await this.executeHttpRequest(input);
-      await this.workflowRuntime.setStepResult(result);
-      this.workflowRuntime.goToNextStep();
+      return await this.executeHttpRequest(input);
     } catch (error) {
-      const result = await this.handleFailure(input, error);
-      await this.workflowRuntime.setStepResult(result);
-      throw new Error(result.error);
-    } finally {
-      await this.workflowRuntime.finishStep(this.node.id);
+      return await this.handleFailure(input, error);
     }
   }
 
-  private async executeHttpRequest(input?: any): Promise<any> {
+  private async executeHttpRequest(input?: any): Promise<RunStepResult> {
     const { url, method, headers, body, timeout } = input;
 
     // Validate that the URL is allowed based on the allowedHosts configuration
@@ -119,7 +123,7 @@ export class HttpStepImpl implements StepImplementation {
         `HTTP request blocked: ${error.message}`,
         error instanceof Error ? error : new Error(String(error)),
         {
-          workflow: { step_id: this.node.configuration.name },
+          workflow: { step_id: this.step.name },
           event: { action: 'http_request', outcome: 'failure' },
           tags: ['http', 'security', 'blocked'],
         }
@@ -128,7 +132,7 @@ export class HttpStepImpl implements StepImplementation {
     }
 
     this.workflowLogger.logInfo(`Making HTTP ${method} request to ${url}`, {
-      workflow: { step_id: this.node.configuration.name },
+      workflow: { step_id: this.step.name },
       event: { action: 'http_request', outcome: 'unknown' },
       tags: ['http', method.toLowerCase()],
     });
@@ -147,7 +151,7 @@ export class HttpStepImpl implements StepImplementation {
     const response: AxiosResponse = await axios(config);
 
     this.workflowLogger.logInfo(`HTTP request completed with status ${response.status}`, {
-      workflow: { step_id: this.node.configuration.name },
+      workflow: { step_id: this.step.name },
       event: { action: 'http_request', outcome: 'success' },
       tags: ['http', method.toLowerCase()],
     });
@@ -164,7 +168,7 @@ export class HttpStepImpl implements StepImplementation {
     };
   }
 
-  private async handleFailure(input: any, error: any): Promise<any> {
+  protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
     const errorMessage = axios.isAxiosError(error)
       ? error.response
         ? `HTTP Error: ${error.response.status} ${error.response.statusText}`
@@ -177,7 +181,7 @@ export class HttpStepImpl implements StepImplementation {
       `HTTP request failed: ${errorMessage}`,
       error instanceof Error ? error : new Error(errorMessage),
       {
-        workflow: { step_id: this.node.configuration.name },
+        workflow: { step_id: this.step.name },
         event: { action: 'http_request', outcome: 'failure' },
         tags: ['http', 'error'],
       }
