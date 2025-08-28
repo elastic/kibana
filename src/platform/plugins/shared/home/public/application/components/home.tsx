@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
 import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
-import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   FavoritesClient,
@@ -39,6 +39,7 @@ import { HomeFavoriteDashboards } from './personalization/favorite_dashboards';
 
 export const KEY_ENABLE_WELCOME = 'home:welcome:show';
 const HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY = 'home:solutions:hide';
+const HOME_SELECTED_TAG_LOCAL_STORAGE_KEY = 'homeContentByTagTableTag';
 
 export interface HomeProps {
   addBasePath: (url: string) => string;
@@ -58,6 +59,7 @@ interface State {
   isWelcomeEnabled: boolean;
   selectedTabId: string;
   hideSolutionsSection: boolean;
+  tagIds: string[];
 }
 
 export class Home extends Component<HomeProps, State> {
@@ -85,6 +87,7 @@ export class Home extends Component<HomeProps, State> {
       selectedTabId: 'recentlyViewed', // <-- default tab id
       hideSolutionsSection:
         props.localStorage.getItem(HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY) === 'true',
+      tagIds: localStorage.getItem(HOME_SELECTED_TAG_LOCAL_STORAGE_KEY)?.split(',') || [],
     };
   }
 
@@ -163,14 +166,14 @@ export class Home extends Component<HomeProps, State> {
     const { selectedTabId } = this.state;
     return (
       <KibanaPageTemplate.Section bottomBorder paddingSize="m" grow={false}>
-        <EuiFlexGroup gutterSize="m">
+        <EuiFlexGrid columns={2} gutterSize="m">
           <EuiFlexItem>
             <EuiTabs
               css={css`
                 padding-left: 24px;
               `}
             >
-              {tabs.map((tab) => (
+              {tabs.map((tab, index) => (
                 <EuiTab
                   key={tab.id}
                   onClick={() => this.onSelectedTabChanged(tab.id)}
@@ -184,10 +187,23 @@ export class Home extends Component<HomeProps, State> {
               {tabs.find((tab) => tab.id === selectedTabId)?.content}
             </div>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <ContentByTagTable />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          {this.state.tagIds.map((tagId: string, index: number) => (
+            <EuiFlexItem>
+              <ContentByTagTable
+                tagId={tagId}
+                saveTag={(newTagId: string) => {
+                  const currentTags = this.state.tagIds;
+                  currentTags[index] = newTagId;
+                  this.setState({ tagIds: currentTags });
+                  this.props.localStorage.setItem(
+                    HOME_SELECTED_TAG_LOCAL_STORAGE_KEY,
+                    currentTags.join(',')
+                  );
+                }}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
       </KibanaPageTemplate.Section>
     );
   }

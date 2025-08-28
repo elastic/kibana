@@ -14,13 +14,13 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { getServices } from '../../kibana_services';
 
-const HOME_SELECTED_TAG_LOCAL_STORAGE_KEY = 'homeContentByTagTableTag';
+interface Props {
+  tagId: string;
+  saveTag: (tagId: string) => void;
+}
 
-export const ContentByTagTable = () => {
+export const ContentByTagTable = ({ tagId, saveTag }: Props) => {
   const { application, uiSettings, savedObjectsTagging, contentClient, http } = getServices();
-  const [tagId, setTagId] = React.useState(
-    localStorage.getItem(HOME_SELECTED_TAG_LOCAL_STORAGE_KEY) || ''
-  );
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
   const tag = savedObjectsTagging.getTaggingApi()?.ui.getTag(tagId);
@@ -65,8 +65,7 @@ export const ContentByTagTable = () => {
               <TagsSelector
                 selected={tagId ? [tagId] : []}
                 onTagsSelected={([selectedTag, newTag = '']) => {
-                  localStorage.setItem(HOME_SELECTED_TAG_LOCAL_STORAGE_KEY, newTag || selectedTag);
-                  setTagId(newTag || selectedTag);
+                  saveTag(newTag || selectedTag);
                 }}
               />
             ) : null}
