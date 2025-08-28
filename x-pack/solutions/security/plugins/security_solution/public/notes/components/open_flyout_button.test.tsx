@@ -15,7 +15,7 @@ import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shar
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks/mock_data_view';
+import { withIndices } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../sourcerer/containers');
@@ -45,10 +45,7 @@ describe('OpenFlyoutButtonIcon', () => {
     const openFlyout = jest.fn();
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout });
     (useSourcererDataView as jest.Mock).mockReturnValue({ selectedPatterns: ['test1', 'test2'] });
-    jest.mocked(useDataView).mockReturnValue({
-      dataView: getMockDataViewWithMatchedIndices(['test1', 'test2']),
-      status: 'ready',
-    });
+    jest.mocked(useDataView).mockReturnValue(withIndices(['test1', 'test2']));
 
     const { getByTestId } = render(
       <TestProviders>

@@ -11,13 +11,10 @@ import { useLocation } from 'react-router-dom';
 import { SourcererButton } from './sourcerer_selection';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { createMockStore, mockGlobalState } from '../../../common/mock';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { DATA_VIEW_PICKER_TEST_ID } from '../../../data_view_manager/components/data_view_picker/constants';
 import { ALERTS_PATH } from '../../../../common/constants';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../../data_view_manager/constants';
-import type { DataView } from '@kbn/data-views-plugin/common';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -46,13 +43,6 @@ describe('SourcererButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useLocation as jest.Mock).mockReturnValue({ pathname: ALERTS_PATH });
-    jest.mocked(useDataView).mockReturnValue({
-      dataView: {
-        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        name: 'Default Security Data View',
-      } as DataView,
-      status: 'ready',
-    });
     jest.mocked(useKibana).mockReturnValue({
       services: {
         dataViewFieldEditor: { openEditor: jest.fn() },

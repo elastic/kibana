@@ -18,7 +18,7 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { HostsTabs } from './hosts_tabs';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { getMockDataView } from '../../../data_view_manager/mocks/mock_data_view';
+import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -112,9 +112,7 @@ describe('Hosts - rendering', () => {
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
-    const dataView = getMockDataView();
-    dataView.matchedIndices = ['test'];
-    jest.mocked(useDataView).mockReturnValue({ dataView, status: 'ready' });
+    jest.mocked(useDataView).mockReturnValue(withIndices(['test']));
 
     mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,

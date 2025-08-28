@@ -69,8 +69,6 @@ const MockUnifiedTimelineComponent = jest.fn(() => <div />);
 describe('UnifiedTimelineBody', () => {
   beforeEach(() => {
     (UnifiedTimeline as unknown as jest.Mock).mockImplementation(MockUnifiedTimelineComponent);
-
-    jest.mocked(useDataView).mockReturnValue({ status: 'ready', dataView: mockDataView });
   });
 
   it('should pass default columns when empty column list is supplied', () => {

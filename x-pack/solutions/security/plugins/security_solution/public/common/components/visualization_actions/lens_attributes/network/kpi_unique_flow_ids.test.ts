@@ -11,8 +11,8 @@ import { wrapper } from '../../mocks';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { kpiUniqueFlowIdsLensAttributes } from './kpi_unique_flow_ids';
-import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks/mock_data_view';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
@@ -35,13 +35,9 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
 
 describe('kpiUniqueFlowIdsLensAttributes', () => {
   beforeAll(() => {
-    const dataView = getMockDataViewWithMatchedIndices(['auditbeat-mytest-*']);
-    dataView.id = 'security-solution-my-test';
-
-    jest.mocked(useDataView).mockReturnValue({
-      dataView,
-      status: 'ready',
-    });
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
   });
 
   it('should render', () => {

@@ -17,7 +17,10 @@ import { useKibana } from '../../common/lib/kibana';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks/mock_data_view';
-import { defaultImplementation } from '../../data_view_manager/hooks/__mocks__/use_data_view';
+import {
+  defaultImplementation,
+  withIndices,
+} from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
 const mockedUseKibana = mockUseKibana();
 
@@ -104,10 +107,9 @@ describe('DataQuality', () => {
     mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
 
-    jest.mocked(useDataView).mockReturnValue({
-      dataView: getMockDataViewWithMatchedIndices(['auditbeat-*', 'logs-*', 'packetbeat-*']),
-      status: 'ready',
-    });
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['auditbeat-*', 'logs-*', 'packetbeat-*']));
   });
 
   describe('when indices exist, and loading is complete', () => {

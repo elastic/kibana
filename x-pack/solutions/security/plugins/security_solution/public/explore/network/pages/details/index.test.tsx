@@ -14,11 +14,7 @@ import { TestProviders } from '../../../../common/mock';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import {
-  getMockDataView,
-  getMockDataViewWithMatchedIndices,
-} from '../../../../data_view_manager/mocks/mock_data_view';
-import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import { withIndices } from '../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn().mockReturnValue({
@@ -128,15 +124,6 @@ const getMockHistory = (ip: string) => ({
 
 describe('Network Details', () => {
   beforeAll(() => {
-    jest.mocked(useDataView).mockReturnValue({
-      status: 'ready',
-      dataView: getMockDataView({
-        getDefaultInstance: () => ({
-          toJSON: () => '{}',
-        }),
-      } as unknown as FieldFormatsStartCommon),
-    });
-
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: false,
       indexPattern: {},
@@ -178,14 +165,7 @@ describe('Network Details', () => {
   });
 
   test('it renders ipv6 headline', async () => {
-    jest.mocked(useDataView).mockReturnValue({
-      status: 'ready',
-      dataView: getMockDataViewWithMatchedIndices(['test-index'], {
-        getDefaultInstance: () => ({
-          toJSON: () => '{}',
-        }),
-      } as unknown as FieldFormatsStartCommon),
-    });
+    jest.mocked(useDataView).mockReturnValue(withIndices(['test-index']));
 
     const ip = 'fe80--24ce-f7ff-fede-a571';
     (useSourcererDataView as jest.Mock).mockReturnValue({
@@ -219,15 +199,6 @@ describe('Network Details', () => {
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
-    });
-
-    jest.mocked(useDataView).mockReturnValue({
-      status: 'ready',
-      dataView: getMockDataView({
-        getDefaultInstance: () => ({
-          toJSON: () => '{}',
-        }),
-      } as unknown as FieldFormatsStartCommon),
     });
 
     render(

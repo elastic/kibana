@@ -11,8 +11,8 @@ import { wrapper } from '../../mocks';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getKpiUserAuthenticationsBarLensAttributes } from './kpi_user_authentications_bar';
-import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks/mock_data_view';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
   ...jest.requireActual('uuid'),
@@ -40,13 +40,9 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
 
 describe('getKpiUserAuthenticationsBarLensAttributes', () => {
   beforeAll(() => {
-    const dataView = getMockDataViewWithMatchedIndices(['auditbeat-mytest-*']);
-    dataView.id = 'security-solution-my-test';
-
-    jest.mocked(useDataView).mockReturnValue({
-      dataView,
-      status: 'ready',
-    });
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
   });
 
   it('should render', () => {

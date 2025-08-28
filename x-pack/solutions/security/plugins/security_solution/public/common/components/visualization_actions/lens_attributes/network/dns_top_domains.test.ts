@@ -14,7 +14,7 @@ import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getDnsTopDomainsLensAttributes } from './dns_top_domains';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks/mock_data_view';
+import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
@@ -41,13 +41,9 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
 
 describe('getDnsTopDomainsLensAttributes', () => {
   beforeAll(() => {
-    const dataView = getMockDataViewWithMatchedIndices(['auditbeat-mytest-*']);
-    dataView.id = 'security-solution-my-test';
-
-    jest.mocked(useDataView).mockReturnValue({
-      dataView,
-      status: 'ready',
-    });
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
   });
 
   let result: RenderHookResult<LensAttributes | null, unknown>['result'];

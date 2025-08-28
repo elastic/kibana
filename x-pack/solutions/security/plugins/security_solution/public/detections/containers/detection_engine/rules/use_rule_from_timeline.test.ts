@@ -22,6 +22,7 @@ import {
   getMockDataView,
   getMockDataViewWithMatchedIndices,
 } from '../../../../data_view_manager/mocks/mock_data_view';
+import { withIndices } from '../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/utils/global_query_string/helpers');
@@ -123,9 +124,7 @@ describe.skip('useRuleFromTimeline', () => {
         sourcererDataView: {},
       });
 
-      const dataView = getMockDataViewWithMatchedIndices(['awesome-*']);
-      dataView.id = 'custom-data-view-id';
-      jest.mocked(useDataView).mockReturnValue({ status: 'ready', dataView });
+      jest.mocked(useDataView).mockReturnValue(withIndices(['awesome-*'], 'custom-data-view-id'));
     });
 
     it('does not reset timeline sourcerer if it originally had same data view as the timeline used in the rule', async () => {

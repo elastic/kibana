@@ -15,6 +15,7 @@ import { mockIndexFieldsByName } from '../../common/containers/source/mock';
 export const getMockDataView = (fieldFormats: FieldFormatsStartCommon = fieldFormatsMock) =>
   new DataView({
     spec: {
+      name: 'Default Security Data View',
       id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
       fields: mockIndexFieldsByName as DataViewFieldMap,
     },

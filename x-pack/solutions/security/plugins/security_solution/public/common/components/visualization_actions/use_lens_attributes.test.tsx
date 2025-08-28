@@ -26,9 +26,11 @@ import { SecurityPageName } from '../../../app/types';
 import type { Query } from '@kbn/es-query';
 import { getEventsHistogramLensAttributes } from './lens_attributes/common/events';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { defaultImplementation } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
+import {
+  defaultImplementation,
+  withIndices,
+} from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
@@ -50,12 +52,7 @@ const params = {
 };
 describe('useLensAttributes', () => {
   beforeAll(() => {
-    const dataView = getMockDataViewWithMatchedIndices(['auditbeat-*']);
-
-    jest.mocked(useDataView).mockReturnValue({
-      dataView,
-      status: 'ready',
-    });
+    jest.mocked(useDataView).mockReturnValue(withIndices(['auditbeat-*']));
   });
 
   beforeEach(() => {

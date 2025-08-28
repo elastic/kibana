@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
 import { getMockDataView, getMockDataViewWithMatchedIndices } from '../../mocks/mock_data_view';
 import type { UseDataViewReturnValue } from '../use_data_view';
 
@@ -24,7 +25,10 @@ export const withMatchedIndices = () =>
     status: 'ready',
   } as UseDataViewReturnValue);
 
-export const withIdAndIndices = (id: string, indices: string[]) => {
+export const withIndices = (
+  indices: string[],
+  id: string = DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID
+) => {
   const dataView = getMockDataViewWithMatchedIndices(indices);
   dataView.id = id;
 

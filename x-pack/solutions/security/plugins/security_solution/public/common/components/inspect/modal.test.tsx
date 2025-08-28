@@ -14,7 +14,7 @@ import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
 import { InputsModelId } from '../../store/inputs/constants';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
+import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -246,8 +246,7 @@ describe('Modal Inspect', () => {
 
   describe('index pattern messaging', () => {
     test('should show no messaging when all patterns match sourcerer selection', () => {
-      const dataView = getMockDataViewWithMatchedIndices(defaultIndices);
-      jest.mocked(useDataView).mockReturnValue({ dataView, status: 'ready' });
+      jest.mocked(useDataView).mockReturnValue(withIndices(defaultIndices));
 
       renderModal();
 

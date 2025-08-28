@@ -29,7 +29,7 @@ import { defaultRowRenderers } from './body/renderers';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
+import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -105,12 +105,14 @@ describe('StatefulTimeline', () => {
   };
 
   beforeEach(() => {
-    const dataView = getMockDataViewWithMatchedIndices(
-      mockGlobalState.timeline.timelineById[TimelineId.test]?.indexNames
-    );
-    dataView.id = mockGlobalState.timeline.timelineById[TimelineId.test]?.dataViewId as string;
-
-    jest.mocked(useDataView).mockReturnValue({ dataView, status: 'ready' });
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(
+        withIndices(
+          mockGlobalState.timeline.timelineById[TimelineId.test]?.indexNames,
+          mockGlobalState.timeline.timelineById[TimelineId.test]?.dataViewId as string
+        )
+      );
 
     jest.clearAllMocks();
     (useTimelineEvents as jest.Mock).mockReturnValue([
