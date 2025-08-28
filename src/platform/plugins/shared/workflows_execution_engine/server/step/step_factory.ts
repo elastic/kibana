@@ -26,6 +26,12 @@ import { WaitStepImpl } from './wait_step/wait_step';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './retry_step';
 import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './continue_step';
+import {
+  EnterOnFailureZoneNodeImpl,
+  ExitOnFailureZoneNodeImpl,
+  EnterPathNodeImpl,
+  ExitPathNodeImpl,
+} from './fallback-step';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -74,6 +80,34 @@ export class StepFactory {
         return new EnterContinueNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
       case 'exit-continue':
         return new ExitContinueNodeImpl(this.workflowRuntime);
+      case 'enter-on-failure-zone':
+        return new EnterOnFailureZoneNodeImpl(
+          step as any,
+          this.workflowRuntime,
+          this.contextManager,
+          this.workflowLogger
+        );
+      case 'exit-on-failure-zone':
+        return new ExitOnFailureZoneNodeImpl(
+          step as any,
+          this.workflowRuntime,
+          this.contextManager,
+          this.workflowLogger
+        );
+      case 'enter-path':
+        return new EnterPathNodeImpl(
+          step as any,
+          this.workflowRuntime,
+          this.contextManager,
+          this.workflowLogger
+        );
+      case 'exit-path':
+        return new ExitPathNodeImpl(
+          step as any,
+          this.workflowRuntime,
+          this.contextManager,
+          this.workflowLogger
+        );
       case 'enter-if':
         return new EnterIfNodeImpl(
           step as any,

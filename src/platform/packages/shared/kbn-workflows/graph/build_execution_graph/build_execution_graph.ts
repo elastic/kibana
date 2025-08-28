@@ -253,6 +253,7 @@ export function visitFallbackStep(
     id: enterFallbackNode.exitNormalPathNodeId,
     type: 'exit-normal-path',
     enterNodeId: enterFallbackNode.enterNormalPathNodeId,
+    exitOnFailureZoneNodeId: exitFallbackNode.id,
   };
   graph.setNode(exitNormalPathNode.id, exitNormalPathNode);
   graph.setEdge(getNodeId(thenPreviousStep), exitNormalPathNode.id);
@@ -275,6 +276,7 @@ export function visitFallbackStep(
       id: enterFallbackNode.exitFallbackPathNodeId,
       type: 'exit-failure-path',
       enterNodeId: enterFallbackNode.enterFallbackPathNodeId,
+      exitOnFailureZoneNodeId: exitFallbackNode.id,
     };
     graph.setNode(exitFallbackPathNode.id, exitFallbackPathNode);
     graph.setEdge(getNodeId(elsePreviousStep), exitFallbackPathNode.id);

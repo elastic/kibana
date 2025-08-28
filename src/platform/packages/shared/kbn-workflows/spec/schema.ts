@@ -80,7 +80,7 @@ export type BaseStep = z.infer<typeof BaseStepSchema>;
 
 export const WorkflowOnFailureSchema = z.object({
   retry: WorkflowRetrySchema.optional(),
-  'fallback-step': BaseStepSchema.optional(),
+  'fallback-step': z.any().optional(),
   continue: z.boolean().optional(),
 });
 export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
