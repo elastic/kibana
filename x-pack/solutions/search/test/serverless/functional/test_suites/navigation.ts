@@ -80,16 +80,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           pageTestSubject: 'playgroundsListPage',
         },
         {
-          deepLinkId: 'serverlessConnectors',
-          breadcrumbs: ['Build', 'Connectors'],
-          pageTestSubject: 'svlSearchConnectorsPage',
-        },
-        {
-          deepLinkId: 'serverlessWebCrawlers',
-          breadcrumbs: ['Build', 'Web crawlers'],
-          pageTestSubject: 'serverlessSearchConnectorsTitle',
-        },
-        {
           deepLinkId: 'searchSynonyms',
           breadcrumbs: ['Relevance', 'Synonyms'],
           pageTestSubject: 'searchSynonymsOverviewPage',
@@ -218,8 +208,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Build' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'RAG Playground' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
@@ -244,8 +232,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'build',
         'elasticsearchIndexManagement',
         'searchPlayground',
-        'serverlessConnectors',
-        'serverlessWebCrawlers',
         'relevance',
         'searchSynonyms',
         'searchQueryRules',
