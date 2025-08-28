@@ -7,16 +7,9 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
-import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { hostname } from 'os';
-import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
-import {
-  processExperimentsToDatasetScores,
-  getUniqueEvaluatorNames,
-  calculateEvaluatorStats,
-  type DatasetScore,
-} from './evaluation_stats';
+import type { DatasetScoreWithStats } from './evaluation_stats';
 
 interface ModelScoreDocument {
   '@timestamp': string;
@@ -145,46 +138,34 @@ export class EvaluationScoreRepository {
     }
   }
 
-  private async processExperiments(
-    experiments: RanExperiment[],
-    phoenixClient: KibanaPhoenixClient
-  ): Promise<DatasetScore[]> {
-    return processExperimentsToDatasetScores(experiments, phoenixClient, true);
-  }
-
   async exportScores({
-    phoenixClient,
+    datasetScoresWithStats,
+    evaluatorNames,
     model,
-    experiments,
     runId,
     tags = [],
   }: {
-    phoenixClient: KibanaPhoenixClient;
+    datasetScoresWithStats: DatasetScoreWithStats[];
+    evaluatorNames: string[];
     model: Model;
-    experiments: RanExperiment[];
     runId: string;
     tags?: string[];
   }): Promise<void> {
     try {
       await this.ensureIndexTemplate();
 
-      if (experiments.length === 0) {
-        this.log.warning('No experiments found to export');
+      if (datasetScoresWithStats.length === 0) {
+        this.log.warning('No dataset scores found to export');
         return;
       }
-
-      const datasetScores = await this.processExperiments(experiments, phoenixClient);
-      const evaluatorNames = getUniqueEvaluatorNames(datasetScores);
 
       const documents: ModelScoreDocument[] = [];
       const timestamp = new Date().toISOString();
 
-      for (const dataset of datasetScores) {
+      for (const dataset of datasetScoresWithStats) {
         for (const evaluatorName of evaluatorNames) {
-          const scores = dataset.evaluatorScores.get(evaluatorName) || [];
-          const stats = calculateEvaluatorStats(scores, dataset.numExamples);
-
-          if (stats.count === 0) {
+          const stats = dataset.evaluatorStats.get(evaluatorName);
+          if (!stats || stats.count === 0) {
             continue;
           }
 
@@ -253,7 +234,7 @@ export class EvaluationScoreRepository {
           }" AND run_id:"${runId}"`
         );
         this.log.info(`  - Timestamp: ${timestamp}`);
-        this.log.info(`  - Datasets: ${datasetScores.map((d) => d.name).join(', ')}`);
+        this.log.info(`  - Datasets: ${datasetScoresWithStats.map((d) => d.name).join(', ')}`);
         this.log.info(`  - Evaluators: ${evaluatorNames.join(', ')}`);
       }
     } catch (error) {

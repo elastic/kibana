@@ -15,7 +15,11 @@ import chalk from 'chalk';
 import { hostname } from 'os';
 import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
 import { EvaluationScoreRepository } from './score_repository';
-import { buildEvaluationResults, calculateEvaluatorStats } from './evaluation_stats';
+import {
+  buildEvaluationResults,
+  calculateEvaluatorStats,
+  type DatasetScoreWithStats,
+} from './evaluation_stats';
 
 export async function reportModelScore({
   log,
@@ -42,7 +46,7 @@ export async function reportModelScore({
   );
 
   // Add evaluator stats to dataset scores for table formatting
-  const datasetScoresWithStats = datasetScores.map((dataset) => ({
+  const datasetScoresWithStats: DatasetScoreWithStats[] = datasetScores.map((dataset) => ({
     ...dataset,
     evaluatorStats: new Map(
       evaluatorNames.map((evaluatorName) => {
@@ -143,9 +147,9 @@ export async function reportModelScore({
       log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
       await exporter.exportScores({
-        phoenixClient,
+        datasetScoresWithStats,
+        evaluatorNames,
         model,
-        experiments,
         runId: currentRunId,
         tags: ['evaluation', 'model-score'],
       });

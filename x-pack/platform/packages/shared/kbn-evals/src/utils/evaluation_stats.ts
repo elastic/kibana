@@ -28,6 +28,10 @@ export interface DatasetScore {
   experiments?: Array<{ id?: string }>;
 }
 
+export interface DatasetScoreWithStats extends DatasetScore {
+  evaluatorStats: Map<string, EvaluatorStats>;
+}
+
 /**
  * Calculate descriptive statistics for a set of scores
  */
