@@ -10,7 +10,9 @@
 import { schema } from '@kbn/config-schema';
 
 export const filterSchema = schema.object({
-  language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')]),
+  language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')], {
+    defaultValue: 'kuery',
+  }),
   /**
    * Filter query
    */
@@ -19,7 +21,7 @@ export const filterSchema = schema.object({
       description: 'Filter query',
     },
   }),
-});
+}, { defaultValue: undefined });
 
 export const filterWithLabelSchema = schema.object({
   /**
@@ -36,4 +38,4 @@ export const filterWithLabelSchema = schema.object({
       },
     })
   ),
-});
+}, { defaultValue: undefined });

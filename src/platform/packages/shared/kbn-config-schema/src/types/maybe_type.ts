@@ -14,14 +14,25 @@ import { META_FIELD_X_OAS_OPTIONAL } from '../oas_meta_fields';
 export class MaybeType<V> extends Type<V | undefined> {
   private readonly maybeType: Type<V>;
 
-  constructor(type: Type<V>) {
-    super(
-      type
-        .getSchema()
-        .optional()
-        .meta({ [META_FIELD_X_OAS_OPTIONAL]: true })
-        .default(() => undefined)
-    );
+  constructor(type: Type<V>, applyDefaults = true) {
+    const defaultValue = type.getSchema().describe().flags.default;
+    if (applyDefaults && defaultValue != undefined && (typeof defaultValue !== 'function' || defaultValue() != undefined)) {
+      super(
+        type
+          .getSchema()
+          .optional()
+          .meta({ [META_FIELD_X_OAS_OPTIONAL]: true })
+      );
+    } else {
+      super(
+        type
+          .getSchema()
+          .optional()
+          .meta({ [META_FIELD_X_OAS_OPTIONAL]: true })
+          .default(() => undefined)
+      );
+    }
+
     this.maybeType = type;
   }
 
