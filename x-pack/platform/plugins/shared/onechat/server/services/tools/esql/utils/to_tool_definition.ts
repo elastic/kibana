@@ -28,7 +28,7 @@ export function toToolDefinition<TSchema extends z.ZodObject<any> = z.ZodObject<
       const client = esClient.asCurrentUser;
       const paramArray = Object.entries(params).map(([key, value]) => ({ [key]: value }));
 
-      const esqlResult = await client.esql.query({
+      const result = await client.esql.query({
         query: configuration.query,
         // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
         params: paramArray as unknown as FieldValue[],
@@ -42,7 +42,7 @@ export function toToolDefinition<TSchema extends z.ZodObject<any> = z.ZodObject<
             data: {
               source: 'esql',
               query: configuration.query,
-              result: esqlResult,
+              result,
             },
           },
         ],
