@@ -655,6 +655,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
       esClient: core.elasticsearch.client.asInternalUser,
       productFeaturesService,
+      licenseService,
     });
 
     this.endpointAppContextService.start({

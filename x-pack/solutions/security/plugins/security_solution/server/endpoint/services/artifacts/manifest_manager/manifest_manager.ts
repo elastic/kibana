@@ -28,6 +28,7 @@ import { stringify } from '../../../utils/stringify';
 import { QueueProcessor } from '../../../utils/queue_processor';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../../../../../common';
+import type { LicenseService } from '../../../../../common/license';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
   manifestDispatchSchema,
@@ -97,6 +98,7 @@ export interface ManifestManagerContext {
   packagerTaskPackagePolicyUpdateBatchSize: number;
   esClient: ElasticsearchClient;
   productFeaturesService: ProductFeaturesService;
+  licenseService: LicenseService;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -119,6 +121,7 @@ export class ManifestManager {
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
   protected esClient: ElasticsearchClient;
   protected productFeaturesService: ProductFeaturesService;
+  protected licenseService: LicenseService;
   protected savedObjectsClientFactory: SavedObjectsClientFactory;
 
   constructor(context: ManifestManagerContext) {
@@ -136,6 +139,7 @@ export class ManifestManager {
       context.packagerTaskPackagePolicyUpdateBatchSize;
     this.esClient = context.esClient;
     this.productFeaturesService = context.productFeaturesService;
+    this.licenseService = context.licenseService;
   }
 
   /**
@@ -145,6 +149,76 @@ export class ManifestManager {
    */
   protected getManifestClient(): ManifestClient {
     return new ManifestClient(this.savedObjectsClient, this.schemaVersion);
+  }
+
+  /**
+   * Determines if exceptions should be retrieved based on licensing conditions
+   * @private
+   */
+  private shouldRetrieveExceptions(listId: ArtifactListId): boolean {
+    if (listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id) {
+      try {
+        const isEnabled = this.productFeaturesService.isEnabled(
+          ProductFeatureKey.endpointHostIsolationExceptions
+        );
+        if (!isEnabled) {
+          this.logger.debug(
+            `Serving empty array for artifact list [${listId}] due to licensing or feature restrictions`
+          );
+        }
+        return isEnabled;
+      } catch (error) {
+        this.logger.warn(
+          `Error checking licensing or feature conditions for artifact list [${listId}]: ${error.message}. Defaulting to deny access.`
+        );
+        return false;
+      }
+    }
+
+    if (listId === ENDPOINT_ARTIFACT_LISTS.trustedDevices.id) {
+      if (!this.experimentalFeatures.trustedDevices) {
+        this.logger.debug(
+          `Serving empty array for artifact list [${listId}] due to licensing or feature restrictions`
+        );
+        return false;
+      }
+
+      try {
+        const isEnabled =
+          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointTrustedDevices) ||
+          this.licenseService.isEnterprise();
+
+        if (!isEnabled) {
+          this.logger.debug(
+            `Serving empty array for artifact list [${listId}] due to licensing or feature restrictions`
+          );
+        }
+        return isEnabled;
+      } catch (error) {
+        this.logger.warn(
+          `Error checking licensing or feature conditions for artifact list [${listId}]: ${error.message}. Defaulting to deny access.`
+        );
+        return false;
+      }
+    }
+
+    try {
+      const isEnabled = this.productFeaturesService.isEnabled(
+        ProductFeatureKey.endpointArtifactManagement
+      );
+      this.logger.debug(
+        `License or feature check for artifact list [${listId}]: ${
+          isEnabled ? 'allowed' : 'denied'
+        }`
+      );
+      return isEnabled;
+    } catch (error) {
+      // For other artifacts, default to allow access if service fails
+      this.logger.debug(
+        `License or feature check for artifact list [${listId}]: allowed (service error, defaulting to allow)`
+      );
+      return true;
+    }
   }
 
   /**
@@ -169,15 +243,10 @@ export class ManifestManager {
       let itemsByListId: ExceptionListItemSchema[] = [];
       // endpointHostIsolationExceptions includes full CRUD support for Host Isolation Exceptions
       // endpointArtifactManagement includes full CRUD support for all other exception lists + RD support for Host Isolation Exceptions
+      // endpointTrustedDevices requires enterprise license and feature enablement
       // If there are host isolation exceptions in place but there is a downgrade scenario, those shouldn't be taken into account when generating artifacts.
-      if (
-        (listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
-          this.productFeaturesService.isEnabled(
-            ProductFeatureKey.endpointHostIsolationExceptions
-          )) ||
-        (listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
-          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement))
-      ) {
+      // If there are trusted devices in place but there is a license downgrade scenario (not enterprise), those shouldn't be taken into account when generating artifacts.
+      if (this.shouldRetrieveExceptions(listId)) {
         itemsByListId = await getAllItemsFromEndpointExceptionList({
           elClient,
           os,
