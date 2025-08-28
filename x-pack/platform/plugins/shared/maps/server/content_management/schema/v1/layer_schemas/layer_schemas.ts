@@ -41,14 +41,6 @@ const layerSchema = schema.object({
       },
     })
   ),
-  areLabelsOnTop: schema.maybe(
-    schema.boolean({
-      meta: {
-        description:
-          'Set to true to display labels on top of all layers regardless of layer ordering',
-      },
-    })
-  ),
   attribution: schema.maybe(attributionSchema),
   id: schema.string(),
   includeInFitToBounds: schema.maybe(
@@ -106,6 +98,14 @@ const layerSchema = schema.object({
 });
 
 export const EMSVectorTileLayerSchema = layerSchema.extends({
+  areLabelsOnTop: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Set to true to display labels on top of all layers regardless of layer ordering',
+      },
+    })
+  ),
   locale: schema.maybe(schema.string()),
   sourceDescriptor: EMSTMSSourceSchema,
   style: EMSVectorTileStyleSchema,
