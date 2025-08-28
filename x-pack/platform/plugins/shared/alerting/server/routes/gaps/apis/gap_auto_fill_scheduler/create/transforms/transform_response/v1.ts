@@ -6,24 +6,24 @@
  */
 
 import type { GapAutoFillSchedulerResponseBodyV1 } from '../../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
-import type { CreateGapFillAutoSchedulerResult } from '../../../../../../../application/gap_auto_fill_scheduler/methods/create/types';
+import type { GapFillAutoSchedulerResponse } from '../../../../../../../application/gap_auto_fill_scheduler/result/types';
 
 export const transformResponse = (
-  result: CreateGapFillAutoSchedulerResult
+  result: GapFillAutoSchedulerResponse
 ): GapAutoFillSchedulerResponseBodyV1 => ({
   id: result.id,
-  name: result.attributes.name,
-  enabled: result.attributes.enabled,
-  schedule: result.attributes.schedule,
-  rules_filter: result.attributes.rulesFilter,
-  gap_fill_range: result.attributes.gapFillRange,
-  max_amount_of_gaps_to_process_per_run: result.attributes.maxAmountOfGapsToProcessPerRun,
-  max_amount_of_rules_to_process_per_run: result.attributes.maxAmountOfRulesToProcessPerRun,
-  amount_of_retries: result.attributes.amountOfRetries,
-  created_by: result.attributes.createdBy,
-  updated_by: result.attributes.updatedBy,
-  created_at: result.attributes.createdAt,
-  updated_at: result.attributes.updatedAt,
-  last_run: result.attributes.lastRun,
-  scheduled_task_id: result.attributes.scheduledTaskId,
+  name: result.name,
+  enabled: result.enabled,
+  schedule: result.schedule,
+  rules_filter: result.rulesFilter,
+  gap_fill_range: result.gapFillRange,
+  max_amount_of_gaps_to_process_per_run: result.maxAmountOfGapsToProcessPerRun,
+  max_amount_of_rules_to_process_per_run: result.maxAmountOfRulesToProcessPerRun,
+  amount_of_retries: result.amountOfRetries,
+  created_by: result.createdBy,
+  updated_by: result.updatedBy,
+  created_at: result.createdAt,
+  updated_at: result.updatedAt,
+  last_run: result.lastRun,
+  scheduled_task_id: result.scheduledTaskId,
 });

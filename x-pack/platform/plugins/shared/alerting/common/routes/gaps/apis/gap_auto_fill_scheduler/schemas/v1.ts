@@ -7,19 +7,22 @@
 import { schema } from '@kbn/config-schema';
 
 export const gapAutoFillSchedulerBodySchema = schema.object({
-  name: schema.maybe(schema.string()),
-  max_amount_of_gaps_to_process_per_run: schema.maybe(
-    schema.number({ defaultValue: 1000, min: 1, max: 10000 })
-  ),
-  max_amount_of_rules_to_process_per_run: schema.maybe(
-    schema.number({ defaultValue: 100, min: 1, max: 10000 })
-  ),
-  amount_of_retries: schema.maybe(schema.number({ defaultValue: 3, min: 1 })),
+  id: schema.maybe(schema.string()),
+  name: schema.string({ defaultValue: '' }),
+  enabled: schema.boolean({ defaultValue: true }),
+  max_amount_of_gaps_to_process_per_run: schema.number({ defaultValue: 1000, min: 1, max: 10000 }),
+  max_amount_of_rules_to_process_per_run: schema.number({ defaultValue: 100, min: 1, max: 10000 }),
+  amount_of_retries: schema.number({ defaultValue: 3, min: 1 }),
   rules_filter: schema.maybe(schema.string()),
-  gap_fill_range: schema.maybe(schema.string()),
-  schedule: schema.maybe(
+  gap_fill_range: schema.string(),
+  schedule: schema.object({
+    interval: schema.string(),
+  }),
+  scope: schema.maybe(schema.arrayOf(schema.string())),
+  rule_types: schema.arrayOf(
     schema.object({
-      interval: schema.string(),
+      type: schema.string(),
+      consumer: schema.string(),
     })
   ),
 });

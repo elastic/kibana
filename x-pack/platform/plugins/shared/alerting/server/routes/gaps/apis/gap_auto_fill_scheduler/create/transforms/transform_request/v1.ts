@@ -14,13 +14,20 @@ export const transformRequest = (
 ): CreateGapFillAutoSchedulerParams => {
   const body = request.body as GapAutoFillSchedulerRequestBodyV1;
   return {
+    id: body.id,
     name: body.name,
+    enabled: body.enabled,
     maxAmountOfGapsToProcessPerRun: body.max_amount_of_gaps_to_process_per_run,
     maxAmountOfRulesToProcessPerRun: body.max_amount_of_rules_to_process_per_run,
     amountOfRetries: body.amount_of_retries,
     rulesFilter: body.rules_filter,
     gapFillRange: body.gap_fill_range,
     schedule: body.schedule,
+    scope: body.scope,
+    ruleTypes: body.rule_types.map((ruleType) => ({
+      type: ruleType.type,
+      consumer: ruleType.consumer,
+    })),
     request,
   };
 };

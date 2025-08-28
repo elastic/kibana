@@ -46,4 +46,5 @@ export enum WriteOperations {
   ScheduleBackfill = 'scheduleBackfill',
   DeleteBackfill = 'deleteBackfill',
   FillGaps = 'fillGaps',
+  CreateGapFillAutoScheduler = 'createGapFillAutoScheduler',
 }

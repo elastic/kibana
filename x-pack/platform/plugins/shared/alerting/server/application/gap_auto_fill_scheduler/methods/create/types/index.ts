@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export type {
-  CreateGapFillAutoSchedulerParams,
-  CreateGapFillAutoSchedulerResult,
-} from './create_gap_fill_auto_scheduler_types';
+export type { CreateGapFillAutoSchedulerParams } from './create_gap_fill_auto_scheduler_types';

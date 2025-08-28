@@ -7,5 +7,4 @@
 
 export type {
   GetGapFillAutoSchedulerParams,
-  GapFillAutoSchedulerResponse,
 } from './get_gap_fill_auto_scheduler_types';

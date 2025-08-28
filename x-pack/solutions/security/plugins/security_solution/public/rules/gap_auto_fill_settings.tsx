@@ -70,12 +70,6 @@ interface GapAutoFill {
   max_amount_of_gaps_to_process_per_run: number;
   max_amount_of_rules_to_process_per_run: number;
   amount_of_retries: number;
-  created_by?: string;
-  updated_by?: string;
-  created_at: string;
-  updated_at: string;
-  last_run?: string | null;
-  scheduled_task_id: string;
 }
 
 // Generic event log interface since the API returns Record<string, unknown>
@@ -281,6 +275,8 @@ export const GapAutoFillSettings: React.FC = () => {
             schedule: {
               interval: '1m',
             },
+            scope: ['securitySolution'],
+            id: 'default',
           }),
         });
         // Fetch the newly created auto fill

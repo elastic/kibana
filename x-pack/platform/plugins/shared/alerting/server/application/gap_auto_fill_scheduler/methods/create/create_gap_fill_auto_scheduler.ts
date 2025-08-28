@@ -5,65 +5,82 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import type { CreateGapFillAutoSchedulerParams, CreateGapFillAutoSchedulerResult } from './types';
+import type { CreateGapFillAutoSchedulerParams } from './types';
+import type { GapFillAutoSchedulerResponse } from '../../result/types';
 import { createGapFillAutoSchedulerSchema } from './schemas';
+import { transformGapAutoFillSchedulerCreateParamToSavedObject } from './transforms/transform_gap_auto_fill_scheduler_param_to_saved_object';
+import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transforms';
+import { GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import type { GapAutoFillSchedulerSO } from '../../../../data/gap_fill_auto_scheduler/types/gap_fill_auto_scheduler';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import {
+  gapAutoFillSchedulerAuditEvent,
+  GapAutoFillSchedulerAuditAction,
+} from '../../../../rules_client/common/audit_events';
 
 export async function createGapFillAutoScheduler(
   context: RulesClientContext,
   params: CreateGapFillAutoSchedulerParams
-): Promise<CreateGapFillAutoSchedulerResult> {
-  // Validate input parameters
-  createGapFillAutoSchedulerSchema.validate(params);
+): Promise<GapFillAutoSchedulerResponse> {
+  try {
+    createGapFillAutoSchedulerSchema.validate(params);
+  } catch (error) {
+    throw Boom.badRequest(
+      `Error validating gap auto fill scheduler parameters "${JSON.stringify(params)}" - ${
+        error.message
+      }`
+    );
+  }
+
+  try {
+    for (const ruleType of params.ruleTypes) {
+      await context.authorization.ensureAuthorized({
+        ruleTypeId: ruleType.type,
+        consumer: ruleType.consumer,
+        operation: WriteOperations.CreateGapFillAutoScheduler,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    }
+  } catch (error) {
+    context.auditLogger?.log(
+      gapAutoFillSchedulerAuditEvent({
+        action: GapAutoFillSchedulerAuditAction.CREATE,
+        error,
+      })
+    );
+    throw error;
+  }
 
   const soClient = context.unsecuredSavedObjectsClient;
   const taskManager = context.taskManager;
-  const {
-    name,
-    maxAmountOfGapsToProcessPerRun,
-    maxAmountOfRulesToProcessPerRun,
-    amountOfRetries,
-    rulesFilter,
-    gapFillRange,
-    schedule,
-  } = params;
 
-  const autoFill = {
-    schedule: schedule || { interval: '1h' },
-    name: name || 'gap-fill-auto-fill-name',
-  };
+  const createdBy = await context.getUserName?.();
 
-  const nowIso = new Date().toISOString();
-  const createdBy = (await context.getUserName?.()) ?? null;
+  const now = new Date().toISOString();
+  const attributes = transformGapAutoFillSchedulerCreateParamToSavedObject(params, {
+    createdBy,
+    createdAt: now,
+    updatedAt: now,
+    updatedBy: createdBy,
+  });
 
-  const { GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE } = await import('../../../../saved_objects');
+  const savedObjectOptions = params.id ? { id: params.id } : {};
 
   const so = await soClient.create(
     GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE,
-    {
-      name: autoFill.name,
-      enabled: true,
-      schedule: autoFill.schedule,
-      rulesFilter: rulesFilter || '',
-      gapFillRange: gapFillRange || 'now-7d',
-      maxAmountOfGapsToProcessPerRun: maxAmountOfGapsToProcessPerRun || 10000,
-      maxAmountOfRulesToProcessPerRun: maxAmountOfRulesToProcessPerRun || 100,
-      amountOfRetries: amountOfRetries || 3,
-      createdBy: createdBy ?? undefined,
-      updatedBy: createdBy ?? undefined,
-      createdAt: nowIso,
-      updatedAt: nowIso,
-      lastRun: undefined,
-    },
-    { id: 'default' }
+    attributes,
+    savedObjectOptions
   );
 
   const task = await taskManager.ensureScheduled(
     {
       id: so.id,
+      // TODO: use a constant for the task type
       taskType: 'gap-fill-auto-scheduler-task',
-      schedule: autoFill.schedule,
-      scope: ['securitySolution'],
+      schedule: params.schedule,
+      scope: params.scope ?? [],
       params: {
         configId: so.id,
         spaceId: context.spaceId,
@@ -75,16 +92,31 @@ export async function createGapFillAutoScheduler(
     }
   );
 
-  await soClient.update(GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE, so.id, {
+  // Update the saved object with the scheduled task ID
+  await soClient.update<GapAutoFillSchedulerSO>(GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE, so.id, {
     scheduledTaskId: task.id,
     updatedAt: new Date().toISOString(),
   });
 
-  return {
-    id: so.id,
-    attributes: {
-      ...so.attributes,
-      scheduledTaskId: task.id,
-    },
-  };
+  const updatedSo = await soClient.get<GapAutoFillSchedulerSO>(
+    GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE,
+    so.id
+  );
+
+  // Log successful creation
+  context.auditLogger?.log(
+    gapAutoFillSchedulerAuditEvent({
+      action: GapAutoFillSchedulerAuditAction.CREATE,
+      savedObject: {
+        type: GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE,
+        id: updatedSo.id,
+        name: updatedSo.attributes.name,
+      },
+    })
+  );
+
+  // Transform the saved object to the result format
+  return transformSavedObjectToGapAutoFillSchedulerResult({
+    savedObject: updatedSo,
+  });
 }

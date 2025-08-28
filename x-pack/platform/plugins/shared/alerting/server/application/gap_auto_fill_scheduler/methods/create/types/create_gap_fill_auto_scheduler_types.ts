@@ -15,23 +15,3 @@ export interface CreateGapFillAutoSchedulerParams
   extends Omit<CreateGapFillAutoSchedulerBase, 'request'> {
   request: KibanaRequest;
 }
-
-export interface CreateGapFillAutoSchedulerResult {
-  id: string;
-  attributes: {
-    name: string;
-    enabled: boolean;
-    schedule: { interval: string };
-    rulesFilter: string;
-    gapFillRange: string;
-    maxAmountOfGapsToProcessPerRun: number;
-    maxAmountOfRulesToProcessPerRun: number;
-    amountOfRetries: number;
-    createdBy?: string;
-    updatedBy?: string;
-    createdAt: string;
-    updatedAt: string;
-    lastRun?: any;
-    scheduledTaskId: string;
-  };
-}

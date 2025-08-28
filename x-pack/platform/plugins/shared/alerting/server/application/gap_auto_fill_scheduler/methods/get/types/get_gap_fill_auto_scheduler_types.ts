@@ -10,20 +10,4 @@ import type { getGapFillAutoSchedulerSchema } from '../schemas';
 
 export type GetGapFillAutoSchedulerParams = TypeOf<typeof getGapFillAutoSchedulerSchema>;
 
-export interface GapFillAutoSchedulerResponse {
-  id: string;
-  name: string;
-  enabled: boolean;
-  schedule: { interval: string };
-  rulesFilter: string;
-  gapFillRange: string;
-  maxAmountOfGapsToProcessPerRun: number;
-  maxAmountOfRulesToProcessPerRun: number;
-  amountOfRetries: number;
-  createdBy?: string;
-  updatedBy?: string;
-  createdAt: string;
-  updatedAt: string;
-  lastRun?: string | null;
-  scheduledTaskId: string;
-}
+

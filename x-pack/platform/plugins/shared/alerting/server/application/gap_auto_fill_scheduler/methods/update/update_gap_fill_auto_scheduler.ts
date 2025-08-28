@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { UpdateGapFillAutoSchedulerParams } from './types';
+import type { GapFillAutoSchedulerResponse } from '../../result/types';
 import { updateGapFillAutoSchedulerSchema } from './schemas';
+import type { GapAutoFillSchedulerSavedObjectAttributes } from '../../transforms';
+import {
+  transformGapAutoFillSchedulerUpdateParams,
+  transformSavedObjectToGapAutoFillSchedulerResult,
+} from '../../transforms';
 
 export async function updateGapFillAutoScheduler(
   context: RulesClientContext,
   params: { id: string; updates: UpdateGapFillAutoSchedulerParams }
-): Promise<SavedObject<Record<string, unknown>> | SavedObjectsUpdateResponse<Record<string, unknown>>> {
+): Promise<GapFillAutoSchedulerResponse> {
   // Validate input parameters
   updateGapFillAutoSchedulerSchema.validate(params.updates);
 
@@ -25,28 +31,8 @@ export async function updateGapFillAutoScheduler(
   const scheduledTaskId: string | undefined = (so.attributes as Record<string, unknown>)
     .scheduledTaskId as string | undefined;
 
-  const {
-    schedule,
-    name,
-    maxAmountOfGapsToProcessPerRun,
-    maxAmountOfRulesToProcessPerRun,
-    amountOfRetries,
-    rulesFilter,
-    gapFillRange,
-    enabled,
-  } = params.updates;
-
-  const updatedAttrs: Record<string, unknown> = {
-    ...(name !== undefined && { name }),
-    ...(maxAmountOfGapsToProcessPerRun !== undefined && { maxAmountOfGapsToProcessPerRun }),
-    ...(maxAmountOfRulesToProcessPerRun !== undefined && { maxAmountOfRulesToProcessPerRun }),
-    ...(amountOfRetries !== undefined && { amountOfRetries }),
-    ...(rulesFilter !== undefined && { rulesFilter }),
-    ...(gapFillRange !== undefined && { gapFillRange }),
-    ...(schedule !== undefined && { schedule }),
-    ...(enabled !== undefined && { enabled }),
-    updatedAt: new Date().toISOString(),
-  };
+  // Transform update parameters to saved object attributes
+  const updatedAttrs = transformGapAutoFillSchedulerUpdateParams(params.updates);
 
   const updatedSo = Object.keys(updatedAttrs).length
     ? await soClient.update(GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE, params.id, updatedAttrs)
@@ -62,5 +48,8 @@ export async function updateGapFillAutoScheduler(
     }
   }
 
-  return updatedSo;
+  // Transform the saved object to the result format
+  return transformSavedObjectToGapAutoFillSchedulerResult({
+    savedObject: updatedSo as SavedObject<GapAutoFillSchedulerSavedObjectAttributes>,
+  });
 }
