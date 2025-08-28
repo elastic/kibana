@@ -11,14 +11,17 @@ import { euiFullHeight, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui
 import type { PropsWithChildren, ReactNode } from 'react';
 import React, { useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import {
   ResizableLayout,
   ResizableLayoutDirection,
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
 import { css } from '@emotion/react';
-import type { UnifiedHistogramChartContext, UnifiedHistogramHitsContext } from '../../types';
+import type {
+  UnifiedHistogramChartContext,
+  UnifiedHistogramHitsContext,
+  UnifiedHistogramTopPanelHeightContext,
+} from '../../types';
 
 export type UnifiedHistogramLayoutProps = PropsWithChildren<{
   /**
@@ -40,11 +43,11 @@ export type UnifiedHistogramLayoutProps = PropsWithChildren<{
   /**
    * Current top panel height -- leave undefined to use the default
    */
-  topPanelHeight?: ResizableLayoutProps['fixedPanelSize'];
+  topPanelHeight?: UnifiedHistogramTopPanelHeightContext;
   /**
    * Callback to update the topPanelHeight prop when a resize is triggered
    */
-  onTopPanelHeightChange?: (topPanelHeight: number | undefined) => void;
+  onTopPanelHeightChange?: (topPanelHeight: UnifiedHistogramTopPanelHeightContext) => void;
 }>;
 
 export const UnifiedHistogramLayout = ({

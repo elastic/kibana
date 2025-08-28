@@ -48,6 +48,13 @@ export const getDefaultProfileState = ({
         stateUpdate.hideChart = defaultState.hideChart;
       }
 
+      if (
+        resetDefaultProfileState.chartSectionHeight &&
+        defaultState.chartSectionHeight !== undefined
+      ) {
+        stateUpdate.chartSectionHeight = defaultState.chartSectionHeight;
+      }
+
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
     },
 

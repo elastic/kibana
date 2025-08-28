@@ -111,6 +111,8 @@ export interface UnifiedHistogramHitsContext {
   total?: number;
 }
 
+export type UnifiedHistogramTopPanelHeightContext = ResizableLayoutProps['fixedPanelSize'];
+
 /**
  * Context object for the chart
  */
@@ -256,7 +258,7 @@ export type ChartSectionConfiguration =
       /**
        * The initial chart section height
        */
-      initialTopPanelHeight?: ResizableLayoutProps['fixedPanelSize'];
+      initialTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
     }
   | {
       replaceDefaultChart: false;

@@ -26,6 +26,7 @@ describe('getStateDefaults', () => {
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartSectionHeight": undefined,
         "columns": Array [
           "default_column",
         ],
@@ -66,6 +67,7 @@ describe('getStateDefaults', () => {
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartSectionHeight": undefined,
         "columns": Array [
           "default_column",
         ],

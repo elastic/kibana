@@ -212,9 +212,9 @@ const CustomChartSectionWrapper = ({
       onTopPanelHeightChange: stateProps.onTopPanelHeightChange,
       isChartAvailable: true,
       chart: stateProps.chart,
-      topPanelHeight: chartSectionConfig.initialTopPanelHeight,
+      topPanelHeight: stateProps.topPanelHeight,
     }),
-    [stateProps.onTopPanelHeightChange, stateProps.chart, chartSectionConfig.initialTopPanelHeight]
+    [stateProps.onTopPanelHeightChange, stateProps.chart, stateProps.topPanelHeight]
   );
 
   const { isEsqlMode, renderCustomChartToggleActions } = useUnifiedHistogramCommon({

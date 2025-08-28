@@ -27,12 +27,15 @@ export const createMetricsDataSourceProfileProvider = (
   restrictedToProductFeature: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   isExperimental: true,
   profile: {
+    getDefaultAppState: (prev) => (params) => ({
+      ...(prev ? prev(params) : {}),
+      chartSectionHeight: 'max-content',
+    }),
     getChartSectionConfiguration: (prev) => () => ({
       ...(prev ? prev() : {}),
       Component: LazyMetricsGridSection,
       replaceDefaultChart: true,
       localStorageKeyPrefix: 'discover:metricsExperience',
-      initialTopPanelHeight: 'max-content',
     }),
   },
   resolve: (params) => {
