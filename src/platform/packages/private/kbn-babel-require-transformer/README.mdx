@@ -2,18 +2,68 @@
 id: kibDevDocsOpsBabelRequireTransformer
 slug: /kibana-dev-docs/ops/babel-require-transformer
 title: '@kbn/babel-require-transformer'
-description: A package with a Babel plugin that rewrites require statements to CommonJS imports
+description: A package with a Babel plugin that rewrites top level require statements in CommonJS to be defered, effectively making the modules lazy loaded
 date: 2025-09-25
 tags: ['kibana', 'dev', 'contributor', 'operations', 'babel', 'require', 'transformer', 'commonjs']
 ---
 
-Convert top-level CommonJS require() patterns into "inlined" CommonJS requires.
-Examples:
-const { a, b } = require('pkg');
--> const \_pkg = require('pkg'); const { a, b } = \_pkg;
+It takes code like this:
 
-const x = require('pkg').x;
--> const \_pkg = require('pkg'); const x = \_pkg.x;
+```
+_var foo = require('./bla')
 
-const x = require('pkg'); // unchanged (already inline)
--> require('pkg'); // unchanged (side-effect)
+
+```
+
+and transforms it to:
+
+```
+function deferRequire(module) {
+   let __loaded = false;
+   let __cache;
+   function __load() {
+     if (!__loaded) {
+       __cache = require(module);
+       __loaded = true;
+     }
+   }
+   const __handler = {
+     get(target, prop) {
+       if (prop === 'value') {
+         __load();
+         return __cache;
+       }
+       __load();
+       return __cache[prop];
+     },
+     set(target, prop, value) {
+       __load();
+       __cache[prop] = value;
+       return true;
+     },
+     has(target, prop) {
+       __load();
+       return prop in __cache;
+     },
+     ownKeys() {
+       __load();
+       return Reflect.ownKeys(__cache);
+     },
+     getOwnPropertyDescriptor(target, prop) {
+       __load();
+       const d = Object.getOwnPropertyDescriptor(__cache, prop);
+       if (d) d.configurable = true;
+       return d;
+     },
+   };
+   const __proxyTarget = {};
+   return new Proxy(__proxyTarget, __handler);
+ }
+
+const x = deferRequire('./x');
+x.value.b();
+```
+
+It only adds the helper function to code that has a top level `require` statement that qualifies.
+
+node_modules and modules from @kbn are excluded to ensure compatibility.

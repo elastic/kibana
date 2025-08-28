@@ -8,8 +8,7 @@
  */
 
 module.exports = {
-  testEnvironment: 'node',
-  // When this config is loaded via -c from the package folder, <rootDir> is the package dir
-  // so just use it directly as the root.
-  roots: ['<rootDir>'],
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-babel-require-transformer'],
 };
