@@ -7,13 +7,12 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiCheckbox, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
-import { isEqual } from 'lodash';
 import type { FieldDefinition, UnsavedFieldChange } from '@kbn/management-settings-types';
 import type { UiSettingsType } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -166,7 +165,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
           onChange={onChangeDefaultLlm}
           isDisabled={fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]?.isReadOnly}
           isLoading={connectors.loading}
-          isInvalid={selectedOptions.length === 0}
+          isInvalid={selectedOptions.length === 0 && !connectors.loading}
         />
       </EuiFormRow>
 

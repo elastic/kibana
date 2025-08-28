@@ -81,7 +81,7 @@ export class GenAiSettingsPlugin
        * {"readonlyMode": "ui", "schema": schema.string(), "value": "NO_DEFAULT_CONNECTOR"}
        */
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
-        readonlyMode: 'strict',
+        readonlyMode: 'ui',
         readonly: true,
         schema: schema.string(),
         value: NO_DEFAULT_CONNECTOR,
