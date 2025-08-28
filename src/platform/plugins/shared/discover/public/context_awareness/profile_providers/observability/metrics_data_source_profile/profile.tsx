@@ -9,6 +9,7 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { METRIC_EXPERIENCE_FEATURE_FLAG_KEY } from '@kbn/metrics-experience-plugin/public';
 import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
@@ -25,7 +26,6 @@ export const createMetricsDataSourceProfileProvider = (
 ): MetricsExperienceDataSourceProfileProvider => ({
   profileId: METRICS_DATA_SOURCE_PROFILE_ID,
   restrictedToProductFeature: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
-  isExperimental: true,
   profile: {
     getChartSectionConfiguration: (prev) => () => ({
       ...(prev ? prev() : {}),
@@ -34,7 +34,18 @@ export const createMetricsDataSourceProfileProvider = (
       localStorageKeyPrefix: 'discover:metricsExperience',
     }),
   },
-  resolve: (params) => {
+  resolve: async (params) => {
+    const isEnabled = await services.core.featureFlags.getBooleanValue(
+      METRIC_EXPERIENCE_FEATURE_FLAG_KEY,
+      false
+    );
+
+    if (!isEnabled) {
+      return {
+        isMatch: false,
+      };
+    }
+
     // This filter still needs to be narrowed down to `FROM metrics-*` or `TS metrics-*`
     // and possibly other conditions
     const isValidQuery =

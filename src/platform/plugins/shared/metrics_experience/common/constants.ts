@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MetricsExperiencePlugin } from './plugin';
-export const plugin = () => new MetricsExperiencePlugin();
-
-export { METRIC_EXPERIENCE_FEATURE_FLAG_KEY } from '../common/constants';
+export const METRIC_EXPERIENCE_FEATURE_FLAG_KEY = 'metricsExperienceEnabled';
