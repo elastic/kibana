@@ -11,6 +11,7 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { Stream } from 'stream';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { OAuthTokenManager } from './o_auth_token_manager';
 import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsoft_defender_endpoint/constants';
 import {
@@ -25,6 +26,7 @@ import {
   MicrosoftDefenderEndpointEmptyParamsSchema,
   GetActionResultsParamsSchema,
   DownloadActionResultsResponseSchema,
+  CancelParamsSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
 import type {
   MicrosoftDefenderEndpointAgentDetailsParams,
@@ -44,6 +46,7 @@ import type {
   MicrosoftDefenderGetLibraryFilesResponse,
   MicrosoftDefenderEndpointRunScriptParams,
   MicrosoftDefenderEndpointGetActionResultsResponse,
+  MicrosoftDefenderEndpointCancelParams,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
@@ -123,6 +126,11 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       method: 'runScript',
       schema: RunScriptParamsSchema,
     });
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION,
+      method: 'cancelAction',
+      schema: CancelParamsSchema,
+    });
 
     this.registerSubAction({
       name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
@@ -180,7 +188,9 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     return response.data;
   }
 
-  protected getResponseErrorMessage(error: AxiosError): string {
+  protected getResponseErrorMessage(
+    error: AxiosError<{ error: { code: string; message: string; target: string } }>
+  ): string {
     const appendResponseBody = (message: string): string => {
       const responseBody = JSON.stringify(error.response?.data ?? {});
 
@@ -193,6 +203,10 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
     if (!error.response?.status) {
       return appendResponseBody(error.message ?? 'Unknown API Error');
+    }
+    const mdeError = error.response.data?.error;
+    if (mdeError.code === 'ActiveRequestAlreadyExists') {
+      return `${mdeError.message}. Please wait or force clear with 'cancel' response action`;
     }
 
     if (error.response.status === 401) {
@@ -413,6 +427,24 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
               ],
             },
           ],
+        },
+      },
+      connectorUsageCollector
+    );
+  }
+
+  public async cancelAction(
+    payload: MicrosoftDefenderEndpointCancelParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<MicrosoftDefenderEndpointMachineAction> {
+    // API Reference:https://learn.microsoft.com/en-us/defender-endpoint/api/cancel-machine-action
+
+    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineAction>(
+      {
+        url: `${this.urls.machineActions}/${payload.actionId}/cancel`,
+        method: 'POST',
+        data: {
+          Comment: payload.comment,
         },
       },
       connectorUsageCollector
