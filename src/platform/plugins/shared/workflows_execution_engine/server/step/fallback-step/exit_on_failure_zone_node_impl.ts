@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitOnFailureZoneNode } from '@kbn/workflows';
+import type { ExitTryBlockNode } from '@kbn/workflows';
 import type { StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
-export class ExitOnFailureZoneNodeImpl implements StepImplementation {
+export class ExitTryBlockNodeImpl implements StepImplementation {
   constructor(
-    private node: ExitOnFailureZoneNode,
+    private node: ExitTryBlockNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitOnFailureZoneNode } from '@kbn/workflows';
+import type { ExitTryBlockNode } from '@kbn/workflows';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { ExitOnFailureZoneNodeImpl } from '../exit_on_failure_zone_node_impl';
+import { ExitTryBlockNodeImpl } from '../exit_on_failure_zone_node_impl';
 
-describe('ExitOnFailureZoneNodeImpl', () => {
-  let underTest: ExitOnFailureZoneNodeImpl;
-  let step: ExitOnFailureZoneNode;
+describe('ExitTryBlockNodeImpl', () => {
+  let underTest: ExitTryBlockNodeImpl;
+  let step: ExitTryBlockNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
 
   beforeEach(() => {
@@ -29,14 +29,14 @@ describe('ExitOnFailureZoneNodeImpl', () => {
     workflowRuntime.finishStep = jest.fn();
     workflowRuntime.exitScope = jest.fn();
     workflowRuntime.goToNextStep = jest.fn();
-    
-    underTest = new ExitOnFailureZoneNodeImpl(step, workflowRuntime);
+
+    underTest = new ExitTryBlockNodeImpl(step, workflowRuntime);
   });
 
   describe('run', () => {
     describe('when there is an error in step state', () => {
       const mockError = new Error('Test error');
-      
+
       beforeEach(() => {
         workflowRuntime.getStepState = jest.fn().mockReturnValue({
           error: mockError,

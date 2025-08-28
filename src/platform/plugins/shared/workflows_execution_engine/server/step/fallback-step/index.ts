@@ -8,7 +8,7 @@
  */
 
 export { EnterTryBlockNodeImpl } from './enter_on_failure_zone_node_impl';
-export { ExitOnFailureZoneNodeImpl } from './exit_on_failure_zone_node_impl';
+export { ExitTryBlockNodeImpl } from './exit_on_failure_zone_node_impl';
 export { EnterNormalPathNodeImpl } from './enter_normal_path_node_impl';
 export { ExitNormalPathNodeImpl } from './exit_normal_path_node_impl';
 export { EnterFailurePathNodeImpl } from './enter_failure_path_node_impl';
