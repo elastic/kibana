@@ -8,16 +8,29 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type { IfStep, ForEachStep, WorkflowYaml, WaitStep, ConnectorStep } from '../../spec/schema';
 import type {
-  EnterIfNode,
-  ExitIfNode,
-  EnterForeachNode,
-  ExitForeachNode,
-  EnterConditionBranchNode,
-  ExitConditionBranchNode,
+  ConnectorStep,
+  ForEachStep,
+  HttpStep,
+  IfStep,
+  WaitStep,
+  ElasticsearchStep,
+  KibanaStep,
+  WorkflowOnFailure,
+  WorkflowYaml,
+} from '../../spec/schema';
+import type {
   AtomicGraphNode,
+  EnterConditionBranchNode,
+  EnterForeachNode,
+  EnterIfNode,
+  ExitConditionBranchNode,
+  ExitForeachNode,
+  ExitIfNode,
+  HttpGraphNode,
   WaitGraphNode,
+  ElasticsearchGraphNode,
+  KibanaGraphNode,
 } from '../../types/execution';
 import { convertToWorkflowGraph } from './build_execution_graph';
 
@@ -133,6 +146,78 @@ describe('convertToWorkflowGraph', () => {
     });
   });
 
+  describe('http step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testAtomicStep1',
+          type: 'slack',
+          connectorId: 'slack',
+          with: {
+            message: 'Hello from atomic step 1',
+          },
+        } as ConnectorStep,
+        {
+          name: 'testHttpStep',
+          type: 'http',
+          with: {
+            url: 'https://api.example.com/test',
+            method: 'GET',
+            headers: {
+              Authorization: 'Bearer token',
+            },
+            timeout: '30s',
+          },
+        } as HttpStep,
+        {
+          name: 'testAtomicStep2',
+          type: 'slack',
+          connectorId: 'slack',
+          with: {
+            message: 'Hello from atomic step 2',
+          },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should return nodes for http step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(3);
+      expect(topSort).toEqual(['testAtomicStep1', 'testHttpStep', 'testAtomicStep2']);
+    });
+
+    it('should return correct edges for http step graph', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual([
+        { v: 'testAtomicStep1', w: 'testHttpStep' },
+        { v: 'testHttpStep', w: 'testAtomicStep2' },
+      ]);
+    });
+
+    it('should configure the http step correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const node = executionGraph.node('testHttpStep');
+      expect(node).toEqual({
+        id: 'testHttpStep',
+        type: 'http',
+        configuration: {
+          name: 'testHttpStep',
+          type: 'http',
+          with: {
+            url: 'https://api.example.com/test',
+            method: 'GET',
+            headers: {
+              Authorization: 'Bearer token',
+            },
+            timeout: '30s',
+          },
+        },
+      } as HttpGraphNode);
+    });
+  });
+
   describe('if step', () => {
     const workflowDefinition = {
       steps: [
@@ -190,6 +275,155 @@ describe('convertToWorkflowGraph', () => {
           with: { duration: '1s' },
         },
       } as WaitGraphNode);
+    });
+  });
+
+  describe('elasticsearch step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testElasticsearchStep',
+          type: 'elasticsearch.search.query',
+          with: {
+            index: 'logs-*',
+            query: {
+              match: {
+                message: 'error',
+              },
+            },
+            size: 10,
+          },
+        } as ElasticsearchStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should return nodes for elasticsearch step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(1);
+      expect(topSort).toEqual(['testElasticsearchStep']);
+    });
+
+    it('should configure the elasticsearch step correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const node = executionGraph.node('testElasticsearchStep');
+      expect(node).toEqual({
+        id: 'testElasticsearchStep',
+        type: 'elasticsearch.search.query',
+        configuration: {
+          name: 'testElasticsearchStep',
+          type: 'elasticsearch.search.query',
+          with: {
+            index: 'logs-*',
+            query: {
+              match: {
+                message: 'error',
+              },
+            },
+            size: 10,
+          },
+        },
+      } as ElasticsearchGraphNode);
+    });
+
+    it('should handle elasticsearch step with raw API format', () => {
+      const rawApiWorkflow = {
+        steps: [
+          {
+            name: 'testElasticsearchRawStep',
+            type: 'elasticsearch.search',
+            with: {
+              request: {
+                method: 'GET',
+                path: '/logs-*/_search',
+                body: {
+                  query: {
+                    match: {
+                      message: 'error',
+                    },
+                  },
+                  size: 5,
+                },
+              },
+            },
+          } as ElasticsearchStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const executionGraph = convertToWorkflowGraph(rawApiWorkflow as any);
+      const node = executionGraph.node(
+        'testElasticsearchRawStep'
+      ) as unknown as ElasticsearchGraphNode;
+      expect(node.type).toBe('elasticsearch.search');
+      expect(node.configuration.with.request.path).toBe('/logs-*/_search');
+    });
+  });
+
+  describe('kibana step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testKibanaStep',
+          type: 'kibana.cases.create',
+          with: {
+            title: 'Test Case',
+            description: 'A test case created by workflow',
+            tags: ['automation'],
+            severity: 'medium',
+          },
+        } as KibanaStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should return nodes for kibana step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(1);
+      expect(topSort).toEqual(['testKibanaStep']);
+    });
+
+    it('should configure the kibana step correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const node = executionGraph.node('testKibanaStep');
+      expect(node).toEqual({
+        id: 'testKibanaStep',
+        type: 'kibana.cases.create',
+        configuration: {
+          name: 'testKibanaStep',
+          type: 'kibana.cases.create',
+          with: {
+            title: 'Test Case',
+            description: 'A test case created by workflow',
+            tags: ['automation'],
+            severity: 'medium',
+          },
+        },
+      } as KibanaGraphNode);
+    });
+
+    it('should handle kibana step with raw API format', () => {
+      const rawApiWorkflow = {
+        steps: [
+          {
+            name: 'testKibanaRawStep',
+            type: 'kibana.cases.get',
+            with: {
+              request: {
+                method: 'GET',
+                path: '/api/cases/test-case-id',
+                headers: {
+                  'kbn-xsrf': 'true',
+                },
+              },
+            },
+          } as KibanaStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const executionGraph = convertToWorkflowGraph(rawApiWorkflow as any);
+      const node = executionGraph.node('testKibanaRawStep') as unknown as KibanaGraphNode;
+      expect(node.type).toBe('kibana.cases.get');
+      expect(node.configuration.with.request.path).toBe('/api/cases/test-case-id');
     });
   });
 
@@ -700,6 +934,60 @@ describe('convertToWorkflowGraph', () => {
           id: 'exitForeach(foreach_testForeachConnectorStep)',
           startNodeId: 'foreach_testForeachConnectorStep',
         } as ExitForeachNode);
+      });
+    });
+  });
+
+  describe('step with retry', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testRetryConnectorStep',
+          type: 'slack',
+          connectorId: 'slack',
+          'on-failure': {
+            retry: {
+              'max-attempts': 3,
+              delay: '5s',
+            },
+          } as WorkflowOnFailure,
+          with: {
+            message: 'Hello from retry step',
+          },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should have correct topological order for step with retry', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topsort = graphlib.alg.topsort(executionGraph);
+      expect(topsort).toEqual([
+        'retry_testRetryConnectorStep',
+        'testRetryConnectorStep',
+        'exitRetry(retry_testRetryConnectorStep)',
+      ]);
+    });
+
+    it('should have correct edges for step with retry', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual([
+        { v: 'retry_testRetryConnectorStep', w: 'testRetryConnectorStep' },
+        { v: 'testRetryConnectorStep', w: 'exitRetry(retry_testRetryConnectorStep)' },
+      ]);
+    });
+
+    it('should configure retry node correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const retryNode = executionGraph.node('retry_testRetryConnectorStep');
+      expect(retryNode).toEqual({
+        id: 'retry_testRetryConnectorStep',
+        type: 'enter-retry',
+        exitNodeId: 'exitRetry(retry_testRetryConnectorStep)',
+        configuration: {
+          'max-attempts': 3,
+          delay: '5s',
+        },
       });
     });
   });

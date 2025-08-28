@@ -333,3 +333,49 @@ This approach ensures both the action registry and translation layer are **spec-
 5. **Developer Experience**: Rich autocompletion and validation in YAML editor
 6. **Authentication**: Proper user context through Task Manager API keys
 7. **Simplicity**: Leverages existing StepFactory pattern with minimal architecture changes
+
+---
+
+## Implementation Status
+
+### ✅ Completed Tasks
+
+**Task 4: Load ES API Specs from Console Plugin**
+- ✅ Created `ElasticsearchSpecsLoader` class to read 568+ ES API specifications
+- ✅ Located specs at `/src/platform/plugins/shared/console/server/lib/spec_definitions/json/generated/`
+- ✅ Implemented spec parsing and conversion to `ConnectorContract[]` format
+- ✅ Added server route `/api/workflows/connectors/elasticsearch`
+
+**Task 6: Create ES Action Registry**
+- ✅ Generated full schema with individual literal types for each of 568+ APIs  
+- ✅ Updated `generateYamlSchemaFromConnectors()` to handle large discriminated unions
+- ✅ Created `/api/workflows/connectors/all` endpoint serving static + ES connectors
+
+### 🔄 In Progress
+
+**Frontend Integration Issues**
+- ❌ **Dynamic Schema Loading Failed**: Attempted to load schemas dynamically in Monaco editor
+- ❌ **Monaco Integration Problem**: React/TypeScript configuration conflicts prevented dynamic loading
+- ❌ **Rollback Completed**: Restored static schema approach in `workflow_yaml_editor.tsx`
+
+### 📋 Next Steps
+
+**Alternative Approach - Build-Time Generation:**
+1. **Generate Static Schemas**: Create build-time script to generate static schemas from ES specs
+2. **Update Schema Files**: Replace hardcoded connectors with generated ES API definitions  
+3. **Monaco Integration**: Use static schemas for editor validation and autocompletion
+4. **Sugar Syntax**: Implement transformation rules for user-friendly syntax
+
+**Files Modified:**
+- `src/platform/plugins/shared/workflows_management/server/lib/elasticsearch_specs_loader.ts` - ES specs parser
+- `src/platform/plugins/shared/workflows_management/server/routes/api/connectors_specs.ts` - API endpoints  
+- `src/platform/plugins/shared/workflows_management/common/dynamic_schema.ts` - Frontend loading (rolled back)
+- `src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts` - Schema generation
+
+**Current Issue:**
+Monaco editor still shows only hardcoded types (`elasticsearch.search`) instead of all 568+ ES APIs. Need build-time static generation approach instead of runtime dynamic loading.
+
+**Lessons Learned:**
+- Dynamic schema loading doesn't work well with Monaco editor's React integration
+- TypeScript configuration prevents proper validation of dynamically loaded schemas
+- Build-time generation is preferred approach for Monaco editor integration

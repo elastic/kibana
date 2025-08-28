@@ -31,8 +31,9 @@ export class KibanaActionStepImpl extends StepBase<KibanaActionStep> {
 
   public async _run(): Promise<RunStepResult> {
     try {
-      const stepType = (this.step as any).configuration?.type || this.step.type;
-      const stepWith = (this.step as any).configuration?.with || this.step.with;
+      // Support both direct step types (kibana.cases.create) and atomic+configuration pattern
+      const stepType = this.step.type || (this.step as any).configuration?.type;
+      const stepWith = this.step.with || (this.step as any).configuration?.with;
 
       this.workflowLogger.logInfo(`Executing Kibana action: ${stepType}`, {
         event: { action: 'kibana-action', outcome: 'unknown' },

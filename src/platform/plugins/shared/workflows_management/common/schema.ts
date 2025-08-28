@@ -11,9 +11,8 @@ import type { ConnectorContract } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
-// TODO: replace with dynamically fetching connectors actions and subactions via ActionsClient or other service once we decide on that.
-
-const connectors: ConnectorContract[] = [
+// Static connectors used for schema generation
+const staticConnectors: ConnectorContract[] = [
   {
     type: 'console',
     paramsSchema: z
@@ -75,91 +74,45 @@ const connectors: ConnectorContract[] = [
       })
     ),
   },
-  // Internal Elasticsearch actions
+  // Basic Elasticsearch actions as fallback
   {
-    type: 'elasticsearch.search.query',
+    type: 'elasticsearch.search',
     connectorIdRequired: false,
     paramsSchema: z.object({
-      // Current raw API structure
-      request: z
-        .object({
-          method: z.enum(['GET', 'POST']).optional(),
-          path: z.string(),
-          body: z.any().optional(),
-          query: z.record(z.any()).optional(), // URL query params
-        })
-        .optional(),
-      // Sugar syntax (alternative to request)
       index: z.string().optional(),
       query: z.any().optional(),
       size: z.number().optional(),
       from: z.number().optional(),
       sort: z.any().optional(),
-      _source: z.any().optional(),
-      aggs: z.any().optional(),
     }),
     outputSchema: z.object({
       hits: z.object({
         total: z.object({
           value: z.number(),
-          relation: z.string(),
         }),
         hits: z.array(z.any()),
       }),
-      took: z.number(),
-      timed_out: z.boolean(),
-      aggregations: z.any().optional(),
     }),
   },
   {
-    type: 'elasticsearch.indices.create',
-    connectorIdRequired: false,
-    paramsSchema: z.object({
-      // Raw API structure
-      request: z
-        .object({
-          method: z.enum(['PUT', 'POST']).optional(),
-          path: z.string(),
-          body: z.any().optional(),
-        })
-        .optional(),
-      // Sugar syntax
-      index: z.string().optional(),
-      mappings: z.any().optional(),
-      settings: z.any().optional(),
-      aliases: z.any().optional(),
-    }),
-    outputSchema: z.object({
-      acknowledged: z.boolean(),
-      shards_acknowledged: z.boolean(),
-      index: z.string(),
-    }),
-  },
-  // More Elasticsearch actions
-  {
-    type: 'elasticsearch.indices.delete',
-    connectorIdRequired: false,
-    paramsSchema: z.object({
-      index: z.string(),
-    }),
-    outputSchema: z.object({
-      acknowledged: z.boolean(),
-    }),
-  },
-  {
-    type: 'elasticsearch.cluster.health',
+    type: 'elasticsearch.search.query',
     connectorIdRequired: false,
     paramsSchema: z.object({
       index: z.string().optional(),
-      level: z.enum(['cluster', 'indices', 'shards']).optional(),
+      query: z.any().optional(),
+      size: z.number().optional(),
+      from: z.number().optional(),
+      sort: z.any().optional(),
     }),
     outputSchema: z.object({
-      cluster_name: z.string(),
-      status: z.enum(['green', 'yellow', 'red']),
-      number_of_nodes: z.number(),
+      hits: z.object({
+        total: z.object({
+          value: z.number(),
+        }),
+        hits: z.array(z.any()),
+      }),
     }),
   },
-  // Internal Kibana actions
   {
     type: 'kibana.cases.create',
     connectorIdRequired: false,
@@ -168,51 +121,39 @@ const connectors: ConnectorContract[] = [
       description: z.string(),
       tags: z.array(z.string()).optional(),
       severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-      assignees: z.array(z.string()).optional(),
     }),
     outputSchema: z.object({
       id: z.string(),
       title: z.string(),
-      description: z.string(),
-      status: z.string(),
-      created_at: z.string(),
-      created_by: z.object({
-        username: z.string(),
-      }),
     }),
   },
+  // Generic request types for raw API calls
   {
-    type: 'kibana.spaces.get',
+    type: 'elasticsearch.request',
     connectorIdRequired: false,
     paramsSchema: z.object({
-      space_id: z.string().optional(),
+      method: z.string(),
+      path: z.string(),
+      body: z.any().optional(),
+      params: z.any().optional(),
     }),
-    outputSchema: z.object({
-      id: z.string(),
-      name: z.string(),
-      description: z.string().optional(),
-      disabledFeatures: z.array(z.string()),
-    }),
+    outputSchema: z.any(),
   },
   {
-    type: 'kibana.alerts.find',
+    type: 'kibana.request',
     connectorIdRequired: false,
     paramsSchema: z.object({
-      page: z.number().optional(),
-      per_page: z.number().optional(),
-      filter: z.string().optional(),
+      method: z.string(),
+      path: z.string(),
+      body: z.any().optional(),
+      headers: z.any().optional(),
     }),
-    outputSchema: z.object({
-      page: z.number(),
-      per_page: z.number(),
-      total: z.number(),
-      data: z.array(z.any()),
-    }),
+    outputSchema: z.any(),
   },
 ];
 
 export const getOutputSchemaForStepType = (stepType: string) => {
-  const connector = connectors.find((c) => c.type === stepType);
+  const connector = staticConnectors.find((c) => c.type === stepType);
   if (connector) {
     return connector.outputSchema;
   }
@@ -229,8 +170,9 @@ export const getOutputSchemaForStepType = (stepType: string) => {
   return z.any();
 };
 
-export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(connectors);
-export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(connectors, true);
+// Static schemas for initial load
+export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(staticConnectors);
+export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(staticConnectors, true);
 
 // Partially recreated from x-pack/platform/plugins/shared/alerting/server/connector_adapters/types.ts
 // TODO: replace with dynamic schema

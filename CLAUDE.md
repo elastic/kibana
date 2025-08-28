@@ -222,3 +222,39 @@ uiSettings.overrides:
 - **API Route Handlers** - HTTP endpoint implementations following Kibana patterns
 
 This architecture enables the workflows team to build scalable, maintainable workflow management and execution capabilities while following Kibana's established patterns and maintaining clear code ownership boundaries.
+
+---
+
+## Current Work Status
+
+### Epic #13173: Internal Elastic Action Steps
+
+**Progress Summary:**
+- ✅ Created ElasticsearchSpecsLoader to read 568+ API specifications from console plugin
+- ✅ Added server routes `/api/workflows/connectors/elasticsearch` and `/api/workflows/connectors/all`
+- ✅ Implemented dynamic schema generation with full ES API coverage
+- ❌ Dynamic Monaco editor integration failed - rolled back to static schemas
+- 🔄 **Current Issue**: Monaco editor validation only shows hardcoded types instead of all ES APIs
+
+**Technical Implementation:**
+- **Specs Source**: `/src/platform/plugins/shared/console/server/lib/spec_definitions/json/generated/` (568 files)
+- **Server Integration**: `ElasticsearchSpecsLoader` class converts ES specs to `ConnectorContract[]`
+- **Schema Generation**: Full Zod schema with individual literal types for each API
+- **Monaco Issue**: Attempted dynamic schema loading but TypeScript/React integration failed
+
+**Files Modified:**
+- `src/platform/plugins/shared/workflows_management/server/lib/elasticsearch_specs_loader.ts` - ES specs parser
+- `src/platform/plugins/shared/workflows_management/server/routes/api/connectors_specs.ts` - API endpoints
+- `src/platform/plugins/shared/workflows_management/common/dynamic_schema.ts` - Frontend schema loading
+- `src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts` - Schema generation logic
+
+**Next Steps:**
+1. **Alternative Approach**: Instead of dynamic loading, generate static schemas at build time from ES specs
+2. **Sugar Syntax**: Implement transformation rules for user-friendly workflow syntax
+3. **Kibana APIs**: Load specs from `oas_docs/output/kibana.yaml` for internal Kibana actions
+4. **API Key Context**: Investigate user context issue showing 'elastic' instead of actual user
+
+**Known Issues:**
+- Dynamic schema approach doesn't work with Monaco editor React integration
+- TypeScript configuration prevents proper validation of dynamic schemas
+- Need build-time static generation instead of runtime dynamic loading

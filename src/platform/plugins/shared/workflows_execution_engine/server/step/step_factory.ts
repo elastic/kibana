@@ -12,26 +12,23 @@ import type { WorkflowContextManager } from '../workflow_context_manager/workflo
 import type { StepImplementation } from './step_base';
 // Import schema and inferred types
 import type { ConnectorExecutor } from '../connector_executor';
+import type { UrlValidator } from '../lib/url_validator';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
+import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
+import { HttpStepImpl } from './http_step';
 import {
   EnterConditionBranchNodeImpl,
   EnterIfNodeImpl,
-  ExitIfNodeImpl,
   ExitConditionBranchNodeImpl,
+  ExitIfNodeImpl,
 } from './if_step';
-import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
-import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './retry_step';
 import { WaitStepImpl } from './wait_step/wait_step';
-import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { KibanaActionStepImpl } from './kibana_action_step';
-// Import specific step implementations
-// import { ForEachStepImpl } from './foreach-step'; // To be created
-// import { IfStepImpl } from './if-step'; // To be created
-// import { AtomicStepImpl } from './atomic-step'; // To be created
-// import { ParallelStepImpl } from './parallel-step'; // To be created
-// import { MergeStepImpl } from './merge-step'; // To be created
 
 export class StepFactory {
   constructor(
@@ -39,7 +36,8 @@ export class StepFactory {
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
-    private workflowTaskManager: WorkflowTaskManager
+    private workflowTaskManager: WorkflowTaskManager,
+    private urlValidator: UrlValidator
   ) {}
 
   public create<TStep extends BaseStep>(
@@ -57,6 +55,10 @@ export class StepFactory {
       tags: ['step-factory'],
     });
 
+    // Check if it's an internal action type
+    const isElasticsearchAction = stepType && stepType.startsWith('elasticsearch.');
+    const isKibanaAction = stepType && stepType.startsWith('kibana.');
+
     switch (stepType) {
       case 'enter-foreach':
         return new EnterForeachNodeImpl(
@@ -67,6 +69,15 @@ export class StepFactory {
         );
       case 'exit-foreach':
         return new ExitForeachNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+      case 'enter-retry':
+        return new EnterRetryNodeImpl(
+          step as any,
+          this.workflowRuntime,
+          this.workflowTaskManager,
+          this.workflowLogger
+        );
+      case 'exit-retry':
+        return new ExitRetryNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
       case 'enter-if':
         return new EnterIfNodeImpl(
           step as any,
@@ -88,7 +99,7 @@ export class StepFactory {
           this.workflowTaskManager
         );
       case 'atomic':
-        // For atomic steps, check the configuration.type for internal actions
+        // Check if this is an internal action (elasticsearch.* or kibana.*)
         const atomicStepType = (step as any).configuration?.type;
 
         if (atomicStepType && atomicStepType.startsWith('elasticsearch.')) {
@@ -125,11 +136,46 @@ export class StepFactory {
           this.workflowRuntime,
           this.workflowLogger
         );
+      case 'http':
+        return new HttpStepImpl(
+          step as any,
+          this.contextManager,
+          this.workflowLogger,
+          this.urlValidator,
+          this.workflowRuntime
+        );
       case 'parallel':
-      // return new ParallelStepImpl(step as ParallelStep, contextManager);
+        throw new Error(`Parallel step not implemented yet: ${stepType}`);
       case 'merge':
-      // return new MergeStepImpl(step as MergeStep, contextManager);
+        throw new Error(`Merge step not implemented yet: ${stepType}`);
       default:
+        // Handle elasticsearch.* and kibana.* actions
+        if (isElasticsearchAction) {
+          this.workflowLogger.logInfo(`Creating Elasticsearch action step: ${stepType}`, {
+            event: { action: 'internal-action-creation', outcome: 'success' },
+            tags: ['step-factory', 'elasticsearch', 'internal-action'],
+          });
+          return new ElasticsearchActionStepImpl(
+            step as any,
+            this.contextManager,
+            this.workflowRuntime,
+            this.workflowLogger
+          );
+        }
+
+        if (isKibanaAction) {
+          this.workflowLogger.logInfo(`Creating Kibana action step: ${stepType}`, {
+            event: { action: 'internal-action-creation', outcome: 'success' },
+            tags: ['step-factory', 'kibana', 'internal-action'],
+          });
+          return new KibanaActionStepImpl(
+            step as any,
+            this.contextManager,
+            this.workflowRuntime,
+            this.workflowLogger
+          );
+        }
+
         throw new Error(`Unknown node type: ${stepType}`);
     }
   }
