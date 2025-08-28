@@ -20,6 +20,13 @@ describe(
   'When defining a kibana role for Endpoint security access',
   {
     tags: '@ess',
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['trustedDevices'])}`,
+        ],
+      },
+    },
   },
   () => {
     const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {

@@ -60,6 +60,7 @@ const removeExceptionsListPromise = (listId: string) => {
 };
 
 const ENDPOINT_ARTIFACT_LIST_TYPES = {
+  [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: ExceptionListTypeEnum.ENDPOINT,
   [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: ExceptionListTypeEnum.ENDPOINT,
   [ENDPOINT_ARTIFACT_LISTS.trustedDevices.id]: ExceptionListTypeEnum.ENDPOINT_TRUSTED_DEVICES,
   [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: ExceptionListTypeEnum.ENDPOINT_EVENTS,

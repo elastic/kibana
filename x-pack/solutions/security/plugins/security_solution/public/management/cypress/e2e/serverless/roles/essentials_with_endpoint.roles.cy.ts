@@ -34,6 +34,9 @@ describe.skip(
           { product_line: 'security', product_tier: 'essentials' },
           { product_line: 'endpoint', product_tier: 'essentials' },
         ],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['trustedDevices'])}`,
+        ],
       },
     },
   },

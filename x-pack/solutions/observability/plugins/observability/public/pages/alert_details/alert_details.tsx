@@ -88,7 +88,6 @@ const isTabId = (value: string): value is TabId => {
 export function AlertDetails() {
   const { services } = useKibana();
   const {
-    cases,
     http,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
@@ -412,21 +411,17 @@ export function AlertDetails() {
         ) : (
           <EuiLoadingSpinner />
         ),
-        rightSideItems: cases
-          ? [
-              <ObsCasesContext>
-                <HeaderActions
-                  alert={alertDetail?.formatted ?? null}
-                  alertIndex={alertDetail?.raw._index}
-                  alertStatus={alertStatus}
-                  onUntrackAlert={onUntrackAlert}
-                  onUpdate={onUpdate}
-                  rule={rule}
-                  refetch={refetch}
-                />
-              </ObsCasesContext>,
-            ]
-          : [],
+        rightSideItems: [
+          <HeaderActions
+            alert={alertDetail?.formatted ?? null}
+            alertIndex={alertDetail?.raw._index}
+            alertStatus={alertStatus}
+            onUntrackAlert={onUntrackAlert}
+            onUpdate={onUpdate}
+            rule={rule}
+            refetch={refetch}
+          />,
+        ],
         bottomBorder: false,
         'data-test-subj': rule?.ruleTypeId || 'alertDetailsPageTitle',
       }}
