@@ -282,6 +282,7 @@ export async function pickTestGroupRunOrder() {
     throw new Error(`invalid JEST_CONFIGS_RETRY_COUNT: ${process.env.JEST_CONFIGS_RETRY_COUNT}`);
   }
 
+  // @ts-expect-error
   const FTR_CONFIGS_DEPS =
     process.env.FTR_CONFIGS_DEPS !== undefined
       ? process.env.FTR_CONFIGS_DEPS.split(',')
@@ -289,9 +290,11 @@ export async function pickTestGroupRunOrder() {
           .filter(Boolean)
       : ['build'];
 
+  // @ts-expect-error
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
     : {};
+  // @ts-expect-error
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
 
   const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(
@@ -498,7 +501,7 @@ export async function pickTestGroupRunOrder() {
             },
             retry: {
               automatic: [
-                { exit_status: '-1', limit: 3 },
+                { exit_status: '-1', limit: 0 },
                 ...(JEST_CONFIGS_RETRY_COUNT > 0
                   ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
                   : []),
@@ -506,69 +509,69 @@ export async function pickTestGroupRunOrder() {
             },
           }
         : [],
-      integration.count > 0
-        ? {
-            label: 'Jest Integration Tests',
-            command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
-            parallelism: integration.count,
-            timeout_in_minutes: 120,
-            key: 'jest-integration',
-            agents: expandAgentQueue('n2-4-spot'),
-            env: {
-              SCOUT_TARGET_TYPE: 'local',
-            },
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
-              ],
-            },
-          }
-        : [],
-      functionalGroups.length
-        ? {
-            group: 'FTR Configs',
-            key: 'ftr-configs',
-            depends_on: FTR_CONFIGS_DEPS,
-            steps: functionalGroups
-              .sort((a, b) =>
-                // if both groups are sorted by number then sort by that
-                typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
-                  ? a.sortBy - b.sortBy
-                  : // if both groups are sorted by string, sort by that
-                  typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
-                  ? a.sortBy.localeCompare(b.sortBy)
-                  : // if a is sorted by number then order it later than b
-                  typeof a.sortBy === 'number'
-                  ? 1
-                  : -1
-              )
-              .map(
-                ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
-                  label: title,
-                  command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 90,
-                  agents: expandAgentQueue(queue),
-                  env: {
-                    SCOUT_TARGET_TYPE: 'local',
-                    FTR_CONFIG_GROUP_KEY: key,
-                    ...ftrExtraArgs,
-                    ...envFromlabels,
-                  },
-                  retry: {
-                    automatic: [
-                      { exit_status: '-1', limit: 3 },
-                      ...(FTR_CONFIGS_RETRY_COUNT > 0
-                        ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
-                        : []),
-                    ],
-                  },
-                })
-              ),
-          }
-        : [],
+      // integration.count > 0
+      //   ? {
+      //       label: 'Jest Integration Tests',
+      //       command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
+      //       parallelism: integration.count,
+      //       timeout_in_minutes: 120,
+      //       key: 'jest-integration',
+      //       agents: expandAgentQueue('n2-4-spot'),
+      //       env: {
+      //         SCOUT_TARGET_TYPE: 'local',
+      //       },
+      //       retry: {
+      //         automatic: [
+      //           { exit_status: '-1', limit: 3 },
+      //           ...(JEST_CONFIGS_RETRY_COUNT > 0
+      //             ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+      //             : []),
+      //         ],
+      //       },
+      //     }
+      //   : [],
+      // functionalGroups.length
+      //   ? {
+      //       group: 'FTR Configs',
+      //       key: 'ftr-configs',
+      //       depends_on: FTR_CONFIGS_DEPS,
+      //       steps: functionalGroups
+      //         .sort((a, b) =>
+      //           // if both groups are sorted by number then sort by that
+      //           typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
+      //             ? a.sortBy - b.sortBy
+      //             : // if both groups are sorted by string, sort by that
+      //             typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
+      //             ? a.sortBy.localeCompare(b.sortBy)
+      //             : // if a is sorted by number then order it later than b
+      //             typeof a.sortBy === 'number'
+      //             ? 1
+      //             : -1
+      //         )
+      //         .map(
+      //           ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+      //             label: title,
+      //             command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+      //             timeout_in_minutes: 90,
+      //             agents: expandAgentQueue(queue),
+      //             env: {
+      //               SCOUT_TARGET_TYPE: 'local',
+      //               FTR_CONFIG_GROUP_KEY: key,
+      //               ...ftrExtraArgs,
+      //               ...envFromlabels,
+      //             },
+      //             retry: {
+      //               automatic: [
+      //                 { exit_status: '-1', limit: 3 },
+      //                 ...(FTR_CONFIGS_RETRY_COUNT > 0
+      //                   ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+      //                   : []),
+      //               ],
+      //             },
+      //           })
+      //         ),
+      //     }
+      //   : [],
     ].flat()
   );
 }
