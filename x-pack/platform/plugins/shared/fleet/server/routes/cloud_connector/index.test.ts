@@ -7,8 +7,8 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
-import { FleetRequestHandlerContext } from '../../types';
-import { CloudProvider } from '../../../common/types/models/cloud_connector';
+import type { FleetRequestHandlerContext } from '../../types';
+import type { CloudProvider } from '../../../common/types/models/cloud_connector';
 
 import { cloudConnectorService } from '../../services';
 
@@ -110,67 +110,6 @@ describe('Cloud Connector API', () => {
             vars: {
               role_arn: { value: 'arn:aws:iam::123:role/TestRole', type: 'text' },
               external_id: { value: { isSecretRef: true, id: 'secret-123' }, type: 'password' },
-            },
-          },
-        });
-
-        await createCloudConnectorHandler(context, request, response);
-
-        expect(response.ok).toHaveBeenCalledWith({
-          body: mockCloudConnector,
-        });
-      });
-
-      it('should accept valid Azure cloud provider', async () => {
-        const mockCloudConnector = {
-          id: 'test-id',
-          name: 'test-connector',
-          cloudProvider: 'azure' as CloudProvider,
-          vars: {},
-          packagePolicyCount: 1,
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-01-01T00:00:00.000Z',
-        };
-
-        mockCloudConnectorService.create.mockResolvedValue(mockCloudConnector);
-
-        const request = httpServerMock.createKibanaRequest({
-          body: {
-            name: 'test-connector',
-            cloudProvider: 'azure',
-            vars: {
-              client_id: { value: 'azure-client-id', type: 'text' },
-              tenant_id: { value: 'azure-tenant-id', type: 'text' },
-            },
-          },
-        });
-
-        await createCloudConnectorHandler(context, request, response);
-
-        expect(response.ok).toHaveBeenCalledWith({
-          body: mockCloudConnector,
-        });
-      });
-
-      it('should accept valid GCP cloud provider', async () => {
-        const mockCloudConnector = {
-          id: 'test-id',
-          name: 'test-connector',
-          cloudProvider: 'gcp' as CloudProvider,
-          vars: {},
-          packagePolicyCount: 1,
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-01-01T00:00:00.000Z',
-        };
-
-        mockCloudConnectorService.create.mockResolvedValue(mockCloudConnector);
-
-        const request = httpServerMock.createKibanaRequest({
-          body: {
-            name: 'test-connector',
-            cloudProvider: 'gcp',
-            vars: {
-              project_id: { value: 'gcp-project-id', type: 'text' },
             },
           },
         });

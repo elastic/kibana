@@ -680,6 +680,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(createdPolicy.agentless).to.have.property('cloud_connectors');
         expect(createdPolicy.agentless.cloud_connectors.enabled).to.equal(true);
         expect(createdPolicy.agentless.cloud_connectors.target_csp).to.equal('aws');
+        expect(createdPolicy.package_policies[0].supports_cloud_connector).to.equal(true);
       });
 
       it('should create agent policy without cloud connectors', async () => {
@@ -707,6 +708,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(createdPolicy.supports_agentless).to.equal(true);
         expect(createdPolicy.agentless).to.have.property('cloud_connectors');
         expect(createdPolicy.agentless.cloud_connectors.enabled).to.equal(false);
+        expect(createdPolicy.package_policies[0]).to.not.have.property('cloud_connector_id');
       });
 
       it('should validate cloud connector target_csp when enabled', async () => {

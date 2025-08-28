@@ -78,6 +78,7 @@ import type {
   PackagePolicyAssetsMap,
   CloudConnectorVarsRecord,
   CloudProvider,
+  CloudConnectorSO,
 } from '../../common/types';
 import {
   FleetError,
@@ -451,6 +452,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         secretReferences = secretsRes.secretReferences;
 
         inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
+
+        const cloudConnector = await this.createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicies[0]
+        );
+        if (cloudConnector) {
+          enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
+        }
       }
       const assetsMap = await getAgentTemplateAssetsMap({
         logger,
@@ -464,28 +474,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         assetsMap,
         { otelcolSuffixId: packagePolicyId }
       );
-
-      const isNewCloudConnectorSetup =
-        enrichedPackagePolicy.supports_cloud_connector &&
-        agentPolicies[0].agentless?.cloud_connectors?.enabled &&
-        !enrichedPackagePolicy?.cloud_connector_id;
-
-      if (isNewCloudConnectorSetup) {
-        const cloudConnectorVars = extractCloudVarsFromPackagePolicy(enrichedPackagePolicy);
-        if (cloudConnectorVars) {
-          try {
-            const cloudConnector = await cloudConnectorService.create(soClient, {
-              name: enrichedPackagePolicy.name,
-              vars: cloudConnectorVars,
-              cloudProvider: agentPolicies[0].agentless?.cloud_connectors
-                ?.target_csp as CloudProvider,
-            });
-            enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
-          } catch (error) {
-            logger.error(`Error creating cloud connector: ${error}`);
-          }
-        }
-      }
 
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -2189,6 +2177,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
           supports_agentless: newPolicy.supports_agentless,
+          supports_cloud_connector: newPolicy.supports_cloud_connector,
           additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
         };
       }
@@ -2838,6 +2827,43 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     for (const [namespace, policies] of Object.entries(updatedPolicies)) {
       const agentPolicyIds = policies.flatMap((policy) => policy.attributes.policy_ids || []);
       await agentPolicyService.bumpAgentPoliciesByIds(agentPolicyIds, {}, namespace);
+    }
+  }
+
+  public async createCloudConnectorForPackagePolicy(
+    soClient: SavedObjectsClientContract,
+    enrichedPackagePolicy: NewPackagePolicy,
+    agentPolicy: AgentPolicy
+  ): Promise<CloudConnectorSO | undefined> {
+    const logger = this.getLogger('createCloudConnectorForPackagePolicy');
+
+    // Check if cloud connector setup is required
+    const isNewCloudConnectorSetup =
+      !!enrichedPackagePolicy?.supports_cloud_connector &&
+      agentPolicy.agentless?.cloud_connectors?.enabled &&
+      !enrichedPackagePolicy?.cloud_connector_id;
+
+    if (!isNewCloudConnectorSetup) {
+      logger.debug('Cloud connector setup not required, skipping');
+      return;
+    }
+
+    try {
+      const cloudConnectorVars = extractCloudVarsFromPackagePolicy(enrichedPackagePolicy);
+      if (cloudConnectorVars) {
+        const cloudConnector = await cloudConnectorService.create(soClient, {
+          name: enrichedPackagePolicy.name,
+          vars: cloudConnectorVars,
+          cloudProvider: agentPolicy.agentless?.cloud_connectors?.target_csp as CloudProvider,
+        });
+        logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
+        return cloudConnector;
+      } else {
+        logger.warn('No cloud connector variables found in package policy');
+      }
+    } catch (error) {
+      logger.error(`Error creating cloud connector: ${error}`);
+      // Don't throw - cloud connector creation failure shouldn't prevent package policy creation
     }
   }
 }

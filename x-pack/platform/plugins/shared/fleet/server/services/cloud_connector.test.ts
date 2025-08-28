@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { CreateCloudConnectorRequest } from '../routes/cloud_connector/handlers';
+import type { CreateCloudConnectorRequest } from '../routes/cloud_connector/handlers';
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 import { createSavedObjectClientMock } from '../mocks';
@@ -84,7 +84,7 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.create).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          name: 'test-connector',
+          name: 'arn:aws:iam::123456789012:role/TestRole',
           cloudProvider: 'aws',
           vars: expect.objectContaining({
             role_arn: 'arn:aws:iam::123456789012:role/TestRole',
@@ -113,32 +113,6 @@ describe('CloudConnectorService', () => {
       expect(mockLogger.info).toHaveBeenCalledWith('Successfully created cloud connector');
     });
 
-    it('should not create a cloud connector without package policy', async () => {
-      mockSoClient.create.mockResolvedValue(mockSavedObject);
-
-      const result = await service.create(mockSoClient, mockCreateRequest);
-
-      expect(mockSoClient.create).toHaveBeenCalledWith(
-        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-        expect.objectContaining({
-          name: 'test-connector',
-          cloudProvider: 'aws',
-        })
-      );
-
-      expect(result).toEqual({
-        id: 'cloud-connector-123',
-        name: 'test-connector',
-        cloudProvider: 'aws',
-        vars: expect.any(Object),
-        packagePolicyCount: 1,
-        created_at: '2023-01-01T00:00:00.000Z',
-        updated_at: '2023-01-01T00:00:00.000Z',
-      });
-
-      expect(mockLogger.info).toHaveBeenCalledWith('Creating cloud connector');
-    });
-
     it('should throw error when vars are empty', async () => {
       const emptyVarsRequest: CreateCloudConnectorRequest = {
         name: 'test-connector',
@@ -147,7 +121,7 @@ describe('CloudConnectorService', () => {
       };
 
       await expect(service.create(mockSoClient, emptyVarsRequest)).rejects.toThrow(
-        'CloudConnectorService AWS package policy must contain role_arn variable'
+        /Error creating cloud connector in Fleet, CloudConnectorService Failed to create cloud connector: AWS package policy must contain role_arn variable/
       );
     });
 
@@ -207,16 +181,12 @@ describe('CloudConnectorService', () => {
             value: 'arn:aws:iam::123456789012:role/TestRole',
             type: 'text',
           },
-          aws: {
-            credentials: {
-              external_id: {
-                value: {
-                  id: 'ABCDEFGHIJKLMNOPQRST',
-                  isSecretRef: true,
-                },
-                type: 'password',
-              },
+          'aws.credentials.external_id': {
+            value: {
+              id: 'ABCDEFGHIJKLMNOPQRST',
+              isSecretRef: true,
             },
+            type: 'password',
           },
         },
       };
@@ -257,7 +227,7 @@ describe('CloudConnectorService', () => {
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
-        'CloudConnectorService AWS package policy must contain role_arn variable'
+        /Error creating cloud connector in Fleet, CloudConnectorService Failed to create cloud connector: AWS package policy must contain role_arn variable/
       );
     });
 
@@ -274,7 +244,7 @@ describe('CloudConnectorService', () => {
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
-        'CloudConnectorService AWS package policy must contain valid external_id secret input var'
+        /Error creating cloud connector in Fleet, CloudConnectorService Failed to create cloud connector: AWS package policy must contain valid external_id secret reference/
       );
     });
   });
@@ -391,7 +361,7 @@ describe('CloudConnectorService', () => {
             },
           },
         },
-        name: 'test-connector',
+        name: 'arn:aws:iam::123456789012:role/TestRole',
       });
     });
 
@@ -479,7 +449,7 @@ describe('CloudConnectorService', () => {
       const getCloudConnectorInfo = (service as any).getCloudConnectorInfo.bind(service);
 
       expect(() => getCloudConnectorInfo(request)).toThrow(
-        'CloudConnectorService External ID input var is not valid'
+        'External ID secret reference is not valid'
       );
     });
 
@@ -505,7 +475,7 @@ describe('CloudConnectorService', () => {
       const getCloudConnectorInfo = (service as any).getCloudConnectorInfo.bind(service);
 
       expect(() => getCloudConnectorInfo(request)).toThrow(
-        'CloudConnectorService External ID input var is not valid'
+        'External ID secret reference is not valid'
       );
     });
 
@@ -531,7 +501,7 @@ describe('CloudConnectorService', () => {
       const getCloudConnectorInfo = (service as any).getCloudConnectorInfo.bind(service);
 
       expect(() => getCloudConnectorInfo(request)).toThrow(
-        'CloudConnectorService External ID input var is not valid'
+        'External ID secret reference is not valid'
       );
     });
 
@@ -557,7 +527,7 @@ describe('CloudConnectorService', () => {
       const getCloudConnectorInfo = (service as any).getCloudConnectorInfo.bind(service);
 
       expect(() => getCloudConnectorInfo(request)).toThrow(
-        'CloudConnectorService External ID input var is not valid'
+        'External ID secret reference is not valid'
       );
     });
 
@@ -618,6 +588,37 @@ describe('CloudConnectorService', () => {
         type: 'password',
         value: {
           id: 'aBcDeFgHiJkLmNoPqRsT',
+          isSecretRef: true,
+        },
+      });
+    });
+
+    it('should validate external_id secret format - valid with underscores and hyphens', () => {
+      const request: CreateCloudConnectorRequest = {
+        name: 'test-connector',
+        cloudProvider: 'aws',
+        vars: {
+          role_arn: {
+            value: 'arn:aws:iam::123456789012:role/TestRole',
+            type: 'text',
+          },
+          external_id: {
+            value: {
+              id: '0BrW7JgB-08CS_HiWrORw',
+              isSecretRef: true,
+            },
+            type: 'password',
+          },
+        },
+      };
+
+      const getCloudConnectorInfo = (service as any).getCloudConnectorInfo.bind(service);
+      const result = getCloudConnectorInfo(request);
+
+      expect(result.vars.external_id).toEqual({
+        type: 'password',
+        value: {
+          id: '0BrW7JgB-08CS_HiWrORw',
           isSecretRef: true,
         },
       });

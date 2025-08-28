@@ -821,7 +821,8 @@ describe('secrets', () => {
         { value: { value: { id: 'role-arn-secret', isSecretRef: true } } },
       ];
 
-      const cloudConnectorsSecretReferences = packagePolicy?.supports_cloud_connector
+      const cloudConnectorsSecretReferences = (packagePolicy as unknown as NewPackagePolicy)
+        ?.supports_cloud_connector
         ? secretPaths
             .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
             .map((secretPath) => ({
@@ -841,7 +842,8 @@ describe('secrets', () => {
         { value: { value: { id: 'aws-external-id-secret', isSecretRef: true } } },
       ];
 
-      const cloudConnectorsSecretReferences = packagePolicy?.supports_cloud_connector
+      const cloudConnectorsSecretReferences = (packagePolicy as unknown as NewPackagePolicy)
+        ?.supports_cloud_connector
         ? secretPaths
             .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
             .map((secretPath) => ({
@@ -887,7 +889,8 @@ describe('secrets', () => {
       };
       const secretPaths = [{ value: { value: { id: 'secret-123', isSecretRef: true } } }];
 
-      const cloudConnectorsSecretReferences = packagePolicy?.supports_cloud_connector
+      const cloudConnectorsSecretReferences = (packagePolicy as unknown as NewPackagePolicy)
+        ?.supports_cloud_connector
         ? secretPaths
             .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
             .map((secretPath) => ({
@@ -906,7 +909,8 @@ describe('secrets', () => {
         { value: { value: { id: 'aws-role-arn', isSecretRef: false } } },
       ];
 
-      const cloudConnectorsSecretReferences = packagePolicy?.supports_cloud_connector
+      const cloudConnectorsSecretReferences = (packagePolicy as unknown as NewPackagePolicy)
+        ?.supports_cloud_connector
         ? secretPaths
             .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
             .map((secretPath) => ({
@@ -919,9 +923,10 @@ describe('secrets', () => {
 
     it('should return empty array when no secret paths exist', () => {
       const packagePolicy = createCspmPackagePolicy(true);
-      const secretPaths = [];
+      const secretPaths: Array<{ value: { value: { id: string; isSecretRef: boolean } } }> = [];
 
-      const cloudConnectorsSecretReferences = packagePolicy?.supports_cloud_connector
+      const cloudConnectorsSecretReferences = (packagePolicy as unknown as NewPackagePolicy)
+        ?.supports_cloud_connector
         ? secretPaths
             .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
             .map((secretPath) => ({
