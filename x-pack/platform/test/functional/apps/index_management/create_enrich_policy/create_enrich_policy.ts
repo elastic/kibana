@@ -53,6 +53,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       try {
         await es.enrich.deletePolicy({ name: POLICY_NAME });
+      } catch (e) {
+        log.debug(`[Teardown error] Error deleting test policy: ${e.message}`);
+      }
+      try {
         await es.indices.delete({ index: INDEX_NAME });
       } catch (e) {
         log.debug(`[Teardown error] Error deleting test index: ${e.message}`);
