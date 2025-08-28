@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export { esqlResponseToJson, extractEsqlQueries } from './esql';
-export { flattenMappings, cleanupMapping, type MappingField } from './mappings';
-export { processFieldCapsResponse } from './field_caps';
+/**
+ * Represents the type of a "searchable" resource in the cluster.
+ * Searchable resources are indices, aliases and data streams
+ */
+export enum EsResourceType {
+  index = 'index',
+  alias = 'alias',
+  dataStream = 'data_stream',
+}

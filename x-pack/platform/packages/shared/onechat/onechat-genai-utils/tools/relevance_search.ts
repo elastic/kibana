@@ -7,44 +7,35 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
-import { flattenMappings } from './utils';
 import type { PerformMatchSearchResponse } from './steps';
-import { getIndexMappings, performMatchSearch } from './steps';
+import { performMatchSearch } from './steps';
+import { resolveResource } from './steps/resolve_resource';
 
 export type RelevanceSearchResponse = PerformMatchSearchResponse;
 
 export const relevanceSearch = async ({
   term,
-  index,
+  target,
   size = 10,
   model,
   esClient,
 }: {
   term: string;
-  index: string;
+  target: string;
   size?: number;
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<RelevanceSearchResponse> => {
+  const { fields } = await resolveResource({ resourceName: target, esClient });
 
-  console.log('**** relevance search', index, term);
-  // TODO: retrieve mappings regardless of target type
-  // <---
-
-  const mappings = await getIndexMappings({
-    indices: [index],
-    esClient,
-  });
-  const flattenedFields = flattenMappings(mappings[index]);
-
-  const selectedFields = flattenedFields.filter(
+  const selectedFields = fields.filter(
     (field) => field.type === 'text' || field.type === 'semantic_text'
   );
 
   return performMatchSearch({
     term,
+    index: target,
     fields: selectedFields,
-    index,
     size,
     esClient,
   });

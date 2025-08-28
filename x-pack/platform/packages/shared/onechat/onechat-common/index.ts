@@ -67,6 +67,7 @@ export {
   type SerializedOnechatError,
 } from './base/errors';
 export { type UserIdAndName } from './base/users';
+export { EsResourceType } from './base/resources';
 export {
   oneChatDefaultAgentId,
   AgentType,

@@ -12,7 +12,7 @@ import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import { indexExplorer } from './index_explorer';
 import { extractEsqlQueries } from './utils/esql';
-import { getResourceMappings } from './steps/get_resource_mappings';
+import { resolveResource } from './steps/resolve_resource';
 
 export interface GenerateEsqlResponse {
   answer: string;
@@ -46,11 +46,10 @@ export const generateEsql = async ({
     selectedTarget = selectedResource.name;
   }
 
-  const targetMapping = await getResourceMappings({
+  const { fields } = await resolveResource({
     resourceName: selectedTarget,
     esClient,
   });
-  const mappings = targetMapping.mappings;
 
   const esqlEvents$ = naturalLanguageToEsql({
     // @ts-expect-error using a scoped inference client
@@ -63,9 +62,9 @@ export const generateEsql = async ({
         - Natural language query: "${nlQuery}",
         - Additional context: "${context ?? 'N/A'}
         - Index to use: "${selectedTarget}"
-        - Mapping of this index:
+        - Fields of the index:
         \`\`\`json
-        ${JSON.stringify(mappings, undefined, 2)}
+        ${JSON.stringify(fields, undefined, 2)}
         \`\`\`
 
         Given those info, please generate an ES|QL query to address the user request.

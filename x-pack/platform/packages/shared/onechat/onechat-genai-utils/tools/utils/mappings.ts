@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
-export type FieldType = Extract<MappingProperty, { type: string }>['type'];
-
+/**
+ * Represents the relevant information of an field
+ */
 export interface MappingField {
+  /** the path of the field */
   path: string;
-  type: FieldType;
+  /** the type of the field */
+  type: string;
+  /** meta attached to the field */
+  meta: Record<string, string>;
 }
 
 interface MappingProperties {
   [key: string]: {
     type?: string; // Leaf field (e.g., "text", "keyword", etc.)
     properties?: MappingProperties; // Nested object fields
+    meta?: Record<string, string>; // meta
   };
 }
 
@@ -36,11 +42,13 @@ export const flattenMappings = ({ mappings }: { mappings: MappingTypeMapping }):
       if (value.type) {
         // If it's a leaf field, add it
         fields.push({
-          type: value.type as FieldType,
+          type: value.type,
           path: fieldPath,
+          meta: value.meta ?? {},
         });
-      } else if (value.properties) {
-        // If it's an object, go deeper
+      }
+      if (value.properties) {
+        // If it's an object or has nested props, go deeper
         fields = fields.concat(extractFields(value.properties, fieldPath));
       }
     }

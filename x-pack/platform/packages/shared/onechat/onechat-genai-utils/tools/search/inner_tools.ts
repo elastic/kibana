@@ -48,7 +48,7 @@ export const createRelevanceSearchTool = ({
         { tool: { input: { term, index, size } } },
         async () => {
           const { results: rawResults } = await relevanceSearch({
-            index,
+            target: index,
             term,
             size,
             model,

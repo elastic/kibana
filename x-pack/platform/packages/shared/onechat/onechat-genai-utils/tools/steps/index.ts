@@ -26,3 +26,4 @@ export {
   type EsSearchSource,
   type ListSourcesResponse,
 } from './list_search_sources';
+export { resolveResource, type ResolveResourceResponse } from './resolve_resource';
