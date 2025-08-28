@@ -7,7 +7,7 @@
 
 // TODO: get docs team approval on the copy
 export const esqlTutorialCommands: string = `# Welcome to the Elasticsearch ES|QL Tutorial!
-# This tutorial will guide you through basic ES|QL queries in Elasticsearch using API calls from within the Kibana Dev console.
+# This tutorial will guide you through basic ES|QL queries in Elasticsearch using API calls from within the Kibana Console.
 
 # After selecting a command, execute it by clicking the "Send Request" button or pressing Ctrl+Enter or Cmd+Enter.
 
@@ -53,7 +53,7 @@ POST /kibana_sample_data_esql/_bulk?refresh=wait_for
 # -----------------------------------------------
 # Step 3: Run a basic full-text search
 # -----------------------------------------------
-# Note: when ES|QL queries are run from within the console, they must be wrapped in triple quotes syntax:
+# Note: when ES|QL queries are run from within the Kibana Console, they must be wrapped in triple quotes syntax:
 
 POST /_query
 {
@@ -291,8 +291,7 @@ DELETE /kibana_sample_data_esql
 # -----------------------------------------------
 # Conclusion
 # -----------------------------------------------
-# In this quickstart, you learned the basics of running ES|QL queries in Elasticsearch
-# using the Kibana Dev Tools console.
+# In this tutorial, you learned the basics of running ES|QL queries in Elasticsearch using the Kibana Console.
 # You covered creating an index, indexing documents, searching, filtering, and advanced scoring.
 # For more, see: https://www.elastic.co/docs/solutions/search/esql-for-search
 `;

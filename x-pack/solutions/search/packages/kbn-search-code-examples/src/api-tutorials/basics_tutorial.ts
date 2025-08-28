@@ -6,7 +6,7 @@
  */
 
 export const basicsTutorialCommands: string = `# Welcome to the Elasticsearch Basics Tutorial!
-# This tutorial will guide you through the fundamental operations in Elasticsearch using API calls from within the Kibana Dev console.
+# This tutorial will guide you through the fundamental operations in Elasticsearch using API calls from within the Kibana Console.
 
 # After selecting a command, execute it by clicking the "Send Request" button or pressing Ctrl+Enter or Cmd+Enter.
 
@@ -179,9 +179,9 @@ DELETE /kibana_sample_data_basics_explicit_mapping
 # -----------------------------------------------
 # Conclusion
 # -----------------------------------------------
-# In this quickstart, you learned the basics of working with Elasticsearch using the Kibana Dev Tools console. 
+# In this tutorial, you learned the basics of working with Elasticsearch using the Kibana Console. 
 # You covered creating an index, indexing documents, searching, and managing mappings.
 
-# Empower your search with AI, learn about semantic search: https://www.elastic.co/docs/solutions/search/semantic-search/semantic-search-semantic-text
 # See more search query options in the Elasticsearch documentation: https://www.elastic.co/docs/reference/query-languages/query-dsl/full-text-queries
+# Empower your search with AI! Learn more about semantic search here: https://www.elastic.co/docs/solutions/search/semantic-search/semantic-search-semantic-text
 `;

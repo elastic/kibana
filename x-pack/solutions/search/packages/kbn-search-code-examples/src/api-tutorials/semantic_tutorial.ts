@@ -7,7 +7,7 @@
 
 export const semanticTutorialCommands: string = `
 # Welcome to the Elasticsearch Semantic Search Tutorial!
-# This tutorial will guide you through basic semantic search operations in Elasticsearch using API calls from within the Kibana Dev console.
+# This tutorial will guide you through basic semantic search operations in Elasticsearch using API calls from within the Kibana Console.
 
 # After selecting a command, execute it by clicking the "Send Request" button or pressing Ctrl+Enter or Cmd+Enter.
 
@@ -134,7 +134,7 @@ GET kibana_sample_data_semantic/_search
 # Search API provides many options to further explore and optimize your queries
 # https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl
 
-# Try out various query options in the Playground to quickly iterate on your search experience
+# Try out various query options in the Kibana Console, or ask the AI Assistant for help!
 
 # -----------------------------------------------
 # Step 7: Delete your index (optional)
@@ -149,7 +149,7 @@ DELETE /kibana_sample_data_semantic
 # -----------------------------------------------
 # Conclusion
 # -----------------------------------------------
-# In this quickstart, you learned the basics of semantic search in Elasticsearch leveraging the "semantic_text" field in an index.
+# In this tutorial, you learned the basics of semantic search in Elasticsearch leveraging the "semantic_text" field in an index.
 
 # Easily ingest your own data for semantic search using an ingest pipeline:
 # https://www.elastic.co/docs/solutions/search/semantic-search/semantic-search-elser-ingest-pipelines
