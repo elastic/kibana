@@ -7,19 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformSync } from '@babel/core';
+import { transformSync, type BabelFileResult } from '@babel/core';
+import * as t from '@babel/types';
 import plugin from '.';
 
-function transform(code, filename = '/tmp/project/src/file.js') {
-  return transformSync(code, {
+function transform(code: string, filename = '/tmp/project/src/file.js'): { ast: t.File } {
+  const res = transformSync(code, {
     ast: true,
     code: false,
     filename,
-    plugins: [[plugin]],
-  });
+    plugins: [[plugin as any]],
+  }) as BabelFileResult | null;
+
+  if (!res || !res.ast) {
+    throw new Error('transform produced no AST');
+  }
+
+  return { ast: res.ast as t.File };
 }
 
-function isRequireCall(node, value) {
+function isRequireCall(node: any, value: string): boolean {
   return (
     node &&
     node.type === 'CallExpression' &&
@@ -45,18 +52,24 @@ describe('kbn-babel-require-transformer (deferRequire)', () => {
 
     const helper = body.find(
       (n) => n.type === 'FunctionDeclaration' && n.id && n.id.name === 'deferRequire'
-    );
+    ) as t.FunctionDeclaration | undefined;
     expect(helper).toBeTruthy();
 
-    const decl = body.find((n) => n.type === 'VariableDeclaration');
+    const decl = body.find((n) => n.type === 'VariableDeclaration') as
+      | t.VariableDeclaration
+      | undefined;
     expect(decl).toBeTruthy();
-
-    const init = decl.declarations[0].init;
+    const init = (decl as t.VariableDeclaration).declarations[0].init as t.CallExpression;
     expect(init.type).toBe('CallExpression');
-    expect(init.callee.type).toBe('Identifier');
-    expect(init.callee.name).toBe('deferRequire');
-    expect(init.arguments[0].type).toBe('StringLiteral');
-    expect(init.arguments[0].value).toBe('./x');
+    expect(t.isIdentifier(init.callee)).toBe(true);
+    if (t.isIdentifier(init.callee)) {
+      expect(init.callee.name).toBe('deferRequire');
+    }
+    const firstArg = init.arguments[0];
+    expect(t.isStringLiteral(firstArg)).toBe(true);
+    if (t.isStringLiteral(firstArg)) {
+      expect(firstArg.value).toBe('./x');
+    }
   });
 
   it('rewrites member access on tracked identifiers to use .value', () => {
@@ -69,23 +82,24 @@ describe('kbn-babel-require-transformer (deferRequire)', () => {
     } = transform(code);
 
     // Find the call expression statement
-    const exprStmt = body.find((n) => n.type === 'ExpressionStatement');
+    const exprStmt = body.find((n) => n.type === 'ExpressionStatement') as
+      | t.ExpressionStatement
+      | undefined;
     expect(exprStmt).toBeTruthy();
-
-    const call = exprStmt.expression;
+    const call = (exprStmt as t.ExpressionStatement).expression as t.CallExpression;
     expect(call.type).toBe('CallExpression');
 
-    const member = call.callee; // x.value.b
+    const member = call.callee as t.MemberExpression; // x.value.b
     expect(member.type).toBe('MemberExpression');
 
-    const obj = member.object; // x.value
+    const obj = member.object as t.MemberExpression; // x.value
     expect(obj.type).toBe('MemberExpression');
-    expect(obj.object.type).toBe('Identifier');
-    expect(obj.object.name).toBe('x');
-    expect(obj.property.type).toBe('Identifier');
-    expect(obj.property.name).toBe('value');
-    expect(member.property.type).toBe('Identifier');
-    expect(member.property.name).toBe('b');
+    expect((obj.object as t.Identifier).type).toBe('Identifier');
+    expect((obj.object as t.Identifier).name).toBe('x');
+    expect((obj.property as t.Identifier).type).toBe('Identifier');
+    expect((obj.property as t.Identifier).name).toBe('value');
+    expect((member.property as t.Identifier).type).toBe('Identifier');
+    expect((member.property as t.Identifier).name).toBe('b');
   });
 
   it('leaves bare specifier requires unchanged (no helper)', () => {
@@ -100,12 +114,13 @@ describe('kbn-babel-require-transformer (deferRequire)', () => {
     // No helper should be injected because this require does not qualify
     const helper = body.find(
       (n) => n.type === 'FunctionDeclaration' && n.id && n.id.name === 'deferRequire'
-    );
+    ) as t.FunctionDeclaration | undefined;
     expect(helper).toBeFalsy();
 
     expect(body.length).toBe(1);
 
-    const decl = body[0].declarations[0];
+    const first = body[0] as t.VariableDeclaration;
+    const decl = first.declarations[0];
     expect(decl.id.type).toBe('Identifier');
     expect(isRequireCall(decl.init, 'pkg')).toBe(true);
   });
@@ -122,7 +137,9 @@ describe('kbn-babel-require-transformer (deferRequire)', () => {
     // Expect exactly 3 statements: helper + each declarator split
     expect(body.length).toBe(3);
 
-    const helper = body.find((n) => n.type === 'FunctionDeclaration');
+    const helper = body.find((n) => n.type === 'FunctionDeclaration') as
+      | t.FunctionDeclaration
+      | undefined;
     expect(helper && helper.id && helper.id.name).toBe('deferRequire');
 
     const xDecl = body.find(
@@ -132,14 +149,19 @@ describe('kbn-babel-require-transformer (deferRequire)', () => {
         n.declarations[0].id &&
         n.declarations[0].id.type === 'Identifier' &&
         n.declarations[0].id.name === 'x'
-    );
+    ) as t.VariableDeclaration | undefined;
     expect(xDecl).toBeTruthy();
-
-    const init = xDecl.declarations[0].init;
+    const init = (xDecl as t.VariableDeclaration).declarations[0].init as t.CallExpression;
     expect(init.type).toBe('CallExpression');
-    expect(init.callee.type).toBe('Identifier');
-    expect(init.callee.name).toBe('deferRequire');
-    expect(init.arguments[0].value).toBe('./x');
+    expect(t.isIdentifier(init.callee)).toBe(true);
+    if (t.isIdentifier(init.callee)) {
+      expect(init.callee.name).toBe('deferRequire');
+    }
+    const firstArg2 = init.arguments[0];
+    expect(t.isStringLiteral(firstArg2)).toBe(true);
+    if (t.isStringLiteral(firstArg2)) {
+      expect(firstArg2.value).toBe('./x');
+    }
 
     const yDeclStmt = body.find(
       (n) =>
@@ -148,9 +170,9 @@ describe('kbn-babel-require-transformer (deferRequire)', () => {
         n.declarations[0].id &&
         n.declarations[0].id.type === 'Identifier' &&
         n.declarations[0].id.name === 'y'
-    );
+    ) as t.VariableDeclaration | undefined;
     expect(yDeclStmt).toBeTruthy();
-    expect(yDeclStmt.declarations[0].init.type).toBe('NumericLiteral');
+    expect((yDeclStmt as t.VariableDeclaration).declarations[0].init!.type).toBe('NumericLiteral');
   });
 
   it('does not transform destructuring require (keeps semantics)', () => {
@@ -167,7 +189,8 @@ describe('kbn-babel-require-transformer (deferRequire)', () => {
     );
     expect(helper).toBeFalsy();
 
-    const decl = body[0].declarations[0];
+    const first = body[0] as t.VariableDeclaration;
+    const decl = first.declarations[0];
     expect(decl.id.type).toBe('ObjectPattern');
     expect(isRequireCall(decl.init, './x')).toBe(true);
   });
@@ -182,8 +205,8 @@ describe('kbn-babel-require-transformer (deferRequire)', () => {
     } = transform(code);
 
     expect(body[0].type).toBe('FunctionDeclaration');
-
-    const inner = body[0].body.body[0];
+    const fn = body[0] as t.FunctionDeclaration;
+    const inner = fn.body.body[0] as t.VariableDeclaration;
     expect(inner.type).toBe('VariableDeclaration');
 
     const innerDecl = inner.declarations[0];
@@ -201,7 +224,8 @@ describe('kbn-babel-require-transformer (deferRequire)', () => {
     } = transform(code, '/tmp/project/src/public/file.js');
     expect(body.length).toBe(1);
 
-    const decl = body[0].declarations[0];
+    const first = body[0] as t.VariableDeclaration;
+    const decl = first.declarations[0];
     expect(decl.id.type).toBe('Identifier');
     expect(isRequireCall(decl.init, './x')).toBe(true);
   });

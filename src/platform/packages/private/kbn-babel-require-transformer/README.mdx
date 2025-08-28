@@ -7,6 +7,8 @@ date: 2025-09-25
 tags: ['kibana', 'dev', 'contributor', 'operations', 'babel', 'require', 'transformer', 'commonjs']
 ---
 
+## What this does
+
 It takes code like this:
 
 ```
@@ -66,4 +68,12 @@ x.value.b();
 
 It only adds the helper function to code that has a top level `require` statement that qualifies.
 
-node_modules and modules from @kbn are excluded to ensure compatibility.
+`node_modules` and modules from `@kbn` are excluded to ensure compatibility.
+
+## Debugging
+
+The following environment variables will output transformed code to the console for inspecting and debugging:
+
+- `KBN_BABEL_DUMP_FINAL` => Output the final transformed code
+- `KBN_BABEL_DUMP_MATCH` => Only output the transformed code of a passed filename
+- `KBN_BABEL_DEBUG` => Will output for which `require` statement the plugin kicks in

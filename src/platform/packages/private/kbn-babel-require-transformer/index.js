@@ -54,51 +54,6 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
     return !(s.startsWith('./') || s.startsWith('../') || s.startsWith('/'));
   }
 
-  /**
-   * Example of the helper injected into transformed files:
-   *
-   * function deferRequire(module) {
-   *   let __loaded = false;
-   *   let __cache;
-   *   function __load() {
-   *     if (!__loaded) {
-   *       __cache = require(module);
-   *       __loaded = true;
-   *     }
-   *   }
-   *   const __handler = {
-   *     get(target, prop) {
-   *       if (prop === 'value') {
-   *         __load();
-   *         return __cache;
-   *       }
-   *       __load();
-   *       return __cache[prop];
-   *     },
-   *     set(target, prop, value) {
-   *       __load();
-   *       __cache[prop] = value;
-   *       return true;
-   *     },
-   *     has(target, prop) {
-   *       __load();
-   *       return prop in __cache;
-   *     },
-   *     ownKeys() {
-   *       __load();
-   *       return Reflect.ownKeys(__cache);
-   *     },
-   *     getOwnPropertyDescriptor(target, prop) {
-   *       __load();
-   *       const d = Object.getOwnPropertyDescriptor(__cache, prop);
-   *       if (d) d.configurable = true;
-   *       return d;
-   *     },
-   *   };
-   *   const __proxyTarget = {};
-   *   return new Proxy(__proxyTarget, __handler);
-   * }
-   */
   function ensureDeferRequireHelper(path) {
     let prog = path.findParent((p) => p.isProgram());
 
@@ -110,7 +65,53 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
 
     const moduleId = t.identifier('module');
 
-    // deferRequire helper implemented using Proxy to lazily load modules and forward operations.
+    /**
+     * `deferRequire` helper implemented using Proxy to lazily load modules and forward operations.
+
+    * Example of the helper injected into transformed files:
+     *
+     * function deferRequire(module) {
+     *   let __loaded = false;
+     *   let __cache;
+     *   function __load() {
+     *     if (!__loaded) {
+     *       __cache = require(module);
+     *       __loaded = true;
+     *     }
+     *   }
+     *   const __handler = {
+     *     get(target, prop) {
+     *       if (prop === 'value') {
+     *         __load();
+     *         return __cache;
+     *       }
+     *       __load();
+     *       return __cache[prop];
+     *     },
+     *     set(target, prop, value) {
+     *       __load();
+     *       __cache[prop] = value;
+     *       return true;
+     *     },
+     *     has(target, prop) {
+     *       __load();
+     *       return prop in __cache;
+     *     },
+     *     ownKeys() {
+     *       __load();
+     *       return Reflect.ownKeys(__cache);
+     *     },
+     *     getOwnPropertyDescriptor(target, prop) {
+     *       __load();
+     *       const d = Object.getOwnPropertyDescriptor(__cache, prop);
+     *       if (d) d.configurable = true;
+     *       return d;
+     *     },
+     *   };
+     *   const __proxyTarget = {};
+     *   return new Proxy(__proxyTarget, __handler);
+     * }
+     */
 
     const loadedId = t.identifier('__loaded');
     const cacheId = t.identifier('__cache');
@@ -165,6 +166,7 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
               t.returnStatement(t.memberExpression(cacheId, propId, true)),
             ])
           ),
+
           // set(target, prop, value) { __load(); __cache[prop] = value; return true; }
           t.objectMethod(
             'method',
@@ -182,6 +184,7 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
               t.returnStatement(t.booleanLiteral(true)),
             ])
           ),
+
           // has(target, prop) { __load(); return prop in __cache; }
           t.objectMethod(
             'method',
@@ -192,6 +195,7 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
               t.returnStatement(t.binaryExpression('in', propId, cacheId)),
             ])
           ),
+
           // ownKeys(target) { __load(); return Reflect.ownKeys(__cache); }
           t.objectMethod(
             'method',
@@ -207,6 +211,7 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
               ),
             ])
           ),
+
           // getOwnPropertyDescriptor(target, prop) { __load(); const d = Object.getOwnPropertyDescriptor(__cache, prop); if (d) d.configurable = true; return d; }
           t.objectMethod(
             'method',
@@ -324,7 +329,9 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
           }
         }
         const call = t.callExpression(t.identifier('deferRequire'), [arg0]);
+
         out.push(t.variableDeclaration(path.node.kind, [t.variableDeclarator(d.id, call)]));
+
         changed = true;
       } else if (t.isObjectPattern(d.id)) {
         // Skip transforming destructured requires to preserve semantics and avoid heavy expansion
