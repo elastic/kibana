@@ -21,9 +21,7 @@ import type {
   NonAggregatableDatasets,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
-import { indexNameToDataStreamParts } from '../../../common/utils';
 import type { IDataStreamDetailsClient } from '../../services/data_stream_details';
-import type { IDataStreamsStatsClient } from '../../services/data_streams_stats';
 import type { DatasetQualityStartDeps } from '../../types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
 import type {
@@ -816,7 +814,6 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   initialContext: DatasetQualityDetailsControllerContext;
   plugins: DatasetQualityStartDeps;
   toasts: IToasts;
-  dataStreamStatsClient: IDataStreamsStatsClient;
   dataStreamDetailsClient: IDataStreamDetailsClient;
 }
 
@@ -824,7 +821,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
   initialContext,
   plugins,
   toasts,
-  dataStreamStatsClient,
   dataStreamDetailsClient,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
   createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
@@ -852,11 +848,9 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
     },
     services: {
       checkDatasetIsAggregatable: (context) => {
-        const { type } = indexNameToDataStreamParts(context.dataStream);
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
-        return dataStreamStatsClient.getNonAggregatableDatasets({
-          types: [type],
+        return dataStreamDetailsClient.getNonAggregatableDatasets({
           start,
           end,
           dataStream: context.dataStream,
