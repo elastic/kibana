@@ -424,76 +424,43 @@ describe('createBulkIndexOperationTuple', () => {
     `);
   });
 
-  it('includes if_seq_no and if_primary_term when useOptimisticConcurrencyControl is true', () => {
+  it('includes if_seq_no and if_primary_term when originId is not defined', () => {
     const document = {
       _id: 'doc1',
-      _seq_no: 123,
-      _primary_term: 7,
-      _source: { type: 'foo', title: 'bar' },
+      _seq_no: 10,
+      _primary_term: 20,
+      _source: { type: 'cases', title: 'no originId' },
     };
-    const typeIndexMap = { foo: 'foo_index' };
-    expect(createBulkIndexOperationTuple(document, typeIndexMap, true)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "index": Object {
-            "_id": "doc1",
-            "_index": "foo_index",
-            "if_primary_term": 7,
-            "if_seq_no": 123,
-          },
-        },
-        Object {
-          "title": "bar",
-          "type": "foo",
-        },
-      ]
-    `);
+    const [operation] = createBulkIndexOperationTuple(document);
+    expect(operation.index).toBeDefined();
+    expect((operation.index as any).if_seq_no).toBe(10);
+    expect((operation.index as any).if_primary_term).toBe(20);
   });
 
-  it('omits if_seq_no and if_primary_term when useOptimisticConcurrencyControl is false', () => {
+  it('includes if_seq_no and if_primary_term when originId === _id', () => {
     const document = {
       _id: 'doc2',
-      _seq_no: 456,
-      _primary_term: 8,
-      _source: { type: 'bar', title: 'baz' },
+      _seq_no: 11,
+      _primary_term: 21,
+      _source: { type: 'cases', title: 'originId equals _id', originId: 'doc2' },
     };
-    const typeIndexMap = { bar: 'bar_index' };
-    expect(createBulkIndexOperationTuple(document, typeIndexMap, false)).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "index": Object {
-              "_id": "doc2",
-              "_index": "bar_index",
-            },
-          },
-          Object {
-            "title": "baz",
-            "type": "bar",
-          },
-        ]
-      `);
+    const [operation] = createBulkIndexOperationTuple(document);
+    expect(operation.index).toBeDefined();
+    expect((operation.index as any).if_seq_no).toBe(11);
+    expect((operation.index as any).if_primary_term).toBe(21);
   });
 
-  it('does not include if_seq_no and if_primary_term if they do not exist and useOptimisticConcurrencyControl is true', () => {
+  it('does NOT include if_seq_no and if_primary_term when originId !== _id', () => {
     const document = {
       _id: 'doc3',
-      _source: { type: 'baz', title: 'qux' },
+      _seq_no: 12,
+      _primary_term: 22,
+      _source: { type: 'cases', title: 'originId not equal _id', originId: 'other-id' },
     };
-    const typeIndexMap = { baz: 'baz_index' };
-    expect(createBulkIndexOperationTuple(document, typeIndexMap, true)).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "index": Object {
-              "_id": "doc3",
-              "_index": "baz_index",
-            },
-          },
-          Object {
-            "title": "qux",
-            "type": "baz",
-          },
-        ]
-      `);
+    const [operation] = createBulkIndexOperationTuple(document);
+    expect(operation.index).toBeDefined();
+    expect((operation.index as any).if_seq_no).toBeUndefined();
+    expect((operation.index as any).if_primary_term).toBeUndefined();
   });
 });
 

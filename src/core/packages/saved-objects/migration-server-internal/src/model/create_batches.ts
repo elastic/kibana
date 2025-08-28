@@ -131,13 +131,7 @@ export function createBatches({
 
   // create index (update) operations for all transformed documents
   for (const document of documents) {
-    const idChanged = document._source.originId && document._id !== document._source.originId;
-    const bulkIndexOperationBody = createBulkIndexOperationTuple(
-      document,
-      typeIndexMap,
-      // if the id changed, we shouldn't use optimistic concurrency control since it will fail when writting
-      !idChanged
-    );
+    const bulkIndexOperationBody = createBulkIndexOperationTuple(document, typeIndexMap);
     // take into account that this tuple's surrounding brackets `[]` won't be present in the NDJSON
     const docSizeBytes =
       Buffer.byteLength(JSON.stringify(bulkIndexOperationBody), 'utf8') - BRACKETS_BYTES;
