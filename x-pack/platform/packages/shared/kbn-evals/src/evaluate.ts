@@ -28,6 +28,7 @@ import { createConnectorFixture } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { EvaluationAnalysisService } from './utils/analysis';
 import { EvaluationScoreRepository } from './utils/score_repository';
+import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 
 /**
  * Test type for evaluations. Loads an inference client and a
@@ -166,6 +167,12 @@ export const evaluate = base.extend<
         },
         correctnessAnalysis: () => {
           return createCorrectnessAnalysisEvaluator({
+            inferenceClient: evaluatorInferenceClient,
+            log,
+          });
+        },
+        groundednessAnalysis: () => {
+          return createGroundednessAnalysisEvaluator({
             inferenceClient: evaluatorInferenceClient,
             log,
           });
