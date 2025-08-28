@@ -609,12 +609,57 @@
               "\nShows a flyout with a table to manage search sessions."
             ],
             "signature": [
-              "() => void"
+              "(attrs?: { appId?: string | undefined; onBackgroundSearchOpened?: ",
+              "BackgroundSearchOpenedHandler",
+              " | undefined; } | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/data/public/search/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.ISearchStart.showSearchSessionsFlyout.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "attrs",
+                "description": [],
+                "path": "src/platform/plugins/shared/data/public/search/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.ISearchStart.showSearchSessionsFlyout.$1.appId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "appId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data/public/search/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.ISearchStart.showSearchSessionsFlyout.$1.onBackgroundSearchOpened",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "onBackgroundSearchOpened",
+                    "description": [],
+                    "signature": [
+                      "BackgroundSearchOpenedHandler",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data/public/search/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
             "returnComment": []
           },
           {
