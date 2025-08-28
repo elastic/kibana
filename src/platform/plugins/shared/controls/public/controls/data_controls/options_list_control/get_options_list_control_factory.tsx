@@ -286,6 +286,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           existsSelected: false,
         },
         onReset: (lastSaved) => {
+          titlesManager.reinitializeState(lastSaved?.rawState);
           dataControlManager.reinitializeState(lastSaved?.rawState);
           selectionsManager.reinitializeState(lastSaved?.rawState);
           editorStateManager.reinitializeState(lastSaved?.rawState);
