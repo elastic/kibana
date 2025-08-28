@@ -28,7 +28,7 @@ export const searchWorkflowExecutions = async ({
   logger,
   workflowExecutionIndex,
   query,
-  sort = [{ startedAt: 'desc' }],
+  sort = [{ createdAt: 'desc' }],
 }: SearchWorkflowExecutionsParams): Promise<WorkflowExecutionListDto> => {
   try {
     logger.info(`Searching workflow executions in index ${workflowExecutionIndex}`);
@@ -52,6 +52,7 @@ function transformToWorkflowExecutionListModel(
     results: response.hits.hits.map((hit) => {
       const workflowExecution = hit._source!;
       return {
+        spaceId: workflowExecution.spaceId,
         id: hit._id!,
         status: workflowExecution.status,
         startedAt: workflowExecution.startedAt,
@@ -63,7 +64,7 @@ function transformToWorkflowExecutionListModel(
     }),
     _pagination: {
       limit: response.hits.hits.length,
-      offset: 0,
+      page: 1,
       total: response.hits.hits.length,
     },
   };

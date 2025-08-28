@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AddToCaseContextItem } from './add_to_case_action';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
@@ -25,10 +25,12 @@ jest.mock('../../hooks', () => ({
   useMonitorDetailLocator: jest
     .fn()
     .mockImplementation(
-      ({ timeRange, locationId, configId, tabId }) =>
-        `/${tabId}?${locationId ? `locationId=${locationId}&` : ''}dateRangeStart=${
-          timeRange.from
-        }&dateRangeEnd=${timeRange.to}&configId=${configId}`
+      ({ timeRange, locationId, configId, tabId, useAbsoluteDate }) =>
+        `/history?locationId=${locationId}&dateRangeStart=${
+          useAbsoluteDate ? '2025-06-26T12:42:38.568Z' : timeRange.from
+        }&dateRangeEnd=${
+          useAbsoluteDate ? '2025-06-26T12:57:38.568Z' : timeRange.to
+        }&configId=${configId}`
     ),
 }));
 
@@ -94,7 +96,7 @@ describe('AddToCaseContextItem', () => {
     expect(screen.getByText('Add to case')).toBeInTheDocument();
   });
 
-  it('opens the case modal when clicked', () => {
+  it('opens the page attachment modal when clicked', async () => {
     mockUseKibana.mockReturnValueOnce({
       services: {
         cases: {
@@ -125,26 +127,15 @@ describe('AddToCaseContextItem', () => {
     render(<AddToCaseContextItem />);
     fireEvent.click(screen.getByText('Add to case'));
 
-    expect(mockOpen).toHaveBeenCalledWith({
-      getAttachments: expect.any(Function),
-    });
-  });
-
-  it('shows an error toast if monitor or URL is missing', () => {
-    mockUseSelectedMonitor.mockReturnValueOnce({ monitor: null });
-
-    render(<AddToCaseContextItem />);
-    fireEvent.click(screen.getByText('Add to case'));
-
-    expect(mockAddDanger).toHaveBeenCalledWith({
-      title: 'Error adding monitor to case',
-      'data-test-subj': 'monitorAddToCaseError',
+    await waitFor(() => {
+      expect(screen.getByText('Add page to case')).toBeInTheDocument();
     });
   });
 
   it('defines persistableStateAttachmentState correctly when case modal is opened', () => {
     render(<AddToCaseContextItem />);
     fireEvent.click(screen.getByText('Add to case'));
+    fireEvent.click(screen.getByText('Confirm'));
 
     const getAttachments = mockOpen.mock.calls[0][0].getAttachments;
     const attachments = getAttachments();
@@ -160,13 +151,15 @@ describe('AddToCaseContextItem', () => {
           actionLabel: 'Go to Monitor History',
           iconType: 'uptimeApp',
         },
+        summary: '',
+        screenContext: [],
       },
       persistableStateAttachmentTypeId: '.page',
       type: 'persistableState',
     });
   });
 
-  it('converts relative date ranges to absolute date ranges via the component', () => {
+  it('converts relative date ranges to absolute date ranges via the component', async () => {
     mockUseGetUrlParams.mockReturnValue({
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
@@ -175,6 +168,12 @@ describe('AddToCaseContextItem', () => {
 
     render(<AddToCaseContextItem />);
     fireEvent.click(screen.getByText('Add to case'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Add page to case')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Confirm'));
 
     const getAttachments = mockOpen.mock.calls[0][0].getAttachments;
     const attachments = getAttachments();
