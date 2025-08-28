@@ -16,6 +16,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/std",
+    "@kbn/ui-actions",
   ],
   "exclude": [
     "target/**/*",

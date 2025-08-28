@@ -26,6 +26,7 @@
     "@kbn/monaco",
     "@kbn/presentation-publishing",
     "@kbn/licensing-types",
+    "@kbn/ui-actions",
   ],
   "exclude": [
     "target/**/*",

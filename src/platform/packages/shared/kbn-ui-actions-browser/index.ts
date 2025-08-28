@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './src/types';
 export type { Trigger, RowClickContext } from './src/triggers';
 export {
   VISUALIZE_FIELD_TRIGGER,

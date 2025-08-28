@@ -11,7 +11,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexItem, EuiIcon, EuiKeyPadMenuItem, EuiToolTip } from '@elastic/eui';
-import type { UiActionsPresentable as Presentable } from '@kbn/ui-actions-plugin/public';
+import type { Presentable } from '@kbn/ui-actions';
 import {
   txtBetaActionFactoryLabel,
   txtBetaActionFactoryTooltip,
