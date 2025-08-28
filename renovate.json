@@ -4636,12 +4636,14 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "main"
+        "main",
+        "/^[9].*/",
+        "8.19"
       ],
       "labels": [
         "Team:Operations",
-        "backport:all-open",
-        "release_note:skip"
+        "release_note:skip",
+        "backport:skip"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
