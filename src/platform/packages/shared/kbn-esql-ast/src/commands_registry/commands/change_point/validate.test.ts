@@ -44,7 +44,7 @@ describe('CHANGE_POINT Validation', () => {
 
       test('raises error on unsupported field time for value', () => {
         changePointExpectErrors('FROM index | CHANGE_POINT keywordField', [
-          'CHANGE_POINT only supports numeric types values, found "keywordField" of type keyword',
+          'CHANGE_POINT only supports numeric values, found "keywordField" of type keyword',
         ]);
       });
 

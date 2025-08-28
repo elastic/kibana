@@ -17,7 +17,13 @@ import type {
   ESQLMessage,
   ESQLSource,
 } from '../../types';
-import type { ErrorTypes, ErrorValues, FunctionDefinition, Signature } from '../types';
+import type {
+  ErrorTypes,
+  ErrorValues,
+  FunctionDefinition,
+  Signature,
+  SupportedDataType,
+} from '../types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -269,6 +275,25 @@ Expected one of:
           },
         }),
       };
+    case 'changePointWrongFieldType':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.changePointWrongFieldType', {
+          defaultMessage:
+            'CHANGE_POINT only supports numeric values, found "{columnName}" of type {givenType}',
+          values: {
+            columnName: out.columnName,
+            givenType: out.givenType,
+          },
+        }),
+        type: 'error',
+      };
+    case 'dropTimestampWarning':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.dropTimestampWarning', {
+          defaultMessage: 'Dropping "@timestamp" prevents the time range from being applied.',
+        }),
+        type: 'warning',
+      };
   }
   return { message: '' };
 }
@@ -432,6 +457,18 @@ export const errors = {
       });
     }
   },
+
+  changePointWrongFieldType: (
+    { location, name }: ESQLColumn,
+    type: SupportedDataType | 'unknown'
+  ): ESQLMessage =>
+    errors.byId('changePointWrongFieldType', location, {
+      columnName: name,
+      givenType: type,
+    }),
+
+  dropTimestampWarning: ({ location }: ESQLColumn): ESQLMessage =>
+    errors.byId('dropTimestampWarning', location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>

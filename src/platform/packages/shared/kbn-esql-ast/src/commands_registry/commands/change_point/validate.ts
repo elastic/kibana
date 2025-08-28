@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { errors } from '../../../definitions/utils';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { isColumn, isOptionNode } from '../../../ast/is';
+import type { SupportedDataType } from '../../../definitions/types';
 import { isNumericType } from '../../../definitions/types';
 import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
@@ -26,7 +28,7 @@ export const validate = (
   if (isColumn(valueArg)) {
     const columnName = valueArg.name;
     // look up for columns in userDefinedColumns and existing fields
-    let valueColumnType: string | undefined;
+    let valueColumnType: SupportedDataType | 'unknown' | undefined;
     const userDefinedColumnRef = context?.userDefinedColumns.get(columnName);
     if (userDefinedColumnRef) {
       valueColumnType = userDefinedColumnRef.find((v) => v.name === columnName)?.type;
@@ -36,17 +38,7 @@ export const validate = (
     }
 
     if (valueColumnType && !isNumericType(valueColumnType)) {
-      // TODO centralize
-      messages.push({
-        location: command.location,
-        text: i18n.translate('kbn-esql-ast.esql.validation.changePointUnsupportedFieldType', {
-          defaultMessage:
-            'CHANGE_POINT only supports numeric types values, found "{columnName}" of type {valueColumnType}',
-          values: { columnName, valueColumnType },
-        }),
-        type: 'error',
-        code: 'changePointUnsupportedFieldType',
-      });
+      messages.push(errors.changePointWrongFieldType(valueArg, valueColumnType));
     }
   }
 
