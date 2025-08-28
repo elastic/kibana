@@ -23354,10 +23354,14 @@
                       "properties": {
                         "agent_policy_count": {
                           "type": "number"
+                        },
+                        "package_policy_count": {
+                          "type": "number"
                         }
                       },
                       "required": [
-                        "agent_policy_count"
+                        "agent_policy_count",
+                        "package_policy_count"
                       ],
                       "type": "object"
                     }
@@ -42049,99 +42053,6 @@
         ]
       }
     },
-    "/api/fleet/service_tokens": {
-      "post": {
-        "description": "[Required authorization] Route required privileges: fleet-agents-all.",
-        "operationId": "post-fleet-service-tokens",
-        "parameters": [
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": false,
-                "nullable": true,
-                "properties": {
-                  "remote": {
-                    "default": false,
-                    "type": "boolean"
-                  }
-                },
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "value": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "name",
-                    "value"
-                  ],
-                  "type": "object"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": false,
-                  "description": "Generic Error",
-                  "properties": {
-                    "attributes": {},
-                    "error": {
-                      "type": "string"
-                    },
-                    "errorType": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "attributes"
-                  ],
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Create a service token",
-        "tags": [
-          "Fleet service tokens"
-        ]
-      }
-    },
     "/api/fleet/settings": {
       "get": {
         "description": "[Required authorization] Route required privileges: fleet-settings-read.",
@@ -49091,6 +49002,13 @@
                                                       "properties": {
                                                         "destination": {
                                                           "minLength": 1,
+                                                          "type": "string"
+                                                        },
+                                                        "status": {
+                                                          "enum": [
+                                                            "enabled",
+                                                            "disabled"
+                                                          ],
                                                           "type": "string"
                                                         },
                                                         "where": {
@@ -58191,6 +58109,13 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "status": {
+                    "enum": [
+                      "enabled",
+                      "disabled"
+                    ],
+                    "type": "string"
+                  },
                   "stream": {
                     "additionalProperties": false,
                     "properties": {
@@ -61507,6 +61432,13 @@
                                       "properties": {
                                         "destination": {
                                           "minLength": 1,
+                                          "type": "string"
+                                        },
+                                        "status": {
+                                          "enum": [
+                                            "enabled",
+                                            "disabled"
+                                          ],
                                           "type": "string"
                                         },
                                         "where": {
@@ -65615,9 +65547,6 @@
     },
     {
       "name": "Fleet Server hosts"
-    },
-    {
-      "name": "Fleet service tokens"
     },
     {
       "name": "Fleet uninstall tokens"

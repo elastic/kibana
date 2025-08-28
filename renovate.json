@@ -21,7 +21,6 @@
     "9.0",
     "8.19",
     "8.18",
-    "8.17",
     "7.17"
   ],
   "prConcurrentLimit": 0,
@@ -4624,6 +4623,27 @@
         "Team:Operations",
         "backport:prev-minor",
         "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "moonrepo",
+      "matchDepNames": [
+        "@moonrepo/cli"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main",
+        "/^[9].*/",
+        "8.19"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true

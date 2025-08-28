@@ -49,7 +49,9 @@ export function NewRoutingStreamEntry() {
           </EuiFormRow>
           <RoutingConditionEditor
             condition={currentRule.where}
-            onConditionChange={(condition) => changeRule({ where: condition })}
+            status={currentRule.status}
+            onConditionChange={(cond) => changeRule({ where: cond })}
+            onStatusChange={(status) => changeRule({ status })}
           />
           <AddRoutingRuleControls />
         </EuiFlexGroup>
