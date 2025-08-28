@@ -11,6 +11,7 @@ import type { HttpGraphNode } from '@kbn/workflows';
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import type { UrlValidator } from '../../lib/url_validator';
 import { WorkflowTemplatingEngine } from '../../templating_engine';
+import { parseDuration } from '../../utils/parse-duration/parse-duration';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
@@ -38,7 +39,7 @@ export class HttpStepImpl implements StepImplementation {
       method = 'GET',
       headers = {},
       body,
-      timeout = 30000,
+      timeout = '30s',
     } = this.node.configuration.with;
 
     return {
@@ -46,7 +47,7 @@ export class HttpStepImpl implements StepImplementation {
       method,
       headers: this.renderHeaders(headers, context),
       body: this.renderBody(body, context),
-      timeout,
+      timeout: parseDuration(timeout),
     };
   }
 

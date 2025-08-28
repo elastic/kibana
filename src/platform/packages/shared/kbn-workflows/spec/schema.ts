@@ -109,7 +109,7 @@ export const HttpStepSchema = BaseStepSchema.extend({
       .optional()
       .default({}),
     body: z.any().optional(),
-    timeout: z.number().int().min(1).optional().default(30000),
+    timeout: z.string().optional().default('30s'),
   }),
 });
 export type HttpStep = z.infer<typeof HttpStepSchema>;

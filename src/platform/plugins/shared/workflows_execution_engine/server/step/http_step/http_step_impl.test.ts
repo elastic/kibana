@@ -56,7 +56,7 @@ describe('HttpStepImpl', () => {
           url: 'https://api.example.com/data',
           method: 'GET',
           headers: {},
-          timeout: 30000,
+          timeout: '30s',
         },
       },
     };
@@ -285,7 +285,7 @@ describe('HttpStepImpl', () => {
               url: 'https://malicious.com/test',
               method: 'GET',
               headers: {},
-              timeout: 30000,
+              timeout: '30s',
             },
           },
         },
@@ -346,7 +346,7 @@ describe('HttpStepImpl', () => {
               url: 'https://any-host.com/test',
               method: 'GET',
               headers: {},
-              timeout: 30000,
+              timeout: '30s',
             },
           },
         },
@@ -372,6 +372,71 @@ describe('HttpStepImpl', () => {
           method: 'GET',
         })
       );
+    });
+  });
+
+  describe('timeout duration parsing', () => {
+    it('should parse timeout duration strings correctly', () => {
+      const testCases = [
+        { input: '1s', expected: 1000 },
+        { input: '30s', expected: 30000 },
+        { input: '1m', expected: 60000 },
+        { input: '5m', expected: 300000 },
+        { input: '1h', expected: 3600000 },
+        { input: '2h30m', expected: 9000000 },
+        { input: '1000ms', expected: 1000 },
+      ];
+
+      testCases.forEach(({ input, expected }) => {
+        mockStep.configuration.with.timeout = input;
+        const httpStepInstance = new HttpStepImpl(
+          mockStep,
+          mockContextManager,
+          mockWorkflowRuntime,
+          mockWorkflowLogger,
+          mockUrlValidator
+        );
+
+        const result = httpStepInstance.getInput();
+        expect(result.timeout).toBe(expected);
+      });
+    });
+
+    it('should handle default timeout when not specified', () => {
+      const stepWithoutTimeout = {
+        ...mockStep,
+        configuration: {
+          ...mockStep.configuration,
+          with: {
+            ...mockStep.configuration.with,
+          },
+        },
+      };
+      delete (stepWithoutTimeout.configuration.with as any).timeout;
+
+      const httpStepInstance = new HttpStepImpl(
+        stepWithoutTimeout,
+        mockContextManager,
+        mockWorkflowRuntime,
+        mockWorkflowLogger,
+        mockUrlValidator
+      );
+
+      const result = httpStepInstance.getInput();
+      expect(result.timeout).toBe(30000); // 30s default
+    });
+
+    it('should throw error for invalid duration format', () => {
+      mockStep.configuration.with.timeout = 'invalid';
+      const httpStepInstance = new HttpStepImpl(
+        mockStep,
+        mockContextManager,
+        mockWorkflowRuntime,
+        mockWorkflowLogger,
+        mockUrlValidator
+      );
+
+      expect(() => httpStepInstance.getInput()).toThrow(/Invalid duration format/);
     });
   });
 });
