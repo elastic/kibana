@@ -86,6 +86,12 @@
     "updatedAt",
     "updatedBy"
   ],
+  "alerting_rule_template": [
+    "consumer",
+    "name",
+    "ruleTypeId",
+    "tags"
+  ],
   "api_key_pending_invalidation": [
     "apiKeyId",
     "createdAt"
