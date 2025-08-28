@@ -9,17 +9,15 @@
 
 import { isEui, isHtmlTag, isExcludedComponent } from '../utils';
 import { getFiberType } from './get_fiber_type';
-import type { ReactFiberNode, ReactFiberNodeWithHtmlElement, SourceComponent } from './types';
+import type { ReactFiberNode, SourceComponent } from './types';
 
 /**
  * Finds the {@link SourceComponent source component} for a {@link ReactFiberNode React Fiber node}.
- * @param {ReactFiberNodeWithHtmlElement} fiber The {@link ReactFiberNode React Fiber node} to start the search from.
+ * @param {ReactFiberNode} fiber The {@link ReactFiberNode React Fiber node} to start the search from.
  * @return {SourceComponent | null} {@link SourceComponent Source component}, or null if it cannot be determined.
  */
-export const findSourceComponent = (
-  fiber: ReactFiberNodeWithHtmlElement
-): SourceComponent | null => {
-  let current: HTMLElement | null = fiber.element;
+export const findSourceComponent = (fiber: ReactFiberNode): SourceComponent | null => {
+  let current: HTMLElement | null = fiber.element ?? null;
   let sourceComponent: SourceComponent | null = null;
 
   while (current && !sourceComponent) {
@@ -27,6 +25,7 @@ export const findSourceComponent = (
 
     while (fiberCursor && !sourceComponent) {
       const type = getFiberType(fiberCursor);
+
       if (type) {
         if (!isHtmlTag(type) && !isEui(type) && !isExcludedComponent(type)) {
           sourceComponent = { element: current, type };

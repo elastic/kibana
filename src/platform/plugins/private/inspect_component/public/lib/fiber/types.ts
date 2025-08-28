@@ -43,16 +43,8 @@ export interface ReactFiberNode {
   sibling?: ReactFiberNode | null;
   /** Parent {@link ReactFiberNode React Fiber node}. */
   return?: ReactFiberNode | null;
-}
-
-/**
- * {@link ReactFiberNode Fiber node} with its associated HTML element.
- */
-export interface ReactFiberNodeWithHtmlElement extends ReactFiberNode {
-  /** {@link DebugSource} */
-  _debugSource: DebugSource;
   /** HTML element associated with the {@link ReactFiberNode React Fiber node}. */
-  element: HTMLElement;
+  element?: HTMLElement;
 }
 
 /**

@@ -21,7 +21,7 @@ import { findSourceComponent } from '../../../lib/fiber/find_source_component';
 import { InspectFlyout, flyoutOptions } from '../flyout/inspect_flyout';
 import { InspectHighlight } from './inspect_highlight';
 import { INSPECT_OVERLAY_ID } from '../../../lib/constants';
-import type { ReactFiberNodeWithHtmlElement, SourceComponent } from '../../../lib/fiber/types';
+import type { ReactFiberNode, SourceComponent } from '../../../lib/fiber/types';
 
 interface Props {
   core: CoreStart;
@@ -37,8 +37,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
   const { euiTheme } = useEuiTheme();
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties>({});
   const [sourceComponent, setSourceComponent] = useState<SourceComponent | null>(null);
-  const [targetFiberNodeWithElement, setTargetFiberNodeWithElement] =
-    useState<ReactFiberNodeWithHtmlElement | null>(null);
+  const [targetFiberNode, setTargetFiberNode] = useState<ReactFiberNode | null>(null);
 
   /**
    * 'pointer-events: none' is required for {@link handleEventPropagation} to work properly.
@@ -68,7 +67,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       return;
     }
 
-    setTargetFiberNodeWithElement(fiberNode);
+    setTargetFiberNode(fiberNode);
 
     const sourceComponentResult = findSourceComponent(fiberNode);
 
@@ -92,7 +91,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
 
       const componentData = await getInspectedElementData({
         httpService: core.http,
-        targetFiberNodeWithHtmlElement: targetFiberNodeWithElement,
+        targetFiberNode,
         sourceComponent,
       });
 
@@ -116,7 +115,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       setFlyoutOverlayRef(flyout);
       setIsInspecting(false);
     },
-    [core, sourceComponent, targetFiberNodeWithElement, setIsInspecting, setFlyoutOverlayRef]
+    [core, sourceComponent, targetFiberNode, setIsInspecting, setFlyoutOverlayRef]
   );
 
   useEffect(() => {

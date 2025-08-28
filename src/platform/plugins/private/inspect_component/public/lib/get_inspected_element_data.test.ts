@@ -12,7 +12,6 @@ import { fetchComponentData } from '../api/fetch_component_data';
 import { getIconType } from './dom/get_icon_type';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { findFirstEuiComponent } from './fiber/find_first_eui_component';
-import type { ReactFiberNodeWithHtmlElement } from './fiber/types';
 
 jest.mock('../api/fetch_component_data');
 jest.mock('./dom/get_icon_type');
@@ -28,7 +27,7 @@ describe('getInspectedElementData', () => {
 
   const mockTarget = document.createElement('p');
 
-  const mockTargetFiberNodeWithHtmlElement: ReactFiberNodeWithHtmlElement = {
+  const mockTargetFiberNode = {
     type: 'p',
     element: mockTarget,
     _debugSource: {
@@ -59,7 +58,7 @@ describe('getInspectedElementData', () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       sourceComponent: mockSourceComponent,
-      targetFiberNodeWithHtmlElement: null,
+      targetFiberNode: null,
     });
 
     expect(result).toBeNull();
@@ -69,7 +68,7 @@ describe('getInspectedElementData', () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       sourceComponent: null,
-      targetFiberNodeWithHtmlElement: mockTargetFiberNodeWithHtmlElement,
+      targetFiberNode: mockTargetFiberNode,
     });
 
     expect(result).toBeNull();
@@ -81,12 +80,12 @@ describe('getInspectedElementData', () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       sourceComponent: mockSourceComponent,
-      targetFiberNodeWithHtmlElement: mockTargetFiberNodeWithHtmlElement,
+      targetFiberNode: mockTargetFiberNode,
     });
 
     expect(fetchComponentData).toHaveBeenCalledWith({
       httpService: mockHttpService,
-      fileName: mockTargetFiberNodeWithHtmlElement._debugSource.fileName,
+      fileName: mockTargetFiberNode?._debugSource.fileName,
     });
 
     expect(result).toBeNull();
@@ -100,18 +99,18 @@ describe('getInspectedElementData', () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       sourceComponent: mockSourceComponent,
-      targetFiberNodeWithHtmlElement: mockTargetFiberNodeWithHtmlElement,
+      targetFiberNode: mockTargetFiberNode,
     });
 
     expect(fetchComponentData).toHaveBeenCalledWith({
       httpService: mockHttpService,
-      fileName: mockTargetFiberNodeWithHtmlElement._debugSource.fileName,
+      fileName: mockTargetFiberNode._debugSource.fileName,
     });
     expect(getIconType).toHaveBeenCalledWith(mockTarget);
 
     expect(result).toEqual({
       fileData: {
-        ...mockTargetFiberNodeWithHtmlElement._debugSource,
+        ...mockTargetFiberNode._debugSource,
         ...mockResponse,
       },
       euiData: mockEuiDocs,

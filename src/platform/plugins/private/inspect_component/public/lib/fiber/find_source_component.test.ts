@@ -9,7 +9,7 @@
 
 import { findSourceComponent } from './find_source_component';
 import { getFiberType } from './get_fiber_type';
-import type { ReactFiberNode, ReactFiberNodeWithHtmlElement } from './types';
+import type { ReactFiberNode } from './types';
 
 jest.mock('./get_fiber_type');
 
@@ -30,7 +30,7 @@ describe('findSourceComponent', () => {
     type: string,
     element: HTMLElement,
     debugOwner?: ReactFiberNode | null
-  ): ReactFiberNodeWithHtmlElement => ({
+  ): ReactFiberNode => ({
     elementType: type,
     type,
     _debugSource: {

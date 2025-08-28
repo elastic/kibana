@@ -13,12 +13,7 @@ import { getIconType } from './dom/get_icon_type';
 import { fetchComponentData } from '../api/fetch_component_data';
 import { EUI_COMPONENTS_DOCS_MAP, EUI_DOCS_BASE } from './constants';
 import type { InspectComponentResponse } from '../api/fetch_component_data';
-import type {
-  DebugSource,
-  EuiData,
-  ReactFiberNodeWithHtmlElement,
-  SourceComponent,
-} from './fiber/types';
+import type { DebugSource, EuiData, ReactFiberNode, SourceComponent } from './fiber/types';
 
 /** Information about the file where the React component is defined. */
 interface FileData extends DebugSource, InspectComponentResponse {
@@ -46,8 +41,8 @@ export interface GetInspectedElementDataOptions {
   httpService: HttpStart;
   /** {@link SourceComponent} */
   sourceComponent: SourceComponent | null;
-  /** {@link ReactFiberNodeWithHtmlElement} */
-  targetFiberNodeWithHtmlElement: ReactFiberNodeWithHtmlElement | null;
+  /** {@link ReactFiberNode} */
+  targetFiberNode: ReactFiberNode | null;
 }
 
 /**
@@ -56,20 +51,22 @@ export interface GetInspectedElementDataOptions {
  * @param {GetInspectedElementDataOptions} options
  * @param {HttpStart} options.httpService {@link HttpStart}
  * @param {string | null} options.sourceComponent {@link SourceComponent}
- * @param {ReactFiberNodeWithHtmlElement | null} options.targetFiberNodeWithHtmlElement {@link ReactFiberNodeWithHtmlElement}
+ * @param {ReactFiberNode | null} options.targetFiberNodeWithHtmlElement {@link ReactFiberNode}
  * @returns {Promise<ComponentData | null>} Resolves with {@link ComponentData component data} if found, otherwise null.
  */
 export const getInspectedElementData = async ({
   httpService,
   sourceComponent,
-  targetFiberNodeWithHtmlElement,
+  targetFiberNode,
 }: GetInspectedElementDataOptions): Promise<ComponentData | null> => {
-  if (!targetFiberNodeWithHtmlElement || !sourceComponent) {
+  const debugSource = targetFiberNode?._debugSource;
+  const element = targetFiberNode?.element;
+  if (!debugSource || !element || !sourceComponent) {
     return null;
   }
   const response = await fetchComponentData({
     httpService,
-    fileName: targetFiberNodeWithHtmlElement._debugSource.fileName,
+    fileName: debugSource.fileName,
   });
 
   if (!response) {
@@ -77,12 +74,12 @@ export const getInspectedElementData = async ({
   }
 
   const { baseFileName, codeowners, relativePath } = response;
-  const { columnNumber, lineNumber, fileName } = targetFiberNodeWithHtmlElement._debugSource;
+  const { columnNumber, lineNumber, fileName } = debugSource;
 
   const fileData = { columnNumber, lineNumber, fileName, baseFileName, codeowners, relativePath };
 
-  const iconType = getIconType(targetFiberNodeWithHtmlElement.element);
-  const euiComponentType = findFirstEuiComponent(targetFiberNodeWithHtmlElement);
+  const iconType = getIconType(element);
+  const euiComponentType = findFirstEuiComponent(targetFiberNode);
   const euiData = {
     componentType: euiComponentType || 'N/A',
     docsLink: euiComponentType

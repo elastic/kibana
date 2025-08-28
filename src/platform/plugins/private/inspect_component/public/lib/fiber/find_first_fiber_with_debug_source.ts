@@ -8,7 +8,7 @@
  */
 
 import { getFiberFromHtmlElement } from './get_fiber_from_html_element';
-import type { DebugSource, ReactFiberNode, ReactFiberNodeWithHtmlElement } from './types';
+import type { DebugSource, ReactFiberNode } from './types';
 
 const hasDebugSource = (
   fiber: ReactFiberNode
@@ -20,11 +20,9 @@ const hasDebugSource = (
  * Finds the first {@link ReactFiberNode React Fiber node} associated with the given HTML element (or its ancestors)
  * that has a {@link DebugSource _debugSource} attached to it.
  * @param {HTMLElement} element The HTML element to start the search from.
- * @return {ReactFiberNodeWithHtmlElement | null} {@link ReactFiberNodeWithHtmlElement React Fiber node with its associated HTML element}, or null if none found.
+ * @return {ReactFiberNode | null} {@link ReactFiberNode React Fiber node}, or null if none found.
  */
-export const findFirstFiberWithDebugSource = (
-  element: HTMLElement
-): ReactFiberNodeWithHtmlElement | null => {
+export const findFirstFiberWithDebugSource = (element: HTMLElement): ReactFiberNode | null => {
   let current: HTMLElement | null = element;
 
   while (current) {
