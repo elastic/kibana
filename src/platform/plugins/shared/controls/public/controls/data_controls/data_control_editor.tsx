@@ -47,7 +47,7 @@ import {
   type CreateControlTypeAction,
 } from '../../actions/control_panel_actions';
 import { confirmDeleteControl } from '../../common';
-import { dataViewsService, uiActionsService } from '../../services/kibana_services';
+import { coreServices, dataViewsService, uiActionsService } from '../../services/kibana_services';
 import { DataControlEditorStrings } from './data_control_constants';
 
 type DataControlEditorState = DefaultDataControlState & SerializedTitles;
@@ -445,11 +445,17 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                 onClick={() => {
                   if (selectedControlType && (!controlId || controlType !== selectedControlType)) {
                     // we need to create a new control from scratch
-                    controlActionRegistry[selectedControlType]?.execute({
-                      trigger: addControlMenuTrigger,
-                      embeddable: parentApi,
-                      state: editorState,
-                    });
+                    try {
+                      controlActionRegistry[selectedControlType]?.execute({
+                        trigger: addControlMenuTrigger,
+                        embeddable: parentApi,
+                        state: editorState,
+                      });
+                    } catch (e) {
+                      coreServices.notifications.toasts.addError(e, {
+                        title: DataControlEditorStrings.manageControl.getOnSaveError(),
+                      });
+                    }
                   } else {
                     // the control already exists with the expected type, so just update it
                     onUpdate(editorState);

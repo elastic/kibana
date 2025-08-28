@@ -91,33 +91,14 @@ export const DataControlEditorStrings = {
         i18n.translate('controls.controlGroup.manageControl.displaySettings.titleInputTitle', {
           defaultMessage: 'Label',
         }),
-      getWidthInputTitle: () =>
-        i18n.translate('controls.controlGroup.manageControl.displaySettings.widthInputTitle', {
-          defaultMessage: 'Minimum width',
-        }),
-      getGrowSwitchTitle: () =>
-        i18n.translate('controls.controlGroup.manageControl.displaySettings.growSwitchTitle', {
-          defaultMessage: 'Expand width to fit available space',
-        }),
-    },
-    controlTypeSettings: {
-      getFormGroupTitle: (type: string) =>
-        i18n.translate('controls.controlGroup.manageControl.controlTypeSettings.formGroupTitle', {
-          defaultMessage: '{controlType} settings',
-          values: { controlType: type },
-        }),
-      getFormGroupDescription: (type: string) =>
-        i18n.translate(
-          'controls.controlGroup.manageControl.controlTypeSettings.formGroupDescription',
-          {
-            defaultMessage: 'Custom settings for your {controlType} control.',
-            values: { controlType: type.toLocaleLowerCase() },
-          }
-        ),
     },
     getSaveChangesTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {
         defaultMessage: 'Save',
+      }),
+    getOnSaveError: () =>
+      i18n.translate('controls.controlGroup.manageControl.onSaveError', {
+        defaultMessage: 'Error saving the control',
       }),
     getCancelTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.cancelTitle', {
@@ -127,13 +108,5 @@ export const DataControlEditorStrings = {
       i18n.translate('controls.controlGroup.management.delete', {
         defaultMessage: 'Delete control',
       }),
-  },
-  management: {
-    controlWidth: {
-      getWidthSwitchLegend: () =>
-        i18n.translate('controls.controlGroup.management.layout.controlWidthLegend', {
-          defaultMessage: 'Change control size',
-        }),
-    },
   },
 };
