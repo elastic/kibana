@@ -5,25 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiPageTemplate,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-  EuiSpacer,
-  EuiImage,
-  EuiLink,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, useEuiTheme, EuiImage } from '@elastic/eui';
 
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { useKibana } from '../../hooks/use_kibana';
+import { StatefulHeaderPromo } from './stateful_promo';
+import { StatelessHeaderPromo } from './stateless_promo';
 
 export const SearchHomepageHeader: React.FC = () => {
   const { euiTheme, colorMode } = useEuiTheme();
   const assetBasePath = useAssetBasePath();
+  const { cloud } = useKibana().services;
 
   return (
     <EuiPageTemplate.Section
@@ -40,35 +32,7 @@ export const SearchHomepageHeader: React.FC = () => {
         }}
       >
         <EuiFlexItem style={{ alignSelf: 'center' }}>
-          <EuiPanel color="transparent" paddingSize="xl">
-            <EuiTitle size="l">
-              <h1>
-                {i18n.translate('xpack.searchHomepage.pageTitle', {
-                  defaultMessage: 'Build your first search solution',
-                })}
-              </h1>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiText grow={false}>
-              <p>
-                {i18n.translate('xpack.searchHomepage.description', {
-                  defaultMessage:
-                    'Learn the fundamentals of creating a complete search experience with this hands-on tutorial.',
-                })}
-              </p>
-            </EuiText>
-            <EuiSpacer size="xl" />
-            {/* To DO: Enable the following once we have text content ready
-            <FeatureUpdateGroup updates={['Feature update', 'Feature update', 'Feature update']} /> */}
-            <EuiLink
-              data-test-subj="searchHomepageSearchHomepageHeaderTutorialLink"
-              href="https://www.elastic.co/search-labs/tutorials/search-tutorial/welcome"
-              target="_blank"
-              data-telemetry-id="search-promo-homepage-8-search-tutorial" // keep "search-promo-homepage" as the prefix for every tracking ID so we can filter on that prefix for the total homepage promo clicks overall
-            >
-              Start the tutorial
-            </EuiLink>
-          </EuiPanel>
+          {cloud?.isServerlessEnabled ? <StatelessHeaderPromo /> : <StatefulHeaderPromo />}
         </EuiFlexItem>
 
         <EuiFlexItem>
