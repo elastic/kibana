@@ -16,10 +16,10 @@ import type { DiscoverEBTContextProps } from './types';
  * Field usage events i.e. when a field is selected in the data table, removed from the data table, or a filter is added
  */
 export const FIELD_USAGE_EVENT_TYPE = 'discover_field_usage';
-export const FIELD_USAGE_IN_QUERY_EVENT_TYPE = 'discover_field_usage_in_query';
+export const QUERY_FIELDS_USAGE_EVENT_TYPE = 'discover_query_fields_usage';
 export const FIELD_USAGE_EVENT_NAME = 'eventName';
 export const FIELD_USAGE_FIELD_NAME = 'fieldName';
-export const FIELD_USAGE_IN_QUERY_FIELD_NAMES = 'fieldNames';
+export const QUERY_FIELDS_USAGE_FIELD_NAMES = 'fieldNames';
 export const FIELD_USAGE_FILTER_OPERATION = 'filterOperation';
 
 /**
@@ -86,7 +86,7 @@ export const registerDiscoverEBTManagerAnalytics = (
   });
 
   core.analytics.registerEventType({
-    eventType: FIELD_USAGE_IN_QUERY_EVENT_TYPE,
+    eventType: QUERY_FIELDS_USAGE_EVENT_TYPE,
     schema: {
       [FIELD_USAGE_EVENT_NAME]: {
         type: 'keyword',
@@ -95,7 +95,7 @@ export const registerDiscoverEBTManagerAnalytics = (
             'The name of the event that is tracked in the metrics i.e. kqlQueryUpdate, esqlQueryUpdate',
         },
       },
-      [FIELD_USAGE_IN_QUERY_FIELD_NAMES]: {
+      [QUERY_FIELDS_USAGE_FIELD_NAMES]: {
         type: 'array',
         items: {
           type: 'keyword',

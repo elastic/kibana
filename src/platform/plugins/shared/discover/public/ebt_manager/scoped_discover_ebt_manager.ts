@@ -22,10 +22,10 @@ import {
   CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
   FIELD_USAGE_EVENT_NAME,
   FIELD_USAGE_EVENT_TYPE,
-  FIELD_USAGE_IN_QUERY_EVENT_TYPE,
+  QUERY_FIELDS_USAGE_EVENT_TYPE,
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
-  FIELD_USAGE_IN_QUERY_FIELD_NAMES,
+  QUERY_FIELDS_USAGE_FIELD_NAMES,
 } from './discover_ebt_manager_registrations';
 import { ContextualProfileLevel } from '../context_awareness';
 import type {
@@ -59,7 +59,7 @@ interface FieldUsageEventData {
 
 interface FieldUsageInQueryEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageInQueryEventName;
-  [FIELD_USAGE_IN_QUERY_FIELD_NAMES]?: string[];
+  [QUERY_FIELDS_USAGE_FIELD_NAMES]?: string[];
 }
 
 interface ContextualProfileResolvedEventData {
@@ -207,7 +207,7 @@ export class ScopedDiscoverEBTManager {
 
     // Handle full text search vs field-specific queries
     if (isOnlyFullTextSearch) {
-      eventData[FIELD_USAGE_IN_QUERY_FIELD_NAMES] = [FREE_TEXT];
+      eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = [FREE_TEXT];
     } else if (fieldsMetadata) {
       // Process actual field names
       const fields = await this.getFieldsFromMetadata({
@@ -220,11 +220,11 @@ export class ScopedDiscoverEBTManager {
         fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
       );
 
-      eventData[FIELD_USAGE_IN_QUERY_FIELD_NAMES] = categorizedFields;
+      eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = categorizedFields;
     }
 
     console.log({ eventData });
-    this.reportEvent(FIELD_USAGE_IN_QUERY_EVENT_TYPE, eventData);
+    this.reportEvent(QUERY_FIELDS_USAGE_EVENT_TYPE, eventData);
   }
 
   public async trackSubmittingQuery({
