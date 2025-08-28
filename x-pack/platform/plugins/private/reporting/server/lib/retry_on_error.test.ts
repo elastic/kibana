@@ -33,6 +33,10 @@ describe('retryOnError', () => {
     jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it(`doesn't retry if operation is successful`, async () => {
     const operationMock = jest.fn().mockResolvedValue('success');
     expect(await retryOnError({ operation: operationMock, retries: 3, report, logger })).toEqual(

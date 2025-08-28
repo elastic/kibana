@@ -9,6 +9,8 @@ import type { Logger } from '@kbn/core/server';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
 import type { SavedReport } from './store';
 
+const MAX_DELAY_SECONDS = 30;
+
 interface RetryOpts {
   attempt?: number;
   logger: Logger;
@@ -43,7 +45,7 @@ export const retryOnError = async ({
 
     if (attempt < retries) {
       const retryCount = attempt + 1;
-      const retryDelaySec: number = Math.min(Math.pow(2, retryCount), 30); // 2s, 4s, 8s, 16s, 30s, 30s, 30s...
+      const retryDelaySec: number = Math.min(Math.pow(2, retryCount), MAX_DELAY_SECONDS); // 2s, 4s, 8s, 16s, 30s, 30s, 30s...
 
       logger.warn(
         `Retrying report generation for report[${
