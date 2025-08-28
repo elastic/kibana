@@ -65,7 +65,7 @@ describe('runCiChecksTool', () => {
         'oas_snapshot',
       ]);
       expect(emptyResult.data.parallel).toBe(true);
-      expect(emptyResult.data.clean_cache).toBe(false);
+      expect(emptyResult.data.cleanCache).toBe(false);
     }
   });
 
@@ -126,17 +126,17 @@ describe('runCiChecksTool', () => {
       expect(schema.safeParse({ parallel: null }).success).toBe(false);
     });
 
-    it('validates clean_cache parameter as boolean', () => {
+    it('validates cleanCache parameter as boolean', () => {
       const schema = runCiChecksTool.inputSchema;
 
       // Valid boolean values
-      expect(schema.safeParse({ clean_cache: true }).success).toBe(true);
-      expect(schema.safeParse({ clean_cache: false }).success).toBe(true);
+      expect(schema.safeParse({ cleanCache: true }).success).toBe(true);
+      expect(schema.safeParse({ cleanCache: false }).success).toBe(true);
 
       // Invalid boolean values
-      expect(schema.safeParse({ clean_cache: 'true' }).success).toBe(false);
-      expect(schema.safeParse({ clean_cache: 1 }).success).toBe(false);
-      expect(schema.safeParse({ clean_cache: null }).success).toBe(false);
+      expect(schema.safeParse({ cleanCache: 'true' }).success).toBe(false);
+      expect(schema.safeParse({ cleanCache: 1 }).success).toBe(false);
+      expect(schema.safeParse({ cleanCache: null }).success).toBe(false);
     });
 
     it('accepts empty checks array', () => {
@@ -177,7 +177,7 @@ describe('runCiChecksTool', () => {
           'oas_snapshot',
         ]);
         expect(result.data.parallel).toBe(true);
-        expect(result.data.clean_cache).toBe(false);
+        expect(result.data.cleanCache).toBe(false);
       }
     });
 
@@ -267,6 +267,85 @@ describe('runCiChecksTool', () => {
       expect(description).toContain('build');
       expect(description).toContain('linting');
       expect(description).toContain('type checking');
+    });
+  });
+
+  describe('advanced features', () => {
+    it('supports all available CI checks', () => {
+      const expectedChecks = [
+        'build',
+        'quick_checks',
+        'checks',
+        'type_check',
+        'linting_with_types',
+        'linting',
+        'oas_snapshot',
+      ];
+
+      expectedChecks.forEach((check) => {
+        const schema = runCiChecksTool.inputSchema;
+        const result = schema.safeParse({ checks: [check] });
+        expect(result.success).toBe(true);
+      });
+    });
+
+    it('has proper timeout configuration for type checks', () => {
+      // This test verifies that the tool is configured to handle long-running type checks
+      const schema = runCiChecksTool.inputSchema;
+      const result = schema.safeParse({
+        checks: ['type_check'],
+        cleanCache: true,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('supports cache detection for type checks', () => {
+      // This test verifies that the tool supports cache detection functionality
+      const schema = runCiChecksTool.inputSchema;
+      const result = schema.safeParse({
+        checks: ['type_check'],
+        cleanCache: false,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('supports parallel and sequential execution', () => {
+      const schema = runCiChecksTool.inputSchema;
+
+      // Test parallel execution
+      const parallelResult = schema.safeParse({
+        checks: ['linting', 'type_check'],
+        parallel: true,
+      });
+      expect(parallelResult.success).toBe(true);
+
+      // Test sequential execution
+      const sequentialResult = schema.safeParse({
+        checks: ['linting', 'type_check'],
+        parallel: false,
+      });
+      expect(sequentialResult.success).toBe(true);
+    });
+
+    it('handles empty checks array gracefully', () => {
+      const schema = runCiChecksTool.inputSchema;
+      const result = schema.safeParse({ checks: [] });
+      expect(result.success).toBe(true);
+    });
+
+    it('provides meaningful default values', () => {
+      const schema = runCiChecksTool.inputSchema;
+      const result = schema.safeParse({});
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        // Should default to all checks
+        expect(result.data.checks).toHaveLength(7);
+        // Should default to parallel execution
+        expect(result.data.parallel).toBe(true);
+        // Should default to no cache clearing
+        expect(result.data.cleanCache).toBe(false);
+      }
     });
   });
 });

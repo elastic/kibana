@@ -37,7 +37,7 @@ const runCiChecksInputSchema = z.object({
       'oas_snapshot',
     ]),
   parallel: z.boolean().optional().default(true),
-  clean_cache: z.boolean().optional().default(false),
+  cleanCache: z.boolean().optional().default(false),
 });
 
 interface CheckResult {
@@ -95,7 +95,7 @@ async function runCheck(check: string, cleanCache: boolean = false): Promise<Che
     const { stdout, stderr } = await execa(command, args, {
       cwd: REPO_ROOT,
       stdio: 'pipe',
-      timeout: 300000, // 5 minutes timeout
+      timeout: check === 'type_check' ? 1200000 : 300000, // 20 minutes for type_check, 5 minutes for others
     });
     const duration = Date.now() - startTime;
 
@@ -126,24 +126,24 @@ async function runCheck(check: string, cleanCache: boolean = false): Promise<Che
 }
 
 async function runCiChecks(input: z.infer<typeof runCiChecksInputSchema>) {
-  const { checks, parallel, clean_cache } = input;
+  const { checks, parallel, cleanCache } = input;
   const results: CheckResult[] = [];
 
   if (parallel) {
     // Run checks in parallel
-    const promises = checks.map((check) => runCheck(check, clean_cache));
+    const promises = checks.map((check) => runCheck(check, cleanCache));
     const parallelResults = await Promise.all(promises);
     results.push(...parallelResults);
   } else {
     // Run checks sequentially
     for (const check of checks) {
-      const result = await runCheck(check, clean_cache);
+      const result = await runCheck(check, cleanCache);
       results.push(result);
 
       // If a check fails and we're running sequentially, we might want to stop
       // or continue depending on the use case
       if (result.status === 'failed') {
-        console.warn(`Check ${check} failed, continuing with remaining checks...`);
+        // Continue with remaining checks
       }
     }
   }
