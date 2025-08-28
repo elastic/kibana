@@ -476,6 +476,48 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
             },
           });
         });
+
+        it('should send both config and secret headers in a cases wehook action', async () => {
+          const customSimulatorUrl = `${casesWebhookSimulatorURL}/rest/api/2/issue/headers`;
+          const { body: createdAction } = await supertest
+            .post('/api/actions/connector')
+            .set('kbn-xsrf', 'true')
+            .send({
+              name: 'Custom headers test',
+              connector_type_id: '.cases-webhook',
+              config: {
+                ...simulatorConfig,
+                createIncidentUrl: customSimulatorUrl,
+                headers: {
+                  config: 'configValue',
+                },
+              },
+              secrets: {
+                ...secrets,
+                secretHeaders: {
+                  secret: 'secretValue',
+                },
+              },
+            })
+            .expect(200);
+
+          const actionId = createdAction.id;
+          const { body: result } = await supertest
+            .post(`/api/actions/connector/${actionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockCasesWebhook.params,
+                subActionParams: {
+                  incident: mockCasesWebhook.params.subActionParams.incident,
+                  comments: [],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(result.status).to.eql('ok');
+        });
       });
 
       after(() => {

@@ -61,6 +61,7 @@ const secrets = {
   crt: null,
   key: null,
   pfx: null,
+  secretHeaders: null,
 };
 const defaultSSLOverrides = {};
 const actionId = '1234';
@@ -72,7 +73,14 @@ const sslConfig: CasesWebhookPublicConfigurationType = {
   certType: SSLCertType.CRT,
   hasAuth: true,
 };
-const sslSecrets = { crt: CRT_FILE, key: KEY_FILE, password: 'foobar', user: null, pfx: null };
+const sslSecrets = {
+  crt: CRT_FILE,
+  key: KEY_FILE,
+  password: 'foobar',
+  user: null,
+  pfx: null,
+  secretHeaders: null,
+};
 let connectorUsageCollector: ConnectorUsageCollector;
 
 describe('Cases webhook service', () => {
@@ -185,6 +193,33 @@ describe('Cases webhook service', () => {
           ...getBasicAuthHeader({ username: 'username', password: 'password' }),
           'content-type': 'application/json',
           foo: 'bar',
+        },
+      });
+    });
+
+    it('adds the secret headers to the basic headers authentication', () => {
+      createExternalService(
+        actionId,
+        {
+          config,
+          secrets: {
+            ...secrets,
+            user: 'username',
+            password: 'password',
+            secretHeaders: { secretKey: 'secretValue' },
+          },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          ...getBasicAuthHeader({ username: 'username', password: 'password' }),
+          'content-type': 'application/json',
+          foo: 'bar',
+          secretKey: 'secretValue',
         },
       });
     });

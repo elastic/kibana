@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { combineHeadersWithBasicAuthHeader, getBasicAuthHeader } from './get_basic_auth_header';
+import {
+  combineHeadersWithBasicAuthHeader,
+  getBasicAuthHeader,
+  mergeConfigHeadersWithSecretHeaders,
+} from './get_basic_auth_header';
 
 describe('get_basic_auth_header', () => {
   describe('getBasicAuthHeader', () => {
@@ -64,6 +68,27 @@ describe('get_basic_auth_header', () => {
 
     it('returns undefined when headers are null', () => {
       expect(combineHeadersWithBasicAuthHeader({ headers: null })).toEqual(undefined);
+    });
+  });
+
+  describe('mergeConfigHeadersWithSecretHeaders', () => {
+    it('merges config headers and secret headers correctly', () => {
+      expect(
+        mergeConfigHeadersWithSecretHeaders(
+          { configKey: 'configValue' },
+          { secretKey: 'secretValue' }
+        )
+      ).toEqual({
+        configKey: 'configValue',
+        secretKey: 'secretValue',
+      });
+    });
+    it('merges config and secret headers correclty if the keys are the same', () => {
+      expect(
+        mergeConfigHeadersWithSecretHeaders({ key: 'configValue' }, { key: 'secretValue' })
+      ).toEqual({
+        key: 'secretValue',
+      });
     });
   });
 });
