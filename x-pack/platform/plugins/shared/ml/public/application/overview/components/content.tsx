@@ -41,7 +41,7 @@ export const OverviewContent: FC<Props> = ({
 
   useEffect(() => {
     setAnomalyTimelineService(
-      new AnomalyTimelineService(timefilter, uiSettings, mlResultsServiceProvider(mlApi))
+      new AnomalyTimelineService(timefilter, uiSettings, mlResultsServiceProvider(mlApi), mlApi)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

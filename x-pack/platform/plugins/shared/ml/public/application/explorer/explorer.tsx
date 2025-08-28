@@ -279,6 +279,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     anomalyDetectionAlertsStateService,
     anomalyTableService,
     annotationsStateService,
+    influencersStateService,
   } = useAnomalyExplorerContext();
 
   const tableData = useObservable(anomalyTableService.tableData$, anomalyTableService.tableData);
@@ -370,7 +371,12 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const mlIndexUtils = useMlIndexUtils();
   const mlLocator = useMlLocator();
 
-  const { filterPlaceHolder, indexPattern, influencers, loading } = explorerState;
+  const { filterPlaceHolder, indexPattern, loading } = explorerState;
+  const influencers = useObservable(
+    influencersStateService.influencers$,
+    influencersStateService.influencers
+  );
+  const influencersLoading = useObservable(influencersStateService.isLoading$, true);
 
   const chartsData = useObservable(
     chartsStateService.getChartsData$(),
@@ -754,7 +760,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
                       <EuiSpacer size={'m'} />
 
-                      <EuiSkeletonText lines={10} isLoading={loading}>
+                      <EuiSkeletonText lines={10} isLoading={loading || influencersLoading}>
                         <InfluencersList influencers={influencers} influencerFilter={applyFilter} />
                       </EuiSkeletonText>
                     </div>

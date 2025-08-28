@@ -23,6 +23,7 @@ import { useMlJobService } from '../services/job_service';
 import { useTableInterval } from '../components/controls/select_interval';
 import { AnomalyTableStateService } from './anomaly_table_state_service';
 import { AnnotationsStateService } from './annotations_state_service';
+import { InfluencersStateService } from './influencers_state_service';
 
 export interface AnomalyExplorerContextValue {
   anomalyExplorerChartsService: AnomalyExplorerChartsService;
@@ -33,6 +34,7 @@ export interface AnomalyExplorerContextValue {
   anomalyDetectionAlertsStateService: AnomalyDetectionAlertsStateService;
   anomalyTableService: AnomalyTableStateService;
   annotationsStateService: AnnotationsStateService;
+  influencersStateService: InfluencersStateService;
 }
 
 /**
@@ -91,7 +93,8 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
     const anomalyTimelineService = new AnomalyTimelineService(
       timefilter,
       uiSettings,
-      mlResultsService
+      mlResultsService,
+      mlApi
     );
 
     const anomalyExplorerCommonStateService = new AnomalyExplorerCommonStateService(
@@ -146,6 +149,13 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       anomalyTimelineStateService
     );
 
+    const influencersStateService = new InfluencersStateService(
+      mlApi,
+      timefilter,
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService
+    );
+
     setAnomalyExplorerContextValue({
       anomalyExplorerChartsService,
       anomalyExplorerCommonStateService,
@@ -155,6 +165,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       anomalyDetectionAlertsStateService,
       anomalyTableService,
       annotationsStateService,
+      influencersStateService,
     });
 
     return () => {
@@ -166,6 +177,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       anomalyDetectionAlertsStateService.destroy();
       anomalyTableService.destroy();
       annotationsStateService.destroy();
+      influencersStateService.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

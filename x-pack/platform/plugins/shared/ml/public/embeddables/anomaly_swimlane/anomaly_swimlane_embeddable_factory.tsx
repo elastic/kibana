@@ -87,7 +87,8 @@ export const getServices = async (
   const anomalyTimelineService = new AnomalyTimelineService(
     pluginsStart.data.query.timefilter.timefilter,
     coreStart.uiSettings,
-    mlResultsServiceProvider(mlApiProvider(httpService))
+    mlResultsServiceProvider(mlApiProvider(httpService)),
+    mlApiProvider(httpService)
   );
 
   return [

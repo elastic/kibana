@@ -6,3 +6,4 @@
  */
 
 export { resultsServiceProvider } from './results_service';
+export { getTopInfluencers } from './top_influencers';

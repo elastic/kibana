@@ -149,3 +149,16 @@ export const getAnomalyRecordsSchema = schema.object({
   interval: schema.string(),
   functionDescription: schema.maybe(schema.nullable(schema.string())),
 });
+
+export const getTopInfluencersSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  earliestMs: schema.number(),
+  latestMs: schema.number(),
+  maxFieldValues: schema.maybe(schema.number()),
+  perPage: schema.maybe(schema.number()),
+  page: schema.maybe(schema.number()),
+  influencers: schema.maybe(
+    schema.arrayOf(schema.object({ fieldName: schema.string(), fieldValue: schema.string() }))
+  ),
+  influencersFilterQuery: schema.maybe(schema.any()),
+});
