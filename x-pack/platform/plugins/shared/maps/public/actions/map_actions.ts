@@ -81,10 +81,13 @@ import { getToasts } from '../kibana_services';
 import { getDeletedFeatureIds } from '../selectors/ui_selectors';
 
 export function setPauseSyncData(pauseSyncData: boolean) {
-  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>, getState: () => MapStoreState) => {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     dispatch({
       type: SET_PAUSE_SYNC_DATA,
-      pauseSyncData
+      pauseSyncData,
     });
 
     if (!pauseSyncData) {

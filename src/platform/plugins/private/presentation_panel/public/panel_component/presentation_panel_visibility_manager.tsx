@@ -9,7 +9,7 @@
 
 import { onVisibilityChange } from '@kbn/presentation-publishing';
 import { useEffect, useRef, useState } from 'react';
-import { DefaultPresentationPanelApi } from './types';
+import type { DefaultPresentationPanelApi } from './types';
 
 export const usePresentationPanelVisibilityManager = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
