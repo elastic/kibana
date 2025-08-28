@@ -95,7 +95,6 @@ export async function processExperimentsToDatasetScores(
     if (evaluationRuns) {
       evaluationRuns.forEach((evalRun) => {
         const score = evalRun.result?.score ?? 0;
-
         if (!datasetScore.evaluatorScores.has(evalRun.name)) {
           datasetScore.evaluatorScores.set(evalRun.name, []);
         }

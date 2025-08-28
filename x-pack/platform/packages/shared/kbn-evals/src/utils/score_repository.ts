@@ -35,6 +35,7 @@ interface ModelScoreDocument {
       count: number;
       percentage: number;
     };
+    scores: number[];
   };
   experiments: Array<{
     id?: string;
@@ -94,6 +95,10 @@ export class EvaluationScoreRepository {
                     count: { type: 'integer' },
                     percentage: { type: 'float' },
                   },
+                },
+                scores: {
+                  type: 'float',
+                  index: false,
                 },
               },
             },
@@ -165,6 +170,7 @@ export class EvaluationScoreRepository {
       for (const dataset of datasetScoresWithStats) {
         for (const evaluatorName of evaluatorNames) {
           const stats = dataset.evaluatorStats.get(evaluatorName);
+          const scores = dataset.evaluatorScores.get(evaluatorName) || [];
           if (!stats || stats.count === 0) {
             continue;
           }
@@ -193,6 +199,7 @@ export class EvaluationScoreRepository {
                 count: stats.count,
                 percentage: stats.percentage,
               },
+              scores,
             },
             experiments: dataset.experiments || [],
             environment: {
