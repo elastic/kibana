@@ -28,6 +28,7 @@ export interface ESQLSourceResult {
 interface ResolveIndexResponseItem {
   name: string;
   mode?: 'lookup' | 'time_series' | string;
+  indices?: string[];
 }
 
 export interface ResolveIndexResponse {

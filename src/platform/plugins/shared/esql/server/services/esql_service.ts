@@ -15,7 +15,7 @@ import type {
 } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
-import { getListOfCCSIndices } from '../lookup/utils';
+import { getListOfCCSResources } from '../lookup/utils';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;
@@ -75,6 +75,18 @@ export class EsqlService {
     const indexNames: string[] = [];
     const indexNamesSet = new Set<string>(); // Track unique index names
 
+    for (const [name, { settings }] of Object.entries(queryByIndexModeResponse)) {
+      if (settings['index.mode'] === mode && !settings['index.hidden']) {
+        if (!indexNamesSet.has(name)) {
+          indexNamesSet.add(name);
+          indexNames.push(name);
+          indices.push({ name, mode, aliases: [] });
+        }
+      }
+    }
+
+    const aliases = await this.getIndexAliases(indexNames);
+
     if (remoteClusters) {
       const remoteClustersArray = remoteClusters.split(',');
       // attach a wildcard * for each remoteCluster
@@ -95,26 +107,26 @@ export class EsqlService {
         }
       });
 
-      const remoteIndices: string[] = getListOfCCSIndices(remoteClustersArray, cssIndicesForMode);
+      const remoteIndices: string[] = getListOfCCSResources(remoteClustersArray, cssIndicesForMode);
       remoteIndices.forEach((index) => {
         if (!indexNamesSet.has(index)) {
           indexNamesSet.add(index);
           indices.push({ name: index, mode, aliases: [] });
         }
       });
-    }
+      // Get alias names where their indices overlap with remoteIndices
+      ccsSources.aliases?.forEach((alias) => {
+        const matchingIndex = alias.indices?.find((indexName) => remoteIndices.includes(indexName));
+        if (matchingIndex) {
+          const remoteAliases: string[] = getListOfCCSResources(remoteClustersArray, [alias.name]);
 
-    for (const [name, { settings }] of Object.entries(queryByIndexModeResponse)) {
-      if (settings['index.mode'] === mode && !settings['index.hidden']) {
-        if (!indexNamesSet.has(name)) {
-          indexNamesSet.add(name);
-          indexNames.push(name);
-          indices.push({ name, mode, aliases: [] });
+          if (!aliases[matchingIndex]) {
+            aliases[matchingIndex] = [];
+          }
+          aliases[matchingIndex].push(...remoteAliases);
         }
-      }
+      });
     }
-
-    const aliases = await this.getIndexAliases(indexNames);
 
     for (const index of indices) {
       index.aliases = aliases[index.name] ?? [];

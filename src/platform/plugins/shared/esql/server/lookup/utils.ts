@@ -16,19 +16,19 @@
  * can be queried across multiple clusters.
  *
  * @param clusters - Array of cluster names to check for common indices
- * @param lookupIndices - Array of indices in "cluster:index" format
+ * @param lookupResources - Array of indices/aliases in "cluster:index" format
  * @returns Array of index names that exist in all specified clusters
  *
  * @example
  * // Returns ['logs'] because it exists in both cluster1 and cluster2
- * getListOfCCSIndices(['cluster1', 'cluster2'], ['cluster1:logs', 'cluster2:logs', 'cluster1:metrics'])
+ * getListOfCCSResources(['cluster1', 'cluster2'], ['cluster1:logs', 'cluster2:logs', 'cluster1:metrics'])
  *
  * @example
  * // Returns ['index1', 'index2'] because both exist in cluster1
- * getListOfCCSIndices(['cluster1'], ['cluster1:index1', 'cluster1:index2', 'cluster2:index3'])
+ * getListOfCCSResources(['cluster1'], ['cluster1:index1', 'cluster1:index2', 'cluster2:index3'])
  */
-export function getListOfCCSIndices(clusters: string[], lookupIndices: string[]): string[] {
-  if (!clusters.length || !lookupIndices.length) {
+export function getListOfCCSResources(clusters: string[], lookupResources: string[]): string[] {
+  if (!clusters.length || !lookupResources.length) {
     return [];
   }
 
@@ -39,12 +39,12 @@ export function getListOfCCSIndices(clusters: string[], lookupIndices: string[])
     clusterIndicesMap.set(cluster, new Set());
   });
 
-  // Parse lookup indices and group by cluster
-  lookupIndices.forEach((lookupIndex) => {
-    const colonIndex = lookupIndex.indexOf(':');
-    if (colonIndex > 0 && colonIndex < lookupIndex.length - 1) {
-      const cluster = lookupIndex.substring(0, colonIndex);
-      const index = lookupIndex.substring(colonIndex + 1);
+  // Parse lookup resources and group by cluster
+  lookupResources.forEach((lookupResource) => {
+    const colonIndex = lookupResource.indexOf(':');
+    if (colonIndex > 0 && colonIndex < lookupResource.length - 1) {
+      const cluster = lookupResource.substring(0, colonIndex);
+      const index = lookupResource.substring(colonIndex + 1);
 
       if (clusterIndicesMap.has(cluster)) {
         clusterIndicesMap.get(cluster)!.add(index);
@@ -52,19 +52,21 @@ export function getListOfCCSIndices(clusters: string[], lookupIndices: string[])
     }
   });
 
-  // Find indices that exist in all specified clusters
-  const clusterIndicesSets = Array.from(clusterIndicesMap.values());
-  if (clusterIndicesSets.length === 0) {
+  // Find resources that exist in all specified clusters
+  const clusterResourcesSets = Array.from(clusterIndicesMap.values());
+  if (clusterResourcesSets.length === 0) {
     return [];
   }
 
-  // Start with indices from the first cluster
-  let commonIndices = new Set(clusterIndicesSets[0]);
+  // Start with resources from the first cluster
+  let commonResources = new Set(clusterResourcesSets[0]);
 
   // Find intersection with other clusters
-  for (let i = 1; i < clusterIndicesSets.length; i++) {
-    commonIndices = new Set([...commonIndices].filter((index) => clusterIndicesSets[i].has(index)));
+  for (let i = 1; i < clusterResourcesSets.length; i++) {
+    commonResources = new Set(
+      [...commonResources].filter((resource) => clusterResourcesSets[i].has(resource))
+    );
   }
 
-  return [...commonIndices];
+  return [...commonResources];
 }
