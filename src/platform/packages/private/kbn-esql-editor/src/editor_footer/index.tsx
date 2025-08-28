@@ -31,6 +31,7 @@ import { QueryHistoryAction, HistoryAndStarredQueriesTabs } from './history_star
 import { SubmitFeedbackComponent } from './feedback_component';
 import { QueryWrapComponent } from './query_wrap_component';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
+import { DocumentCountIndicator } from './document_count_indicator';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -158,6 +159,8 @@ export const EditorFooter = memo(function EditorFooter({
                   </p>
                 </EuiText>
               </EuiFlexItem>
+              <DocumentCountIndicator esqlQuery={code} />
+
               {/* If there is no space and no @timestamp detected hide the information */}
               {(detectedTimestamp || !isSpaceReduced) && !hideTimeFilterInfo && (
                 <EuiFlexItem grow={false}>

@@ -9,6 +9,8 @@
 
 export type { ESQLEditorProps, DataErrorsControl } from './src/types';
 export { fetchFieldsFromESQL } from './src/fetch_fields_from_esql';
+export { useEsqlDocumentCount } from './src/hooks/use_esql_document_count';
+export type { DocumentCountState } from './src/hooks/use_esql_document_count';
 import { ESQLEditor } from './src/esql_editor';
 
 // React.lazy support
