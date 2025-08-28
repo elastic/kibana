@@ -8,9 +8,9 @@
  */
 
 // Fallback step node implementation tests
-export * from './enter_on_failure_zone_node_impl.test';
-export * from './exit_on_failure_zone_node_impl.test';
+export * from './enter_try_block_node_impl.test';
+export * from './exit_try_block_node_impl.test';
 export * from './enter_normal_path_node_impl.test';
 export * from './exit_normal_path_node_impl.test';
-export * from './enter_failure_path_node_impl.test';
-export * from './exit_failure_path_node_impl.test';
+export * from './enter_fallback_path_node_impl.test';
+export * from './exit_fallback_path_node_impl.test';

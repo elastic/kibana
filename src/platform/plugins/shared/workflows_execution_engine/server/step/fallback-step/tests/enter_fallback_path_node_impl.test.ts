@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterFallbackPathNodeImpl } from '../enter_failure_path_node_impl';
+import { EnterFallbackPathNodeImpl } from '../enter_fallback_path_node_impl';
 
 describe('EnterFallbackPathNodeImpl', () => {
   let underTest: EnterFallbackPathNodeImpl;

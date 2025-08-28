@@ -9,7 +9,7 @@
 
 import type { EnterTryBlockNode } from '@kbn/workflows';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterTryBlockNodeImpl } from '../enter_on_failure_zone_node_impl';
+import { EnterTryBlockNodeImpl } from '../enter_try_block_node_impl';
 
 describe('EnterTryBlockNodeImpl', () => {
   let underTest: EnterTryBlockNodeImpl;
