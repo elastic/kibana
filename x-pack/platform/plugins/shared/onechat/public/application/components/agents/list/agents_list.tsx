@@ -197,6 +197,8 @@ export const AgentsList: React.FC = () => {
             name: 'Labels',
             multiSelect: 'and',
             options: labelOptions,
+            field: 'labels',
+            operator: 'exact',
           },
         ],
       }}
