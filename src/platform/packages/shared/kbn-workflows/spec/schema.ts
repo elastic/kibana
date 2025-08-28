@@ -67,34 +67,50 @@ export const WorkflowRetrySchema = z.object({
 });
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
-export const WorkflowOnFailureSchema = z.object({
-  retry: WorkflowRetrySchema,
-  'fallback-step': z.string().min(1).optional(),
-  continue: z.boolean().optional(),
+const StepWithTimeoutSchema = z.object({
+  timeout: z.number().optional(),
 });
-export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
+export type StepWithTimeout = z.infer<typeof StepWithTimeoutSchema>;
 
-const IfPropSchema = z.string().optional();
+const StepWithForEachSchema = z.object({
+  foreach: z.string().optional(),
+});
+export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 
-const ForEachPropSchema = z.string().optional();
+export type StepWithOnFailure = z.infer<typeof StepWithOnFailureSchema>;
 
-const TimeoutPropSchema = z.number().optional();
+const StepWithIfConditionSchema = z.object({
+  if: z.string().optional(),
+});
+export type StepWithIfCondition = z.infer<typeof StepWithIfConditionSchema>;
 
 // Base step schema, with recursive steps property
 export const BaseStepSchema = z.object({
   name: z.string().min(1),
+  type: z.string(),
 });
 export type BaseStep = z.infer<typeof BaseStepSchema>;
+
+export const WorkflowOnFailureSchema = z.object({
+  retry: WorkflowRetrySchema.optional(),
+  'fallback-steps': z.array(BaseStepSchema).min(1),
+  continue: z.boolean().optional(),
+});
+export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
+
+export const StepWithOnFailureSchema = z.object({
+  'on-failure': WorkflowOnFailureSchema.optional(),
+});
 
 export const BaseConnectorStepSchema = BaseStepSchema.extend({
   type: z.string().min(1),
   'connector-id': z.string().optional(), // http.request for example, doesn't need connectorId
-  'on-failure': WorkflowOnFailureSchema.optional(),
   with: z.record(z.string(), z.any()).optional(),
-  if: IfPropSchema,
-  foreach: ForEachPropSchema,
-  timeout: TimeoutPropSchema,
-});
+})
+  .merge(StepWithIfConditionSchema)
+  .merge(StepWithForEachSchema)
+  .merge(StepWithTimeoutSchema)
+  .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
 export const WaitStepSchema = BaseStepSchema.extend({
@@ -117,18 +133,29 @@ export const HttpStepSchema = BaseStepSchema.extend({
     body: z.any().optional(),
     timeout: z.string().optional().default('30s'),
   }),
-  if: IfPropSchema,
-  foreach: ForEachPropSchema,
-  timeout: TimeoutPropSchema,
-  'on-failure': WorkflowOnFailureSchema.optional(),
-});
+})
+  .merge(StepWithIfConditionSchema)
+  .merge(StepWithForEachSchema)
+  .merge(StepWithTimeoutSchema)
+  .merge(StepWithOnFailureSchema);
 export type HttpStep = z.infer<typeof HttpStepSchema>;
+
+export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
+  const schema = WorkflowOnFailureSchema.extend({
+    'fallback-steps': stepSchema.optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial();
+  }
+
+  return schema;
+}
 
 export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
   const schema = HttpStepSchema.extend({
-    'on-failure': WorkflowOnFailureSchema.extend({
-      'fallback-step': stepSchema.optional(),
-    }),
+    'on-failure': getOnFailureStepSchema(stepSchema, loose),
   });
 
   if (loose) {
@@ -143,17 +170,13 @@ export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
   foreach: z.string(),
   steps: z.array(BaseStepSchema).min(1),
-});
+}).merge(StepWithIfConditionSchema);
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
 
 export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
   const schema = ForEachStepSchema.extend({
     steps: z.array(stepSchema).min(1),
-    if: IfPropSchema,
-    timeout: TimeoutPropSchema,
-    'on-failure': WorkflowOnFailureSchema.extend({
-      'fallback-step': stepSchema.optional(),
-    }),
+    'on-failure': getOnFailureStepSchema(stepSchema, loose),
   });
 
   if (loose) {
