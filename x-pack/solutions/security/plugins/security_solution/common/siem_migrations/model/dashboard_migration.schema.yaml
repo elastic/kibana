@@ -150,8 +150,8 @@ components:
           type: string
           description: The description of the dashboard
         data:
-          type: object
-          description: The data of the dashboard Saved Object
+          type: string
+          description: The data of the dashboard, format could depend on the vendor
 
     DashboardMigrationTaskStats:
       description: The dashboard migration task stats object.

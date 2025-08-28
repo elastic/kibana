@@ -30,7 +30,7 @@ describe('RuleResourceRetriever', () => {
     retriever = new RuleResourceRetriever('mockMigrationId', mockDataClient.resources);
 
     MockResourceIdentifier.mockImplementation(() => ({
-      fromOriginalRule: jest.fn().mockReturnValue([]),
+      fromOriginal: jest.fn().mockReturnValue([]),
       fromResources: jest.fn().mockReturnValue([]),
     }));
     mockResourceIdentifier = new MockResourceIdentifier(
@@ -46,7 +46,7 @@ describe('RuleResourceRetriever', () => {
 
   it('returns an empty object if no matching resources are found', async () => {
     // Mock the resource identifier to return no resources
-    mockResourceIdentifier.fromOriginal.mockReturnValue([]);
+    mockResourceIdentifier.fromOriginal.mockResolvedValue([]);
     await retriever.initialize(); // Pretend initialize has been called
 
     const result = await retriever.getResources(migration.original_rule);
@@ -67,7 +67,7 @@ describe('RuleResourceRetriever', () => {
       { name: 'lookup1', type: 'lookup' as const },
     ];
     MockResourceIdentifier.mockImplementation(() => ({
-      fromOriginalRule: jest.fn().mockReturnValue(mockResourcesIdentified),
+      fromOriginal: jest.fn().mockReturnValue(mockResourcesIdentified),
       fromResources: jest.fn().mockReturnValue([]),
     }));
 
@@ -103,7 +103,7 @@ describe('RuleResourceRetriever', () => {
     ];
 
     MockResourceIdentifier.mockImplementation(() => ({
-      fromOriginalRule: jest.fn().mockReturnValue(mockResourcesIdentifiedFromRule),
+      fromOriginal: jest.fn().mockReturnValue(mockResourcesIdentifiedFromRule),
       fromResources: jest.fn().mockReturnValue([]).mockReturnValueOnce(mockNestedResources),
     }));
 

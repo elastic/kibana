@@ -138,7 +138,7 @@ export const FullScreenWaterfall = ({
                   ariaLabel={i18n.translate(
                     'unifiedDocViewer.observability.traces.fullScreenWaterfall.exitFullScreen.button',
                     {
-                      defaultMessage: 'Exit full screen waterfall',
+                      defaultMessage: 'Exit expanded trace timeline',
                     }
                   )}
                 />

@@ -6,8 +6,8 @@
  */
 
 import Papa from 'papaparse';
-import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SiemMigrationResourceData } from '../../../../../../common/siem_migrations/model/common.gen';
+import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SiemRuleMigrationsClient } from '../../siem_rule_migrations_service';
 
 interface LookupWithData extends SiemMigrationResourceData {

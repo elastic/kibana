@@ -6,10 +6,10 @@
  */
 import type { OriginalRule, RuleMigrationRule } from '../../model/rule_migration.gen';
 import type { SiemMigrationResourceBase } from '../../model/common.gen';
-import { ResourceIdentifier } from '../../resources/resource_identifier';
+import { ResourceIdentifier } from '../../resources';
 
 export class RuleResourceIdentifier extends ResourceIdentifier<RuleMigrationRule> {
-  public fromOriginal(originalRule: OriginalRule): SiemMigrationResourceBase[] {
+  public async fromOriginal(originalRule: OriginalRule): Promise<SiemMigrationResourceBase[]> {
     return this.identifier(originalRule.query);
   }
 }

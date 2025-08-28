@@ -27,6 +27,8 @@ export type {
   // commands
   CreateWorkflowCommand,
   UpdatedWorkflowResponseDto,
+  RunWorkflowCommand,
+  RunWorkflowResponseDto,
 
   // execution engine
   Provider,
@@ -37,10 +39,11 @@ export type {
 // exported full to use enum as values
 export {
   ExecutionStatus,
-  WorkflowStatus,
 
   // command schemas
   CreateWorkflowCommandSchema,
+  UpdateWorkflowCommandSchema,
+  SearchWorkflowCommandSchema,
 } from './v1';
 
 export type {
@@ -53,4 +56,6 @@ export type {
   EnterForeachNode,
   ExitForeachNode,
   AtomicGraphNode,
+  WaitGraphNodeSchema,
+  WaitGraphNode,
 } from './execution';

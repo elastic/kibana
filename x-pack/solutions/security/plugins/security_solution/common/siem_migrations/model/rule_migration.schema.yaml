@@ -322,7 +322,6 @@ components:
           type: integer
           description: The number of rules that are associated with the integration.
 
-    ## Rule migration resources
     RuleMigrationLastExecution:
       description: The last execution of the rule migration task.
       allOf:

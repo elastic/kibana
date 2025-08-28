@@ -65,8 +65,9 @@ export abstract class SiemMigrationsDataItemClient<
     const profileId = await this.getProfileUid();
 
     let itemsSlice: CreateMigrationItemInput<I>[];
+    const allItems = structuredClone(items);
     const createdAt = new Date().toISOString();
-    while ((itemsSlice = items.splice(0, BULK_MAX_SIZE)).length) {
+    while ((itemsSlice = allItems.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
         .bulk({
           refresh: 'wait_for',

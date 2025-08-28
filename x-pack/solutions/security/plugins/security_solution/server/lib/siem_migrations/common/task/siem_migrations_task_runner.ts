@@ -260,7 +260,7 @@ export class SiemMigrationTaskRunner<
               this.isWaiting = false;
             });
           }
-          this.logger.debug(`Awaiting backoff task for document "${migrationItem.id}"`);
+          this.logger.debug(`Awaiting backoff task for migration item "${migrationItem.id}"`);
           await backoffPromise.catch(() => {
             throw error; // throw the original error
           });
@@ -320,7 +320,7 @@ export class SiemMigrationTaskRunner<
 
   protected async saveItemFailed(migrationItem: Stored<I>, error: Error) {
     this.logger.error(
-      `Error translating document "${migrationItem.id}" with error: ${error.message}`
+      `Error translating migration item "${migrationItem.id}" with error: ${error.message}`
     );
     const comments = [generateAssistantComment(`Error migrating document: ${error.message}`)];
     return this.data.items.saveError({ ...migrationItem, comments });

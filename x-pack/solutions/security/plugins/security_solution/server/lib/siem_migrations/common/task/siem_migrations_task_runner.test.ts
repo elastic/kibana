@@ -195,7 +195,7 @@ describe('SiemMigrationTaskRunner', () => {
           await expect(runPromise).resolves.toBeUndefined();
 
           expect(mockLogger.error).toHaveBeenCalledWith(
-            `Error translating document \"${itemId}\" with error: ${errorMessage}`
+            `Error translating migration item \"${itemId}\" with error: ${errorMessage}`
           );
           expect(mockSiemMigrationsDataClient.items.saveError).toHaveBeenCalled();
         });
@@ -261,7 +261,7 @@ describe('SiemMigrationTaskRunner', () => {
             );
 
             expect(mockLogger.debug).toHaveBeenCalledWith(
-              `Awaiting backoff task for document "${item2Id}"`
+              `Awaiting backoff task for migration item "${item2Id}"`
             );
             expect(mockPrepareTaskInput).toHaveBeenCalledTimes(2); // 2 items
             expect(mockInvoke).toHaveBeenCalledTimes(6); // 3 retries + 3 executions

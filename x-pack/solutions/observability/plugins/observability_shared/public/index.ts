@@ -34,6 +34,7 @@ export {
 } from './components/section/section';
 export type { SectionLinkProps } from './components/section/section';
 export { LoadWhenInView } from './components/load_when_in_view/get_load_when_in_view_lazy';
+export { AddPageAttachmentToCaseModal } from './components/add_page_attachment_to_case_modal/add_page_attachment_to_case_modal_lazy';
 export { TagsList } from './components/tags_list/tags_list_lazy';
 export type { TagsListProps } from './components/tags_list/tags_list';
 

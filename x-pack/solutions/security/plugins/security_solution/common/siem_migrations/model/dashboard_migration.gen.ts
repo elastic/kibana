@@ -122,9 +122,9 @@ export const ElasticDashboard = z.object({
    */
   description: z.string().optional(),
   /**
-   * The data of the dashboard Saved Object
+   * The data of the dashboard, format could depend on the vendor
    */
-  data: z.object({}).optional(),
+  data: z.string().optional(),
 });
 
 /**

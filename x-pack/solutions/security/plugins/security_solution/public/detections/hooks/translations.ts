@@ -111,3 +111,45 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
     defaultMessage: 'Mark as closed',
   }
 );
+
+export const ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.restartSuppressionTitle',
+  {
+    defaultMessage: 'Closing alert restarts alert suppression',
+  }
+);
+
+export const ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.continueSuppressionTitle',
+  {
+    defaultMessage: "Closing alert doesn't interrupt alert suppression",
+  }
+);
+
+export const ALERT_CLOSE_INFO_MODAL_LEARN_MORE_LINK = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.learnMoreLink',
+  {
+    defaultMessage: 'Learn more',
+  }
+);
+
+export const ALERT_CLOSE_INFO_MODAL_CONFIRM_LABEL = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.confirmLabel',
+  {
+    defaultMessage: 'Continue',
+  }
+);
+
+export const ALERT_CLOSE_INFO_MODAL_CANCEL_LABEL = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.cancelLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const ALERT_CLOSE_INFO_MODAL_DO_NOT_SHOW_AGAIN_LABEL = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.doNotShowAgainLabel',
+  {
+    defaultMessage: 'Do not show this message again.',
+  }
+);

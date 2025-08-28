@@ -170,7 +170,7 @@ describe('Dashboard Migrations Dashboards client', () => {
         index: INDEX_NAME,
         query: {
           bool: {
-            filter: { term: { migration_id: sampleMigrationId } },
+            filter: [{ term: { migration_id: sampleMigrationId } }],
           },
         },
         aggregations: {
@@ -197,10 +197,9 @@ describe('Dashboard Migrations Dashboards client', () => {
 
       expect(stats).toEqual({
         id: sampleMigrationId,
-        dashboards: { pending: 3, processing: 0, completed: 0, failed: 0, total: 4 },
+        items: { pending: 3, processing: 0, completed: 0, failed: 0, total: 4 },
         created_at: 1622548800000,
         last_updated_at: 1622635200000,
-        status: 'ready',
       });
     });
 
@@ -213,7 +212,7 @@ describe('Dashboard Migrations Dashboards client', () => {
           dashboardMigrationDataDashboardsClient.getStats(sampleMigrationId)
         ).rejects.toThrow(error);
         expect(logger.error).toHaveBeenCalledWith(
-          `Error getting dashboard migration stats: ${error}`
+          `Error getting migration dashboard stats: ${error}`
         );
       });
     });

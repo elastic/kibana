@@ -74,9 +74,12 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
 
               // Create identified resource documents without content to keep track of them
               const resourceIdentifier = new RuleResourceIdentifier(firstOriginalRule.vendor);
-              const resources = resourceIdentifier
-                .fromOriginals(originalRules)
-                .map((resource) => ({ ...resource, migration_id: migrationId }));
+              const extractedResources = await resourceIdentifier.fromOriginals(originalRules);
+
+              const resources = extractedResources.map((resource) => ({
+                ...resource,
+                migration_id: migrationId,
+              }));
 
               if (resources.length > 0) {
                 await ruleMigrationsClient.data.resources.create(resources);

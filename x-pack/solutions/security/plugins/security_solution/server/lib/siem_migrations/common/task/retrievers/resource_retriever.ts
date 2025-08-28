@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ResourceIdentifierConstructor } from '../../../../../../common/siem_migrations/resources/resource_identifier';
+import type { ResourceIdentifierConstructor } from '../../../../../../common/siem_migrations/resources';
 import type { OriginalItem } from '../../../../../../common/siem_migrations/types';
 import type {
   SiemMigrationResource,
@@ -53,14 +53,14 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
     this.existingResources = existingResources;
   }
 
-  public async getResources(migrationItem: OriginalItem<I>): Promise<MigrationResources> {
+  public async getResources(originalItem: OriginalItem<I>): Promise<MigrationResources> {
     const existingResources = this.existingResources;
     if (!existingResources) {
       throw new Error('initialize must be called before calling getResources');
     }
 
-    const resourceIdentifier = new this.ResourceIdentifier(migrationItem.vendor);
-    const resourcesIdentifiedFromRule = resourceIdentifier.fromOriginal(migrationItem);
+    const resourceIdentifier = new this.ResourceIdentifier(originalItem.vendor);
+    const resourcesIdentifiedFromRule = await resourceIdentifier.fromOriginal(originalItem);
 
     const macrosFound = new Map<string, MigrationDefinedResource>();
     const lookupsFound = new Map<string, MigrationDefinedResource>();

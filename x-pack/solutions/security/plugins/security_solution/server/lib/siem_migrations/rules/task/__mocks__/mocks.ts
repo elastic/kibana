@@ -22,7 +22,7 @@ export const createSiemMigrationTelemetryClientMock = () => {
 
   // Mock for startSiemMigrationTask return value
   const mockStartSiemMigrationTaskReturn = {
-    startRuleTranslation: mockStartRuleTranslation,
+    startItemTranslation: mockStartRuleTranslation,
     success: jest.fn(),
     failure: jest.fn(),
     aborted: jest.fn(),

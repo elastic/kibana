@@ -11,7 +11,6 @@
  * Please make sure to test all regular expressions them before using them.
  * At the time of writing, this tool can be used to test it: https://devina.io/redos-checker
  */
-// TODO: move resource related types to migration.gen.ts
 import type { SiemMigrationResourceBase } from '../../model/common.gen';
 import type { VendorResourceIdentifier } from '../types';
 

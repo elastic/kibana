@@ -6,4 +6,4 @@
  */
 
 import { MockSiemMigrationsDataResourcesClient } from './mocks';
-export const RuleMigrationsDataResourcesClient = MockSiemMigrationsDataResourcesClient;
+export const SiemMigrationsDataResourcesClient = MockSiemMigrationsDataResourcesClient;
