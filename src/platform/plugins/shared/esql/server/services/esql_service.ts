@@ -8,7 +8,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { IndicesAutocompleteResult, IndexAutocompleteItem } from '@kbn/esql-types';
+import type {
+  IndicesAutocompleteResult,
+  IndexAutocompleteItem,
+  ResolveIndexResponse,
+} from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 
@@ -51,34 +55,27 @@ export class EsqlService {
   ): Promise<IndicesAutocompleteResult> {
     const { client } = this.options;
 
-    // Execute: GET /_all/_settings/index.mode,index.hidden,aliases?flat_settings=true
-    interface IndexModeResponse {
-      [indexName: string]: {
-        settings: {
-          'index.mode': string;
-          'index.hidden': boolean;
-        };
-      };
-    }
-    const queryByIndexModeResponse = (await client.indices.getSettings({
-      name: ['index.hidden', 'index.mode'],
-      flat_settings: true,
-    })) as IndexModeResponse;
-
     const indices: IndexAutocompleteItem[] = [];
     const indexNames: string[] = [];
 
-    for (const [name, { settings }] of Object.entries(queryByIndexModeResponse)) {
-      if (settings['index.mode'] === mode && !settings['index.hidden']) {
-        indexNames.push(name);
-        indices.push({ name, mode, aliases: [] });
+    // It doesn't return hidden indices
+    const sources = (await client.indices.resolveIndex({
+      name: '*',
+      expand_wildcards: 'open',
+    })) as ResolveIndexResponse;
+
+    sources.indices?.forEach((index) => {
+      if (index.mode === mode) {
+        indices.push({ name: index.name, mode, aliases: [] });
+        indexNames.push(index.name);
       }
-    }
+    });
 
-    const aliases = await this.getIndexAliases(indexNames);
-
-    for (const index of indices) {
-      index.aliases = aliases[index.name] ?? [];
+    if (indexNames.length) {
+      const aliases = await this.getIndexAliases(indexNames);
+      for (const index of indices) {
+        index.aliases = aliases[index.name] ?? [];
+      }
     }
 
     const result: IndicesAutocompleteResult = {

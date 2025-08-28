@@ -25,6 +25,7 @@ export interface RecommendedField {
 
 interface ResolveIndexResponseItem {
   name: string;
+  mode?: 'lookup' | 'time_series' | string;
 }
 
 export interface ResolveIndexResponse {
