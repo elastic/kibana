@@ -36,7 +36,7 @@ export function ruleFilter(rule: RenovatePackageRule) {
     // Only include rules that have a team reviewer
     rule.reviewers?.some((reviewer) => reviewer.startsWith('team:')) &&
     // Only include rules that use the default manager, or specify npm
-    (!rule.matchManagers || rule.matchManagers.includes('npm')) &&
+    (!rule.matchManagers || !rule.matchManagers.length || rule.matchManagers.includes('npm')) &&
     // Exclude rules that use custom managers
     !rulesWithCustomManagers.includes(rule.groupName)
   );
