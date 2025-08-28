@@ -37,13 +37,13 @@ export interface ContentFrameworkSectionProps {
   children: React.ReactNode;
 }
 
-export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = ({
+export function ContentFrameworkSection({
   id,
   title,
   description,
   actions,
   children,
-}) => {
+}: ContentFrameworkSectionProps) {
   const renderActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       {actions?.map((action, idx) => {
@@ -110,4 +110,4 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
       </>
     </EuiAccordion>
   );
-};
+}
