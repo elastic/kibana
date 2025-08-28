@@ -27807,7 +27807,7 @@
                                 ],
                                 "type": "string"
                               },
-                              "write_to_streams": {
+                              "write_to_logs_streams": {
                                 "type": "boolean"
                               }
                             },
@@ -28042,7 +28042,7 @@
                                 ],
                                 "type": "string"
                               },
-                              "write_to_streams": {
+                              "write_to_logs_streams": {
                                 "type": "boolean"
                               }
                             },
@@ -28978,7 +28978,7 @@
                         ],
                         "type": "string"
                       },
-                      "write_to_streams": {
+                      "write_to_logs_streams": {
                         "type": "boolean"
                       }
                     },
@@ -29213,7 +29213,7 @@
                         ],
                         "type": "string"
                       },
-                      "write_to_streams": {
+                      "write_to_logs_streams": {
                         "type": "boolean"
                       }
                     },
@@ -30082,7 +30082,7 @@
                               ],
                               "type": "string"
                             },
-                            "write_to_streams": {
+                            "write_to_logs_streams": {
                               "type": "boolean"
                             }
                           },
@@ -30317,7 +30317,7 @@
                               ],
                               "type": "string"
                             },
-                            "write_to_streams": {
+                            "write_to_logs_streams": {
                               "type": "boolean"
                             }
                           },
@@ -31351,7 +31351,7 @@
                               ],
                               "type": "string"
                             },
-                            "write_to_streams": {
+                            "write_to_logs_streams": {
                               "type": "boolean"
                             }
                           },
@@ -31586,7 +31586,7 @@
                               ],
                               "type": "string"
                             },
-                            "write_to_streams": {
+                            "write_to_logs_streams": {
                               "type": "boolean"
                             }
                           },
@@ -32514,7 +32514,7 @@
                         ],
                         "type": "string"
                       },
-                      "write_to_streams": {
+                      "write_to_logs_streams": {
                         "type": "boolean"
                       }
                     },
@@ -32742,7 +32742,7 @@
                         ],
                         "type": "string"
                       },
-                      "write_to_streams": {
+                      "write_to_logs_streams": {
                         "type": "boolean"
                       }
                     },
@@ -33596,7 +33596,7 @@
                               ],
                               "type": "string"
                             },
-                            "write_to_streams": {
+                            "write_to_logs_streams": {
                               "type": "boolean"
                             }
                           },
@@ -33831,7 +33831,7 @@
                               ],
                               "type": "string"
                             },
-                            "write_to_streams": {
+                            "write_to_logs_streams": {
                               "type": "boolean"
                             }
                           },
