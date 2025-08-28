@@ -201,6 +201,7 @@ const AlertsTableContent = typedForwardRef(
       lastReloadRequestTime,
       configurationStorage = new Storage(window.localStorage),
       services,
+      caseData,
       ...publicDataGridProps
     }: AlertsTableProps<AC>,
     ref: Ref<AlertsTableImperativeApi>
@@ -585,6 +586,7 @@ const AlertsTableContent = typedForwardRef(
         setFlyoutAlertIndex,
         sort,
         onSortChange,
+        caseData,
       }),
       [
         publicDataGridProps,

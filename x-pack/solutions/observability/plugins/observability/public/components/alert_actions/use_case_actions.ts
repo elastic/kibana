@@ -38,7 +38,10 @@ export const useCaseActions = ({
   }, [onAddToCase]);
 
   const handleRemoveAlertsFromCaseClick = () => {
-    removeAlertModal?.open();
+    removeAlertModal?.open({
+      alertId: alerts.map((alert) => alert._id),
+      caseId: caseId as string,
+    });
   };
 
   const onAddToNewCase = useCallback(() => {
@@ -51,8 +54,6 @@ export const useCaseActions = ({
 
   const removeAlertModal = caseId
     ? cases?.hooks.useRemoveAlertFromCaseModal({
-        caseId,
-        alertId: alerts.map((alert) => alert._id),
         onSuccess: onRemoveAlertFromCase,
         onClose: () => {
           closeActionsPopover();

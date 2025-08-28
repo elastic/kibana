@@ -7,7 +7,7 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { AlertAttachment, CaseCustomField, User, Attachment } from '../../common/types/domain';
+import type { CaseCustomField, User, Attachment } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -44,6 +44,7 @@ import type {
   CasesSimilarResponseUI,
   InternalFindCaseUserActions,
   InferenceConnectors,
+  AlertAttachmentUI,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -459,32 +460,109 @@ export const patchComment = async ({
 
 export const removeAlertFromComment = async ({
   caseId,
-  alertId: alertIdToRemove,
-  alertAttachment,
+  alertIds: alertIdsToRemove,
+  caseAttachments,
   signal,
 }: {
   caseId: string;
-  alertId: string;
-  alertAttachment: AlertAttachment;
+  alertIds: string[];
+  caseAttachments: AlertAttachmentUI[];
   signal?: AbortSignal;
 }): Promise<Attachment | void> => {
-  const { alertId, index, rule, version, id, owner } = alertAttachment;
-  if (Array.isArray(alertId) && Array.isArray(index) && alertId.length > 1) {
-    const alertIdx = alertId.indexOf(alertIdToRemove);
-    const newAlertId = [...alertId.slice(0, alertIdx), ...alertId.slice(alertIdx + 1)];
-    const newIndex = [...index.slice(0, alertIdx), ...index.slice(alertIdx + 1)];
-    return patchComment({
-      caseId,
-      commentId: id,
-      version,
-      patch: { type: AttachmentType.alert, alertId: newAlertId, index: newIndex, rule, owner },
-      signal,
+  if (alertIdsToRemove.length === 1) {
+    let alertIdxs: number[] = [];
+    const alertAttachment = caseAttachments.find((attachment) => {
+      const idx = attachment.alertId.indexOf(alertIdsToRemove.toString());
+      if (idx > -1) {
+        alertIdxs = [idx];
+        return attachment;
+      }
     });
+
+    if (!alertAttachment) {
+      throw new Error(`Alert with id ${alertIdsToRemove} not found in case ${caseId}`);
+    }
+
+    const { alertId, index, id, version, rule, owner } = alertAttachment;
+
+    if (Array.isArray(alertId) && alertId.length > 1 && Array.isArray(index)) {
+      const newAlertId = alertId.filter((_, i) => !alertIdxs?.includes(i));
+      const newIndex = index.filter((_, i) => !alertIdxs?.includes(i));
+
+      return patchComment({
+        caseId,
+        commentId: id,
+        version,
+        patch: { type: AttachmentType.alert, alertId: newAlertId, index: newIndex, rule, owner },
+        signal,
+      });
+    } else {
+      return deleteComment({
+        caseId,
+        commentId: alertAttachment.id,
+        signal,
+      });
+    }
   } else {
-    return deleteComment({
-      caseId,
-      commentId: alertAttachment.id,
-      signal,
+    const attachmentMap = new Map<string, AlertAttachmentUI & { alertIdxs: number[] }>();
+
+    alertIdsToRemove.forEach((alertIdToRemove) => {
+      let alertIdxs: number[] = [];
+      const alertAttachment = caseAttachments.find((attachment) => {
+        const idx = attachment.alertId.indexOf(alertIdToRemove.toString());
+        if (idx > -1) {
+          alertIdxs = [idx];
+          return attachment;
+        }
+      });
+
+      if (!alertAttachment) {
+        throw new Error(`Alert with id ${alertIdsToRemove} not found in case ${caseId}`);
+      }
+
+      if (attachmentMap.has(alertAttachment.id)) {
+        const existing = attachmentMap.get(alertAttachment.id);
+        if (existing != null && alertIdxs != null) {
+          existing.alertIdxs.push(...alertIdxs);
+          attachmentMap.set(alertAttachment.id, existing);
+        }
+      } else {
+        attachmentMap.set(alertAttachment.id, {
+          ...alertAttachment,
+          alertIdxs: alertIdxs ?? [],
+        });
+      }
+    });
+
+    attachmentMap.forEach((alertAttachment) => {
+      const { alertId, index, id, version, rule, owner } = alertAttachment;
+
+      if (Array.isArray(alertId) && alertId.length > 1 && Array.isArray(index)) {
+        const newAlertId = alertId.filter((_, i) => !alertAttachment.alertIdxs?.includes(i));
+        const newIndex = index.filter((_, i) => !alertAttachment?.alertIdxs?.includes(i));
+
+        if (newAlertId.length > 0 && newIndex.length > 0) {
+          return patchComment({
+            caseId,
+            commentId: id,
+            version,
+            patch: {
+              type: AttachmentType.alert,
+              alertId: newAlertId,
+              index: newIndex,
+              rule,
+              owner,
+            },
+            signal,
+          });
+        } else {
+          return deleteComment({
+            caseId,
+            commentId: alertAttachment.id,
+            signal,
+          });
+        }
+      }
     });
   }
 };

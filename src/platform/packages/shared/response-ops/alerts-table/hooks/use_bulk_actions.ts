@@ -30,6 +30,7 @@ import {
   ALERTS_ALREADY_ATTACHED_TO_CASE,
   MARK_AS_UNTRACKED,
   NO_ALERTS_ADDED_TO_CASE,
+  REMOVE_FROM_CASE,
 } from '../translations';
 import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
 import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
@@ -46,6 +47,7 @@ interface BulkActionsProps {
   casesService?: CasesService;
   http: HttpStart;
   notifications: NotificationsStart;
+  caseId?: string;
 }
 
 export interface UseBulkActions {
@@ -62,6 +64,14 @@ type UseBulkAddToCaseActionsProps = Pick<
   'casesConfig' | 'refresh' | 'casesService' | 'http' | 'notifications'
 > &
   Pick<UseBulkActions, 'clearSelection'>;
+
+type UseBulkRemoveFromCaseActionsProps = Pick<
+  BulkActionsProps,
+  'casesConfig' | 'refresh' | 'casesService' | 'http' | 'notifications'
+> &
+  Pick<UseBulkActions, 'clearSelection'> & {
+    caseId: string;
+  };
 
 type UseBulkUntrackActionsProps = Pick<
   BulkActionsProps,
@@ -283,6 +293,60 @@ export const useBulkUntrackActions = ({
   ]);
 };
 
+export const useBulkRemoveFromCaseActions = ({
+  casesService,
+  casesConfig,
+  refresh,
+  clearSelection,
+  caseId,
+}: UseBulkRemoveFromCaseActionsProps): BulkActionsConfig[] => {
+  const userCasesPermissions = useMemo(() => {
+    return casesService?.helpers.canUseCases(casesConfig?.owner ?? []);
+  }, [casesConfig?.owner, casesService]);
+  const CasesContext = useMemo(() => casesService?.ui.getCasesContext(), [casesService]);
+  const isCasesContextAvailable = Boolean(casesService && CasesContext);
+
+  const onSuccess = useCallback(() => {
+    refresh();
+    clearSelection();
+  }, [clearSelection, refresh]);
+
+  const removeAlertModal = casesService?.hooks.useRemoveAlertFromCaseModal({
+    onSuccess,
+  });
+
+  return useMemo(() => {
+    return isCasesContextAvailable &&
+      removeAlertModal &&
+      userCasesPermissions?.create &&
+      userCasesPermissions?.read
+      ? [
+          {
+            label: REMOVE_FROM_CASE,
+            key: 'remove-from-case',
+            'data-test-subj': 'remove-from-case',
+            disableOnQuery: true,
+            disabledLabel: REMOVE_FROM_CASE,
+            onClick: (alerts?: TimelineItem[]) => {
+              if (alerts) {
+                removeAlertModal.open({
+                  alertId: alerts.map((alert) => alert._id),
+                  caseId,
+                });
+              }
+            },
+          },
+        ]
+      : [];
+  }, [
+    casesService?.helpers,
+    removeAlertModal,
+    isCasesContextAvailable,
+    userCasesPermissions?.create,
+    userCasesPermissions?.read,
+  ]);
+};
+
 const EMPTY_BULK_ACTIONS_CONFIG: BulkActionsPanelConfig[] = [];
 
 export function useBulkActions({
@@ -297,6 +361,7 @@ export function useBulkActions({
   notifications,
   application,
   casesService,
+  caseId,
 }: BulkActionsProps): UseBulkActions {
   const {
     bulkActionsStore: [bulkActionsState, updateBulkActionsState],
@@ -331,9 +396,27 @@ export function useBulkActions({
     notifications,
   });
 
+  const removeBulkActions = caseId
+    ? useBulkRemoveFromCaseActions({
+        casesService,
+        casesConfig,
+        refresh,
+        clearSelection,
+        http,
+        notifications,
+        caseId,
+      })
+    : [];
+
+  console.log(caseId);
+
   const initialItems = useMemo(() => {
-    return [...caseBulkActions, ...(ruleTypeIds?.some(isSiemRuleType) ? [] : untrackBulkActions)];
-  }, [caseBulkActions, ruleTypeIds, untrackBulkActions]);
+    return [
+      ...caseBulkActions,
+      ...removeBulkActions,
+      ...(ruleTypeIds?.some(isSiemRuleType) ? [] : untrackBulkActions),
+    ];
+  }, [caseBulkActions, ruleTypeIds, untrackBulkActions, removeBulkActions]);
 
   const bulkActions = useMemo(() => {
     if (hideBulkActions) {

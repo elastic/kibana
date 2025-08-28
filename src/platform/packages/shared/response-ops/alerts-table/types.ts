@@ -93,20 +93,16 @@ type UseCasesAddToExistingCaseModal = (
 };
 
 type UseRemoveAlertFromCaseModal = ({
-  alertId,
-  caseId,
   onClose,
   onSuccess,
 }: {
-  alertId: string[];
-  caseId: string;
-  onClose: () => void;
+  onClose?: () => void;
   onSuccess: () => void;
 }) => {
-  open: () => void;
+  open: ({ alertId, caseId }: { alertId: string[]; caseId: string }) => void;
   close: () => void;
   onSuccess: () => void;
-  onClose: () => void;
+  onClose?: () => void;
 };
 
 export interface Ecs {
@@ -331,6 +327,10 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
      */
     cases?: CasesService;
   };
+  /**
+   * Strictly for leveraging the caseId for removing alerts from cases
+   */
+  caseData: Object & { id: string };
 }
 
 /**
@@ -524,6 +524,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   onPaginateFlyout: (nextPageIndex: number) => void;
   onChangePageSize: (size: number) => void;
   onChangePageIndex: (index: number) => void;
+  caseData?: Object & { id: string };
 }
 
 export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> =

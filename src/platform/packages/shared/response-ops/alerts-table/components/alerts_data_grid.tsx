@@ -82,6 +82,7 @@ export const AlertsDataGrid = typedMemo(
       cellActionsOptions,
       pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
       height,
+      caseData,
       ...euiDataGridProps
     } = props;
     const {
@@ -119,6 +120,7 @@ export const AlertsDataGrid = typedMemo(
       notifications,
       application,
       casesService,
+      caseId: caseData?.id,
     });
 
     const refresh = useCallback(() => {
