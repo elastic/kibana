@@ -11,8 +11,6 @@ import type { AgentlessPolicy, GlobalDataTag } from '../../../common/types';
 import { getSettings } from '../../services/form_settings';
 
 import { AgentPolicyBaseSchema, FullAgentPolicyResponseSchema } from './agent_policy';
-import { getInnerType } from '../../services/form_settings/form_settings';
-import { logs } from '@elastic/opentelemetry-node/sdk';
 
 describe('AgentPolicyBaseSchema', () => {
   describe('global_data_tags validations', () => {
