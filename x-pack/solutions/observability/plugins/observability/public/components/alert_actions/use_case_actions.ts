@@ -5,34 +5,67 @@
  * 2.0.
  */
 
-import { CaseAttachmentsWithoutOwner, CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useCallback, useState } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { Alert } from '@kbn/alerting-types';
+import type { CasesService } from '@kbn/response-ops-alerts-table/types';
 import type { EventNonEcsData } from '../../../common/typings';
-import { useKibana } from '../../utils/kibana_react';
 
-export const useCaseActions = ({ alerts, refresh }: { alerts: Alert[]; refresh?: () => void }) => {
-  const services = useKibana().services;
+export const useCaseActions = ({
+  alerts,
+  onAddToCase,
+  onRemoveAlertFromCase,
+  services,
+  caseId,
+}: {
+  alerts: Alert[];
+  onAddToCase?: ({ isNewCase }: { isNewCase: boolean }) => void;
+  onRemoveAlertFromCase: () => void;
+  services: {
+    /**
+     * The cases service is optional: cases features will be disabled if not provided
+     */
+    cases?: CasesService;
+  };
+  caseId?: string;
+}) => {
+  const { cases } = services;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const {
-    helpers: { getRuleIdFromEvent },
-    hooks: { useCasesAddToNewCaseFlyout, useCasesAddToExistingCaseModal },
-  } = services.cases! as unknown as CasesPublicStart; // Cases is guaranteed to be defined in Observability
+  const onAddToExistingCase = useCallback(() => {
+    onAddToCase?.({ isNewCase: false });
+  }, [onAddToCase]);
 
-  const onSuccess = useCallback(() => {
-    refresh?.();
-  }, [refresh]);
+  const handleRemoveAlertsFromCaseClick = () => {
+    removeAlertModal?.open();
+  };
 
-  const selectCaseModal = useCasesAddToExistingCaseModal({ onSuccess });
+  const onAddToNewCase = useCallback(() => {
+    onAddToCase?.({ isNewCase: true });
+  }, [onAddToCase]);
+
+  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
+    onSuccess: onAddToExistingCase,
+  });
+
+  const removeAlertModal = caseId
+    ? cases?.hooks.useRemoveAlertFromCaseModal({
+        caseId,
+        alertId: alerts.map((alert) => alert._id),
+        onSuccess: onRemoveAlertFromCase,
+        onClose: () => {
+          closeActionsPopover();
+        },
+      })
+    : undefined;
 
   function getCaseAttachments(): CaseAttachmentsWithoutOwner {
     return alerts.map((alert) => ({
       alertId: alert?._id ?? '',
       index: alert?._index ?? '',
       type: AttachmentType.alert,
-      rule: getRuleIdFromEvent({
+      rule: cases?.helpers.getRuleIdFromEvent({
         ecs: {
           _id: alert?._id ?? '',
           _index: alert?._index ?? '',
@@ -42,21 +75,21 @@ export const useCaseActions = ({ alerts, refresh }: { alerts: Alert[]; refresh?:
             (acc, [field, value]) => [...acc, { field, value: value as string[] }],
             []
           ) ?? [],
-      }),
+      }) ?? { id: '', name: '' },
     }));
   }
-  const createCaseFlyout = useCasesAddToNewCaseFlyout({ onSuccess });
+  const createCaseFlyout = cases?.hooks.useCasesAddToNewCaseFlyout({ onSuccess: onAddToNewCase });
   const closeActionsPopover = () => {
     setIsPopoverOpen(false);
   };
 
   const handleAddToNewCaseClick = () => {
-    createCaseFlyout.open({ attachments: getCaseAttachments() });
+    createCaseFlyout?.open({ attachments: getCaseAttachments() });
     closeActionsPopover();
   };
 
   const handleAddToExistingCaseClick = () => {
-    selectCaseModal.open({ getAttachments: () => getCaseAttachments() });
+    selectCaseModal?.open({ getAttachments: () => getCaseAttachments() });
     closeActionsPopover();
   };
 
@@ -65,5 +98,6 @@ export const useCaseActions = ({ alerts, refresh }: { alerts: Alert[]; refresh?:
     setIsPopoverOpen,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
+    handleRemoveAlertsFromCaseClick,
   };
 };

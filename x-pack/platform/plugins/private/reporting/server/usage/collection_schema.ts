@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { ReportingUsageType } from './reporting_usage_collector';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { ReportingUsageType } from './reporting_usage_collector';
 
 /*
  * NOTE: Schema must live in standalone file for the `telemetry_check` parser.

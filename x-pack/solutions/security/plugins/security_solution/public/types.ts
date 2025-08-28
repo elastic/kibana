@@ -44,7 +44,6 @@ import type {
   SavedObjectsTaggingApi,
   SavedObjectTaggingOssPluginStart,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -70,6 +69,7 @@ import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
 import type { Onboarding } from './onboarding';
 import type { Overview } from './overview';
+import type { Reports } from './reports';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
@@ -124,7 +124,6 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
@@ -235,6 +234,7 @@ export interface SubPlugins {
   management: Management;
   onboarding: Onboarding;
   overview: Overview;
+  reports: Reports;
   rules: Rules;
   threatIntelligence: ThreatIntelligence;
   timelines: Timelines;
@@ -256,6 +256,7 @@ export interface StartedSubPlugins {
   management: ReturnType<Management['start']>;
   onboarding: ReturnType<Onboarding['start']>;
   overview: ReturnType<Overview['start']>;
+  reports: ReturnType<Reports['start']>;
   rules: ReturnType<Rules['start']>;
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
   timelines: ReturnType<Timelines['start']>;

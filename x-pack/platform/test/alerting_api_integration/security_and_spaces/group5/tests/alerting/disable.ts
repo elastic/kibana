@@ -19,7 +19,6 @@ import {
   getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function createDisableAlertTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');

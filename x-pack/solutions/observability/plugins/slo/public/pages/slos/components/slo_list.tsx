@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useIsMutating } from '@tanstack/react-query';
 import dedent from 'dedent';
 import { groupBy as _groupBy, mapValues } from 'lodash';
@@ -82,6 +82,13 @@ export function SloList() {
   usePageReady({
     isReady: !isLoading && sloList !== undefined,
     isRefreshing: isLoading,
+    customMetrics: {
+      key1: 'slo_list_count',
+      value1: sloList?.total ?? 0,
+    },
+    meta: {
+      description: '[ttfmp_slos] The SLOs list has finished loading.',
+    },
   });
 
   return (

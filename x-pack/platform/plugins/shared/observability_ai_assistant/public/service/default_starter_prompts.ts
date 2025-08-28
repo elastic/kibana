@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { StarterPrompt } from '../../common/types';
+import type { StarterPrompt } from '../../common/types';
 
 export const defaultStarterPrompts: StarterPrompt[] = [
   {

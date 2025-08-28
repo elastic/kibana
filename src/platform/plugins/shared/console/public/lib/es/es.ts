@@ -30,6 +30,7 @@ interface SendConfig {
   asSystemRequest?: boolean;
   withProductOrigin?: boolean;
   asResponse?: boolean;
+  host?: string;
 }
 
 type Method = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'head';
@@ -42,6 +43,7 @@ export async function send({
   asSystemRequest = false,
   withProductOrigin = false,
   asResponse = false,
+  host,
 }: SendConfig) {
   const kibanaRequestUrl = getKibanaRequestUrl(path);
 
@@ -61,7 +63,7 @@ export async function send({
   }
 
   return await http.post<HttpResponse>(`${API_BASE_PATH}/proxy`, {
-    query: { path, method, ...(withProductOrigin && { withProductOrigin }) },
+    query: { path, method, ...(withProductOrigin && { withProductOrigin }), ...(host && { host }) },
     body: data,
     asResponse,
     asSystemRequest,

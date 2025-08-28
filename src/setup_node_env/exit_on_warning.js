@@ -89,6 +89,12 @@ var IGNORE_WARNINGS = [
     code: 'DEP0060',
     message: 'The `util._extend` API is deprecated. Please use Object.assign() instead.',
   },
+  // EBT is currently referencing a non-existing entry file https://github.com/elastic/ebt/blob/main/package.json#L7
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0128',
+    messageContains: '@elastic/ebt/package.json',
+  },
 ];
 
 if (process.noProcessWarnings !== true) {

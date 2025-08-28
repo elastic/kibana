@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiImage, EuiImageProps, useEuiTheme } from '@elastic/eui';
+import type { EuiImageProps } from '@elastic/eui';
+import { EuiImage, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
@@ -23,6 +24,13 @@ const imageSets = {
     dark: () => import('./no_results_dark.png'),
     alt: i18n.translate('xpack.streams.streamDetailView.noResultsImage', {
       defaultMessage: 'No results image for the streams app',
+    }),
+  },
+  significantEventsEmptyState: {
+    light: () => import('./sig_events_empty_state_light.png'),
+    dark: () => import('./sig_events_empty_state_dark.png'),
+    alt: i18n.translate('xpack.streams.significantEvents.emptyStateImage', {
+      defaultMessage: 'Empty state illustration for the Significant events view',
     }),
   },
   addStreams: {
@@ -62,6 +70,13 @@ const imageSets = {
         defaultMessage: 'Processors cannot be added to root streams image for the streams app',
       }
     ),
+  },
+  extractFields: {
+    light: () => import('./extract_fields_light.png'),
+    dark: () => import('./extract_fields_dark.png'),
+    alt: i18n.translate('xpack.streams.streamDetailView.extractFieldsImage', {
+      defaultMessage: 'Extract fields image for the streams app',
+    }),
   },
 };
 

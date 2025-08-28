@@ -12,7 +12,8 @@ import {
   isIlmLifecycle,
   isInheritLifecycle,
 } from '@kbn/streams-schema';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { useBoolean } from '@kbn/react-hooks';
 import {
   EuiBadge,
@@ -24,7 +25,6 @@ import {
   EuiHorizontalRule,
   EuiIconTip,
   EuiLink,
-  EuiLoadingSpinner,
   EuiPopover,
   EuiText,
   EuiToolTip,
@@ -34,10 +34,10 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { css } from '@emotion/react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { LifecycleEditAction } from './modal';
+import type { LifecycleEditAction } from './modal';
 import { IlmLink } from './ilm_link';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { DataStreamStats } from './hooks/use_data_stream_stats';
+import type { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatIngestionRate } from './helpers/format_bytes';
 import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
 
@@ -46,14 +46,12 @@ export function RetentionMetadata({
   lifecycleActions,
   openEditModal,
   stats,
-  isLoadingStats,
   statsError,
 }: {
   definition: Streams.ingest.all.GetResponse;
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
   stats?: DataStreamStats;
-  isLoadingStats: boolean;
   statsError?: Error;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -203,13 +201,7 @@ export function RetentionMetadata({
             hasPrivileges={definition.privileges.monitor}
             title="lastUpdated"
           >
-            {statsError ? (
-              '-'
-            ) : isLoadingStats || !stats ? (
-              <EuiLoadingSpinner size="s" />
-            ) : (
-              dateFormatter.convert(stats.lastActivity)
-            )}
+            {statsError || !stats?.lastActivity ? '-' : dateFormatter.convert(stats.lastActivity)}
           </PrivilegesWarningIconWrapper>
         }
       />
@@ -227,15 +219,7 @@ export function RetentionMetadata({
             hasPrivileges={definition.privileges.monitor}
             title="ingestionRate"
           >
-            {statsError ? (
-              '-'
-            ) : isLoadingStats || !stats ? (
-              <EuiLoadingSpinner size="s" />
-            ) : stats.bytesPerDay ? (
-              formatIngestionRate(stats.bytesPerDay)
-            ) : (
-              '-'
-            )}
+            {statsError ? '-' : stats?.bytesPerDay ? formatIngestionRate(stats.bytesPerDay) : '-'}
           </PrivilegesWarningIconWrapper>
         }
       />

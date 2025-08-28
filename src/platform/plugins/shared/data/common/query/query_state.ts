@@ -8,7 +8,8 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { TimeRange, RefreshInterval } from './timefilter/types';
+import type { RefreshInterval } from '@kbn/data-service-server';
+import type { TimeRange } from './timefilter/types';
 import type { Query, AggregateQuery } from './types';
 
 /**

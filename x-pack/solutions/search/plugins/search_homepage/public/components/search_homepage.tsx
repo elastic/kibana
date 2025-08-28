@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiPageTemplate } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import { EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../hooks/use_kibana';
 import { useSearchHomePageRedirect } from '../hooks/use_search_home_page_redirect';
 import { SearchHomepageBody } from './search_homepage_body';
@@ -14,10 +15,14 @@ import { SearchHomepageHeader } from './search_homepage_header';
 
 export const SearchHomepagePage = () => {
   const {
-    services: { console: consolePlugin },
+    services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
-
-  useSearchHomePageRedirect();
+  useEffect(() => {
+    if (searchNavigation) {
+      searchNavigation.breadcrumbs.setSearchBreadCrumbs([]);
+    }
+  }, [searchNavigation]);
+  const { isLoading } = useSearchHomePageRedirect();
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -25,11 +30,23 @@ export const SearchHomepagePage = () => {
   );
 
   return (
-    <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="search-homepage" grow={false}>
-      <SearchHomepageHeader />
-      <EuiHorizontalRule margin="none" />
-      <SearchHomepageBody />
-      {embeddableConsole}
-    </EuiPageTemplate>
+    <KibanaPageTemplate
+      offset={0}
+      restrictWidth={false}
+      data-test-subj="search-homepage"
+      grow={false}
+      solutionNav={searchNavigation?.useClassicNavigation(history)}
+    >
+      {isLoading ? (
+        <KibanaPageTemplate.EmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />
+      ) : (
+        <>
+          <SearchHomepageHeader />
+          <EuiHorizontalRule margin="none" />
+          <SearchHomepageBody />
+          {embeddableConsole}
+        </>
+      )}
+    </KibanaPageTemplate>
   );
 };

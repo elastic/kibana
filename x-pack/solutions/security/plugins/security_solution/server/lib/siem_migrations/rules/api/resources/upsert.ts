@@ -14,13 +14,13 @@ import {
   UpsertRuleMigrationResourcesRequestParams,
   type UpsertRuleMigrationResourcesResponse,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
+import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { CreateRuleMigrationResourceInput } from '../../data/rule_migrations_data_resources_client';
-import { SiemMigrationAuditLogger } from '../util/audit';
-import { authz } from '../util/authz';
+import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
+import { authz } from '../../../common/utils/authz';
 import { processLookups } from '../util/lookups';
-import { withLicense } from '../util/with_license';
+import { withLicense } from '../../../common/utils/with_license';
 
 export const registerSiemRuleMigrationsResourceUpsertRoute = (
   router: SecuritySolutionPluginRouter,
@@ -51,10 +51,13 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
         ): Promise<IKibanaResponse<UpsertRuleMigrationResourcesResponse>> => {
           const resources = req.body;
           const migrationId = req.params.migration_id;
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'rules'
+          );
           try {
             const ctx = await context.resolve(['securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
 
             await siemMigrationAuditLogger.logUploadResources({ migrationId });
 
@@ -76,7 +79,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             await ruleMigrationsClient.data.resources.upsert(resourcesUpsert);
 
             // Create identified resource documents to keep track of them (without content)
-            const resourceIdentifier = new ResourceIdentifier(rule.original_rule.vendor);
+            const resourceIdentifier = new RuleResourceIdentifier(rule.original_rule.vendor);
             const resourcesToCreate = resourceIdentifier
               .fromResources(resources)
               .map<CreateRuleMigrationResourceInput>((resource) => ({
@@ -89,7 +92,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
           } catch (error) {
             logger.error(error);
             await siemMigrationAuditLogger.logUploadResources({ migrationId, error });
-            return res.badRequest({ body: error.message });
+            return res.customError({ statusCode: 500, body: error.message });
           }
         }
       )

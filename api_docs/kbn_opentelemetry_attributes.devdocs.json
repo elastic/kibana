@@ -1,0 +1,163 @@
+{
+  "id": "@kbn/opentelemetry-attributes",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/opentelemetry-attributes",
+        "id": "def-common.ATTR_SERVICE_INSTANCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ATTR_SERVICE_INSTANCE_ID",
+        "description": [],
+        "signature": [
+          "\"service.instance.id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/resource_attributes/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/opentelemetry-attributes",
+        "id": "def-common.ATTR_SERVICE_NAMESPACE",
+        "type": "string",
+        "tags": [],
+        "label": "ATTR_SERVICE_NAMESPACE",
+        "description": [],
+        "signature": [
+          "\"service.namespace\""
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/resource_attributes/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/opentelemetry-attributes",
+        "id": "def-common.ATTR_SPAN_DESTINATION_SERVICE_RESOURCE",
+        "type": "string",
+        "tags": [],
+        "label": "ATTR_SPAN_DESTINATION_SERVICE_RESOURCE",
+        "description": [],
+        "signature": [
+          "\"span.destination.service.resource\""
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/attributes/tracing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/opentelemetry-attributes",
+        "id": "def-common.ATTR_SPAN_SUBTYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ATTR_SPAN_SUBTYPE",
+        "description": [],
+        "signature": [
+          "\"span.subtype\""
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/attributes/tracing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/opentelemetry-attributes",
+        "id": "def-common.ATTR_SPAN_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ATTR_SPAN_TYPE",
+        "description": [],
+        "signature": [
+          "\"span.type\""
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/attributes/tracing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/opentelemetry-attributes",
+        "id": "def-common.ATTR_TRANSACTION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ATTR_TRANSACTION_NAME",
+        "description": [],
+        "signature": [
+          "\"transaction.name\""
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/attributes/tracing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/opentelemetry-attributes",
+        "id": "def-common.ATTR_TRANSACTION_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ATTR_TRANSACTION_TYPE",
+        "description": [],
+        "signature": [
+          "\"transaction.type\""
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/attributes/tracing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/opentelemetry-attributes",
+        "id": "def-common.METRIC_SPAN_SELF_TIME_COUNT",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_SPAN_SELF_TIME_COUNT",
+        "description": [],
+        "signature": [
+          "\"span.self_time.count\""
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/metrics/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/opentelemetry-attributes",
+        "id": "def-common.METRIC_SPAN_SELF_TIME_SUM_US",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_SPAN_SELF_TIME_SUM_US",
+        "description": [],
+        "signature": [
+          "\"span.self_time.sum.us\""
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/metrics/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

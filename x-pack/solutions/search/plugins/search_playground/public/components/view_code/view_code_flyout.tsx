@@ -16,13 +16,15 @@ import {
   EuiSelect,
   EuiText,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { PlaygroundForm, PlaygroundPageMode } from '../../types';
+import type { PlaygroundForm } from '../../types';
+import { PlaygroundPageMode } from '../../types';
 import { useKibana } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../../common/routes';
 import { LangchainPythonExmaple } from './examples/py_langchain_python';
@@ -44,6 +46,8 @@ es_client = Elasticsearch(
 };
 
 export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selectedPageMode }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+
   const usageTracker = useUsageTracker();
   const [selectedLanguage, setSelectedLanguage] = useState('py-es-client');
   const {
@@ -85,10 +89,15 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selecte
   }, [usageTracker, selectedLanguage]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} data-test-subj="viewCodeFlyout">
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      data-test-subj="viewCodeFlyout"
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={flyoutTitleId}>
             <FormattedMessage
               id="xpack.searchPlayground.viewCode.flyout.title"
               defaultMessage="Application code"

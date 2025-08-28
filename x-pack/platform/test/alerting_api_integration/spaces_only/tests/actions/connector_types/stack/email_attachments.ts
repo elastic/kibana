@@ -13,7 +13,6 @@ import type { FtrProviderContext } from '../../../../../common/ftr_provider_cont
 import { getEventLog, ObjectRemover } from '../../../../../common/lib';
 import { EmailDomainsAllowed } from '../../config';
 
-// eslint-disable-next-line import/no-default-export
 export default function emailNotificationTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');

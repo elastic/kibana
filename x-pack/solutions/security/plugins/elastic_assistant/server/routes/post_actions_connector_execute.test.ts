@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { IRouter, KibanaRequest } from '@kbn/core/server';
+import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import { NEVER } from 'rxjs';
 import { mockActionResponse } from '../__mocks__/action_result_data';
 import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
-import { ElasticAssistantRequestHandlerContext } from '../types';
+import type { ElasticAssistantRequestHandlerContext } from '../types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { PassThrough } from 'stream';
-import { getConversationResponseMock } from '../ai_assistant_data_clients/conversations/update_conversation.test';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import { getFindAnonymizationFieldsResultWithSingleHit } from '../__mocks__/response';
 import {
-  defaultAssistantFeatures,
-  ExecuteConnectorRequestBody,
-} from '@kbn/elastic-assistant-common';
+  getConversationResponseMock,
+  getFindAnonymizationFieldsResultWithSingleHit,
+} from '../__mocks__/response';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { appendAssistantMessageToConversation, langChainExecute } from './helpers';
 import { getPrompt } from '../lib/prompt';
-import { ELASTICSEARCH_ELSER_INFERENCE_ID } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 const license = licensingMock.createLicenseMock();
 const actionsClient = actionsClientMock.create();
@@ -132,7 +132,7 @@ const mockResponse = {
   error: jest.fn().mockImplementation((x) => x),
 };
 const mockConfig = {
-  elserInferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID,
+  elserInferenceId: defaultInferenceEndpoints.ELSER,
   responseTimeout: 1000,
 };
 

@@ -201,11 +201,39 @@ paths:
             default: 20
             minimum: 0
             type: integer
+        - description: >-
+            If true, additionally fetch all anonymization fields, otherwise
+            fetch only the provided page
+          in: query
+          name: all_data
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
             application/json:
               example:
+                aggregations:
+                  anonymized:
+                    buckets:
+                      allowed:
+                        doc_count: 1
+                      anonymized:
+                        doc_count: 1
+                      denied:
+                        doc_count: 1
+                all:
+                  - allowed: true
+                    anonymized: true
+                    createdAt: '2023-10-31T12:00:00Z'
+                    createdBy: user1
+                    field: user.name
+                    id: '1'
+                    namespace: default
+                    timestamp: '2023-10-31T12:00:00Z'
+                    updatedAt: '2023-10-31T12:00:00Z'
+                    updatedBy: user1
                 data:
                   - allowed: true
                     anonymized: true
@@ -223,6 +251,37 @@ paths:
               schema:
                 type: object
                 properties:
+                  aggregations:
+                    type: object
+                    properties:
+                      field_status:
+                        type: object
+                        properties:
+                          buckets:
+                            type: object
+                            properties:
+                              allowed:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                              anonymized:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                              denied:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                  all:
+                    items:
+                      $ref: '#/components/schemas/AnonymizationFieldResponse'
+                    type: array
                   data:
                     items:
                       $ref: '#/components/schemas/AnonymizationFieldResponse'
@@ -1900,14 +1959,6 @@ components:
         - insights
       example: assistant
       type: string
-    ConversationConfidence:
-      description: The conversation confidence.
-      enum:
-        - low
-        - medium
-        - high
-      example: high
-      type: string
     ConversationCreateProps:
       type: object
       properties:
@@ -1992,28 +2043,30 @@ components:
         - namespace
         - category
     ConversationSummary:
+      allOf:
+        - $ref: '#/components/schemas/ConversationSummaryBase'
+        - type: object
+          properties:
+            timestamp:
+              $ref: '#/components/schemas/NonEmptyTimestamp'
+              description: The timestamp summary was updated.
+              example: '2025-04-30T16:00:00Z'
+          required:
+            - timestamp
+    ConversationSummaryBase:
       type: object
       properties:
-        confidence:
-          $ref: '#/components/schemas/ConversationConfidence'
-          description: >-
-            How confident you are about this being a correct and useful
-            learning.
-          example: high
-        content:
+        semanticContent:
           description: Summary text of the conversation over time.
           example: >-
             This conversation covered how to configure the Security AI
             Assistant.
           type: string
-        public:
-          description: Define if summary is marked as publicly available.
-          example: true
-          type: boolean
-        timestamp:
-          $ref: '#/components/schemas/NonEmptyTimestamp'
-          description: The timestamp summary was updated.
-          example: '2025-04-30T16:00:00Z'
+        summarizedMessageIds:
+          description: The list of summarized messages.
+          items:
+            $ref: '#/components/schemas/NonEmptyString'
+          type: array
     ConversationUpdateProps:
       type: object
       properties:
@@ -2037,7 +2090,7 @@ components:
         replacements:
           $ref: '#/components/schemas/Replacements'
         summary:
-          $ref: '#/components/schemas/ConversationSummary'
+          $ref: '#/components/schemas/ConversationSummaryBase'
         title:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
@@ -2670,6 +2723,9 @@ components:
           description: Message content.
           example: Hello, how can I assist you today?
           type: string
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: Message id
         isError:
           description: Is error message.
           example: false

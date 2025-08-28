@@ -15,8 +15,8 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
-import { FSRepository, Repository } from '../../../../../common/types';
-import { RepositorySettingsValidation } from '../../../services/validation';
+import type { FSRepository, Repository } from '../../../../../common/types';
+import type { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxRestoreField, MaxSnapshotsField } from './common';
 
 interface Props {
@@ -89,6 +89,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.location}
         >
           <EuiFieldText
+            isInvalid={Boolean(hasErrors && settingErrors.location)}
             defaultValue={location || ''}
             fullWidth
             onChange={(e) => {

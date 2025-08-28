@@ -8,18 +8,28 @@
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useLicense } from '../licence/use_licence';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
-import { ASSISTANT_FEATURE_ID, SECURITY_FEATURE_ID } from '../../common/constants';
-import { LicenseService } from '../licence/license_service';
+import type { LicenseService } from '../licence/license_service';
 import { renderHook } from '@testing-library/react';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
+import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-features/constants';
+import { useIsNavControlVisible } from '../is_nav_control_visible/use_is_nav_control_visible';
+
 jest.mock('../licence/use_licence');
 jest.mock('../../context/typed_kibana_context/typed_kibana_context');
+jest.mock('../is_nav_control_visible/use_is_nav_control_visible');
 
 const mockUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseIsNavControlVisible = useIsNavControlVisible as jest.MockedFunction<
+  typeof useIsNavControlVisible
+>;
 
 describe('useAssistantAvailability', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    mockUseIsNavControlVisible.mockReturnValue({
+      isVisible: true,
+    });
   });
 
   it('returns correct values when all privileges are available', () => {
@@ -45,7 +55,15 @@ describe('useAssistantAvailability', () => {
               save: true,
               delete: true,
             },
+            management: {
+              ai: {
+                aiAssistantManagementSelection: true,
+              },
+            },
           },
+        },
+        aiAssistantManagementSelection: {
+          aiAssistantManagementSelection$: jest.fn(),
         },
         featureFlags: {
           getBooleanValue: jest.fn().mockReturnValue(true),
@@ -61,7 +79,66 @@ describe('useAssistantAvailability', () => {
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
-      isStarterPromptsEnabled: true,
+      isAssistantVisible: true,
+      isAssistantManagementEnabled: true,
+      hasUpdateAIAssistantAnonymization: true,
+      hasManageGlobalKnowledgeBase: true,
+    });
+  });
+
+  it('returns correct values when all privileges are available but assistant his hidden', () => {
+    mockUseLicense.mockReturnValue({
+      isEnterprise: jest.fn().mockReturnValue(true),
+    } as unknown as LicenseService);
+
+    mockUseIsNavControlVisible.mockReturnValue({
+      isVisible: false,
+    });
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            [ASSISTANT_FEATURE_ID]: {
+              'ai-assistant': true,
+              updateAIAssistantAnonymization: true,
+              manageGlobalKnowledgeBaseAIAssistant: true,
+            },
+            [SECURITY_FEATURE_ID]: {
+              configurations: true,
+            },
+            actions: {
+              show: true,
+              execute: true,
+              save: true,
+              delete: true,
+            },
+            management: {
+              ai: {
+                aiAssistantManagementSelection: true,
+              },
+            },
+          },
+        },
+        aiAssistantManagementSelection: {
+          aiAssistantManagementSelection$: jest.fn(),
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+
+    const { result } = renderHook(() => useAssistantAvailability());
+
+    expect(result.current).toEqual({
+      hasSearchAILakeConfigurations: true,
+      hasAssistantPrivilege: true,
+      hasConnectorsAllPrivilege: true,
+      hasConnectorsReadPrivilege: true,
+      isAssistantEnabled: true,
+      isAssistantVisible: false,
+      isAssistantManagementEnabled: true,
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
     });
@@ -90,6 +167,11 @@ describe('useAssistantAvailability', () => {
               save: false,
               delete: false,
             },
+            management: {
+              ai: {
+                aiAssistantManagementSelection: false,
+              },
+            },
           },
         },
         featureFlags: {
@@ -106,7 +188,8 @@ describe('useAssistantAvailability', () => {
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: false,
-      isStarterPromptsEnabled: false,
+      isAssistantVisible: false,
+      isAssistantManagementEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
@@ -135,6 +218,11 @@ describe('useAssistantAvailability', () => {
               save: false,
               delete: false,
             },
+            management: {
+              ai: {
+                aiAssistantManagementSelection: false,
+              },
+            },
           },
         },
         featureFlags: {
@@ -151,7 +239,8 @@ describe('useAssistantAvailability', () => {
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
-      isStarterPromptsEnabled: true,
+      isAssistantVisible: true,
+      isAssistantManagementEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
@@ -181,7 +270,8 @@ describe('useAssistantAvailability', () => {
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: true,
-      isStarterPromptsEnabled: true,
+      isAssistantVisible: true,
+      isAssistantManagementEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });

@@ -37,7 +37,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
 
 describe('useFileValidation', () => {
   const validLine = 'user1';
-  const invalidLine = 'user1,extra_field';
+  const invalidLine = 'user1,label,extra_field';
 
   test('should call onError when an error occurs', () => {
     const onErrorMock = jest.fn();
@@ -71,7 +71,7 @@ describe('useFileValidation', () => {
         expect.objectContaining({
           validatedFile: {
             name: fileName,
-            size: 23,
+            size: 29,
             validLines: {
               text: validLine,
               count: 1,
@@ -81,7 +81,7 @@ describe('useFileValidation', () => {
               count: 1,
               errors: [
                 {
-                  message: 'Expected 1 column, got 2',
+                  message: 'Expected 1 or 2 columns, got 3',
                   index: 1,
                 },
               ],

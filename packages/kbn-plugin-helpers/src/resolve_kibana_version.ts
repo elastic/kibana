@@ -9,7 +9,7 @@
 
 import inquirer from 'inquirer';
 
-import { Plugin } from './load_kibana_platform_plugin';
+import type { Plugin } from './load_kibana_platform_plugin';
 
 export async function resolveKibanaVersion(option: string | undefined, plugin: Plugin) {
   const preselectedVersion = option || plugin.manifest.kibanaVersion || plugin.manifest.version;

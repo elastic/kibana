@@ -2,26 +2,10 @@
   "id": "@kbn/field-utils",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.comboBoxFieldOptionMatcher",
+        "id": "def-public.comboBoxFieldOptionMatcher",
         "type": "Function",
         "tags": [],
         "label": "comboBoxFieldOptionMatcher",
@@ -37,7 +21,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.comboBoxFieldOptionMatcher.$1",
+            "id": "def-public.comboBoxFieldOptionMatcher.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  option: { name, label },\n  searchValue,\n}",
@@ -48,7 +32,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/field-utils",
-                "id": "def-common.comboBoxFieldOptionMatcher.$1.option",
+                "id": "def-public.comboBoxFieldOptionMatcher.$1.option",
                 "type": "Object",
                 "tags": [],
                 "label": "option",
@@ -62,7 +46,7 @@
               },
               {
                 "parentPluginId": "@kbn/field-utils",
-                "id": "def-common.comboBoxFieldOptionMatcher.$1.searchValue",
+                "id": "def-public.comboBoxFieldOptionMatcher.$1.searchValue",
                 "type": "string",
                 "tags": [],
                 "label": "searchValue",
@@ -79,7 +63,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.FieldDescription",
+        "id": "def-public.FieldDescription",
         "type": "Function",
         "tags": [],
         "label": "FieldDescription",
@@ -88,9 +72,9 @@
           "({ fieldsMetadataService, ...props }: ",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldDescriptionProps",
+            "section": "def-public.FieldDescriptionProps",
             "text": "FieldDescriptionProps"
           },
           ") => React.JSX.Element"
@@ -101,7 +85,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldDescription.$1",
+            "id": "def-public.FieldDescription.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  fieldsMetadataService,\n  ...props\n}",
@@ -109,9 +93,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/field-utils",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnFieldUtilsPluginApi",
-                "section": "def-common.FieldDescriptionProps",
+                "section": "def-public.FieldDescriptionProps",
                 "text": "FieldDescriptionProps"
               }
             ],
@@ -126,7 +110,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.FieldIcon",
+        "id": "def-public.FieldIcon",
         "type": "Function",
         "tags": [],
         "label": "FieldIcon",
@@ -135,9 +119,9 @@
           "<T extends ",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           " = ",
@@ -151,9 +135,9 @@
           ">(props: ",
           {
             "pluginId": "@kbn/react-field",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactFieldPluginApi",
-            "section": "def-common.FieldIconProps",
+            "section": "def-public.FieldIconProps",
             "text": "FieldIconProps"
           },
           ") => React.JSX.Element"
@@ -165,7 +149,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldIcon.$1",
+            "id": "def-public.FieldIcon.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
@@ -173,9 +157,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/react-field",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnReactFieldPluginApi",
-                "section": "def-common.FieldIconProps",
+                "section": "def-public.FieldIconProps",
                 "text": "FieldIconProps"
               }
             ],
@@ -188,7 +172,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.fieldNameWildcardMatcher",
+        "id": "def-public.fieldNameWildcardMatcher",
         "type": "Function",
         "tags": [],
         "label": "fieldNameWildcardMatcher",
@@ -204,7 +188,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.fieldNameWildcardMatcher.$1",
+            "id": "def-public.fieldNameWildcardMatcher.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -215,7 +199,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/field-utils",
-                "id": "def-common.fieldNameWildcardMatcher.$1.name",
+                "id": "def-public.fieldNameWildcardMatcher.$1.name",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -226,7 +210,7 @@
               },
               {
                 "parentPluginId": "@kbn/field-utils",
-                "id": "def-common.fieldNameWildcardMatcher.$1.displayName",
+                "id": "def-public.fieldNameWildcardMatcher.$1.displayName",
                 "type": "string",
                 "tags": [],
                 "label": "displayName",
@@ -242,7 +226,7 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.fieldNameWildcardMatcher.$2",
+            "id": "def-public.fieldNameWildcardMatcher.$2",
             "type": "string",
             "tags": [],
             "label": "fieldSearchHighlight",
@@ -261,7 +245,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.fieldSupportsBreakdown",
+        "id": "def-public.fieldSupportsBreakdown",
         "type": "Function",
         "tags": [],
         "label": "fieldSupportsBreakdown",
@@ -283,7 +267,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.fieldSupportsBreakdown.$1",
+            "id": "def-public.fieldSupportsBreakdown.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -308,7 +292,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.getFieldIconProps",
+        "id": "def-public.getFieldIconProps",
         "type": "Function",
         "tags": [],
         "label": "getFieldIconProps",
@@ -317,9 +301,9 @@
           "(field: T) => ",
           {
             "pluginId": "@kbn/react-field",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactFieldPluginApi",
-            "section": "def-common.FieldIconProps",
+            "section": "def-public.FieldIconProps",
             "text": "FieldIconProps"
           }
         ],
@@ -329,7 +313,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.getFieldIconProps.$1",
+            "id": "def-public.getFieldIconProps.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "field",
@@ -348,7 +332,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.getFieldIconType",
+        "id": "def-public.getFieldIconType",
         "type": "Function",
         "tags": [],
         "label": "getFieldIconType",
@@ -366,7 +350,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.getFieldIconType.$1",
+            "id": "def-public.getFieldIconType.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "field",
@@ -381,7 +365,7 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.getFieldIconType.$2",
+            "id": "def-public.getFieldIconType.$2",
             "type": "Function",
             "tags": [],
             "label": "getCustomFieldType",
@@ -401,7 +385,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.getFieldSearchMatchingHighlight",
+        "id": "def-public.getFieldSearchMatchingHighlight",
         "type": "Function",
         "tags": [],
         "label": "getFieldSearchMatchingHighlight",
@@ -417,7 +401,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.getFieldSearchMatchingHighlight.$1",
+            "id": "def-public.getFieldSearchMatchingHighlight.$1",
             "type": "string",
             "tags": [],
             "label": "displayName",
@@ -432,7 +416,7 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.getFieldSearchMatchingHighlight.$2",
+            "id": "def-public.getFieldSearchMatchingHighlight.$2",
             "type": "string",
             "tags": [],
             "label": "fieldSearchHighlight",
@@ -451,7 +435,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.getFieldType",
+        "id": "def-public.getFieldType",
         "type": "Function",
         "tags": [],
         "label": "getFieldType",
@@ -467,7 +451,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.getFieldType.$1",
+            "id": "def-public.getFieldType.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "field",
@@ -486,7 +470,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.getFieldTypeDescription",
+        "id": "def-public.getFieldTypeDescription",
         "type": "Function",
         "tags": [],
         "label": "getFieldTypeDescription",
@@ -502,7 +486,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.getFieldTypeDescription.$1",
+            "id": "def-public.getFieldTypeDescription.$1",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -521,7 +505,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.getFieldTypeName",
+        "id": "def-public.getFieldTypeName",
         "type": "Function",
         "tags": [],
         "label": "getFieldTypeName",
@@ -537,7 +521,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.getFieldTypeName.$1",
+            "id": "def-public.getFieldTypeName.$1",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -556,7 +540,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.getTextBasedColumnIconType",
+        "id": "def-public.getTextBasedColumnIconType",
         "type": "Function",
         "tags": [],
         "label": "getTextBasedColumnIconType",
@@ -578,7 +562,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.getTextBasedColumnIconType.$1",
+            "id": "def-public.getTextBasedColumnIconType.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "columnMeta",
@@ -605,7 +589,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.isKnownFieldType",
+        "id": "def-public.isKnownFieldType",
         "type": "Function",
         "tags": [],
         "label": "isKnownFieldType",
@@ -619,7 +603,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.isKnownFieldType.$1",
+            "id": "def-public.isKnownFieldType.$1",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -640,7 +624,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.FieldBase",
+        "id": "def-public.FieldBase",
         "type": "Interface",
         "tags": [],
         "label": "FieldBase",
@@ -651,7 +635,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldBase.name",
+            "id": "def-public.FieldBase.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -662,7 +646,7 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldBase.type",
+            "id": "def-public.FieldBase.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -676,7 +660,7 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldBase.displayName",
+            "id": "def-public.FieldBase.displayName",
             "type": "string",
             "tags": [],
             "label": "displayName",
@@ -690,7 +674,7 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldBase.customDescription",
+            "id": "def-public.FieldBase.customDescription",
             "type": "string",
             "tags": [],
             "label": "customDescription",
@@ -704,7 +688,7 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldBase.count",
+            "id": "def-public.FieldBase.count",
             "type": "number",
             "tags": [],
             "label": "count",
@@ -718,7 +702,7 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldBase.timeSeriesMetric",
+            "id": "def-public.FieldBase.timeSeriesMetric",
             "type": "CompoundType",
             "tags": [],
             "label": "timeSeriesMetric",
@@ -733,7 +717,7 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldBase.esTypes",
+            "id": "def-public.FieldBase.esTypes",
             "type": "Array",
             "tags": [],
             "label": "esTypes",
@@ -747,7 +731,7 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldBase.scripted",
+            "id": "def-public.FieldBase.scripted",
             "type": "CompoundType",
             "tags": [],
             "label": "scripted",
@@ -761,7 +745,7 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldBase.isNull",
+            "id": "def-public.FieldBase.isNull",
             "type": "CompoundType",
             "tags": [],
             "label": "isNull",
@@ -775,7 +759,7 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldBase.conflictDescriptions",
+            "id": "def-public.FieldBase.conflictDescriptions",
             "type": "Object",
             "tags": [],
             "label": "conflictDescriptions",
@@ -792,7 +776,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.FieldDescriptionProps",
+        "id": "def-public.FieldDescriptionProps",
         "type": "Interface",
         "tags": [],
         "label": "FieldDescriptionProps",
@@ -800,9 +784,9 @@
         "signature": [
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldDescriptionProps",
+            "section": "def-public.FieldDescriptionProps",
             "text": "FieldDescriptionProps"
           },
           " extends ",
@@ -814,7 +798,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldDescriptionProps.fieldsMetadataService",
+            "id": "def-public.FieldDescriptionProps.fieldsMetadataService",
             "type": "Object",
             "tags": [],
             "label": "fieldsMetadataService",
@@ -840,7 +824,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.KNOWN_FIELD_TYPES",
+        "id": "def-public.KNOWN_FIELD_TYPES",
         "type": "Enum",
         "tags": [],
         "label": "KNOWN_FIELD_TYPES",
@@ -856,7 +840,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.FieldIconProps",
+        "id": "def-public.FieldIconProps",
         "type": "Type",
         "tags": [],
         "label": "FieldIconProps",
@@ -868,7 +852,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.FieldTypeKnown",
+        "id": "def-public.FieldTypeKnown",
         "type": "Type",
         "tags": [],
         "label": "FieldTypeKnown",
@@ -883,7 +867,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.KNOWN_FIELD_TYPE_LIST",
+        "id": "def-public.KNOWN_FIELD_TYPE_LIST",
         "type": "Array",
         "tags": [],
         "label": "KNOWN_FIELD_TYPE_LIST",
@@ -898,7 +882,7 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.UNKNOWN_FIELD_TYPE_MESSAGE",
+        "id": "def-public.UNKNOWN_FIELD_TYPE_MESSAGE",
         "type": "string",
         "tags": [],
         "label": "UNKNOWN_FIELD_TYPE_MESSAGE",
@@ -911,6 +895,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

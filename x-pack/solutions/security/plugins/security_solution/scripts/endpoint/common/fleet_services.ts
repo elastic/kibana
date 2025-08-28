@@ -1126,6 +1126,7 @@ export const addMicrosoftDefenderForEndpointIntegrationToAgentPolicy = async ({
                 value: clientId,
               },
               enable_request_tracer: {
+                value: false,
                 type: 'bool',
               },
               client_secret: {
@@ -1136,9 +1137,13 @@ export const addMicrosoftDefenderForEndpointIntegrationToAgentPolicy = async ({
                 type: 'text',
                 value: tenantId,
               },
-              interval: {
+              initial_interval: {
+                value: '5m',
                 type: 'text',
-                value: '30s',
+              },
+              interval: {
+                value: '5m',
+                type: 'text',
               },
               scopes: {
                 value: [],
@@ -1208,6 +1213,170 @@ export const addMicrosoftDefenderForEndpointIntegrationToAgentPolicy = async ({
             },
           },
         ],
+      },
+      {
+        type: 'cel',
+        policy_template: 'microsoft_defender_endpoint',
+        enabled: false,
+        streams: [
+          {
+            enabled: false,
+            data_stream: {
+              type: 'logs',
+              dataset: 'microsoft_defender_endpoint.machine',
+            },
+            vars: {
+              interval: {
+                value: '24h',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'microsoft_defender_endpoint-machine'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: false,
+            data_stream: {
+              type: 'logs',
+              dataset: 'microsoft_defender_endpoint.machine_action',
+            },
+            vars: {
+              initial_interval: {
+                value: '24h',
+                type: 'text',
+              },
+              interval: {
+                value: '5m',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'microsoft_defender_endpoint-machine_action'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: false,
+            data_stream: {
+              type: 'logs',
+              dataset: 'microsoft_defender_endpoint.vulnerability',
+            },
+            vars: {
+              interval: {
+                value: '4h',
+                type: 'text',
+              },
+              batch_size: {
+                value: 8000,
+                type: 'integer',
+              },
+              affected_machines_only: {
+                value: true,
+                type: 'bool',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'microsoft_defender_endpoint-vulnerability'],
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              preserve_duplicate_custom_fields: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+        ],
+        vars: {
+          client_id: {
+            type: 'text',
+          },
+          client_secret: {
+            type: 'password',
+          },
+          login_url: {
+            value: 'https://login.microsoftonline.com',
+            type: 'text',
+          },
+          url: {
+            value: 'https://api.security.microsoft.com',
+            type: 'text',
+          },
+          tenant_id: {
+            type: 'text',
+          },
+          token_scopes: {
+            value: ['https://securitycenter.onmicrosoft.com/windowsatpservice/.default'],
+            type: 'text',
+          },
+          proxy_url: {
+            type: 'text',
+          },
+          ssl: {
+            value:
+              '#certificate_authorities:\n#  - |\n#    -----BEGIN CERTIFICATE-----\n#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF\n#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2\n#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB\n#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n\n#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl\n#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t\n#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP\n#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41\n#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O\n#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux\n#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D\n#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw\n#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA\n#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu\n#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0\n#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk\n#    sxSmbIUfc2SGJGCJD4I=\n#    -----END CERTIFICATE-----\n',
+            type: 'yaml',
+          },
+        },
       },
     ],
     package: {

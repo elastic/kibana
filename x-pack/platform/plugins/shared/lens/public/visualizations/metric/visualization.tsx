@@ -7,18 +7,19 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, getOverridePaletteStops } from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { getOverridePaletteStops } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
-import { AccessorConfig } from '@kbn/visualization-ui-components';
-import { ThemeServiceStart } from '@kbn/core/public';
+import type { AccessorConfig } from '@kbn/visualization-ui-components';
+import type { ThemeServiceStart } from '@kbn/core/public';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
-import {
+import type {
   Visualization,
   OperationMetadata,
   VisualizationConfigProps,
@@ -37,8 +38,13 @@ import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
-import { MetricVisualizationState, SecondaryTrend } from './types';
-import { getColorMode, getDefaultConfigForMode, getTrendPalette } from './helpers';
+import type { MetricVisualizationState, SecondaryTrend } from './types';
+import {
+  getColorMode,
+  getDefaultConfigForMode,
+  getTrendPalette,
+  isSecondaryTrendConfigInvalid,
+} from './helpers';
 import { getAccessorType } from '../../shared_components';
 
 export const DEFAULT_MAX_COLUMNS = 3;
@@ -553,22 +559,32 @@ export const getMetricVisualization = ({
     });
     // early return if there's no datasource found
     if (!datasourceLayer) {
-      return { state, savedObjectReferences: [] };
+      return { state, references: [] };
     }
+
     // this should clean up the secondary trend state if in conflict
-    const { isNumeric: isMetricNumeric } = getAccessorType(datasourceLayer, state.metricAccessor);
-    const colorMode = getColorMode(state.secondaryTrend, isMetricNumeric);
-    // if there are no conflicts, it's all persistable as is
-    if (colorMode === state.secondaryTrend?.type) {
-      return { state, savedObjectReferences: [] };
+    const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(
+      datasourceLayer,
+      state.metricAccessor
+    );
+    const { isNumeric: isSecondaryMetricNumeric } = getAccessorType(
+      datasourceLayer,
+      state.secondaryMetricAccessor
+    );
+    const colorMode = getColorMode(state.secondaryTrend, isSecondaryMetricNumeric);
+
+    if (isSecondaryTrendConfigInvalid(state.secondaryTrend, colorMode, isPrimaryMetricNumeric)) {
+      return {
+        state: {
+          ...state,
+          secondaryPrefix: undefined,
+          secondaryTrend: getDefaultConfigForMode(colorMode),
+        },
+        references: [],
+      };
     }
-    return {
-      state: {
-        ...state,
-        secondaryTrend: getDefaultConfigForMode(colorMode),
-      },
-      savedObjectReferences: [],
-    };
+    // if there are no conflicts, it's all persistable as is
+    return { state, references: [] };
   },
 
   setDimension({ prevState, columnId, groupId }) {

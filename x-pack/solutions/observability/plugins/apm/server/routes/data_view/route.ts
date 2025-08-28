@@ -52,8 +52,8 @@ const dataViewTitleRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/data_view/index_pattern',
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async ({ getApmIndices }): Promise<{ apmDataViewIndexPattern: string }> => {
-    const apmIndicies = await getApmIndices();
-    const apmDataViewIndexPattern = getApmDataViewIndexPattern(apmIndicies);
+    const apmIndices = await getApmIndices();
+    const apmDataViewIndexPattern = getApmDataViewIndexPattern(apmIndices);
 
     return { apmDataViewIndexPattern };
   },

@@ -17,5 +17,7 @@
     "@kbn/apm-config-loader",
     "@kbn/tracing",
     "@kbn/logging",
+    "@kbn/metrics",
+    "@kbn/repo-info",
   ]
 }

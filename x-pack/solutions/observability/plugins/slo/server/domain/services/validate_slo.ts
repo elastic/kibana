@@ -13,7 +13,7 @@ import {
   calendarAlignedTimeWindowSchema,
 } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../errors';
-import { SLODefinition } from '../models';
+import type { SLODefinition } from '../models';
 
 /**
  * Asserts the SLO Definition is valid from a business invariants point of view.

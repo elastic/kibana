@@ -10,7 +10,7 @@ import React, { useCallback, useState } from 'react';
 import type { UserStartPrivilegesResponse } from '../../../common';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { CreateIndexFormState } from '../../types';
+import type { CreateIndexFormState } from '../../types';
 import { isValidIndexName } from '../../utils/indices';
 
 import { useCreateIndex } from '../shared/hooks/use_create_index';

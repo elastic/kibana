@@ -5,25 +5,51 @@
  * 2.0.
  */
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { OnechatAgentsCreate } from './pages/agent_create';
+import { OnechatAgentsEdit } from './pages/agent_edit';
+import { OnechatAgentsPage } from './pages/agents';
+import { OnechatConversationsPage } from './pages/conversations';
+import { OnechatToolCreatePage } from './pages/tool_create';
+import { OnechatToolEditPage } from './pages/tool_edit';
 import { OnechatToolsPage } from './pages/tools';
-import { OnechatConversationsPage } from './pages/chat';
-import { ONECHAT_TOOLS_UI_SETTING_ID } from '../../common/constants';
 
 export const OnechatRoutes: React.FC<{}> = () => {
-  const isToolsPageEnabled = useUiSetting<boolean>(ONECHAT_TOOLS_UI_SETTING_ID, false);
   return (
     <Routes>
-      <Route path="/conversations">
+      <Route path="/conversations/:conversationId">
         <OnechatConversationsPage />
       </Route>
-      {isToolsPageEnabled && (
-        <Route path="/tools">
-          <OnechatToolsPage />
-        </Route>
-      )}
+
+      <Route path="/agents/new">
+        <OnechatAgentsCreate />
+      </Route>
+
+      <Route path="/agents/:agentId">
+        <OnechatAgentsEdit />
+      </Route>
+
+      <Route path="/agents">
+        <OnechatAgentsPage />
+      </Route>
+
+      <Route path="/tools/new">
+        <OnechatToolCreatePage />
+      </Route>
+
+      <Route path="/tools/:toolId">
+        <OnechatToolEditPage />
+      </Route>
+
+      <Route path="/tools">
+        <OnechatToolsPage />
+      </Route>
+
+      {/* Default to conversations page */}
+      <Route path="/">
+        <OnechatConversationsPage />
+      </Route>
     </Routes>
   );
 };

@@ -6,14 +6,15 @@
  */
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer, IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
-import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
+import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { useKibana } from '../../../common/lib/kibana';
@@ -138,6 +139,7 @@ export const ActionTypeMenu = ({
               ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
               : undefined
           }
+          role="listitem"
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}
@@ -172,7 +174,15 @@ export const ActionTypeMenu = ({
   ) : (
     <div className="actConnectorsListGrid">
       <EuiSpacer size="s" />
-      <EuiFlexGrid gutterSize="xl" columns={3}>
+      <EuiFlexGrid
+        gutterSize="xl"
+        columns={3}
+        role="list"
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListLabel',
+          { defaultMessage: 'Available connector types' }
+        )}
+      >
         {cardNodes}
       </EuiFlexGrid>
     </div>

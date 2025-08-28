@@ -82,7 +82,6 @@ export const convertSOQueriesToPack = (
 
       return acc;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     {} as Record<string, any>
   );
 
@@ -110,7 +109,6 @@ export const convertSOQueriesToPackConfig = (
 
       return acc;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     {} as Record<string, any>
   );
 

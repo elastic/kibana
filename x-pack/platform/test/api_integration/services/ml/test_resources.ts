@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test';
-import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { ProvidedType } from '@kbn/test';
+import type { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { savedSearches, dashboards } from './test_resources_data';
 import { getCommonRequestHeader } from './common_api';
-import { MlApi } from './api';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlApi } from './api';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export enum SavedObjectType {
   CONFIG = 'config',
@@ -245,11 +244,6 @@ export function MachineLearningTestResourcesProvider(
           return value;
         }
       });
-
-      // make searchSourceJSON node a string
-      const searchSourceJsonNode = updatedBody.attributes.kibanaSavedObjectMeta.searchSourceJSON;
-      const searchSourceJsonString = JSON.stringify(searchSourceJsonNode);
-      updatedBody.attributes.kibanaSavedObjectMeta.searchSourceJSON = searchSourceJsonString;
 
       return updatedBody;
     },
@@ -559,59 +553,29 @@ export function MachineLearningTestResourcesProvider(
       log.debug(` > Setup done`);
     },
 
-    async installFleetPackage(packageName: string): Promise<string> {
+    async installFleetPackage(packageName: string): Promise<void> {
       log.debug(`Installing Fleet package '${packageName}'`);
-
-      const version = await this.getFleetPackageVersion(packageName);
 
       await retry.tryForTime(30 * 1000, async () => {
         const { body, status } = await supertest
-          .post(`/api/fleet/epm/packages/${packageName}/${version}`)
+          .post(`/api/fleet/epm/packages/${packageName}`)
           .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
       });
-
       log.debug(` > Installed`);
-      return version;
     },
 
-    async removeFleetPackage(packageName: string, version: string) {
-      log.debug(`Removing Fleet package '${packageName}-${version}'`);
+    async removeFleetPackage(packageName: string) {
+      log.debug(`Removing Fleet package '${packageName}'`);
 
       await retry.tryForTime(30 * 1000, async () => {
         const { body, status } = await supertest
-          .delete(`/api/fleet/epm/packages/${packageName}/${version}`)
+          .delete(`/api/fleet/epm/packages/${packageName}`)
           .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
       });
 
       log.debug(` > Removed`);
-    },
-
-    async getFleetPackageVersion(packageName: string): Promise<string> {
-      log.debug(`Fetching version for Fleet package '${packageName}'`);
-      let packageVersion = '';
-
-      await retry.tryForTime(10 * 1000, async () => {
-        const { body, status } = await supertest
-          .get(`/api/fleet/epm/packages?prerelease=true`)
-          .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
-        mlApi.assertResponseStatusCode(200, status, body);
-
-        packageVersion =
-          body.items.find(
-            ({ name, version }: { name: string; version: string }) =>
-              name === packageName && version
-          )?.version ?? '';
-
-        expect(packageVersion).to.not.eql(
-          '',
-          `Fleet package definition for '${packageName}' should exist and have a version`
-        );
-      });
-
-      log.debug(` > found version '${packageVersion}'`);
-      return packageVersion;
     },
 
     async setAdvancedSettingProperty(

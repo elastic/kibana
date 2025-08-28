@@ -35,7 +35,7 @@ export interface OsqueryPluginStart {}
 
 export interface SetupPlugins {
   actions: ActionsPlugin['setup'];
-  cases: CasesServerSetup;
+  cases?: CasesServerSetup;
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   security: SecurityPluginStart;

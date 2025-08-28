@@ -22,7 +22,7 @@ export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '300px' }}>
+        <div css={{ maxWidth: '300px' }}>
           <FlyoutRiskSummary
             openDetailsPanel={() => {}}
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
@@ -41,7 +41,7 @@ export const LinkEnabledInPreviewMode: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '300px' }}>
+        <div css={{ maxWidth: '300px' }}>
           <FlyoutRiskSummary
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
@@ -61,7 +61,7 @@ export const LinkDisabled: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '300px' }}>
+        <div css={{ maxWidth: '300px' }}>
           <FlyoutRiskSummary
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}

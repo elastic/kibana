@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { css, cx } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -21,16 +22,18 @@ import type { MetricsChartsFields, HostMetricTypes } from './types';
 
 interface Props extends MetricsChartsFields {
   metric: Exclude<HostMetricTypes, 'kpi'>;
+  schema?: DataSchemaFormat | null;
 }
 
 const FRAGMENT_BASE = 'key-metrics';
 
 export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
-  ({ assetId, dataView, dateRange, metric, onShowAll, overview = false }, ref) => {
+  ({ entityId, dataView, dateRange, metric, onShowAll, overview = false, schema }, ref) => {
     const { charts } = useHostCharts({
       metric,
       dataViewId: dataView?.id,
       overview,
+      schema,
     });
 
     return (
@@ -101,7 +104,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
             <Chart
               id={chart.id}
               key={chart.id}
-              assetId={assetId}
+              entityId={entityId}
               dateRange={dateRange}
               lensAttributes={chart}
               queryField={findInventoryFields('host').id}

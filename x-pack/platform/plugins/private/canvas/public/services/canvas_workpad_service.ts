@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResolvedSimpleSavedObject, SavedObject } from '@kbn/core/public';
+import type { SavedObjectsResolveResponse, SavedObject } from '@kbn/core-saved-objects-api-server';
 import {
   API_ROUTE_SHAREABLE_ZIP,
   API_ROUTE_TEMPLATES,
@@ -15,7 +15,7 @@ import {
   DEFAULT_WORKPAD_CSS,
 } from '../../common/lib';
 import type { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
-import { CanvasTemplate, CanvasWorkpad } from '../../types';
+import type { CanvasTemplate, CanvasWorkpad } from '../../types';
 import { coreServices } from './kibana_services';
 
 export type FoundWorkpads = Array<Pick<CanvasWorkpad, 'name' | 'id' | '@timestamp' | '@created'>>;
@@ -31,9 +31,9 @@ export interface TemplateFindResponse {
 
 export interface ResolveWorkpadResponse {
   workpad: CanvasWorkpad;
-  outcome: ResolvedSimpleSavedObject['outcome'];
-  aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 /*

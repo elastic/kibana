@@ -54,8 +54,6 @@ export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND =
 export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION =
   `${ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL}/_bulk_action` as const;
 
-export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL =
-  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/knowledge_base/_indices` as const;
 export const ELASTIC_AI_ASSISTANT_EVALUATE_URL =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/evaluate` as const;
 
@@ -79,8 +77,6 @@ export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insi
 export const DEFEND_INSIGHTS_BY_ID = `${DEFEND_INSIGHTS}/{id}`;
 
 // Attack Discovery
-export const ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG =
-  'securitySolution.assistantAttackDiscoverySchedulingEnabled' as const;
 export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
 export const ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID = 'siem' as const;
 
@@ -110,31 +106,19 @@ export const ATTACK_DISCOVERY_AD_HOC_RULE_ID = 'attack_discovery_ad_hoc_rule_id'
 export const ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID = 'attack_discovery_ad_hoc_rule_type_id' as const;
 
 /**
- * This feature flag enables the Attack discoveries alerts feature.
- *
- * It may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:
- * ```
- * feature_flags.overrides:
- *   securitySolution.attackDiscoveryAlertsEnabled: true
- * ```
- */
-export const ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG =
-  'securitySolution.attackDiscoveryAlertsEnabled' as const;
-
-/**
  * The common prefix for all (ad hoc and scheduled) Attack discovery alerts indices
  */
 export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
   '.alerts-security.attack.discovery.alerts' as const;
 
 /**
- * This feature flag enables the InferenceChatModel feature.
+ * This feature flag disables the InferenceChatModel feature.
  *
  * It may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:
  * ```
  * feature_flags.overrides:
- *   securitySolution.inferenceChatModelEnabled: true
+ *   securitySolution.inferenceChatModelDisabled: true
  * ```
  */
-export const INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG =
-  'securitySolution.inferenceChatModelEnabled' as const;
+export const INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG =
+  'securitySolution.inferenceChatModelDisabled' as const;

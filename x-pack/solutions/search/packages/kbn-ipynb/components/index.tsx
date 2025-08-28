@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
-import { NotebookDefinition } from '../types';
+import type { NotebookDefinition } from '../types';
 
 import { NotebookCell } from './notebook_cell';
 import { NotebookCellOutput } from './notebook_cell_output';

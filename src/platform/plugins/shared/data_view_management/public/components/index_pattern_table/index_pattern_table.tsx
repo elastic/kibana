@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBasicTableColumn,
   EuiButton,
   EuiIconTip,
   EuiInMemoryTable,
@@ -22,7 +22,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import React, { useMemo, useState } from 'react';
-import { RouteComponentProps, useLocation, withRouter } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -35,7 +36,7 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import type { IndexPatternManagmentContext } from '../../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { type RemoveDataViewProps, removeDataView } from '../edit_index_pattern';
-import { IndexPatternTableItem } from '../types';
+import type { IndexPatternTableItem } from '../types';
 import {
   DataViewTableController,
   dataViewTableControllerStateDefaults as defaults,
@@ -53,10 +54,6 @@ const sorting = {
   },
 };
 
-const title = i18n.translate('indexPatternManagement.dataViewTable.title', {
-  defaultMessage: 'Data Views',
-});
-
 const securityDataView = i18n.translate(
   'indexPatternManagement.indexPatternTable.badge.securityDataViewTitle',
   {
@@ -68,16 +65,13 @@ const securitySolution = 'security-solution';
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
-  showCreateDialog?: boolean;
+  setShowCreateDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  title: string;
 }
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
-export const IndexPatternTable = ({
-  history,
-  canSave,
-  showCreateDialog: showCreateDialogProp = false,
-}: Props) => {
+export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title }: Props) => {
   const {
     setBreadcrumbs,
     http,
@@ -94,7 +88,6 @@ export const IndexPatternTable = ({
     ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
   const [query, setQuery] = useState('');
-  const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
   const [selectedItems, setSelectedItems] = useState<IndexPatternTableItem[]>([]);
   const [dataViewController] = useState(
     () =>
@@ -184,10 +177,6 @@ export const IndexPatternTable = ({
   setBreadcrumbs(getListBreadcrumbs());
 
   chrome.docTitle.change(title);
-
-  const isRollup =
-    new URLSearchParams(useLocation().search).get('type') === DataViewType.ROLLUP &&
-    dataViews.getRollupsEnabled();
 
   const ContextWrapper = useMemo(
     () => (spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent),
@@ -329,18 +318,6 @@ export const IndexPatternTable = ({
     return <></>;
   }
 
-  const displayIndexPatternEditor = showCreateDialog ? (
-    <IndexPatternEditor
-      onSave={(indexPattern) => {
-        history.push(`patterns/${indexPattern.id}`);
-      }}
-      onCancel={() => setShowCreateDialog(false)}
-      defaultTypeIsRollup={isRollup}
-    />
-  ) : (
-    <></>
-  );
-
   const selection = {
     onSelectionChange: setSelectedItems,
   };
@@ -409,7 +386,7 @@ export const IndexPatternTable = ({
     );
 
   return (
-    <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
+    <>
       {isLoadingDataState ? (
         <div css={{ display: 'flex', justifyContent: 'center' }}>
           <EuiLoadingSpinner size="xxl" />
@@ -417,8 +394,7 @@ export const IndexPatternTable = ({
       ) : (
         displayIndexPatternSection
       )}
-      {displayIndexPatternEditor}
-    </div>
+    </>
   );
 };
 

@@ -28,13 +28,14 @@ import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 import { logResolutionError } from './utils';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { ContextualProfileLevel } from './consts';
+import { recordHasContext } from './record_has_context';
 
 interface SerializedDataSourceProfileParams {
   dataViewId: string | undefined;
   esqlQuery: string | undefined;
 }
 
-interface DataTableRecordWithContext extends DataTableRecord {
+export interface DataTableRecordWithContext extends DataTableRecord {
   context: ContextWithProfileId<DocumentContext>;
 }
 
@@ -181,6 +182,13 @@ export class ScopedProfilesManager {
     );
   }
 
+  public getContexts() {
+    return {
+      rootContext: this.rootContext$.getValue(),
+      dataSourceContext: this.dataSourceContext$.getValue(),
+    };
+  }
+
   /**
    * Tracks the active profiles in the EBT context
    */
@@ -213,10 +221,4 @@ const serializeDataSourceProfileParams = (
         ? params.query.esql
         : undefined,
   };
-};
-
-const recordHasContext = (
-  record: DataTableRecord | undefined
-): record is DataTableRecordWithContext => {
-  return Boolean(record && 'context' in record);
 };

@@ -1,0 +1,181 @@
+openapi: 3.0.3
+info:
+  title: SIEM Dashboard Migration components
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    OriginalDashboardVendor:
+      type: string
+      description: The original dashboard vendor identifier.
+      enum:
+        - splunk
+
+    DashboardMigration:
+      description: The dashboard migration object with its settings.
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              description: The dashboard migration id
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - $ref: '#/components/schemas/DashboardMigrationData'
+
+    DashboardMigrationData:
+      type: object
+      description: The dashboard migration object ( without Id ) with its settings.
+      required:
+        - name
+        - created_by
+        - created_at
+      properties:
+        name:
+          description: The dashboard migration name
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        created_by:
+          description: The user profile ID of the user who created the migration.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        created_at:
+          description:  The moment migration was created
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        last_execution:
+          description: The last execution of the dashboard migration task.
+          $ref: './common.schema.yaml#/components/schemas/MigrationLastExecution'
+
+
+    DashboardMigrationDashboard:
+      description: The dashboard migration document object.
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              description: The dashboard migration id
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - $ref: '#/components/schemas/DashboardMigrationDashboardData'
+
+    DashboardMigrationDashboardData:
+      type: object
+      description: The dashboard migration document object.
+      required:
+        - '@timestamp'
+        - migration_id
+        - original_dashboard
+        - status
+        - created_by
+      properties:
+        '@timestamp':
+          type: string
+          description: The moment of creation
+        migration_id:
+          description: The migration id.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        created_by:
+          description: The user profile ID of the user who created the migration.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        original_dashboard:
+          description: The original dashboard to migrate.
+          $ref: '#/components/schemas/OriginalDashboard'
+        status:
+          description: The status of the dashboard migration process.
+          $ref: './common.schema.yaml#/components/schemas/MigrationStatus'
+          default: pending
+        updated_at:
+          type: string
+          description: The moment of the last update
+        updated_by:
+          type: string
+          description: The user who last updated the migration
+
+    OriginalDashboard:
+      type: object
+      required:
+        - id
+        - vendor
+        - title
+        - description
+        - data
+        - last_updated
+        - format
+      description: The raw dashboard object from different vendors
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the dashboard
+        vendor:
+          description: The original dashboard vendor identifier.
+          $ref: '#/components/schemas/OriginalDashboardVendor'
+        title:
+          type: string
+          description: The title of the dashboard
+        description:
+          type: string
+          description: The description of the dashboard
+        data:
+          type: string
+          description: The data of the dashboard, format could depend on the vendor
+        last_updated:
+          type: string
+          description: The last updated timestamp of the dashboard
+        format:
+          type: string
+          description: The format of the dashboard (e.g., 'json', 'xml')
+        splunk_properties:
+          description: Additional properties specific to the splunk
+          $ref: './vendor/dashboards/splunk.schema.yaml#/components/schemas/SplunkOriginalDashboardProperties'
+
+    DashboardMigrationTaskStats:
+      type: object
+      description: The dashboard migration task stats object.
+      required:
+        - id
+        - name
+        - status
+        - dashboard
+        - created_at
+        - last_updated_at
+      properties:
+        id:
+          description: The migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        name:
+          description: The migration name
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        status:
+          description: Indicates if the migration task status.
+          $ref: './common.schema.yaml#/components/schemas/MigrationTaskStatus'
+        dashboards:
+          type: object
+          description: The dashboards migration stats.
+          required:
+            - total
+            - pending
+            - processing
+            - completed
+            - failed
+          properties:
+            total:
+              type: integer
+              description: The total number of dashboards to migrate.
+            pending:
+              type: integer
+              description: The number of dashboards that are pending migration.
+            processing:
+              type: integer
+              description: The number of dashboards that are being migrated.
+            completed:
+              type: integer
+              description: The number of dashboards that have been migrated successfully.
+            failed:
+              type: integer
+              description: The number of dashboards that have failed migration.
+        created_at:
+          type: string
+          description: The moment the migration was created.
+        last_updated_at:
+          type: string
+          description: The moment of the last update.

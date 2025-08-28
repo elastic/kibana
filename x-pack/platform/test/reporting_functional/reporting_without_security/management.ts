@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 // This concatenates lines of multi-line string into a single line.
 // It is so long strings can be entered at short widths, making syntax highlighting easier on editors
@@ -41,7 +41,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const reportingApi = getService('reportingAPI');
-  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+  const ecommerceSOPath =
+    'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
 
   const postJobJSON = async (
     apiPath: string,
@@ -79,6 +80,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const [firstTitleElem] = await testSubjects.findAll('reportingListItemObjectTitle');
       const tableCellText = await firstTitleElem.getVisibleText();
       expect(tableCellText).to.be(`Tiểu thuyết`);
+    });
+
+    describe('Schedules', () => {
+      it('allows user with reporting privileges to navigate to the Schedules tab', async () => {
+        await PageObjects.common.navigateToApp('reporting');
+        await (await testSubjects.find('reportingTabs-schedules')).click();
+        await testSubjects.existOrFail('reportSchedulesTable');
+      });
     });
   });
 };

@@ -39,6 +39,7 @@ describe('useFetchAlertSummary', () => {
       http: mockHttp,
       assistantAvailability: {
         isAssistantEnabled: true,
+        isAssistantVisible: true,
       },
     });
   });

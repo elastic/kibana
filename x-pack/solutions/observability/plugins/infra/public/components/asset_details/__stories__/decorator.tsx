@@ -211,7 +211,6 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
     },
     featureFlags: {
       customThresholdAlertsEnabled: true,
-      logsUIEnabled: false,
       metricsExplorerEnabled: false,
       osqueryEnabled: true,
       inventoryThresholdAlertRuleEnabled: true,
@@ -221,6 +220,7 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
       // to be removed in https://github.com/elastic/kibana/issues/221904
       profilingEnabled: false,
       ruleFormV2Enabled: false,
+      hostOtelEnabled: false,
     },
   };
 

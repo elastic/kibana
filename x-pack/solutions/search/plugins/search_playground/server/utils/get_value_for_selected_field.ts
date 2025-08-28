@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { get, has } from 'lodash';
 
 export const getValueForSelectedField = (hit: SearchHit, path: string): string => {

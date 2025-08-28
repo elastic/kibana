@@ -17,7 +17,7 @@ import {
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
-// eslint-disable-next-line import/no-default-export
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');

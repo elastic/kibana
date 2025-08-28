@@ -306,6 +306,45 @@ paths:
       summary: List asset criticality records
       tags:
         - Security Entity Analytics API
+  /api/entity_analytics/monitoring/engine/delete:
+    delete:
+      operationId: DeleteMonitoringEngine
+      parameters:
+        - description: Whether to delete all the privileged user data
+          in: query
+          name: data
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                required:
+                  - deleted
+          description: Successful response
+      summary: Delete the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/engine/disable:
+    post:
+      operationId: DisableMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringEngineDescriptor'
+          description: Successful response
+      summary: Disable the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/init:
     post:
       operationId: InitMonitoringEngine
@@ -317,6 +356,33 @@ paths:
                 $ref: '#/components/schemas/MonitoringEngineDescriptor'
           description: Successful response
       summary: Initialize the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/engine/schedule_now:
+    post:
+      operationId: ScheduleMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    description: Indicates the scheduling was successful
+                    type: boolean
+          description: Successful response
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    description: Error message indicating the engine is already running
+                    type: string
+          description: Conflict - Monitoring engine is already running
+      summary: Schedule the Privilege Monitoring Engine
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/health:
@@ -337,15 +403,34 @@ paths:
                     required:
                       - status
                   status:
-                    oneOf:
-                      - $ref: '#/components/schemas/EngineStatus'
-                      - enum:
-                          - not_found
-                        type: string
+                    $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
                 required:
                   - status
           description: Successful response
       summary: Health check on Privilege Monitoring
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/privileges/privileges:
+    get:
+      description: >-
+        Check if the current user has all required permissions for Privilege
+        Monitoring
+      operationId: PrivMonPrivileges
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                has_all_required: true
+                privileges:
+                  elasticsearch:
+                    index:
+                      .entity_analytics.monitoring.user-default:
+                        read: true
+              schema:
+                $ref: '#/components/schemas/EntityAnalyticsPrivileges'
+          description: Successful response
+      summary: Run a privileges check on Privilege Monitoring
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users:
@@ -429,7 +514,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  aknowledged:
+                  acknowledged:
                     description: Indicates if the deletion was successful
                     type: boolean
                   message:
@@ -574,6 +659,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:
@@ -596,12 +682,18 @@ paths:
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
                 lookbackPeriod:
-                  default: 24h
+                  default: 3h
                   description: >-
                     The amount of time the transform looks back to calculate the
                     aggregations.
                   pattern: '[smdh]$'
                   type: string
+                maxPageSearchSize:
+                  default: 500
+                  description: >-
+                    The initial page size to use for the composite aggregation
+                    of each checkpoint.
+                  type: integer
                 timeout:
                   default: 180s
                   description: The timeout for initializing the aggregating transform.
@@ -704,7 +796,7 @@ paths:
     post:
       operationId: InitEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine.
           in: path
           name: entityType
           required: true
@@ -722,6 +814,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:
@@ -740,12 +833,18 @@ paths:
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
                 lookbackPeriod:
-                  default: 24h
+                  default: 3h
                   description: >-
                     The amount of time the transform looks back to calculate the
                     aggregations.
                   pattern: '[smdh]$'
                   type: string
+                maxPageSearchSize:
+                  default: 500
+                  description: >-
+                    The initial page size to use for the composite aggregation
+                    of each checkpoint.
+                  type: integer
                 timeout:
                   default: 180s
                   description: The timeout for initializing the aggregating transform.
@@ -1322,6 +1421,7 @@ components:
             - green
             - yellow
             - red
+            - unavailable
             - unknown
           type: string
         id:
@@ -1421,6 +1521,40 @@ components:
         - $ref: '#/components/schemas/HostEntity'
         - $ref: '#/components/schemas/ServiceEntity'
         - $ref: '#/components/schemas/GenericEntity'
+    EntityAnalyticsPrivileges:
+      type: object
+      properties:
+        has_all_required:
+          type: boolean
+        has_read_permissions:
+          type: boolean
+        has_write_permissions:
+          type: boolean
+        privileges:
+          type: object
+          properties:
+            elasticsearch:
+              type: object
+              properties:
+                cluster:
+                  additionalProperties:
+                    type: boolean
+                  type: object
+                index:
+                  additionalProperties:
+                    additionalProperties:
+                      type: boolean
+                    type: object
+                  type: object
+            kibana:
+              additionalProperties:
+                type: boolean
+              type: object
+          required:
+            - elasticsearch
+      required:
+        - has_all_required
+        - privileges
     EntityRiskLevels:
       enum:
         - Unknown
@@ -1689,7 +1823,7 @@ components:
         labels:
           type: object
           properties:
-            source_indices:
+            source_ids:
               items:
                 type: string
               type: array
@@ -1716,10 +1850,17 @@ components:
       type: object
       properties:
         status:
-          $ref: '#/components/schemas/EngineStatus'
+          $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
       required:
         - type
         - status
+    PrivilegeMonitoringEngineStatus:
+      enum:
+        - started
+        - error
+        - disabled
+        - not_installed
+      type: string
     PrivmonUserCsvUploadErrorItem:
       type: object
       properties:

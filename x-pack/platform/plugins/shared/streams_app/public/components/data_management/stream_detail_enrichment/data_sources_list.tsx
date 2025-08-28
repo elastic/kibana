@@ -25,10 +25,8 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import {
-  DataSourceActorRef,
-  useDataSourceSelector,
-} from './state_management/data_source_state_machine';
+import type { DataSourceActorRef } from './state_management/data_source_state_machine';
+import { useDataSourceSelector } from './state_management/data_source_state_machine';
 
 const DataSourcesFlyout = dynamic(() =>
   import('./data_sources_flyout').then((mod) => ({ default: mod.DataSourcesFlyout }))
@@ -55,9 +53,15 @@ export const DataSourcesList = () => {
   const hasHiddenDataSources = hiddenDataSourcesRefs.length > 0;
 
   return (
-    <EuiFlexGroup wrap={false} alignItems="center" gutterSize="s">
+    <EuiFlexGroup
+      component="ul"
+      wrap={false}
+      alignItems="center"
+      gutterSize="s"
+      data-test-subj="streamsAppProcessingDataSourcesList"
+    >
       {visibleDataSourcesRefs.map((dataSourceRef) => (
-        <EuiFlexItem key={dataSourceRef.id} grow={false}>
+        <EuiFlexItem component="li" key={dataSourceRef.id} grow={false}>
           <DataSourceListItem dataSourceRef={dataSourceRef} />
         </EuiFlexItem>
       ))}
@@ -66,6 +70,7 @@ export const DataSourcesList = () => {
           <EuiToolTip content={manageDataSourcesLabel}>
             {hasHiddenDataSources ? (
               <EuiButtonEmpty
+                data-test-subj="streamsAppProcessingManageDataSourcesButton"
                 iconType="controls"
                 iconSide="right"
                 onClick={openDataSourcesManagement}
@@ -78,6 +83,7 @@ export const DataSourcesList = () => {
               </EuiButtonEmpty>
             ) : (
               <EuiButtonIcon
+                data-test-subj="streamsAppProcessingManageDataSourcesButton"
                 iconType="controls"
                 onClick={openDataSourcesManagement}
                 aria-label={manageDataSourcesLabel}
@@ -128,7 +134,12 @@ const DataSourceListItem = ({ dataSourceRef }: DataSourceListItemProps) => {
   );
 
   return (
-    <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
+    <EuiPanel
+      paddingSize="s"
+      hasShadow={false}
+      hasBorder
+      data-test-subj="streamsAppProcessingDataSourceListItem"
+    >
       <EuiCheckbox
         id={dataSourceRef.id}
         label={content}

@@ -8,6 +8,7 @@
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
+import { EXPLORE_DATA_VIEW_PREFIX } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { sharedStateSelector } from '../redux/selectors';
 
@@ -17,7 +18,7 @@ import { sharedStateSelector } from '../redux/selectors';
 export const useManagedDataViews = (): DataView[] => {
   const {
     dataViews: dataViewSpecs,
-    defaultDataViewId,
+    adhocDataViews,
     alertDataViewId,
   } = useSelector(sharedStateSelector);
   const {
@@ -26,9 +27,9 @@ export const useManagedDataViews = (): DataView[] => {
 
   return useMemo(
     () =>
-      dataViewSpecs
-        .filter((dv) => dv.id === defaultDataViewId || dv.id === alertDataViewId)
+      [...dataViewSpecs, ...adhocDataViews]
+        .filter((dv) => dv.id === alertDataViewId || dv.id?.startsWith(EXPLORE_DATA_VIEW_PREFIX))
         .map((spec) => new DataView({ spec, fieldFormats })),
-    [dataViewSpecs, defaultDataViewId, alertDataViewId, fieldFormats]
+    [dataViewSpecs, adhocDataViews, alertDataViewId, fieldFormats]
   );
 };

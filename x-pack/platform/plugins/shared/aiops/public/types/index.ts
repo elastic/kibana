@@ -26,9 +26,8 @@ import type { LogCategorizationEmbeddableWrapperProps } from '../components/log_
 
 export interface AiopsPluginSetupDeps {
   embeddable: EmbeddableSetup;
-  cases: CasesPublicSetup;
+  cases?: CasesPublicSetup;
   licensing: LicensingPluginSetup;
-
   uiActions: UiActionsSetup;
 }
 

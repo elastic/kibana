@@ -211,6 +211,28 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     );
   });
 
+  it('should work if kibanaUrl has a trailing slash', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    mockedOutputService.get.mockResolvedValue({
+      ...output,
+      sync_integrations: true,
+      kibana_url: 'http://remote-kibana-host/',
+      kibana_api_key: 'APIKEY',
+    } as any);
+
+    mockedFetch.mockResolvedValueOnce({
+      json: () => statusRes,
+      status: 200,
+      ok: true,
+    } as any);
+
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual(
+      statusRes
+    );
+  });
+
   it('should not throw if the remote status api has errors in the body', async () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
@@ -258,6 +280,29 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
       integrations: [],
       error:
         'GET http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed with error: some error',
+    });
+  });
+
+  it('should return an error if kibanaUrl is not found', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    mockedOutputService.get.mockResolvedValue({
+      ...output,
+      sync_integrations: true,
+      kibana_url: 'http://remote-kibana-host',
+      kibana_api_key: 'APIKEY',
+    } as any);
+
+    mockedFetch.mockResolvedValueOnce({
+      json: () => ({ ok: false, message: 'Unknown resource.' }),
+      status: 404,
+      ok: false,
+    } as any);
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+      error:
+        'GET http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed with status 404: Unknown resource.',
     });
   });
 

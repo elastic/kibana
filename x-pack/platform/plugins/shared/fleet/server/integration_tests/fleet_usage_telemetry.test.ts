@@ -15,6 +15,8 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 
 import { fetchFleetUsage } from '../collectors/register';
+import { getAgentPolicySavedObjectType } from '../services/agent_policy';
+import { getPackagePolicySavedObjectType } from '../services/package_policy';
 
 import { waitForFleetSetup } from './helpers';
 
@@ -24,6 +26,9 @@ describe('fleet usage telemetry', () => {
   let core: any;
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
+  let agentPolicyType: string;
+  let packagePolicyType: string;
+
   const registryUrl = 'http://localhost';
 
   const startServers = async () => {
@@ -112,7 +117,8 @@ describe('fleet usage telemetry', () => {
 
   beforeAll(async () => {
     await startServers();
-
+    agentPolicyType = await getAgentPolicySavedObjectType();
+    packagePolicyType = await getPackagePolicySavedObjectType();
     const esClient = kbnServer.coreStart.elasticsearch.client.asInternalUser;
     await esClient.bulk({
       index: '.fleet-agents',
@@ -342,7 +348,7 @@ describe('fleet usage telemetry', () => {
     });
 
     const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
-    await soClient.create('ingest-package-policies', {
+    await soClient.create(packagePolicyType, {
       name: 'fleet_server-1',
       namespace: 'default',
       package: {
@@ -370,7 +376,7 @@ describe('fleet usage telemetry', () => {
       latest_revision: true,
     });
 
-    await soClient.create('ingest-package-policies', {
+    await soClient.create(packagePolicyType, {
       name: 'nginx-1',
       namespace: 'default',
       package: {
@@ -430,7 +436,7 @@ describe('fleet usage telemetry', () => {
     );
 
     await soClient.create(
-      'ingest-agent-policies',
+      agentPolicyType,
       {
         namespace: 'default',
         monitoring_enabled: ['logs', 'metrics'],
@@ -452,7 +458,7 @@ describe('fleet usage telemetry', () => {
       { id: 'policy2' }
     );
     await soClient.create(
-      'ingest-agent-policies',
+      agentPolicyType,
       {
         namespace: 'default',
         monitoring_enabled: ['logs', 'metrics'],

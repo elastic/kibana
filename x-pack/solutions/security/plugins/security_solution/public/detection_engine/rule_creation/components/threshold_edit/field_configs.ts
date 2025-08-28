@@ -19,7 +19,7 @@ export const THRESHOLD_FIELD_CONFIG = {
   validations: [
     {
       validator: fieldValidators.maxLengthField({
-        length: 3,
+        length: 5,
         message: i18n.THRESHOLD_FIELD_COUNT_VALIDATION_ERROR,
       }),
     },

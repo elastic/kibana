@@ -38,7 +38,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
         <h3>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.title"
-            defaultMessage="Add data source of your privileged users"
+            defaultMessage="Add data source for your privileged users"
           />
         </h3>
       </EuiTitle>
@@ -47,7 +47,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
         <p>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.description"
-            defaultMessage="To get started, define your privileged users by selecting an index with the relevant data, or importing your list of privileged users from a CSV file."
+            defaultMessage="To get started, define your privileged users by selecting an index with user data or importing your list of privileged users from a supported file."
           />
         </p>
       </EuiText>
@@ -56,6 +56,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
       <EuiFlexGroup direction="row" justifyContent="spaceBetween">
         <EuiFlexItem grow={1}>
           <EuiCard
+            data-test-subj="privilegedUserMonitoringAddIndexCard"
             hasBorder
             layout="horizontal"
             icon={<EuiIcon size="l" type="indexOpen" />}
@@ -84,6 +85,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
             layout="horizontal"
             icon={<EuiIcon size="l" type="importAction" />}
             titleSize="xs"
+            data-test-subj="privilegedUserMonitoringImportCSVCard"
             title={
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.file.title"

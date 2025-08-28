@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ServerlessRoleName } from '@kbn/test-suites-serverless/shared/lib/security/types';
+export { ServerlessRoleName } from '../lib/types';

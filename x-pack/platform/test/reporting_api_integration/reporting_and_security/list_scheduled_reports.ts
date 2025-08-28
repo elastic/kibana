@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const pdfPayload: JobParamsPDFV2 = {
   browserTimezone: 'UTC',
@@ -32,7 +32,7 @@ const csvPayload: JobParamsCSV = {
   columns: [],
   version: '7.13.0',
 };
-// eslint-disable-next-line import/no-default-export
+
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
 

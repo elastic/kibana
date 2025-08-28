@@ -14,9 +14,12 @@ import type {
   RecentlyAccessedDefinition,
   RootNavigationItemDefinition,
 } from '@kbn/core-chrome-browser';
-import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import classnames from 'classnames';
 import type { Observable } from 'rxjs';
+import { EMPTY } from 'rxjs';
 import { useNavigation as useNavigationService } from '../services';
 import {
   FeedbackBtn,
@@ -42,12 +45,19 @@ const NavigationContext = createContext<Context>({
 
 export interface Props {
   navigationTree$: Observable<NavigationTreeDefinitionUI>;
-  dataTestSubj?: string;
+  dataTestSubj$?: Observable<string | undefined>;
 }
 
-const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
-  const { activeNodes$, selectedPanelNode, setSelectedPanelNode, isFeedbackBtnVisible$ } =
-    useNavigationService();
+const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj$ }) => {
+  const {
+    activeNodes$,
+    selectedPanelNode,
+    setSelectedPanelNode,
+    isFeedbackBtnVisible$,
+    isSideNavCollapsed,
+  } = useNavigationService();
+
+  const dataTestSubj = useObservable(dataTestSubj$ ?? EMPTY, undefined);
 
   const activeNodes = useObservable(activeNodes$, []);
   const navigationTree = useObservable(navigationTree$, { id: 'es', body: [] });
@@ -70,7 +80,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
           return <RecentlyAccessed {...navNode} key={`recentlyAccessed-${i}`} />;
         }
 
-        if (navNode.sideNavStatus === 'hidden') {
+        if (navNode.sideNavStatus === 'hidden' || navNode.sideNavVersion === 'v2') {
           return null;
         }
 
@@ -84,12 +94,14 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
     <PanelProvider selectedNode={selectedPanelNode} setSelectedNode={setSelectedPanelNode}>
       <NavigationContext.Provider value={contextValue}>
         {/* Main navigation content */}
-        <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
+        <EuiCollapsibleNavBeta.Body
+          data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV1')}
+        >
           <EuiFlexGroup direction="column" justifyContent="spaceBetween" css={{ height: '100%' }}>
             <EuiFlexItem>{renderNodes(navigationTree.body)}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiCollapsibleNavBeta.Body>
-        {isFeedbackBtnVisible && (
+        {isFeedbackBtnVisible && !isSideNavCollapsed && (
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiSpacer size="s" />
@@ -118,6 +130,19 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
 
 export const Navigation = React.memo(NavigationComp) as typeof NavigationComp;
 
+/**
+ * A React hook for accessing the internal state and rendering logic of the `Navigation` component.
+ *
+ * This hook consumes a private context set up by the `Navigation` component itself.
+ * It is intended for use only by the immediate child components of `Navigation` (e.g., `NavGroup`, `NavLinks`)
+ * to coordinate their rendering with the parent.
+ *
+ * NOTE: This is distinct from the `useNavigation` hook in `src/services.tsx`, which provides
+ * access to the top-level navigation services.
+ *
+ * @returns The internal state of the `Navigation` component.
+ * @throws If the hook is used outside of a `Navigation` component.
+ */
 export function useNavigation() {
   const context = useContext(NavigationContext);
   if (!context) {

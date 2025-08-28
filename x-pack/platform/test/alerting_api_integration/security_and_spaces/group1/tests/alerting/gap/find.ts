@@ -14,7 +14,6 @@ import {
   getUnauthorizedErrorMessage,
 } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function findGapsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -53,6 +52,14 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
           username: user.username,
           password: user.password,
         };
+
+        beforeEach(async () => {
+          await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/delete_gaps`)
+            .set('kbn-xsrf', 'foo')
+            .send({})
+            .expect(200);
+        });
 
         describe('find gaps with request body', () => {
           it('should handle finding gaps with various parameters', async () => {

@@ -5,36 +5,26 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { PackageService } from '@kbn/fleet-plugin/server';
-import type { InferenceClient } from '@kbn/inference-common';
 import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleMigration,
   RuleMigrationRule,
   RuleMigrationTranslationResult,
   UpdateRuleMigrationRule,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import { type RuleMigrationResource } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SiemMigrationResource } from '../../../../common/siem_migrations/model/common.gen';
 import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_client';
 import type { Stored } from '../types';
+import type {
+  SiemMigrationsClientDependencies,
+  SiemMigrationsIndexNameProvider,
+} from '../common/types';
 
 export type StoredSiemMigration = Stored<RuleMigration>;
 
 export type StoredRuleMigration = Stored<RuleMigrationRule>;
-export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
-
-export interface SiemRuleMigrationsClientDependencies {
-  inferenceClient: InferenceClient;
-  rulesClient: RulesClient;
-  actionsClient: ActionsClient;
-  savedObjectsClient: SavedObjectsClientContract;
-  packageService?: PackageService;
-  telemetry: AnalyticsServiceSetup;
-}
+export type StoredRuleMigrationResource = Stored<SiemMigrationResource>;
 
 export interface RuleMigrationIntegration {
   id: string;
@@ -73,7 +63,7 @@ export type InternalUpdateRuleMigrationRule = UpdateRuleMigrationRule & {
  **/
 export type SplunkSeverity = '1' | '2' | '3' | '4' | '5';
 
-export interface Adapters {
+export interface RuleMigrationAdapters {
   rules: IndexPatternAdapter;
   resources: IndexPatternAdapter;
   integrations: IndexAdapter;
@@ -81,7 +71,13 @@ export interface Adapters {
   migrations: IndexPatternAdapter;
 }
 
-export type AdapterId = keyof Adapters;
+export type RuleMigrationAdapterId = keyof RuleMigrationAdapters;
 
-export type IndexNameProvider = () => Promise<string>;
-export type IndexNameProviders = Record<AdapterId, IndexNameProvider>;
+export type RuleMigrationIndexNameProviders = Record<
+  RuleMigrationAdapterId,
+  SiemMigrationsIndexNameProvider
+>;
+
+export type RuleMigrationsClientDependencies = SiemMigrationsClientDependencies & {
+  rulesClient: RulesClient;
+};

@@ -12,8 +12,8 @@ import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 
-import { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
 import type { DashboardAttributes, DashboardOptions } from '../server/content_management';
 
 export interface DashboardCapabilities {
@@ -36,11 +36,10 @@ export type DashboardSettings = Writable<DashboardOptions> & {
 };
 
 export interface DashboardState extends DashboardSettings {
-  query: Query;
-  filters: Filter[];
+  query?: Query;
+  filters?: Filter[];
   timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
-  viewMode: ViewMode;
   panels: DashboardAttributes['panels'];
 
   /**
@@ -53,7 +52,7 @@ export interface DashboardState extends DashboardSettings {
    * Serialized control group state.
    * Contains state loaded from dashboard saved object
    */
-  controlGroupInput?: ControlGroupSerializedState;
+  controlGroupInput?: ControlsGroupState;
 }
 
 export type DashboardLocatorParams = Partial<
@@ -61,6 +60,8 @@ export type DashboardLocatorParams = Partial<
     controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
 
     references?: DashboardState['references'] & SerializableRecord;
+
+    viewMode?: ViewMode;
 
     /**
      * If provided, the dashboard with this id will be loaded. If not given, new, unsaved dashboard will be loaded.
@@ -83,5 +84,11 @@ export type DashboardLocatorParams = Partial<
      * (Background search)
      */
     searchSessionId?: string;
+
+    /**
+     * Set to pass state from solution to embeddables.
+     * See PassThroughContext presentation container interface for details
+     */
+    passThroughContext?: SerializableRecord;
   }
 >;

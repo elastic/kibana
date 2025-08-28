@@ -21,19 +21,16 @@ import {
   getPercentilesMbColorRampStops,
   getColorPalette,
 } from '../../color_palettes';
-import {
-  COLOR_MAP_TYPE,
-  DATA_MAPPING_FUNCTION,
-  FieldFormatter,
-  VECTOR_STYLES,
-} from '../../../../../common/constants';
+import type { FieldFormatter, VECTOR_STYLES } from '../../../../../common/constants';
+import { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION } from '../../../../../common/constants';
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
-import { Break, BreakedLegend } from '../components/legend/breaked_legend';
-import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
-import { LegendProps } from './style_property';
+import type { Break } from '../components/legend/breaked_legend';
+import { BreakedLegend } from '../components/legend/breaked_legend';
+import type { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
+import type { LegendProps } from './style_property';
 import { getOrdinalSuffix } from '../../../util/ordinal_suffix';
-import { IField } from '../../../fields/field';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import type { IField } from '../../../fields/field';
+import type { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 
 const UP_TO = i18n.translate('xpack.maps.legend.upto', {
   defaultMessage: 'up to',
