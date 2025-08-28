@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import type { Logger, KibanaRequest } from '@kbn/core/server';
+import {
+  httpServerMock,
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { createMockEndpointAppContext, createRouteHandlerContext } from '../../../mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { validateCommandSpecificCancelPermissions } from './cancel_authz';
 import { fetchActionRequestById } from '../../../services/actions/utils/fetch_action_request_by_id';
 import type { CancelActionRequestBody } from '../../../../../common/api/endpoint';
+import type { LogsEndpointAction } from '../../../../../common/endpoint/types';
 import { EndpointAuthorizationError } from '../../../errors';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../../../lib/detection_engine/routes/__mocks__/request_context';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
+import type { EndpointAppContext } from '../../../types';
 
 jest.mock('../../../services/actions/utils/fetch_action_request_by_id');
 
@@ -23,10 +32,10 @@ const mockedFetchActionRequestById = fetchActionRequestById as jest.MockedFuncti
 
 describe('validateCommandSpecificCancelPermissions', () => {
   let endpointAppContextService: EndpointAppContextService;
-  let endpointContext: any;
-  let mockLogger: any;
-  let mockContext: any;
-  let mockRequest: any;
+  let endpointContext: EndpointAppContext;
+  let mockLogger: jest.Mocked<Logger>;
+  let mockContext: SecuritySolutionRequestHandlerContextMock;
+  let mockRequest: KibanaRequest<unknown, unknown, CancelActionRequestBody>;
 
   beforeEach(() => {
     endpointAppContextService = new EndpointAppContextService();
@@ -40,10 +49,12 @@ describe('validateCommandSpecificCancelPermissions', () => {
       debug: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
-    };
+    } as unknown as jest.Mocked<Logger>;
 
-    mockContext = createRouteHandlerContext(null, null);
-    mockContext.securitySolution.getSpaceId.mockResolvedValue('default');
+    const mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    const mockSavedObjectsClient = savedObjectsClientMock.create();
+    mockContext = createRouteHandlerContext(mockScopedClient, mockSavedObjectsClient);
+    mockContext.securitySolution.getSpaceId.mockResolvedValue('default' as never);
 
     mockRequest = httpServerMock.createKibanaRequest({
       body: {
@@ -75,7 +86,7 @@ describe('validateCommandSpecificCancelPermissions', () => {
           EndpointActions: {
             data: { command },
           },
-        } as any);
+        } as unknown as LogsEndpointAction);
 
         const authz = getEndpointAuthzInitialStateMock({
           [commandPermission]: true,
@@ -84,7 +95,7 @@ describe('validateCommandSpecificCancelPermissions', () => {
 
         await expect(
           validateCommandSpecificCancelPermissions(
-            mockContext,
+            mockContext as unknown as SecuritySolutionRequestHandlerContext,
             mockRequest,
             endpointContext,
             mockLogger
@@ -121,7 +132,7 @@ describe('validateCommandSpecificCancelPermissions', () => {
           EndpointActions: {
             data: { command },
           },
-        } as any);
+        } as unknown as LogsEndpointAction);
 
         const authz = getEndpointAuthzInitialStateMock({
           [commandPermission]: false, // User lacks command-specific permission
@@ -130,7 +141,7 @@ describe('validateCommandSpecificCancelPermissions', () => {
 
         await expect(
           validateCommandSpecificCancelPermissions(
-            mockContext,
+            mockContext as unknown as SecuritySolutionRequestHandlerContext,
             mockRequest,
             endpointContext,
             mockLogger
@@ -146,11 +157,11 @@ describe('validateCommandSpecificCancelPermissions', () => {
 
   describe('error handling', () => {
     it('should throw CustomHttpRequestError when action is not found', async () => {
-      mockedFetchActionRequestById.mockResolvedValue(null);
+      mockedFetchActionRequestById.mockResolvedValue(null as unknown as LogsEndpointAction);
 
       await expect(
         validateCommandSpecificCancelPermissions(
-          mockContext,
+          mockContext as unknown as SecuritySolutionRequestHandlerContext,
           mockRequest,
           endpointContext,
           mockLogger
@@ -165,11 +176,11 @@ describe('validateCommandSpecificCancelPermissions', () => {
         EndpointActions: {
           data: {}, // Missing command
         },
-      } as any);
+      } as unknown as LogsEndpointAction);
 
       await expect(
         validateCommandSpecificCancelPermissions(
-          mockContext,
+          mockContext as unknown as SecuritySolutionRequestHandlerContext,
           mockRequest,
           endpointContext,
           mockLogger
@@ -190,11 +201,11 @@ describe('validateCommandSpecificCancelPermissions', () => {
         EndpointActions: {
           data: { command: 'unknown-command' },
         },
-      } as any);
+      } as unknown as LogsEndpointAction);
 
       await expect(
         validateCommandSpecificCancelPermissions(
-          mockContext,
+          mockContext as unknown as SecuritySolutionRequestHandlerContext,
           mockRequest,
           endpointContext,
           mockLogger

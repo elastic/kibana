@@ -24,7 +24,6 @@ export interface BaseSelectorState {
 export interface BaseSelectorConfig {
   initialLabel: string;
   tooltipText: string;
-  errorMessageId: string;
   minWidth: number;
   rowHeight: number;
   selectableId: string;

@@ -6,8 +6,9 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { IHttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { ArgSelectorState } from '../../console/types';
 import type { BaseSelectorState } from './types';
 
 /**
@@ -25,8 +26,9 @@ export const useGenericErrorToast = (
 
       const err = error;
       if (err?.body && typeof err.body === 'object' && 'message' in err.body) {
-        message = (err.body as any).message;
-        code = String((err.body as any).statusCode ?? code);
+        const errorBody = err.body as ResponseErrorBody;
+        message = errorBody.message;
+        code = String(errorBody.statusCode ?? code);
       } else {
         message = err?.message || String(err);
       }
@@ -59,7 +61,7 @@ export const useBaseSelectorState = <T extends BaseSelectorState>(
  */
 export const useBaseSelectorHandlers = <T extends BaseSelectorState>(
   state: T,
-  onChange: Function,
+  onChange: (newData: ArgSelectorState<T>) => void,
   value: string,
   valueText: string
 ) => {

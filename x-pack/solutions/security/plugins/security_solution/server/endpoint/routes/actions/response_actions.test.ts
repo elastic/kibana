@@ -62,6 +62,7 @@ import * as ActionDetailsService from '../../services/actions/action_details_by_
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import { getResponseActionsClient as _getResponseActionsClient } from '../../services';
+import type { ResponseActionsClient } from '../../services';
 import type {
   ResponseActionsRequestBody,
   UploadActionApiRequestBody,
@@ -1043,16 +1044,25 @@ describe('Response actions', () => {
 
     describe('Cancel Action Authorization', () => {
       let fetchActionByIdSpy: jest.SpyInstance;
-      let responseActionsClientMockInstance: jest.Mocked<any>;
-      const mockIsolateAction = {
+      let responseActionsClientMockInstance: jest.Mocked<Pick<ResponseActionsClient, 'cancel'>>;
+      let originalGetResponseActionsClientMock: ((...args: any) => any) | undefined;
+      const mockIsolateAction: Partial<LogsEndpointAction> = {
         EndpointActions: {
+          action_id: 'test-action-id-1',
+          expiration: '2024-12-31T23:59:59.999Z',
+          type: 'INPUT_ACTION' as const,
+          input_type: 'endpoint' as const,
           data: {
             command: 'isolate',
           },
         },
       };
-      const mockExecuteAction = {
+      const mockExecuteAction: Partial<LogsEndpointAction> = {
         EndpointActions: {
+          action_id: 'test-action-id-2',
+          expiration: '2024-12-31T23:59:59.999Z',
+          type: 'INPUT_ACTION' as const,
+          input_type: 'endpoint' as const,
           data: {
             command: 'runscript',
           },
@@ -1060,9 +1070,13 @@ describe('Response actions', () => {
       };
 
       beforeEach(() => {
+        // Store the original mock implementation
+        originalGetResponseActionsClientMock =
+          (getResponseActionsClientMock as jest.Mock).getMockImplementation() || jest.fn();
+
         fetchActionByIdSpy = jest
           .spyOn(fetchActionUtils, 'fetchActionRequestById')
-          .mockResolvedValue(mockIsolateAction);
+          .mockResolvedValue(mockIsolateAction as LogsEndpointAction);
 
         // Mock the response actions client
         responseActionsClientMockInstance = {
@@ -1091,6 +1105,14 @@ describe('Response actions', () => {
 
       afterEach(() => {
         fetchActionByIdSpy.mockRestore();
+        // Restore the original mock implementation
+        if (originalGetResponseActionsClientMock) {
+          (getResponseActionsClientMock as jest.Mock).mockImplementation(
+            originalGetResponseActionsClientMock
+          );
+        } else {
+          (getResponseActionsClientMock as jest.Mock).mockRestore();
+        }
         jest.clearAllMocks();
       });
 
@@ -1233,6 +1255,20 @@ describe('Response actions', () => {
       httpRequestMock = testSetup.createRequestMock({ body: reqBody });
       registerResponseActionRoutes(testSetup.routerMock, testSetup.endpointAppContextMock);
 
+      // Helper function to set up authorization - similar to callRoute pattern
+      const setupAuthz = (authz: Partial<EndpointAuthz>) => {
+        const currentSecuritySolution = testSetup.httpHandlerContextMock.securitySolution;
+        testSetup.httpHandlerContextMock.securitySolution = currentSecuritySolution.then(
+          (resolved) => ({
+            ...resolved,
+            getEndpointAuthz: jest.fn().mockResolvedValue(getEndpointAuthzInitialStateMock(authz)),
+          })
+        );
+      };
+
+      // Set up authorization for upload operations
+      setupAuthz({ canWriteFileOperations: true });
+
       const actionsGenerator = new EndpointActionGenerator('seed');
       createdUploadAction = actionsGenerator.generateActionDetails({
         command: 'upload',
@@ -1365,6 +1401,20 @@ describe('Response actions', () => {
         },
       });
       registerResponseActionRoutes(testSetup.routerMock, testSetup.endpointAppContextMock);
+
+      // Helper function to set up authorization - similar to callRoute pattern
+      const setupAuthz = (authz: Partial<EndpointAuthz>) => {
+        const currentSecuritySolution = testSetup.httpHandlerContextMock.securitySolution;
+        testSetup.httpHandlerContextMock.securitySolution = currentSecuritySolution.then(
+          (resolved) => ({
+            ...resolved,
+            getEndpointAuthz: jest.fn().mockResolvedValue(getEndpointAuthzInitialStateMock(authz)),
+          })
+        );
+      };
+
+      // Set up authorization for isolate operations
+      setupAuthz({ canIsolateHost: true });
 
       (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
         .fn()
