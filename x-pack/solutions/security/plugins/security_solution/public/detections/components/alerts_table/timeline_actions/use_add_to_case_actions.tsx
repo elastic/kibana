@@ -21,8 +21,6 @@ export interface UseAddToCaseActions {
   ecsData?: Ecs;
   nonEcsData?: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
-  isActiveTimelines: boolean;
-  isInDetections: boolean;
   refetch?: (() => void) | undefined;
 }
 
@@ -32,8 +30,6 @@ export const useAddToCaseActions = ({
   ecsData,
   nonEcsData,
   onSuccess,
-  isActiveTimelines,
-  isInDetections,
   refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
@@ -111,11 +107,7 @@ export const useAddToCaseActions = ({
   }, [caseAttachments, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
-    if (
-      (isActiveTimelines || isInDetections) &&
-      userCasesPermissions.createComment &&
-      userCasesPermissions.read
-    ) {
+    if (userCasesPermissions.createComment && userCasesPermissions.read) {
       return [
         // add to existing case menu item
         {
@@ -139,8 +131,6 @@ export const useAddToCaseActions = ({
     }
     return [];
   }, [
-    isActiveTimelines,
-    isInDetections,
     userCasesPermissions.createComment,
     userCasesPermissions.read,
     ariaLabel,

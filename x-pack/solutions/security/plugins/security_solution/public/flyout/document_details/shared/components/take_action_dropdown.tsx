@@ -307,8 +307,6 @@ export const TakeActionDropdown = memo(
         dataFormattedForFieldBrowser?.map((d) => ({ field: d.field, value: d.values })) ?? [],
       onMenuItemClick,
       onSuccess: refetchFlyoutData,
-      isActiveTimelines: isActiveTimeline(scopeId),
-      isInDetections,
       refetch,
     });
 
