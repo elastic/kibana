@@ -219,11 +219,12 @@ export class ScopedDiscoverEBTManager {
       const categorizedFields = fieldNames.map((fieldName) =>
         fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
       );
+      console.log('field names after ECS check: ', categorizedFields);
 
       eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = categorizedFields;
     }
 
-    console.log({ eventData });
+    console.log('ready EBT payload: ', { eventType: QUERY_FIELDS_USAGE_EVENT_TYPE, eventData });
     this.reportEvent(QUERY_FIELDS_USAGE_EVENT_TYPE, eventData);
   }
 
@@ -237,6 +238,7 @@ export class ScopedDiscoverEBTManager {
     if (!query) {
       return;
     }
+    console.log('raw query: ', query);
 
     if (isOfAggregateQueryType(query)) {
       // ES|QL query
@@ -246,7 +248,7 @@ export class ScopedDiscoverEBTManager {
       }
 
       const fieldNames = [...new Set(getQueryColumnsFromESQLQuery(query.esql))];
-
+      console.log('ES|QL parsed fields from query: ', fieldNames);
       if (fieldNames.length === 0) {
         return;
       }
@@ -264,9 +266,11 @@ export class ScopedDiscoverEBTManager {
       }
 
       const extractedFieldNames = [...new Set(getKqlFieldNamesFromExpression(query.query))];
+      console.log('KQL/Lucene parsed fields from query: ', extractedFieldNames);
 
       // we discarded an empty query earlier, so if we're getting an empty array here it's a full text search
       const fieldNames = extractedFieldNames.length === 0 ? [FREE_TEXT] : extractedFieldNames;
+      console.log('KQL/Lucene fields or FREE TEXT: ', fieldNames);
 
       await this.trackFieldUsageInQueryEvent({
         eventName:
