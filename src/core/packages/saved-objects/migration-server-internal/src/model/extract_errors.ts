@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { TransformErrorObjects } from '../core';
 import type { DocumentIdAndType } from '../actions';
 
@@ -88,17 +87,3 @@ export const fatalReasonDocumentExceedsMaxBatchSizeBytes = ({
   maxBatchSizeBytes: number;
 }) =>
   `The document with _id "${_id}" is ${docSizeBytes} bytes which exceeds the configured maximum batch size of ${maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`;
-
-/**
- * Constructs a summary message of how many errors were found and shows a max of 5. Currently used in outdatedDocumentsSearchBulkIndex.
- */
-export function summarizeErrorsWithSameType(errors: estypes.ErrorCause[]): string {
-  if (!errors.length) return 'No errors found.';
-  const type = errors[0].type;
-  const reasons = errors.map((e) => e.reason).filter(Boolean);
-  const shown = reasons.slice(0, 5);
-  const summary = `Found ${errors.length} errors related to ${type}, showing ${
-    shown.length
-  } reasons: ${shown.join('; ')}`;
-  return summary;
-}

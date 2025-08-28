@@ -13,7 +13,6 @@ import {
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
   extractDiscardedCorruptDocs,
   extractTransformFailuresReason,
-  summarizeErrorsWithSameType,
 } from './extract_errors';
 
 describe('extractUnknownDocFailureReason', () => {
@@ -120,78 +119,6 @@ describe('fatalReasonDocumentExceedsMaxBatchSizeBytes', () => {
       })
     ).toMatchInlineSnapshot(
       `"The document with _id \\"abc\\" is 106954752 bytes which exceeds the configured maximum batch size of 104857600 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value."`
-    );
-  });
-});
-
-describe('summarizeErrorsWithSameType', () => {
-  it('returns a message for empty errors array', () => {
-    expect(summarizeErrorsWithSameType([])).toBe('No errors found.');
-  });
-
-  it('summarizes a single error', () => {
-    const errors = [
-      {
-        type: 'mapper_parsing_exception',
-        reason: 'failed to parse field [title]',
-      },
-    ];
-
-    expect(summarizeErrorsWithSameType(errors)).toBe(
-      'Found 1 errors related to mapper_parsing_exception, showing 1 reasons: failed to parse field [title]'
-    );
-  });
-
-  it('summarizes multiple errors (fewer than 5)', () => {
-    const errors = [
-      {
-        type: 'mapper_parsing_exception',
-        reason: 'failed to parse field [title]',
-      },
-      {
-        type: 'mapper_parsing_exception',
-        reason: 'failed to parse field [description]',
-      },
-      {
-        type: 'mapper_parsing_exception',
-        reason: 'failed to parse field [tags]',
-      },
-    ];
-
-    expect(summarizeErrorsWithSameType(errors)).toBe(
-      'Found 3 errors related to mapper_parsing_exception, showing 3 reasons: ' +
-        'failed to parse field [title]; failed to parse field [description]; failed to parse field [tags]'
-    );
-  });
-
-  it('limits the summary to 5 reasons when there are more errors', () => {
-    const errors = [
-      { type: 'validation_exception', reason: 'error 1' },
-      { type: 'validation_exception', reason: 'error 2' },
-      { type: 'validation_exception', reason: 'error 3' },
-      { type: 'validation_exception', reason: 'error 4' },
-      { type: 'validation_exception', reason: 'error 5' },
-      { type: 'validation_exception', reason: 'error 6' },
-      { type: 'validation_exception', reason: 'error 7' },
-    ];
-
-    expect(summarizeErrorsWithSameType(errors)).toBe(
-      'Found 7 errors related to validation_exception, showing 5 reasons: ' +
-        'error 1; error 2; error 3; error 4; error 5'
-    );
-  });
-
-  it('handles errors with missing reason field', () => {
-    const errors = [
-      { type: 'index_not_found_exception', reason: 'index missing' },
-      { type: 'index_not_found_exception' },
-      { type: 'index_not_found_exception', reason: null },
-      { type: 'index_not_found_exception', reason: 'another index missing' },
-    ];
-
-    expect(summarizeErrorsWithSameType(errors)).toBe(
-      'Found 4 errors related to index_not_found_exception, showing 2 reasons: ' +
-        'index missing; another index missing'
     );
   });
 });

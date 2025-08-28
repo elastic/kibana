@@ -48,7 +48,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     const result = await task();
 
     expect(Either.isRight(result)).toBe(true);
-    expect((result as Either.Right<any>).right.type).toEqual('bulk_index_succeeded');
+    expect((result as Either.Right<any>).right).toEqual('bulk_index_succeeded');
   });
 
   it('resolves with `right:bulk_index_succeeded` if version conflict errors are encountered', async () => {
@@ -64,15 +64,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
             index: {
               error: {
                 type: 'version_conflict_engine_exception',
-                reason: 'reason 1',
-              },
-            },
-          },
-          {
-            index: {
-              error: {
-                type: 'version_conflict_engine_exception',
-                reason: 'reason 2',
+                reason: 'reason',
               },
             },
           },
@@ -90,8 +82,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     const result = await task();
 
     expect(Either.isRight(result)).toBe(true);
-    expect((result as Either.Right<any>).right.type).toEqual('bulk_index_succeeded');
-    expect((result as Either.Right<any>).right.versionConflictErrors).toHaveLength(2);
+    expect((result as Either.Right<any>).right).toEqual('bulk_index_succeeded');
   });
 
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {

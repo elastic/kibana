@@ -30,7 +30,6 @@ import {
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
   extractDiscardedUnknownDocs,
   extractDiscardedCorruptDocs,
-  summarizeErrorsWithSameType,
 } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
@@ -1470,16 +1469,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'TRANSFORMED_DOCUMENTS_BULK_INDEX') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (res.right.versionConflictErrors.length > 0) {
-        logs = [
-          ...stateP.logs,
-          {
-            level: 'warning' as const,
-            message: summarizeErrorsWithSameType(res.right.versionConflictErrors),
-          },
-        ];
-      }
-
       if (stateP.currentBatch + 1 < stateP.bulkOperationBatches.length) {
         return {
           ...stateP,

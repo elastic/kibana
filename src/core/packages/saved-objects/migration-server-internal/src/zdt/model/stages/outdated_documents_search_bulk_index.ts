@@ -12,7 +12,6 @@ import { FATAL_REASON_REQUEST_ENTITY_TOO_LARGE } from '../../../common/constants
 import { throwBadResponse } from '../../../model/helpers';
 import { isTypeof } from '../../actions';
 import type { ModelStage } from '../types';
-import { summarizeErrorsWithSameType } from '../../../model/extract_errors';
 
 export const outdatedDocumentsSearchBulkIndex: ModelStage<
   'OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX',
@@ -38,28 +37,15 @@ export const outdatedDocumentsSearchBulkIndex: ModelStage<
     }
   }
 
-  let logs = state.logs;
-  if (res.right.versionConflictErrors.length > 0) {
-    logs = [
-      ...state.logs,
-      {
-        level: 'warning' as const,
-        message: summarizeErrorsWithSameType(res.right.versionConflictErrors),
-      },
-    ];
-  }
-
   if (state.currentBatch + 1 < state.bulkOperationBatches.length) {
     return {
       ...state,
-      logs,
       controlState: 'OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX',
       currentBatch: state.currentBatch + 1,
     };
   }
   return {
     ...state,
-    logs,
     controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
     corruptDocumentIds: [],
     transformErrors: [],

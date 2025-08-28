@@ -70,9 +70,6 @@ describe('ZDT & V2 upgrades - optimistic concurrency tests', () => {
 
       const records = await parseLogFile(logFilePath);
       expect(records).toContainLogEntry('-> DONE');
-      expect(records).toContainLogEntry(
-        'Found 3 errors related to version_conflict_engine_exception, showing 3 reasons:'
-      );
 
       const { saved_objects: sampleADocs } = await savedObjectsRepository.find<TestSOType>({
         type: 'sample_a',
