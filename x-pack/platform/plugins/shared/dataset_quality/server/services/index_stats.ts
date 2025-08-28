@@ -21,7 +21,11 @@ class IndexStatsService {
   ): Promise<IndexStatsResponse> {
     try {
       const { indices } = await processAsyncInChunks(dataStreams, (indexChunk) =>
-        esClient.indices.stats({ index: indexChunk, metric: ['docs'] })
+        esClient.indices.stats({
+          index: indexChunk,
+          metric: ['docs'],
+          forbid_closed_indices: false,
+        })
       );
 
       const docsCountPerDataStream = chain(indices || {})

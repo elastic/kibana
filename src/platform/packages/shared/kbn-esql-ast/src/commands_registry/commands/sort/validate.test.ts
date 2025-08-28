@@ -9,6 +9,7 @@
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/validation';
+import { getNoValidCallSignatureError } from '../../../definitions/utils/validation/utils';
 
 const sortExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'sort', validate);
@@ -57,12 +58,12 @@ describe('SORT Validation', () => {
 
     // Expression parts are also validated
     sortExpectErrors('from a_index | sort sin(textField)', [
-      'Argument of [sin] must be [double], found value [textField] type [text]',
+      getNoValidCallSignatureError('sin', ['text']),
     ]);
 
     // Expression parts are also validated
     sortExpectErrors('from a_index | sort doubleField + textField', [
-      'Argument of [+] must be [double], found value [textField] type [text]',
+      getNoValidCallSignatureError('+', ['double', 'text']),
     ]);
   });
 });

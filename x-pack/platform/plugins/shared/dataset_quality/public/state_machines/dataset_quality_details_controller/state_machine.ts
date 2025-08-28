@@ -21,9 +21,7 @@ import type {
   NonAggregatableDatasets,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
-import { indexNameToDataStreamParts } from '../../../common/utils';
 import type { IDataStreamDetailsClient } from '../../services/data_stream_details';
-import type { IDataStreamsStatsClient } from '../../services/data_streams_stats';
 import type { DatasetQualityStartDeps } from '../../types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
 import type {
@@ -41,6 +39,8 @@ import {
   fetchIntegrationDashboardsFailedNotifier,
   rolloverDataStreamFailedNotifier,
   updateFieldLimitFailedNotifier,
+  updateFailureStoreFailedNotifier,
+  updateFailureStoreSuccessNotifier,
 } from './notifications';
 import {
   filterIssues,
@@ -531,6 +531,32 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 ],
               },
             },
+            failureStoreUpdate: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    UPDATE_FAILURE_STORE: {
+                      target: 'updating',
+                      actions: ['storeDataStreamDetails'],
+                    },
+                  },
+                },
+                updating: {
+                  invoke: {
+                    src: 'updateFailureStore',
+                    onDone: {
+                      target: 'idle',
+                      actions: ['notifyUpdateFailureStoreSuccess', 'raiseForceTimeRangeRefresh'],
+                    },
+                    onError: {
+                      target: 'idle',
+                      actions: ['notifyUpdateFailureStoreFailed', 'raiseForceTimeRangeRefresh'],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         indexNotFound: {
@@ -788,7 +814,6 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   initialContext: DatasetQualityDetailsControllerContext;
   plugins: DatasetQualityStartDeps;
   toasts: IToasts;
-  dataStreamStatsClient: IDataStreamsStatsClient;
   dataStreamDetailsClient: IDataStreamDetailsClient;
 }
 
@@ -796,7 +821,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
   initialContext,
   plugins,
   toasts,
-  dataStreamStatsClient,
   dataStreamDetailsClient,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
   createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
@@ -818,14 +842,15 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         updateFieldLimitFailedNotifier(toasts, event.data),
       notifyRolloverDataStreamError: (context, event: DoneInvokeEvent<Error>) =>
         rolloverDataStreamFailedNotifier(toasts, event.data, context.dataStream),
+      notifyUpdateFailureStoreSuccess: () => updateFailureStoreSuccessNotifier(toasts),
+      notifyUpdateFailureStoreFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        updateFailureStoreFailedNotifier(toasts, event.data),
     },
     services: {
       checkDatasetIsAggregatable: (context) => {
-        const { type } = indexNameToDataStreamParts(context.dataStream);
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
-        return dataStreamStatsClient.getNonAggregatableDatasets({
-          types: [type],
+        return dataStreamDetailsClient.getNonAggregatableDatasets({
           start,
           end,
           dataStream: context.dataStream,
@@ -960,6 +985,21 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return dataStreamDetailsClient.rolloverDataStream({
           dataStream: context.dataStream,
         });
+      },
+      updateFailureStore: (context) => {
+        if (
+          'dataStreamDetails' in context &&
+          context.dataStreamDetails &&
+          context.dataStreamDetails.hasFailureStore
+        ) {
+          return dataStreamDetailsClient.updateFailureStore({
+            dataStream: context.dataStream,
+            failureStoreEnabled: context.dataStreamDetails.hasFailureStore,
+            customRetentionPeriod: context.dataStreamDetails.customRetentionPeriod,
+          });
+        }
+
+        return Promise.resolve();
       },
     },
   });
