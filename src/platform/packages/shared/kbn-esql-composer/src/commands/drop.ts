@@ -9,6 +9,12 @@
 
 import { append } from '../pipeline/append';
 
+/**
+ * Appends a `DROP` command to the ESQL composer pipeline.
+ *
+ * @param columns The columns to drop.
+ * @returns A `QueryPipeline` instance with the `DROP` command appended.
+ */
 export function drop(...columns: Array<string | string[]>) {
   const command = `DROP ${columns.flatMap((column) => column).join(', ')}`;
 
