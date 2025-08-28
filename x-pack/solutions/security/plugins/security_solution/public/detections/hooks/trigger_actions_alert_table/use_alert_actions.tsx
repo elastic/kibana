@@ -14,8 +14,6 @@ import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import type { AlertClosingReason } from '../../../../common/constants';
-import { AlertClosingReasonValues } from '../../../../common/constants';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -26,8 +24,7 @@ import * as i18n from '../translations';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
-
-const ALERT_CLOSING_REASON_PANEL_ID = 'ALERT_CLOSING_REASON_PANEL_ID_BULK';
+import { useBulkAlertClosingReasonItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
 
 interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
@@ -167,6 +164,26 @@ export const useBulkAlertActionItems = ({
     ]
   );
 
+  const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
+    useBulkAlertClosingReasonItems({
+      onSubmitCloseReason({
+        reason,
+        alertItems,
+        setIsBulkActionsLoading,
+        clearSelection,
+        isAllSelected,
+        refresh,
+      }) {
+        getOnAction(FILTER_CLOSED as AlertWorkflowStatus, reason)(
+          alertItems,
+          !!isAllSelected,
+          setIsBulkActionsLoading,
+          () => clearSelection?.(),
+          () => refresh?.()
+        );
+      },
+    });
+
   const getUpdateAlertStatusAction = useCallback(
     (status: AlertWorkflowStatus) => {
       const label =
@@ -176,73 +193,35 @@ export const useBulkAlertActionItems = ({
           ? i18n.BULK_ACTION_CLOSE_SELECTED
           : i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED;
 
+      if (status === FILTER_CLOSED) {
+        return alertClosingReasonItem;
+      }
+
       return {
         label,
         key: `${status}-alert-status`,
         'data-test-subj': `${status}-alert-status`,
         disableOnQuery: false,
-        ...(status === FILTER_CLOSED
-          ? {
-              panel: ALERT_CLOSING_REASON_PANEL_ID,
-            }
-          : { onClick: getOnAction(status) }),
+        onClick: getOnAction(status),
       };
     },
-    [getOnAction]
+    [alertClosingReasonItem, getOnAction]
   );
 
   const items = useMemo(() => {
     return hasIndexWrite
-      ? [FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED].map((status) => {
-          return getUpdateAlertStatusAction(status as AlertWorkflowStatus);
-        })
+      ? ([FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED]
+          .map((status) => {
+            return getUpdateAlertStatusAction(status as AlertWorkflowStatus);
+          })
+          //  Filter out undefined items
+          .filter((item) => !!item) as BulkActionsConfig[])
       : [];
   }, [getUpdateAlertStatusAction, hasIndexWrite]);
 
   const panels = useMemo(
-    () =>
-      [
-        {
-          id: ALERT_CLOSING_REASON_PANEL_ID,
-          title: i18n.BULK_ACTION_CLOSING_PANEL_TITLE,
-          items: [
-            {
-              key: 'none',
-              disableOnQuery: false,
-              label: i18n.BULK_ACTION_CLOSE_SELECTED_AS_NONE,
-              onClick: getOnAction(FILTER_CLOSED as AlertWorkflowStatus),
-            },
-            {
-              key: AlertClosingReasonValues.false_positive,
-              disableOnQuery: false,
-              label: i18n.BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE,
-              onClick: getOnAction(
-                FILTER_CLOSED as AlertWorkflowStatus,
-                AlertClosingReasonValues.false_positive
-              ),
-            },
-            {
-              key: AlertClosingReasonValues.duplicate,
-              disableOnQuery: false,
-              label: i18n.BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE,
-              onClick: getOnAction(
-                FILTER_CLOSED as AlertWorkflowStatus,
-                AlertClosingReasonValues.duplicate
-              ),
-            },
-            {
-              key: AlertClosingReasonValues.investigation_required,
-              disableOnQuery: false,
-              label: i18n.BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED,
-              onClick: getOnAction(
-                FILTER_CLOSED as AlertWorkflowStatus,
-                AlertClosingReasonValues.investigation_required
-              ),
-            },
-          ],
-        },
-      ] as BulkActionsPanelConfig[],
-    [getOnAction]
+    () => [...alertClosingReasonPanels] as BulkActionsPanelConfig[],
+    [alertClosingReasonPanels]
   );
 
   return useMemo(() => ({ items, panels }), [items, panels]);

@@ -239,3 +239,17 @@ export const REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE = i18n.translate(
     defaultMessage: 'Unassign alert',
   }
 );
+
+export const ALERT_CLOSING_REASON_MENU_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertClosingReason.MenuTitle',
+  {
+    defaultMessage: 'Reason for closing',
+  }
+);
+
+export const ALERT_CLOSING_REASON_BUTTON_MESSAGE = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertClosingReason.ButtonMessage',
+  {
+    defaultMessage: 'Close alert',
+  }
+);
