@@ -12,7 +12,6 @@ import * as fs from 'fs';
 import { processSemconvYaml } from './lib/generate_semconv';
 
 function generateTypeScriptFile(result: any, outputPath: string): void {
-
   const timestamp = new Date().toISOString();
   const { totalFields, stats } = result;
 
