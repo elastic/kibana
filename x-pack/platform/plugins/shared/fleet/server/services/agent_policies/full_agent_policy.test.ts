@@ -2255,7 +2255,8 @@ describe('generateOtelcolConfig', () => {
     is_default: true,
     is_default_monitoring: true,
     name: 'default',
-    id: 'default'
+    id: 'default',
+    hosts: ['http://localhost:9200'],
   };
 
   const logInput : FullAgentPolicyInput = {
@@ -2270,10 +2271,10 @@ describe('generateOtelcolConfig', () => {
     package_policy_id: '123'
   };
 
-  const otelInput : FullAgentPolicyInput = {
+  const otelInput1 : FullAgentPolicyInput = {
     type: OTEL_COLLECTOR_INPUT_TYPE,
-    id: 'test',
-    name: 'test',
+    id: 'test1',
+    name: 'test1',
     revision: 0,
     data_stream: {
       namespace: 'default'
@@ -2288,7 +2289,7 @@ describe('generateOtelcolConfig', () => {
           type: 'metrics',
         },
         receivers: {
-          httpcheck: {
+          "httpcheck/1": {
             targets: [
               {
                 endpoints: ['https://epr.elastic.co'],
@@ -2297,7 +2298,7 @@ describe('generateOtelcolConfig', () => {
           },
         },
         processors: {
-          transform: {
+          "transform/1": {
             metrics_statements: [
               'set(metric.description, "Sum") where metric.type == "Sum"',
             ],
@@ -2305,9 +2306,54 @@ describe('generateOtelcolConfig', () => {
         },
         service: {
           pipelines: {
-            metrics: {
-              receivers: ["httpcheck"],
-              processors: ["transform"],
+            "metrics/1": {
+              receivers: ["httpcheck/1"],
+              processors: ["transform/1"],
+            },
+          },
+        },
+      },
+    ],
+  };
+
+  const otelInput2 : FullAgentPolicyInput = {
+    type: OTEL_COLLECTOR_INPUT_TYPE,
+    id: 'test2',
+    name: 'test2',
+    revision: 0,
+    data_stream: {
+      namespace: 'default'
+    },
+    use_output: 'default',
+    package_policy_id: 'otherpolicy',
+    streams: [
+      {
+        id: 'someid',
+        data_stream: {
+          dataset: 'somedataset',
+          type: 'metrics',
+        },
+        receivers: {
+          "httpcheck/2": {
+            targets: [
+              {
+                endpoints: ['https://www.elastic.co'],
+              },
+            ],
+          },
+        },
+        processors: {
+          "transform/2": {
+            metrics_statements: [
+              'set(metric.description, "Sum") where metric.type == "Sum"',
+            ],
+          },
+        },
+        service: {
+          pipelines: {
+            "metrics/2": {
+              receivers: ["httpcheck/2"],
+              processors: ["transform/2"],
             },
           },
         },
@@ -2326,10 +2372,10 @@ describe('generateOtelcolConfig', () => {
   });
 
   it('should return the otel config when there is one', () => {
-    const inputs : FullAgentPolicyInput[] = [otelInput];
+    const inputs : FullAgentPolicyInput[] = [otelInput1];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
         receivers: {
-          httpcheck: {
+          "httpcheck/1": {
             targets: [
               {
                 endpoints: ['https://epr.elastic.co'],
@@ -2338,31 +2384,29 @@ describe('generateOtelcolConfig', () => {
           },
         },
         processors: {
-          transform: {
+          "transform/1": {
             metrics_statements: [
               'set(metric.description, "Sum") where metric.type == "Sum"',
             ],
           },
         },
         connectors: {
-          "forward/1": {},
+          "forward": {},
         },
         exporters: {
           elasticsearch: {
-            endpoint: "http://localhost:9200",
-            username: "elastic",
-            password: "changeme",
+            endpoints: ['http://localhost:9200'],
           },
         },
         service: {
           pipelines: {
             "metrics/1": {
-              receivers: ["httpcheck"],
-              processors: ["transform"],
-              exporters: ["forward/1"],
+              receivers: ["httpcheck/1"],
+              processors: ["transform/1"],
+              exporters: ["forward"],
             },
             metrics: {
-              receivers: ["forward/1"],
+              receivers: ["forward"],
               exporters: ["elasticsearch"],
             },
           },
@@ -2371,10 +2415,10 @@ describe('generateOtelcolConfig', () => {
   });
 
   it('should return the otel config if there is any', () => {
-    const inputs : FullAgentPolicyInput[] = [logInput, otelInput];
+    const inputs : FullAgentPolicyInput[] = [logInput, otelInput1];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
         receivers: {
-          httpcheck: {
+          "httpcheck/1": {
             targets: [
               {
                 endpoints: ['https://epr.elastic.co'],
@@ -2383,31 +2427,29 @@ describe('generateOtelcolConfig', () => {
           },
         },
         processors: {
-          transform: {
+          "transform/1": {
             metrics_statements: [
               'set(metric.description, "Sum") where metric.type == "Sum"',
             ],
           },
         },
         connectors: {
-          "forward/1": {},
+          "forward": {},
         },
         exporters: {
           elasticsearch: {
-            endpoint: "http://localhost:9200",
-            username: "elastic",
-            password: "changeme",
+            endpoints: ['http://localhost:9200'],
           },
         },
         service: {
           pipelines: {
             "metrics/1": {
-              receivers: ["httpcheck"],
-              processors: ["transform"],
-              exporters: ["forward/1"],
+              receivers: ["httpcheck/1"],
+              processors: ["transform/1"],
+              exporters: ["forward"],
             },
             metrics: {
-              receivers: ["forward/1"],
+              receivers: ["forward"],
               exporters: ["elasticsearch"],
             },
           },
@@ -2416,8 +2458,7 @@ describe('generateOtelcolConfig', () => {
   });
 
   it('should merge otel configs', () => {
-    skip("not implemented")
-    const inputs : FullAgentPolicyInput[] = [logInput, otelInput, otelInput];
+    const inputs : FullAgentPolicyInput[] = [logInput, otelInput1, otelInput2];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
         receivers: {
           "httpcheck/1": {
@@ -2430,7 +2471,7 @@ describe('generateOtelcolConfig', () => {
           "httpcheck/2": {
             targets: [
               {
-                endpoints: ['https://epr.elastic.co'],
+                endpoints: ['https://www.elastic.co'],
               },
             ],
           },
@@ -2448,14 +2489,11 @@ describe('generateOtelcolConfig', () => {
           },
         },
         connectors: {
-          "forward/1": {},
-          "forward/2": {},
+          "forward": {},
         },
         exporters: {
           elasticsearch: {
-            endpoint: "http://localhost:9200",
-            username: "elastic",
-            password: "changeme",
+            endpoints: ['http://localhost:9200'],
           },
         },
         service: {
@@ -2463,15 +2501,15 @@ describe('generateOtelcolConfig', () => {
             "metrics/1": {
               receivers: ["httpcheck/1"],
               processors: ["transform/1"],
-              exporters: ["forward/1"],
+              exporters: ["forward"],
             },
             "metrics/2": {
               receivers: ["httpcheck/2"],
               processors: ["transform/2"],
-              exporters: ["forward/2"],
+              exporters: ["forward"],
             },
             metrics: {
-              receivers: ["forward/1", "forward/2"],
+              receivers: ["forward"],
               exporters: ["elasticsearch"],
             },
           },
