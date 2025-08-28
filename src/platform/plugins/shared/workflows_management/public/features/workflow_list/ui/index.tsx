@@ -33,6 +33,7 @@ import type { WorkflowsSearchParams } from '../../../types';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { getExecutionStatusIcon } from '../../../shared/ui';
 import { getStatusLabel } from '../../../shared/translations';
+import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -46,6 +47,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
 
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
+  const [executeWorkflow, setExecuteWorkflow] = useState<WorkflowListItemDto | null>(null);
 
   const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
   const canExecuteWorkflow = application?.capabilities.workflowsManagement.executeWorkflow;
@@ -67,9 +69,9 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
   };
 
   const handleRunWorkflow = useCallback(
-    (item: WorkflowListItemDto) => {
+    (id: string, event: Record<string, any>) => {
       runWorkflow.mutate(
-        { id: item.id, inputs: {} },
+        { id, inputs: event },
         {
           onSuccess: ({ workflowExecutionId }) => {
             notifications?.toasts.addSuccess('Workflow run started', {
@@ -77,7 +79,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
             });
             application!.navigateToUrl(
               application!.getUrlForApp('workflows', {
-                path: `/${item.id}?tab=executions&executionId=${workflowExecutionId}`,
+                path: `/${id}?tab=executions&executionId=${workflowExecutionId}`,
               })
             );
           },
@@ -225,8 +227,8 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
             color: 'primary',
             name: 'Run',
             icon: 'play',
-            description: 'Run workflow',
-            onClick: (item: WorkflowListItemDto) => handleRunWorkflow(item),
+            description: 'Run workflow 1',
+            onClick: (item: WorkflowListItemDto) => setExecuteWorkflow(item),
           },
           {
             enabled: () => !!canUpdateWorkflow,
@@ -277,7 +279,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
       canUpdateWorkflow,
       handleCloneWorkflow,
       handleDeleteWorkflow,
-      handleRunWorkflow,
+      setExecuteWorkflow,
       handleToggleWorkflow,
     ]
   );
@@ -353,6 +355,13 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
           pageIndex: search.page - 1,
         }}
       />
+      {executeWorkflow && (
+        <WorkflowExecuteModal
+          workflow={executeWorkflow}
+          onClose={() => setExecuteWorkflow(null)}
+          onSubmit={(event) => handleRunWorkflow(executeWorkflow.id, event)}
+        />
+      )}
     </>
   );
 }

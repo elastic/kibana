@@ -15,14 +15,14 @@ import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { useWorkflowDetail } from '../../../entities/workflows/model/useWorkflowDetail';
+import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
-import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
+import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import { WorkflowEventModal } from '../../../features/run_workflow/ui/workflow_event_modal';
+import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
 
 const WorkflowYAMLEditor = React.lazy(() =>
@@ -88,11 +88,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     });
   };
 
-  const [workflowEventModalOpen, setWorkflowEventModalOpen] = useState(false);
+  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
   const handleRunClick = () => {
-    setWorkflowEventModalOpen(true);
+    setWorkflowExecuteModalOpen(true);
   };
 
   const handleRunWorkflow = (event: Record<string, any>) => {
@@ -253,9 +253,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {workflowEventModalOpen && (
-        <WorkflowEventModal
-          onClose={() => setWorkflowEventModalOpen(false)}
+      {workflowExecuteModalOpen && workflow && (
+        <WorkflowExecuteModal
+          workflow={workflow}
+          onClose={() => setWorkflowExecuteModalOpen(false)}
           onSubmit={handleRunWorkflow}
         />
       )}
