@@ -116,26 +116,30 @@ export const performBulkCreate = async <T>(
 
     const method = requestId && overwrite ? 'index' : 'create';
     const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
-    const accessMode = options.accessControl?.accessMode;
+    const accessMode = object.accessControl?.accessMode ?? options.accessControl?.accessMode; // options.accessControl?.accessMode;
     const typeSupportsAccessControl = registry.supportsAccessControl(type);
 
-    if (!typeSupportsAccessControl && accessMode) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        `The "accessMode" field is not supported for saved objects of type "${type}".`
-      );
-    }
+    // This condition is fine, the option will just be ignored
+    // if (!typeSupportsAccessControl && accessMode) {
+    //   throw SavedObjectsErrorHelpers.createBadRequestError(
+    //     `The "accessMode" field is not supported for saved objects of type "${type}".`
+    //   );
+    // }
 
-    if (!createdBy && accessMode === 'read_only') {
+    // Should this just be a more generic check? If the options include an accessMode, or any of the objects include an accessMode,
+    // and there is no current user, then throw an error?
+    if (!createdBy && typeSupportsAccessControl && accessMode === 'read_only') {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
       );
     }
 
+    // This will effectively create the accessControl property for supporting types and remove the property for non-supporting types
     const accessControlToWrite =
       typeSupportsAccessControl && createdBy
         ? {
             owner: createdBy,
-            accessMode: object.accessControl?.accessMode ?? options.accessControl?.accessMode,
+            accessMode: accessMode,
           }
         : undefined;
     return right({

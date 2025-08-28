@@ -1199,7 +1199,7 @@ describe('#bulkCreate', () => {
             } as Pick<SavedObjectAccessControl, 'accessMode'>,
           };
           await bulkCreateSuccess(client, repository, [obj1NoAccessControl, obj2AccessControl], {
-            accessControl: { accessMode: undefined }, // we only have one mode, so this is the only way to test the order
+            accessControl: { accessMode: 'default' }, // default === RBAC-only
           });
 
           expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith(
