@@ -743,7 +743,7 @@ describe('validation logic', () => {
         `from a_index | keep unsupportedField`,
         [],
         [
-          'Field [unsupportedField] cannot be retrieved, it is unsupported or not indexed; returning null',
+          'Field "unsupportedField" cannot be retrieved, it is unsupported or not indexed; returning null',
         ]
       );
     });

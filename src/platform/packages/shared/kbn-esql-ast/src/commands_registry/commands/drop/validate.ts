@@ -19,25 +19,13 @@ export const validate = (
   callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
-  const wildcardItems = command.args.filter((arg) => isColumn(arg) && arg.name === '*');
-  if (wildcardItems.length) {
-    messages.push(
-      ...wildcardItems.map((column) => ({
-        location: (column as ESQLColumn).location,
-        text: i18n.translate('kbn-esql-ast.esql.validation.dropAllColumnsError', {
-          defaultMessage: 'Removing all fields is not allowed [*]',
-        }),
-        type: 'error' as const,
-        code: 'dropAllColumnsError',
-      }))
-    );
-  }
   const droppingTimestamp = command.args.find((arg) => isColumn(arg) && arg.name === '@timestamp');
   if (droppingTimestamp) {
+    // centralize
     messages.push({
       location: (droppingTimestamp as ESQLColumn).location,
       text: i18n.translate('kbn-esql-ast.esql.validation.dropTimestampWarning', {
-        defaultMessage: 'Drop [@timestamp] will remove all time filters to the search results',
+        defaultMessage: 'Dropping "@timestamp" prevents the time range from being applied.',
       }),
       type: 'warning',
       code: 'dropTimestampWarning',

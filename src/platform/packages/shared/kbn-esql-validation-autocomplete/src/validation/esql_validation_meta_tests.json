@@ -647,7 +647,7 @@
     {
       "query": "from a_index | eval trim(\"23\"::double)",
       "error": [
-        "The arguments to [trim] don't match a valid call signature.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
+        "Invalid input types for TRIM.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
       ],
       "warning": []
     },
@@ -679,14 +679,14 @@
     {
       "query": "from a_index | eval 1 + \"2\"",
       "error": [
-        "The arguments to [+] don't match a valid call signature.\n\nReceived (integer, keyword).\n\nExpected one of:\n  - (date, date_period)\n  - (date, time_duration)\n  - (date_nanos, date_period)\n  - (date_nanos, time_duration)\n  - (date_period, date)\n  - (date_period, date_nanos)\n  - (date_period, date_period)\n  - (double, double)\n  - (double, integer)\n  - (double, long)\n  - (integer, double)\n  - (integer, integer)\n  - (integer, long)\n  - (long, double)\n  - (long, integer)\n  - (long, long)\n  - (time_duration, date)\n  - (time_duration, date_nanos)\n  - (time_duration, time_duration)\n  - (unsigned_long, unsigned_long)\n  - (time_duration, date)\n  - (date, time_duration)"
+        "Invalid input types for +.\n\nReceived (integer, keyword).\n\nExpected one of:\n  - (date, date_period)\n  - (date, time_duration)\n  - (date_nanos, date_period)\n  - (date_nanos, time_duration)\n  - (date_period, date)\n  - (date_period, date_nanos)\n  - (date_period, date_period)\n  - (double, double)\n  - (double, integer)\n  - (double, long)\n  - (integer, double)\n  - (integer, integer)\n  - (integer, long)\n  - (long, double)\n  - (long, integer)\n  - (long, long)\n  - (time_duration, date)\n  - (time_duration, date_nanos)\n  - (time_duration, time_duration)\n  - (unsigned_long, unsigned_long)\n  - (time_duration, date)\n  - (date, time_duration)"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval trim(to_double(\"23\")::keyword::double::long::keyword::double)",
       "error": [
-        "The arguments to [trim] don't match a valid call signature.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
+        "Invalid input types for TRIM.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
       ],
       "warning": []
     },
@@ -753,28 +753,28 @@
     {
       "query": "from a_index | eval true AND 0",
       "error": [
-        "The arguments to [and] don't match a valid call signature.\n\nReceived (boolean, integer).\n\nExpected one of:\n  - (boolean, boolean)"
+        "Invalid input types for AND.\n\nReceived (boolean, integer).\n\nExpected one of:\n  - (boolean, boolean)"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval to_lower(trim(doubleField)::keyword)",
       "error": [
-        "The arguments to [trim] don't match a valid call signature.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
+        "Invalid input types for TRIM.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval to_upper(trim(doubleField)::keyword::keyword::keyword::keyword)",
       "error": [
-        "The arguments to [trim] don't match a valid call signature.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
+        "Invalid input types for TRIM.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval to_lower(to_upper(trim(doubleField)::keyword)::keyword)",
       "error": [
-        "The arguments to [trim] don't match a valid call signature.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
+        "Invalid input types for TRIM.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
       ],
       "warning": []
     },

@@ -36,11 +36,12 @@ export const validate = (
     }
 
     if (valueColumnType && !isNumericType(valueColumnType)) {
+      // TODO centralize
       messages.push({
         location: command.location,
         text: i18n.translate('kbn-esql-ast.esql.validation.changePointUnsupportedFieldType', {
           defaultMessage:
-            'CHANGE_POINT only supports numeric types values, found [{columnName}] of type [{valueColumnType}]',
+            'CHANGE_POINT only supports numeric types values, found "{columnName}" of type {valueColumnType}',
           values: { columnName, valueColumnType },
         }),
         type: 'error',
