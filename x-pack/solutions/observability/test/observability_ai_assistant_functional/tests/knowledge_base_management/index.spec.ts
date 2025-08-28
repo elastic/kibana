@@ -210,8 +210,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/231420
-    describe.skip('Bulk import knowledge base entries', () => {
+    describe('Bulk import knowledge base entries', () => {
       const tempDir = os.tmpdir();
       const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
 
@@ -249,6 +248,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         try {
           await common.setFileInputPath(tempFilePath);
+          // Wait for the file to be processed and save button to be enabled
+          await retry.waitFor('save button to be enabled after file upload', async () => {
+            const saveButton = await testSubjects.find(
+              ui.pages.kbManagementTab.bulkImportSaveButton
+            );
+            return await saveButton.isEnabled();
+          });
         } catch (error) {
           log.debug(`Error uploading file: ${error}`);
           throw error;
