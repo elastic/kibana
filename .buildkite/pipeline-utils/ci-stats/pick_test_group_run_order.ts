@@ -587,7 +587,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
             },
             retry: {
               automatic: [
-                { exit_status: '-1', limit: 1 },
+                { exit_status: '10', limit: 1 },
                 { exit_status: '*', limit: 0 },
               ],
             },
