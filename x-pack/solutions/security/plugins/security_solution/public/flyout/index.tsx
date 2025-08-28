@@ -23,9 +23,9 @@ import {
 } from './entity_details/generic_details_left';
 import type { GenericEntityPanelExpandableFlyoutProps } from './entity_details/generic_right';
 import { GenericEntityPanel } from './entity_details/generic_right';
-import type { AIForSOCDetailsProps } from './ai_for_soc/types';
-import { AIForSOCDetailsProvider } from './ai_for_soc/context';
-import { AIForSOCPanel } from './ai_for_soc';
+import type { EaseDetailsProps } from './ease/types';
+import { EaseDetailsProvider } from './ease/context';
+import { EasePanel } from './ease';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
@@ -65,9 +65,9 @@ import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_det
 import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
 import { AnalyzerPanel } from './document_details/analyzer_panels';
 import {
+  GenericEntityPanelKey,
   HostPanelKey,
   ServicePanelKey,
-  GenericEntityPanelKey,
   UserPanelKey,
 } from './entity_details/shared/constants';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
@@ -79,7 +79,7 @@ import {
   MisconfigurationFindingsPreviewPanelKey,
 } from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
-import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
+import { EasePanelKey } from './ease/constants/panel_keys';
 import {
   VulnerabilityFindingsPanelKey,
   VulnerabilityFindingsPreviewPanelKey,
@@ -243,11 +243,11 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
-    key: IOCPanelKey,
+    key: EasePanelKey,
     component: (props) => (
-      <AIForSOCDetailsProvider {...(props as AIForSOCDetailsProps).params}>
-        <AIForSOCPanel />
-      </AIForSOCDetailsProvider>
+      <EaseDetailsProvider {...(props as EaseDetailsProps).params}>
+        <EasePanel />
+      </EaseDetailsProvider>
     ),
   },
   {
