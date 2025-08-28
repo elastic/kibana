@@ -37,16 +37,16 @@ export const InstallTranslatedButton = ({
     }
   }, [numberOfSelectedRules, installTranslatedRule, installSelectedRule]);
 
-  const buttonText =
-    numberOfSelectedRules === 0
-      ? numberOfTranslatedRules > 0
-        ? isSelected
-          ? i18n.INSTALL_TRANSLATED_RULES(installTranslatedRulesSelected)
-          : i18n.INSTALL_TRANSLATED_RULES(numberOfTranslatedRules)
-        : i18n.INSTALL_TRANSLATED_RULES_EMPTY_STATE
-      : isSelected
-      ? i18n.INSTALL_SELECTED_RULES(installTranslatedRulesSelected)
-      : i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules);
+  let buttonText = i18n.INSTALL_TRANSLATED_RULES_EMPTY_STATE;
+  if (numberOfSelectedRules > 0) {
+    buttonText = i18n.INSTALL_SELECTED_RULES(
+      isSelected ? installTranslatedRulesSelected : numberOfSelectedRules
+    );
+  } else if (numberOfTranslatedRules > 0) {
+    buttonText = i18n.INSTALL_TRANSLATED_RULES(
+      isSelected ? installTranslatedRulesSelected : numberOfTranslatedRules
+    );
+  }
 
   const ariaLabel =
     numberOfSelectedRules === 0
