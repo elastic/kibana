@@ -11,6 +11,7 @@ export {
   builtinToolIds,
   builtinTags,
   builtInToolIdPrefix,
+  activeToolsCountWarningThreshold,
   defaultAgentToolIds,
   editableToolTypes,
 } from './constants';

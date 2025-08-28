@@ -32,6 +32,7 @@ export {
   type EsqlToolDefinitionWithSchema,
   EsqlToolFieldType,
   idRegexp,
+  activeToolsCountWarningThreshold,
   ToolResultType,
   type ToolResult,
   type ErrorResult,
