@@ -23,4 +23,5 @@ export interface SettingsConfig {
     value: string;
     text: string;
   }>;
+  example_value?: string | number | boolean;
 }

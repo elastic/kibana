@@ -485,6 +485,8 @@ export const FullAgentPolicyResponseSchema = schema.object({
         sourceURI: schema.string(),
         ssl: schema.maybe(BaseSSLSchema),
         secrets: schema.maybe(BaseSecretsSchema),
+        timeout: schema.maybe(schema.string()),
+        target_directory: schema.maybe(schema.string()),
       }),
       features: schema.recordOf(
         schema.string(),
@@ -508,6 +510,11 @@ export const FullAgentPolicyResponseSchema = schema.object({
               rotateeverybytes: schema.maybe(schema.number()),
               keepfiles: schema.maybe(schema.number()),
               interval: schema.maybe(schema.string()),
+            })
+          ),
+          metrics: schema.maybe(
+            schema.object({
+              period: schema.maybe(schema.string()),
             })
           ),
         })
