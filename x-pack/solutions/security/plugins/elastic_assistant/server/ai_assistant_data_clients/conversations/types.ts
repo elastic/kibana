@@ -30,6 +30,7 @@ export interface EsConversationSchema {
   category: ConversationCategory;
   messages?: Array<{
     '@timestamp': string;
+    id?: string;
     content: string;
     reader?: Reader;
     role: MessageRole;
@@ -67,6 +68,7 @@ export interface CreateMessageSchema {
   category: ConversationCategory;
   messages?: Array<{
     '@timestamp': string;
+    id: string;
     content: string;
     reader?: Reader;
     role: MessageRole;
