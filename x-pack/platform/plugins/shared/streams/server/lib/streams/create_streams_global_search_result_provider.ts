@@ -106,9 +106,7 @@ async function findStreams({
   });
 
   if (types.length === 0) {
-    return hitsWithAccess.map((hit) =>
-      toGlobalSearchProviderResult(hit._id!, hit._source, term, groupStreamsEnabled)
-    );
+    return hitsWithAccess.map((hit) => toGlobalSearchProviderResult(hit._id!, hit._source, term));
   }
 
   const relevantTypes = types.filter((type) => streamTypes.includes(type));
@@ -117,9 +115,7 @@ async function findStreams({
   }
 
   if (relevantTypes.includes('stream')) {
-    return hitsWithAccess.map((hit) =>
-      toGlobalSearchProviderResult(hit._id!, hit._source, term, groupStreamsEnabled)
-    );
+    return hitsWithAccess.map((hit) => toGlobalSearchProviderResult(hit._id!, hit._source, term));
   }
 
   const includeClassicStream = relevantTypes.includes('classic stream');
@@ -135,14 +131,13 @@ async function findStreams({
 
   return hitsWithAccess
     .filter(includeStream)
-    .map((hit) => toGlobalSearchProviderResult(hit._id!, hit._source, term, groupStreamsEnabled));
+    .map((hit) => toGlobalSearchProviderResult(hit._id!, hit._source, term));
 }
 
 function toGlobalSearchProviderResult(
   id: string,
   definition: Streams.all.Definition,
-  term: string,
-  groupStreamsEnabled: boolean
+  term: string
 ): GlobalSearchProviderResult {
   const type = Streams.ClassicStream.Definition.is(definition)
     ? 'Classic stream'
@@ -152,10 +147,9 @@ function toGlobalSearchProviderResult(
     ? 'Group stream'
     : 'Stream';
 
-  const score =
-    Streams.GroupStream.Definition.is(definition) && groupStreamsEnabled
-      ? boostGroupStreamScore(definition.name.toLowerCase(), term.toLowerCase())
-      : scoreStream(definition.name.toLowerCase(), term.toLowerCase());
+  const score = Streams.GroupStream.Definition.is(definition)
+    ? boostGroupStreamScore(definition.name.toLowerCase(), term.toLowerCase())
+    : scoreStream(definition.name.toLowerCase(), term.toLowerCase());
 
   return {
     id,
