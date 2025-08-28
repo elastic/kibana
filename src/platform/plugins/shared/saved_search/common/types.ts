@@ -72,6 +72,7 @@ export interface SavedSearchAttributes {
   visContext?: VisContextUnmapped;
 
   tabs: DiscoverSessionTabSchema[];
+  controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
 }
 
 /** @internal **/
@@ -121,6 +122,7 @@ export interface DiscoverSessionTab {
   breakdownField?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
+  controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
 }
 
 export interface DiscoverSession {

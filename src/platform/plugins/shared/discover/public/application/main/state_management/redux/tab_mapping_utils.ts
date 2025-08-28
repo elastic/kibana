@@ -92,6 +92,7 @@ export const fromSavedObjectTabToSavedSearch = async ({
   breakdownField: tab.breakdownField,
   density: tab.density,
   visContext: tab.visContext,
+  controlGroupJson: tab.controlGroupJson,
 });
 
 export const fromTabStateToSavedObjectTab = ({

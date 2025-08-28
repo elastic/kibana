@@ -18,6 +18,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { Subject, of } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { cloneDeep, pick } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
@@ -77,6 +78,10 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    * The current breakdown field
    */
   breakdownField?: string;
+  /**
+   * The ES|QL variables to use for the chart
+   */
+  esqlVariables?: ESQLControlVariable[];
   /**
    * The external custom Lens vis
    */
@@ -206,6 +211,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     timeRange,
     table,
     externalVisContext,
+    esqlVariables,
   } = props;
   const initialBreakdownField = useMemo(
     () =>
@@ -303,6 +309,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       ? {
           ...props,
           ...stateProps,
+          esqlVariables,
           input$,
           chart,
           isChartAvailable,
@@ -310,7 +317,16 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
           lensVisService,
         }
       : undefined;
-  }, [chart, input$, isChartAvailable, lensVisService, props, requestParams, stateProps]);
+  }, [
+    chart,
+    input$,
+    isChartAvailable,
+    lensVisService,
+    props,
+    requestParams,
+    stateProps,
+    esqlVariables,
+  ]);
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
       chart,

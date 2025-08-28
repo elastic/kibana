@@ -27,6 +27,7 @@ import {
   selectTab,
 } from './redux';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
+import { mockControlState } from '../../../__mocks__/esql_controls';
 import { omit } from 'lodash';
 import { createTabsStorageManager } from './tabs_storage_manager';
 
@@ -191,6 +192,18 @@ describe('DiscoverSavedSearchContainer', () => {
       savedSearch2.searchSource.setField('query', { language: 'lucene', query: 'test' });
       expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(false);
     });
+
+    it('should return false for different control states', () => {
+      const savedSearch1 = {
+        ...savedSearchMock,
+        controlGroupState: {
+          ...mockControlState,
+          panel1: { ...mockControlState.panel1, selectedOptions: ['baz'] },
+        },
+      };
+      const savedSearch2 = { ...savedSearchMock, controlGroupState: mockControlState };
+      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(false);
+    });
   });
 
   describe('URL tracking', () => {
@@ -273,6 +286,76 @@ describe('DiscoverSavedSearchContainer', () => {
       savedSearchContainer.set(currentSavedSearch);
       expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(true);
       unsubscribe();
+    });
+  });
+
+  describe('getHasReset$', () => {
+    it('should initially return false', () => {
+      const container = getSavedSearchContainer({
+        services,
+        globalStateContainer,
+        internalState,
+      });
+      expect(container.getHasReset$().getValue()).toBe(false);
+    });
+
+    it('should return a BehaviorSubject that can be subscribed to', () => {
+      const container = getSavedSearchContainer({
+        services,
+        globalStateContainer,
+        internalState,
+      });
+      const hasReset$ = container.getHasReset$();
+
+      expect(typeof hasReset$.subscribe).toBe('function');
+      expect(typeof hasReset$.getValue).toBe('function');
+      expect(typeof hasReset$.next).toBe('function');
+    });
+
+    it('should allow updating the reset state', () => {
+      const container = getSavedSearchContainer({
+        services,
+        globalStateContainer,
+        internalState,
+      });
+      const hasReset$ = container.getHasReset$();
+
+      // Initially false
+      expect(hasReset$.getValue()).toBe(false);
+
+      // Update to true
+      hasReset$.next(true);
+      expect(hasReset$.getValue()).toBe(true);
+
+      // Update back to false
+      hasReset$.next(false);
+      expect(hasReset$.getValue()).toBe(false);
+    });
+
+    it('should notify subscribers when reset state changes', () => {
+      const container = getSavedSearchContainer({
+        services,
+        globalStateContainer,
+        internalState,
+      });
+      const hasReset$ = container.getHasReset$();
+      const mockSubscriber = jest.fn();
+
+      const subscription = hasReset$.subscribe(mockSubscriber);
+
+      // Should be called initially with false
+      expect(mockSubscriber).toHaveBeenCalledWith(false);
+
+      // Should be called when value changes to true
+      hasReset$.next(true);
+      expect(mockSubscriber).toHaveBeenCalledWith(true);
+
+      // Should be called when value changes back to false
+      hasReset$.next(false);
+      expect(mockSubscriber).toHaveBeenCalledWith(false);
+
+      expect(mockSubscriber).toHaveBeenCalledTimes(3);
+      subscription.unsubscribe();
     });
   });
 });

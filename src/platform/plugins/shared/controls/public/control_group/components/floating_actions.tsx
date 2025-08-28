@@ -8,8 +8,8 @@
  */
 
 import classNames from 'classnames';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import type { FC, ReactElement } from 'react';
-import React, { useEffect, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
@@ -48,6 +48,30 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   isTwoLine,
 }) => {
   const [floatingActions, setFloatingActions] = useState<FloatingActionItem[]>([]);
+  const [positionLeft, setPositionLeft] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
+
+  const updatePosition = useCallback(() => {
+    if (!wrapperRef.current || !actionsRef.current) return;
+
+    const wrapperRect = wrapperRef.current.getBoundingClientRect();
+    const actionsRect = actionsRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+
+    // Check if positioning to the right would cause overflow
+    const rightPosition = wrapperRect.right;
+    const actionsWidth = actionsRect.width || 200; // fallback width estimate
+    const wouldOverflow = rightPosition + actionsWidth > viewportWidth - 16; // 16px buffer
+
+    setPositionLeft(wouldOverflow);
+  }, []);
+
+  useEffect(() => {
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
+  }, [updatePosition, floatingActions]);
 
   useEffect(() => {
     if (!api) return;
@@ -124,16 +148,20 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   const styles = useMemoCss(floatingActionsStyles);
 
   return (
-    <div css={styles.wrapper}>
+    <div css={styles.wrapper} ref={wrapperRef}>
       {children}
       {isEnabled && floatingActions.length > 0 && (
         <div
+          ref={actionsRef}
           data-test-subj={`presentationUtil__floatingActions__${
             apiHasUniqueId(api) ? api.uuid : v4()
           }`}
           className={classNames(
             'presentationUtil__floatingActions',
             `controlFrameFloatingActions--${isTwoLine ? 'twoLine' : 'oneLine'}`,
+            positionLeft
+              ? 'controlFrameFloatingActions--left'
+              : 'controlFrameFloatingActions--right',
             className
           )}
           css={styles.floatingActions}
@@ -171,9 +199,12 @@ const floatingActionsStyles = {
       // slower transition on hover leave in case the user accidentally stops hover
       transition: `opacity ${euiTheme.animation.slow}`,
       position: 'absolute',
-      right: euiTheme.size.xs,
-      top: `-${euiTheme.size.l}`,
+      top: '90%',
+      transform: 'translateY(-50%)',
       zIndex: euiTheme.levels.toast,
+      display: 'flex',
+      flexDirection: 'row',
+      gap: euiTheme.size.xs,
       '&.controlFrameFloatingActions--oneLine': {
         padding: euiTheme.size.xs,
         borderRadius: euiTheme.border.radius.medium,
@@ -181,7 +212,14 @@ const floatingActionsStyles = {
         boxShadow: `0 0 0 1px ${euiTheme.colors.lightShade}`,
       },
       '&.controlFrameFloatingActions--twoLine': {
-        top: `-${euiTheme.size.xs} !important`,
+        top: '90%',
+        transform: 'translateY(-50%)',
+      },
+      '&.controlFrameFloatingActions--right': {
+        left: `100%`,
+      },
+      '&.controlFrameFloatingActions--left': {
+        right: `100%`,
       },
     }),
 };

@@ -48,6 +48,7 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
+          "controlGroupState": undefined,
           "dataRequestParams": Object {
             "searchSessionId": undefined,
             "timeRangeAbsolute": undefined,
@@ -106,6 +107,7 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
+          "controlGroupState": undefined,
           "dataRequestParams": Object {
             "searchSessionId": undefined,
             "timeRangeAbsolute": undefined,
@@ -179,6 +181,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "column1",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "description": "description",
           "grid": Object {},

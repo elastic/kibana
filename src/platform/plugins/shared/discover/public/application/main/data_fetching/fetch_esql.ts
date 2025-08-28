@@ -12,6 +12,7 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -40,6 +41,7 @@ export function fetchEsql({
   data,
   expressions,
   scopedProfilesManager,
+  esqlVariables,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
@@ -51,6 +53,7 @@ export function fetchEsql({
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
   scopedProfilesManager: ScopedProfilesManager;
+  esqlVariables?: ESQLControlVariable[];
 }): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
@@ -65,6 +68,10 @@ export function fetchEsql({
       if (ast) {
         const contract = expressions.execute(ast, null, {
           inspectorAdapters,
+          searchContext: {
+            timeRange,
+            esqlVariables,
+          },
         });
         abortSignal?.addEventListener('abort', contract.cancel);
         const execution = contract.getData();

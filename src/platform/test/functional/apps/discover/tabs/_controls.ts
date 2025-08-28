@@ -1,0 +1,109 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import expect from '@kbn/expect';
+import type { FtrProviderContext } from '../ftr_provider_context';
+
+const savedSession = 'my ESQL session';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const { discover, common, header, dashboardControls } = getPageObjects([
+    'discover',
+    'common',
+    'header',
+    'dashboardControls',
+  ]);
+  const retry = getService('retry');
+  const esql = getService('esql');
+  const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
+
+  describe('discover - ES|QL controls', function () {
+    it('should add an ES|QL value control', async () => {
+      await discover.selectTextBaseLang();
+      await discover.waitUntilSearchingHasFinished();
+
+      await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
+      await discover.waitUntilSearchingHasFinished();
+
+      await retry.try(async () => {
+        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+        expect(controlGroupVisible).to.be(true);
+      });
+
+      await common.sleep(1000);
+
+      // Check Discover editor has been updated accordingly
+      const editorValue = await esql.getEsqlEditorQuery();
+      expect(editorValue).to.contain('FROM logstash-* | WHERE geo.dest == ?geo_dest');
+
+      await discover.waitUntilSearchingHasFinished();
+    });
+
+    it('should keep the ES|QL control after a browser refresh', async () => {
+      await discover.selectTextBaseLang();
+      await discover.waitUntilSearchingHasFinished();
+
+      await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
+      await discover.waitUntilSearchingHasFinished();
+
+      // Refresh the page
+      await browser.refresh();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await retry.try(async () => {
+        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+        expect(controlGroupVisible).to.be(true);
+      });
+    });
+
+    it('should save the ES|QL control', async () => {
+      await discover.selectTextBaseLang();
+      await discover.waitUntilSearchingHasFinished();
+
+      await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
+      await discover.waitUntilSearchingHasFinished();
+      // Save the search
+      await discover.saveSearch(savedSession);
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await retry.try(async () => {
+        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+        expect(controlGroupVisible).to.be(true);
+      });
+    });
+
+    it('should open a saved session with a control group', async () => {
+      // load saved search
+      await discover.loadSavedSearch(savedSession);
+      await header.waitUntilLoadingHasFinished();
+
+      await retry.try(async () => {
+        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+        expect(controlGroupVisible).to.be(true);
+      });
+    });
+
+    it('should reset successfully a saved session with a control group', async () => {
+      // load saved search
+      await discover.loadSavedSearch(savedSession);
+      await header.waitUntilLoadingHasFinished();
+
+      // Make a change in the controls
+      const controlId = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.optionsListOpenPopover(controlId);
+      await dashboardControls.optionsListPopoverSelectOption('CN');
+
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('unsavedChangesBadge');
+
+      await discover.revertUnsavedChanges();
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+    });
+  });
+}

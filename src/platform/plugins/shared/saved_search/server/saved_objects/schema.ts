@@ -138,7 +138,11 @@ export const SCHEMA_SEARCH_MODEL_VERSION_5 = SCHEMA_SEARCH_MODEL_VERSION_4.exten
   ),
 });
 
-const DISCOVER_SESSION_TAB_ATTRIBUTES = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
+export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
+  controlGroupJson: schema.maybe(schema.string()),
+});
+
+const DISCOVER_SESSION_TAB_ATTRIBUTES = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
   title: undefined,
   description: undefined,
 });
@@ -153,6 +157,6 @@ const SCHEMA_DISCOVER_SESSION_TAB = schema.object({
 export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES>;
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB>;
 
-export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
+export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
   tabs: schema.maybe(schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 })),
 });
