@@ -144,7 +144,6 @@ export const evaluate = base.extend<
         experiments: await phoenixClient.getRanExperiments(),
         repetitions,
         runId: process.env.TEST_RUN_ID,
-        exportToElasticsearch: true,
       });
     },
     {

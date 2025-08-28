@@ -29,7 +29,6 @@ export async function reportModelScore({
   repetitions,
   esClient,
   runId,
-  exportToElasticsearch = true,
 }: {
   log: SomeDevLog;
   phoenixClient: KibanaPhoenixClient;
@@ -38,7 +37,6 @@ export async function reportModelScore({
   experiments: RanExperiment[];
   repetitions: number;
   runId?: string;
-  exportToElasticsearch?: boolean;
 }): Promise<void> {
   const { datasetScores, evaluatorNames, overallStats } = await buildEvaluationResults(
     experiments,
@@ -139,31 +137,30 @@ export async function reportModelScore({
   log.info(`\n\n${header[0]}`);
   log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);
 
-  if (exportToElasticsearch) {
-    try {
-      const exporter = new EvaluationScoreRepository(esClient, log);
-      const currentRunId = runId || process.env.TEST_RUN_ID || `run_${Date.now()}`;
+  // Export to Elasticsearch
+  try {
+    const exporter = new EvaluationScoreRepository(esClient, log);
+    const currentRunId = runId || process.env.TEST_RUN_ID || `run_${Date.now()}`;
 
-      log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
+    log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
-      await exporter.exportScores({
-        datasetScoresWithStats,
-        evaluatorNames,
-        model,
-        runId: currentRunId,
-        tags: ['evaluation', 'model-score'],
-      });
+    await exporter.exportScores({
+      datasetScoresWithStats,
+      evaluatorNames,
+      model,
+      runId: currentRunId,
+      tags: ['evaluation', 'model-score'],
+    });
 
-      log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
-      log.info(
-        chalk.gray(
-          `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${
-            model.id || 'unknown'
-          }" AND run_id:"${currentRunId}"`
-        )
-      );
-    } catch (error) {
-      log.warning(chalk.yellow('⚠️ Failed to export scores to Elasticsearch:'), error);
-    }
+    log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
+    log.info(
+      chalk.gray(
+        `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${
+          model.id || 'unknown'
+        }" AND run_id:"${currentRunId}"`
+      )
+    );
+  } catch (error) {
+    log.warning(chalk.yellow('⚠️ Failed to export scores to Elasticsearch:'), error);
   }
 }
