@@ -19,7 +19,7 @@ export interface StreamDetailContextProviderProps {
 }
 
 export interface StreamDetailContextValue {
-  definition: Streams.ingest.all.GetResponse;
+  definition: Streams.all.GetResponse;
   loading: boolean;
   refresh: () => void;
 }
