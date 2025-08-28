@@ -9,28 +9,70 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import YAML from 'yaml';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import type { SchemasSettings } from 'monaco-yaml';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import YAML, { isPair, isScalar, visit } from 'yaml';
+import { getStepNode } from '../../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
+import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
+import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import { useYamlValidation } from '../lib/use_yaml_validation';
 import {
   getHighlightStepDecorations,
   getMonacoRangeFromYamlNode,
   navigateToErrorPosition,
 } from '../lib/utils';
-import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
-import { getStepNode } from '../../../../common/lib/yaml_utils';
-import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import type { YamlValidationError } from '../model/types';
+import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
+
+const getTriggerNodes = (
+  yamlDocument: YAML.Document
+): Array<{ node: any; triggerType: string }> => {
+  const triggerNodes: Array<{ node: any; triggerType: string }> = [];
+
+  if (!yamlDocument?.contents) return triggerNodes;
+
+  visit(yamlDocument, {
+    Pair(key, pair, ancestors) {
+      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
+        return;
+      }
+
+      // Check if this is a type field within a trigger
+      const path = ancestors.slice();
+      let isTriggerType = false;
+
+      // Walk up the ancestors to see if we're in a triggers array
+      for (let i = path.length - 1; i >= 0; i--) {
+        const ancestor = path[i];
+        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
+          isTriggerType = true;
+          break;
+        }
+      }
+
+      if (isTriggerType && isScalar(pair.value)) {
+        const triggerType = pair.value.value as string;
+        // Find the parent map node that contains this trigger
+        const triggerMapNode = ancestors[ancestors.length - 1];
+        triggerNodes.push({
+          node: triggerMapNode,
+          triggerType,
+        });
+      }
+    },
+  });
+
+  return triggerNodes;
+};
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -48,6 +90,7 @@ export interface WorkflowYAMLEditorProps {
   lastUpdatedAt?: Date;
   highlightStep?: string;
   stepExecutions?: EsWorkflowStepExecution[];
+  isExecutionsView?: boolean;
   'data-testid'?: string;
   value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
@@ -64,6 +107,7 @@ export const WorkflowYAMLEditor = ({
   lastUpdatedAt,
   highlightStep,
   stepExecutions,
+  isExecutionsView = false,
   onMount,
   onChange,
   onSave,
@@ -90,6 +134,8 @@ export const WorkflowYAMLEditor = ({
   const highlightStepDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const stepExecutionsDecorationCollectionRef =
+    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const alertTriggerDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   const {
@@ -234,6 +280,61 @@ export const WorkflowYAMLEditor = ({
     stepExecutionsDecorationCollectionRef.current =
       editorRef.current?.createDecorationsCollection(decorations) ?? null;
   }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument]);
+
+  useEffect(() => {
+    const model = editorRef.current?.getModel() ?? null;
+    if (alertTriggerDecorationCollectionRef.current) {
+      // clear existing decorations
+      alertTriggerDecorationCollectionRef.current.clear();
+    }
+
+    // Don't show alert dots when in executions view
+    if (!model || !yamlDocument || !isEditorMounted || isExecutionsView) {
+      return;
+    }
+
+    const triggerNodes = getTriggerNodes(yamlDocument);
+    const alertTriggers = triggerNodes.filter(({ triggerType }) => triggerType === 'alert');
+
+    if (alertTriggers.length === 0) {
+      return;
+    }
+
+    const decorations = alertTriggers
+      .map(({ node }) => {
+        const triggerRange = getMonacoRangeFromYamlNode(model, node);
+        if (!triggerRange) {
+          return null;
+        }
+
+        const decoration: monaco.editor.IModelDeltaDecoration = {
+          range: new monaco.Range(
+            triggerRange.startLineNumber,
+            triggerRange.startColumn,
+            triggerRange.startLineNumber,
+            triggerRange.endColumn
+          ),
+          options: {
+            glyphMarginClassName: 'alert-trigger-glyph',
+            glyphMarginHoverMessage: {
+              value: i18n.translate(
+                'workflows.workflowDetail.yamlEditor.alertTriggerGlyphTooltip',
+                {
+                  defaultMessage:
+                    'Alert trigger: This workflow will be executed automatically only when connected to a rule via the "Run Workflow" action.',
+                }
+              ),
+            },
+          },
+        };
+
+        return decoration;
+      })
+      .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
+
+    alertTriggerDecorationCollectionRef.current =
+      editorRef.current?.createDecorationsCollection(decorations) ?? null;
+  }, [isEditorMounted, yamlDocument, isExecutionsView]);
 
   const completionProvider = useMemo(() => {
     return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
@@ -468,6 +569,16 @@ const componentStyles = {
           width: '12px',
           height: '12px',
           backgroundColor: euiTheme.colors.danger,
+          borderRadius: '50%',
+        },
+      },
+      '.alert-trigger-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.warning,
           borderRadius: '50%',
         },
       },
