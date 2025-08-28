@@ -23,6 +23,7 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { SlmPolicyPayload } from '../../../../../../../../common/types';
@@ -114,6 +115,16 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
       : []
   );
 
+  const errorMessageId = useGeneratedHtmlId();
+
+  // This adds 'aria-describedby' and 'aria-invalid' attributes to options that are needed to properly announce validation errors.
+  // This also ensures that UI is in sync with validation state without needing to store these attributes in state.
+  const indicesAndDataStreamsOptionsWithAria = indicesAndDataStreamsOptions.map((option) => ({
+    ...option,
+    'aria-describedby': errorMessageId,
+    'aria-invalid': Boolean(errors.indices),
+  }));
+
   const indicesSwitch = (
     <EuiSwitch
       label={
@@ -155,6 +166,8 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
       }}
     />
   );
+
+  const errorNode = <span id={errorMessageId}>{errors.indices}</span>;
 
   return (
     <EuiDescribedFormGroup
@@ -276,21 +289,30 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                   ) : null
                 }
                 isInvalid={Boolean(errors.indices)}
-                error={errors.indices}
+                error={errorNode}
               >
                 {selectIndicesMode === 'list' ? (
                   <EuiSelectable
                     allowExclusions={false}
                     data-test-subj="indicesAndDataStreamsList"
-                    options={indicesAndDataStreamsOptions}
+                    options={indicesAndDataStreamsOptionsWithAria}
                     onChange={(options) => {
                       const newSelectedIndices: string[] = [];
-                      options.forEach(({ label, checked }) => {
-                        if (checked === 'on') {
-                          newSelectedIndices.push(label);
+                      // This strips 'aria-invalid' and 'aria-describedby' attributes from the 'options' that has been added so validation errors are properly announced.
+                      // This keeps the 'indicesAndDataStreamsOptions' state clean, containing only the option data itself.
+                      const optionsWithoutAria = options.map(
+                        ({
+                          'aria-invalid': ariaInvalid,
+                          'aria-describedby': ariaDescribedBy,
+                          ...rest
+                        }) => {
+                          if (rest.checked === 'on') {
+                            newSelectedIndices.push(rest.label);
+                          }
+                          return rest;
                         }
-                      });
-                      setIndicesAndDataStreamsOptions(options);
+                      );
+                      setIndicesAndDataStreamsOptions(optionsWithoutAria);
                       onUpdate({ indices: newSelectedIndices });
                       setIndicesAndDataStreamsSelection(newSelectedIndices);
                     }}
@@ -357,6 +379,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                         indices: newPatterns.join(','),
                       });
                     }}
+                    isInvalid={Boolean(errors.indices)}
                   />
                 )}
               </EuiFormRow>
