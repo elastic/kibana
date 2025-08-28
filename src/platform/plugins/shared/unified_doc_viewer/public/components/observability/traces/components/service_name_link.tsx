@@ -63,7 +63,7 @@ export function ServiceNameLink({
     : undefined;
 
   const content = (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {agentName && (
         <EuiFlexItem grow={false}>
           <AgentIcon agentName={agentName as AgentName} size="m" />

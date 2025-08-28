@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiCode } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FailureStoreModal } from '@kbn/failure-store-modal';
 import {
   overviewPanelDatasetQualityIndicatorDegradedDocs,
@@ -19,6 +20,24 @@ import { useQualityIssuesDocsChart } from '../../../../hooks/use_quality_issues_
 import { useDatasetQualityDetailsState } from '../../../../hooks/use_dataset_quality_details_state';
 import { DatasetQualityIndicator, QualityPercentageIndicator } from '../../../quality_indicator';
 import { Card } from './card';
+
+const degradedDocTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.details.degradedDocTooltip"
+    defaultMessage="Documents with the {ignoredProperty} property, usually due to malformed fields or exceeding the limit of total fields when {ignoredAboveSetting}."
+    values={{
+      ignoredProperty: <EuiCode transparentBackground>_ignored</EuiCode>,
+      ignoredAboveSetting: <EuiCode transparentBackground>_ignore_above: false</EuiCode>,
+    }}
+  />
+);
+
+const failedDocTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.details.failedDocTooltip"
+    defaultMessage="Documents that were rejected during ingestion, usually due to mapping errors or pipeline failures."
+  />
+);
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -77,6 +96,7 @@ export default function QualitySummaryCards({
           isDisabled={false}
           isSelected={selectedCard === 'degraded'}
           title={overviewPanelDatasetQualityIndicatorDegradedDocs}
+          titleTooltipContent={degradedDocTooltip}
           kpiValue={totalDegradedDocsCount}
           footer={
             <EuiFlexGroup direction="row" gutterSize="s">
@@ -114,6 +134,7 @@ export default function QualitySummaryCards({
             <Card
               isDisabled={true}
               title={overviewPanelDatasetQualityIndicatorNoFailureStore}
+              titleTooltipContent={failedDocTooltip}
               kpiValue={i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
                 defaultMessage: 'No failure store',
               })}
@@ -147,6 +168,7 @@ export default function QualitySummaryCards({
             isDisabled={false}
             isSelected={selectedCard === 'failed'}
             title={overviewPanelDatasetQualityIndicatorFailedDocs}
+            titleTooltipContent={failedDocTooltip}
             kpiValue={totalFailedDocsCount}
             footer={
               <EuiFlexGroup direction="row" gutterSize="s">
