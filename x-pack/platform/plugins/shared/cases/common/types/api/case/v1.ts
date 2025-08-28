@@ -533,13 +533,13 @@ export const GetRelatedCasesByAlertResponseRt = rt.array(RelatedCaseRt);
 export const SimilarCasesSearchRequestRt = paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE });
 
 export const FindCasesContainingAllAlertsRequestRt = rt.exact(
-  rt.partial({
+  rt.type({
     /**
      * The IDs of the alerts to find cases for.
      */
-    alertIds: rt.union([rt.string, rt.array(rt.string)]),
+    alertIds: rt.array(rt.string),
     // The IDs of the cases to find alerts for.
-    caseIds: rt.union([rt.string, rt.array(rt.string)]),
+    caseIds: rt.array(rt.string),
   })
 );
 

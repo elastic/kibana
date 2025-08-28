@@ -23,8 +23,8 @@ export const findCasesContainingAllAlertsRoute = createCasesRoute({
   security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     body: schema.object({
-      alertIds: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-      caseIds: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      alertIds: schema.arrayOf(schema.string()),
+      caseIds: schema.arrayOf(schema.string()),
     }),
   },
   routerOptions: {
@@ -37,15 +37,9 @@ export const findCasesContainingAllAlertsRoute = createCasesRoute({
   }): Promise<IKibanaResponse<{ casesWithAllAttachments: string[] }>> => {
     const { alertIds, caseIds } = request.body as caseApiV1.FindCasesContainingAllAlertsRequest;
 
-    if (!caseIds || !alertIds) {
+    if (!caseIds.length || !alertIds.length) {
       return response.ok({
         body: { casesWithAllAttachments: [] },
-      });
-    }
-
-    if (!isStringOrArray(caseIds) || !isStringOrArray(alertIds)) {
-      return response.badRequest({
-        body: { message: 'Invalid request parameters' },
       });
     }
 
