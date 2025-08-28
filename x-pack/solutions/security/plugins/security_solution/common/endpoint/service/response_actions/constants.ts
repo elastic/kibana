@@ -113,7 +113,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   upload: 'writeFileOperations',
   scan: 'writeScanOperations',
   runscript: 'writeExecuteOperations',
-  cancel: 'writeExecuteOperations',
+  cancel: 'canReadActionsLogManagement',
 });
 
 export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
@@ -180,7 +180,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   'suspend-process': 'canSuspendProcess',
   scan: 'canWriteScanOperations',
   runscript: 'canWriteExecuteOperations',
-  cancel: 'canWriteExecuteOperations',
+  cancel: 'canReadActionsLogManagement',
 });
 
 // 4 hrs in seconds

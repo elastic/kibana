@@ -32,8 +32,6 @@ export const validateCommandSpecificCancelPermissions = async (
   const spaceId = (await context.securitySolution).getSpaceId();
   const actionId = (request.body as CancelActionRequestBody).parameters.id;
 
-  logger.debug(`Validating command-specific authorization for cancel action: ${actionId}`);
-
   // Fetch the action to be cancelled to determine its command type
   const actionToCancel = await fetchActionRequestById(endpointContext.service, spaceId, actionId);
 
@@ -51,8 +49,6 @@ export const validateCommandSpecificCancelPermissions = async (
     );
   }
 
-  logger.debug(`Cancel authorization check for command: ${command}`);
-
   // Get required permissions for this specific command
   let requiredPermissions;
   try {
@@ -69,13 +65,14 @@ export const validateCommandSpecificCancelPermissions = async (
   const hasCommandPermission = endpointAuthz[requiredPermissions];
 
   if (!hasCommandPermission) {
-    logger.debug(
+    logger.warn(
       `User lacks command-specific permission '${requiredPermissions}' for cancel action`
     );
-    throw new EndpointAuthorizationError({
-      need_all: [requiredPermissions],
-    });
+    throw new EndpointAuthorizationError(
+      {
+        need_all: [requiredPermissions],
+      },
+      `User lacks command-specific permission '${requiredPermissions}' to cancel '${command}' action.`
+    );
   }
-
-  logger.debug(`Command-specific cancel authorization successful for action ${actionId}`);
 };
