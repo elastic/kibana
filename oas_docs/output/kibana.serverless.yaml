@@ -28871,6 +28871,8 @@ paths:
                               enum:
                                 - elasticsearch
                               type: string
+                            write_to_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29033,6 +29035,8 @@ paths:
                               enum:
                                 - remote_elasticsearch
                               type: string
+                            write_to_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29646,6 +29650,8 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
+                    write_to_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -29808,6 +29814,8 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
+                    write_to_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -30377,6 +30385,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -30539,6 +30549,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31220,6 +31232,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31382,6 +31396,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31988,6 +32004,8 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
+                    write_to_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32144,6 +32162,8 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
+                    write_to_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32700,6 +32720,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -32862,6 +32884,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_streams:
+                            type: boolean
                         required:
                           - name
                           - type
