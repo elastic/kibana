@@ -68,11 +68,18 @@ const assigneesSchema: AssigneesSchema = {
   totalWithAtLeastOne: long,
 };
 
+const statusSchema: StatusSchema = {
+  open: long,
+  inProgress: long,
+  closed: long,
+};
+
 const solutionTelemetry: SolutionTelemetrySchema = {
   ...countSchema,
   assignees: assigneesSchema,
   attachmentFramework: attachmentFrameworkSchema,
   totalWithAlerts: long,
+  status: statusSchema,
 };
 
 const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema = {
@@ -83,12 +90,6 @@ const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema =
     totals: long,
     required: long,
   },
-};
-
-const statusSchema: StatusSchema = {
-  open: long,
-  inProgress: long,
-  closed: long,
 };
 
 const latestDatesSchema: LatestDatesSchema = {
