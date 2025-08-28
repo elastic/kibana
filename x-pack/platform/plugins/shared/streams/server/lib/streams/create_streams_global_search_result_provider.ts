@@ -101,7 +101,7 @@ async function findStreams({
   });
 
   const hitsWithAccess = searchResponse.hits.hits.filter((hit) => {
-    if (Streams.GroupStream.Definition.is(hit._source)) return true;
+    if (Streams.GroupStream.Definition.is(hit._source)) return groupStreamsEnabled;
     return privileges[hit._source.name]?.read === true;
   });
 
