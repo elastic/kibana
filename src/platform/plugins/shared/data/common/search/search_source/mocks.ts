@@ -36,16 +36,7 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   destroy: jest.fn(),
   history: [],
   getSerializedFields: jest.fn(),
-  serialize: jest.fn().mockImplementation(() => ({
-    searchSourceJSON: JSON.stringify({
-      query: {
-        bool: {
-          must: [{ match_all: {} }],
-        },
-      },
-      size: 500,
-    }),
-  })),
+  serialize: jest.fn(),
   toExpressionAst: jest.fn(),
   getActiveIndexFilter: jest.fn(),
   parseActiveIndexPatternFromQueryString: jest.fn(),
