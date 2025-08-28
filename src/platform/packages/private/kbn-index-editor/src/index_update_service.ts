@@ -555,18 +555,25 @@ export class IndexUpdateService {
           next: ({ updates, response, bulkOperations, exitAfterFlush, docs, savingDocs }) => {
             this._isSaving$.next(false);
 
+            if (!bulkOperations.length) {
+              this.setError(IndexEditorErrors.NO_DATA_TO_SAVE_ERROR);
+              this.addAction('saved', {
+                response,
+                updates: [],
+              });
+              return;
+            }
+
             if (!response.errors) {
               if (exitAfterFlush) {
                 this.destroy();
               }
             } else {
               const errorDetail = response.items
-                ? response.items
-                    .map((item) => Object.values(item)[0])
-                    .filter((res) => res.error)
-                    .map((res) => `- ${res.error?.type}: ${res.error?.reason}`)
-                    .join('\n')
-                : '';
+                .map((item) => Object.values(item)[0])
+                .filter((res) => res.error)
+                .map((res) => `- ${res.error?.type}: ${res.error?.reason}`)
+                .join('\n');
 
               this.setError(IndexEditorErrors.PARTIAL_SAVING_ERROR, errorDetail);
             }
