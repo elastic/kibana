@@ -6996,6 +6996,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/otel-semantic-conventions@link:src/platform/packages/shared/kbn-otel-semantic-conventions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/paertial-results-example-plugin@link:examples/partial_results_example":
   version "0.0.0"
   uid ""
