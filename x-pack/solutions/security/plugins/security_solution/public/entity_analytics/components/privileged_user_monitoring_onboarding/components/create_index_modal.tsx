@@ -27,6 +27,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { UserLimitCallOut } from './user_limit_callout';
 
 enum IndexMode {
   STANDARD = 'standard',
@@ -128,6 +129,8 @@ export const CreateIndexModal = ({
             />
           </p>
         </EuiText>
+        <EuiSpacer size="m" />
+        <UserLimitCallOut />
         <EuiSpacer size="m" />
         <EuiFormRow
           label={INDEX_NAME_LABEL}
