@@ -37,7 +37,7 @@ export const DATA_VIEW_ERROR_TEST_ID = 'alert-summary-data-view-error';
 export const SKELETON_TEST_ID = 'alert-summary-skeleton';
 export const CONTENT_TEST_ID = 'alert-summary-content';
 
-const RUNTIME_FIELD_MAP: Record<string, RuntimeFieldSpec> = {
+export const RUNTIME_FIELD_MAP: Record<string, RuntimeFieldSpec> = {
   [RELATED_INTEGRATION]: {
     type: 'keyword',
     script: {

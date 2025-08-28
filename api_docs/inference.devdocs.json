@@ -2,7 +2,75 @@
   "id": "inference",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "inference",
+        "id": "def-public.getDefaultConnector",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultConnector",
+        "description": [],
+        "signature": [
+          "({ connectors, }: { connectors: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          },
+          "[]; }) => ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-public.getDefaultConnector.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  connectors,\n}",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "inference",
+                "id": "def-public.getDefaultConnector.$1.connectors",
+                "type": "Array",
+                "tags": [],
+                "label": "connectors",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.InferenceConnector",
+                    "text": "InferenceConnector"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -1535,6 +1603,172 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getConnectorList",
+          "type": "Function",
+          "tags": [],
+          "label": "getConnectorList",
+          "description": [
+            "\nReturns a list of all available inference connectors.\n"
+          ],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => Promise<",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
+            "[]>"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getConnectorList.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [
+                "- The Kibana request to scope the operation to"
+              ],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "A promise that resolves to an array of inference connectors"
+          ]
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getDefaultConnector",
+          "type": "Function",
+          "tags": [],
+          "label": "getDefaultConnector",
+          "description": [
+            "\nRetrieves the default inference connector configured for the system.\n"
+          ],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => Promise<",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getDefaultConnector.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [
+                "- The Kibana request to scope the operation to"
+              ],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "A promise that resolves to the default inference connector"
+          ]
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getConnectorById",
+          "type": "Function",
+          "tags": [
+            "throws"
+          ],
+          "label": "getConnectorById",
+          "description": [
+            "\nRetrieves a specific inference connector by its ID.\n"
+          ],
+          "signature": [
+            "(id: string, request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => Promise<",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getConnectorById.$1",
+              "type": "string",
+              "tags": [],
+              "label": "id",
+              "description": [
+                "- The unique identifier of the connector to retrieve"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getConnectorById.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [
+                "- The Kibana request to scope the operation to"
+              ],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "A promise that resolves to the requested inference connector"
+          ]
         }
       ],
       "lifecycle": "start",
