@@ -10,6 +10,7 @@
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 export type { DefaultControlState, DefaultDataControlState, SerializedControlState } from './types';
 
+// TODO: We will need some way of getting this from the parent
 export interface ControlGroupEditorConfig {
   hideDataViewSelector?: boolean;
   hideWidthSettings?: boolean;

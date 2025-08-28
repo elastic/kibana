@@ -23,12 +23,14 @@ export const openDataControlEditor = <
   controlId,
   initialDefaultPanelTitle,
   parentApi,
+  onUpdate,
 }: {
   initialState: Partial<State>;
   controlType?: string;
   controlId?: string;
   initialDefaultPanelTitle?: string;
   parentApi: unknown;
+  onUpdate?: (newState: Partial<State>) => void;
 }) => {
   const onCancel = (newState: Partial<State>, closeFlyout: () => void) => {
     if (deepEqual(initialState, newState)) {
@@ -73,6 +75,7 @@ export const openDataControlEditor = <
           controlType={controlType}
           controlId={controlId}
           initialDefaultPanelTitle={initialDefaultPanelTitle}
+          onUpdate={(state) => onUpdate?.(state)}
           onCancel={(state) => {
             onCancel(state, closeFlyout);
           }}

@@ -35,6 +35,7 @@ import type {
 import { isValidSearch } from '../../../../common/options_list';
 import { coreServices } from '../../../services/kibana_services';
 import {
+  type DataControlStateManager,
   defaultDataControlComparators,
   initializeDataControlManager,
 } from '../data_control_manager';
@@ -44,7 +45,11 @@ import {
   MIN_OPTIONS_LIST_REQUEST_SIZE,
   OPTIONS_LIST_DEFAULT_SORT,
 } from './constants';
-import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
+import {
+  type EditorState,
+  editorComparators,
+  initializeEditorStateManager,
+} from './editor_state_manager';
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
 import { OptionsListStrings } from './options_list_strings';
@@ -73,15 +78,19 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const titlesManager = initializeTitleManager(state);
       const selectionsManager = initializeSelectionsManager(state);
 
-      const dataControlManager = await initializeDataControlManager({
-        controlId: uuid,
-        controlType: OPTIONS_LIST_CONTROL,
-        typeDisplayName: OptionsListStrings.control.getDisplayName(),
-        state,
-        parentApi,
-        willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
-        getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
-      });
+      const dataControlManager: DataControlStateManager =
+        await initializeDataControlManager<EditorState>({
+          controlId: uuid,
+          controlType: OPTIONS_LIST_CONTROL,
+          typeDisplayName: OptionsListStrings.control.getDisplayName(),
+          state,
+          parentApi,
+          willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
+          getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
+          getLatestState: serializeState,
+          editorStateManager,
+          titlesManager,
+        });
 
       const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
         dataControlManager.internalApi.onSelectionChange

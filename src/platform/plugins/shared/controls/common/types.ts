@@ -8,6 +8,7 @@
  */
 
 import type { ControlWidth } from '@kbn/controls-schemas';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
 
 export type TimeSlice = [number, number];
 
@@ -22,7 +23,7 @@ export interface SerializedControlState<ControlStateType extends object = object
   explicitInput: ControlStateType;
 }
 
-export interface DefaultDataControlState extends DefaultControlState {
+export interface DefaultDataControlState extends DefaultControlState, SerializedTitles {
   dataViewId: string;
   fieldName: string;
   useGlobalFilters?: boolean;

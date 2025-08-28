@@ -8,12 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel, apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import type { DefaultDataControlState } from '../../common';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { ACTION_CREATE_CONTROL } from './constants';
+import type { CreateControlTypeContext } from './control_panel_actions';
 
 export const createControlAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_CONTROL,
@@ -49,3 +51,42 @@ export const createControlAction = (): ActionDefinition<EmbeddableApiContext> =>
       defaultMessage: 'Add a control to your dashboard.',
     }),
 });
+
+export const createDataControlOfType = <
+  State extends DefaultDataControlState = DefaultDataControlState
+>(
+  type: string,
+  { embeddable, state, controlId }: CreateControlTypeContext<State>
+) => {
+  if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
+
+  const { dataViewId, fieldName } = state;
+  if (!dataViewId || !fieldName) {
+    // this shouldn't happen but, if it does, throw an error
+    throw new Error(
+      i18n.translate('controls.optionsList.creationError', {
+        defaultMessage: 'There was an error when creating this control.',
+      })
+    );
+  }
+
+  if (controlId) {
+    // the control exists but changed type - so, replace the old control
+    embeddable.replacePanel(controlId, {
+      panelType: type,
+      serializedState: {
+        rawState: state,
+      },
+    });
+  } else {
+    embeddable.addNewPanel(
+      {
+        panelType: type,
+        serializedState: {
+          rawState: state,
+        },
+      },
+      true
+    );
+  }
+};
