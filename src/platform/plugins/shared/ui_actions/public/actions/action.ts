@@ -8,7 +8,7 @@
  */
 
 import type { Presentable } from '@kbn/ui-actions';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 import type { Observable } from 'rxjs';
 
 /**

@@ -14,7 +14,7 @@ import {
   VALUE_CLICK_TRIGGER,
   MULTI_VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
+import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-triggers';
 
 export interface VisEventToTrigger {
   ['applyFilter']: typeof APPLY_FILTER_TRIGGER;

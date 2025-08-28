@@ -11,12 +11,12 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/es-query",
-    "@kbn/ui-actions-browser",
     "@kbn/expressions-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/std",
     "@kbn/ui-actions",
+    "@kbn/ui-actions-triggers",
   ],
   "exclude": [
     "target/**/*",

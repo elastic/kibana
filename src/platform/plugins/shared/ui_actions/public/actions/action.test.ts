@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultTrigger } from '@kbn/ui-actions-browser';
+import { defaultTrigger } from '@kbn/ui-actions-triggers';
 import type { ActionExecutionContext } from '..';
 import { createAction } from '..';
 

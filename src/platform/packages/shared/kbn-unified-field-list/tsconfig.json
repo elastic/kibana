@@ -22,7 +22,6 @@
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/field-types",
-    "@kbn/ui-actions-browser",
     "@kbn/data-service",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/dom-drag-drop",
@@ -36,7 +35,8 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/esql-utils",
     "@kbn/restorable-state",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/ui-actions-triggers"
   ],
   "exclude": ["target/**/*"]
 }
