@@ -33,26 +33,26 @@ describe(
       : EssHeaders.SETTINGS_PANEL_BTN;
 
     const allPages = [
-    {
-      name: 'Endpoints',
-      privilegePrefix: 'endpoint_list_',
-      selector: Selectors.ENDPOINTS,
-    },
-    {
-      name: 'Policies',
-      privilegePrefix: 'policy_management_',
-      selector: Selectors.POLICIES,
-    },
-    {
-      name: 'Trusted applications',
-      privilegePrefix: 'trusted_applications_',
-      selector: Selectors.TRUSTED_APPS,
-    },
-    {
-      name: 'Trusted devices',
-      privilegePrefix: 'trusted_devices_',
-      selector: Selectors.TRUSTED_DEVICES,
-      siemVersions: [SECURITY_FEATURE_ID as SiemVersion], // Only available in siemV3
+      {
+        name: 'Endpoints',
+        privilegePrefix: 'endpoint_list_',
+        selector: Selectors.ENDPOINTS,
+      },
+      {
+        name: 'Policies',
+        privilegePrefix: 'policy_management_',
+        selector: Selectors.POLICIES,
+      },
+      {
+        name: 'Trusted applications',
+        privilegePrefix: 'trusted_applications_',
+        selector: Selectors.TRUSTED_APPS,
+      },
+      {
+        name: 'Trusted devices',
+        privilegePrefix: 'trusted_devices_',
+        selector: Selectors.TRUSTED_DEVICES,
+        siemVersions: [SECURITY_FEATURE_ID as SiemVersion], // Only available in siemV3
       },
       {
         name: 'Event filters',
@@ -77,18 +77,20 @@ describe(
     ];
 
     const getPagesForSiemVersion = (siemVersion: SiemVersion) => {
-    return allPages.filter((page) => !page.siemVersions || page.siemVersions.includes(siemVersion));
-  };
+      return allPages.filter(
+        (page) => !page.siemVersions || page.siemVersions.includes(siemVersion)
+      );
+    };
 
-  describe('ESS - using custom roles', { tags: ['@ess'] }, () => {
-    for (const siemVersion of SIEM_VERSIONS) {
-      describe(siemVersion, () => {
-        const pages = getPagesForSiemVersion(siemVersion);
+    describe('ESS - using custom roles', { tags: ['@ess'] }, () => {
+      for (const siemVersion of SIEM_VERSIONS) {
+        describe(siemVersion, () => {
+          const pages = getPagesForSiemVersion(siemVersion);
 
-        describe('NONE access', () => {
-          beforeEach(() => {
-            login.withCustomKibanaPrivileges({ [siemVersion]: ['all'] });
-          });
+          describe('NONE access', () => {
+            beforeEach(() => {
+              login.withCustomKibanaPrivileges({ [siemVersion]: ['all'] });
+            });
 
             it(`none of the links should be visible in navigation bar`, () => {
               loadPage('/app/security');
@@ -162,9 +164,10 @@ describe(
         cy.get(MenuButtonSelector).click();
         cy.get('[data-test-subj~="sideNavPanel-id-securityGroup:assets"]');
 
-      for (const page of allPages) {
-        cy.get(page.selector);
-      }
+        for (const page of allPages) {
+          cy.get(page.selector);
+        }
+      });
     });
-  });
-});
+  }
+);
