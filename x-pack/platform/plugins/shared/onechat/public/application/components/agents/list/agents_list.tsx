@@ -188,7 +188,6 @@ export const AgentsList: React.FC = () => {
       itemId={(agent) => agent.id}
       columns={columns}
       sorting={true}
-      selection={{ selectable: (agent) => agent.id !== oneChatDefaultAgentId }}
       search={{
         box: { incremental: true },
         filters: [
