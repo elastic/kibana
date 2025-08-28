@@ -36,6 +36,9 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
 
     if (f.includes('/node_modules/')) return false;
 
+    // This package is not supported at the moment.
+    if (f.includes('/src/platform/packages/shared/kbn-safer-lodash-set/')) return false;
+
     // Optionally skip test files/specs to avoid interfering with Jest mocks/spies
     if (f.includes('@kbn')) return false;
     if (f.includes('/src/setup_node_env/')) return false;
