@@ -25,6 +25,7 @@ import type {
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowListDto,
+  WorkflowYaml,
 } from '@kbn/workflows';
 import type { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
 import { EsWorkflowSchema } from '@kbn/workflows/types/v1';
@@ -322,8 +323,8 @@ export class WorkflowsService {
     if (!parsedYaml.success) {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
     }
-    // @ts-expect-error - TODO: fix this
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
+    // The type of parsedYaml.data is validated by WORKFLOW_ZOD_SCHEMA_LOOSE, so this assertion is safe.
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
 
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const savedObjectData: WorkflowSavedObjectAttributes = {
@@ -404,7 +405,6 @@ export class WorkflowsService {
           valid: false,
           enabled: false,
         };
-        // throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
       } else {
         // @ts-expect-error - TODO: fix this
         const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data) as any;

@@ -21,8 +21,7 @@ import {
   parseDocument,
   visit,
 } from 'yaml';
-import { InvalidYamlSyntaxError } from './errors/invalid_yaml_syntax';
-import { InvalidYamlSchemaError } from './errors/invalid_yaml_schema';
+import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from './errors';
 
 const YAML_STRINGIFY_OPTIONS = {
   indent: 2,

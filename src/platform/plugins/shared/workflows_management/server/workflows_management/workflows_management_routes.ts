@@ -18,6 +18,7 @@ import {
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsManagementApi } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
+import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../../common/lib/errors';
 
 export function defineRoutes(
   router: IRouter,
@@ -367,12 +368,18 @@ export function defineRoutes(
         if (!workflow) {
           return response.notFound();
         }
-        if (!workflow.definition || !workflow.valid) {
+        if (!workflow.valid) {
           return response.badRequest({
             body: {
-              message: `Workflow is not valid: ${
-                workflow.valid ? 'definition is null' : 'definition is not valid'
-              }`,
+              message: `Workflow is not valid.`,
+            },
+          });
+        }
+        if (!workflow.definition) {
+          return response.customError({
+            statusCode: 500,
+            body: {
+              message: `Workflow definition is missing.`,
             },
           });
         }
@@ -481,6 +488,13 @@ export function defineRoutes(
           },
         });
       } catch (error) {
+        if (error instanceof InvalidYamlSyntaxError || error instanceof InvalidYamlSchemaError) {
+          return response.badRequest({
+            body: {
+              message: `Invalid workflow yaml: ${error.message}`,
+            },
+          });
+        }
         return response.customError({
           statusCode: 500,
           body: {
