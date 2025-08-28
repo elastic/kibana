@@ -18,7 +18,7 @@ import type {
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EngineComponentResource } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
-import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/utils';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { ApiKeyManager } from '../auth/api_key';
 
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';

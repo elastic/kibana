@@ -15,11 +15,6 @@ import type {
 import type { CreatePrivilegesImportIndexResponse } from '../../../common/api/entity_analytics/monitoring/create_index.gen';
 import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics/privilege_monitoring/health.gen';
 import type { InitMonitoringEngineResponse } from '../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
-import {
-  getPrivmonMonitoringSourceByIdUrl,
-  PRIVMON_PUBLIC_INIT,
-  PRIVMON_USER_PUBLIC_CSV_UPLOAD_URL,
-} from '../../../common/entity_analytics/privileged_user_monitoring/constants';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import {
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
@@ -62,7 +57,14 @@ import {
   RISK_ENGINE_SCHEDULE_NOW_URL,
   RISK_ENGINE_CONFIGURE_SO_URL,
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
-  PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API,
+  PRIVMON_PRIVILEGE_CHECK_API,
+  getPrivmonMonitoringSourceByIdUrl,
+  MONITORING_USERS_CSV_UPLOAD_URL,
+  PRIVMON_HEALTH_URL,
+  MONITORING_ENGINE_INIT_URL,
+  MONITORING_ENTITY_LIST_SOURCES_URL,
+  PRIVMON_INDICES_URL,
+  MONITORING_ENTITY_SOURCE_URL,
 } from '../../../common/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
@@ -218,17 +220,14 @@ export const useEntityAnalyticsRoutes = () => {
       query: string | undefined;
       signal?: AbortSignal;
     }) =>
-      http.fetch<SearchPrivilegesIndicesResponse>(
-        '/api/entity_analytics/monitoring/privileges/indices',
-        {
-          version: API_VERSIONS.public.v1,
-          method: 'GET',
-          query: {
-            searchQuery: params.query,
-          },
-          signal: params.signal,
-        }
-      );
+      http.fetch<SearchPrivilegesIndicesResponse>(PRIVMON_INDICES_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          searchQuery: params.query,
+        },
+        signal: params.signal,
+      });
 
     /**
      * Create an index for privilege monitoring import
@@ -238,26 +237,22 @@ export const useEntityAnalyticsRoutes = () => {
       mode: 'standard' | 'lookup';
       signal?: AbortSignal;
     }) =>
-      http.fetch<CreatePrivilegesImportIndexResponse>(
-        '/api/entity_analytics/monitoring/privileges/indices',
-        {
-          version: API_VERSIONS.public.v1,
-          method: 'PUT',
-          body: JSON.stringify({
-            name: params.name,
-            mode: params.mode,
-          }),
-          signal: params.signal,
-        }
-      );
+      http.fetch<CreatePrivilegesImportIndexResponse>(PRIVMON_INDICES_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'PUT',
+        body: JSON.stringify({
+          name: params.name,
+          mode: params.mode,
+        }),
+        signal: params.signal,
+      });
     /**
      * Register a data source for privilege monitoring engine
      */
     const registerPrivMonMonitoredIndices = async (indexPattern: string | undefined) =>
-      http.fetch<CreateEntitySourceResponse>('/api/entity_analytics/monitoring/entity_source', {
+      http.fetch<CreateEntitySourceResponse>(MONITORING_ENTITY_SOURCE_URL, {
         version: API_VERSIONS.public.v1,
         method: 'POST',
-
         body: JSON.stringify({
           type: 'index',
           name: ENTITY_SOURCE_NAME,
@@ -384,7 +379,7 @@ export const useEntityAnalyticsRoutes = () => {
      * List all data source for privilege monitoring engine
      */
     const listPrivMonMonitoredIndices = async ({ signal }: { signal?: AbortSignal }) =>
-      http.fetch<ListEntitySourcesResponse>('/api/entity_analytics/monitoring/entity_source/list', {
+      http.fetch<ListEntitySourcesResponse>(MONITORING_ENTITY_LIST_SOURCES_URL, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
         signal,
@@ -405,7 +400,7 @@ export const useEntityAnalyticsRoutes = () => {
       const body = new FormData();
       body.append('file', file);
 
-      return http.fetch<PrivmonBulkUploadUsersCSVResponse>(PRIVMON_USER_PUBLIC_CSV_UPLOAD_URL, {
+      return http.fetch<PrivmonBulkUploadUsersCSVResponse>(MONITORING_USERS_CSV_UPLOAD_URL, {
         version: API_VERSIONS.public.v1,
         method: 'POST',
         headers: {
@@ -416,19 +411,19 @@ export const useEntityAnalyticsRoutes = () => {
     };
 
     const initPrivilegedMonitoringEngine = (): Promise<InitMonitoringEngineResponse> =>
-      http.fetch<InitMonitoringEngineResponse>(PRIVMON_PUBLIC_INIT, {
+      http.fetch<InitMonitoringEngineResponse>(MONITORING_ENGINE_INIT_URL, {
         version: API_VERSIONS.public.v1,
         method: 'POST',
       });
 
     const fetchPrivilegeMonitoringEngineStatus = (): Promise<PrivMonHealthResponse> =>
-      http.fetch<PrivMonHealthResponse>('/api/entity_analytics/monitoring/privileges/health', {
+      http.fetch<PrivMonHealthResponse>(PRIVMON_HEALTH_URL, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
       });
 
     const fetchPrivilegeMonitoringPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
-      http.fetch<PrivMonPrivilegesResponse>(PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API, {
+      http.fetch<PrivMonPrivilegesResponse>(PRIVMON_PRIVILEGE_CHECK_API, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
       });

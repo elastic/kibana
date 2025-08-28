@@ -13,6 +13,7 @@ import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  MONITORING_ENTITY_LIST_SOURCES_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import {
@@ -29,7 +30,7 @@ export const listMonitoringEntitySourceRoute = (
   router.versioned
     .get({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/entity_source/list',
+      path: MONITORING_ENTITY_LIST_SOURCES_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],

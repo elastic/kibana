@@ -40,8 +40,8 @@ export const registerPrivilegeMonitoringRoutes = ({
   padGetStatusRoute(router, logger, config);
   initPrivilegeMonitoringEngineRoute(router, logger, config);
   scheduleNowMonitoringEngineRoute(router, logger, config);
-  deletePrivilegeMonitoringEngineRoute(router, logger, config);
-  healthCheckPrivilegeMonitoringRoute(router, logger, config);
+  deletePrivilegeMonitoringEngineRoute(router, logger);
+  healthCheckPrivilegeMonitoringRoute(router, logger);
   privilegesCheckPrivilegeMonitoringRoute(router, logger, getStartServices);
   searchPrivilegeMonitoringIndicesRoute(router, logger);
   createPrivilegeMonitoringIndicesRoute(router, logger);
@@ -52,5 +52,5 @@ export const registerPrivilegeMonitoringRoutes = ({
   listUsersRoute(router, logger);
   updateUserRoute(router, logger);
   uploadUsersCSVRoute(router, logger, config);
-  disablePrivilegeMonitoringEngineRoute(router, logger, config);
+  disablePrivilegeMonitoringEngineRoute(router, logger);
 };

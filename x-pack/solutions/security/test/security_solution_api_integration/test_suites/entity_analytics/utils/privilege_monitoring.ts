@@ -13,7 +13,7 @@ export const privilegeMonitoringRouteHelpersFactoryNoAuth = (
 ) => ({
   privilegesForUser: async ({ username, password }: { username: string; password: string }) =>
     await supertestWithoutAuth
-      .get('/api/entity_analytics/monitoring/privileges/privileges')
+      .get(PRIVMON_PRIVILEGE_CHECK_API)
       .auth(username, password)
       .set('elastic-api-version', API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

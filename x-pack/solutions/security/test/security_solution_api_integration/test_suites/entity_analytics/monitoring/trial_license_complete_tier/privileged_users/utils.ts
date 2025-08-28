@@ -49,7 +49,7 @@ export const PrivMonUtils = (
     password: string;
   }) => {
     return await supertestWithoutAuth
-      .post(routeWithNamespace('/api/entity_analytics/monitoring/engine/init', namespace))
+      .post(routeWithNamespace(MONITORING_ENGINE_INIT_URL, namespace))
       .auth(username, password)
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', API_VERSIONS.public.v1)
@@ -63,7 +63,7 @@ export const PrivMonUtils = (
   ) => {
     const file = fileContent instanceof Buffer ? fileContent : Buffer.from(fileContent);
     return supertest
-      .post(routeWithNamespace('/api/entity_analytics/monitoring/users/_csv', namespace))
+      .post(routeWithNamespace(MONITORING_USERS_CSV_UPLOAD_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -83,7 +83,7 @@ export const PrivMonUtils = (
       }, ignoreConflict: ${!!ignoreConflict}`
     );
     return supertest
-      .post(routeWithNamespace('/api/entity_analytics/monitoring/engine/schedule_now', namespace))
+      .post(routeWithNamespace(MONITORING_ENGINE_SCHEDULE_NOW_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

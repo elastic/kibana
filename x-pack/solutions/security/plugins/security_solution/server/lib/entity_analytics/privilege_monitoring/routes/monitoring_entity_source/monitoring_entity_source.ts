@@ -14,6 +14,7 @@ import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  MONITORING_ENTITY_SOURCE_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import {
@@ -39,7 +40,7 @@ export const monitoringEntitySourceRoute = (
   router.versioned
     .post({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/entity_source',
+      path: MONITORING_ENTITY_SOURCE_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -100,7 +101,7 @@ export const monitoringEntitySourceRoute = (
   router.versioned
     .get({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/entity_source/{id}',
+      path: `${MONITORING_ENTITY_SOURCE_URL}/{id}`,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -138,7 +139,7 @@ export const monitoringEntitySourceRoute = (
   router.versioned
     .put({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/entity_source/{id}',
+      path: `${MONITORING_ENTITY_SOURCE_URL}/{id}`,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],

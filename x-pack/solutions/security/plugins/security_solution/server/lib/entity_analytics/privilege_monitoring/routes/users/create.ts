@@ -15,6 +15,7 @@ import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  MONITORING_USERS_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
@@ -24,7 +25,7 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
   router.versioned
     .post({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/users',
+      path: MONITORING_USERS_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
