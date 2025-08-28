@@ -12,7 +12,7 @@ import type { CreateMonitoringEntitySource } from '../../../../../common/api/ent
 import {
   INTEGRATION_TYPES,
   defaultMonitoringUsersIndex,
-  getMatcherFor,
+  getMatchersFor,
   getStreamPatternFor,
   integrationsSourceIndex,
 } from '../../../../../common/entity_analytics/privilege_monitoring/constants';
@@ -129,7 +129,7 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
           managed: true,
           indexPattern: getStreamPatternFor(integrationName, deps.namespace),
           name: integrationsSourceIndex(deps.namespace, integrationName),
-          matchers: getMatcherFor(integrationName), // TODO: update this
+          matchers: getMatchersFor(integrationName),
         })
       )
     );
