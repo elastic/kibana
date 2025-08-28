@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import { ScoreExporter } from './score_exporter';
+import type { EvaluationScoreRepository } from './score_repository';
 
-export class EvaluationScoreHelper {
-  private exporter: ScoreExporter;
-
-  constructor(esClient: EsClient, private readonly log: SomeDevLog) {
-    this.exporter = new ScoreExporter(esClient, log);
-  }
+export class EvaluationAnalysisService {
+  constructor(
+    private readonly scoreRepository: EvaluationScoreRepository,
+    private readonly log: SomeDevLog
+  ) {}
 
   async compareEvaluationRuns({
     currentRunId,
@@ -56,8 +54,8 @@ export class EvaluationScoreHelper {
     );
 
     const [currentScores, referenceScores] = await Promise.all([
-      this.exporter.getScoresByRunId(currentRunId),
-      this.exporter.getScoresByRunId(referenceRunId),
+      this.scoreRepository.getScoresByRunId(currentRunId),
+      this.scoreRepository.getScoresByRunId(referenceRunId),
     ]);
 
     if (currentScores.length === 0) {

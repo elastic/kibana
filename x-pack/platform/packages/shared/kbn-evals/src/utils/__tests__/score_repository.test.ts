@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ScoreExporter } from '../score_exporter';
+import { EvaluationScoreRepository } from '../score_repository';
 
 const mockEsClient = {
   indices: {
@@ -22,11 +22,11 @@ const mockLog = {
   success: jest.fn(),
 } as any;
 
-describe('ScoreExporter', () => {
-  let exporter: ScoreExporter;
+describe('EvaluationScoreRepository', () => {
+  let exporter: EvaluationScoreRepository;
 
   beforeEach(() => {
-    exporter = new ScoreExporter(mockEsClient, mockLog);
+    exporter = new EvaluationScoreRepository(mockEsClient, mockLog);
     jest.clearAllMocks();
   });
 

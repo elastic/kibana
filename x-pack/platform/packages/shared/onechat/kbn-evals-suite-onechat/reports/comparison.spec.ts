@@ -14,7 +14,7 @@ evaluate.describe(
   { tag: '@svlSearch' },
   () => {
     // Run-to-Run Comparison
-    evaluate('Evaluation Run Comparison', async ({ scoreHelper, log }) => {
+    evaluate('Evaluation Run Comparison', async ({ evaluationAnalysisService, log }) => {
       const currentRunId = process.env.EVALUATION_RUN_ID;
       const referenceRunId = process.env.REFERENCE_EVALUATION_RUN_ID;
 
@@ -35,7 +35,7 @@ evaluate.describe(
       log.info(`Reference Run ID: ${chalk.cyan(referenceRunId)}`);
 
       try {
-        const comparisonResult = await scoreHelper.compareEvaluationRuns({
+        const comparisonResult = await evaluationAnalysisService.compareEvaluationRuns({
           currentRunId,
           referenceRunId,
         });

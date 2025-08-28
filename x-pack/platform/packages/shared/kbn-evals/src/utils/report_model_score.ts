@@ -14,7 +14,7 @@ import { table } from 'table';
 import chalk from 'chalk';
 import { hostname } from 'os';
 import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
-import { ScoreExporter } from './score_exporter';
+import { EvaluationScoreRepository } from './score_repository';
 import { buildEvaluationResults, calculateEvaluatorStats } from './evaluation_stats';
 
 export async function reportModelScore({
@@ -137,7 +137,7 @@ export async function reportModelScore({
 
   if (exportToElasticsearch) {
     try {
-      const exporter = new ScoreExporter(esClient, log);
+      const exporter = new EvaluationScoreRepository(esClient, log);
       const currentRunId = runId || process.env.TEST_RUN_ID || `run_${Date.now()}`;
 
       log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));

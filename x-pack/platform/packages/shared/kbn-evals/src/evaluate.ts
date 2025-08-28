@@ -26,7 +26,8 @@ import type { DefaultEvaluators } from './types';
 import { reportModelScore } from './utils/report_model_score';
 import { createConnectorFixture } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
-import { EvaluationScoreHelper } from './utils/evaluation_score_helper';
+import { EvaluationAnalysisService } from './utils/analysis';
+import { EvaluationScoreRepository } from './utils/score_repository';
 
 /**
  * Test type for evaluations. Loads an inference client and a
@@ -42,7 +43,7 @@ export const evaluate = base.extend<
     connector: AvailableConnectorWithId;
     evaluationConnector: AvailableConnectorWithId;
     repetitions: number;
-    scoreHelper: EvaluationScoreHelper;
+    evaluationAnalysisService: EvaluationAnalysisService;
   }
 >({
   fetch: [
@@ -185,9 +186,10 @@ export const evaluate = base.extend<
     },
     { scope: 'worker' },
   ],
-  scoreHelper: [
+  evaluationAnalysisService: [
     async ({ esClient, log }, use) => {
-      const helper = new EvaluationScoreHelper(esClient, log);
+      const scoreRepository = new EvaluationScoreRepository(esClient, log);
+      const helper = new EvaluationAnalysisService(scoreRepository, log);
       await use(helper);
     },
     { scope: 'worker' },

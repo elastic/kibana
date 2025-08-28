@@ -54,7 +54,7 @@ interface ModelScoreDocument {
 
 const ELASTICSEARCH_INDEX = '.kibana-evals-scores';
 
-export class ScoreExporter {
+export class EvaluationScoreRepository {
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
   private async ensureIndexTemplate(): Promise<void> {
