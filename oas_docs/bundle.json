@@ -7909,6 +7909,9 @@
                               "agent_limits_go_max_procs": {
                                 "nullable": true
                               },
+                              "agent_logging_files_interval": {
+                                "nullable": true
+                              },
                               "agent_logging_files_keepfiles": {
                                 "nullable": true
                               },
@@ -8929,6 +8932,9 @@
                       "agent_limits_go_max_procs": {
                         "nullable": true
                       },
+                      "agent_logging_files_interval": {
+                        "nullable": true
+                      },
                       "agent_logging_files_keepfiles": {
                         "nullable": true
                       },
@@ -9244,6 +9250,9 @@
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_interval": {
                               "nullable": true
                             },
                             "agent_logging_files_keepfiles": {
@@ -10290,6 +10299,9 @@
                                 "nullable": true
                               },
                               "agent_limits_go_max_procs": {
+                                "nullable": true
+                              },
+                              "agent_logging_files_interval": {
                                 "nullable": true
                               },
                               "agent_logging_files_keepfiles": {
@@ -11584,6 +11596,9 @@
                             "agent_limits_go_max_procs": {
                               "nullable": true
                             },
+                            "agent_logging_files_interval": {
+                              "nullable": true
+                            },
                             "agent_logging_files_keepfiles": {
                               "nullable": true
                             },
@@ -12602,6 +12617,9 @@
                       "agent_limits_go_max_procs": {
                         "nullable": true
                       },
+                      "agent_logging_files_interval": {
+                        "nullable": true
+                      },
                       "agent_logging_files_keepfiles": {
                         "nullable": true
                       },
@@ -12920,6 +12938,9 @@
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_interval": {
                               "nullable": true
                             },
                             "agent_logging_files_keepfiles": {
@@ -14060,6 +14081,9 @@
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_interval": {
                               "nullable": true
                             },
                             "agent_logging_files_keepfiles": {
