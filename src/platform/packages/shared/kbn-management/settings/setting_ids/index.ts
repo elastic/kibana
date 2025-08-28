@@ -128,6 +128,7 @@ export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExc
 export const OBSERVABILITY_ENABLE_STREAMS_UI = 'observability:enableStreamsUI';
 export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS =
   'observability:streamsEnableSignificantEvents';
+export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';

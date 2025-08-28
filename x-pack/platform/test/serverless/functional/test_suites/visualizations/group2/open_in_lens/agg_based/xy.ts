@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('XY', function describeIndexTests() {
     const fixture =
-      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/xy.json';
+      'x-pack/platform/test/serverless/fixtures/kbn_archives/lens/open_in_lens/agg_based/xy.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);

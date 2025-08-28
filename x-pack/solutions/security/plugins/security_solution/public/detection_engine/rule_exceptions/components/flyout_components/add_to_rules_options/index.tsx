@@ -108,7 +108,7 @@ const ExceptionsAddToRulesOptionsComponent: React.FC<ExceptionsAddToRulesOptions
 
   return (
     <>
-      <EuiRadio {...ruleRadioOptionProps} />
+      <EuiRadio name="addToRulesOption" {...ruleRadioOptionProps} />
       {selectedRadioOption === 'select_rules_to_add_to' && (
         <ExceptionsAddToRulesTable
           onRuleSelectionChange={onRuleSelectionChange}

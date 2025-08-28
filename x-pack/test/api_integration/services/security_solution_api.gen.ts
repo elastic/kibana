@@ -19,6 +19,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 import { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
 import { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
@@ -187,7 +188,6 @@ import {
   UpsertRuleMigrationResourcesRequestParamsInput,
   UpsertRuleMigrationResourcesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { routeWithNamespace } from '../../common/utils/security_solution';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
@@ -206,7 +206,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       */
     alertsMigrationCleanup(props: AlertsMigrationCleanupProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/detection_engine/signals/migration', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/detection_engine/signals/migration', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -214,14 +214,14 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
     },
     applyEntityEngineDataviewIndices(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/entity_store/engines/apply_dataview_indices', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/entity_store/engines/apply_dataview_indices', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/asset_criticality/privileges', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/asset_criticality/privileges', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -232,7 +232,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
     bootstrapPrebuiltRules(kibanaSpace: string = 'default') {
       return supertest
         .post(
-          routeWithNamespace('/internal/detection_engine/prebuilt_rules/_bootstrap', kibanaSpace)
+          getRouteUrlForSpace('/internal/detection_engine/prebuilt_rules/_bootstrap', kibanaSpace)
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -249,7 +249,7 @@ If asset criticality records already exist for the specified entities, those rec
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .post(routeWithNamespace('/api/asset_criticality/bulk', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/asset_criticality/bulk', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -263,7 +263,7 @@ If asset criticality records already exist for the specified entities, those rec
       */
     cleanDraftTimelines(props: CleanDraftTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/timeline/_draft', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/timeline/_draft', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -274,7 +274,7 @@ If asset criticality records already exist for the specified entities, those rec
      */
     cleanUpRiskEngine(kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/risk_score/engine/dangerously_delete_data', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/risk_score/engine/dangerously_delete_data', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -287,7 +287,7 @@ If asset criticality records already exist for the specified entities, those rec
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .patch(routeWithNamespace('/api/risk_score/engine/saved_object/configure', kibanaSpace))
+        .patch(getRouteUrlForSpace('/api/risk_score/engine/saved_object/configure', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -299,7 +299,7 @@ If asset criticality records already exist for the specified entities, those rec
       */
     copyTimeline(props: CopyTimelineProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/timeline/_copy', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/timeline/_copy', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -307,7 +307,7 @@ If asset criticality records already exist for the specified entities, those rec
     },
     createAlertsIndex(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/index', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -319,7 +319,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       */
     createAlertsMigration(props: CreateAlertsMigrationProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/signals/migration', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/detection_engine/signals/migration', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -336,7 +336,7 @@ If a record already exists for the specified entity, that record is overwritten 
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .post(routeWithNamespace('/api/asset_criticality', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/asset_criticality', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -344,9 +344,9 @@ If a record already exists for the specified entity, that record is overwritten 
     },
     createEntitySource(props: CreateEntitySourceProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/entity_analytics/monitoring/entity_source', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/entity_source', kibanaSpace))
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
@@ -355,7 +355,9 @@ If a record already exists for the specified entity, that record is overwritten 
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .put(routeWithNamespace('/api/entity_analytics/monitoring/privileges/indices', kibanaSpace))
+        .put(
+          getRouteUrlForSpace('/api/entity_analytics/monitoring/privileges/indices', kibanaSpace)
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -363,7 +365,7 @@ If a record already exists for the specified entity, that record is overwritten 
     },
     createPrivMonUser(props: CreatePrivMonUserProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/entity_analytics/monitoring/users', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/users', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -428,7 +430,7 @@ For detailed information on Kibana actions and alerting, and additional API call
       */
     createRule(props: CreateRuleProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/rules', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -439,7 +441,7 @@ For detailed information on Kibana actions and alerting, and additional API call
      */
     createRuleMigration(props: CreateRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(routeWithNamespace('/internal/siem_migrations/rules', kibanaSpace))
+        .put(getRouteUrlForSpace('/internal/siem_migrations/rules', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -454,7 +456,7 @@ For detailed information on Kibana actions and alerting, and additional API call
     ) {
       return supertest
         .post(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
             kibanaSpace
           )
@@ -469,7 +471,7 @@ For detailed information on Kibana actions and alerting, and additional API call
      */
     createTimelines(props: CreateTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/timeline', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/timeline', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -481,7 +483,7 @@ For detailed information on Kibana actions and alerting, and additional API call
     ) {
       return supertest
         .post(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams(
               '/api/endpoint/protection_updates_note/{package_policy_id}',
               props.params
@@ -496,7 +498,7 @@ For detailed information on Kibana actions and alerting, and additional API call
     },
     deleteAlertsIndex(kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/detection_engine/index', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -509,7 +511,7 @@ For detailed information on Kibana actions and alerting, and additional API call
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .delete(routeWithNamespace('/api/asset_criticality', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/asset_criticality', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -518,7 +520,7 @@ For detailed information on Kibana actions and alerting, and additional API call
     deleteEntityEngine(props: DeleteEntityEngineProps, kibanaSpace: string = 'default') {
       return supertest
         .delete(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/entity_store/engines/{entityType}', props.params),
             kibanaSpace
           )
@@ -531,18 +533,18 @@ For detailed information on Kibana actions and alerting, and additional API call
     deleteEntitySource(props: DeleteEntitySourceProps, kibanaSpace: string = 'default') {
       return supertest
         .delete(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
             kibanaSpace
           )
         )
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     deleteMonitoringEngine(props: DeleteMonitoringEngineProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/entity_analytics/monitoring/engine/delete', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/delete', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -553,7 +555,7 @@ For detailed information on Kibana actions and alerting, and additional API call
      */
     deleteNote(props: DeleteNoteProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/note', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/note', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -562,7 +564,7 @@ For detailed information on Kibana actions and alerting, and additional API call
     deletePrivMonUser(props: DeletePrivMonUserProps, kibanaSpace: string = 'default') {
       return supertest
         .delete(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
             kibanaSpace
           )
@@ -584,7 +586,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       */
     deleteRule(props: DeleteRuleProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/detection_engine/rules', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -596,7 +598,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     deleteRuleMigration(props: DeleteRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
         .delete(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
             kibanaSpace
           )
@@ -610,7 +612,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     deleteTimelines(props: DeleteTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/timeline', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/timeline', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -624,7 +626,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .post(routeWithNamespace('/api/risk_scores/calculation/entity', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/risk_scores/calculation/entity', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -632,21 +634,21 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     },
     disableMonitoringEngine(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/entity_analytics/monitoring/engine/disable', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/disable', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     disableRiskEngine(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/internal/risk_score/engine/disable', kibanaSpace))
+        .post(getRouteUrlForSpace('/internal/risk_score/engine/disable', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     enableRiskEngine(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/internal/risk_score/engine/enable', kibanaSpace))
+        .post(getRouteUrlForSpace('/internal/risk_score/engine/enable', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -656,19 +658,23 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     endpointExecuteAction(props: EndpointExecuteActionProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/endpoint/action/execute', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint/action/execute', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
     /**
-     * Download a file from an endpoint.
-     */
+      * Download a file from an endpoint. 
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+      */
     endpointFileDownload(props: EndpointFileDownloadProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/endpoint/action/{action_id}/file/{file_id}/download', props.params),
             kibanaSpace
           )
@@ -678,12 +684,16 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get information for the specified file using the file ID.
-     */
+      * Get information for the specified file using the file ID.
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+      */
     endpointFileInfo(props: EndpointFileInfoProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', props.params),
             kibanaSpace
           )
@@ -701,7 +711,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     ) {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/endpoint/action/{action_id}', props.params),
             kibanaSpace
           )
@@ -715,7 +725,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     endpointGetActionsList(props: EndpointGetActionsListProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/endpoint/action', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/endpoint/action', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -726,7 +736,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     endpointGetActionsState(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/endpoint/action/state', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/endpoint/action/state', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -739,7 +749,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .get(routeWithNamespace('/api/endpoint/action_status', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/endpoint/action_status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -750,7 +760,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     endpointGetFileAction(props: EndpointGetFileActionProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/endpoint/action/get_file', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint/action/get_file', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -764,7 +774,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .post(routeWithNamespace('/api/endpoint/action/running_procs', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint/action/running_procs', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -775,7 +785,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     endpointIsolateAction(props: EndpointIsolateActionProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/endpoint/action/isolate', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint/action/isolate', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -789,7 +799,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .post(routeWithNamespace('/api/endpoint/action/kill_process', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint/action/kill_process', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -800,7 +810,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     endpointScanAction(props: EndpointScanActionProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/endpoint/action/scan', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint/action/scan', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -814,7 +824,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .post(routeWithNamespace('/api/endpoint/action/suspend_process', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint/action/suspend_process', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -825,7 +835,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     endpointUnisolateAction(props: EndpointUnisolateActionProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/endpoint/action/unisolate', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint/action/unisolate', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -836,14 +846,14 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     endpointUploadAction(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/endpoint/action/upload', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint/action/upload', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     entityStoreGetPrivileges(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/entity_store/privileges', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/entity_store/privileges', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -862,7 +872,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       */
     exportRules(props: ExportRulesProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/rules/_export', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/detection_engine/rules/_export', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -874,7 +884,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     exportTimelines(props: ExportTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/timeline/_export', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/timeline/_export', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -889,7 +899,7 @@ finalize it.
       */
     finalizeAlertsMigration(props: FinalizeAlertsMigrationProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/signals/finalize_migration', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/detection_engine/signals/finalize_migration', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -903,7 +913,7 @@ finalize it.
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .get(routeWithNamespace('/api/asset_criticality/list', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/asset_criticality/list', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -914,7 +924,7 @@ finalize it.
      */
     findRules(props: FindRulesProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/detection_engine/rules/_find', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/detection_engine/rules/_find', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -925,7 +935,7 @@ finalize it.
      */
     getAllStatsRuleMigration(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/siem_migrations/rules/stats', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/siem_migrations/rules/stats', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -938,7 +948,7 @@ finalize it.
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .get(routeWithNamespace('/api/asset_criticality', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/asset_criticality', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -946,7 +956,7 @@ finalize it.
     },
     getAssetCriticalityStatus(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/asset_criticality/status', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/asset_criticality/status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -956,7 +966,7 @@ finalize it.
      */
     getDraftTimelines(props: GetDraftTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/timeline/_draft', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/timeline/_draft', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -964,7 +974,7 @@ finalize it.
     },
     getEndpointMetadataList(props: GetEndpointMetadataListProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/endpoint/metadata', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/endpoint/metadata', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -973,7 +983,7 @@ finalize it.
     getEndpointSuggestions(props: GetEndpointSuggestionsProps, kibanaSpace: string = 'default') {
       return supertest
         .post(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/api/endpoint/suggestions/{suggestion_type}', props.params),
             kibanaSpace
           )
@@ -986,7 +996,7 @@ finalize it.
     getEntityEngine(props: GetEntityEngineProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/entity_store/engines/{entityType}', props.params),
             kibanaSpace
           )
@@ -998,18 +1008,18 @@ finalize it.
     getEntitySource(props: GetEntitySourceProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
             kibanaSpace
           )
         )
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     getEntityStoreStatus(props: GetEntityStoreStatusProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/entity_store/status', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/entity_store/status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1020,7 +1030,7 @@ finalize it.
      */
     getNotes(props: GetNotesProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/note', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/note', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1028,7 +1038,7 @@ finalize it.
     },
     getPolicyResponse(props: GetPolicyResponseProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/endpoint/policy_response', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/endpoint/policy_response', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1037,7 +1047,7 @@ finalize it.
     getPrivilegedAccessDetectionPackageStatus(kibanaSpace: string = 'default') {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             '/api/entity_analytics/privileged_user_monitoring/pad/status',
             kibanaSpace
           )
@@ -1052,7 +1062,7 @@ finalize it.
     ) {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams(
               '/api/endpoint/protection_updates_note/{package_policy_id}',
               props.params
@@ -1069,7 +1079,7 @@ finalize it.
      */
     getRiskEngineStatus(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/risk_score/engine/status', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/risk_score/engine/status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1077,7 +1087,7 @@ finalize it.
     getRuleExecutionEvents(props: GetRuleExecutionEventsProps, kibanaSpace: string = 'default') {
       return supertest
         .put(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams(
               '/internal/detection_engine/rules/{ruleId}/execution/events',
               props.params
@@ -1093,7 +1103,7 @@ finalize it.
     getRuleExecutionResults(props: GetRuleExecutionResultsProps, kibanaSpace: string = 'default') {
       return supertest
         .put(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams(
               '/internal/detection_engine/rules/{ruleId}/execution/results',
               props.params
@@ -1112,7 +1122,7 @@ finalize it.
     getRuleMigration(props: GetRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
             kibanaSpace
           )
@@ -1126,7 +1136,7 @@ finalize it.
      */
     getRuleMigrationIntegrations(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/siem_migrations/rules/integrations', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/siem_migrations/rules/integrations', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1136,7 +1146,7 @@ finalize it.
      */
     getRuleMigrationIntegrationsStats(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/siem_migrations/rules/integrations/stats', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/siem_migrations/rules/integrations/stats', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1150,7 +1160,7 @@ finalize it.
     ) {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams(
               '/internal/siem_migrations/rules/{migration_id}/prebuilt_rules',
               props.params
@@ -1167,7 +1177,7 @@ finalize it.
      */
     getRuleMigrationPrivileges(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/siem_migrations/rules/missing_privileges', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/siem_migrations/rules/missing_privileges', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1181,7 +1191,7 @@ finalize it.
     ) {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/resources', props.params),
             kibanaSpace
           )
@@ -1200,7 +1210,7 @@ finalize it.
     ) {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams(
               '/internal/siem_migrations/rules/{migration_id}/resources/missing',
               props.params
@@ -1218,7 +1228,7 @@ finalize it.
     getRuleMigrationRules(props: GetRuleMigrationRulesProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
             kibanaSpace
           )
@@ -1234,7 +1244,7 @@ finalize it.
     getRuleMigrationStats(props: GetRuleMigrationStatsProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/stats', props.params),
             kibanaSpace
           )
@@ -1252,7 +1262,7 @@ finalize it.
     ) {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams(
               '/internal/siem_migrations/rules/{migration_id}/translation_stats',
               props.params
@@ -1269,7 +1279,7 @@ finalize it.
      */
     getTimeline(props: GetTimelineProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/timeline', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/timeline', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1280,7 +1290,7 @@ finalize it.
      */
     getTimelines(props: GetTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/timelines', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/timelines', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1288,7 +1298,7 @@ finalize it.
     },
     getWorkflowInsights(props: GetWorkflowInsightsProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/api/endpoint/workflow_insights', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/api/endpoint/workflow_insights', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1315,7 +1325,7 @@ finalize it.
       */
     importRules(props: ImportRulesProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/rules/_import', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/detection_engine/rules/_import', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1326,7 +1336,7 @@ finalize it.
      */
     importTimelines(props: ImportTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/timeline/_import', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/timeline/_import', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1335,7 +1345,7 @@ finalize it.
     initEntityEngine(props: InitEntityEngineProps, kibanaSpace: string = 'default') {
       return supertest
         .post(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
             kibanaSpace
           )
@@ -1347,7 +1357,7 @@ finalize it.
     },
     initEntityStore(props: InitEntityStoreProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/entity_store/enable', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/entity_store/enable', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1355,7 +1365,7 @@ finalize it.
     },
     initMonitoringEngine(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/entity_analytics/monitoring/engine/init', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/init', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1365,7 +1375,7 @@ finalize it.
      */
     initRiskEngine(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/internal/risk_score/engine/init', kibanaSpace))
+        .post(getRouteUrlForSpace('/internal/risk_score/engine/init', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1376,7 +1386,7 @@ finalize it.
     installMigrationRules(props: InstallMigrationRulesProps, kibanaSpace: string = 'default') {
       return supertest
         .post(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/install', props.params),
             kibanaSpace
           )
@@ -1402,7 +1412,7 @@ providing you with the most current and effective threat detection capabilities.
       */
     installPrebuiltRulesAndTimelines(kibanaSpace: string = 'default') {
       return supertest
-        .put(routeWithNamespace('/api/detection_engine/rules/prepackaged', kibanaSpace))
+        .put(getRouteUrlForSpace('/api/detection_engine/rules/prepackaged', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1415,7 +1425,7 @@ providing you with the most current and effective threat detection capabilities.
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .post(routeWithNamespace('/api/timeline/_prepackaged', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/timeline/_prepackaged', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1424,7 +1434,7 @@ providing you with the most current and effective threat detection capabilities.
     installPrivilegedAccessDetectionPackage(kibanaSpace: string = 'default') {
       return supertest
         .post(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             '/api/entity_analytics/privileged_user_monitoring/pad/install',
             kibanaSpace
           )
@@ -1435,7 +1445,7 @@ providing you with the most current and effective threat detection capabilities.
     },
     internalUploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/internal/asset_criticality/upload_csv', kibanaSpace))
+        .post(getRouteUrlForSpace('/internal/asset_criticality/upload_csv', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1445,7 +1455,7 @@ providing you with the most current and effective threat detection capabilities.
      */
     listEntities(props: ListEntitiesProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/entity_store/entities/list', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/entity_store/entities/list', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1453,22 +1463,24 @@ providing you with the most current and effective threat detection capabilities.
     },
     listEntityEngines(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/entity_store/engines', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/entity_store/engines', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     listEntitySources(props: ListEntitySourcesProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/entity_analytics/monitoring/entity_source/list', kibanaSpace))
+        .get(
+          getRouteUrlForSpace('/api/entity_analytics/monitoring/entity_source/list', kibanaSpace)
+        )
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
     listPrivMonUsers(props: ListPrivMonUsersProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/entity_analytics/monitoring/users/list', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/users/list', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1486,7 +1498,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       */
     patchRule(props: PatchRuleProps, kibanaSpace: string = 'default') {
       return supertest
-        .patch(routeWithNamespace('/api/detection_engine/rules', kibanaSpace))
+        .patch(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1497,7 +1509,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     patchTimeline(props: PatchTimelineProps, kibanaSpace: string = 'default') {
       return supertest
-        .patch(routeWithNamespace('/api/timeline', kibanaSpace))
+        .patch(getRouteUrlForSpace('/api/timeline', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1516,7 +1528,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
       */
     performRulesBulkAction(props: PerformRulesBulkActionProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/rules/_bulk_action', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_action', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1528,7 +1540,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
      */
     persistFavoriteRoute(props: PersistFavoriteRouteProps, kibanaSpace: string = 'default') {
       return supertest
-        .patch(routeWithNamespace('/api/timeline/_favorite', kibanaSpace))
+        .patch(getRouteUrlForSpace('/api/timeline/_favorite', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1539,7 +1551,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
      */
     persistNoteRoute(props: PersistNoteRouteProps, kibanaSpace: string = 'default') {
       return supertest
-        .patch(routeWithNamespace('/api/note', kibanaSpace))
+        .patch(getRouteUrlForSpace('/api/note', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1550,7 +1562,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
      */
     persistPinnedEventRoute(props: PersistPinnedEventRouteProps, kibanaSpace: string = 'default') {
       return supertest
-        .patch(routeWithNamespace('/api/pinned_event', kibanaSpace))
+        .patch(getRouteUrlForSpace('/api/pinned_event', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1561,7 +1573,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
      */
     previewRiskScore(props: PreviewRiskScoreProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/internal/risk_score/preview', kibanaSpace))
+        .post(getRouteUrlForSpace('/internal/risk_score/preview', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1569,14 +1581,14 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
     },
     privmonBulkUploadUsersCsv(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/entity_analytics/monitoring/users/_csv', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/users/_csv', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     privMonHealth(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/entity_analytics/monitoring/privileges/health', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/privileges/health', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1587,7 +1599,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
     privMonPrivileges(kibanaSpace: string = 'default') {
       return supertest
         .get(
-          routeWithNamespace('/api/entity_analytics/monitoring/privileges/privileges', kibanaSpace)
+          getRouteUrlForSpace('/api/entity_analytics/monitoring/privileges/privileges', kibanaSpace)
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
@@ -1595,7 +1607,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
     },
     readAlertsIndex(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/detection_engine/index', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1608,7 +1620,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .get(routeWithNamespace('/api/detection_engine/signals/migration_status', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/detection_engine/signals/migration_status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1622,7 +1634,7 @@ This endpoint provides detailed information about the number of custom rules, in
       */
     readPrebuiltRulesAndTimelinesStatus(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/detection_engine/rules/prepackaged/_status', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/detection_engine/rules/prepackaged/_status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1636,14 +1648,14 @@ detection engine rules.
       */
     readPrivileges(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/detection_engine/privileges', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/detection_engine/privileges', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     readRiskEngineSettings(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/risk_score/engine/settings', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/risk_score/engine/settings', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1661,7 +1673,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       */
     readRule(props: ReadRuleProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/detection_engine/rules', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1672,14 +1684,14 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     readTags(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/detection_engine/tags', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/detection_engine/tags', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     resolveTimeline(props: ResolveTimelineProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/timeline/resolve', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/timeline/resolve', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1687,14 +1699,14 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     },
     riskEngineGetPrivileges(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/risk_engine/privileges', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/risk_engine/privileges', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     rulePreview(props: RulePreviewProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/rules/preview', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/detection_engine/rules/preview', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1703,7 +1715,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     },
     runEntityAnalyticsMigrations(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/internal/entity_analytics/migrations/run', kibanaSpace))
+        .post(getRouteUrlForSpace('/internal/entity_analytics/migrations/run', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1713,7 +1725,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     runScriptAction(props: RunScriptActionProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/endpoint/action/runscript', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint/action/runscript', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1724,7 +1736,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     scheduleRiskEngineNow(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/risk_score/engine/schedule_now', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/risk_score/engine/schedule_now', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1734,7 +1746,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     searchAlerts(props: SearchAlertsProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/signals/search', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/detection_engine/signals/search', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1742,7 +1754,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     },
     searchPrivilegesIndices(props: SearchPrivilegesIndicesProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/entity_analytics/monitoring/privileges/indices', kibanaSpace))
+        .get(
+          getRouteUrlForSpace('/api/entity_analytics/monitoring/privileges/indices', kibanaSpace)
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1756,7 +1770,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       */
     setAlertAssignees(props: SetAlertAssigneesProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/signals/assignees', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/detection_engine/signals/assignees', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1767,7 +1781,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     setAlertsStatus(props: SetAlertsStatusProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/signals/status', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/detection_engine/signals/status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1781,7 +1795,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       */
     setAlertTags(props: SetAlertTagsProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/signals/tags', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/detection_engine/signals/tags', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1790,7 +1804,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     startEntityEngine(props: StartEntityEngineProps, kibanaSpace: string = 'default') {
       return supertest
         .post(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/entity_store/engines/{entityType}/start', props.params),
             kibanaSpace
           )
@@ -1805,7 +1819,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     startRuleMigration(props: StartRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
         .post(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/start', props.params),
             kibanaSpace
           )
@@ -1818,7 +1832,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     stopEntityEngine(props: StopEntityEngineProps, kibanaSpace: string = 'default') {
       return supertest
         .post(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/entity_store/engines/{entityType}/stop', props.params),
             kibanaSpace
           )
@@ -1833,7 +1847,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     stopRuleMigration(props: StopRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
         .post(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/stop', props.params),
             kibanaSpace
           )
@@ -1847,7 +1861,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     suggestUserProfiles(props: SuggestUserProfilesProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/internal/detection_engine/users/_find', kibanaSpace))
+        .post(getRouteUrlForSpace('/internal/detection_engine/users/_find', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1861,7 +1875,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .post(routeWithNamespace('/internal/risk_score/calculation/entity', kibanaSpace))
+        .post(getRouteUrlForSpace('/internal/risk_score/calculation/entity', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1870,20 +1884,20 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     updateEntitySource(props: UpdateEntitySourceProps, kibanaSpace: string = 'default') {
       return supertest
         .put(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
             kibanaSpace
           )
         )
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
     updatePrivMonUser(props: UpdatePrivMonUserProps, kibanaSpace: string = 'default') {
       return supertest
         .put(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
             kibanaSpace
           )
@@ -1905,7 +1919,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       */
     updateRule(props: UpdateRuleProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(routeWithNamespace('/api/detection_engine/rules', kibanaSpace))
+        .put(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1917,7 +1931,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     updateRuleMigration(props: UpdateRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
         .patch(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
             kibanaSpace
           )
@@ -1936,7 +1950,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     ) {
       return supertest
         .patch(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
             kibanaSpace
           )
@@ -1949,7 +1963,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     updateWorkflowInsight(props: UpdateWorkflowInsightProps, kibanaSpace: string = 'default') {
       return supertest
         .put(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/api/endpoint/workflow_insights/{insightId}', props.params),
             kibanaSpace
           )
@@ -1961,7 +1975,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     },
     uploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/asset_criticality/upload_csv', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/asset_criticality/upload_csv', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1975,7 +1989,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     ) {
       return supertest
         .post(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/resources', props.params),
             kibanaSpace
           )

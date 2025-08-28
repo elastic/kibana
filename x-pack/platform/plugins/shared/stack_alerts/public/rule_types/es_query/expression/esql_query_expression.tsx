@@ -308,6 +308,7 @@ export const EsqlQueryExpression: React.FC<
             setRadioIdSelected(optionId);
             setParam('groupBy', optionId);
           }}
+          name="alertGroup"
         />
       </EuiFormRow>
       <EuiSpacer />

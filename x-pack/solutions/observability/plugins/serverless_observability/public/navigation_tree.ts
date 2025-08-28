@@ -105,7 +105,6 @@ export const createNavigationTree = ({
             children: [
               {
                 id: 'apm',
-                link: 'apm:services',
                 children: [
                   {
                     link: 'apm:services',

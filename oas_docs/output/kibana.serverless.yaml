@@ -4410,14 +4410,16 @@ paths:
             required:
               - type
               - id
-        - in: query
+        - description: The fields to return in the `attributes` key of the response.
+          in: query
           name: fields
           required: false
           schema:
-            items:
-              description: The fields to return in the `attributes` key of the response.
-              type: string
-            type: array
+            anyOf:
+              - items:
+                  type: string
+                type: array
+              - type: string
         - description: 'A KQL string that you filter with an attribute from your saved object. It should look like `savedObjectType.attributes.title: "myTitle"`. However, if you used a direct attribute of a saved object, such as `updatedAt`, you must define your filter, for example, `savedObjectType.updatedAt > 2018-12-22`.'
           in: query
           name: filter
@@ -10679,7 +10681,11 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}:
     get:
-      description: Get information for the specified file using the file ID.
+      description: |
+        Get information for the specified file using the file ID.
+        > info
+        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileInfo
       parameters:
         - in: path
@@ -10704,7 +10710,11 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
-      description: Download a file from an endpoint.
+      description: |
+        Download a file from an endpoint. 
+        > info
+        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileDownload
       parameters:
         - in: path
@@ -66905,6 +66915,7 @@ components:
             - green
             - yellow
             - red
+            - unavailable
             - unknown
           type: string
         id:

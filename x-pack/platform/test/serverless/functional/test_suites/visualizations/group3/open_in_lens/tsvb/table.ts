@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Table', function describeIndexTests() {
     const fixture =
-      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/table.json';
+      'x-pack/platform/test/serverless/fixtures/kbn_archives/lens/open_in_lens/tsvb/table.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);

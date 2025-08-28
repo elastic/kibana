@@ -39,7 +39,7 @@ export function AiAssistantSelectionPage() {
   const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
 
   const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
-  const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant;
+  const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant.home;
   const isSecurityAIAssistantEnabled = securityAIAssistantEnabled && aiAssistantManagementSelection;
 
   useEffect(() => {

@@ -134,3 +134,7 @@ export const inlineSourceFormatter: FormatterFn = (fields, key) => {
   // Escape template literals to prevent unintended interpolation
   return escapeTemplateLiterals(value).trim();
 };
+
+export const handleMultilineStringFormatter = (value: string) => {
+  return value.replace(/(\n+)/g, '$1\n');
+};

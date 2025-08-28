@@ -99,6 +99,7 @@ export const SetViewForm = React.memo<SetViewFormProps>(({ settings, zoom, cente
         `}
       >
         <EuiRadioGroup
+          name="coordinateSystem"
           options={COORDINATE_SYSTEM_OPTIONS}
           idSelected={coordinateSystem}
           onChange={onCoordinateSystemChange}

@@ -159,5 +159,8 @@
     "@kbn/serverless-common-settings",
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/management-settings-ids",
+    "@kbn/core-chrome-browser",
+    "@kbn/product-intercept-plugin",
+    "@kbn/core-chrome-browser",
   ]
 }

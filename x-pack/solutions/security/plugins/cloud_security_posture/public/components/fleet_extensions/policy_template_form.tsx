@@ -265,6 +265,7 @@ const AwsAccountTypeSelect = ({
           );
         }}
         size="m"
+        name="awsAccountType"
       />
       {getAwsAccountType(input) === AWS_ORGANIZATION_ACCOUNT && (
         <>
@@ -404,6 +405,7 @@ const GcpAccountTypeSelect = ({
           accountType !== getGcpAccountType(input) && onSetupFormatChange(accountType)
         }
         size="m"
+        name="accountType"
       />
       {getGcpAccountType(input) === GCP_ORGANIZATION_ACCOUNT && (
         <>
@@ -503,6 +505,7 @@ const AzureAccountTypeSelect = ({
           );
         }}
         size="m"
+        name="azureAccountType"
       />
       {getAzureAccountType(input) === AZURE_ORGANIZATION_ACCOUNT && (
         <>
