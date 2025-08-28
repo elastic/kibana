@@ -1,27 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/stack-connectors-plugin",
-  "owner": [
-    "@elastic/response-ops"
-  ],
+  "owner": ["@elastic/response-ops"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
     "id": "stackConnectors",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "stack_connectors"
-    ],
-    "requiredPlugins": [
-      "actions",
-      "esUiShared",
-      "kibanaReact",
-      "triggersActionsUi"
-    ],
-    "extraPublicDirs": [
-      "public/common"
-    ]
+    "configPath": ["xpack", "stack_connectors"],
+    "requiredPlugins": ["actions", "esUiShared", "kibanaReact", "triggersActionsUi"],
+    "optionalPlugins": ["encryptedSavedObjects"],
+    "extraPublicDirs": ["public/common"]
   }
 }
