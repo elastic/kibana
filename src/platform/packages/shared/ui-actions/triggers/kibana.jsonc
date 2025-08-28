@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ui-actions-triggers",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "private"
+}
