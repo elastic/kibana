@@ -130,6 +130,9 @@ export const ALERT_CLOSE_INFO_MODAL_DO_NOT_SHOW_AGAIN_LABEL = i18n.translate(
   'xpack.securitySolution.alert.closeInfoModal.doNotShowAgainLabel',
   {
     defaultMessage: 'Do not show this message again.',
+  }
+);
+
 export const BULK_ACTION_CLOSING_PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.bulkActions.closingPanelTitle',
   {

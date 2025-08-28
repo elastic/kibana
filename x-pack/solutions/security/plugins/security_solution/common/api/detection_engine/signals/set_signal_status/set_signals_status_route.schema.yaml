@@ -126,7 +126,16 @@ components:
   schemas:
     ReasonEnum:
       type: string
-      enum: ['false_positive', 'duplicate', 'investigation_required']
+      enum:
+        [
+          'false_positive',
+          'issue_resolved',
+          'acceptable_risk',
+          'expected_activity',
+          'low_severity',
+          'duplicate',
+          'investigation_required',
+        ]
       description: 'The reason for closing the alerts'
 
     SetAlertsStatusByIds:

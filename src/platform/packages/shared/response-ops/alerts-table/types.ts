@@ -574,12 +574,12 @@ export interface RenderContentPanelProps {
   closePopoverMenu: () => void;
 }
 
-interface ContentPanelConfig extends PanelConfig {
+export interface ContentPanelConfig extends PanelConfig {
   renderContent: (args: RenderContentPanelProps) => JSX.Element;
   items?: never;
 }
 
-interface ItemsPanelConfig extends PanelConfig {
+export interface ItemsPanelConfig extends PanelConfig {
   content?: never;
   items: BulkActionsConfig[];
 }

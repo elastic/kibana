@@ -552,7 +552,6 @@ export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
 /*
  * The tag to mark promotion rules that are related to the AI for SOC integrations
  */
-
 export const PROMOTION_RULE_TAGS = [
   'Promotion', // This is the legacy tag for promotion rules and can be safely removed once promotion rules go live
   'Promotion: External Alerts',
@@ -560,6 +559,10 @@ export const PROMOTION_RULE_TAGS = [
 
 export const AlertClosingReasonSchema = z.enum([
   'false_positive',
+  'issue_resolved',
+  'acceptable_risk',
+  'expected_activity',
+  'low_severity',
   'duplicate',
   'investigation_required',
 ]);

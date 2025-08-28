@@ -11,6 +11,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { AlertsUserProfilesData } from '../../configurations/security_solution_detections/fetch_page_context';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -64,7 +65,7 @@ export interface ThresholdAggregationData {
   dataProviders: DataProvider[];
 }
 
-export type AlertTableContextMenuItem = EuiContextMenuPanelItemDescriptorEntry;
+export type AlertTableContextMenuItem = EuiContextMenuPanelItemDescriptor;
 
 export interface SecurityAlertsTableContext {
   tableType: TableId;
