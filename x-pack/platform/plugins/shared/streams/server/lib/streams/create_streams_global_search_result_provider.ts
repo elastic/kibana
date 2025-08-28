@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { CoreSetup, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { from, takeUntil } from 'rxjs';
 import type {
   GlobalSearchProviderResult,
@@ -13,17 +13,21 @@ import type {
 } from '@kbn/global-search-plugin/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { Streams } from '@kbn/streams-schema';
+import type { SearchHit } from '@kbn/es-types';
 import type { StreamsStorageClient, StreamsStorageSettings } from './service';
 import { streamsStorageSettings } from './service';
 import { migrateOnRead } from './helpers/migrate_on_read';
 import { checkAccessBulk } from './stream_crud';
 
+const streamTypes = ['classic stream', 'wired stream', 'group stream', 'stream'];
+
 export function createStreamsGlobalSearchResultProvider(
+  core: CoreSetup,
   logger: Logger
 ): GlobalSearchResultProvider {
   return {
     id: 'streams',
-    getSearchableTypes: () => ['classic stream', 'wired stream', 'group stream', 'stream'],
+    getSearchableTypes: () => streamTypes,
     find: ({ term = '' as string, types = [] }, { aborted$, maxResults, client }) => {
       if (!client) {
         return from([]);
@@ -37,7 +41,7 @@ export function createStreamsGlobalSearchResultProvider(
       });
       const storageClient = storageAdapter.getClient();
 
-      return from(findStreams({ term, types, maxResults, storageClient, client })).pipe(
+      return from(findStreams({ term, types, maxResults, storageClient, client, core })).pipe(
         takeUntil(aborted$)
       );
     },
@@ -50,13 +54,20 @@ async function findStreams({
   maxResults,
   storageClient,
   client,
+  core,
 }: {
   term: string;
   types: string[];
   maxResults: number;
   storageClient: StreamsStorageClient;
   client: IScopedClusterClient;
+  core: CoreSetup;
 }) {
+  const [coreStart] = await core.getStartServices();
+  const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+  const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+  const groupStreamsEnabled = await uiSettingsClient.get('observability:streamsEnableGroupStreams');
+
   // This does NOT included unmanaged Classic streams
   const searchResponse = await storageClient.search({
     size: maxResults,
@@ -94,31 +105,44 @@ async function findStreams({
     return privileges[hit._source.name]?.read === true;
   });
 
-  const allStreams = types.includes('stream');
-  const classicStreams = types.includes('classic stream');
-  const wiredStreams = types.includes('wired stream');
-  const groupStreams = types.includes('group stream');
-  const noSubStreams = !classicStreams && !wiredStreams && !groupStreams;
-
-  if (allStreams || noSubStreams) {
-    return hitsWithAccess.map((hit) => toGlobalSearchProviderResult(hit._id!, hit._source, term));
+  if (types.length === 0) {
+    return hitsWithAccess.map((hit) =>
+      toGlobalSearchProviderResult(hit._id!, hit._source, term, groupStreamsEnabled)
+    );
   }
 
-  const relevantStreams = hitsWithAccess.filter(({ _source }) => {
-    return (
-      (classicStreams && Streams.ClassicStream.Definition.is(_source)) ||
-      (wiredStreams && Streams.WiredStream.Definition.is(_source)) ||
-      (groupStreams && Streams.GroupStream.Definition.is(_source))
-    );
-  });
+  const relevantTypes = types.filter((type) => streamTypes.includes(type));
+  if (relevantTypes.length === 0) {
+    return [];
+  }
 
-  return relevantStreams.map((hit) => toGlobalSearchProviderResult(hit._id!, hit._source, term));
+  if (relevantTypes.includes('stream')) {
+    return hitsWithAccess.map((hit) =>
+      toGlobalSearchProviderResult(hit._id!, hit._source, term, groupStreamsEnabled)
+    );
+  }
+
+  const includeClassicStream = relevantTypes.includes('classic stream');
+  const includeWiredStream = relevantTypes.includes('wired stream');
+  const includeGroupStream = relevantTypes.includes('group stream');
+  const includeStream = ({ _source }: SearchHit<Streams.all.Definition>) => {
+    return (
+      (includeClassicStream && Streams.ClassicStream.Definition.is(_source)) ||
+      (includeWiredStream && Streams.WiredStream.Definition.is(_source)) ||
+      (includeGroupStream && Streams.GroupStream.Definition.is(_source))
+    );
+  };
+
+  return hitsWithAccess
+    .filter(includeStream)
+    .map((hit) => toGlobalSearchProviderResult(hit._id!, hit._source, term, groupStreamsEnabled));
 }
 
 function toGlobalSearchProviderResult(
   id: string,
   definition: Streams.all.Definition,
-  term: string
+  term: string,
+  groupStreamsEnabled: boolean
 ): GlobalSearchProviderResult {
   const type = Streams.ClassicStream.Definition.is(definition)
     ? 'Classic stream'
@@ -128,26 +152,40 @@ function toGlobalSearchProviderResult(
     ? 'Group stream'
     : 'Stream';
 
+  const score =
+    Streams.GroupStream.Definition.is(definition) && groupStreamsEnabled
+      ? boostGroupStreamScore(definition.name.toLowerCase(), term.toLowerCase())
+      : scoreStream(definition.name.toLowerCase(), term.toLowerCase());
+
   return {
     id,
-    score: calculateTermScore(definition.name.toLowerCase(), term.toLowerCase()),
+    score,
     title: definition.name,
     type,
-    url: `/app/streams/${definition.name}/management/lifecycle`,
-    icon: 'logsApp',
+    url: `/app/streams/${definition.name}`,
   };
 }
 
-function calculateTermScore(name: string, searchTerm: string) {
-  if (!searchTerm) {
-    return 80;
-  } else if (name === searchTerm) {
+function boostGroupStreamScore(name: string, searchTerm: string) {
+  if (name === searchTerm) {
     return 100;
   } else if (name.startsWith(searchTerm)) {
     return 90;
   } else if (name.includes(searchTerm)) {
-    return 75;
+    return 80;
   }
 
-  return 50;
+  return 0;
+}
+
+function scoreStream(name: string, searchTerm: string) {
+  if (name === searchTerm) {
+    return 85;
+  } else if (name.startsWith(searchTerm)) {
+    return 75;
+  } else if (name.includes(searchTerm)) {
+    return 65;
+  }
+
+  return 0;
 }
