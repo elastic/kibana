@@ -35,9 +35,9 @@ import type {
 import { isValidSearch } from '../../../../common/options_list';
 import { coreServices } from '../../../services/kibana_services';
 import {
-  type DataControlStateManager,
   defaultDataControlComparators,
   initializeDataControlManager,
+  type DataControlStateManager,
 } from '../data_control_manager';
 import { OptionsListControl } from './components/options_list_control';
 import {
@@ -46,9 +46,9 @@ import {
   OPTIONS_LIST_DEFAULT_SORT,
 } from './constants';
 import {
-  type EditorState,
   editorComparators,
   initializeEditorStateManager,
+  type EditorState,
 } from './editor_state_manager';
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';

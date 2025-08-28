@@ -17,12 +17,7 @@ import {
 } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type {
-  SerializedPanelState,
-  SerializedTitles,
-  StateComparators,
-  initializeTitleManager,
-} from '@kbn/presentation-publishing';
+import type { StateComparators, initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 
@@ -33,17 +28,15 @@ import { openDataControlEditor } from './open_data_control_editor';
 import { getReferenceName } from './reference_name_utils';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
 
-type DataControlState = Omit<DefaultDataControlState, keyof SerializedTitles>;
-
-export const defaultDataControlComparators: StateComparators<DataControlState> = {
+export const defaultDataControlComparators: StateComparators<DefaultDataControlState> = {
   ...defaultControlComparators,
   dataViewId: 'referenceEquality',
   fieldName: 'referenceEquality',
   useGlobalFilters: (a, b) => a ?? true === b ?? true,
 };
 
-export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'> & {
-  api: StateManager<DataControlState>['api'] & DataControlApi;
+export type DataControlStateManager = Omit<StateManager<DefaultDataControlState>, 'api'> & {
+  api: StateManager<DefaultDataControlState>['api'] & DataControlApi;
   cleanup: () => void;
   internalApi: {
     extractReferences: (referenceNameSuffix: string) => Reference[];
@@ -73,7 +66,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
   willHaveInitialFilter?: boolean;
   getInitialFilter?: (dataView: DataView) => Filter | undefined;
 }): Promise<DataControlStateManager> => {
-  const dataControlStateManager = initializeStateManager<DataControlState>(
+  const dataControlStateManager = initializeStateManager<DefaultDataControlState>(
     state,
     {
       ...defaultControlDefaultValues,
@@ -182,7 +175,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       initialDefaultPanelTitle: defaultTitle$.getValue(),
       parentApi,
       onUpdate: (newState) => {
-        if (newState.title) titlesManager.reinitializeState(newState);
+        titlesManager.reinitializeState(newState);
         dataControlStateManager.reinitializeState(newState);
         editorStateManager.reinitializeState(newState);
       },
