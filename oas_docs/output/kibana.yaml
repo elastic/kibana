@@ -74838,6 +74838,9 @@ components:
           description: Message content.
           example: Hello, how can I assist you today?
           type: string
+        id:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          description: Message id
         isError:
           description: Is error message.
           example: false

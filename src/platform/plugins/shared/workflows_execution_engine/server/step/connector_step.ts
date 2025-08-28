@@ -67,16 +67,6 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
     try {
       const step = this.step;
 
-      // Evaluate optional 'if' condition
-      const shouldRun = await this.evaluateCondition(step.if);
-      if (!shouldRun) {
-        return {
-          input: undefined,
-          output: undefined,
-          error: undefined,
-        };
-      }
-
       // Parse step type and determine if it's a sub-action
       const [stepType, subActionName] = step.type.includes('.')
         ? step.type.split('.', 2)

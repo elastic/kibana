@@ -34,6 +34,9 @@ describe.skip(
           { product_line: 'security', product_tier: 'essentials' },
           { product_line: 'endpoint', product_tier: 'essentials' },
         ],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['trustedDevices'])}`,
+        ],
       },
     },
   },
@@ -85,6 +88,7 @@ describe.skip(
     describe('for role: t3_analyst', () => {
       const artifactPagesFullAccess = [
         pageById.trustedApps,
+        pageById.trustedDevices,
         pageById.eventFilters,
         pageById.blocklist,
       ];
@@ -159,6 +163,7 @@ describe.skip(
     describe('for role: rule_author', () => {
       const artifactPagesFullAccess = [
         pageById.trustedApps,
+        pageById.trustedDevices,
         pageById.eventFilters,
         pageById.blocklist,
       ];
@@ -202,6 +207,7 @@ describe.skip(
     describe('for role: soc_manager', () => {
       const artifactPagesFullAccess = [
         pageById.trustedApps,
+        pageById.trustedDevices,
         pageById.eventFilters,
         pageById.blocklist,
       ];
@@ -246,6 +252,7 @@ describe.skip(
       describe(`for role: ${roleName}`, () => {
         const artifactPagesFullAccess = [
           pageById.trustedApps,
+          pageById.trustedDevices,
           pageById.eventFilters,
           pageById.blocklist,
         ];
