@@ -331,7 +331,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/runscript:
     post:
-      description: Run a shell command on an endpoint.
+      description: Run a script on a host. Currently supported only for some Agent Types
       operationId: RunScriptAction
       requestBody:
         content:
@@ -1486,18 +1486,41 @@ components:
       required:
         - raw
     RunScriptRouteRequestBody:
-      type: object
-      properties:
-        parameters:
-          description: >-
-            Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided.
-            CommandLine and Timeout are optional for all.
-          oneOf:
-            - $ref: '#/components/schemas/RawScriptParameters'
-            - $ref: '#/components/schemas/HostPathScriptParameters'
-            - $ref: '#/components/schemas/CloudFileScriptParameters'
-      required:
-        - parameters
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              description: >
+                For agentType of crowdstrike: Exactly one of 'Raw', 'HostPath',
+                or 'CloudFile' must be provided. CommandLine and Timeout are
+                optional for all.
+
+                For agentType of SentinelOne: a 'script' must be provided. If
+                the script requires input parameters, those can be provided in
+                the 'inputParams' field.
+              oneOf:
+                - $ref: '#/components/schemas/RawScriptParameters'
+                - $ref: '#/components/schemas/HostPathScriptParameters'
+                - $ref: '#/components/schemas/CloudFileScriptParameters'
+                - $ref: '#/components/schemas/SentinelOneRunScriptParameters'
+          required:
+            - parameters
     ScanRouteRequestBody:
       allOf:
         - type: object
@@ -1561,6 +1584,25 @@ components:
           wasSuccessful: false
       type: object
       properties: {}
+    SentinelOneRunScriptParameters:
+      description: >-
+        Parameters for Run Script response action against SentinelOne agent
+        type.
+      example: TBD.
+      type: object
+      properties:
+        inputParams:
+          description: The input parameter arguments for the script that was selected
+          minLength: 1
+          type: string
+        script:
+          description: >-
+            The script ID from SentinelOne scripts library that will be
+            executed.
+          minLength: 1
+          type: string
+      required:
+        - script
     SortDirection:
       description: Determines the sort order.
       enum:
