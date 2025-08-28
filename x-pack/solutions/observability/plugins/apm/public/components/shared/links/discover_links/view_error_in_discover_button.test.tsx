@@ -14,7 +14,7 @@ import { ERROR_GROUP_ID, SERVICE_NAME } from '@kbn/apm-types';
 import { ViewErrorInDiscoverButton } from './view_error_in_discover_button';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 
-const MOCK_INDEX_PATTERN = 'traces-*';
+const MOCK_INDEX_PATTERN = 'logs-*';
 
 jest.mock('../../../../context/apm_service/use_apm_service_context');
 jest.mock('../../../../hooks/use_apm_params');
@@ -39,15 +39,6 @@ jest.mock('../../../../hooks/use_fetcher', () => {
         return {
           data: {
             apmIndexSettings: [
-              {
-                configurationName: 'transaction',
-                defaultValue: MOCK_INDEX_PATTERN,
-              },
-              {
-                configurationName: 'span',
-                savedValue: MOCK_INDEX_PATTERN,
-                defaultValue: 'traces-otel-*',
-              },
               {
                 configurationName: 'test',
                 savedValue: 'fake-index',

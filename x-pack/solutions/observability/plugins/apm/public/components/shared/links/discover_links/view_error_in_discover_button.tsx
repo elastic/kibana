@@ -16,12 +16,51 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
+import { from, where } from '@kbn/esql-composer';
+import { ERROR_GROUP_ID, SERVICE_NAME } from '@kbn/apm-types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { getEsQlQuery } from './get_esql_query';
+
+export const getEsQlQuery = ({
+  params,
+  apmIndexSettings,
+}: {
+  params: {
+    serviceName?: string;
+    kuery?: string;
+    errorGroupId?: string;
+  };
+  apmIndexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
+}) => {
+  const { serviceName, kuery, errorGroupId } = params;
+
+  const errorIndices = apmIndexSettings
+    .filter((indexSetting) => ['error'].includes(indexSetting.configurationName))
+    .map((indexSetting) => indexSetting.savedValue ?? indexSetting.defaultValue);
+  const dedupedIndices = Array.from(new Set(errorIndices)).join(',');
+
+  const filters = [];
+
+  if (errorGroupId) {
+    filters.push(where(`${ERROR_GROUP_ID} == ?errorGroupId`, { errorGroupId }));
+  }
+
+  if (serviceName) {
+    filters.push(where(`${SERVICE_NAME} == ?serviceName`, { serviceName }));
+  }
+
+  if (kuery) {
+    filters.push(where(`KQL("${kuery.replaceAll('"', '\\"')}")`));
+  }
+
+  return from(dedupedIndices)
+    .pipe(...filters)
+    .toString();
+};
 
 export function ViewErrorInDiscoverButton({ dataTestSubj }: { dataTestSubj: string }) {
   const { share } = useApmPluginContext();
@@ -45,7 +84,6 @@ export function ViewErrorInDiscoverButton({ dataTestSubj }: { dataTestSubj: stri
   };
 
   const esqlQuery = getEsQlQuery({
-    mode: 'error',
     params,
     apmIndexSettings: data.apmIndexSettings,
   });

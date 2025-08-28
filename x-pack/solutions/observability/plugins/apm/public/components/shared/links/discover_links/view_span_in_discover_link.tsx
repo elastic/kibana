@@ -16,11 +16,45 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
+import { from, where } from '@kbn/esql-composer';
+import { SPAN_ID } from '@kbn/apm-types';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { getEsQlQuery } from './get_esql_query';
+
+export const getEsQlQuery = ({
+  params,
+  apmIndexSettings,
+}: {
+  params: {
+    kuery?: string;
+    spanId?: string;
+  };
+  apmIndexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
+}) => {
+  const { kuery, spanId } = params;
+
+  const tracesIndices = apmIndexSettings
+    .filter((indexSetting) => ['span', 'transaction'].includes(indexSetting.configurationName))
+    .map((indexSetting) => indexSetting.savedValue ?? indexSetting.defaultValue);
+  const dedupedIndices = Array.from(new Set(tracesIndices)).join(',');
+
+  const filters = [];
+
+  if (spanId) {
+    filters.push(where(`${SPAN_ID} == ?spanId`, { spanId }));
+  }
+
+  if (kuery) {
+    filters.push(where(`KQL("${kuery.replaceAll('"', '\\"')}")`));
+  }
+
+  return from(dedupedIndices)
+    .pipe(...filters)
+    .toString();
+};
 
 export function ViewSpanInDiscoverLink({
   dataTestSubj,
@@ -52,7 +86,6 @@ export function ViewSpanInDiscoverLink({
   };
 
   const esqlQuery = getEsQlQuery({
-    mode: 'span',
     params,
     apmIndexSettings: data.apmIndexSettings,
   });
