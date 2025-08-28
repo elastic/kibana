@@ -56,8 +56,6 @@ export type {
   ExitRetryNode,
   EnterContinueNode,
   ExitContinueNode,
-  AtomicGraphNode,
-  WaitGraphNodeSchema,
   HttpGraphNode,
   HttpGraphNodeSchema,
   WaitGraphNode,
