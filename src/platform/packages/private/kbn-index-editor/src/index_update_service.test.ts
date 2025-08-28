@@ -41,7 +41,7 @@ describe('IndexUpdateService', () => {
     const query = await firstValueFrom(service.esqlQuery$);
 
     expect(query.toLowerCase()).toBe(
-      'from my-index metadata _id, _source | where qstr("response:200") | limit 1000 | sort @timestamp desc'
+      'from "my-index" metadata _id, _source | where qstr("response:200") | limit 1000 | sort @timestamp desc'
     );
   });
 
@@ -51,7 +51,7 @@ describe('IndexUpdateService', () => {
 
     const query = await firstValueFrom(service.esqlDiscoverQuery$);
 
-    expect(query).toBe('FROM logs-* | WHERE QSTR("level:ERROR") | LIMIT 1000');
+    expect(query).toBe('FROM "logs-*" | WHERE QSTR("level:ERROR") | LIMIT 1000');
   });
 
   it('marks unsaved changes after adding a new row', async () => {
