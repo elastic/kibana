@@ -87928,7 +87928,7 @@ components:
           properties:
             check:
               description: The check request settings.
-              type: objects
+              type: object
               properties:
                 request:
                   description: An optional request to send to the remote host.
