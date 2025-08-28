@@ -115,11 +115,7 @@ export const HostsTable = () => {
         }
       />
       {isFlyoutOpen && clickedItem && (
-        <FlyoutWrapper
-          node={clickedItem}
-          closeFlyout={closeFlyout}
-          preferredSchema={searchCriteria.preferredSchema}
-        />
+        <FlyoutWrapper node={clickedItem} closeFlyout={closeFlyout} />
       )}
     </>
   );

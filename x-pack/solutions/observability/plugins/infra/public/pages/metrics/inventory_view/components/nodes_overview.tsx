@@ -25,7 +25,6 @@ import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { Legend } from './waffle/legend';
 import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
 import { AssetDetailsFlyout } from './waffle/asset_details_flyout';
-import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -68,11 +67,8 @@ export const NodesOverview = ({
   isAutoReloading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
-  const { preferredSchema } = useWaffleOptionsContext();
   const [{ detailsItemId, entityType }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
   const { onPageReady } = usePerformanceContext();
-
-  console.log('NodesOverview preferredSchema:', preferredSchema);
 
   const nodeName = useMemo(
     () => nodes.find((node) => node.path[0].value === detailsItemId)?.name,
@@ -156,7 +152,6 @@ export const NodesOverview = ({
             isAutoReloading={isAutoReloading}
             options={options}
             refreshInterval={refreshInterval}
-            preferredSchema={preferredSchema}
           />
         )}
       </TableContainer>
@@ -186,7 +181,6 @@ export const NodesOverview = ({
           isAutoReloading={isAutoReloading}
           options={options}
           refreshInterval={refreshInterval}
-          preferredSchema={preferredSchema}
         />
       )}
       <Legend

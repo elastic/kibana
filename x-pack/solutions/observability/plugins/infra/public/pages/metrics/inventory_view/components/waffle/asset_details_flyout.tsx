@@ -6,11 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { cons } from 'fp-ts/lib/ReadonlyNonEmptyArray';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraWaffleMapOptions } from '../../../../../common/inventory/types';
 import { AssetDetails } from '../../../../../components/asset_details';
 import { getAssetDetailsFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
+import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 
 interface Props {
   entityName?: string;
@@ -21,7 +21,6 @@ interface Props {
   options?: Pick<InfraWaffleMapOptions, 'groupBy' | 'metric'>;
   isAutoReloading?: boolean;
   refreshInterval?: number;
-  preferredSchema?: DataSchemaFormat | null;
 }
 
 const ONE_HOUR = 60 * 60 * 1000;
@@ -35,8 +34,8 @@ export const AssetDetailsFlyout = ({
   options,
   refreshInterval,
   isAutoReloading = false,
-  preferredSchema,
 }: Props) => {
+  const { preferredSchema } = useWaffleOptionsContext();
   const dateRange = useMemo(() => {
     // forces relative dates when auto-refresh is active
     return isAutoReloading
@@ -49,8 +48,6 @@ export const AssetDetailsFlyout = ({
           to: new Date(currentTime).toISOString(),
         };
   }, [currentTime, isAutoReloading]);
-
-  console.log('AssetDetailsFlyout preferredSchema:', preferredSchema);
 
   return (
     <AssetDetails
