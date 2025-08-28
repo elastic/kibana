@@ -34,6 +34,8 @@ import type {
   ExitOnFailureZoneNode,
   EnterPathNode,
   ExitPathNode,
+  EnterFailurePathNode,
+  ExitFailurePathNode,
 } from '../../types/execution';
 
 /**
@@ -215,8 +217,8 @@ export function visitFallbackStep(
 ): any {
   const enterFallbackNodeId = getNodeId(currentStep);
   const exitFallbackNodeId = `exitCondition(${enterFallbackNodeId})`;
-  const trueSteps: BaseStep[] = currentStep.normalPathSteps || [];
-  const falseSteps: BaseStep[] = currentStep.fallbackPathSteps || [];
+  const normalPathSteps: BaseStep[] = currentStep.normalPathSteps || [];
+  const fallbackPathSteps: BaseStep[] = currentStep.fallbackPathSteps || [];
   const enterNormalPathNodeId = `normalPath_${enterFallbackNodeId}`;
   const exitNormalPathNodeId = `exit_${enterNormalPathNodeId}`;
   const enterFallbackPathNodeId = `fallbackPath_${enterFallbackNodeId}`;
@@ -239,13 +241,14 @@ export function visitFallbackStep(
   const enterNormalPathNode: EnterPathNode = {
     id: enterFallbackNode.enterNormalPathNodeId,
     type: 'enter-normal-path',
-    enterNodeId: enterFallbackNode.enterNormalPathNodeId,
+    enterZoneNodeId: enterFallbackNode.id,
+    enterFailurePathNodeId: enterFallbackNode.enterFallbackPathNodeId,
   };
 
   graph.setNode(enterNormalPathNode.id, enterNormalPathNode);
   graph.setEdge(enterFallbackNodeId, enterNormalPathNode.id);
   let thenPreviousStep: any = enterNormalPathNode;
-  trueSteps.forEach(
+  normalPathSteps.forEach(
     (ifTrueCurrentStep: any) =>
       (thenPreviousStep = visitAbstractStep(graph, thenPreviousStep, ifTrueCurrentStep))
   );
@@ -259,20 +262,20 @@ export function visitFallbackStep(
   graph.setEdge(getNodeId(thenPreviousStep), exitNormalPathNode.id);
   graph.setEdge(exitNormalPathNode.id, exitFallbackNode.id);
 
-  if (falseSteps?.length > 0) {
-    const enterFallbackPathNode: EnterPathNode = {
+  if (fallbackPathSteps?.length > 0) {
+    const enterFallbackPathNode: EnterFailurePathNode = {
       id: enterFallbackNode.enterFallbackPathNodeId,
       type: 'enter-failure-path',
-      enterNodeId: enterFallbackNode.exitFallbackPathNodeId,
+      enterZoneNodeId: enterFallbackNode.id,
     };
     graph.setNode(enterFallbackPathNode.id, enterFallbackPathNode);
     graph.setEdge(enterFallbackNodeId, enterFallbackPathNode.id);
     let elsePreviousStep: any = enterFallbackPathNode;
-    falseSteps.forEach(
+    fallbackPathSteps.forEach(
       (ifFalseCurrentStep: any) =>
         (elsePreviousStep = visitAbstractStep(graph, elsePreviousStep, ifFalseCurrentStep))
     );
-    const exitFallbackPathNode: ExitPathNode = {
+    const exitFallbackPathNode: ExitFailurePathNode = {
       id: enterFallbackNode.exitFallbackPathNodeId,
       type: 'exit-failure-path',
       enterNodeId: enterFallbackNode.enterFallbackPathNodeId,
@@ -437,6 +440,7 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
   if ((currentStep as any)?.['on-failure']?.['fallback-step']) {
     // Wrap the current step in a fallback step
     // and remove the fallback-step from the current step's on-failure to avoid infinite nesting
+    const fallbackSteps = (currentStep as any)?.['on-failure']?.['fallback-step'];
     return {
       name: `fallback_${getNodeId(currentStep)}`,
       type: 'fall-back',
@@ -446,8 +450,7 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
           'on-failure': omit((currentStep as any)['on-failure'], ['fallback-step']) as any,
         } as any),
       ],
-      fallbackPathSteps:
-        [(currentStep as any)?.['on-failure']?.['fallback-step'] as BaseStep] || [],
+      fallbackPathSteps: Array.isArray(fallbackSteps) ? fallbackSteps : [fallbackSteps],
     } as FallbackStep;
   }
 

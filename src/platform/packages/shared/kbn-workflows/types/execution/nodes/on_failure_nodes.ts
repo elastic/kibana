@@ -58,15 +58,31 @@ export type ExitOnFailureZoneNode = z.infer<typeof ExitOnFailureZoneNodeSchema>;
 
 export const EnterPathNodeSchema = z.object({
   id: z.string(),
-  type: z.union([z.literal('enter-normal-path'), z.literal('enter-failure-path')]),
-  enterNodeId: z.string(),
+  type: z.literal('enter-normal-path'),
+  enterZoneNodeId: z.string(),
+  enterFailurePathNodeId: z.string(),
 });
 export type EnterPathNode = z.infer<typeof EnterPathNodeSchema>;
 
 export const ExitPathNodeSchema = z.object({
   id: z.string(),
-  type: z.union([z.literal('exit-normal-path'), z.literal('exit-failure-path')]),
+  type: z.literal('exit-normal-path'),
   exitOnFailureZoneNodeId: z.string(),
   enterNodeId: z.string(),
 });
 export type ExitPathNode = z.infer<typeof ExitPathNodeSchema>;
+
+export const EnterFailurePathNodeSchema = z.object({
+  id: z.string(),
+  type: z.literal('enter-failure-path'),
+  enterZoneNodeId: z.string(),
+});
+export type EnterFailurePathNode = z.infer<typeof EnterPathNodeSchema>;
+
+export const ExitFailurePathNodeSchema = z.object({
+  id: z.string(),
+  type: z.literal('exit-failure-path'),
+  exitOnFailureZoneNodeId: z.string(),
+  enterNodeId: z.string(),
+});
+export type ExitFailurePathNode = z.infer<typeof ExitPathNodeSchema>;

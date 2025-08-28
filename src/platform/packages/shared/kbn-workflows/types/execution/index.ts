@@ -29,5 +29,9 @@ export type {
   EnterPathNode,
   ExitPathNodeSchema,
   ExitPathNode,
+  EnterFailurePathNodeSchema,
+  EnterFailurePathNode,
+  ExitFailurePathNodeSchema,
+  ExitFailurePathNode,
 } from './nodes/on_failure_nodes';
 export type { AtomicGraphNode, WaitGraphNodeSchema, WaitGraphNode } from './nodes/base';

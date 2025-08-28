@@ -66,4 +66,6 @@ export type {
   ExitOnFailureZoneNode,
   EnterPathNode,
   ExitPathNode,
+  EnterFailurePathNode,
+  ExitFailurePathNode,
 } from './execution';

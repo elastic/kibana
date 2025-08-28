@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EnterOnFailureZoneNodeImpl } from './enter_on_failure_zone_node_impl';
-export { ExitOnFailureZoneNodeImpl } from './exit_on_failure_zone_node_impl';
-export { EnterNormalPathNodeImpl } from './enter_normal_path_node_impl';
-export { ExitNormalPathNodeImpl } from './exit_normal_path_node_impl';
-export { EnterFailurePathNodeImpl } from './enter_failure_path_node_impl';
-export { ExitFailurePathNodeImpl } from './exit_failure_path_node_impl';
+// Fallback step node implementation tests
+export * from './enter_on_failure_zone_node_impl.test';
+export * from './exit_on_failure_zone_node_impl.test';
+export * from './enter_normal_path_node_impl.test';
+export * from './exit_normal_path_node_impl.test';
+export * from './enter_failure_path_node_impl.test';
+export * from './exit_failure_path_node_impl.test';

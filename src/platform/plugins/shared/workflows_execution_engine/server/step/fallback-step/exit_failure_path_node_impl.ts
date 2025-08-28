@@ -7,29 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitOnFailureZoneNode } from '@kbn/workflows';
+import type { ExitPathNode } from '@kbn/workflows';
 import type { StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
-export class ExitOnFailureZoneNodeImpl implements StepImplementation {
+export class ExitFailurePathNodeImpl implements StepImplementation {
   constructor(
-    private node: ExitOnFailureZoneNode,
+    private node: ExitPathNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
   public async run(): Promise<void> {
-    const stepState = this.wfExecutionRuntimeManager.getStepState(this.node.enterNodeId) || {};
-
-    if (stepState.error) {
-      // if error is in state, that means failure path was executed
-      // and we have to throw error
-      await this.wfExecutionRuntimeManager.failStep(this.node.enterNodeId, stepState.error);
-      this.wfExecutionRuntimeManager.setWorkflowError(stepState.error);
-      return;
-    }
-
-    this.wfExecutionRuntimeManager.finishStep(this.node.enterNodeId);
     this.wfExecutionRuntimeManager.exitScope();
-    this.wfExecutionRuntimeManager.goToNextStep();
+    this.wfExecutionRuntimeManager.goToStep(this.node.exitOnFailureZoneNodeId);
   }
 }

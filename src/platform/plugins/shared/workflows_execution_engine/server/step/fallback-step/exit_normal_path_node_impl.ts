@@ -11,10 +11,10 @@ import type { ExitPathNode } from '@kbn/workflows';
 import type { StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
-export class ExitPathNodeImpl implements StepImplementation {
+export class ExitNormalPathNodeImpl implements StepImplementation {
   constructor(
     private node: ExitPathNode,
-    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
   public async run(): Promise<void> {

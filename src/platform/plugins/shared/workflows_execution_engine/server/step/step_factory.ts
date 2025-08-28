@@ -29,8 +29,10 @@ import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './continue_step';
 import {
   EnterOnFailureZoneNodeImpl,
   ExitOnFailureZoneNodeImpl,
-  EnterPathNodeImpl,
-  ExitPathNodeImpl,
+  EnterNormalPathNodeImpl,
+  ExitNormalPathNodeImpl,
+  EnterFailurePathNodeImpl,
+  ExitFailurePathNodeImpl,
 } from './fallback-step';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
@@ -81,33 +83,17 @@ export class StepFactory {
       case 'exit-continue':
         return new ExitContinueNodeImpl(this.workflowRuntime);
       case 'enter-on-failure-zone':
-        return new EnterOnFailureZoneNodeImpl(
-          step as any,
-          this.workflowRuntime,
-          this.contextManager,
-          this.workflowLogger
-        );
+        return new EnterOnFailureZoneNodeImpl(step as any, this.workflowRuntime);
       case 'exit-on-failure-zone':
-        return new ExitOnFailureZoneNodeImpl(
-          step as any,
-          this.workflowRuntime,
-          this.contextManager,
-          this.workflowLogger
-        );
-      case 'enter-path':
-        return new EnterPathNodeImpl(
-          step as any,
-          this.workflowRuntime,
-          this.contextManager,
-          this.workflowLogger
-        );
-      case 'exit-path':
-        return new ExitPathNodeImpl(
-          step as any,
-          this.workflowRuntime,
-          this.contextManager,
-          this.workflowLogger
-        );
+        return new ExitOnFailureZoneNodeImpl(step as any, this.workflowRuntime);
+      case 'enter-normal-path':
+        return new EnterNormalPathNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+      case 'enter-failure-path':
+        return new EnterFailurePathNodeImpl(this.workflowRuntime);
+      case 'exit-normal-path':
+        return new ExitNormalPathNodeImpl(step as any, this.workflowRuntime);
+      case 'exit-failure-path':
+        return new ExitFailurePathNodeImpl(step as any, this.workflowRuntime);
       case 'enter-if':
         return new EnterIfNodeImpl(
           step as any,

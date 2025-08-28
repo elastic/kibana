@@ -10,7 +10,7 @@
 import type { StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
-export class EnterPathNodeImpl implements StepImplementation {
+export class EnterFailurePathNodeImpl implements StepImplementation {
   constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
 
   public async run(): Promise<void> {
