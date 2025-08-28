@@ -21,14 +21,14 @@ export interface GenerateEsqlResponse {
 
 export const generateEsql = async ({
   nlQuery,
-  context,
   index,
+  context,
   model,
   esClient,
 }: {
   nlQuery: string;
   context?: string;
-  index?: string; // TODO rename to target
+  index?: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<GenerateEsqlResponse> => {

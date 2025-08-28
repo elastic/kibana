@@ -40,8 +40,9 @@ You **must** call **one** of the available tools. Do not answer the user directl
   - "list all products where status is 'in_stock' and price is less than 50"
   - "how many errors were logged in the past hour?"
 
-The search will be performed against the \`${searchTarget.name}\` ${searchTarget.type}, so
-you should use that value for the \`index\` parameters of the tools.`;
+## Additional instructions
+
+- The search will be performed against the \`${searchTarget.name}\` ${searchTarget.type}, so you should use that value for the \`index\` parameters of the tool you will call.`;
 
   const userPrompt = `Execute the following user query: "${nlQuery}"`;
 

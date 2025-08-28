@@ -7,4 +7,4 @@
 
 export { esqlResponseToJson, extractEsqlQueries } from './esql';
 export { flattenMappings, cleanupMapping, type MappingField } from './mappings';
-export { processFieldCapsResponse } from './field_caps';
+export { processFieldCapsResponse, type FieldListFromFieldCapsResponse } from './field_caps';

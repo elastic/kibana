@@ -14,7 +14,7 @@ import type { MappingField } from './mappings';
 /**
  * response for {@link processFieldCapsResponse}
  */
-interface FieldListFromFieldCapsResponse {
+export interface FieldListFromFieldCapsResponse {
   /**
    * List of indices included in the field_caps response
    */
@@ -26,8 +26,8 @@ interface FieldListFromFieldCapsResponse {
 }
 
 /**
- * Process a field caps response and returns the list targeted indices and
- * the list of non-conflicting fields.
+ * Process a field caps response and return the list of targeted indices and
+ * the list of corresponding non-conflicting fields.
  */
 export const processFieldCapsResponse = (
   fieldCapsRes: FieldCapsResponse

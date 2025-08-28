@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { EsResourceType } from '@kbn/onechat-common';
+
 export interface SearchTarget {
-  type: 'index' | 'alias' | 'data_stream';
+  type: EsResourceType;
   name: string;
 }

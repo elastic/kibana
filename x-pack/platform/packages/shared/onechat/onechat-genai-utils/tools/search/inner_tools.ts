@@ -98,7 +98,7 @@ export const createNaturalLanguageSearchTool = ({
         async () => {
           const response = await naturalLanguageSearch({
             nlQuery: query,
-            index,
+            target: index,
             model,
             esClient,
           });

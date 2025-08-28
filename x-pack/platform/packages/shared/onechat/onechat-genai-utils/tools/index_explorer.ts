@@ -8,20 +8,21 @@
 import { take } from 'lodash';
 import { z } from '@kbn/zod';
 import type { Logger } from '@kbn/logging';
+import { EsResourceType } from '@kbn/onechat-common';
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   AliasSearchSource,
-  IndexSearchSource,
   DataStreamSearchSource,
+  IndexSearchSource,
 } from './steps/list_search_sources';
 import { listSearchSources } from './steps/list_search_sources';
-import { getIndexMappings, getDatastreamMappings } from './steps/get_mappings';
+import { getDatastreamMappings, getIndexMappings } from './steps/get_mappings';
 import { flattenMappings } from './utils/mappings';
 
 export interface RelevantResource {
-  type: 'index' | 'alias' | 'data_stream';
+  type: EsResourceType;
   name: string;
   reason: string;
 }
@@ -31,7 +32,7 @@ export interface IndexExplorerResponse {
 }
 
 export interface ResourceDescriptor {
-  type: 'index' | 'alias' | 'data_stream';
+  type: EsResourceType;
   name: string;
   description?: string;
   fields?: string[];
@@ -54,7 +55,7 @@ const createIndexSummaries = async ({
     const indexMappings = allMappings[indexName];
     const flattened = flattenMappings({ mappings: indexMappings.mappings });
     return {
-      type: 'index',
+      type: EsResourceType.index,
       name: indexName,
       description: indexMappings?.mappings._meta?.description,
       fields: flattened.map((field) => field.path),
@@ -70,7 +71,7 @@ const createAliasSummaries = async ({
   // for now aliases are only described by the list of indices they target
   return aliases.map<ResourceDescriptor>(({ name: aliasName, indices }) => {
     return {
-      type: 'alias',
+      type: EsResourceType.alias,
       name: aliasName,
       description: `Point to the following indices: ${indices.join(', ')}`,
     };
@@ -94,7 +95,7 @@ const createDatastreamSummaries = async ({
     const mappings = allMappings[name];
     const flattened = flattenMappings({ mappings: mappings.mappings });
     return {
-      type: 'data_stream',
+      type: EsResourceType.dataStream,
       name,
       description: mappings?.mappings._meta?.description,
       fields: flattened.map((field) => field.path),
@@ -171,7 +172,7 @@ export const indexExplorer = async ({
 };
 
 export interface SelectedResource {
-  type: 'index' | 'alias' | 'data_stream';
+  type: EsResourceType;
   name: string;
   reason: string;
 }
@@ -246,7 +247,9 @@ const selectResources = async ({
       targets: z.array(
         z.object({
           reason: z.string().describe('brief explanation of why this resource could be relevant'),
-          type: z.enum(['index', 'alias', 'data_stream']).describe('the type of the resource'),
+          type: z
+            .enum([EsResourceType.index, EsResourceType.alias, EsResourceType.dataStream])
+            .describe('the type of the resource'),
           name: z.string().describe('name of the index, alias or data stream'),
         })
       ),

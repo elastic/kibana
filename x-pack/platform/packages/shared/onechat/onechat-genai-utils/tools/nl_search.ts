@@ -25,20 +25,20 @@ export interface NaturalLanguageSearchResponse {
 export const naturalLanguageSearch = async ({
   nlQuery,
   context,
-  index,
+  target,
   model,
   esClient,
 }: {
   nlQuery: string;
   context?: string;
-  index: string;
+  target: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<NaturalLanguageSearchResponse> => {
   const queryGenResponse = await generateEsql({
     nlQuery,
     context,
-    index,
+    index: target,
     model,
     esClient,
   });

@@ -7,23 +7,24 @@
 
 import { take } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { EsResourceType } from '@kbn/onechat-common';
 import { isNotFoundError } from '@kbn/es-errors';
 
 export interface DataStreamSearchSource {
-  type: 'datastream';
+  type: EsResourceType.dataStream;
   name: string;
   indices: string[];
   timestamp_field: string;
 }
 
 export interface AliasSearchSource {
-  type: 'alias';
+  type: EsResourceType.alias;
   name: string;
   indices: string[];
 }
 
 export interface IndexSearchSource {
-  type: 'index';
+  type: EsResourceType.index;
   name: string;
 }
 
@@ -69,7 +70,7 @@ export const listSearchSources = async ({
     // data streams
     const dataStreamSources = resolveRes.data_streams.map<DataStreamSearchSource>((dataStream) => {
       return {
-        type: 'datastream',
+        type: EsResourceType.dataStream,
         name: dataStream.name,
         indices: Array.isArray(dataStream.backing_indices)
           ? dataStream.backing_indices
@@ -81,7 +82,7 @@ export const listSearchSources = async ({
     // aliases
     const aliasSources = resolveRes.aliases.map<AliasSearchSource>((alias) => {
       return {
-        type: 'alias',
+        type: EsResourceType.alias,
         name: alias.name,
         indices: Array.isArray(alias.indices) ? alias.indices : [alias.indices],
       };
@@ -113,7 +114,7 @@ export const listSearchSources = async ({
       })
       .map<IndexSearchSource>((index) => {
         return {
-          type: 'index',
+          type: EsResourceType.index,
           name: index.name,
         };
       });
