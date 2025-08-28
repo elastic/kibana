@@ -6,10 +6,6 @@
  */
 
 import expect from 'expect';
-import {
-  BulkActionEditTypeEnum,
-  BulkActionTypeEnum,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
@@ -78,61 +74,6 @@ export default ({ getService }: FtrProviderContext) => {
         query: { rule_id: prebuiltRule.rule_id },
       });
       expect(importedRule.rule_source.is_customized).toEqual(true);
-    });
-
-    it('should not allow rule customization on bulk edit', async () => {
-      await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
-      await installPrebuiltRules(es, supertest);
-
-      const { body: findResult } = await securitySolutionApi
-        .findRules({
-          query: {
-            per_page: 1,
-            filter: `alert.attributes.params.immutable: true`,
-          },
-        })
-        .expect(200);
-      const prebuiltRule = findResult.data[0];
-
-      // Check that the rule has been created and is not customized
-      expect(prebuiltRule).not.toBeNull();
-      expect(prebuiltRule.rule_source.is_customized).toEqual(false);
-
-      const { body: bulkResult } = await securitySolutionApi
-        .performRulesBulkAction({
-          query: {},
-          body: {
-            ids: [prebuiltRule.id],
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.add_tags,
-                value: ['test'],
-              },
-            ],
-          },
-        })
-        .expect(500);
-
-      expect(bulkResult).toMatchObject(
-        expect.objectContaining({
-          attributes: expect.objectContaining({
-            summary: {
-              failed: 1,
-              skipped: 0,
-              succeeded: 0,
-              total: 1,
-            },
-            errors: [expect.objectContaining({ message: "Elastic rule can't be edited" })],
-          }),
-        })
-      );
-
-      // Check that the rule has not been customized
-      const { body: ruleAfterUpdate } = await securitySolutionApi.readRule({
-        query: { rule_id: prebuiltRule.rule_id },
-      });
-      expect(ruleAfterUpdate.rule_source.is_customized).toEqual(false);
     });
   });
 };
