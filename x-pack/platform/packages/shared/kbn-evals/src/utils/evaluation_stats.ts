@@ -25,7 +25,7 @@ export interface DatasetScore {
   name: string;
   numExamples: number;
   evaluatorScores: Map<string, number[]>;
-  experiments?: Array<{ id?: string }>;
+  experiments: Array<{ id?: string }>;
 }
 
 export interface DatasetScoreWithStats extends DatasetScore {
@@ -65,8 +65,7 @@ export function calculateEvaluatorStats(scores: number[], totalExamples: number)
  */
 export async function processExperimentsToDatasetScores(
   experiments: RanExperiment[],
-  phoenixClient: KibanaPhoenixClient,
-  includeExperimentInfo = false
+  phoenixClient: KibanaPhoenixClient
 ): Promise<DatasetScore[]> {
   const allDatasetIds = uniq(experiments.flatMap((experiment) => experiment.datasetId));
   const datasetInfos = await phoenixClient.getDatasets(allDatasetIds);
@@ -84,23 +83,14 @@ export async function processExperimentsToDatasetScores(
         name: datasetInfosById[datasetId]?.name ?? datasetId,
         numExamples: 0,
         evaluatorScores: new Map<string, number[]>(),
-        ...(includeExperimentInfo && { experiments: [] }),
+        experiments: [],
       });
     }
 
     const datasetScore = datasetScoresMap.get(datasetId)!;
     datasetScore.numExamples += numExamplesForExperiment;
 
-    // Add experiment info if requested and not already present
-    if (includeExperimentInfo && datasetScore.experiments) {
-      const experimentInfo = { id: experiment.id };
-      const existingExperiment = datasetScore.experiments.find(
-        (exp) => exp.id === experimentInfo.id
-      );
-      if (!existingExperiment) {
-        datasetScore.experiments.push(experimentInfo);
-      }
-    }
+    datasetScore.experiments.push({ id: experiment.id });
 
     if (evaluationRuns) {
       evaluationRuns.forEach((evalRun) => {
