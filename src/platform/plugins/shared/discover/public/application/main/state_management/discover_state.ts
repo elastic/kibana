@@ -247,9 +247,6 @@ export function getDiscoverStateContainer({
   const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
 
-  const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-  const scopedEbtManager = scopedEbtManager$.getValue();
-
   /**
    * Search session logic
    */
@@ -528,6 +525,8 @@ export function getDiscoverStateContainer({
   };
 
   const trackQueryFieldUsage = (query: Query | AggregateQuery | undefined) => {
+    const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const scopedEbtManager = scopedEbtManager$.getValue();
     const { fieldsMetadata } = services;
 
     if (isOfAggregateQueryType(query)) {
