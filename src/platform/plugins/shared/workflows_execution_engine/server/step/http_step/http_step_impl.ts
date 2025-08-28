@@ -97,11 +97,13 @@ export class HttpStepImpl implements StepImplementation {
     try {
       const result = await this.executeHttpRequest(input);
       await this.workflowRuntime.setStepResult(result);
-      await this.workflowRuntime.finishStep(this.node.id);
       this.workflowRuntime.goToNextStep();
     } catch (error) {
       const result = await this.handleFailure(input, error);
+      await this.workflowRuntime.setStepResult(result);
       throw new Error(result.error);
+    } finally {
+      await this.workflowRuntime.finishStep(this.node.id);
     }
   }
 

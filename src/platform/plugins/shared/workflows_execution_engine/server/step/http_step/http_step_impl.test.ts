@@ -317,10 +317,21 @@ describe('HttpStepImpl', () => {
         })
       );
 
-      // Should start the step but throw before setting result or finishing
+      // Should start the step, set the error result, finish the step, but not go to next step
       expect(mockWorkflowRuntime.startStep).toHaveBeenCalled();
-      expect(mockWorkflowRuntime.setStepResult).not.toHaveBeenCalled();
-      expect(mockWorkflowRuntime.finishStep).not.toHaveBeenCalled();
+      expect(mockWorkflowRuntime.setStepResult).toHaveBeenCalledWith({
+        input: {
+          url: 'https://malicious.com/test',
+          method: 'GET',
+          headers: {},
+          body: undefined,
+          timeout: 30000,
+        },
+        output: undefined,
+        error:
+          'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts',
+      });
+      expect(mockWorkflowRuntime.finishStep).toHaveBeenCalled();
       expect(mockWorkflowRuntime.goToNextStep).not.toHaveBeenCalled();
     });
 

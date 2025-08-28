@@ -50,10 +50,10 @@ describe('UrlValidator', () => {
 
     it('should throw for disallowed URLs', () => {
       expect(() => validator.ensureUrlAllowed('https://malicious.com/test')).toThrow(
-        'target url "https://malicious.com/test" is not added to the Kibana config xpack.actions.allowedHosts'
+        'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts'
       );
       expect(() => validator.ensureUrlAllowed('https://github.com/users')).toThrow(
-        'target url "https://github.com/users" is not added to the Kibana config xpack.actions.allowedHosts'
+        'target url "https://github.com/users" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts'
       );
     });
 
