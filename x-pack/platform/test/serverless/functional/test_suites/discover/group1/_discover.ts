@@ -44,15 +44,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectClassicMode();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
     after(async () => {
-      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      // await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
     describe('query', function () {
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {
+        await PageObjects.discover.clickFieldSort('@timestamp', 'Sort New-Old');
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be(PageObjects.timePicker.defaultStartTime);
         expect(time.end).to.be(PageObjects.timePicker.defaultEndTime);
@@ -228,6 +230,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show bars in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectClassicMode();
         await PageObjects.header.awaitKibanaChrome();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -236,6 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await queryBar.clearQuery();
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.clickFieldSort('@timestamp', 'Sort New-Old');
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         log.debug(
@@ -262,6 +266,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should add a field, sort by it, remove it and also sorting by it', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectClassicMode();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('_score');
         await PageObjects.discover.clickFieldSort('_score', 'Sort Low-High');
         const currentUrlWithScore = await browser.getCurrentUrl();
@@ -273,6 +278,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should add a field with customLabel, sort by it, display it correctly', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectClassicMode();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('referer');
         await PageObjects.discover.clickFieldSort('referer', 'Sort A-Z');
         expect(await PageObjects.discover.getDocHeader()).to.have.string('Referer custom');

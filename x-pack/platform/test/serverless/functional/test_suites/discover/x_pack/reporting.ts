@@ -72,6 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         concurrency: 4,
       });
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectClassicMode();
     });
 
     after(async () => {
@@ -111,8 +112,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Generate CSV: new search', () => {
       it('generates a report from a new search with data: default', async () => {
         await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.discover.selectClassicMode();
         await PageObjects.reporting.setTimepickerInEcommerceDataRange();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('order_id');
+        await PageObjects.discover.clickFieldSort('order_date', 'Sort New-Old');
         await PageObjects.discover.clickFieldSort('order_id', 'Sort A-Z');
         await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
 
@@ -127,6 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('generates a report with no data', async () => {
         await PageObjects.reporting.setTimepickerInEcommerceNoDataRange();
         await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.discover.selectClassicMode();
         await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
 
         const res = await getReport({ timeout: 180_000 }); // 3 minutes
@@ -135,6 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('generates a large export', async () => {
         await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.discover.selectClassicMode();
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
@@ -217,6 +222,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs'
         );
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectClassicMode();
         await PageObjects.discover.loadSavedSearch('Sparse Columns');
       });
 

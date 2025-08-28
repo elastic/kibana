@@ -579,6 +579,19 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  public async selectClassicMode() {
+    if (await this.testSubjects.exists('switch-to-dataviews')) {
+      await this.testSubjects.click('switch-to-dataviews');
+
+      if (await this.testSubjects.exists('switch-to-dataviews')) {
+        await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
+      }
+
+      await this.header.waitUntilLoadingHasFinished();
+      await this.waitUntilSearchingHasFinished();
+    }
+  }
+
   public async removeHeaderColumn(name: string) {
     await this.dataGrid.clickRemoveColumn(name);
   }

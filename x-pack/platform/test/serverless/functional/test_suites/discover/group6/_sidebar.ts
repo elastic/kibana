@@ -63,6 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectClassicMode();
       await PageObjects.discover.waitUntilSearchingHasFinished();
     });
 
@@ -328,6 +329,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
         await browser.refresh();
+        await PageObjects.discover.selectClassicMode();
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
         await dataViews.switchToAndValidate('with-timefield');
 
@@ -358,6 +360,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await browser.refresh();
+        await PageObjects.discover.selectClassicMode();
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
 
         await dataViews.switchToAndValidate('without-timefield');
@@ -415,6 +418,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await dataViews.switchToAndValidate('logstash-*');
         await browser.refresh();
+        await PageObjects.discover.selectClassicMode();
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
 
         await dataViews.switchToAndValidate('indices-stats*');
@@ -492,6 +496,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(allFields.includes('_invalid-runtimefield')).to.be(true);
 
         await browser.refresh();
+        await PageObjects.discover.selectClassicMode();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.showsErrorCallout(); // still has error
 
@@ -513,6 +518,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
         await browser.refresh();
+        await PageObjects.discover.selectClassicMode();
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
 
         await dataViews.switchToAndValidate('with-timefield');

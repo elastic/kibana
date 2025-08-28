@@ -58,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectClassicMode();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
@@ -109,6 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
         });
         await waitForLoadingToFinish();
+        await PageObjects.discover.selectClassicMode();
         const searchCount = await getSearchCount(type);
         expect(searchCount).to.be(2);
       });

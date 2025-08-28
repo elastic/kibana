@@ -53,6 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.loginAsViewer();
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectClassicMode();
       await PageObjects.header.waitUntilLoadingHasFinished();
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await filterBar.addFilter({ field: columnName, operation: 'is', value });
