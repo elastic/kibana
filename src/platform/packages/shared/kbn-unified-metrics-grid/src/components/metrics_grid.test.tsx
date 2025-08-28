@@ -49,7 +49,7 @@ describe('MetricsGrid', () => {
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('renders "No results found" when pivotOn is metric and fields are empty', () => {
+  it('renders "No results found" when fields are empty', () => {
     const { getByText } = render(
       <MetricsGrid
         loading={false}
@@ -93,7 +93,6 @@ describe('MetricsGrid', () => {
       />
     );
 
-    // For columns=3 → size should be "m"
     expect(MetricChart).toHaveBeenCalledWith(
       expect.objectContaining({ size: 'm' }),
       expect.anything()
@@ -111,7 +110,6 @@ describe('MetricsGrid', () => {
       />
     );
 
-    // For columns=4 → size should be "s"
     expect(MetricChart).toHaveBeenCalledWith(
       expect.objectContaining({ size: 's' }),
       expect.anything()
