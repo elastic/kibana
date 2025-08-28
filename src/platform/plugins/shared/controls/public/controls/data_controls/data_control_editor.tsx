@@ -30,7 +30,9 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -38,8 +40,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { asyncForEach } from '@kbn/std';
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { DefaultDataControlState } from '../../../common';
+import type { ControlGroupEditorConfig, DefaultDataControlState } from '../../../common';
 import {
   CONTROL_MENU_TRIGGER,
   addControlMenuTrigger,
@@ -49,9 +50,9 @@ import { confirmDeleteControl } from '../../common';
 import { dataViewsService, uiActionsService } from '../../services/kibana_services';
 import { DataControlEditorStrings } from './data_control_constants';
 
-export interface ControlEditorProps<
-  State extends DefaultDataControlState = DefaultDataControlState
-> {
+type DataControlEditorState = DefaultDataControlState & SerializedTitles;
+
+export interface ControlEditorProps<State extends DataControlEditorState = DataControlEditorState> {
   initialState: Partial<State>;
   controlType?: string;
   controlId?: string;
@@ -87,7 +88,7 @@ const useControlActionRegistry = (): ControlActionRegistry => {
         }
       })
       .catch(() => {
-        if (!cancelled) setControlActionRegistry([]);
+        if (!cancelled) setControlActionRegistry({});
       });
 
     return () => {
@@ -102,7 +103,7 @@ const CompatibleControlTypesComponent = ({
   fieldName,
   selectedControlType: selectedAction,
   setSelectedControlType: setSelectedAction,
-}: Partial<DefaultDataControlState> & {
+}: Partial<DataControlEditorState> & {
   selectedControlType?: string;
   setSelectedControlType: (type: string) => void;
 }) => {
@@ -188,7 +189,7 @@ const CompatibleControlTypesComponent = ({
   );
 };
 
-export const DataControlEditor = <State extends DefaultDataControlState = DefaultDataControlState>({
+export const DataControlEditor = <State extends DataControlEditorState = DataControlEditorState>({
   initialState,
   controlId,
   controlType, // initial control type
@@ -208,9 +209,12 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
 
-  // TODO get editor config from parent?
-  const editorConfig = useMemo(
-    () => ({ hideAdditionalSettings: false, hideWidthSettings: false }),
+  // TODO: get editor config from parent?
+  const editorConfig = useMemo<ControlGroupEditorConfig>(
+    () => ({
+      hideAdditionalSettings: false,
+      hideWidthSettings: false,
+    }),
     []
   );
 
@@ -232,9 +236,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     if (!editorState.dataViewId) {
       return;
     }
-
     const dataView = await dataViewsService.get(editorState.dataViewId);
-    // const registry = await getDataControlFieldRegistry(dataView);
     return {
       selectedDataView: dataView,
     };

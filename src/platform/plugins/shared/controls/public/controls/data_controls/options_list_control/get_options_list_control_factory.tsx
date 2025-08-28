@@ -8,14 +8,8 @@
  */
 
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import {
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  type Filter,
-} from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   initializeTitleManager,
@@ -36,10 +30,9 @@ import {
 } from 'rxjs';
 import type {
   OptionsListControlState,
-  OptionsListSortingType,
   OptionsListSuccessResponse,
 } from '../../../../common/options_list';
-import { getSelectionAsFieldType, isValidSearch } from '../../../../common/options_list';
+import { isValidSearch } from '../../../../common/options_list';
 import { coreServices } from '../../../services/kibana_services';
 import {
   defaultDataControlComparators,
@@ -58,8 +51,14 @@ import { OptionsListStrings } from './options_list_strings';
 import { initializeSelectionsManager, selectionComparators } from './selections_manager';
 import { initializeTemporayStateManager } from './temporay_state_manager';
 import type { OptionsListComponentApi, OptionsListControlApi } from './types';
-import { buildFilter } from './utils';
-import { deselectAll, deselectOption, makeSelection, selectAll } from './utils/selection_utils';
+import { buildFilter } from './utils/filter_utils';
+import {
+  clearSelections,
+  deselectAll,
+  deselectOption,
+  makeSelection,
+  selectAll,
+} from './utils/selection_utils';
 
 export const getOptionsListControlFactory = (): EmbeddableFactory<
   OptionsListControlState,
@@ -69,24 +68,20 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
-      const sort$ = new BehaviorSubject<OptionsListSortingType | undefined>(
-        state.sort ?? OPTIONS_LIST_DEFAULT_SORT
-      );
-
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
       const titlesManager = initializeTitleManager(state);
       const selectionsManager = initializeSelectionsManager(state);
 
-      const dataControlManager = await initializeDataControlManager(
-        uuid,
-        OPTIONS_LIST_CONTROL,
-        OptionsListStrings.control.getDisplayName(),
+      const dataControlManager = await initializeDataControlManager({
+        controlId: uuid,
+        controlType: OPTIONS_LIST_CONTROL,
+        typeDisplayName: OptionsListStrings.control.getDisplayName(),
         state,
         parentApi,
-        selectionsManager.api.hasInitialSelections,
-        (dataView) => buildFilter(dataView, uuid, state)
-      );
+        willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
+        getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
+      });
 
       const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
         dataControlManager.internalApi.onSelectionChange
@@ -137,8 +132,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           selectionsManager.api.setSelectedOptions(undefined);
           selectionsManager.api.setExistsSelected(false);
           selectionsManager.api.setExclude(false);
+          selectionsManager.api.setSort(OPTIONS_LIST_DEFAULT_SORT);
           temporaryStateManager.api.setRequestSize(MIN_OPTIONS_LIST_REQUEST_SIZE);
-          sort$.next(OPTIONS_LIST_DEFAULT_SORT);
         });
 
       /** Fetch the suggestions and perform validation */
@@ -157,7 +152,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         runPastTimeout$: editorStateManager.api.runPastTimeout$,
         selectedOptions$: selectionsManager.api.selectedOptions$,
         searchTechnique$: editorStateManager.api.searchTechnique$,
-        sort$,
+        sort$: selectionsManager.api.sort$,
       }).subscribe((result) => {
         // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
@@ -240,7 +235,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             ...selectionsManager.getLatestState(),
             ...editorStateManager.getLatestState(),
             ...titlesManager.getLatestState(),
-            sort: sort$.getValue(),
 
             // serialize state that cannot be changed to keep it consistent
             placeholder,
@@ -261,8 +255,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           dataControlManager.anyStateChange$,
           selectionsManager.anyStateChange$,
           editorStateManager.anyStateChange$,
-          titlesManager.anyStateChange$,
-          sort$
+          titlesManager.anyStateChange$
         ).pipe(map(() => undefined)),
         getComparators: () => {
           return {
@@ -270,7 +263,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             ...defaultDataControlComparators,
             ...selectionComparators,
             ...editorComparators,
-            sort: 'deepEquality',
             // This state cannot currently be changed after the control is created
             placeholder: 'skip',
             hideActionBar: 'skip',
@@ -289,7 +281,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           dataControlManager.reinitializeState(lastSaved?.rawState);
           selectionsManager.reinitializeState(lastSaved?.rawState);
           editorStateManager.reinitializeState(lastSaved?.rawState);
-          sort$.next(lastSaved?.rawState.sort ?? OPTIONS_LIST_DEFAULT_SORT);
         },
       });
 
@@ -313,14 +304,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
         serializeState,
-        clearSelections: () => {
-          if (selectionsManager.api.selectedOptions$.getValue()?.length)
-            selectionsManager.api.setSelectedOptions([]);
-          if (selectionsManager.api.existsSelected$.getValue())
-            selectionsManager.api.setExistsSelected(false);
-          if (temporaryStateManager.api.invalidSelections$.getValue().size)
-            temporaryStateManager.api.setInvalidSelections(new Set([]));
-        },
+        clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
       });
@@ -359,10 +343,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             key,
             showOnlySelected,
           }),
-        sort$,
-        setSort: (sort: OptionsListSortingType | undefined) => {
-          sort$.next(sort);
-        },
         selectAll: (keys: string[]) => selectAll({ api, keys, selectionsManager }),
         deselectAll: (keys: string[]) => deselectAll({ api, keys, selectionsManager }),
         allowExpensiveQueries$,

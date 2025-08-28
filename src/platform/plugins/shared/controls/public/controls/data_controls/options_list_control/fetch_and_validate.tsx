@@ -46,20 +46,20 @@ export function fetchAndValidate$({
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;
 
-  return combineLatest([
-    api.dataViews$,
-    api.field$,
-    fetch$(api),
-    api.useGlobalFilters$,
-    api.debouncedSearchString,
-    sort$,
-    searchTechnique$,
+  return combineLatest({
+    dataViews: api.dataViews$,
+    field: api.field$,
+    fetchContext: fetch$(api),
+    useGlobalFilters: api.useGlobalFilters$,
+    searchString: api.debouncedSearchString,
+    sort: sort$,
+    searchTechnique: searchTechnique$,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
-    api.loadMoreSubject.pipe(
+    loadMore: api.loadMoreSubject.pipe(
       startWith(null), // start with null so that `combineLatest` subscription fires
       debounceTime(100) // debounce load more so "loading" state briefly shows
     ),
-  ]).pipe(
+  }).pipe(
     tap(() => {
       // abort any in progress requests
       if (abortController) {
@@ -70,7 +70,7 @@ export function fetchAndValidate$({
     withLatestFrom(requestSize$, runPastTimeout$, selectedOptions$),
     switchMap(
       async ([
-        [dataViews, field, fetchContext, useGlobalFilters, searchString, sort, searchTechnique],
+        { dataViews, field, fetchContext, useGlobalFilters, searchString, sort, searchTechnique },
         requestSize,
         runPastTimeout,
         selectedOptions,

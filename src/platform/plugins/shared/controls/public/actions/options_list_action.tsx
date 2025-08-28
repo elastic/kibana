@@ -19,14 +19,15 @@ import { dataViewsService } from '../services/kibana_services';
 import { OPTIONS_LIST_ACTION } from './constants';
 import type { ControlTypeAction } from './control_panel_actions';
 
+const isFieldCompatible = (field: DataViewField) => {
+  return (
+    !field.spec.scripted &&
+    field.aggregatable &&
+    ['string', 'boolean', 'ip', 'date', 'number'].includes(field.type)
+  );
+};
+
 export const createOptionsListControlAction = (): ControlTypeAction<OptionsListControlState> => {
-  const isFieldCompatible = (field: DataViewField) => {
-    return (
-      !field.spec.scripted &&
-      field.aggregatable &&
-      ['string', 'boolean', 'ip', 'date', 'number'].includes(field.type)
-    );
-  };
   return {
     id: OPTIONS_LIST_ACTION,
     type: OPTIONS_LIST_CONTROL,
@@ -52,11 +53,20 @@ export const createOptionsListControlAction = (): ControlTypeAction<OptionsListC
           },
         });
       } else {
+        const { dataViewId, fieldName, ...rest } = state;
+        if (!dataViewId || !fieldName) {
+          // this shouldn't happen but, if it does, throw an error
+          throw new Error('');
+        }
         embeddable.addNewPanel<OptionsListControlState, OptionsListControlApi>(
           {
             panelType: OPTIONS_LIST_CONTROL,
             serializedState: {
-              rawState: state,
+              rawState: {
+                dataViewId,
+                fieldName,
+                ...rest,
+              },
             },
           },
           true

@@ -17,7 +17,7 @@ import {
 } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { StateComparators } from '@kbn/presentation-publishing';
+import { type SerializedTitles, type StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 
@@ -28,6 +28,8 @@ import { openDataControlEditor } from './open_data_control_editor';
 import { getReferenceName } from './reference_name_utils';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
 
+type DataControlState = Omit<DefaultDataControlState, keyof SerializedTitles>;
+
 export const defaultDataControlComparators: StateComparators<DefaultDataControlState> = {
   ...defaultControlComparators,
   dataViewId: 'referenceEquality',
@@ -35,15 +37,23 @@ export const defaultDataControlComparators: StateComparators<DefaultDataControlS
   useGlobalFilters: (a, b) => a ?? true === b ?? true,
 };
 
-export const initializeDataControlManager = async <EditorState extends object = {}>(
-  controlId: string,
-  controlType: string,
-  typeDisplayName: string,
-  state: DefaultDataControlState,
-  parentApi: unknown,
-  willHaveInitialFilter?: boolean,
-  getInitialFilter?: (dataView: DataView) => Filter | undefined
-): Promise<{
+export const initializeDataControlManager = async ({
+  controlId,
+  controlType,
+  typeDisplayName,
+  state,
+  parentApi,
+  willHaveInitialFilter,
+  getInitialFilter,
+}: {
+  controlId: string;
+  controlType: string;
+  typeDisplayName: string;
+  state: DefaultDataControlState;
+  parentApi: unknown;
+  willHaveInitialFilter?: boolean;
+  getInitialFilter?: (dataView: DataView) => Filter | undefined;
+}): Promise<{
   api: StateManager<DefaultDataControlState>['api'] & DataControlApi;
   cleanup: () => void;
   internalApi: {

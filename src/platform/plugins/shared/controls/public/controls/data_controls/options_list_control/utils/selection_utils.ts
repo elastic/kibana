@@ -137,3 +137,18 @@ export const deselectAll = ({
   const remainingSelections = selectedOptions.filter((option) => !keys.includes(option as string));
   selectionsManager.api.setSelectedOptions(remainingSelections);
 };
+
+export const clearSelections = ({
+  selectionsManager,
+  temporaryStateManager,
+}: {
+  selectionsManager: ReturnType<typeof initializeSelectionsManager>;
+  temporaryStateManager: ReturnType<typeof initializeTemporayStateManager>;
+}) => {
+  if (selectionsManager.api.selectedOptions$.getValue()?.length)
+    selectionsManager.api.setSelectedOptions([]);
+  if (selectionsManager.api.existsSelected$.getValue())
+    selectionsManager.api.setExistsSelected(false);
+  if (temporaryStateManager.api.invalidSelections$.getValue().size)
+    temporaryStateManager.api.setInvalidSelections(new Set([]));
+};

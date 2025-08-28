@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 export type { DefaultControlState, DefaultDataControlState, SerializedControlState } from './types';
 
-export type {
-  ControlGroupEditorConfig,
-  ControlGroupRuntimeState,
-  ControlPanelState,
-  ControlPanelsState,
-} from './control_group';
+export interface ControlGroupEditorConfig {
+  hideDataViewSelector?: boolean;
+  hideWidthSettings?: boolean;
+  hideAdditionalSettings?: boolean;
+  fieldFilterPredicate?: (f: DataViewField) => boolean;
+}

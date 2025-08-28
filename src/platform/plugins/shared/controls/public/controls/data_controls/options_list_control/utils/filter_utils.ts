@@ -15,7 +15,7 @@ import {
   buildPhrasesFilter,
 } from '@kbn/es-query';
 
-import type { OptionsListControlState } from '../../../../common/options_list';
+import type { OptionsListControlState } from '../../../../../common/options_list';
 
 export const buildFilter = (
   dataView: DataView,
