@@ -189,7 +189,7 @@ describe('runCiChecksTool', () => {
       if (result.success) {
         expect(result.data.checks).toEqual(['build']);
         expect(result.data.parallel).toBe(true);
-        expect(result.data.clean_cache).toBe(false);
+        expect(result.data.cleanCache).toBe(false);
       }
     });
 
@@ -197,13 +197,13 @@ describe('runCiChecksTool', () => {
       const schema = runCiChecksTool.inputSchema;
       const result = schema.safeParse({
         parallel: false,
-        clean_cache: true,
+        cleanCache: true,
       });
 
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.parallel).toBe(false);
-        expect(result.data.clean_cache).toBe(true);
+        expect(result.data.cleanCache).toBe(true);
       }
     });
   });
@@ -215,12 +215,12 @@ describe('runCiChecksTool', () => {
 
       expect(shape).toHaveProperty('checks');
       expect(shape).toHaveProperty('parallel');
-      expect(shape).toHaveProperty('clean_cache');
+      expect(shape).toHaveProperty('cleanCache');
 
       // Check that all properties are zod types
       expect(shape.checks).toBeDefined();
       expect(shape.parallel).toBeDefined();
-      expect(shape.clean_cache).toBeDefined();
+      expect(shape.cleanCache).toBeDefined();
     });
 
     it('has the correct enum values for checks', () => {
