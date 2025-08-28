@@ -1217,7 +1217,13 @@
               "\nThe result value as returned by the tool."
             ],
             "signature": [
-              "ToolResult",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ToolResult",
+                "text": "ToolResult"
+              },
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/runner.ts",
@@ -1694,7 +1700,13 @@
             "label": "results",
             "description": [],
             "signature": [
-              "ToolResult",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ToolResult",
+                "text": "ToolResult"
+              },
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
