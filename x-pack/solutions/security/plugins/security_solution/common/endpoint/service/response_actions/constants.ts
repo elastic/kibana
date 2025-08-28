@@ -94,7 +94,9 @@ export type ResponseConsoleRbacControls =
   | 'writeProcessOperations'
   | 'writeFileOperations'
   | 'writeExecuteOperations'
-  | 'writeScanOperations';
+  | 'writeScanOperations'
+  // TODO: Check for Cancel action, or we can change RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL to use Partial and omit cancel
+  | 'canReadActionsLogManagement';
 
 /**
  * maps the console command to the RBAC control (kibana feature control) that is required to access it via console

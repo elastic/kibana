@@ -21,6 +21,7 @@ export const CancelActionRequestSchema = {
           }
         },
       }),
+      comment: schema.maybe(schema.string({ minLength: 1 })),
     }),
   }),
 };

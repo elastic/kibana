@@ -28,15 +28,59 @@ components:
     RunScriptRouteRequestBody:
       type: object
       required:
+        - endpoint_ids
         - parameters
       properties:
+        endpoint_ids:
+          type: array
+          items:
+            type: string
+            minLength: 1
+          minItems: 1
+          description: A list of endpoint IDs whose hosts will run the script (Fleet Agent IDs will be retrieved for these)
+        alert_ids:
+          type: array
+          items:
+            type: string
+            minLength: 1
+          minItems: 1
+          description: If defined, any case associated with the given IDs will be updated
+        case_ids:
+          type: array
+          items:
+            type: string
+            minLength: 1
+          minItems: 1
+          description: Case IDs to be updated
+        comment:
+          type: string
+          description: Optional comment for the action
+        agent_type:
+          type: string
+          enum: ['endpoint', 'sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint']
+          default: 'endpoint'
+          description: Type of agent to execute the script on
         parameters:
           oneOf:
-            - $ref: '#/components/schemas/RawScriptParameters'
-            - $ref: '#/components/schemas/HostPathScriptParameters'
-            - $ref: '#/components/schemas/CloudFileScriptParameters'
-          description: Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided. CommandLine and Timeout are optional for all.
-    RawScriptParameters:
+            - $ref: '#/components/schemas/CrowdStrikeRunScriptParameters'
+            - $ref: '#/components/schemas/MSDefenderRunScriptParameters' 
+            - $ref: '#/components/schemas/SentinelOneRunScriptParameters'
+          discriminator:
+            propertyName: agent_type
+            mapping:
+              crowdstrike: '#/components/schemas/CrowdStrikeRunScriptParameters'
+              microsoft_defender_endpoint: '#/components/schemas/MSDefenderRunScriptParameters'
+              sentinel_one: '#/components/schemas/SentinelOneRunScriptParameters'
+          description: Script execution parameters that vary by agent type
+    
+    # CrowdStrike parameters - supports raw, hostPath, or cloudFile approaches
+    CrowdStrikeRunScriptParameters:
+      oneOf:
+        - $ref: '#/components/schemas/CrowdStrikeRunScriptRawParameters'
+        - $ref: '#/components/schemas/CrowdStrikeRunScriptHostPathParameters'
+        - $ref: '#/components/schemas/CrowdStrikeRunScriptCloudFileParameters'
+    
+    CrowdStrikeRunScriptRawParameters:
       type: object
       required:
         - raw
@@ -44,16 +88,17 @@ components:
         raw:
           type: string
           minLength: 1
-          description: Raw script content.
+          description: Raw script content to execute
         commandLine:
           type: string
           minLength: 1
-          description: Command line arguments.
+          description: Command line arguments
         timeout:
           type: integer
           minimum: 1
-          description: Timeout in seconds.
-    HostPathScriptParameters:
+          description: Timeout in milliseconds before the command is killed
+    
+    CrowdStrikeRunScriptHostPathParameters:
       type: object
       required:
         - hostPath
@@ -61,16 +106,17 @@ components:
         hostPath:
           type: string
           minLength: 1
-          description: Absolute or relative path of script on host machine.
+          description: Absolute or relative path of script on host machine
         commandLine:
           type: string
           minLength: 1
-          description: Command line arguments.
+          description: Command line arguments
         timeout:
           type: integer
           minimum: 1
-          description: Timeout in seconds.
-    CloudFileScriptParameters:
+          description: Timeout in milliseconds before the command is killed
+    
+    CrowdStrikeRunScriptCloudFileParameters:
       type: object
       required:
         - cloudFile
@@ -78,12 +124,42 @@ components:
         cloudFile:
           type: string
           minLength: 1
-          description: Script name in cloud storage.
+          description: Script name in cloud storage
         commandLine:
           type: string
           minLength: 1
-          description: Command line arguments.
+          description: Command line arguments
         timeout:
           type: integer
           minimum: 1
-          description: Timeout in seconds.
+          description: Timeout in milliseconds before the command is killed
+    
+    # Microsoft Defender Endpoint (MDE) parameters
+    MSDefenderRunScriptParameters:
+      type: object
+      required:
+        - scriptName
+      properties:
+        scriptName:
+          type: string
+          minLength: 1
+          description: The path to the script in the cloud to run
+        args:
+          type: string
+          minLength: 1
+          description: Optional arguments for the script
+    
+    # SentinelOne parameters
+    SentinelOneRunScriptParameters:
+      type: object
+      required:
+        - scriptId
+      properties:
+        scriptId:
+          type: string
+          minLength: 1
+          description: The SentinelOne Script ID to be executed
+        scriptInput:
+          type: string
+          minLength: 1
+          description: Any input arguments for the selected script
