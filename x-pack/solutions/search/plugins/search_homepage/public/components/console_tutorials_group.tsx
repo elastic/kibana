@@ -21,7 +21,7 @@ import { useKibana } from '../hooks/use_kibana';
 
 interface TutorialMetadata {
   title: string;
-  telemetryId: string;
+  dataTestSubj: string;
   description: string;
   request: string;
   duration: number;
@@ -36,7 +36,7 @@ export const ConsoleTutorialsGroup = () => {
       title: i18n.translate('xpack.searchHomepage.consoleTutorials.basicsTitle', {
         defaultMessage: 'Search basics',
       }),
-      telemetryId: 'console_tutorials_search_basics',
+      dataTestSubj: 'console_tutorials_search_basics',
       description: i18n.translate('xpack.searchHomepage.consoleTutorials.basicsDescription', {
         defaultMessage: 'Learn how to create an index, add documents, and basic search techniques.',
       }),
@@ -47,7 +47,7 @@ export const ConsoleTutorialsGroup = () => {
       title: i18n.translate('xpack.searchHomepage.consoleTutorials.semanticTitle', {
         defaultMessage: 'Semantic search',
       }),
-      telemetryId: 'console_tutorials_semantic_search',
+      dataTestSubj: 'console_tutorials_semantic_search',
       description: i18n.translate('xpack.searchHomepage.consoleTutorials.semanticDescription', {
         defaultMessage:
           'Learn semantic search techniques to understand intent and deliver more accurate, relevant results.',
@@ -59,7 +59,7 @@ export const ConsoleTutorialsGroup = () => {
       title: i18n.translate('xpack.searchHomepage.consoleTutorials.esqlTitle', {
         defaultMessage: 'ES|QL',
       }),
-      telemetryId: 'console_tutorials_esql',
+      dataTestSubj: 'console_tutorials_esql',
       description: i18n.translate('xpack.searchHomepage.consoleTutorials.esqlDescription', {
         defaultMessage:
           "Learn how to use Elastic's piped query language to simplify data investigations.",
@@ -118,6 +118,8 @@ export const ConsoleTutorialsGroup = () => {
                   application={application}
                   consolePlugin={consolePlugin}
                   sharePlugin={share}
+                  telemetryId={tutorial.dataTestSubj}
+                  data-test-subj={tutorial.dataTestSubj}
                 />
               </EuiCard>
             </EuiFlexItem>
