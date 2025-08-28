@@ -8,11 +8,13 @@
  */
 
 import 'moment-timezone';
+
 const QUERY_HISTORY_ITEM_KEY = 'QUERY_HISTORY_ITEM_KEY';
 export const dateFormat = 'MMM. D, YY HH:mm:ss';
 
 /**
- * We show maximum 20 ES|QL queries in the Query history component
+ * We store ES|QL queries in history based on storage size rather than a fixed count.
+ * This allows for more queries when they're shorter, fewer when they're longer.
  */
 
 export interface QueryHistoryItem {
@@ -21,7 +23,7 @@ export interface QueryHistoryItem {
   timeRan?: string;
 }
 
-export const MAX_HISTORY_QUERIES_NUMBER = 20;
+const MAX_STORAGE_SIZE_KB = 50; // 50KB storage limit
 
 export const getTrimmedQuery = (queryString: string) => {
   return queryString.replaceAll('\n', '').trim().replace(/\s\s+/g, ' ');
@@ -57,11 +59,26 @@ export const getCachedQueries = (): QueryHistoryItem[] => {
   return Array.from(cachedQueries, ([name, value]) => ({ ...value }));
 };
 
+/**
+ * Get current storage usage statistics for debugging/monitoring
+ */
+export const getStorageStats = () => {
+  const queries = getHistoryItems('desc');
+  const storageString = JSON.stringify(queries);
+  const storageSizeKB = new Blob([storageString]).size / 1024;
+
+  return {
+    queryCount: queries.length,
+    storageSizeKB: parseFloat(storageSizeKB.toFixed(2)),
+    maxStorageLimitKB: MAX_STORAGE_SIZE_KB,
+    storageUsagePercent: parseFloat(
+      Math.round((storageSizeKB / MAX_STORAGE_SIZE_KB) * 100).toFixed(2)
+    ), // Round to 2 decimals
+  };
+};
+
 // Adding the maxQueriesAllowed here for testing purposes
-export const addQueriesToCache = (
-  itemToAddOrUpdate: QueryHistoryItem,
-  maxQueriesAllowed = MAX_HISTORY_QUERIES_NUMBER
-) => {
+export const addQueriesToCache = (itemToAddOrUpdate: QueryHistoryItem) => {
   // if the user is working on multiple tabs
   // the cachedQueries Map might not contain all
   // the localStorage queries
@@ -82,17 +99,29 @@ export const addQueriesToCache = (
 
   let allQueries = [...getCachedQueries()];
 
-  if (allQueries.length >= maxQueriesAllowed + 1) {
-    const sortedByDate = allQueries.sort((a, b) => sortDates(b.timeRan, a.timeRan));
+  // Check storage size and trim if needed
+  const checkAndTrimBySize = (queryList: QueryHistoryItem[]): QueryHistoryItem[] => {
+    const storageString = JSON.stringify(queryList);
+    const storageSizeKB = new Blob([storageString]).size / 1024;
 
-    // queries to store in the localstorage
-    allQueries = sortedByDate.slice(0, maxQueriesAllowed);
+    if (storageSizeKB > MAX_STORAGE_SIZE_KB && queryList.length > 10) {
+      // Remove oldest queries until under size limit or minimum count
+      const sortedByDate = queryList.sort((a, b) => sortDates(b.timeRan, a.timeRan));
+      return checkAndTrimBySize(sortedByDate.slice(0, -1));
+    }
 
-    // clear and reset the queries in the cache
-    cachedQueries.clear();
-    allQueries.forEach((queryItem) => {
-      cachedQueries.set(queryItem.queryString, queryItem);
-    });
-  }
+    return queryList;
+  };
+
+  // Apply storage-based trimming
+  allQueries = checkAndTrimBySize(allQueries);
+
+  // Update cache with final query list
+  cachedQueries.clear();
+  allQueries.forEach((queryItem) => {
+    const queryKey = getTrimmedQuery(queryItem.queryString);
+    cachedQueries.set(queryKey, queryItem);
+  });
+
   localStorage.setItem(QUERY_HISTORY_ITEM_KEY, JSON.stringify(allQueries));
 };
