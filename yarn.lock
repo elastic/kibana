@@ -4296,11 +4296,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/check-saved-objects-cli@link:packages/kbn-check-saved-objects-cli":
+"@kbn/check-prod-native-modules-cli@link:packages/kbn-check-prod-native-modules-cli":
   version "0.0.0"
   uid ""
 
-"@kbn/check-prod-native-modules-cli@link:packages/kbn-check-prod-native-modules-cli":
+"@kbn/check-saved-objects-cli@link:packages/kbn-check-saved-objects-cli":
   version "0.0.0"
   uid ""
 

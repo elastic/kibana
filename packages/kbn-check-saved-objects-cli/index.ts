@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
-require('@kbn/check-saved-objects-cli').runCheckMappingsUpdateCli();
+export { runCheckMappingsUpdateCli } from './src/commands/run_check_mappings_update_cli';
