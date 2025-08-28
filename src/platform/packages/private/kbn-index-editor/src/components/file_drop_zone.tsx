@@ -110,7 +110,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     // Generic errors
     if (uploadStatus.errors.length) {
       const errorDetail = uploadStatus.errors
-        .map((error) => `- ${error.title}: \n ${JSON.stringify(error.error)}`)
+        .map((errorItem) => `- ${errorItem.title}: \n ${errorItem?.error?.error?.reason}`)
         .join('\n');
       indexUpdateService.setError(IndexEditorErrors.FILE_UPLOAD_ERROR, errorDetail);
     }
