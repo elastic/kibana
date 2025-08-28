@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { ConversationResponse, Message } from '@kbn/elastic-assistant-common';
@@ -57,6 +58,7 @@ export const appendConversationMessages = async ({
               for (message in params.messages) {
                 def newMessage = [:];
                 newMessage['@timestamp'] = message['@timestamp'];
+                newMessage.id = message.id;
                 newMessage.content = message.content;
                 newMessage.is_error = message.is_error;
                 newMessage.reader = message.reader;
@@ -129,6 +131,7 @@ export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) 
     updated_at: updatedAt,
     messages: messages?.map((message) => ({
       '@timestamp': message.timestamp,
+      id: message.id ?? uuidv4(),
       content: message.content,
       is_error: message.isError,
       reader: message.reader,
