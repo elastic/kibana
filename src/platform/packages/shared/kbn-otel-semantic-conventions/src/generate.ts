@@ -9,10 +9,9 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-import type { ToolingLog } from '@kbn/tooling-log';
 import { processSemconvYaml } from './lib/generate_semconv';
 
-function generateTypeScriptFile(result: any, outputPath: string, log: ToolingLog): void {
+function generateTypeScriptFile(result: any, outputPath: string): void {
   const timestamp = new Date().toISOString();
   const { totalFields, stats } = result;
 
@@ -88,18 +87,20 @@ export const semconvFlat = ${fieldsString} as const;
   }
 
   fs.writeFileSync(outputPath, tsContent, 'utf8');
-  log.success(`✅ Generated TypeScript file: ${outputPath}`);
-  log.info(`📊 Statistics: ${stats.totalFields} fields from ${stats.totalGroups} groups`);
+  process.stdout.write(`✅ Generated TypeScript file: ${outputPath}\n`);
+  process.stdout.write(
+    `📊 Statistics: ${stats.totalFields} fields from ${stats.totalGroups} groups\n`
+  );
 }
 
-export function runGenerateOtelSemconvCli({ log }: { log: ToolingLog }): void {
+export function runGenerateOtelSemconvCli(): void {
   const packageRoot = path.resolve(__dirname, '../');
   const yamlPath = path.join(packageRoot, 'assets', 'resolved-semconv.yaml');
   const outputPath = path.join(packageRoot, 'src', 'generated', 'resolved-semconv.ts');
 
-  log.info('🚀 Starting OpenTelemetry Semantic Conventions processing...');
-  log.info(`📁 YAML file: ${yamlPath}`);
-  log.info(`📝 Output file: ${outputPath}`);
+  process.stdout.write('🚀 Starting OpenTelemetry Semantic Conventions processing...\n');
+  process.stdout.write(`📁 YAML file: ${yamlPath}\n`);
+  process.stdout.write(`📝 Output file: ${outputPath}\n`);
 
   try {
     const result = processSemconvYaml(yamlPath, {
@@ -108,12 +109,12 @@ export function runGenerateOtelSemconvCli({ log }: { log: ToolingLog }): void {
       validateOutput: true,
     });
 
-    generateTypeScriptFile(result, outputPath, log);
+    generateTypeScriptFile(result, outputPath);
 
-    log.success('🎉 Processing completed successfully!');
-    log.info(`📋 Generated ${result.stats.totalFields} field definitions`);
+    process.stdout.write('🎉 Processing completed successfully!\n');
+    process.stdout.write(`📋 Generated ${result.stats.totalFields} field definitions\n`);
   } catch (error) {
-    log.error(`❌ Processing failed: ${error}`);
-    process.exit(1);
+    process.stderr.write(`❌ Processing failed: ${error}\n`);
+    throw error;
   }
 }
