@@ -67,6 +67,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
 
   /**
    * Access control settings for the saved object.
+   * For write-restricted and editable saved objects
    */
   accessControl?: SavedObjectAccessControl;
 }
