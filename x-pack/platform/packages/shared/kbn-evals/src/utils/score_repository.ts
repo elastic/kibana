@@ -46,19 +46,25 @@ interface ModelScoreDocument {
   tags: string[];
 }
 
-const ELASTICSEARCH_INDEX = '.kibana-evals-scores';
+const EVALUATIONS_DATA_STREAM_ALIAS = '.kibana-evaluations';
+const EVALUATIONS_DATA_STREAM_WILDCARD = '.kibana-evaluations*';
+const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
 
 export class EvaluationScoreRepository {
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
   private async ensureIndexTemplate(): Promise<void> {
     const templateBody = {
-      index_patterns: [ELASTICSEARCH_INDEX],
+      index_patterns: [EVALUATIONS_DATA_STREAM_WILDCARD],
+      data_stream: {
+        hidden: true,
+      },
       template: {
         settings: {
           number_of_shards: 1,
           number_of_replicas: 0,
           refresh_interval: '30s',
+          'index.hidden': true,
         },
         mappings: {
           properties: {
@@ -123,23 +129,43 @@ export class EvaluationScoreRepository {
     try {
       const templateExists = await this.esClient.indices
         .existsIndexTemplate({
-          name: 'kibana-evals-scores-template',
+          name: EVALUATIONS_DATA_STREAM_TEMPLATE,
         })
         .then(() => true)
         .catch(() => false);
 
       if (!templateExists) {
         await this.esClient.indices.putIndexTemplate({
-          name: 'kibana-evals-scores-template',
+          name: EVALUATIONS_DATA_STREAM_TEMPLATE,
           index_patterns: templateBody.index_patterns,
+          data_stream: templateBody.data_stream,
           template: templateBody.template as any,
         });
 
-        this.log.info('Created Elasticsearch index template for evaluation scores');
+        this.log.debug('Created Elasticsearch index template for evaluation scores');
       }
     } catch (error) {
       this.log.error('Failed to create index template:', error);
       throw error;
+    }
+  }
+
+  private async ensureDatastream(): Promise<void> {
+    try {
+      // Check if datastream exists by trying to get it
+      await this.esClient.indices.getDataStream({
+        name: EVALUATIONS_DATA_STREAM_ALIAS,
+      });
+    } catch (error: any) {
+      if (error?.statusCode === 404) {
+        // Datastream doesn't exist, create it
+        await this.esClient.indices.createDataStream({
+          name: EVALUATIONS_DATA_STREAM_ALIAS,
+        });
+        this.log.debug(`Created datastream: ${EVALUATIONS_DATA_STREAM_ALIAS}`);
+      } else {
+        throw error;
+      }
     }
   }
 
@@ -158,6 +184,7 @@ export class EvaluationScoreRepository {
   }): Promise<void> {
     try {
       await this.ensureIndexTemplate();
+      await this.ensureDatastream();
 
       if (datasetScoresWithStats.length === 0) {
         this.log.warning('No dataset scores found to export');
@@ -213,24 +240,30 @@ export class EvaluationScoreRepository {
       }
       // Bulk index documents
       if (documents.length > 0) {
-        const bulkBody: any[] = [];
-
-        for (const doc of documents) {
-          bulkBody.push({
-            index: {
-              _index: ELASTICSEARCH_INDEX,
-              _id: `${doc.environment.hostname}-${doc.model.id}-${doc.dataset.id}-${doc.evaluator.name}-${timestamp}`,
-            },
-          });
-          bulkBody.push(doc);
-        }
-
-        await this.esClient.bulk({
-          body: bulkBody,
+        const stats = await this.esClient.helpers.bulk({
+          datasource: documents,
+          onDocument: (doc) => {
+            return {
+              create: {
+                _index: EVALUATIONS_DATA_STREAM_ALIAS,
+                _id: `${doc.environment.hostname}-${doc.model.id}-${doc.dataset.id}-${doc.evaluator.name}-${timestamp}`,
+              },
+            };
+          },
         });
 
+        // Check for bulk operation errors
+        if (stats.failed > 0) {
+          this.log.error(
+            `Bulk indexing had ${stats.failed} failed operations out of ${stats.total}`
+          );
+          throw new Error(
+            `Bulk indexing failed: ${stats.failed} of ${stats.total} operations failed`
+          );
+        }
+
         this.log.success(
-          `Successfully exported ${documents.length} evaluation score records to Elasticsearch index: ${ELASTICSEARCH_INDEX}`
+          `Successfully indexed evaluation results to a datastream: ${EVALUATIONS_DATA_STREAM_ALIAS}`
         );
 
         // Log summary information for easy querying
@@ -254,16 +287,16 @@ export class EvaluationScoreRepository {
     try {
       const query = {
         bool: {
-          must: [{ term: { 'run_id.keyword': runId } }],
+          must: [{ term: { run_id: runId } }],
         },
       };
 
       const response = await this.esClient.search({
-        index: ELASTICSEARCH_INDEX,
+        index: EVALUATIONS_DATA_STREAM_WILDCARD,
         query,
         sort: [
-          { 'dataset.name.keyword': { order: 'asc' as const } },
-          { 'evaluator.name.keyword': { order: 'asc' as const } },
+          { 'dataset.name': { order: 'asc' as const } },
+          { 'evaluator.name': { order: 'asc' as const } },
         ],
         size: 1000,
       });
