@@ -39,7 +39,7 @@ export interface CloudConnectorServiceInterface {
 }
 
 export class CloudConnectorService implements CloudConnectorServiceInterface {
-  private static readonly EXTERNAL_ID_REGEX = /^[a-zA-Z0-9]{20}$/;
+  private static readonly EXTERNAL_ID_REGEX = /^[a-zA-Z0-9_-]{20}$/;
 
   protected getLogger(...childContextPaths: string[]): Logger {
     return appContextService.getLogger().get('CloudConnectorService', ...childContextPaths);

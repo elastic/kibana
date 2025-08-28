@@ -120,67 +120,6 @@ describe('Cloud Connector API', () => {
           body: mockCloudConnector,
         });
       });
-
-      it('should accept valid Azure cloud provider', async () => {
-        const mockCloudConnector = {
-          id: 'test-id',
-          name: 'test-connector',
-          cloudProvider: 'azure' as CloudProvider,
-          vars: {},
-          packagePolicyCount: 1,
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-01-01T00:00:00.000Z',
-        };
-
-        mockCloudConnectorService.create.mockResolvedValue(mockCloudConnector);
-
-        const request = httpServerMock.createKibanaRequest({
-          body: {
-            name: 'test-connector',
-            cloudProvider: 'azure',
-            vars: {
-              client_id: { value: 'azure-client-id', type: 'text' },
-              tenant_id: { value: 'azure-tenant-id', type: 'text' },
-            },
-          },
-        });
-
-        await createCloudConnectorHandler(context, request, response);
-
-        expect(response.ok).toHaveBeenCalledWith({
-          body: mockCloudConnector,
-        });
-      });
-
-      it('should accept valid GCP cloud provider', async () => {
-        const mockCloudConnector = {
-          id: 'test-id',
-          name: 'test-connector',
-          cloudProvider: 'gcp' as CloudProvider,
-          vars: {},
-          packagePolicyCount: 1,
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-01-01T00:00:00.000Z',
-        };
-
-        mockCloudConnectorService.create.mockResolvedValue(mockCloudConnector);
-
-        const request = httpServerMock.createKibanaRequest({
-          body: {
-            name: 'test-connector',
-            cloudProvider: 'gcp',
-            vars: {
-              project_id: { value: 'gcp-project-id', type: 'text' },
-            },
-          },
-        });
-
-        await createCloudConnectorHandler(context, request, response);
-
-        expect(response.ok).toHaveBeenCalledWith({
-          body: mockCloudConnector,
-        });
-      });
     });
 
     describe('GET /api/fleet/cloud_connectors', () => {

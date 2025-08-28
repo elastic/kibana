@@ -592,5 +592,36 @@ describe('CloudConnectorService', () => {
         },
       });
     });
+
+    it('should validate external_id secret format - valid with underscores and hyphens', () => {
+      const request: CreateCloudConnectorRequest = {
+        name: 'test-connector',
+        cloudProvider: 'aws',
+        vars: {
+          role_arn: {
+            value: 'arn:aws:iam::123456789012:role/TestRole',
+            type: 'text',
+          },
+          external_id: {
+            value: {
+              id: '0BrW7JgB-08CS_HiWrORw',
+              isSecretRef: true,
+            },
+            type: 'password',
+          },
+        },
+      };
+
+      const getCloudConnectorInfo = (service as any).getCloudConnectorInfo.bind(service);
+      const result = getCloudConnectorInfo(request);
+
+      expect(result.vars.external_id).toEqual({
+        type: 'password',
+        value: {
+          id: '0BrW7JgB-08CS_HiWrORw',
+          isSecretRef: true,
+        },
+      });
+    });
   });
 });

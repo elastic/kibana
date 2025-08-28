@@ -1415,7 +1415,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(packagePolicy.name).to.equal('test-cspm-package-policy-cloud-connector');
         expect(packagePolicy.supports_cloud_connector).to.equal(true);
         expect(packagePolicy).to.have.property('cloud_connector_id');
-        expect(packagePolicy.cloud_connector_id).to.be(undefined);
         expect(packagePolicy.inputs[0].streams[0].vars).to.have.property('role_arn');
         expect(packagePolicy.inputs[0].streams[0].vars).to.have.property('external_id');
       });

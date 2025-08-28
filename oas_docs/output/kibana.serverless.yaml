@@ -23701,6 +23701,7 @@ paths:
             type: string
       responses:
         '200':
+          description: Successfully get a list of cloud connectors
           content:
             application/json:
               schema:
@@ -23733,6 +23734,7 @@ paths:
                     - updated_at
                 type: array
         '400':
+          description: Generic Bad Request Error
           content:
             application/json:
               schema:
@@ -23826,6 +23828,7 @@ paths:
                 - vars
       responses:
         '200':
+          description: Successfully create a new cloud connector
           content:
             application/json:
               schema:
@@ -23856,6 +23859,7 @@ paths:
                   - created_at
                   - updated_at
         '400':
+          description: Generic Bad Request Error
           content:
             application/json:
               schema:
