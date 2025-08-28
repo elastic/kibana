@@ -19,11 +19,6 @@ import type {
 import type { DataRequestDescriptor } from './data_request_descriptor_types';
 import type { JoinSourceDescriptor } from '.';
 
-export type Attribution = {
-  label: string;
-  url: string;
-};
-
 export type JoinDescriptor = {
   leftField?: string;
   right: Partial<JoinSourceDescriptor>;

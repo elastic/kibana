@@ -14,6 +14,7 @@ export type {
   //
   // Layer types
   //
+  Attribution,
   StoredEMSVectorTileLayer,
   StoredHeatmapLayer,
   StoredLayerGroup,

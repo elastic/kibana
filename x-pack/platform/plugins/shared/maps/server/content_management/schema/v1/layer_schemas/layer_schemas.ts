@@ -25,7 +25,7 @@ import {
 } from '../source_schemas/es_agg_source_schemas';
 import { ESQLSourceSchema, ESSearchSourceSchema } from '../source_schemas/es_source_schemas';
 
-const attributionSchema = schema.object({
+export const attributionSchema = schema.object({
   label: schema.string(),
   url: schema.uri(),
 });

@@ -10,6 +10,8 @@ export type * from './layer_descriptor_types';
 export type * from './map_descriptor';
 
 export type {
+  Attribution,
+
   //
   // Source types
   //
