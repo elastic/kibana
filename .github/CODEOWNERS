@@ -529,6 +529,7 @@ src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-r
 src/platform/packages/shared/kbn-opentelemetry-attributes @elastic/kibana-core
 src/platform/packages/shared/kbn-opentelemetry-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-defend-workflows
+src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
@@ -1488,6 +1489,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/observability/public/pages/overview @elastic/obs-ux-infra_services-team # Assigned to this team since it mostly uses infra/APM components
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces @elastic/obs-ux-infra_services-team
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/attributes @elastic/obs-ux-infra_services-team
+/src/platform/plugins/shared/unified_doc_viewer/public/components/content_framework @elastic/obs-ux-infra_services-team
 /src/platform/packages/shared/kbn-unified-metrics-grid @elastic/obs-ux-infra_services-team
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
@@ -3014,6 +3016,12 @@ x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/flee
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/saved_objects.ts @elastic/obs-ux-management-team @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts @elastic/obs-ux-management-team @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-ux-management-team @elastic/kibana-security
+
+# OpenTelemetry semantic conventions Buildkite pipeline and scripts
+/.buildkite/pipeline-resource-definitions/kibana-otel-semconv-sync.yml @elastic/obs-ux-logs-team
+/.buildkite/pipelines/otel_semconv_sync.yml @elastic/obs-ux-logs-team
+/.buildkite/scripts/steps/otel_semconv_sync.sh @elastic/obs-ux-logs-team
+/scripts/generate_otel_semconv.js @elastic/obs-ux-logs-team
 
 # Specialised GitHub workflows for the Observability robots
 /.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations

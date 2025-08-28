@@ -14,6 +14,7 @@ import { WorkflowSchema } from '../spec/schema';
 export enum ExecutionStatus {
   // In progress
   PENDING = 'pending',
+  WAITING = 'waiting',
   WAITING_FOR_INPUT = 'waiting_for_input',
   RUNNING = 'running',
 
@@ -28,9 +29,11 @@ export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
   workflowId: string;
+  isTestRun: boolean;
   status: ExecutionStatus;
-  context: Record<string, string>;
+  context: Record<string, any>;
   workflowDefinition: WorkflowYaml;
+  yaml: string;
   currentNodeId?: string; // The node currently being executed
   stack: string[];
   createdAt: string;
@@ -102,9 +105,10 @@ export interface WorkflowExecutionDto {
   stepExecutions: EsWorkflowStepExecution[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
+  yaml: string;
 }
 
-export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecutions'>;
+export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecutions' | 'yaml'>;
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
@@ -210,10 +214,10 @@ export interface WorkflowListDto {
   };
   results: WorkflowListItemDto[];
 }
-export type WorkflowExecutionEngineModel = Pick<
-  EsWorkflow,
-  'id' | 'name' | 'enabled' | 'definition'
->;
+export interface WorkflowExecutionEngineModel
+  extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition' | 'yaml'> {
+  isTestRun?: boolean;
+}
 
 export interface WorkflowListItemAction {
   isPrimary?: boolean;

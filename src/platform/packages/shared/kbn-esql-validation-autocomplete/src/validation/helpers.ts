@@ -16,19 +16,6 @@ export function buildQueryForFieldsInPolicies(policies: ESQLPolicy[]) {
     .join(', ')} | keep ${policies.flatMap(({ enrichFields }) => enrichFields).join(', ')}`;
 }
 
-export function buildQueryForFieldsForStringSources(queryString: string, ast: ESQLAst) {
-  // filter out the query until the last GROK or DISSECT command
-  const lastCommandIndex =
-    ast.length - [...ast].reverse().findIndex(({ name }) => ['grok', 'dissect'].includes(name));
-  // we're sure it's not -1 because we check the commands chain before calling this function
-  const nextCommandIndex = Math.min(lastCommandIndex + 1, ast.length - 1);
-  const customQuery = queryString.substring(0, ast[nextCommandIndex].location.min).trimEnd();
-  if (customQuery[customQuery.length - 1] === '|') {
-    return customQuery.substring(0, customQuery.length - 1);
-  }
-  return customQuery;
-}
-
 /**
  * Returns the maximum and minimum number of parameters allowed by a function
  *

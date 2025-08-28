@@ -80,7 +80,7 @@ export async function validateQuery(
  * @internal
  */
 export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
-  getColumnsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
+  getColumnsFor: ['unknownColumn', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
   getPreferences: [],

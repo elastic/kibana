@@ -59,6 +59,7 @@
     "@kbn/grok-heuristics",
     "@kbn/streamlang",
     "@kbn/licensing-types",
+    "@kbn/safer-lodash-set",
     "@kbn/sse-utils"
   ]
 }

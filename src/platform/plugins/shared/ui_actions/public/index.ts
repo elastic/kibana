@@ -18,8 +18,6 @@ export type {
   UiActionsPublicSetup as UiActionsSetup,
   UiActionsPublicStart as UiActionsStart,
 } from './plugin';
-export type { UiActionsServiceParams } from './service';
-export { UiActionsService } from './service';
 export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
 export { ActionInternal, createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
