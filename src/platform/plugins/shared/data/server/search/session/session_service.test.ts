@@ -26,7 +26,6 @@ const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('SearchSessionService', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let elasticsearchClient: ElasticsearchClientMock;
   let asCurrentUserElasticsearchClient: ElasticsearchClientMock;
   let service: SearchSessionService;
 
@@ -65,7 +64,6 @@ describe('SearchSessionService', () => {
   describe('Feature disabled', () => {
     beforeEach(async () => {
       savedObjectsClient = savedObjectsClientMock.create();
-      elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
       asCurrentUserElasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
       const config: ConfigSchema = {
         search: {
@@ -133,7 +131,6 @@ describe('SearchSessionService', () => {
   describe('Feature enabled', () => {
     beforeEach(async () => {
       savedObjectsClient = savedObjectsClientMock.create();
-      elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
       const config: ConfigSchema = {
         search: {
           sessions: {
@@ -294,7 +291,6 @@ describe('SearchSessionService', () => {
         const response = await service.find(
           {
             savedObjectsClient,
-            internalElasticsearchClient: elasticsearchClient,
             asCurrentUserElasticsearchClient,
           },
           mockUser1,
@@ -386,7 +382,6 @@ describe('SearchSessionService', () => {
         const response1 = await service.find(
           {
             savedObjectsClient,
-            internalElasticsearchClient: elasticsearchClient,
             asCurrentUserElasticsearchClient,
           },
           mockUser1,
@@ -397,7 +392,6 @@ describe('SearchSessionService', () => {
         const response2 = await service.find(
           {
             savedObjectsClient,
-            internalElasticsearchClient: elasticsearchClient,
             asCurrentUserElasticsearchClient,
           },
           mockUser1,
@@ -580,7 +574,6 @@ describe('SearchSessionService', () => {
         const response = await service.find(
           {
             savedObjectsClient,
-            internalElasticsearchClient: elasticsearchClient,
             asCurrentUserElasticsearchClient,
           },
           null,

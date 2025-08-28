@@ -41,7 +41,6 @@ export interface SearchSessionDependencies {
 }
 
 export interface SearchSessionStatusDependencies extends SearchSessionDependencies {
-  internalElasticsearchClient: ElasticsearchClient;
   asCurrentUserElasticsearchClient: ElasticsearchClient;
 }
 
@@ -162,11 +161,7 @@ export class SearchSessionService implements ISearchSessionService {
   };
 
   public find = async (
-    {
-      savedObjectsClient,
-      internalElasticsearchClient,
-      asCurrentUserElasticsearchClient,
-    }: SearchSessionStatusDependencies,
+    { savedObjectsClient, asCurrentUserElasticsearchClient }: SearchSessionStatusDependencies,
     user: AuthenticatedUser | null,
     options: Omit<SavedObjectsFindOptions, 'type'>
   ): Promise<SearchSessionsFindResponse> => {
@@ -197,7 +192,6 @@ export class SearchSessionService implements ISearchSessionService {
       findResponse.saved_objects.map(async (so) => {
         const sessionStatus = await getSessionStatus(
           {
-            internalClient: internalElasticsearchClient,
             asUserClient: asCurrentUserElasticsearchClient,
           },
           so.attributes,
@@ -379,7 +373,6 @@ export class SearchSessionService implements ISearchSessionService {
 
     const sessionStatus = await getSessionStatus(
       {
-        internalClient: deps.internalElasticsearchClient,
         asUserClient: deps.asCurrentUserElasticsearchClient,
       },
       session.attributes,
@@ -433,12 +426,10 @@ export class SearchSessionService implements ISearchSessionService {
         includedHiddenTypes: [SEARCH_SESSION_TYPE],
       });
 
-      const internalElasticsearchClient = elasticsearch.client.asScoped(request).asInternalUser;
       const asCurrentUserElasticsearchClient = elasticsearch.client.asScoped(request).asCurrentUser;
 
       const deps = {
         savedObjectsClient,
-        internalElasticsearchClient,
         asCurrentUserElasticsearchClient,
       };
       return {
