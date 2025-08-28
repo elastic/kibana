@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable no-console */
+
 import * as path from 'path';
 import * as fs from 'fs';
 import { processSemconvYaml } from './lib/generate_semconv';
@@ -87,10 +89,8 @@ export const semconvFlat = ${fieldsString} as const;
   }
 
   fs.writeFileSync(outputPath, tsContent, 'utf8');
-  process.stdout.write(`✅ Generated TypeScript file: ${outputPath}\n`);
-  process.stdout.write(
-    `📊 Statistics: ${stats.totalFields} fields from ${stats.totalGroups} groups\n`
-  );
+  console.log(`✅ Generated TypeScript file: ${outputPath}`);
+  console.log(`📊 Statistics: ${stats.totalFields} fields from ${stats.totalGroups} groups`);
 }
 
 export function runGenerateOtelSemconvCli(): void {
@@ -98,9 +98,9 @@ export function runGenerateOtelSemconvCli(): void {
   const yamlPath = path.join(packageRoot, 'assets', 'resolved-semconv.yaml');
   const outputPath = path.join(packageRoot, 'src', 'generated', 'resolved-semconv.ts');
 
-  process.stdout.write('🚀 Starting OpenTelemetry Semantic Conventions processing...\n');
-  process.stdout.write(`📁 YAML file: ${yamlPath}\n`);
-  process.stdout.write(`📝 Output file: ${outputPath}\n`);
+  console.log('🚀 Starting OpenTelemetry Semantic Conventions processing...');
+  console.log(`📁 YAML file: ${yamlPath}`);
+  console.log(`📝 Output file: ${outputPath}`);
 
   try {
     const result = processSemconvYaml(yamlPath, {
@@ -111,10 +111,10 @@ export function runGenerateOtelSemconvCli(): void {
 
     generateTypeScriptFile(result, outputPath);
 
-    process.stdout.write('🎉 Processing completed successfully!\n');
-    process.stdout.write(`📋 Generated ${result.stats.totalFields} field definitions\n`);
+    console.log('🎉 Processing completed successfully!');
+    console.log(`📋 Generated ${result.stats.totalFields} field definitions`);
   } catch (error) {
-    process.stderr.write(`❌ Processing failed: ${error}\n`);
+    console.error(`❌ Processing failed: ${error}`);
     throw error;
   }
 }

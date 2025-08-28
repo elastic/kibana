@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable no-console */
+
 import { runGenerateOtelSemconvCli } from './generate';
 
 export function cli() {
-  process.stdout.write('🚀 Starting OpenTelemetry Semantic Conventions processing...\n');
+  console.log('🚀 Starting OpenTelemetry Semantic Conventions processing...');
 
   try {
     runGenerateOtelSemconvCli();
-    process.stdout.write(
-      '✅ OpenTelemetry semantic conventions generation completed successfully!\n'
-    );
+    console.log('✅ OpenTelemetry semantic conventions generation completed successfully!');
     process.exit(0);
   } catch (error) {
-    process.stderr.write(`❌ Processing failed: ${error}\n`);
+    console.error(`❌ Processing failed: ${error}`);
     process.exit(1);
   }
 }
