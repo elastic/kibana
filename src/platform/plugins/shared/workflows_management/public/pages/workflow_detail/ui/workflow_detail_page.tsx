@@ -50,6 +50,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
 
+  const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
+  const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
+  const [hasChanges, setHasChanges] = useState(false);
+
   chrome!.setBreadcrumbs([
     {
       text: i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
@@ -64,7 +68,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   ]);
 
   const { updateWorkflow, runWorkflow } = useWorkflowActions();
-  const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
+  const canSaveWorkflow =
+    Boolean(application?.capabilities.workflowsManagement.updateWorkflow) && hasChanges;
   const canRunWorkflow =
     Boolean(application?.capabilities.workflowsManagement.executeWorkflow) &&
     Boolean(workflow?.enabled);
@@ -80,12 +85,22 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       });
       return;
     }
-    updateWorkflow.mutate({
-      id,
-      workflow: {
-        yaml: workflowYaml,
+    updateWorkflow.mutate(
+      {
+        id,
+        workflow: {
+          yaml: workflowYaml,
+        },
       },
-    });
+      {
+        onError: (err: unknown) => {
+          notifications?.toasts.addError(err as Error, {
+            toastLifeTimeMs: 3000,
+            title: 'Failed to save workflow',
+          });
+        },
+      }
+    );
   };
 
   const [workflowEventModalOpen, setWorkflowEventModalOpen] = useState(false);
@@ -160,10 +175,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
     false
   );
-
-  const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
-  const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
-  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');

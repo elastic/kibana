@@ -9,6 +9,7 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiFlexGroup,
@@ -24,7 +25,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
@@ -189,6 +190,21 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
             <EuiText size="s">
               {icon} {getStatusLabel(lastRun.status)}
             </EuiText>
+          );
+        },
+      },
+      {
+        name: 'Valid',
+        field: 'valid',
+        render: (value: boolean) => {
+          return (
+            <EuiBadge color={value ? 'default' : 'warning'} iconType={value ? 'check' : 'warning'}>
+              {value ? (
+                <FormattedMessage id="workflows.workflowList.valid" defaultMessage="Valid" />
+              ) : (
+                <FormattedMessage id="workflows.workflowList.invalid" defaultMessage="Invalid" />
+              )}
+            </EuiBadge>
           );
         },
       },

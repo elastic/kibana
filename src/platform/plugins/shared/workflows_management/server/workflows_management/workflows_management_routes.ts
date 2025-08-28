@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   CreateWorkflowCommandSchema,
   SearchWorkflowCommandSchema,
@@ -366,8 +367,30 @@ export function defineRoutes(
         if (!workflow) {
           return response.notFound();
         }
+        if (!workflow.definition || !workflow.valid) {
+          return response.badRequest({
+            body: {
+              message: `Workflow is not valid: ${
+                workflow.valid ? 'definition is null' : 'definition is not valid'
+              }`,
+            },
+          });
+        }
+        if (!workflow.enabled) {
+          return response.badRequest({
+            body: {
+              message: `Workflow is disabled. Enable it to run it.`,
+            },
+          });
+        }
         const { inputs } = request.body as { inputs: Record<string, any> };
-        const workflowExecutionId = await api.runWorkflow(workflow, spaceId, inputs);
+        const workflowForExecution: WorkflowExecutionEngineModel = {
+          id: workflow.id,
+          name: workflow.name,
+          enabled: workflow.enabled,
+          definition: workflow.definition,
+        };
+        const workflowExecutionId = await api.runWorkflow(workflowForExecution, spaceId, inputs);
         return response.ok({
           body: {
             workflowExecutionId,
