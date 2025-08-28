@@ -82,7 +82,6 @@ import {
   SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
 } from './apps/embeddables/constants';
 import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
-import { syntheticsSuggestionDefinition } from './cases/suggestion_definition';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -238,9 +237,13 @@ export class SyntheticsPlugin
 
     registerSyntheticsEmbeddables(coreSetup, plugins);
 
-    plugins.cases?.attachmentFramework.registerSuggestion<SyntheticsSuggestion>(
-      syntheticsSuggestionDefinition
-    );
+    if (plugins.cases?.attachmentFramework) {
+      import('./cases/suggestion_definition').then(({ syntheticsSuggestionDefinition }) => {
+        plugins.cases!.attachmentFramework.registerSuggestion<SyntheticsSuggestion>(
+          syntheticsSuggestionDefinition
+        );
+      });
+    }
   }
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
