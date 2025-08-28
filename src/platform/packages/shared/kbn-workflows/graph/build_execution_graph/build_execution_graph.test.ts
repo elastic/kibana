@@ -9,13 +9,13 @@
 
 import { graphlib } from '@dagrejs/dagre';
 import type {
-  IfStep,
-  ForEachStep,
-  WorkflowYaml,
-  WaitStep,
   ConnectorStep,
+  ForEachStep,
   HttpStep,
+  IfStep,
+  WaitStep,
   WorkflowOnFailure,
+  WorkflowYaml,
 } from '../../spec/schema';
 import type {
   AtomicGraphNode,
@@ -162,7 +162,7 @@ describe('convertToWorkflowGraph', () => {
             headers: {
               Authorization: 'Bearer token',
             },
-            timeout: 30000,
+            timeout: '30s',
           },
         } as HttpStep,
         {
@@ -207,7 +207,7 @@ describe('convertToWorkflowGraph', () => {
             headers: {
               Authorization: 'Bearer token',
             },
-            timeout: 30000,
+            timeout: '30s',
           },
         },
       } as HttpGraphNode);
