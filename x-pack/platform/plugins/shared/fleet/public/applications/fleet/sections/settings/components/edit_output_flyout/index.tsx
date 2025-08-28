@@ -461,7 +461,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               label={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.writeToStreamsLabel"
-                  defaultMessage="Write to streams"
+                  defaultMessage="Write to logs streams"
                 />
               }
               checked={inputs.writeToStreams.value}

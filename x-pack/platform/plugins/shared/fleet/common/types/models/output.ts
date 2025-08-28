@@ -49,7 +49,7 @@ interface NewBaseOutput {
   allow_edit?: string[];
   secrets?: BaseSSLSecrets;
   preset?: OutputPreset;
-  write_to_streams?: boolean;
+  write_to_logs_streams?: boolean;
 }
 
 export interface NewElasticsearchOutput extends NewBaseOutput {

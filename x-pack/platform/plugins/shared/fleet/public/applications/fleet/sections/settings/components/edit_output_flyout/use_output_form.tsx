@@ -577,7 +577,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
 
   // Write to streams input - defaults to false
   const writeToStreams = useSwitchInput(
-    (output as any)?.write_to_streams ?? false,
+    (output as any)?.write_to_logs_streams ?? false,
     false // Not disabled for now
   );
 
@@ -945,7 +945,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                 kafkaBrokerReachabilityTimeoutInput.value
               ),
               required_acks: parseIntegerIfStringDefined(kafkaBrokerAckReliabilityInput.value),
-              write_to_streams: writeToStreams.value,
+              write_to_logs_streams: writeToStreams.value,
               ...shipperParams,
               ...(maybeSecrets ? { secrets: maybeSecrets } : {}),
             } as KafkaOutput;
@@ -977,7 +977,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                   },
                 }),
               proxy_id: proxyIdValue,
-              write_to_streams: writeToStreams.value,
+              write_to_logs_streams: writeToStreams.value,
               ...shipperParams,
             } as NewLogstashOutput;
           case outputType.RemoteElasticsearch:
@@ -1011,7 +1011,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               kibana_url: kibanaURLInput.value || null,
               sync_uninstalled_integrations: syncUninstalledIntegrationsInput.value,
               proxy_id: proxyIdValue,
-              write_to_streams: writeToStreams.value,
+              write_to_logs_streams: writeToStreams.value,
               ...shipperParams,
               ssl: {
                 certificate: sslCertificateInput.value,
@@ -1033,7 +1033,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               config_yaml: additionalYamlConfigInput.value,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
-              write_to_streams: writeToStreams.value,
+              write_to_logs_streams: writeToStreams.value,
               ...shipperParams,
               ssl: {
                 certificate: sslCertificateInput.value,

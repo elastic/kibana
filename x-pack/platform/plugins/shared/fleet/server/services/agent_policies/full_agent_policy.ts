@@ -309,9 +309,9 @@ export async function getFullAgentPolicy(
 
       // Add logs-* permissions for outputs with write_to_streams enabled
       const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
-      if (originalOutput?.write_to_streams) {
+      if (originalOutput?.write_to_logs_streams) {
         const streamsPermissions = {
-          _write_to_streams: {
+          _write_to_logs_streams: {
             indices: [
               {
                 names: ['logs', 'logs.*'],

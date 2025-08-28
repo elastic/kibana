@@ -167,7 +167,7 @@ interface OutputSoBaseAttributes {
   output_id?: string;
   ssl?: string | null; // encrypted ssl field
   preset?: OutputPreset;
-  write_to_streams?: boolean;
+  write_to_logs_streams?: boolean;
   secrets?: {
     ssl?: {
       key?: { id: string };

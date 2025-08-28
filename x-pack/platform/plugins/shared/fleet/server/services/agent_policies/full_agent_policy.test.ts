@@ -108,7 +108,7 @@ jest.mock('../output', () => {
       // @ts-ignore
       type: 'elasticsearch',
       hosts: ['http://127.0.0.1:9201'],
-      write_to_streams: true,
+      write_to_logs_streams: true,
     },
   };
   return {
@@ -1096,7 +1096,15 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
-  it('should return a policy with logs permissions when write_to_streams is enabled', async () => {
+  it('should return a policy with logs permissions when write_to_logs_streams is enabled', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'somelogs.log',
+        },
+      ],
+    } as PackageInfo);
     mockAgentPolicy({
       data_output_id: 'test-streams-id',
       package_policies: [
@@ -1107,7 +1115,7 @@ describe('getFullAgentPolicy', () => {
           enabled: true,
           policy_ids: ['agent-policy'],
           package: {
-            name: 'some-logs',
+            name: 'somelogs',
             title: 'Some logs',
             version: '0.0.1',
           },
@@ -1117,10 +1125,10 @@ describe('getFullAgentPolicy', () => {
               enabled: true,
               streams: [
                 {
-                  id: 'logfile-some-logs.log',
+                  id: 'logfile-somelogs.log',
                   enabled: true,
                   data_stream: {
-                    dataset: 'some-logs.log',
+                    dataset: 'somelogs.log',
                     type: 'logs',
                   },
                 },
@@ -1144,23 +1152,15 @@ describe('getFullAgentPolicy', () => {
           _elastic_agent_checks: {
             cluster: ['monitor'],
           },
-          _elastic_agent_monitoring: {
-            indices: [
-              {
-                names: [],
-                privileges: [],
-              },
-            ],
-          },
           'package-policy-uuid-test-123': {
             indices: [
               {
-                names: ['logs-some-logs.log-defaultspace'],
+                names: ['logs-somelogs.log-defaultspace'],
                 privileges: ['auto_configure', 'create_doc'],
               },
             ],
           },
-          _write_to_streams: {
+          _write_to_logs_streams: {
             indices: [
               {
                 names: ['logs', 'logs.*'],
