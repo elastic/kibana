@@ -82,7 +82,7 @@ export class GenAiSettingsPlugin
        */
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
         readonlyMode: 'strict',
-        readonly: false,
+        readonly: true,
         schema: schema.string(),
         value: NO_DEFAULT_CONNECTOR,
       },
@@ -97,7 +97,7 @@ export class GenAiSettingsPlugin
        */
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: {
         readonlyMode: 'ui',
-        readonly: false,
+        readonly: true,
         schema: schema.boolean(),
         value: false,
       },

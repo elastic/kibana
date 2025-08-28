@@ -6,7 +6,7 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCheckbox, EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiCheckbox, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -93,14 +93,10 @@ const getOptionsByValues = (
 };
 
 export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
-  const [options, setOptions] = useState<EuiComboBoxOptionOption<string>[]>(getOptions(connectors));
+  const options = useMemo(() => getOptions(connectors), [connectors]);
   const { handleFieldChange, fields, unsavedChanges } = useSettingsContext();
   const { services } = useKibana();
   const { notifications } = services;
-
-  useEffect(() => {
-    setOptions(getOptions(connectors));
-  }, [connectors]);
 
   const onChangeDefaultLlm = (selectedOptions: EuiComboBoxOptionOption<string>[]) => {
     const values = selectedOptions.map((option) => option.value);
@@ -123,7 +119,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
     }
     const value = values[0] ?? NO_DEFAULT_CONNECTOR;
 
-    if (isEqual(value, fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]?.savedValue)) {
+    if (value === fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]?.savedValue) {
       handleFieldChange(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
       return;
     }
@@ -175,19 +171,35 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
       </EuiFormRow>
 
       <EuiFormRow>
-        <EuiCheckbox
-          id="defaultAiConnectorCheckbox"
-          data-test-subj="defaultAiConnectorCheckbox"
-          disabled={fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]?.isReadOnly}
-          label={
-            <FormattedMessage
-              id="genAiSettings.gen_ai_settings.settings.defaultLlmOnly.checkbox.label"
-              defaultMessage="Disallow all other connectors"
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiCheckbox
+              id="defaultAiConnectorCheckbox"
+              data-test-subj="defaultAiConnectorCheckbox"
+              disabled={fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]?.isReadOnly}
+              label={
+                <FormattedMessage
+                  id="genAiSettings.gen_ai_settings.settings.defaultLlmOnly.checkbox.label"
+                  defaultMessage="Disallow all other connectors"
+                />
+              }
+              checked={defaultLlmOnlyValue}
+              onChange={(e) => onChangeDefaultOnly(e.target.checked)}
             />
-          }
-          checked={defaultLlmOnlyValue}
-          onChange={(e) => onChangeDefaultOnly(e.target.checked)}
-        />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={
+                i18n.translate(
+                  'xpack.gen_ai_settings.settings.defaultLLmOnly.checkbox.tooltip',
+                  { defaultMessage: 'Only the chosen default connector will be shown to users of this space.' }
+                )
+              }
+              position="top"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
     </>
   );

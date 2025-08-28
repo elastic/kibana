@@ -97,6 +97,8 @@ describe('GenAiSettingsApp', () => {
       // Connectors section
       expect(screen.getByTestId('connectorsSection')).toBeInTheDocument();
       expect(screen.getByTestId('connectorsTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('connectorsTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('defaultAiConnectorCheckbox')).toBeInTheDocument();
 
       // Feature visibility section (with default settings)
       expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();

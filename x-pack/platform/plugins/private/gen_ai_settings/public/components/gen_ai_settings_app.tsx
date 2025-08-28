@@ -31,7 +31,7 @@ import { GoToSpacesButton } from './go_to_spaces_button';
 import { useGenAiConnectors } from '../hooks/use_genai_connectors';
 import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_connector';
 import { useSettingsContext } from '../contexts/settings_context';
-import { DefaultAIConnector } from './default_at_connector/default_ai_connector';
+import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 
 interface GenAiSettingsAppProps {
