@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataViewPluginMocks } from '../../../../data_views/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import { createFiltersFromMultiValueClickAction } from './create_filters_from_multi_value_click';

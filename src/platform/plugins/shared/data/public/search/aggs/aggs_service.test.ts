@@ -12,7 +12,7 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { BucketAggType, MetricAggType } from '../../../common';
 import { getAggTypes } from '../../../common';
-import { dataViewPluginMocks } from '../../../../data_views/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
