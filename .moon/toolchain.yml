@@ -2,7 +2,6 @@
 $schema: 'https://moonrepo.dev/schemas/toolchain.json'
 
 node:
-  version: 20.19.4
   packageManager: yarn
   yarn:
     version: 1.22.21
