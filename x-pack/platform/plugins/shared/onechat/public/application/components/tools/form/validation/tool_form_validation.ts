@@ -171,7 +171,7 @@ export const esqlFormValidationSchema = z
           }
         });
       }),
-    tags: z.array(z.string()),
+    labels: z.array(z.string()),
   })
   .superRefine(({ esql, params }, ctx) => {
     const inferredParams = getESQLQueryVariables(esql);
