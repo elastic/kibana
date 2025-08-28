@@ -35,7 +35,7 @@ export const getOptionsListContextMock = () => {
       ...temporaryStateManager.api,
       uuid: 'testControl',
       field$,
-      fieldName$: new BehaviorSubject<string>('field'),
+      displayName$: new BehaviorSubject<string>('field'),
       sort$,
       setSort: (next: OptionsListSortingType | undefined) => {
         sort$.next(next);
