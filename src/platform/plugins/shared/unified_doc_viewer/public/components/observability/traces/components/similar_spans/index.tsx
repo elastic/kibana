@@ -38,6 +38,7 @@ export function SimilarSpans({
   return (
     <ContentFrameworkSection
       id={id}
+      data-test-subj={`docViewerSimilarSpans-${id}`}
       title={i18n.translate('unifiedDocViewer.observability.traces.similarSpans', {
         defaultMessage: 'Similar spans',
       })}
@@ -62,7 +63,7 @@ export function SimilarSpans({
             showAxisTitle={false}
             showLegend={false}
             isOtelData={isOtelSpan}
-            dataTestSubPrefix="docViewerSpanOverview"
+            dataTestSubPrefix="docViewerSimilarSpansDurationDistributionChart"
           />
         )}
       </ContentFrameworkChart>
