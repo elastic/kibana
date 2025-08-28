@@ -77,6 +77,9 @@ export const OriginalDashboard = z.object({
    * The unique identifier for the dashboard
    */
   id: z.string(),
+  /**
+   * The original dashboard vendor identifier.
+   */
   vendor: OriginalDashboardVendor,
   /**
    * The title of the dashboard
