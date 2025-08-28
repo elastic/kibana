@@ -80,16 +80,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           pageTestSubject: 'playgroundsListPage',
         },
         {
-          deepLinkId: 'serverlessConnectors',
-          breadcrumbs: ['Build', 'Connectors'],
-          pageTestSubject: 'svlSearchConnectorsPage',
-        },
-        {
-          deepLinkId: 'serverlessWebCrawlers',
-          breadcrumbs: ['Build', 'Web crawlers'],
-          pageTestSubject: 'serverlessSearchConnectorsTitle',
-        },
-        {
           deepLinkId: 'searchSynonyms',
           breadcrumbs: ['Relevance', 'Synonyms'],
           pageTestSubject: 'searchSynonymsOverviewPage',
@@ -213,15 +203,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       );
       const isV2 = await solutionNavigation.sidenav.isV2();
       const isV1 = !isV2;
+
       // Verify all expected top-level links exist
-      await solutionNavigation.sidenav.expectLinkExists({ deepLinkId: 'searchHomepage' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'RAG Playground' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
@@ -243,7 +230,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectSectionOpen(
         'search_project_nav_footer.project_settings_project_nav'
       );
-
       if (isV1) {
         await solutionNavigation.sidenav.expectOnlyDefinedLinks([
           'search_project_nav',
@@ -253,8 +239,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'build',
           'elasticsearchIndexManagement',
           'searchPlayground',
-          'serverlessConnectors',
-          'serverlessWebCrawlers',
           'relevance',
           'searchSynonyms',
           'searchQueryRules',
@@ -279,10 +263,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             'dashboards',
             'elasticsearchIndexManagement',
             'searchPlayground',
-            'serverlessConnectors',
-            'serverlessWebCrawlers',
-
-            // more:
             'searchSynonyms',
             'searchQueryRules',
             'searchInferenceEndpoints',
