@@ -219,6 +219,9 @@ export function setupSavedObjects(
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: true,
+    },
     mappings: ruleTemplateMappings,
     modelVersions: ruleTemplateModelVersions,
   });
