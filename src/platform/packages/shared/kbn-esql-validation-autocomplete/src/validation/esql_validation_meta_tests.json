@@ -276,7 +276,7 @@
     {
       "query": "ROW a=1::LONG | LOOKUP JOIN t ON a",
       "error": [
-        "[t] index is not a valid JOIN index. Please use a \"lookup\" mode index JOIN commands."
+        "\"t\" is not a valid JOIN index. Please use a \"lookup\" mode index."
       ],
       "warning": []
     },
@@ -284,7 +284,7 @@
       "query": "from index | drop ",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column []"
+        "Unknown column \"\""
       ],
       "warning": []
     },
@@ -295,14 +295,14 @@
         "SyntaxError: token recognition error at: '5'",
         "SyntaxError: mismatched input '.' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [.]"
+        "Unknown column \".\""
       ],
       "warning": []
     },
     {
       "query": "from index | drop missingField, doubleField, dateField",
       "error": [
-        "Unknown column [missingField]"
+        "Unknown column \"missingField\""
       ],
       "warning": []
     },
@@ -346,7 +346,7 @@
       "query": "from a_index | rename textField as",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "[as] expected 2 arguments, but got 1."
+        "AS expected 2 arguments, but got 1."
       ],
       "warning": []
     },
@@ -584,7 +584,7 @@
       "query": "from a_index | enrich _:",
       "error": [
         "SyntaxError: token recognition error at: ':'",
-        "Unknown policy [_]"
+        "Unknown policy \"_\""
       ],
       "warning": []
     },
@@ -782,7 +782,7 @@
       "query": "from a_index | keep unsupportedField",
       "error": [],
       "warning": [
-        "Field [unsupportedField] cannot be retrieved, it is unsupported or not indexed; returning null"
+        "Field \"unsupportedField\" cannot be retrieved, it is unsupported or not indexed; returning null"
       ]
     }
   ]

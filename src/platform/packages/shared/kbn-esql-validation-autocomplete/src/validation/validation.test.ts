@@ -294,17 +294,17 @@ describe('validation logic', () => {
 
           await expectErrors(`from assignment = 1`, [
             "SyntaxError: mismatched input '=' expecting <EOF>",
-            'Unknown index [assignment]',
+            'Unknown index "assignment"',
           ]);
         });
 
         test('errors on invalid syntax', async () => {
           const { expectErrors } = await setup();
 
-          await expectErrors('FROM `index`', ['Unknown index [`index`]']);
+          await expectErrors('FROM `index`', ['Unknown index "`index`"']);
           await expectErrors(`from assignment = 1`, [
             "SyntaxError: mismatched input '=' expecting <EOF>",
-            'Unknown index [assignment]',
+            'Unknown index "assignment"',
           ]);
         });
       });
@@ -369,24 +369,24 @@ describe('validation logic', () => {
 
     describe('join', () => {
       testErrorsAndWarnings('ROW a=1::LONG | LOOKUP JOIN t ON a', [
-        '[t] index is not a valid JOIN index. Please use a "lookup" mode index JOIN commands.',
+        '"t" is not a valid JOIN index. Please use a "lookup" mode index.',
       ]);
     });
 
     describe('drop', () => {
       testErrorsAndWarnings('from index | drop ', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        'Unknown column []',
+        'Unknown column ""',
       ]);
       testErrorsAndWarnings('from index | drop 4.5', [
         "SyntaxError: token recognition error at: '4'",
         "SyntaxError: token recognition error at: '5'",
         "SyntaxError: mismatched input '.' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        'Unknown column [.]',
+        'Unknown column "."',
       ]);
       testErrorsAndWarnings('from index | drop missingField, doubleField, dateField', [
-        'Unknown column [missingField]',
+        'Unknown column "missingField"',
       ]);
     });
 
@@ -413,7 +413,7 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | rename textField as', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        '[as] expected 2 arguments, but got 1.',
+        'AS expected 2 arguments, but got 1.',
       ]);
       testErrorsAndWarnings('row a = 10 | rename a as this is fine', [
         "SyntaxError: mismatched input 'is' expecting <EOF>",
@@ -522,7 +522,7 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings(`from a_index | enrich _:`, [
         "SyntaxError: token recognition error at: ':'",
-        'Unknown policy [_]',
+        'Unknown policy "_"',
       ]);
       testErrorsAndWarnings(`from a_index | enrich :policy`, [
         "SyntaxError: token recognition error at: ':'",
