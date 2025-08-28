@@ -46,9 +46,6 @@ import {
 
 import { AutoFollowPatternRequestFlyout } from './auto_follow_pattern_request_flyout';
 
-
-
-
 const indexPatternIllegalCharacters = ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexNameIllegalCharacters = indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
