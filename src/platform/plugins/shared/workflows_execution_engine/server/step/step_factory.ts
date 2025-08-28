@@ -24,6 +24,8 @@ import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WaitStepImpl } from './wait_step/wait_step';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
+import { KibanaActionStepImpl } from './kibana_action_step';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -48,6 +50,12 @@ export class StepFactory {
     if (!stepType) {
       throw new Error('Step type is not defined for step: ' + JSON.stringify(step));
     }
+
+    // Log step creation for debugging
+    this.workflowLogger.logDebug(`Creating step implementation for type: ${stepType}`, {
+      event: { action: 'step-creation', outcome: 'in-progress' },
+      tags: ['step-factory'],
+    });
 
     switch (stepType) {
       case 'enter-foreach':
@@ -80,6 +88,36 @@ export class StepFactory {
           this.workflowTaskManager
         );
       case 'atomic':
+        // For atomic steps, check the configuration.type for internal actions
+        const atomicStepType = (step as any).configuration?.type;
+
+        if (atomicStepType && atomicStepType.startsWith('elasticsearch.')) {
+          this.workflowLogger.logInfo(`Creating Elasticsearch action step: ${atomicStepType}`, {
+            event: { action: 'internal-action-creation', outcome: 'success' },
+            tags: ['step-factory', 'elasticsearch', 'internal-action'],
+          });
+          return new ElasticsearchActionStepImpl(
+            step as any,
+            this.contextManager,
+            this.workflowRuntime,
+            this.workflowLogger
+          );
+        }
+
+        if (atomicStepType && atomicStepType.startsWith('kibana.')) {
+          this.workflowLogger.logInfo(`Creating Kibana action step: ${atomicStepType}`, {
+            event: { action: 'internal-action-creation', outcome: 'success' },
+            tags: ['step-factory', 'kibana', 'internal-action'],
+          });
+          return new KibanaActionStepImpl(
+            step as any,
+            this.contextManager,
+            this.workflowRuntime,
+            this.workflowLogger
+          );
+        }
+
+        // Default atomic step (connector-based)
         return new AtomicStepImpl(
           step as any,
           this.contextManager,

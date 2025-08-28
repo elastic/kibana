@@ -134,7 +134,8 @@ export class WorkflowsManagementApi {
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
-    inputs: Record<string, any>
+    inputs: Record<string, any>,
+    request: KibanaRequest
   ): Promise<string> {
     if (!this.schedulerService) {
       throw new Error('Scheduler service not set');
@@ -144,14 +145,19 @@ export class WorkflowsManagementApi {
       spaceId,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(
+      workflow,
+      context,
+      request
+    );
     return executeResponse.workflowExecutionId;
   }
 
   public async testWorkflow(
     workflowYaml: string,
     inputs: Record<string, any>,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<string> {
     if (!this.schedulerService) {
       throw new Error('Scheduler service not set');
@@ -177,7 +183,8 @@ export class WorkflowsManagementApi {
         enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
       },
-      context
+      context,
+      request
     );
     return executeResponse.workflowExecutionId;
   }

@@ -367,7 +367,7 @@ export function defineRoutes(
           return response.notFound();
         }
         const { inputs } = request.body as { inputs: Record<string, any> };
-        const workflowRunId = await api.runWorkflow(workflow, spaceId, inputs);
+        const workflowRunId = await api.runWorkflow(workflow, spaceId, inputs, request);
         return response.ok({
           body: workflowRunId,
         });
@@ -447,7 +447,8 @@ export function defineRoutes(
         const workflowExecutionId = await api.testWorkflow(
           request.body.workflowYaml,
           request.body.inputs,
-          spaceId
+          spaceId,
+          request
         );
 
         return response.ok({

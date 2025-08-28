@@ -1,0 +1,45 @@
+name: "Test Internal Actions"
+description: "Testing elasticsearch and kibana internal actions"
+triggers:
+  - type: "alert"
+
+steps:
+  # Raw API syntax (current working format)
+  - name: searchDocsRaw
+    type: elasticsearch.search.query
+    with:
+      request:
+        method: GET
+        path: /workflows_e2e/_search
+        body:
+          size: 5
+          sort:
+            - created_at: desc
+          query:
+            term:
+              category: news
+
+  # Sugar syntax (simplified format - to be implemented)  
+  - name: searchDocsSugar
+    type: elasticsearch.search.query
+    with:
+      index: "workflows_e2e"
+      size: 5
+      sort:
+        - created_at: desc
+      query:
+        term:
+          category: news
+
+  - name: createCase
+    type: kibana.cases.create
+    with:
+      title: "High Priority Issues"
+      description: "Found {{ steps.searchDocsRaw.output.hits.total.value }} errors in logs"
+      tags: ["security", "high-priority"]
+      severity: "high"
+
+  - name: getSpace
+    type: kibana.spaces.get
+    with:
+      space_id: "default"
