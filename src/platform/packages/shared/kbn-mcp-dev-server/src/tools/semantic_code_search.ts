@@ -23,8 +23,8 @@ import type { ToolDefinition } from '../types';
 import { client } from '../utils/elasticsearch';
 
 const {
-  ELASTICSEARCH_INDEX = 'kibana-code-search',
-  ELASTICSEARCH_INFERENCE_ID = '.elser_model_2',
+  ELASTICSEARCH_INDEX = 'kibana-code-search-2.0',
+  ELASTICSEARCH_INFERENCE_ID = '.elser_model_2_linux-x86_64',
 } = process.env;
 
 interface CodeChunk {
@@ -55,9 +55,8 @@ async function semanticCodeSearchHandler(input: z.infer<typeof semanticCodeSearc
 
   if (queryString) {
     mustClauses.push({
-      sparse_vector: {
-        field: 'content_embedding',
-        inference_id: ELASTICSEARCH_INFERENCE_ID,
+      semantic: {
+        field: 'semantic_text',
         query: queryString,
       },
     });

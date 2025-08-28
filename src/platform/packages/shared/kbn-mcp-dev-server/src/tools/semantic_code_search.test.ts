@@ -31,7 +31,7 @@ describe('semanticCodeSearchTool', () => {
 
     await semanticCodeSearchTool.handler({ query: 'test query', size: 10, page: 1 });
     expect(mockSearch).toHaveBeenCalledWith({
-      index: 'kibana-code-search',
+      index: 'kibana-code-search-2.0',
       size: 10,
       from: 0,
       _source: [
@@ -53,9 +53,8 @@ describe('semanticCodeSearchTool', () => {
         bool: {
           must: [
             {
-              sparse_vector: {
-                field: 'content_embedding',
-                inference_id: '.elser_model_2',
+              semantic: {
+                field: 'semantic_text',
                 query: 'test query',
               },
             },
@@ -80,7 +79,7 @@ describe('semanticCodeSearchTool', () => {
       page: 2,
     });
     expect(mockSearch).toHaveBeenCalledWith({
-      index: 'kibana-code-search',
+      index: 'kibana-code-search-2.0',
       size: 20,
       from: 20,
       _source: [
@@ -102,9 +101,8 @@ describe('semanticCodeSearchTool', () => {
         bool: {
           must: [
             {
-              sparse_vector: {
-                field: 'content_embedding',
-                inference_id: '.elser_model_2',
+              semantic: {
+                field: 'semantic_text',
                 query: 'test query',
               },
             },
