@@ -16,6 +16,12 @@ jest.mock('../../../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 
+jest.mock('../../../../hooks/use_data_sources', () => ({
+  useDataSourcesContext: () => ({
+    indexes: { apm: { traces: 'test-index' } },
+  }),
+}));
+
 const mockSearch = jest.fn();
 const mockAddDanger = jest.fn();
 
@@ -36,7 +42,6 @@ const mockServices = {
 
 describe('useSpan', () => {
   const spanId = 'test-span-id';
-  const indexPattern = 'test-index';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,7 +62,7 @@ describe('useSpan', () => {
         })
       );
 
-      const { result } = renderHook(() => useSpan({ spanId, indexPattern }));
+      const { result } = renderHook(() => useSpan({ spanId }));
       await waitFor(() => !result.current.loading);
 
       expect(result.current.loading).toBe(false);
@@ -68,7 +73,7 @@ describe('useSpan', () => {
 
   describe('when parameters are missing', () => {
     it('should set span to null and loading to false', () => {
-      const { result } = renderHook(() => useSpan({ spanId: undefined, indexPattern }));
+      const { result } = renderHook(() => useSpan({ spanId: undefined }));
 
       expect(result.current.loading).toBe(false);
       expect(result.current.span).toBe(null);
@@ -81,7 +86,7 @@ describe('useSpan', () => {
       const error = new Error('something went wrong');
       mockSearch.mockReturnValue(throwError(() => error));
 
-      const { result } = renderHook(() => useSpan({ spanId, indexPattern }));
+      const { result } = renderHook(() => useSpan({ spanId }));
       await waitFor(() => !result.current.loading);
 
       expect(result.current.loading).toBe(false);

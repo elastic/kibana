@@ -73,23 +73,23 @@ describe('INLINESTATS Validation', () => {
 
       test('errors when input is not an aggregate function', () => {
         inlinestatsExpectErrors('from a_index | inlinestats doubleField ', [
-          'Expected an aggregate function or group but got [doubleField] of type [FieldAttribute]',
+          'Expected an aggregate function or group but got "doubleField" of type FieldAttribute',
         ]);
       });
 
       test('various errors', () => {
         inlinestatsExpectErrors('from a_index | inlinestats avg(doubleField) by wrongField', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         inlinestatsExpectErrors('from a_index | inlinestats avg(doubleField) by wrongField + 1', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         inlinestatsExpectErrors(
           'from a_index | inlinestats avg(doubleField) by col0 = wrongField + 1',
-          ['Unknown column [wrongField]']
+          ['Unknown column "wrongField"']
         );
         inlinestatsExpectErrors('from a_index | inlinestats col0 = avg(fn(number)), count(*)', [
-          'Unknown function [fn]',
+          'Unknown function FN',
         ]);
       });
 
@@ -124,11 +124,11 @@ describe('INLINESTATS Validation', () => {
       test('various errors', () => {
         inlinestatsExpectErrors(
           'from a_index | inlinestats avg(doubleField) by percentile(doubleField, 90)',
-          ['Function [percentile] not allowed in [by]']
+          ['Function PERCENTILE not allowed in BY']
         );
         inlinestatsExpectErrors(
           'from a_index | inlinestats avg(doubleField) by textField, percentile(doubleField, 90) by ipField',
-          ['Function [percentile] not allowed in [by]']
+          ['Function PERCENTILE not allowed in BY']
         );
       });
 
