@@ -107,10 +107,10 @@ export class Host extends Entity<HostDocument> {
     });
   }
 
-  filesystem() {
+  filesystem(fields?: { 'system.filesystem.used.pct'?: number }) {
     return new HostMetrics({
       ...this.fields,
-      'system.filesystem.used.pct': 12.23,
+      'system.filesystem.used.pct': fields?.['system.filesystem.used.pct'] ?? 12.23,
       'metricset.period': 10000,
       'metricset.name': 'filesystem',
     });

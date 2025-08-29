@@ -7,14 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * This scenario simulates an intermittent latency spike in a service.
+ *
+ * The story: The `spikey-frontend` and `spikey-backend` services have several
+ * endpoints. One endpoint, `/always-spike`, is always slow. Another,
+ * `/sometimes-spike`, is slow approximately 1% of the time. This can be used
+ * to test the effectiveness of anomaly detection on transaction latency.
+ */
+
 import { random } from 'lodash';
 import type { ApmFields, Instance, LogDocument } from '@kbn/apm-synthtrace-client';
 import { apm, log, generateLongId, generateShortId } from '@kbn/apm-synthtrace-client';
-import type { Scenario } from '../cli/scenario';
-import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import { withClient } from '../lib/utils/with_client';
-import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
-import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
+import type { Scenario } from '../../cli/scenario';
+import { getSynthtraceEnvironment } from '../../lib/utils/get_synthtrace_environment';
+import { withClient } from '../../lib/utils/with_client';
+import { parseLogsScenarioOpts } from '../helpers/logs_scenario_opts_parser';
+import { IndexTemplateName } from '../../lib/logs/custom_logsdb_index_templates';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const alwaysSpikeTransactionName = 'GET /always-spike';

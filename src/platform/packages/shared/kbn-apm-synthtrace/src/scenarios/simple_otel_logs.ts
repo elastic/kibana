@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a variety of simple OpenTelemetry log documents.
+ */
+
 import type { OtelLogDocument } from '@kbn/apm-synthtrace-client';
 import { generateLongId, generateShortId, otelLog } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';

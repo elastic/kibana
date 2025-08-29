@@ -7,6 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Simulates a cascading failure caused by a critical third-party API outage.
+ *
+ * The Demo Story:
+ * "We're an e-commerce company. Our on-call SRE gets a high-severity alert:
+ * 'Checkout Success Rate has dropped to 0%'. Users are calling support, saying
+ * they can't buy anything. Revenue has stopped. The SRE needs to find the root
+ * cause immediately."
+ *
+ * What this scenario generates:
+ * The `checkout-service` fails because its external dependency, `shipping-rates-api.com`,
+ * begins returning HTTP 503 Service Unavailable errors. This causes a 100% error
+ * rate for the checkout process, which cascades up to the API gateway and frontend.
+ */
+
 import type { ApmFields, LogDocument } from '@kbn/apm-synthtrace-client';
 import {
   apm,
@@ -15,11 +30,11 @@ import {
   httpExitSpan,
   log,
 } from '@kbn/apm-synthtrace-client';
-import type { Scenario } from '../cli/scenario';
-import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import { withClient } from '../lib/utils/with_client';
-import { parseApmScenarioOpts } from './helpers/apm_scenario_ops_parser';
-import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
+import type { Scenario } from '../../cli/scenario';
+import { getSynthtraceEnvironment } from '../../lib/utils/get_synthtrace_environment';
+import { withClient } from '../../lib/utils/with_client';
+import { parseApmScenarioOpts } from '../helpers/apm_scenario_ops_parser';
+import { parseLogsScenarioOpts } from '../helpers/logs_scenario_opts_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 

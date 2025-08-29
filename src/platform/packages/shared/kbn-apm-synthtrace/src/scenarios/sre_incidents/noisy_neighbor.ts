@@ -7,12 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Simulates a "noisy neighbor" incident where the root cause is in the
+ * underlying infrastructure, not the application code.
+ *
+ * The Demo Story:
+ * "Our most critical service, the `payment-service`, has suddenly slowed to a crawl.
+ * Latency has jumped from 150ms to over 5 seconds. Alerts are firing for 'High 99th
+ * Percentile Latency'. There have been no new deployments, and the service isn't
+ * reporting any errors. The team is baffled."
+ *
+ * What this scenario generates:
+ * The `payment-service` experiences a massive latency spike. The root cause is not
+ * in its code, but a separate `batch-processing-service` running on the same host
+ * which begins consuming 95% of the CPU, starving the payment service of resources.
+ */
+
 import type { ApmFields, InfraDocument } from '@kbn/apm-synthtrace-client';
 import { apm, ApmSynthtracePipelineSchema, infra, timerange } from '@kbn/apm-synthtrace-client';
-import type { Scenario } from '../cli/scenario';
-import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import { withClient } from '../lib/utils/with_client';
-import { parseApmScenarioOpts } from './helpers/apm_scenario_ops_parser';
+import type { Scenario } from '../../cli/scenario';
+import { getSynthtraceEnvironment } from '../../lib/utils/get_synthtrace_environment';
+import { withClient } from '../../lib/utils/with_client';
+import { parseApmScenarioOpts } from '../helpers/apm_scenario_ops_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 

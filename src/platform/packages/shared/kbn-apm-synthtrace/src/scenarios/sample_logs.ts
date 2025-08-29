@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates log documents based on the sample log parser.
+ */
+
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { Serializable } from '@kbn/apm-synthtrace-client';
 import { SampleParserClient } from '@kbn/sample-log-parser';

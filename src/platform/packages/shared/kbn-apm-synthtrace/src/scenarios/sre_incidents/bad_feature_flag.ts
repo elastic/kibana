@@ -7,12 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Simulates a subtle "bad feature flag" incident affecting a specific subset of users.
+ *
+ * The Demo Story:
+ * "The product team has just enabled a new 'Personalized Recommendations' feature for
+ * our premium-tier users. A few minutes later, a VIP customer contacts support,
+ * saying product searches are failing. No main alarms have fired because the overall
+ * error rate for the `product-service` is still very low. An engineer needs to
+ * investigate this 'needle in a haystack' problem."
+ *
+ * What this scenario generates:
+ * Product searches start failing, but only for users with `user.tier: 'premium'`.
+ * This is caused by a bad configuration in the new feature that results in a
+ * 401 Unauthorized error from a downstream `recommendation-service`.
+ */
+
 import { apm, ApmSynthtracePipelineSchema, log } from '@kbn/apm-synthtrace-client';
-import type { Scenario } from '../cli/scenario';
-import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import { withClient } from '../lib/utils/with_client';
-import { parseApmScenarioOpts } from './helpers/apm_scenario_ops_parser';
-import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
+import type { Scenario } from '../../cli/scenario';
+import { getSynthtraceEnvironment } from '../../lib/utils/get_synthtrace_environment';
+import { withClient } from '../../lib/utils/with_client';
+import { parseApmScenarioOpts } from '../helpers/apm_scenario_ops_parser';
+import { parseLogsScenarioOpts } from '../helpers/logs_scenario_opts_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
