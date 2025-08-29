@@ -179,7 +179,7 @@ create_pull_request() {
   # Push branch to origin
   git push origin "$BRANCH_NAME"
 
-  # Create pull request with proper labels and team assignment
+  # Create pull request with proper labels and individual assignment
   gh pr create \
     --title "$PR_TITLE" \
     --body "$PR_BODY" \
@@ -189,8 +189,7 @@ create_pull_request() {
     --label 'release_note:skip' \
     --label 'backport:skip' \
     --label 'otel-semantic-conventions' \
-    --reviewer 'elastic/obs-ux-logs-team' \
-    --assignee 'elastic/obs-ux-logs-team'
+    --assignee 'achyutjhunjhunwala'
 
   echo "✅ Pull request created successfully!"
 }
