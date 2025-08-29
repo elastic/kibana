@@ -20,6 +20,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { IBasePath as BasePath } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import { NavigationTour } from '@kbn/core-chrome-navigation-tour';
 import useObservable from 'react-use/lib/useObservable';
 import { RedirectNavigationAppLinks } from './redirect_app_links';
 import type { NavigationItems } from './to_navigation_items';
@@ -58,16 +59,26 @@ export const Navigation = (props: ChromeNavigationProps) => {
   const { navItems, logoItem, activeItemId } = state;
 
   return (
-    <RedirectNavigationAppLinks application={props.application}>
-      <NavigationComponent
-        items={navItems}
-        logo={logoItem}
-        isCollapsed={props.isCollapsed}
-        setWidth={props.setWidth}
-        activeItemId={activeItemId}
-        data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
+    <>
+      <NavigationTour
+        onTourComplete={() => {
+          alert('Tour completed; Never showing again');
+        }}
+        onTourSkipped={() => {
+          alert('Tour skipped; Never showing again');
+        }}
       />
-    </RedirectNavigationAppLinks>
+      <RedirectNavigationAppLinks application={props.application}>
+        <NavigationComponent
+          items={navItems}
+          logo={logoItem}
+          isCollapsed={props.isCollapsed}
+          setWidth={props.setWidth}
+          activeItemId={activeItemId}
+          data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
+        />
+      </RedirectNavigationAppLinks>
+    </>
   );
 };
 

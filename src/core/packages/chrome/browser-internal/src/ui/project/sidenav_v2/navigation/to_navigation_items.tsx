@@ -80,13 +80,18 @@ export const toNavigationItems = (
     }
   };
 
-  const getTestSubj = (navNode: ChromeProjectNavigationNode): string => {
+  const getTestSubj = (navNode: ChromeProjectNavigationNode, append: string[] = []): string => {
     const { id, path, deepLink } = navNode;
-    return classnames(`nav-item`, `nav-item-${path}`, {
-      [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
-      [`nav-item-id-${id}`]: id,
-      [`nav-item-isActive`]: isActive(navNode),
-    });
+    return classnames(
+      `nav-item`,
+      `nav-item-${path}`,
+      {
+        [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
+        [`nav-item-id-${id}`]: id,
+        [`nav-item-isActive`]: isActive(navNode),
+      },
+      ...append
+    );
   };
 
   if (navigationTree.body.length === 1) {
@@ -126,7 +131,7 @@ export const toNavigationItems = (
     iconType: getIcon(logoNode),
     id: warnIfMissing(logoNode, 'id', 'kibana'),
     label: warnIfMissing(logoNode, 'title', 'Kibana'),
-    'data-test-subj': logoNode ? getTestSubj(logoNode) : undefined,
+    'data-test-subj': logoNode ? getTestSubj(logoNode, ['nav-item-home']) : undefined,
   };
 
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {

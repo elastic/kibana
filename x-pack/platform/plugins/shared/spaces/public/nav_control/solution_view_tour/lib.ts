@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { BehaviorSubject, defer, from, map, of, shareReplay, switchMap } from 'rxjs';
+import { BehaviorSubject, defer, from, map, of, shareReplay, switchMap, tap } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
+import { startNavigationTour } from '@kbn/core-chrome-navigation-tour';
 
 import type { Space } from '../../../common';
 import {
@@ -18,7 +19,19 @@ import {
 import type { SpacesManager } from '../../spaces_manager';
 
 export function initTour(core: CoreStart, spacesManager: SpacesManager) {
-  const showTourUiSettingValue = core.settings.globalClient.get(SHOW_SPACE_SOLUTION_TOUR_SETTING);
+  const canManageSpaces = core.application.capabilities.spaces?.manage === true;
+
+  if (!canManageSpaces) {
+    // If the user can't manage spaces, we never show the tour, as this tour is meant for admins
+    return {
+      showTour$: of(false),
+      onFinishTour: () => {},
+    };
+  }
+
+  const showTourUiSettingValue = core.settings.globalClient.get<boolean | undefined>(
+    SHOW_SPACE_SOLUTION_TOUR_SETTING
+  );
   const showTour$ = new BehaviorSubject(showTourUiSettingValue ?? true);
 
   const allSpaces$ = defer(() => from(spacesManager.getSpaces())).pipe(shareReplay(1));
@@ -47,36 +60,42 @@ export function initTour(core: CoreStart, spacesManager: SpacesManager) {
       return allSpaces$.pipe(
         map((spaces) => {
           if (hasMultipleSpaces(spaces) || isDefaultSpaceOnClassic(spaces)) {
+            // If we have either (1) multiple space or (2) only one space and it's the default space with the classic solution,
+            // we don't want to show the tour later on. This can happen in the following scenarios:
+            // - the user deletes all the spaces but one (and that last space has a solution set)
+            // - the user edits the default space and sets a solution
+            // So we can immediately hide the tour in the global settings from now on.
+            hideTourInGlobalSettings();
             return false;
           }
 
           return true;
         })
       );
+    }),
+    tap((showTour) => {
+      if (!showTour) {
+        startNavigationTour({
+          globalStepOffset: 0,
+        });
+      }
     })
   );
 
   const hideTourInGlobalSettings = () => {
-    core.settings.globalClient.set(SHOW_SPACE_SOLUTION_TOUR_SETTING, false).catch(() => {
-      // Silently swallow errors, the user will just see the tour again next time they load the page
-    });
-  };
+    if (showTourUiSettingValue === false) return; // already disabled, nothing to do
 
-  if (showTourUiSettingValue !== false) {
-    allSpaces$.subscribe((spaces) => {
-      if (hasMultipleSpaces(spaces) || isDefaultSpaceOnClassic(spaces)) {
-        // If we have either (1) multiple space or (2) only one space and it's the default space with the classic solution,
-        // we don't want to show the tour later on. This can happen in the following scenarios:
-        // - the user deletes all the spaces but one (and that last space has a solution set)
-        // - the user edits the default space and sets a solution
-        // So we can immediately hide the tour in the global settings from now on.
-        hideTourInGlobalSettings();
-      }
-    });
-  }
+    alert('hiding solution view tour forever'); // TODO: remove
+    // core.settings.globalClient.set(SHOW_SPACE_SOLUTION_TOUR_SETTING, false).catch(() => {
+    //   // Silently swallow errors, the user will just see the tour again next time they load the page
+    // });
+  };
 
   const onFinishTour = () => {
     hideTourInGlobalSettings();
+    startNavigationTour({
+      globalStepOffset: 1,
+    });
     showTour$.next(false);
   };
 

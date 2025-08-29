@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiLink, EuiText, EuiTourStep } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiLink, EuiText, EuiTourStep } from '@elastic/eui';
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 
@@ -60,7 +60,7 @@ export const SolutionViewTour: FC<Props> = ({ children, solution, isTourOpen, on
           <p>
             <FormattedMessage
               id="xpack.spaces.navControl.tour.content"
-              defaultMessage="It provides all the analytics and {solution} features you need. You can switch views or return to the classic navigation from your space settings, or create other spaces with different views. {learnMore}"
+              defaultMessage="You can switch between Elastic Observability, Elastic Security, Elasticsearch or show all solutions by configuring the space here. {learnMore}"
               values={{
                 solution: solutionLabel,
                 learnMore: <LearnMoreLink />,
@@ -74,20 +74,25 @@ export const SolutionViewTour: FC<Props> = ({ children, solution, isTourOpen, on
       maxWidth={360}
       onFinish={onFinishTour}
       step={1}
-      stepsTotal={1}
+      stepsTotal={4}
       repositionOnScroll
       title={i18n.translate('xpack.spaces.navControl.tour.title', {
-        defaultMessage: 'You chose the {solution} solution view',
+        defaultMessage: 'This space is on {solution} solution view',
         values: { solution: solutionLabel },
       })}
       anchorPosition="downCenter"
-      footerAction={
+      footerAction={[
         <EuiButtonEmpty size="s" color="text" onClick={onFinishTour} data-test-subj="closeTourBtn">
           {i18n.translate('xpack.spaces.navControl.tour.closeBtn', {
-            defaultMessage: 'Close',
+            defaultMessage: 'Skip tour',
           })}
-        </EuiButtonEmpty>
-      }
+        </EuiButtonEmpty>,
+        <EuiButton size="s" color="success" onClick={onFinishTour} data-test-subj="nextTourBtn">
+          {i18n.translate('xpack.spaces.navControl.tour.nextBtn', {
+            defaultMessage: 'Next',
+          })}
+        </EuiButton>,
+      ]}
       panelProps={{
         'data-test-subj': 'spaceSolutionTour',
       }}
