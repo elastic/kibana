@@ -80,7 +80,7 @@ export const EntityInsight = <T,>({
 
   const onDismiss = () => {
     setShowCallOut(false);
-    localStorage.setItem('EuiCallOutOnDismissDemo', 'hidden');
+    localStorage.setItem('InsightCallOutOnDismiss', 'hidden');
   };
 
   if (showAlertsPreview) {
