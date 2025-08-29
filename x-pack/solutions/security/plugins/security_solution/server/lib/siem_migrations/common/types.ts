@@ -43,8 +43,6 @@ export type SiemMigrationsIndexNameProvider = () => Promise<string>;
 
 export type Stored<T extends object> = T & { id: string };
 
-// TODO: replace these with the schemas for the common properties of the migrations and items
-// TODO: move these to the security_solution/common/siem_migrations/types.ts
 export type MigrationDocument = RuleMigration | DashboardMigration;
 export type ItemDocument = RuleMigrationRule | DashboardMigrationDashboard;
 

@@ -76,10 +76,6 @@ export class ActionsClientChat {
     }
 
     const llmType = this.getLLMType(connector.actionTypeId);
-    if (llmType === 'inference') {
-      // TODO: instantiate from inferenceService
-      throw new Error('Inference model creation not implemented yet');
-    }
 
     const ChatModelClass = this.getLLMClass(llmType);
 
@@ -114,12 +110,13 @@ export class ActionsClientChat {
     throw new Error(`Unknown LLM type for action type ID: ${actionTypeId}`);
   }
 
-  private getLLMClass(llmType: Omit<LlmType, 'inference'>): ActionsClientChatModelClass {
+  private getLLMClass(llmType: LlmType): ActionsClientChatModelClass {
     switch (llmType) {
       case 'bedrock':
         return ActionsClientChatBedrockConverse;
       case 'gemini':
         return ActionsClientChatVertexAI;
+      case 'inference':
       case 'openai':
       default:
         return ActionsClientChatOpenAI;
