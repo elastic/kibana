@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { Span } from '@opentelemetry/api';
-import { Observable, tap } from 'rxjs';
+import type { Span } from '@opentelemetry/api';
+import type { Observable } from 'rxjs';
+import { tap } from 'rxjs';
 import { safeJsonStringify } from '@kbn/std';
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
-import { AgentMode, ChatEvent, isRoundCompleteEvent } from '@kbn/onechat-common';
+import type { AgentMode, ChatEvent } from '@kbn/onechat-common';
+import { isRoundCompleteEvent } from '@kbn/onechat-common';
 
 interface WithConverseSpanOptions {
   agentId: string;

@@ -26,17 +26,16 @@ export const WorkflowSettingsSchema = z.object({
 });
 
 /* --- Triggers --- */
-export const DetectionRuleTriggerSchema = z.object({
-  type: z.literal('triggers.elastic.detectionRule'),
+export const AlertRuleTriggerSchema = z.object({
+  type: z.literal('alert'),
   enabled: z.boolean().optional().default(true),
-  with: z.union([
-    z.object({ rule_id: z.string().min(1) }),
-    z.object({ rule_name: z.string().min(1) }),
-  ]),
+  with: z
+    .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
+    .optional(),
 });
 
 export const ScheduledTriggerSchema = z.object({
-  type: z.literal('triggers.elastic.scheduled'),
+  type: z.literal('scheduled'),
   enabled: z.boolean().optional().default(true),
   with: z.union([
     z.object({
@@ -48,12 +47,12 @@ export const ScheduledTriggerSchema = z.object({
 });
 
 export const ManualTriggerSchema = z.object({
-  type: z.literal('triggers.elastic.manual'),
+  type: z.literal('manual'),
   enabled: z.boolean().optional().default(true),
 });
 
 export const TriggerSchema = z.discriminatedUnion('type', [
-  DetectionRuleTriggerSchema,
+  AlertRuleTriggerSchema,
   ScheduledTriggerSchema,
   ManualTriggerSchema,
 ]);
@@ -86,6 +85,14 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   with: z.record(z.string(), z.any()).optional(),
 });
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
+
+export const WaitStepSchema = BaseStepSchema.extend({
+  type: z.literal('wait'),
+  with: z.object({
+    duration: z.string().regex(/^\d+(ms|[smhdw])$/), // e.g., '5s', '1m', '2h'
+  }),
+});
+export type WaitStep = z.infer<typeof WaitStepSchema>;
 
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
@@ -235,6 +242,7 @@ const StepSchema = z.lazy(() =>
   z.discriminatedUnion('type', [
     ForEachStepSchema,
     IfStepSchema,
+    WaitStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,
@@ -256,3 +264,24 @@ export const WorkflowSchema = z.object({
 });
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
+
+export const WorkflowContextSchema = z.object({
+  workflowRunId: z.string(),
+  event: z.any().optional(),
+  consts: z.record(z.string(), z.any()).optional(),
+  steps: z.record(
+    z.string(),
+    z.object({
+      output: z.any().optional(),
+      error: z.any().optional(),
+    })
+  ),
+  foreach: z
+    .object({
+      item: z.any(),
+    })
+    .optional(),
+  now: z.date().optional(),
+});
+
+export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;

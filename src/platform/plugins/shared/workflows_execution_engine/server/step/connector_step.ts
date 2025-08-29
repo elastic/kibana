@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConnectorExecutor } from '../connector_executor';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import { RunStepResult, StepBase, BaseStep } from './step_base';
+import type { ConnectorExecutor } from '../connector_executor';
+import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { RunStepResult, BaseStep } from './step_base';
+import { StepBase } from './step_base';
 
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {
@@ -69,8 +70,8 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
           tags: ['console', 'log'],
         });
         // eslint-disable-next-line no-console
-        console.log(step.with?.message);
-        return { output: step.with?.message, error: undefined };
+        console.log(withInputs.message);
+        return { output: withInputs.message, error: undefined };
       } else if (step.type === 'delay') {
         const delayTime = step.with?.delay ?? 1000;
         // this.contextManager.logDebug(`Delaying for ${delayTime}ms`);
@@ -92,7 +93,13 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
         renderedInputs
       );
 
-      return { output, error: undefined };
+      const { data, status, message } = output;
+
+      if (status === 'ok') {
+        return { output: data, error: undefined };
+      } else {
+        return await this.handleFailure(message);
+      }
     } catch (error) {
       return await this.handleFailure(error);
     }

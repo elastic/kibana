@@ -15,10 +15,8 @@ import {
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import classNames from 'classnames';
-import {
-  PresentationPanelHoverActions,
-  PresentationPanelHoverActionsProps,
-} from './presentation_panel_hover_actions';
+import type { PresentationPanelHoverActionsProps } from './presentation_panel_hover_actions';
+import { PresentationPanelHoverActions } from './presentation_panel_hover_actions';
 import { useHoverActionStyles } from './use_hover_actions_styles';
 
 const customActionsStyles = css({

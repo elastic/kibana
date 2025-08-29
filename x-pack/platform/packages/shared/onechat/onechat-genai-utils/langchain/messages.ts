@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  BaseMessage,
-  ToolMessage,
-  MessageContentComplex,
-  isAIMessage,
-} from '@langchain/core/messages';
+import type { BaseMessage, ToolMessage, MessageContentComplex } from '@langchain/core/messages';
+import { isAIMessage } from '@langchain/core/messages';
 import type { RunToolReturn } from '@kbn/onechat-server';
 import { isArray, isEmpty } from 'lodash';
 

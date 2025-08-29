@@ -11,13 +11,13 @@ import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiText, EuiTitle } from '@e
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
 import { css } from '@emotion/react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CodeEditor } from '@kbn/code-editor';
-import { IClickActionDescriptor } from './types';
-import { UISession } from '../../../types';
-import { SearchSessionsMgmtAPI } from '../../../lib/api';
+import type { IClickActionDescriptor } from './types';
+import type { UISession } from '../../../types';
+import type { SearchSessionsMgmtAPI } from '../../../lib/api';
 
 interface InspectFlyoutProps {
   searchSession: UISession;

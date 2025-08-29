@@ -9,9 +9,11 @@ import React, { useCallback, useState } from 'react';
 import { EuiPopover, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { POPOVER_SCREENSHOT_SIZE, ScreenshotImageSize } from '../screenshot/screenshot_size';
+import type { ScreenshotImageSize } from '../screenshot/screenshot_size';
+import { POPOVER_SCREENSHOT_SIZE } from '../screenshot/screenshot_size';
 import { JourneyScreenshotDialog } from '../screenshot/journey_screenshot_dialog';
-import { ScreenshotImage, ScreenshotImageProps } from '../screenshot/screenshot_image';
+import type { ScreenshotImageProps } from '../screenshot/screenshot_image';
+import { ScreenshotImage } from '../screenshot/screenshot_image';
 
 export interface StepImagePopoverProps {
   timestamp?: string;

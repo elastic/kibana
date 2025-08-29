@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
+import type { Observable } from 'rxjs';
 import {
   filter,
   of,
@@ -16,9 +17,8 @@ import {
   merge,
   catchError,
   throwError,
-  Observable,
 } from 'rxjs';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {

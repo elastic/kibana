@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
-import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type {
+  SavedDashboardPanel,
+  SavedDashboardSection,
+} from '../../../../dashboard_saved_object';
+import type { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 import { getReferencesForPanelId } from '../../../../../common';
 import { embeddableService, logger } from '../../../../kibana_services';
 

@@ -1252,6 +1252,16 @@
         },
         "<",
         "SloDetailsLocatorParams",
+        ">; sloDetailsHistoryLocator: ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.LocatorPublic",
+          "text": "LocatorPublic"
+        },
+        "<",
+        "SloDetailsHistoryLocatorParams",
         ">; sloEditLocator: ",
         {
           "pluginId": "share",

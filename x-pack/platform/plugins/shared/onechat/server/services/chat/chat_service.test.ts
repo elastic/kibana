@@ -17,7 +17,8 @@ import {
 } from './chat_service.test.mocks';
 
 import { firstValueFrom, toArray, of } from 'rxjs';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -28,7 +29,8 @@ import {
   createConversationServiceMock,
   createEmptyConversation,
 } from '../../test_utils';
-import { ChatService, createChatService } from './chat_service';
+import type { ChatService } from './chat_service';
+import { createChatService } from './chat_service';
 
 const createChatModel = (): InferenceChatModel => {
   // we don't really need it

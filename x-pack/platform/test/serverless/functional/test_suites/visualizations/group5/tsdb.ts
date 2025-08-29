@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { partition } from 'lodash';
 import moment from 'moment';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   type ScenarioIndexes,
   TEST_DOC_COUNT,

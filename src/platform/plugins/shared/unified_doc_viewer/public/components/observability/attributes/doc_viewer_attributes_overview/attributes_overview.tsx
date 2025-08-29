@@ -6,16 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import {
-  EuiSpacer,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSwitch,
-  EuiSwitchEvent,
-} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiSpacer, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
@@ -47,11 +41,11 @@ export function AttributesOverview({
   dataView,
   textBasedHits,
   filter,
-  decreaseAvailableHeightBy,
+  decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) {
-  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { storage, uiSettings } = getUnifiedDocViewerServices();
   const isEsqlMode = Array.isArray(textBasedHits);
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
@@ -87,8 +81,8 @@ export function AttributesOverview({
 
   const { attributesFields, resourceAttributesFields, scopeAttributesFields } = groupedFields;
 
-  const containerHeight = containerRef
-    ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
+  const containerHeight = containerRef.current
+    ? getTabContentAvailableHeight(containerRef.current, decreaseAvailableHeightBy)
     : 0;
 
   const filterFieldsBySearchTerm = (fields: AttributeField[]) =>
@@ -161,7 +155,7 @@ export function AttributesOverview({
 
   return (
     <EuiFlexGroup
-      ref={setContainerRef}
+      ref={containerRef}
       direction="column"
       gutterSize="none"
       responsive={false}

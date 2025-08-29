@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { Logger } from '@kbn/core/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { Logger } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { v4 as generateUuid } from 'uuid';
 import {
   convertToSerializableGraph,
   convertToWorkflowGraph,
 } from '../../common/lib/build_execution_graph/build_execution_graph';
-import { WorkflowsService } from '../workflows_management/workflows_management_service';
-import { extractConnectorIds } from './lib/extract_connector_ids';
+import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
 const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {
   return [];
@@ -25,16 +23,13 @@ const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineMod
 
 export class SchedulerService {
   private readonly logger: Logger;
-  private readonly actionsClient: IUnsecuredActionsClient;
 
   constructor(
     logger: Logger,
     workflowsService: WorkflowsService,
-    actionsClient: IUnsecuredActionsClient,
     private readonly taskManager: TaskManagerStartContract
   ) {
     this.logger = logger;
-    this.actionsClient = actionsClient;
   }
 
   public async start() {
@@ -62,14 +57,12 @@ export class SchedulerService {
   ): Promise<string> {
     const executionGraph = convertToWorkflowGraph(workflow.definition);
     workflow.executionGraph = convertToSerializableGraph(executionGraph); // TODO: It's not good approach, it's temporary
-    const connectorCredentials = await extractConnectorIds(this.actionsClient);
 
     const workflowRunId = generateUuid();
     const context = {
       workflowRunId,
       inputs,
       event: 'event' in inputs ? inputs.event : undefined,
-      connectorCredentials,
       triggeredBy: 'manual', // <-- mark as manual
     };
 

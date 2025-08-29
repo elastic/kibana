@@ -12,8 +12,14 @@ import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { omit, isEmpty } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config_schema';
-import { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
+import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
+import type {
+  Locations,
+  MonitorFields,
+  ProjectMonitor,
+  SyntheticsMonitor,
+} from '../../../common/runtime_types';
 import {
   BrowserFieldsCodec,
   CodeEditorMode,
@@ -21,13 +27,9 @@ import {
   FormMonitorType,
   HTTPFieldsCodec,
   ICMPFieldsCodec,
-  Locations,
-  MonitorFields,
   MonitorTypeCodec,
   MonitorTypeEnum,
-  ProjectMonitor,
   ProjectMonitorCodec,
-  SyntheticsMonitor,
   type SyntheticsPrivateLocations,
   TCPFieldsCodec,
 } from '../../../common/runtime_types';

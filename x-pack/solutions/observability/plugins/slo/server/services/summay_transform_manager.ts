@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { SLODefinition } from '../domain/models';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
-import { SummaryTransformGenerator } from './summary_transform_generator/summary_transform_generator';
-import { TransformManager } from './transform_manager';
+import type { SummaryTransformGenerator } from './summary_transform_generator/summary_transform_generator';
+import type { TransformManager } from './transform_manager';
 
 type TransformId = string;
 

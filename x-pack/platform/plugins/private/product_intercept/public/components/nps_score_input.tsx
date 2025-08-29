@@ -7,13 +7,8 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonGroup,
-  EuiButtonGroupProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-} from '@elastic/eui';
+import type { EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 interface NPSScoreInputProps {
   /**

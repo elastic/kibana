@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
-import { WorkflowStatus, WorkflowYaml } from '@kbn/workflows';
+import type { SavedObjectsType } from '@kbn/core/server';
+import type { WorkflowStatus, WorkflowYaml } from '@kbn/workflows';
 
 export const WORKFLOW_SAVED_OBJECT_TYPE = 'workflow';
 
@@ -21,6 +21,7 @@ export interface WorkflowSavedObjectAttributes {
   definition: WorkflowYaml;
   createdBy: string;
   lastUpdatedBy: string;
+  deleted_at: Date | null;
 }
 
 export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttributes> = {
@@ -68,6 +69,9 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
       lastUpdatedBy: {
         type: 'keyword',
       },
+      deleted_at: {
+        type: 'date',
+      },
     },
   },
   management: {
@@ -83,6 +87,18 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
   modelVersions: {
     1: {
       changes: [],
+    },
+    2: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            deleted_at: {
+              type: 'date',
+            },
+          },
+        },
+      ],
     },
   },
 };

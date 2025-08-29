@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { _IGNORED } from '../../../../common/es_fields';
-import { DataStreamType } from '../../../../common/types';
+import type { DataStreamType } from '../../../../common/types';
 import { createDatasetQualityESClient } from '../../../utils';
 import { rangeQuery } from '../../../utils/queries';
 import { extractNonAggregatableDatasets } from './extract_non_aggregatable_datasets';

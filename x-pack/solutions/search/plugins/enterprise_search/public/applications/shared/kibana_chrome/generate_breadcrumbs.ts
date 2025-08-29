@@ -7,7 +7,7 @@
 
 import { useValues } from 'kea';
 
-import { EuiBreadcrumb } from '@elastic/eui';
+import type { EuiBreadcrumb } from '@elastic/eui';
 
 import {
   ANALYTICS_PLUGIN,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';

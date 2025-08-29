@@ -84,6 +84,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
             layout="horizontal"
             icon={<EuiIcon size="l" type="importAction" />}
             titleSize="xs"
+            data-test-subj="privilegedUserMonitoringImportCSVCard"
             title={
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.file.title"

@@ -10,7 +10,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import { FeaturesRegistry } from '../../../common';
+import type { FeaturesRegistry } from '../../../common';
 
 /**
  * Features types

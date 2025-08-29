@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RegexAnonymizationRule } from '@kbn/inference-common';
-import { AnonymizationState } from './types';
-import { RegexWorkerService } from './regex_worker_service';
+import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { AnonymizationState } from './types';
+import type { RegexWorkerService } from './regex_worker_service';
 
 /**
  * Executes a regex anonymization rule, by iterating over the matches,

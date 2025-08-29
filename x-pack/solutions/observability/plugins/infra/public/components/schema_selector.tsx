@@ -7,7 +7,6 @@
 import React, { useCallback, useMemo } from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -28,7 +27,7 @@ const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvail
   defaultMessage: 'Selected schema is not available for this query.',
 });
 
-const PrependLabel = ({ count }: { count: number }) => {
+const PrependLabel = () => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -37,17 +36,6 @@ const PrependLabel = ({ count }: { count: number }) => {
             defaultMessage: 'Schema',
           })}
         </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge
-          color="primary"
-          data-test-subj="infraSchemaSelectorCount"
-          aria-label={i18n.translate('xpack.infra.schemaSelector.count', {
-            defaultMessage: 'Schemas available',
-          })}
-        >
-          {count}
-        </EuiBadge>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiIconTip
@@ -183,6 +171,12 @@ export const SchemaSelector = ({
                   defaultMessage: 'Schema selector for data collection',
                 })}
                 css={{ minWidth: '356px' }}
+                helpText={
+                  (options.length > 1 || isInvalid) &&
+                  i18n.translate('xpack.infra.schemaSelector.select.helpText', {
+                    defaultMessage: 'There are hosts available in another schema',
+                  })
+                }
               >
                 <EuiSuperSelect
                   data-test-subj="infraSchemaSelect"
@@ -192,7 +186,7 @@ export const SchemaSelector = ({
                   onChange={onSelect}
                   isLoading={isLoading}
                   fullWidth
-                  prepend={<PrependLabel count={options.length} />}
+                  prepend={<PrependLabel />}
                 />
               </EuiFormRow>
             </EuiFlexItem>

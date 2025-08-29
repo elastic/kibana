@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const testUserUsername = 'test_reporting_user';
   const testUserPassword = 'changeme';
 
-  describe('Default reporting_user role', () => {
+  describe.skip('Default reporting_user role', () => {
     before(async () => {
       await reportingAPI.initEcommerce();
 

@@ -7,13 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { EsWorkflowExecution } from '@kbn/workflows';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
 export class WorkflowExecutionRepository {
   private indexName = WORKFLOWS_EXECUTIONS_INDEX;
   constructor(private esClient: ElasticsearchClient) {}
+
+  /**
+   * Retrieves a workflow execution by its ID from Elasticsearch.
+   *
+   * @param workflowExecutionId - The ID of the workflow execution to retrieve.
+   * @returns A promise that resolves to the workflow execution document, or null if not found.
+   */
+  public async getWorkflowExecutionById(
+    workflowExecutionId: string
+  ): Promise<EsWorkflowExecution | null> {
+    const response = await this.esClient.get<EsWorkflowExecution>({
+      index: this.indexName,
+      id: workflowExecutionId,
+    });
+    if (!response.found) {
+      return null;
+    }
+    return response._source as EsWorkflowExecution;
+  }
 
   /**
    * Creates a new workflow execution document in Elasticsearch.

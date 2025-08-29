@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ChromeHelpMenuLink } from '@kbn/core-chrome-browser';
+import type { ChromeHelpMenuLink } from '@kbn/core-chrome-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';

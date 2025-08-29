@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GetPanelPlacementSettings } from './types';
+import type { GetPanelPlacementSettings } from './types';
 
 const registry = new Map<string, GetPanelPlacementSettings<object>>();
 

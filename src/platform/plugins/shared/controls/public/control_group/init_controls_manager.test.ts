@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlPanelsState, DefaultDataControlState } from '../../common';
+import type { ControlPanelsState, DefaultDataControlState } from '../../common';
 import type { DefaultControlApi } from '../controls/types';
 import { getLastUsedDataViewId, initControlsManager } from './init_controls_manager';
 

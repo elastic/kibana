@@ -8,7 +8,7 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';

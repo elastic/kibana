@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Message, Deanonymization, Anonymization } from '@kbn/inference-common';
+import type { Message, Deanonymization, Anonymization } from '@kbn/inference-common';
 import { isEmpty } from 'lodash';
 import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
 

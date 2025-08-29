@@ -11,7 +11,8 @@ import { coreMock, httpServiceMock, uiSettingsServiceMock } from '@kbn/core/publ
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { ReportingPanelProps as Props, ReportingPanelContent } from '.';
+import type { ReportingPanelProps as Props } from '.';
+import { ReportingPanelContent } from '.';
 import { ReportingAPIClient } from '../../..';
 import { ErrorUnsavedWorkPanel } from './components';
 import * as constants from './constants';

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import {
-  getRelatedDashboardsParamsSchema,
-  GetRelatedDashboardsResponse,
-} from '@kbn/observability-schema';
-import { IKibanaResponse } from '@kbn/core-http-server';
+import type { GetRelatedDashboardsResponse } from '@kbn/observability-schema';
+import { getRelatedDashboardsParamsSchema } from '@kbn/observability-schema';
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 import { ALERTS_API_URLS } from '../../../common/constants';

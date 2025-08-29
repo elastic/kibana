@@ -11,18 +11,19 @@ import type { PrivMonBulkUser } from '../../types';
 
 export const findStaleUsersForIndexFactory =
   (dataClient: PrivilegeMonitoringDataClient) =>
-  async (indexName: string, userNames: string[]): Promise<PrivMonBulkUser[]> => {
+  async (sourceId: string, userNames: string[]): Promise<PrivMonBulkUser[]> => {
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
 
     const response = await esClient.search<MonitoredUserDoc>({
       index: dataClient.index,
       size: 10, // check this
-      _source: ['user.name', 'labels.source_indices'],
+      _source: ['user.name', 'labels.source_ids'],
       query: {
         bool: {
           must: [
             { term: { 'user.is_privileged': true } },
-            { term: { 'labels.source_indices.keyword': indexName } },
+            { term: { 'labels.sources': 'index' } },
+            { term: { 'labels.source_ids.keyword': sourceId } },
           ],
           must_not: {
             terms: { 'user.name': userNames },
@@ -34,6 +35,6 @@ export const findStaleUsersForIndexFactory =
     return response.hits.hits.map((hit) => ({
       username: hit._source?.user?.name ?? 'unknown',
       existingUserId: hit._id,
-      indexName,
+      sourceId,
     }));
   };

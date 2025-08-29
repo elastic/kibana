@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useCallback } from 'react';
 import { paths } from '../../common/locators/paths';
 import { useKibana } from './use_kibana';

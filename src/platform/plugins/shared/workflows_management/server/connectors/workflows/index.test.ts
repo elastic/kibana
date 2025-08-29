@@ -42,7 +42,6 @@ describe('Workflows Connector', () => {
       expect(connectorType.validate.config).toBeDefined();
       expect(connectorType.validate.secrets).toBeDefined();
       expect(connectorType.validate.params).toBeDefined();
-      expect(connectorType.validate.connector).toBeDefined();
     });
   });
 

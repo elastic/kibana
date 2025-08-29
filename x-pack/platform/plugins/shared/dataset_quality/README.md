@@ -117,17 +117,17 @@ yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/a
 ##### Server
 
 ```
-yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
+yarn test:ftr:server --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts
 ```
 
 ##### Runner
 
 ```
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/index.ts
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality/index.ts
 ```
 
 ##### Running Individual Tests
 
 ```
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/$1
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality/$1
 ```

@@ -6,7 +6,8 @@
  */
 import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { DefaultRouteHandlerResources, registerRoutes } from '@kbn/server-route-repository';
+import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import { registerRoutes } from '@kbn/server-route-repository';
 import { getGlobalGenAiSettingsServerRouteRepository } from './get_global_gen_ai_settings_route_repository';
 import type { GenAiSettingsRouteHandlerResources } from './types';
 import type { GenAiSettingsPluginStartDependencies } from '../types';

@@ -6,14 +6,14 @@
  */
 
 import { type QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 
 import type { PlaygroundConnector, InferenceActionConnector, ActionConnector } from '../types';
 import { SearchPlaygroundQueryKeys } from '../../common';
 import { LLMs } from '../../common/types';
-import { LLMModel } from '../types';
+import type { LLMModel } from '../types';
 import { MODELS } from '../../common/models';
 import { useKibana } from './use_kibana';
 import { LoadConnectorsQuery } from './use_load_connectors';

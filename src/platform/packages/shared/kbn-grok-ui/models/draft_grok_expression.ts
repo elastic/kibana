@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { GrokCollection, GrokPattern } from './grok_collection_and_pattern';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import type { GrokCollection } from './grok_collection_and_pattern';
+import { GrokPattern } from './grok_collection_and_pattern';
 
 export class DraftGrokExpression {
   private expression: string = '';

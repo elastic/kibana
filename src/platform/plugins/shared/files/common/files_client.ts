@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BaseFilesClient } from '@kbn/shared-ux-file-types';
+import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
 import type { FilesMetrics } from './types';
 
 /**

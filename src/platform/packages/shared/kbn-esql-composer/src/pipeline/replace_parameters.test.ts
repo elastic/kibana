@@ -9,7 +9,7 @@
 
 import { Builder, BasicPrettyPrinter, synth, parse } from '@kbn/esql-ast';
 import { replaceParameters } from './replace_parameters';
-import { Query } from '../types';
+import type { Query } from '../types';
 import { buildQueryAst } from './build_query_ast';
 
 describe('buildQueryAst', () => {

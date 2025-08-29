@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function searchSolutionNavigation({
   getPageObjects,
@@ -47,11 +47,11 @@ export default function searchSolutionNavigation({
         { id: 'Indices', label: 'Index Management' },
         { id: 'Playground', label: 'Playground' },
         { id: 'Connectors', label: 'Connectors' },
-        { id: 'SearchApplications', label: 'Search Applications' },
+        { id: 'SearchApplications', label: 'Search applications' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'Synonyms', label: 'Synonyms' },
-        { id: 'QueryRules', label: 'Query Rules' },
-        { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
+        { id: 'QueryRules', label: 'Query rules' },
+        { id: 'InferenceEndpoints', label: 'Inference endpoints' },
       ]);
     });
     it('has expected navigation', async () => {
@@ -81,7 +81,7 @@ export default function searchSolutionNavigation({
         },
         {
           navItem: 'SearchApplications',
-          breadcrumbs: ['Build', 'Search Applications'],
+          breadcrumbs: ['Build', 'Search applications'],
           pageTestSubject: 'searchApplicationsListPage',
         },
         {
@@ -91,12 +91,12 @@ export default function searchSolutionNavigation({
         },
         {
           navItem: 'QueryRules',
-          breadcrumbs: ['Relevance', 'Query Rules'],
+          breadcrumbs: ['Relevance', 'Query rules'],
           pageTestSubject: 'queryRulesBasePage',
         },
         {
           navItem: 'InferenceEndpoints',
-          breadcrumbs: ['Relevance', 'Inference Endpoints'],
+          breadcrumbs: ['Relevance', 'Inference endpoints'],
           pageTestSubject: 'inferenceEndpointsPage',
         },
       ];

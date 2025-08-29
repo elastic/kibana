@@ -10,14 +10,14 @@
 import { inspect } from 'util';
 
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
-import { KbnClient } from '@kbn/test';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClient } from '@kbn/test';
 import {
   MAIN_SAVED_OBJECT_INDEX,
   ALL_SAVED_OBJECT_INDICES,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
-import { Stats } from '../stats';
+import type { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 

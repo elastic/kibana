@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBasicTableColumn,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,21 +19,21 @@ import {
   EuiToolTip,
   formatNumber,
 } from '@elastic/eui';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { BrowserUrlService } from '@kbn/share-plugin/public';
+import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import React from 'react';
 import {
   BYTE_NUMBER_FORMAT,
   DEGRADED_DOCS_QUERY,
-  DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
+  WARNING_QUALITY_MINIMUM_PERCENTAGE,
   FAILURE_STORE_SELECTOR,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
-import { TimeRangeConfig } from '../../../../common/types';
+import type { TimeRangeConfig } from '../../../../common/types';
 import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
 import { IntegrationIcon, PrivilegesWarningIconWrapper } from '../../common';
 import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
@@ -144,10 +144,10 @@ const datasetQualityColumnTooltip = (
           </EuiFlexItem>
           <EuiFlexItem>
             <QualityIndicator
-              quality="degraded"
+              quality="warning"
               description={` ${degradedDocsDescription(
                 'Degraded',
-                DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
+                WARNING_QUALITY_MINIMUM_PERCENTAGE,
                 ' greater than'
               )}`}
             />
@@ -157,7 +157,7 @@ const datasetQualityColumnTooltip = (
               quality="good"
               description={` ${degradedDocsDescription(
                 'Good',
-                DEGRADED_QUALITY_MINIMUM_PERCENTAGE
+                WARNING_QUALITY_MINIMUM_PERCENTAGE
               )}`}
             />
           </EuiFlexItem>
@@ -351,7 +351,10 @@ export const getDatasetQualityTableColumns = ({
             field: 'failedDocs.percentage',
             sortable: true,
             render: (_: any, dataStreamStat: DataStreamStat) => {
-              if (!dataStreamStat.hasFailureStore) {
+              if (
+                !dataStreamStat.hasFailureStore &&
+                dataStreamStat.userPrivileges?.canReadFailureStore
+              ) {
                 const FailureStoreHoverLink = () => {
                   const [hovered, setHovered] = React.useState(false);
                   const locator = urlService.locators.get('INDEX_MANAGEMENT_LOCATOR_ID');

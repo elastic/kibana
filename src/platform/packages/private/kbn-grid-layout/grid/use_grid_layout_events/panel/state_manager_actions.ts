@@ -8,7 +8,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
 
 import type { ActivePanelEvent, GridPanelData } from '../../grid_panel';
 import type { GridLayoutStateManager, OrderedLayout } from '../../types';

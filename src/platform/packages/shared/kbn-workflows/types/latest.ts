@@ -53,4 +53,6 @@ export type {
   EnterForeachNode,
   ExitForeachNode,
   AtomicGraphNode,
+  WaitGraphNodeSchema,
+  WaitGraphNode,
 } from './execution';

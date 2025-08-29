@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-import {
-  CONTENT_ID as LENS_CONTENT,
-  LensSavedObjectAttributes,
-} from '@kbn/lens-plugin/common/content_management';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/common/content_management';
+import { CONTENT_ID as LENS_CONTENT } from '@kbn/lens-plugin/common/content_management';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 

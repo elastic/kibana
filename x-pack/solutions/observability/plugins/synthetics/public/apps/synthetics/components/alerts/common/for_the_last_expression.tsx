@@ -7,9 +7,9 @@
 import { EuiExpression, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { StatusRuleCondition } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { StatusRuleCondition } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { getConditionType } from '../../../../../../common/rules/status_rule';
-import { StatusRuleParamsProps } from '../status_rule_ui';
+import type { StatusRuleParamsProps } from '../status_rule_ui';
 
 interface Props {
   ruleParams: StatusRuleParamsProps['ruleParams'];
