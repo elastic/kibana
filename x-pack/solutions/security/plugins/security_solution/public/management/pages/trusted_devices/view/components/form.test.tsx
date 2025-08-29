@@ -284,14 +284,18 @@ describe('Trusted devices form', () => {
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
       ]);
-      expect(options).not.toContain(CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME]);
+      expect(options).not.toContain(
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME]
+      );
     });
 
     it('should show USERNAME field when Windows-only OS is selected', async () => {
       // Change to Windows-only OS first
       await openOsCombo();
-      await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.WINDOWS] }));
-      
+      await userEvent.click(
+        screen.getByRole('option', { name: OS_TITLES[OperatingSystem.WINDOWS] })
+      );
+
       // Check field options - USERNAME should now be available
       const fieldSelect = getConditionsFieldSelect();
       await userEvent.click(fieldSelect);
@@ -315,15 +319,15 @@ describe('Trusted devices form', () => {
       // Change to Mac-only OS first
       await openOsCombo();
       await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
-      
+
       // Wait for component to update after OS change
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
-      
+
       // Re-render to ensure component reflects the OS change
       rerenderWithLatestProps();
-      
+
       // Check field options - USERNAME should be hidden
       const fieldSelect = getConditionsFieldSelect();
       await userEvent.click(fieldSelect);
@@ -340,9 +344,10 @@ describe('Trusted devices form', () => {
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
       ]);
-      expect(options).not.toContain(CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME]);
+      expect(options).not.toContain(
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME]
+      );
     });
-
 
     it('should toggle operator from "is" to "matches" and update entry type to wildcard', async () => {
       const operatorSelect = getConditionsOperatorSelect();
