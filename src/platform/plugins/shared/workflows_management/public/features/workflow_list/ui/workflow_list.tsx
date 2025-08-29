@@ -31,7 +31,7 @@ import { useWorkflowActions } from '../../../entities/workflows/model/use_workfl
 import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
 import type { WorkflowsSearchParams } from '../../../types';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import { StatusBadge, WorkflowStatus } from '../../../shared/ui';
+import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../../../shared/ui';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -238,17 +238,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
             }),
             icon: 'play',
             description: (item: WorkflowListItemDto) =>
-              !item.valid
-                ? i18n.translate('workflows.workflowList.invalid', {
-                    defaultMessage: 'Fix errors to run workflow',
-                  })
-                : !item.enabled
-                ? i18n.translate('workflows.workflowList.disabled', {
-                    defaultMessage: 'Enable workflow to run it',
-                  })
-                : i18n.translate('workflows.workflowList.run', {
-                    defaultMessage: 'Run workflow',
-                  }),
+              getRunWorkflowTooltipContent(item.valid, !!canExecuteWorkflow, item.enabled),
             onClick: (item: WorkflowListItemDto) => handleRunWorkflow(item),
           },
           {

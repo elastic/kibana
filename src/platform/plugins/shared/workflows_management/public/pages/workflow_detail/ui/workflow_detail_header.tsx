@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
+import { getRunWorkflowTooltipContent } from '../../../shared/ui';
 
 export interface WorkflowDetailHeaderProps {
   name: string | undefined;
@@ -77,6 +78,10 @@ export const WorkflowDetailHeader = ({
     ],
     []
   );
+
+  const runWorkflowTooltipContent = useMemo(() => {
+    return getRunWorkflowTooltipContent(isValid, canRunWorkflow, isEnabled);
+  }, [isValid, canRunWorkflow, isEnabled]);
 
   return (
     <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
@@ -137,39 +142,36 @@ export const WorkflowDetailHeader = ({
               />
             </EuiToolTip>
             <div css={styles.separator} />
-            <EuiButtonIcon
-              display="base"
-              iconType="beaker"
-              size="s"
-              disabled={isLoading || !canTestWorkflow}
-              onClick={handleTestClick}
-              aria-label={i18n.translate('workflows.workflowDetailHeader.testWorkflow.ariaLabel', {
-                defaultMessage: 'Test workflow',
-              })}
-            />
-            <EuiButtonIcon
-              color="success"
-              display="base"
-              iconType="play"
-              size="s"
-              onClick={handleRunClick}
-              disabled={!canRunWorkflow || !isEnabled || isLoading}
-              title={
-                !canRunWorkflow
-                  ? i18n.translate('workflows.workflowDetailHeader.runWorkflow.notAllowed', {
-                      defaultMessage: 'You are not allowed to run workflows',
-                    })
-                  : !isEnabled
-                  ? i18n.translate('workflows.workflowDetailHeader.runWorkflow.disabled', {
-                      defaultMessage: 'Enable the workflow to run it',
-                    })
-                  : undefined
-              }
-              aria-label={i18n.translate('workflows.workflowDetailHeader.runWorkflow.ariaLabel', {
-                defaultMessage: 'Run workflow',
-              })}
-            />
-
+            <EuiToolTip content={runWorkflowTooltipContent}>
+              <EuiButtonIcon
+                display="base"
+                iconType="beaker"
+                size="s"
+                disabled={isLoading || !canTestWorkflow || !isValid}
+                onClick={handleTestClick}
+                title={runWorkflowTooltipContent ?? undefined}
+                aria-label={i18n.translate(
+                  'workflows.workflowDetailHeader.testWorkflow.ariaLabel',
+                  {
+                    defaultMessage: 'Test workflow',
+                  }
+                )}
+              />
+            </EuiToolTip>
+            <EuiToolTip content={runWorkflowTooltipContent}>
+              <EuiButtonIcon
+                color="success"
+                display="base"
+                iconType="play"
+                size="s"
+                onClick={handleRunClick}
+                disabled={!canRunWorkflow || !isEnabled || isLoading || !isValid}
+                title={runWorkflowTooltipContent ?? undefined}
+                aria-label={i18n.translate('workflows.workflowDetailHeader.runWorkflow.ariaLabel', {
+                  defaultMessage: 'Run workflow',
+                })}
+              />
+            </EuiToolTip>
             <EuiButton
               fill
               color="primary"
