@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-//
 import useObservable from 'react-use/lib/useObservable';
 
 import type { Observable } from 'rxjs';
@@ -31,13 +30,6 @@ import type { AnomalyExplorerChartsService } from '../../services/anomaly_explor
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import type { MlApi } from '../../services/ml_api_service';
 import type { ExplorerState } from '../explorer_data';
-
-// Memoize the data fetching methods.
-// wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
-// which will be considered by memoizeOne. This way we can add the `lastRefresh` argument as a
-// caching parameter without having to change all the original functions which shouldn't care
-// about this parameter. The generic type T retains and returns the type information of
-// the original function.
 
 export interface LoadExplorerDataConfig {
   influencersFilterQuery: InfluencersFilterQuery;
