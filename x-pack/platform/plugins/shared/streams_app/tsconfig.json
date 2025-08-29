@@ -20,7 +20,6 @@
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/dataset-quality-plugin",
-    "@kbn/data-quality-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/kibana-react-plugin",
@@ -83,5 +82,7 @@
     "@kbn/apm-synthtrace-client",
     "@kbn/streamlang",
     "@kbn/data-quality",
+    "@kbn/core-notifications-browser",
+    "@kbn/io-ts-utils",
   ]
 }
