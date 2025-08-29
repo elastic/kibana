@@ -20,7 +20,7 @@ interface MetricField {
   timeSeriesMetric?: string;
   unit?: string;
   brief?: string;
-  stability?: string;
+  stability?: 'stable' | 'beta' | 'experimental';
 }
 
 type MetricsGridProps = {

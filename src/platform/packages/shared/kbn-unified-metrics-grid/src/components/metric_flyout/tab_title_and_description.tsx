@@ -33,7 +33,6 @@ export const TabTitleAndDescription = ({ metric }: OverviewTabProps) => {
         </EuiTitle>
 
         <EuiSpacer size="s" />
-        {/* Description */}
         {metric.description && (
           <EuiDescriptionListDescription>
             <EuiText size="s" color="subdued">

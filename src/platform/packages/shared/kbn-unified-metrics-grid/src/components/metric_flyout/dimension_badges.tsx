@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiToken, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToken, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -28,6 +28,8 @@ export const DimensionBadges = ({
   metricName,
   maxDisplay = 10,
 }: DimensionBadgesProps) => {
+  const { euiTheme } = useEuiTheme();
+
   // Extract top-level namespace from metric name (e.g., "system" from "system.network.in.bytes")
   const topLevelNamespace = metricName.split('.')[0] + '.';
 
@@ -63,10 +65,14 @@ export const DimensionBadges = ({
           <EuiBadge
             key={index}
             color={badgeColor}
-            style={{ marginRight: '4px', marginBottom: '2px' }}
+            style={{ marginRight: euiTheme.size.xs, marginBottom: euiTheme.size.xxs }}
           >
             {isKeyword && (
-              <EuiToken iconType="tokenKeyword" size="xs" style={{ marginRight: '4px' }} />
+              <EuiToken
+                iconType="tokenKeyword"
+                size="xs"
+                style={{ marginRight: euiTheme.size.xs }}
+              />
             )}
             {dimension.name}
             {!isKeyword && ` (${dimension.type})`}
@@ -85,7 +91,7 @@ export const DimensionBadges = ({
         return badgeContent;
       })}
       {remainingCount > 0 && (
-        <EuiText size="xs" style={{ marginTop: '4px' }}>
+        <EuiText size="xs" style={{ marginTop: euiTheme.size.xs }}>
           {'...'}
           {remainingCount}{' '}
           {i18n.translate('metricsExperience.dimensionBadges.moreTextLabel', {

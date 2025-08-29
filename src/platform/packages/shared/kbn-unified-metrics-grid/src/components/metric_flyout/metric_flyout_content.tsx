@@ -8,29 +8,37 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { EuiTabs, EuiTab, EuiSpacer, EuiCodeBlock } from '@elastic/eui';
+import { EuiTabs, EuiTab } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { OverviewTab } from './overview_tab';
 import type { MetricField } from '../../types';
-import { TabTitleAndDescription } from './tab_title_and_description';
+import { EsqlQueryTab } from './esql_query_tab';
+
+const tabIds = {
+  OVERVIEW: 'overview',
+  ESQL_QUERY: 'esql-query',
+} as const;
+
+type TabId = (typeof tabIds)[keyof typeof tabIds];
+
+const OverviewTabName = i18n.translate('metricsExperience.metricFlyout.overviewTab', {
+  defaultMessage: 'Overview',
+});
+
+const EsqlQueryTabName = i18n.translate('metricsExperience.metricFlyout.esqlQueryTab', {
+  defaultMessage: 'ES|QL Query',
+});
 
 const tabs = (metric: MetricField, esqlQuery: string) => [
   {
-    id: 'overview',
-    name: 'Overview',
+    id: tabIds.OVERVIEW,
+    name: OverviewTabName,
     content: <OverviewTab metric={metric} />,
   },
   {
-    id: 'esql-query',
-    name: 'ES|QL Query',
-    content: (
-      <>
-        <TabTitleAndDescription metric={metric} />
-        <EuiCodeBlock language="sql" fontSize="s" paddingSize="s" isCopyable>
-          {esqlQuery}
-        </EuiCodeBlock>
-        <EuiSpacer size="m" />
-      </>
-    ),
+    id: tabIds.ESQL_QUERY,
+    name: EsqlQueryTabName,
+    content: <EsqlQueryTab esqlQuery={esqlQuery} metric={metric} />,
   },
 ];
 
@@ -40,13 +48,13 @@ interface MetricFlyoutContentProps {
 }
 
 export const MetricFlyoutContent = ({ metric, esqlQuery }: MetricFlyoutContentProps) => {
-  const [selectedTabId, setSelectedTabId] = useState('overview');
+  const [selectedTabId, setSelectedTabId] = useState<TabId>(tabIds.OVERVIEW);
   const metricTabs = useMemo(() => tabs(metric, esqlQuery), [esqlQuery, metric]);
   const selectedTabContent = useMemo(() => {
     return metricTabs.find((obj) => obj.id === selectedTabId)?.content;
   }, [metricTabs, selectedTabId]);
 
-  const onSelectedTabChanged = (id: string) => {
+  const onSelectedTabChanged = (id: TabId) => {
     setSelectedTabId(id);
   };
 

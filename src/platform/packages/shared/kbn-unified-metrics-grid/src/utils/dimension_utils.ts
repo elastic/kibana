@@ -25,3 +25,28 @@ export const categorizeDimensions = (
 
   return { requiredDimensions, optionalDimensions };
 };
+
+const getTopLevelNamespace = (metricName: string) => metricName.split('.')[0] + '.';
+
+const getSortPriority = (name: string, topLevelNamespace: string): number => {
+  if (name.startsWith('attributes.')) {
+    return 0;
+  }
+  if (name.startsWith(`${topLevelNamespace}.`)) {
+    return 1;
+  }
+  return 2;
+};
+
+export const sortDimensions = (
+  dimensions: Array<{ name: string; type: string }>,
+  metricName: string
+) => {
+  const topLevelNamespace = getTopLevelNamespace(metricName);
+
+  return [...dimensions].sort((a, b) => {
+    const priorityDiff =
+      getSortPriority(a.name, topLevelNamespace) - getSortPriority(b.name, topLevelNamespace);
+    return priorityDiff !== 0 ? priorityDiff : a.name.localeCompare(b.name);
+  });
+};

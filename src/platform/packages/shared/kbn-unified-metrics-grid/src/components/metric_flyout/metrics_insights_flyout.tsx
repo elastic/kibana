@@ -45,7 +45,7 @@ export const MetricInsightsFlyout = ({
   const defaultWidth = euiTheme.base * 34;
   const isXlScreen = useIsWithinMinBreakpoint('xl');
   const [flyoutWidth, setFlyoutWidth] = useLocalStorage(
-    'metricInsightsFlyout:flyoutWidth',
+    'metricsExperience:flyoutWidth',
     defaultWidth
   );
   const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
