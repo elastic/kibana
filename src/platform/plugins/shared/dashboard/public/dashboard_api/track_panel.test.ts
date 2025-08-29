@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expectationFailed } from '@hapi/boom';
 import { initializeTrackPanel } from './track_panel';
 
 describe('track panel', () => {
