@@ -73,6 +73,7 @@ async function updateWiredIngest({
       ...stream,
       ingest,
     },
+    rules: [],
   };
 
   return await streamsClient.upsertStream({
@@ -112,6 +113,7 @@ async function updateClassicIngest({
       ...stream,
       ingest,
     },
+    rules: [],
   };
 
   return await streamsClient.upsertStream({

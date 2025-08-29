@@ -19,7 +19,7 @@ import {
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
-import type { DashboardLink } from '../../../../common/assets';
+import type { DashboardLink, RuleLink } from '../../../../common/assets';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
 export async function readStream({
@@ -43,7 +43,10 @@ export async function readStream({
     (asset): asset is DashboardLink => asset[ASSET_TYPE] === 'dashboard'
   );
 
-  const [ruleLinks, queryLinks] = partition(otherAssets, (asset) => asset[ASSET_TYPE] === 'rule');
+  const [ruleLinks, queryLinks] = partition(
+    otherAssets,
+    (asset): asset is RuleLink => asset[ASSET_TYPE] === 'rule'
+  );
 
   const dashboards = dashboardLinks.map((dashboard) => dashboard['asset.id']);
   const rules = ruleLinks.map((rule) => rule['asset.id']);

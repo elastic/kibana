@@ -157,10 +157,6 @@ const unlinkRuleRoute = createServerRoute({
   },
 });
 
-const ruleSchema = z.object({
-  id: z.string(),
-});
-
 export const ruleRoutes = {
   ...listRulesRoute,
   ...linkRuleRoute,
