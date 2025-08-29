@@ -54,7 +54,8 @@ const scenario: Scenario = async (runOptions) => {
         const transaction = productService.transaction({ transactionName }).timestamp(timestamp);
 
         // Introduce a low, baseline failure rate for standard users
-        if (i % 50 === 0) { // Roughly 2% failure rate
+        const isFailure = i % 50 === 0; // 2% failure rate
+        if (isFailure) {
           return transaction
             .duration(350)
             .failure()
@@ -78,7 +79,8 @@ const scenario: Scenario = async (runOptions) => {
         const transaction = productService.transaction({ transactionName }).timestamp(timestamp);
 
         // ~80% of premium users experience the failure
-        if (i % 5 < 4) { // 4 out of 5 = 80%
+        const isFailure = i % 5 < 4; // 4 out of 5 = 80%
+        if (isFailure) {
           return transaction
             .duration(80) // Fails fast
             .failure()
@@ -118,7 +120,8 @@ const scenario: Scenario = async (runOptions) => {
       // Logs from product-service for failed requests (now only for premium users)
       const productServiceLogs = premiumUserTimestamps.generator((timestamp, i) => {
         // Only log for the failing requests
-        if (i % 5 < 4) {
+        const isFailure = i % 5 < 4; // 4 out of 5 = 80% failure rate
+        if (isFailure) {
           return log
             .create({ isLogsDb })
             .message(
@@ -136,7 +139,8 @@ const scenario: Scenario = async (runOptions) => {
 
       // Logs from recommendation-service (THE NEEDLE: this is where the real 401 is)
       const recommendationServiceLogs = premiumUserTimestamps.generator((timestamp, i) => {
-        if (i % 5 < 4) {
+        const isFailure = i % 5 < 4; // 4 out of 5 = 80% failure rate
+        if (isFailure) {
           return log
             .create({ isLogsDb })
             .message(`Authentication failed for client 'product-service'. Invalid token provided.`)

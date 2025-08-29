@@ -101,32 +101,44 @@ const scenario: Scenario<ApmFields | LogDocument | InfraDocument> = async (runOp
       });
 
       // Generate Metrics
-      const hostMetrics = range.interval('10s').rate(1).generator((timestamp) => {
-        return POD_NAMES.map((podName) => {
-          const isFaulty = podName === FAULTY_POD_NAME;
-          const hostName = `host-for-${podName}`;
-          const host = infra.host(hostName);
-          const defaults = {
-            'agent.id': 'metricbeat-agent',
-            'host.hostname': hostName,
-            'host.name': hostName,
-            'kubernetes.pod.name': podName,
-          };
+      const hostMetrics = range
+        .interval('10s')
+        .rate(1)
+        .generator((timestamp) => {
+          return POD_NAMES.map((podName) => {
+            const isFaulty = podName === FAULTY_POD_NAME;
+            const hostName = `host-for-${podName}`;
+            const host = infra.host(hostName);
+            const defaults = {
+              'agent.id': 'metricbeat-agent',
+              'host.hostname': hostName,
+              'host.name': hostName,
+              'kubernetes.pod.name': podName,
+            };
 
-          return host
-            .diskio({
-              'system.diskio.read.bytes': isFaulty ? 50000000 : 10000,
-              'system.diskio.write.bytes': isFaulty ? 25000000 : 5000,
-            })
-            .defaults(defaults)
-            .timestamp(timestamp);
+            return host
+              .diskio({
+                'system.diskio.read.bytes': isFaulty ? 50000000 : 10000,
+                'system.diskio.write.bytes': isFaulty ? 25000000 : 5000,
+              })
+              .defaults(defaults)
+              .timestamp(timestamp);
+          });
         });
-      });
 
       return [
-        withClient(apmEsClient, logger.perf('generating_apm_events', () => traceEvents)),
-        withClient(logsEsClient, logger.perf('generating_log_events', () => logEvents)),
-        withClient(infraEsClient, logger.perf('generating_infra_events', () => hostMetrics)),
+        withClient(
+          apmEsClient,
+          logger.perf('generating_apm_events', () => traceEvents)
+        ),
+        withClient(
+          logsEsClient,
+          logger.perf('generating_log_events', () => logEvents)
+        ),
+        withClient(
+          infraEsClient,
+          logger.perf('generating_infra_events', () => hostMetrics)
+        ),
       ];
     },
   };

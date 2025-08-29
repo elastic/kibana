@@ -11,8 +11,9 @@
  * Simulates a cascading failure caused by a slow downstream dependency.
  *
  * A slow database query in the `inventory-service` causes timeouts that cascade
- * up to the `product-recommendation` and user-facing `frontend-web` services,
- * resulting in a partial site outage.
+ * up to the `product-recommendation` and user-facing `frontend-web` services.
+ * The trace includes other healthy downstream dependencies (Redis, Elasticsearch)
+ * to make identifying the root cause more challenging.
  */
 
 import type { ApmFields, LogDocument } from '@kbn/apm-synthtrace-client';
@@ -55,13 +56,26 @@ const scenario: Scenario<LogDocument | ApmFields> = async (runOptions) => {
       const inventoryService = apm
         .service({ name: 'inventory-service', agentName: 'nodejs', environment: ENVIRONMENT })
         .instance('is-1');
+      const userPreferenceService = apm
+        .service({ name: 'user-preference-service', agentName: 'python', environment: ENVIRONMENT })
+        .instance('ups-1');
 
       const traceEvents = timestamps.generator((timestamp) => {
         const traceId = generateLongId();
         const isIncident = timestamp > incidentStart && timestamp < incidentEnd;
 
         const inventoryServiceDuration = isIncident ? 5000 : 100;
-        const inventoryServiceOutcome = isIncident ? 'failure' : 'success';
+
+        const esSpan = inventoryService
+          .span({
+            spanName: 'GET /products/_search',
+            spanType: 'db',
+            spanSubtype: 'elasticsearch',
+          })
+          .outcome('success')
+          .duration(20)
+          .destination('elasticsearch')
+          .timestamp(timestamp + 5);
 
         const inventoryDbSpan = inventoryService
           .span({
@@ -69,21 +83,21 @@ const scenario: Scenario<LogDocument | ApmFields> = async (runOptions) => {
             spanType: 'db',
             spanSubtype: 'sql',
             ...(isIncident && {
-              'event.outcome': 'failure',
               'error.message': 'PostgreSQL query timed out for statement: SELECT * FROM products',
               'error.type': 'db_timeout',
             }),
           })
+          .outcome(isIncident ? 'failure' : 'success')
           .duration(inventoryServiceDuration * 0.8)
           .destination('postgres')
-          .timestamp(timestamp + 10);
+          .timestamp(timestamp + 30);
 
         const inventoryServiceTransaction = inventoryService
           .transaction({ transactionName: 'GET /products' })
           .timestamp(timestamp)
           .duration(inventoryServiceDuration)
-          .outcome(inventoryServiceOutcome)
-          .children(inventoryDbSpan);
+          .outcome(isIncident ? 'failure' : 'success')
+          .children(esSpan, inventoryDbSpan);
 
         if (isIncident) {
           inventoryServiceTransaction.errors(
@@ -95,26 +109,54 @@ const scenario: Scenario<LogDocument | ApmFields> = async (runOptions) => {
           );
         }
 
-        const productRecommendationExit = productRecommendationService
+        const userPreferenceRedisSpan = userPreferenceService
+          .span({
+            spanName: 'GET user:123',
+            spanType: 'db',
+            spanSubtype: 'redis',
+          })
+          .duration(15)
+          .destination('redis')
+          .timestamp(timestamp + 5);
+
+        const userPreferenceTransaction = userPreferenceService
+          .transaction({ transactionName: 'GET /preferences' })
+          .timestamp(timestamp)
+          .duration(25)
+          .success()
+          .children(userPreferenceRedisSpan);
+
+        const recommendationToInventoryExit = productRecommendationService
           .span(
             httpExitSpan({
               spanName: 'GET /products',
               destinationUrl: 'http://inventory-service',
             })
           )
+          .outcome(isIncident ? 'failure' : 'success')
           .timestamp(timestamp)
           .duration(inventoryServiceDuration + 50)
           .children(inventoryServiceTransaction);
 
+        const recommendationToUserPreferenceExit = productRecommendationService
+          .span(
+            httpExitSpan({
+              spanName: 'GET /preferences',
+              destinationUrl: 'http://user-preference-service',
+            })
+          )
+          .timestamp(timestamp)
+          .duration(75)
+          .children(userPreferenceTransaction);
+
         const productRecommendationServiceDuration = isIncident ? 5100 : 150;
-        const productRecommendationServiceOutcome = isIncident ? 'failure' : 'success';
 
         const productRecommendationTransaction = productRecommendationService
           .transaction({ transactionName: 'GET /recommendations' })
           .timestamp(timestamp)
           .duration(productRecommendationServiceDuration)
-          .outcome(productRecommendationServiceOutcome)
-          .children(productRecommendationExit);
+          .outcome(isIncident ? 'failure' : 'success')
+          .children(recommendationToInventoryExit, recommendationToUserPreferenceExit);
 
         if (isIncident) {
           productRecommendationTransaction.errors(
@@ -126,6 +168,8 @@ const scenario: Scenario<LogDocument | ApmFields> = async (runOptions) => {
           );
         }
 
+        const frontendWebServiceDuration = isIncident ? 5200 : 200;
+
         const frontendWebExit = frontendWebService
           .span(
             httpExitSpan({
@@ -133,18 +177,16 @@ const scenario: Scenario<LogDocument | ApmFields> = async (runOptions) => {
               destinationUrl: 'http://product-recommendation-service',
             })
           )
+          .outcome(isIncident ? 'failure' : 'success')
           .timestamp(timestamp)
           .duration(productRecommendationServiceDuration + 50)
           .children(productRecommendationTransaction);
-
-        const frontendWebServiceDuration = isIncident ? 5200 : 200;
-        const frontendWebServiceOutcome = isIncident ? 'failure' : 'success';
 
         const frontendTransaction = frontendWebService
           .transaction({ transactionName: 'GET /products' })
           .timestamp(timestamp)
           .duration(frontendWebServiceDuration)
-          .outcome(frontendWebServiceOutcome)
+          .outcome(isIncident ? 'failure' : 'success')
           .children(frontendWebExit);
 
         if (isIncident) {
