@@ -30,15 +30,9 @@ import {
   setUsageCollectionStart,
 } from './services';
 
-import { createVegaFn } from './vega_fn';
-import { vegaVisType } from './vega_type';
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
-
 import type { ConfigSchema } from '../server/config';
-
-import { getVegaInspectorView } from './vega_inspector';
-import { getVegaVisRenderer } from './vega_vis_renderer';
-import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
+import { registerVegaVis } from './register_vis';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -75,28 +69,11 @@ export class VegaPlugin implements Plugin<void, void> {
     this.initializerContext = initializerContext;
   }
 
-  public setup(
-    core: CoreSetup,
-    { inspector, data, expressions, visualizations }: VegaPluginSetupDependencies
-  ) {
+  public setup(core: CoreSetup, deps: VegaPluginSetupDependencies) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
     });
-
-    const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
-      core,
-      plugins: {
-        data,
-      },
-      getServiceSettings: getServiceSettingsLazy,
-    };
-
-    inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
-
-    expressions.registerFunction(() => createVegaFn(visualizationDependencies));
-    expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
-
-    visualizations.createBaseVisualization(vegaVisType);
+    registerVegaVis(core, deps);
   }
 
   public start(core: CoreStart, deps: VegaPluginStartDependencies) {
