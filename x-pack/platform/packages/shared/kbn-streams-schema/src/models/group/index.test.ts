@@ -59,6 +59,7 @@ describe('GroupStream', () => {
         },
         dashboards: [],
         queries: [],
+        rules: [],
       },
     ])('is valid', (val) => {
       expect(GroupStream.GetResponse.is(val)).toBe(true);
@@ -104,6 +105,7 @@ describe('GroupStream', () => {
       {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           group: {
