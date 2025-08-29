@@ -14,6 +14,7 @@ import type {
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { Streams } from '@kbn/streams-schema';
 import type { SearchHit } from '@kbn/es-types';
+import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
 import type { StreamsStorageClient, StreamsStorageSettings } from './service';
 import { streamsStorageSettings } from './service';
 import { migrateOnRead } from './helpers/migrate_on_read';
@@ -66,7 +67,9 @@ async function findStreams({
   const [coreStart] = await core.getStartServices();
   const soClient = coreStart.savedObjects.getUnsafeInternalClient();
   const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-  const groupStreamsEnabled = await uiSettingsClient.get('observability:streamsEnableGroupStreams');
+  const groupStreamsEnabled = await uiSettingsClient.get(
+    OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS
+  );
 
   // This does NOT included unmanaged Classic streams
   const searchResponse = await storageClient.search({
