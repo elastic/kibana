@@ -16,3 +16,5 @@ export {
   TIKA_PREVIEW_CHARS,
   INDEX_META_DATA_CREATED_BY,
 } from './src/constants';
+
+export { FileReaderBase, MessageReader, NdjsonReader, TikaReader } from './src/file_reader';

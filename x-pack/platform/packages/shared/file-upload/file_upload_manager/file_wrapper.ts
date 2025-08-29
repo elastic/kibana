@@ -166,7 +166,8 @@ export class FileWrapper {
     try {
       const resp = await this.fileUpload.analyzeFile(
         fileContents,
-        overrides as Record<string, string>
+        overrides as Record<string, string>,
+        true
       );
 
       const serverSettings = processResults(resp);

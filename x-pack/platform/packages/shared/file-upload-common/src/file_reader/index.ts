@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { NdjsonReader } from '@kbn/file-upload-common';
-import { Importer } from './importer';
-
-export class NdjsonImporter extends Importer {
-  constructor() {
-    super();
-    this._reader = new NdjsonReader();
-  }
-}
+export { FileReaderBase } from './file_reader_base';
+export { MessageReader } from './message_reader';
+export { NdjsonReader } from './ndjson_reader';
+export { TikaReader } from './tika_reader';
