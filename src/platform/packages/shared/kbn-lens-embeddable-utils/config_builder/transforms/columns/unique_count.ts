@@ -10,11 +10,7 @@
 import type { CardinalityIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiUniqueCountMetricOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
-import {
-  LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-  getLensAPIMetricSharedProps,
-  getLensStateMetricSharedProps,
-} from './utils';
+import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
 function ofName(field: string): string {
   return `Unique Count of ${field}`;
