@@ -98,6 +98,7 @@ export function fromSumMetricLensStateToAPI(
   return {
     operation: 'sum',
     field: options.sourceField,
+    empty_as_null: Boolean(options.params?.emptyAsNull),
     ...getLensAPIMetricSharedProps(options, ofName(options.sourceField, 'sum')),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };

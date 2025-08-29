@@ -66,7 +66,12 @@ import { fromCumulativeSumAPItoLensState, fromCumulativeSumLensStateToAPI } from
 import { fromCounterRateAPItoLensState, fromCounterRateLensStateToAPI } from './counter_rate';
 import { fromMovingAverageAPItoLensState, fromMovingAverageLensStateToAPI } from './moving_average';
 import type { AnyMetricLensStateColumn, ReferableMetricLensStateColumn } from './types';
-import { isAPIColumnOfType, isApiColumnOfReferableType, isLensStateColumnOfType } from './utils';
+import {
+  LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+  isAPIColumnOfType,
+  isApiColumnOfReferableType,
+  isLensStateColumnOfType,
+} from './utils';
 
 /**
  * Specialized function signatures for transforming metric API operations to Lens state columns
@@ -171,7 +176,11 @@ export function fromMetricAPItoLensState(
     ];
   }
   if (isAPIColumnOfType<LensApiCumulativeSumOperation>('cumulative_sum', options)) {
-    const [refColumn] = fromMetricAPItoLensState({ operation: 'sum', field: options.field });
+    const [refColumn] = fromMetricAPItoLensState({
+      operation: 'sum',
+      field: options.field,
+      empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+    });
     if (!refColumn || !('sourceField' in refColumn)) {
       return [];
     }

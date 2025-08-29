@@ -22,6 +22,7 @@ import type {
 import { fromBucketLensApiToLensState, fromBucketLensStateToAPI } from './buckets';
 import type { AnyMetricLensStateColumn } from './types';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 
 describe('Buckets Transforms', () => {
   describe('fromBucketLensApiToLensState', () => {
@@ -102,7 +103,14 @@ describe('Buckets Transforms', () => {
 
   describe('fromBucketLensStateToAPI', () => {
     const metricColumns: { column: LensApiAllMetricOperations; id: string }[] = [
-      { column: { operation: 'sum', field: 'value' }, id: 'metricCol1' },
+      {
+        column: {
+          operation: 'sum',
+          field: 'value',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+        id: 'metricCol1',
+      },
       { column: { operation: 'average', field: 'score' }, id: 'metricCol2' },
     ];
     it('should transform filters lens state to API', () => {
