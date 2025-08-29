@@ -74,7 +74,6 @@ export interface IndexEditorError {
 
 export enum IndexEditorErrors {
   GENERIC_SAVING_ERROR = 'genericSavingError',
-  NO_DATA_TO_SAVE_ERROR = 'noDataToSaveError',
   PARTIAL_SAVING_ERROR = 'partialSavingError',
   FILE_REJECTION_ERROR = 'fileRejectionError',
   FILE_TOO_BIG_ERROR = 'fileTooBigError',
