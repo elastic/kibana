@@ -973,7 +973,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           },
         },
         summary: `Change agent privilege level`,
-        description: `Change the privilege level of a single agent.`,
+        description: `Change the privilege level of a single agent to unprivileged.`,
         options: {
           tags: ['oas-tag:Elastic Agents'],
         },
