@@ -8,8 +8,7 @@
  */
 
 import { resolve, dirname } from 'path';
-import { glob } from 'fs/promises';
-import { readFile } from 'fs/promises';
+import { readFile, glob } from 'fs/promises';
 
 interface I18NRCFileStructure {
   translations?: string[];
