@@ -14,6 +14,7 @@ import {
   switchMap,
   Subscription,
   from,
+  skipWhile,
 } from 'rxjs';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
@@ -97,6 +98,8 @@ export class InfluencersStateService extends StateService {
         this._refresh$,
       ])
         .pipe(
+          // selectedCells is initially undefined, so we skip until it's loaded
+          skipWhile(([, selectedCells]) => selectedCells === undefined),
           switchMap(([selectedJobs, selectedCells, viewByFieldName, influencersFilterQuery]) => {
             const selectionInfluencers = getSelectionInfluencers(selectedCells, viewByFieldName!);
 
