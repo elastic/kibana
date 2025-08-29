@@ -12,33 +12,33 @@ import type * as EsTree from 'estree';
 
 const messages = {
   awaitInLoop:
-    'Avoid using await inside loops. Consider collecting promises and awaiting Promise.all for concurrency.',
+    'Avoid using await inside loops. Consider collecting promises and awaiting Promise.all for concurrency. (score=5)',
   arraySpreadConcat:
-    'Using array spread in concatenation inside hot paths can be costly. Prefer push/apply or preallocate when possible.',
+    'Using array spread in concatenation inside hot paths can be costly. Prefer push/apply or preallocate when possible. (score=3)',
   largeObjectSpread:
-    'Object spread in tight loops can cause allocations. Consider mutating a preallocated object or moving spread out of the loop.',
+    'Object spread in tight loops can cause allocations. Consider mutating a preallocated object or moving spread out of the loop. (score=3)',
   mapForSideEffects:
-    'Array.map is meant for transformations. For side effects use forEach; for performance-critical paths, consider a for loop.',
+    'Array.map is meant for transformations. For side effects use forEach; for performance-critical paths, consider a for loop. (score=1)',
   nPlusOneAwait:
-    'Detected potential N+1 async pattern. Batch requests or use Promise.all to parallelize.',
+    'Detected potential N+1 async pattern. Batch requests or use Promise.all to parallelize. (score=5)',
   regexInLoop:
-    'RegExp creation or heavy parsing inside loops can be expensive. Hoist the RegExp or parsed value outside the loop.',
+    'RegExp creation or heavy parsing inside loops can be expensive. Hoist the RegExp or parsed value outside the loop. (score=3)',
   jsonParseInLoop:
-    'JSON.parse/stringify inside tight loops can be costly. Hoist or avoid when possible.',
+    'JSON.parse/stringify inside tight loops can be costly. Hoist or avoid when possible. (score=4)',
   jsxInlineFunction:
-    'Avoid inline functions in JSX props; define handlers with useCallback or as stable methods to prevent unnecessary re-renders.',
+    'Avoid inline functions in JSX props; define handlers with useCallback or as stable methods to prevent unnecessary re-renders. (score=2)',
   jsxInlineObject:
-    'Avoid creating new object/array literals in JSX props; hoist or memoize to keep prop identity stable.',
+    'Avoid creating new object/array literals in JSX props; hoist or memoize to keep prop identity stable. (score=2)',
   arrayConcatInLoop:
-    'Array.concat inside loops allocates new arrays. Prefer push or pre-sizing when possible.',
+    'Array.concat inside loops allocates new arrays. Prefer push or pre-sizing when possible. (score=4)',
   membershipLinearInLoop:
-    'Linear membership checks (includes/indexOf) inside loops are O(n^2). Consider using a Set/Map for O(1) lookups.',
+    'Linear membership checks (includes/indexOf) inside loops are O(n^2). Consider using a Set/Map for O(1) lookups. (score=5)',
   bindInLoop:
-    'Function.bind inside loops allocates. Hoist bound functions or use stable arrow functions created once.',
+    'Function.bind inside loops allocates. Hoist bound functions or use stable arrow functions created once. (score=3)',
   tryCatchInLoop:
-    'try/catch inside tight loops may impact performance. Move it outside the loop if possible.',
+    'try/catch inside tight loops may impact performance. Move it outside the loop if possible. (score=2)',
   chainedArrayMethods:
-    'Multiple array transformations chained (map/filter/reduce/flatMap). Consider a single-pass loop for performance-critical paths.',
+    'Multiple array transformations chained (map/filter/reduce/flatMap). Consider a single-pass loop for performance-critical paths. (score=3)',
 } as const;
 
 export const CodeShouldBePerformant: EsLint.Rule.RuleModule = {

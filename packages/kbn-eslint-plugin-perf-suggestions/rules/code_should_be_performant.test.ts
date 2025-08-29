@@ -70,61 +70,111 @@ for (const [name, tester] of [tsTester, babelTester]) {
         {
           filename: 'foo.ts',
           code: `async function f(items){ for (const it of items){ await load(it); } }`,
-          errors: [{ messageId: 'awaitInLoop' }],
+          errors: [
+            {
+              message:
+                'Avoid using await inside loops. Consider collecting promises and awaiting Promise.all for concurrency. (score=5)',
+            },
+          ],
         },
         // array spread in loop
         {
           filename: 'foo.ts',
           code: `function g(arr){ for (let i=0;i<10;i++){ const x=[...arr, i]; } }`,
-          errors: [{ messageId: 'arraySpreadConcat' }],
+          errors: [
+            {
+              message:
+                'Using array spread in concatenation inside hot paths can be costly. Prefer push/apply or preallocate when possible. (score=3)',
+            },
+          ],
         },
         // object spread in loop
         {
           filename: 'foo.ts',
           code: `function h(obj){ for (const k in obj){ const y = { ...obj, k }; } }`,
-          errors: [{ messageId: 'largeObjectSpread' }],
+          errors: [
+            {
+              message:
+                'Object spread in tight loops can cause allocations. Consider mutating a preallocated object or moving spread out of the loop. (score=3)',
+            },
+          ],
         },
         // map used for side effects only
         {
           filename: 'foo.ts',
           code: `function s(arr){ arr.map(x => console.log(x)); }`,
-          errors: [{ messageId: 'mapForSideEffects' }],
+          errors: [
+            {
+              message:
+                'Array.map is meant for transformations. For side effects use forEach; for performance-critical paths, consider a for loop. (score=1)',
+            },
+          ],
         },
         // JSON.parse in loop
         {
           filename: 'foo.ts',
           code: `function p(ss){ for (const s of ss){ JSON.parse(s); } }`,
-          errors: [{ messageId: 'jsonParseInLoop' }],
+          errors: [
+            {
+              message:
+                'JSON.parse/stringify inside tight loops can be costly. Hoist or avoid when possible. (score=4)',
+            },
+          ],
         },
         // RegExp in loop
         {
           filename: 'foo.ts',
           code: `function r(strs){ for (const s of strs){ const re = new RegExp('a'); } }`,
-          errors: [{ messageId: 'regexInLoop' }],
+          errors: [
+            {
+              message:
+                'RegExp creation or heavy parsing inside loops can be expensive. Hoist the RegExp or parsed value outside the loop. (score=3)',
+            },
+          ],
         },
         // React: inline handler in JSX
         {
           filename: 'comp.tsx',
           code: `const Comp = () => <button onClick={() => console.log('x')}>x</button>;`,
-          errors: [{ messageId: 'jsxInlineFunction' }],
+          errors: [
+            {
+              message:
+                'Avoid inline functions in JSX props; define handlers with useCallback or as stable methods to prevent unnecessary re-renders. (score=2)',
+            },
+          ],
         },
         // React: inline function expression
         {
           filename: 'comp.tsx',
           code: `const Comp = () => <button onClick={function(){}} />;`,
-          errors: [{ messageId: 'jsxInlineFunction' }],
+          errors: [
+            {
+              message:
+                'Avoid inline functions in JSX props; define handlers with useCallback or as stable methods to prevent unnecessary re-renders. (score=2)',
+            },
+          ],
         },
         // React: inline object literal prop
         {
           filename: 'comp.tsx',
           code: `const Comp = () => <div style={{ color: 'red' }} />;`,
-          errors: [{ messageId: 'jsxInlineObject' }],
+          errors: [
+            {
+              message:
+                'Avoid creating new object/array literals in JSX props; hoist or memoize to keep prop identity stable. (score=2)',
+            },
+          ],
         },
         // React: inline array literal prop
         {
           filename: 'comp.tsx',
           code: `const Comp = () => <List items={[1,2,3]} />;`,
-          errors: [{ messageId: 'jsxInlineObject' }],
+          errors: [
+            {
+              message:
+                'Avoid creating new object/array literals in JSX props; hoist or memoize to keep prop identity stable. (score=2)',
+            },
+          ],
         },
       ],
     });
