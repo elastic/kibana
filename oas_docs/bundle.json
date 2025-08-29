@@ -41852,9 +41852,9 @@
             }
           }
         },
-        "summary": "Get CCR Remote synced integrations status",
+        "summary": "Get Fleet Remote synced integrations status",
         "tags": [
-          "CCR Remote synced integrations"
+          "Fleet Remote synced integrations"
         ]
       }
     },
@@ -42047,9 +42047,9 @@
             }
           }
         },
-        "summary": "Get CCR Remote synced integrations status by outputId",
+        "summary": "Get Fleet Remote synced integrations status by outputId",
         "tags": [
-          "CCR Remote synced integrations"
+          "Fleet Remote synced integrations"
         ]
       }
     },
@@ -66006,9 +66006,6 @@
       "name": "alerting"
     },
     {
-      "name": "CCR Remote synced integrations"
-    },
-    {
       "name": "connectors"
     },
     {
@@ -66046,6 +66043,9 @@
     },
     {
       "name": "Fleet proxies"
+    },
+    {
+      "name": "Fleet Remote synced integrations"
     },
     {
       "name": "Fleet Server hosts"
