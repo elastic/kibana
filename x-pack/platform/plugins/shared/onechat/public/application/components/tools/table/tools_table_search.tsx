@@ -8,10 +8,9 @@
 import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
 import { EuiSearchBar } from '@elastic/eui';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { ToolType } from '@kbn/onechat-common';
+import type { ToolType } from '@kbn/onechat-common';
 import { countBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useToolsPreferences } from '../../../context/tools_preferences_provider';
 import { useToolsTags } from '../../../hooks/tools/use_tool_tags';
 import { useToolsService } from '../../../hooks/tools/use_tools';
 import { useQueryState } from '../../../hooks/use_query_state';
@@ -29,67 +28,37 @@ const toValidSearchQuery = (query: string | null): string => {
 };
 
 const getToolsTableSearchConfig = ({
-  includeSystemTools,
   matchesByType,
   matchesByTag,
   tags,
 }: {
-  includeSystemTools: boolean;
   matchesByType: Record<ToolType, number>;
   matchesByTag: Record<string, number>;
   tags: string[];
-}): EuiSearchBarProps => ({
-  box: {
-    incremental: true,
-    placeholder: labels.tools.searchToolsPlaceholder,
-  },
-  filters: [
-    {
-      type: 'field_value_selection',
-      field: 'type',
-      name: labels.tools.typeFilter,
-      multiSelect: false,
-      options: [
-        {
-          value: ToolType.esql,
-          name: labels.tools.esqlLabel,
-          view: (
-            <ToolFilterOption
-              name={labels.tools.esqlLabel}
-              matches={matchesByType[ToolType.esql] ?? 0}
-            />
-          ),
-        },
-        ...(includeSystemTools
-          ? [
-              {
-                value: ToolType.builtin,
-                name: labels.tools.builtinLabel,
-                view: (
-                  <ToolFilterOption
-                    name={labels.tools.builtinLabel}
-                    matches={matchesByType[ToolType.builtin] ?? 0}
-                  />
-                ),
-              },
-            ]
-          : []),
-      ],
+}): EuiSearchBarProps => {
+  const labelsOptions = tags.map((tag) => ({
+    value: tag,
+    name: tag,
+    view: <ToolFilterOption name={tag} matches={matchesByTag[tag] ?? 0} />,
+  }));
+
+  return {
+    box: {
+      incremental: true,
+      placeholder: labels.tools.searchToolsPlaceholder,
     },
-    {
-      type: 'field_value_selection',
-      field: 'tags',
-      name: labels.tools.tagsFilter,
-      multiSelect: 'or',
-      options: tags.map((tag) => ({
-        value: tag,
-        name: tag,
-        view: <ToolFilterOption name={tag} matches={matchesByTag[tag] ?? 0} />,
-      })),
-      searchThreshold: 1,
-    },
-  ],
-});
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'tags',
+        name: labels.tools.tagsFilter,
+        multiSelect: 'or',
+        options: labelsOptions,
+        searchThreshold: 1,
+      },
+    ],
+  };
+};
 
 export interface ToolsTableSearch {
   searchConfig: Search;
@@ -97,9 +66,8 @@ export interface ToolsTableSearch {
 }
 
 export const useToolsTableSearch = (): ToolsTableSearch => {
-  const { includeSystemTools } = useToolsPreferences();
-  const { tools } = useToolsService({ includeSystemTools });
-  const { tags } = useToolsTags({ includeSystemTools });
+  const { tools } = useToolsService();
+  const { tags } = useToolsTags();
   const [results, setResults] = useState<ToolDefinitionWithSchema[]>(tools);
   const [searchQuery, setSearchQuery] = useQueryState('search', {
     defaultValue: '',
@@ -138,11 +106,11 @@ export const useToolsTableSearch = (): ToolsTableSearch => {
 
   const searchConfig: Search = useMemo(
     () => ({
-      ...getToolsTableSearchConfig({ includeSystemTools, matchesByType, matchesByTag, tags }),
+      ...getToolsTableSearchConfig({ matchesByType, matchesByTag, tags }),
       onChange: handleChange,
       query: searchQuery,
     }),
-    [includeSystemTools, handleChange, matchesByType, matchesByTag, tags, searchQuery]
+    [handleChange, matchesByType, matchesByTag, tags, searchQuery]
   );
   return {
     searchConfig,
