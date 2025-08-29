@@ -27,11 +27,11 @@ import {
 } from '@kbn/esql-ast';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import { isEqual, memoize } from 'lodash';
+import { isEqual } from 'lodash';
 import { useDebounceFn } from '@kbn/react-hooks';
-import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getLookupIndicesFromQuery } from '@kbn/esql-utils';
 import type { ESQLEditorDeps } from '../types';
+import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
 
 /**
  * Replace the index name in a join command.
@@ -147,36 +147,18 @@ export function appendIndexToJoinCommand(
   return BasicPrettyPrinter.multiline(root);
 }
 
-export type IndexPrivileges = SecurityHasPrivilegesResponse['index'];
-
-/** Helper to determine if a privilege is granted either globally (*) or for the specific index */
-const hasPrivilege = (
-  privileges: IndexPrivileges,
-  index: string,
-  permission: keyof IndexPrivileges[string]
-): boolean => !!(privileges['*']?.[permission] || privileges[index]?.[permission]);
-
 /**
  * Hook to determine if the current user has the necessary privileges to create a lookup index.
  */
 export const useCanCreateLookupIndex = () => {
-  const {
-    services: { http },
-  } = useKibana<ESQLEditorDeps>();
-
-  const memoizedFetchPrivileges = useRef(
-    memoize(async (indexName: string) => {
-      return http!.get<IndexPrivileges>(`/internal/esql/lookup_index/privileges`, {
-        query: { indexName },
-      });
-    })
-  );
+  const { getPermissions } = useLookupIndexPrivileges();
 
   const { run } = useDebounceFn(
     async (indexName: string) => {
+      if (!indexName) return false;
       try {
-        const response = await memoizedFetchPrivileges.current(indexName);
-        return hasPrivilege(response, indexName, 'create_index');
+        const permissions = await getPermissions([indexName]);
+        return permissions[indexName]?.canCreateIndex ?? false;
       } catch (e) {
         return false;
       }
@@ -204,8 +186,9 @@ export const useLookupIndexCommand = (
 ) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { uiActions, docLinks, http },
+    services: { uiActions, docLinks },
   } = useKibana<ESQLEditorDeps>();
+  const { getPermissions } = useLookupIndexPrivileges();
 
   const inQueryLookupIndices = useRef<string[]>([]);
 
@@ -217,17 +200,6 @@ export const useLookupIndexCommand = (
       }
     },
     [query.esql]
-  );
-
-  const getIndexPrivileges = useCallback(
-    (indexName: string, indicesPrivileges: IndexPrivileges) => {
-      return {
-        canCreateIndex: hasPrivilege(indicesPrivileges, indexName, 'create_index'),
-        canEditIndex: hasPrivilege(indicesPrivileges, indexName, 'write'),
-        canReadIndex: hasPrivilege(indicesPrivileges, indexName, 'read'),
-      };
-    },
-    []
   );
 
   const lookupIndexBaseBadgeClassName = 'lookupIndexBadge';
@@ -247,32 +219,6 @@ export const useLookupIndexCommand = (
       border-bottom: ${euiTheme.border.width.thick} dotted ${euiTheme.colors.textParagraph};
     }
   `;
-
-  const memoizedFetchPrivileges = useRef(
-    memoize(async (indexName: string) => {
-      return http!.get<IndexPrivileges>(`/internal/esql/lookup_index/privileges`, {
-        query: { indexName },
-      });
-    })
-  );
-
-  const fetchUserPrivileges = useCallback(async (indexNames: string[]) => {
-    try {
-      const response = (await Promise.all(
-        indexNames.map((v) => memoizedFetchPrivileges.current(v))
-      )) as Array<IndexPrivileges>;
-      return response.reduce((acc, curr) => {
-        return {
-          ...acc,
-          ...curr,
-        };
-      }, {} as IndexPrivileges);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error fetching user privileges:', error);
-      return {};
-    }
-  }, []);
 
   // TODO: Replace with the actual lookup index docs URL once it's available
   // @ts-ignore
@@ -296,7 +242,7 @@ export const useLookupIndexCommand = (
       const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
 
       const lookupIndices: string[] = inQueryLookupIndices.current;
-      const privileges = await fetchUserPrivileges(lookupIndices);
+      const permissions = await getPermissions(lookupIndices);
 
       // we need to remove the previous decorations first
       const lineCount = editorModel.current?.getLineCount() || 1;
@@ -312,10 +258,7 @@ export const useLookupIndexCommand = (
         const lookupIndex = lookupIndices[i];
 
         const isExistingIndex = existingIndices.indices.some((index) => index.name === lookupIndex);
-        const { canCreateIndex, canReadIndex, canEditIndex } = getIndexPrivileges(
-          lookupIndex,
-          privileges
-        );
+        const { canCreateIndex, canReadIndex, canEditIndex } = permissions[lookupIndex];
 
         const matches =
           editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
