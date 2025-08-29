@@ -170,14 +170,20 @@ export function getMonitorByServiceName(
             };
           });
 
-          const suggestions = monitorsOverviewMetaData.map((monitor) => {
+          const suggestions = monitorsOverviewMetaData.flatMap((monitor) => {
             const url = locator?.getRedirectUrl({
               configId: monitor.configId,
               locationId: monitor.locationId,
               spaceId: monitor.spaces ?? [],
             });
+            if (!url) {
+              logger.debug(
+                `No URL found for monitor ${monitor.name} with service ${monitor.service.name}`
+              );
+              return [];
+            }
             const item: AttachmentItem<SyntheticsSuggestion> = {
-              description: `Synthetic ${monitor.name} is ${monitor.status} for the service: ${monitor.service.name} `,
+              description: `Synthetic ${monitor.name} is ${monitor.status} for the service: ${monitor.service.name}`,
               payload: monitor,
               attachment: {
                 type: 'persistableState' as Extract<
@@ -188,7 +194,7 @@ export function getMonitorByServiceName(
                 persistableStateAttachmentState: {
                   type: 'synthetics_history',
                   url: {
-                    pathAndQuery: url ?? '#',
+                    pathAndQuery: url,
                     label: monitor.name,
                     actionLabel: i18n.translate('xpack.synthetics.addToCase.caseAttachmentLabel', {
                       defaultMessage: 'Go to Synthetics monitor overview of {monitorName}',
@@ -199,17 +205,23 @@ export function getMonitorByServiceName(
                 },
               },
             };
-            return {
-              id: `synthetics-monitors-suggestion-${monitor.monitorQueryId}-${monitor.locationId}-${monitor.service.name}`,
-              componentId: 'synthetics',
-              description: i18n.translate('xpack.synthetics.addToCase.caseAttachmentDescription', {
-                defaultMessage:
-                  'The synthetics monitor {monitorName} might be related to this case with service {serviceName}',
-                values: { monitorName: monitor.name, serviceName: monitor.service.name },
-              }),
-              data: [item],
-            };
+            return [
+              {
+                id: `synthetics-monitors-suggestion-${monitor.monitorQueryId}-${monitor.locationId}-${monitor.service.name}`,
+                componentId: 'synthetics',
+                description: i18n.translate(
+                  'xpack.synthetics.addToCase.caseAttachmentDescription',
+                  {
+                    defaultMessage:
+                      'The synthetics monitor {monitorName} might be related to this case with service {serviceName}',
+                    values: { monitorName: monitor.name, serviceName: monitor.service.name },
+                  }
+                ),
+                data: [item],
+              },
+            ];
           });
+
           return { suggestions };
         },
       },

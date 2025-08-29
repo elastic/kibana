@@ -37,6 +37,9 @@ const mockElasticsearchHit = {
       space_id: 'default',
     },
     type: 'synthetics',
+    service: {
+      name: 'Test Service',
+    },
   },
 };
 
@@ -260,6 +263,7 @@ describe('getMonitorByServiceName', () => {
                       'status',
                       'observer.geo.name',
                       'observer.name',
+                      'service.name',
                       'monitor.id',
                       'config_id',
                       'url.full',
@@ -360,10 +364,12 @@ describe('getMonitorByServiceName', () => {
       expect(result.suggestions).toHaveLength(1);
 
       const suggestion = result.suggestions[0];
-      expect(suggestion.id).toBe('synthetics-monitors-suggestion-test-monitor-id-us-east-1');
+      expect(suggestion.id).toBe(
+        'synthetics-monitors-suggestion-test-monitor-id-us-east-1-Test Service'
+      );
       expect(suggestion.componentId).toBe('synthetics');
       expect(suggestion.description).toBe(
-        'The synthetics monitor Test Monitor might be related to this case with service test-service-1, test-service-2'
+        'The synthetics monitor Test Monitor might be related to this case with service Test Service'
       );
       expect(suggestion.data).toHaveLength(1);
     });
@@ -384,7 +390,7 @@ describe('getMonitorByServiceName', () => {
       const attachmentItem = result.suggestions[0].data[0];
 
       expect(attachmentItem.description).toBe(
-        'Synthetic Test Monitor is up for the service: test-service-1,test-service-2 '
+        'Synthetic Test Monitor is up for the service: Test Service'
       );
       expect(attachmentItem.payload).toMatchObject({
         monitorQueryId: 'test-monitor-id',
