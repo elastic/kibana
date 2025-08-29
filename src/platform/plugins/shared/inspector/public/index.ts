@@ -29,7 +29,7 @@ export {
   type Request,
   type RequestStatistic,
   type RequestStatistics,
-} from '../common';
+} from '@kbn/inspector-common';
 export { InspectorPublicPlugin as Plugin } from './plugin';
 export type { Setup, Start } from './plugin';
 export type {
