@@ -67,6 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream,
         dashboards: [],
         queries: [],
+        rules: [],
       });
       await alertingApi.deleteRules({ roleAuthc });
     });
@@ -91,6 +92,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream,
         dashboards: [],
         queries,
+        rules: [],
       });
       expect(updateStreamResponse).to.have.property('acknowledged', true);
 
@@ -147,6 +149,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream,
           dashboards: [],
           queries: [query],
+          rules: [],
         });
         const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
@@ -189,6 +192,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream,
           dashboards: [],
           queries: [query],
+          rules: [],
         });
         const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
@@ -234,6 +238,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             kql: { query: "message:'query'" },
           },
         ],
+        rules: [],
       });
 
       const deleteQueryResponse = await apiClient
@@ -280,6 +285,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream,
         dashboards: [],
         queries: [firstQuery, secondQuery, thirdQuery],
+        rules: [],
       });
       const initialRules = await alertingApi.searchRules(roleAuthc, '');
 

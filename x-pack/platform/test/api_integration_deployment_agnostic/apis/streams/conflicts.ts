@@ -170,6 +170,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             queries: [],
             dashboards: [],
+            rules: [],
           },
           500
         );
@@ -210,6 +211,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             queries: [],
             dashboards: [],
+            rules: [],
           },
           200
         );
