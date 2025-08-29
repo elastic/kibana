@@ -819,9 +819,39 @@ function PrimaryMetricEditor(props: SubProps) {
           customIconSet={metricIconsSet}
           value={state?.icon}
           onChange={(newIcon) => {
+            if (state.icon === newIcon) return;
+
+            // If no icon selected, remove icon and iconAlign properties from the state
+            if (newIcon === 'empty') {
+              const { icon, iconAlign, ...restState } = state;
+              setState({ ...restState });
+              return;
+            }
+
+            // If both icon and iconAlign are set, only update icon
+            if (state.icon && state.iconAlign) {
+              setState({
+                ...state,
+                icon: newIcon,
+              });
+              return;
+            }
+
+            // If icon is set but iconAlign is missing, set legacy align
+            if (state.icon && !state.iconAlign) {
+              setState({
+                ...state,
+                icon: newIcon,
+                iconAlign: 'left',
+              });
+              return;
+            }
+
+            // If icon is missing, always set iconAlign to the default
             setState({
               ...state,
               icon: newIcon,
+              iconAlign: metricStateDefaults.iconAlign,
             });
           }}
         />
