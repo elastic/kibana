@@ -233,7 +233,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
-    productFeaturesService.init(plugins.features);
+    productFeaturesService.setup(core, plugins);
 
     events.forEach((eventConfig) => {
       core.analytics.registerEventType(eventConfig);
@@ -311,7 +311,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       productFeaturesService,
     });
 
-    productFeaturesService.registerApiAccessControl(core.http);
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
@@ -639,6 +638,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+      defendInsightsPolicyResponseFailure:
+        config.experimentalFeatures.defendInsightsPolicyResponseFailure,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);

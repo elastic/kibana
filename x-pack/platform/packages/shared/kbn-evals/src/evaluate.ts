@@ -26,6 +26,7 @@ import type { DefaultEvaluators } from './types';
 import { reportModelScore } from './utils/report_model_score';
 import { createConnectorFixture } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
+import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 
 /**
  * Test type for evaluations. Loads an inference client and a
@@ -161,6 +162,12 @@ export const evaluate = base.extend<
         },
         correctnessAnalysis: () => {
           return createCorrectnessAnalysisEvaluator({
+            inferenceClient: evaluatorInferenceClient,
+            log,
+          });
+        },
+        groundednessAnalysis: () => {
+          return createGroundednessAnalysisEvaluator({
             inferenceClient: evaluatorInferenceClient,
             log,
           });
