@@ -1,13 +1,15 @@
 # Kibana API reference documentation
 
 Documentation about our OpenAPI bundling workflow and configuration.
-The finalized OpenAPI documents are published to [Kibana API](https://www.elastic.co/docs/api/doc/kibana) and [Kibana Serverless API](https://www.elastic.co/docs/api/doc/serverless) documentation.
+The finalized OpenAPI documents are published to [Kibana API docs](https://www.elastic.co/docs/api/doc/kibana) and [Kibana Serverless API docs](https://www.elastic.co/docs/api/doc/serverless).
 
 ## Workflow
 
-The final goal of this workflow is to produce an OpenAPI bundle containing all Kibana's public APIs.
+This workflow produces OpenAPI documents that contain all of the Kibana public APIs.
+It runs automatically by using Buildkite scripts.
+You can also generate the documents by using `make` commands.
 
-### Step 0
+### Step 1 - Generate OpenAPI from code
 
 Kibana OpenAPI specifications are extracted from the code by `@kbn/capture-oas-snapshot-cli`.
 In particular, it captures information about HTTP APIs that use the following components:
@@ -19,12 +21,11 @@ For more information about generating this snapshot, run `node scripts/capture_o
 
 Per [capture_oas_snapshot.sh](https://github.com/elastic/kibana/blob/main/.buildkite/scripts/steps/checks/capture_oas_snapshot.sh), OpenAPI snapshots are captured automatically for a specific list of endpoints.
 The results are stored in `oas_docs/bundle.json` and `oas_docs/bundle.serverless.json`.
-These bundles form the basis of our Kibana OpenAPI documents to which we append and layer extra information before publishing.
 
 NOTE: The `capture_oas_snapshot` script also validates the output files using `@kbn/validate-oas`.
 To see the validation results locally, run `node scripts/validate_oas_docs.js`.
 
-### Step 1
+### Step 2 - Merge more OpenAPI documents
 
 Information about some APIs cannot be extracted from code.
 In those cases, details exist in separate OpenAPI documents that are bundled together using [`kbn-openapi-bundler`](../src/platform/packages/shared/kbn-openapi-bundler/README.md).
@@ -38,10 +39,23 @@ Each of the OpenAPI documents listed in those scripts might have unique details 
 Refer to the readmes in each file path.
 To add more files into these documents, edit the appropriate `oas_docs/scripts/merge*.js` files.
 
-Per [final_merge.sh](https://github.com/elastic/kibana/blob/main/.buildkite/scripts/steps/openapi_bundling/final_merge.sh), the final OpenAPI documents are automatically bundled and stored in the `oas_docs/output` folder.
+### Step 2 - Apply overlays
+
+The files generated in the previous steps form the basis of our Kibana OpenAPI documents.
+However, if exceptional additions or cleanup are required, we can accomplish those changes by using overlays.
+
+Per [final_merge.sh](https://github.com/elastic/kibana/blob/main/.buildkite/scripts/steps/openapi_bundling/final_merge.sh), the final OpenAPI documents are automatically created and stored in the `oas_docs/output` folder.
 
 ## Make commands
 
 There is an `oas_docs/makefile` that contains commands that simplify the workflow.
 You can also use these commands locally to generate or lint the files.
-Use `make help` to see available commands.
+For example:
+
+```
+make api-docs
+make api-docs-lint
+```
+
+Use `make help` for the full list of commands.
+
