@@ -240,7 +240,7 @@ export class ScopedDiscoverEBTManager {
     if (isOfAggregateQueryType(query)) {
       // ES|QL query
 
-      if (query.esql === '') {
+      if (query.esql.trim() === '') {
         return;
       }
 
@@ -258,7 +258,7 @@ export class ScopedDiscoverEBTManager {
     } else if (isOfQueryType(query)) {
       // KQL or Lucene query
 
-      if (typeof query.query !== 'string' || query.query === '') {
+      if (typeof query.query !== 'string' || query.query.trim() === '') {
         return;
       }
 
