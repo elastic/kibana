@@ -10,11 +10,7 @@
 import type { CountIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiCountMetricOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
-import {
-  LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-  getLensAPIMetricSharedProps,
-  getLensStateMetricSharedProps,
-} from './utils';
+import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
 export type CountColumnParams = CountIndexPatternColumn['params'];
 
@@ -36,7 +32,7 @@ export const fromCountAPItoLensState = (
     sourceField: field || '',
     ...getLensStateMetricSharedProps(options, ofName(field)),
     params: {
-      emptyAsNull: empty_as_null ?? LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+      emptyAsNull: empty_as_null,
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
     },
   };

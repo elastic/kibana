@@ -17,6 +17,7 @@ import {
   LENS_PERCENTILE_RANK_DEFAULT_VALUE,
   LENS_STATIC_VALUE_DEFAULT,
 } from './constants';
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../transforms/columns/utils';
 
 const genericOperationOptionsSchema = formatSchema.extends({
   /**
@@ -91,13 +92,12 @@ const emptyAsNullSchemaRawObject = {
   /**
    * Whether to consider null values as null
    */
-  empty_as_null: schema.maybe(
-    schema.boolean({
-      meta: {
-        description: 'Whether to consider null values as null',
-      },
-    })
-  ),
+  empty_as_null: schema.boolean({
+    meta: {
+      description: 'Whether to consider null values as null',
+    },
+    defaultValue: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+  }),
 };
 
 export const countMetricOperationSchema = fieldBasedOperationSharedSchema.extends({

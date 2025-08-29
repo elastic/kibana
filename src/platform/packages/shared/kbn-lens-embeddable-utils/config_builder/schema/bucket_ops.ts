@@ -18,11 +18,7 @@ import {
 } from './constants';
 import { formatSchema } from './format';
 
-export const bucketDateHistogramOperationSchema = schema.object({
-  /**
-   * Select bucket operation type
-   */
-  operation: schema.literal('date_histogram'),
+const labelSharedProp = {
   /**
    * Label for the operation
    */
@@ -33,6 +29,14 @@ export const bucketDateHistogramOperationSchema = schema.object({
       },
     })
   ),
+};
+
+export const bucketDateHistogramOperationSchema = schema.object({
+  /**
+   * Select bucket operation type
+   */
+  operation: schema.literal('date_histogram'),
+  ...labelSharedProp,
   /**
    * Field to be used for the date histogram
    */
@@ -82,16 +86,7 @@ export const bucketDateHistogramOperationSchema = schema.object({
 
 export const bucketTermsOperationSchema = formatSchema.extends({
   operation: schema.literal('terms'),
-  /**
-   * Label for the operation
-   */
-  label: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Label for the operation',
-      },
-    })
-  ),
+  ...labelSharedProp,
   /**
    * Fields to be used for the terms
    */
@@ -252,16 +247,7 @@ export const bucketTermsOperationSchema = formatSchema.extends({
 
 export const bucketFiltersOperationSchema = schema.object({
   operation: schema.literal('filters'),
-  /**
-   * Label for the operation
-   */
-  label: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Label for the operation',
-      },
-    })
-  ),
+  ...labelSharedProp,
   /**
    * Filters
    */
@@ -270,6 +256,7 @@ export const bucketFiltersOperationSchema = schema.object({
 
 export const bucketHistogramOperationSchema = formatSchema.extends({
   operation: schema.literal('histogram'),
+  ...labelSharedProp,
   /**
    * Label for the operation
    */
@@ -319,6 +306,7 @@ export const bucketHistogramOperationSchema = formatSchema.extends({
 
 export const bucketRangesOperationSchema = formatSchema.extends({
   operation: schema.literal('range'),
+  ...labelSharedProp,
   /**
    * Label for the operation
    */
