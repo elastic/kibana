@@ -122,7 +122,7 @@ export const WorkflowExecuteManualForm = ({
         </>
       )}
 
-      {/* Input Data Edsitor */}
+      {/* Input Data Editor */}
       <EuiFlexItem>
         <EuiFormRow
           label="Input Data"
