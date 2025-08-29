@@ -8,11 +8,11 @@ import type {
   MutableKibanaFeatureConfig,
   ProductFeaturesConfiguratorExtensions,
 } from '@kbn/security-solution-features';
-import { SECURITY_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
 import {
   ProductFeatureSecurityKey,
   SecuritySubFeatureId,
 } from '@kbn/security-solution-features/keys';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 
 export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = {
   security: {
@@ -36,7 +36,7 @@ export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = 
   },
 };
 
-// When endpointArtifactManagement PLI is enabled, the replacedBy to the siemV3 feature needs to
+// When endpointArtifactManagement PLI is enabled, the replacedBy to the SIEM feature needs to
 // account for the privileges of the additional sub-features that it introduces, migrating them correctly.
 // This needs to be done here because the replacements of serverless and ESS are different.
 export function updateGlobalArtifactManageReplacements(
@@ -46,13 +46,14 @@ export function updateGlobalArtifactManageReplacements(
   if (!replacedBy || !('default' in replacedBy)) {
     return;
   }
+
   // only "default" is overwritten, "minimal" is not as it does not includes Endpoint Exceptions ALL.
-  const v3Default = replacedBy.default.find(
-    ({ feature }) => feature === SECURITY_FEATURE_ID_V3 // Only for features that are replaced by siemV3 (siem and siemV2)
+  const siemDefault = replacedBy.default.find(
+    ({ feature }) => feature === SECURITY_FEATURE_ID // Only for SIEM feature replacements
   );
-  if (v3Default) {
+  if (siemDefault) {
     // Override replaced privileges from `all` to `minimal_all` with additional sub-features privileges
-    v3Default.privileges = [
+    siemDefault.privileges = [
       'minimal_all',
       // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
       // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
