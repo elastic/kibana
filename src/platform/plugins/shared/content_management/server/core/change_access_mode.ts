@@ -20,7 +20,7 @@ export class ChangeAccessModeService {
 
   async changeAccessMode(
     objects: Array<{ type: string; id: string; ctx: StorageContext }>,
-    options?: { accessMode?: 'read_only' | 'default' }
+    options: { accessMode: 'read_only' | 'default' }
   ): Promise<ChangeAccessModeResult> {
     const objectsByType = objects.reduce((acc, obj) => {
       if (!acc[obj.type]) {
@@ -51,11 +51,11 @@ export class ChangeAccessModeService {
           }
         } else {
           const ctx = typeObjects[0].ctx;
-          const objectsForStorage = typeObjects.map((obj) => ({ type: obj.type, id: obj.id }));
+          const idsForStorage = typeObjects.map((obj) => obj.id);
 
           const result = await contentTypeDefinition.storage.changeAccessMode(
             ctx,
-            objectsForStorage,
+            idsForStorage,
             options
           );
           results.push(...result.objects);

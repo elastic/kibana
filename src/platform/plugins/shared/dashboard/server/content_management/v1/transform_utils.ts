@@ -61,6 +61,7 @@ export function savedObjectToItem(
     namespaces,
     version,
     managed,
+    accessControl,
   } = savedObject;
   try {
     const dashboardState = transformDashboardOut(
@@ -86,6 +87,7 @@ export function savedObjectToItem(
           : references,
         version,
         managed,
+        ...(accessControl && { accessControl }),
       },
       error: null,
     };

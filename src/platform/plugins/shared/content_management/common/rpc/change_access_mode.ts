@@ -17,10 +17,12 @@
 
 import { schema } from '@kbn/config-schema';
 import type { ProcedureSchemas } from './types';
+import { versionSchema } from './constants';
 
 export const changeAccessModeSchemas: ProcedureSchemas = {
   in: schema.object(
     {
+      version: versionSchema,
       objects: schema.arrayOf(
         schema.object(
           {
@@ -33,9 +35,7 @@ export const changeAccessModeSchemas: ProcedureSchemas = {
       ),
       options: schema.object(
         {
-          accessMode: schema.maybe(
-            schema.oneOf([schema.literal('read_only'), schema.literal('default')])
-          ),
+          accessMode: schema.oneOf([schema.literal('read_only'), schema.literal('default')]),
         },
         { unknowns: 'forbid' }
       ),
@@ -63,12 +63,13 @@ export const changeAccessModeSchemas: ProcedureSchemas = {
 };
 
 export interface ChangeAccessModeIn {
+  version: number;
   objects: Array<{
     type: string;
     id: string;
   }>;
   options: {
-    accessMode?: 'read_only' | 'default';
+    accessMode: 'read_only' | 'default';
   };
 }
 

@@ -31,6 +31,8 @@ import type {
   dashboardSearchOptionsSchema,
   dashboardSearchResultsSchema,
   dashboardUpdateOptionsSchema,
+  dashboardChangeAccessModeOptionsSchema,
+  dashboardChangeAccessModeResultSchema,
   optionsSchema,
 } from './cm_services';
 import type { CONTENT_ID } from '../../../common/content_management';
@@ -74,3 +76,8 @@ export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
 export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardSearchResultsSchema>>;
+
+export type DashboardChangeAccessModeOptions = TypeOf<
+  typeof dashboardChangeAccessModeOptionsSchema
+>;
+export type DashboardChangeAccessModeOut = TypeOf<typeof dashboardChangeAccessModeResultSchema>;

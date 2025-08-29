@@ -90,8 +90,8 @@ export interface ContentStorage<
   /** Change access mode for items */
   changeAccessMode?(
     ctx: StorageContext,
-    objects: Array<{ type: string; id: string }>,
-    options?: { accessMode?: 'read_only' | 'default' }
+    ids: string[],
+    options: { accessMode: 'read_only' | 'default' }
   ): Promise<ChangeAccessModeResult>;
 
   /**

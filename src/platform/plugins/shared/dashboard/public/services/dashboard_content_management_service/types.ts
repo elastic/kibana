@@ -28,7 +28,7 @@ export interface DashboardContentManagementService {
   saveDashboardState: (props: SaveDashboardProps) => Promise<SaveDashboardReturn>;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
   updateDashboardMeta: (props: UpdateDashboardMetaProps) => Promise<void>;
-  changeAccessMode: () => Promise<void>;
+  changeAccessMode: (props: ChangeAccessModeProps) => Promise<void>;
 }
 
 /**
@@ -98,4 +98,12 @@ export interface FindDashboardsService {
   findById: (id: string) => Promise<FindDashboardsByIdResponse>;
   findByIds: (ids: string[]) => Promise<FindDashboardsByIdResponse[]>;
   findByTitle: (title: string) => Promise<{ id: string } | undefined>;
+}
+
+/**
+ * Types for changing access mode of dashboards
+ */
+export interface ChangeAccessModeProps {
+  ids: string[];
+  accessMode: 'read_only' | 'default';
 }

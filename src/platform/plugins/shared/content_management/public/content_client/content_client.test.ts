@@ -213,6 +213,7 @@ describe('#changeAccessMode', () => {
     const input: ChangeAccessModeIn = {
       objects: [{ type: 'testType', id: 'test-id' }],
       options: { accessMode: 'read_only' },
+      version: 1,
     };
     const output = { objects: [{ type: 'testType', id: 'test-id' }] };
     // @ts-ignore

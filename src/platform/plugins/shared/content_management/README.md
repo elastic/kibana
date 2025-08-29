@@ -20,8 +20,6 @@ The Content Management plugin provides the following methods for managing conten
 
 - `changeAccessMode()` - Change the access mode for content items
 
-**Note**: `changeAccessMode` is implemented as a dedicated service (similar to `mSearch`) rather than a CRUD operation, since it operates across multiple content types and doesn't fit the traditional Create/Read/Update/Delete paradigm.
-
 ## Testing
 
 Many parts of the Content Management service are implemented *in-memory*, hence it

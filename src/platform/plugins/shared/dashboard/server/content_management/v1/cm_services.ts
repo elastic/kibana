@@ -319,7 +319,7 @@ export const dashboardItemSchema = schema.object(
     originId: schema.maybe(schema.string()),
     accessControl: schema.maybe(
       schema.object({
-        owner: schema.string(),
+        owner: schema.maybe(schema.string()),
         accessMode: schema.maybe(
           schema.oneOf([schema.literal('default'), schema.literal('read_only')])
         ),
@@ -394,6 +394,29 @@ export const dashboardGetResultSchema = schema.object(
 export const dashboardCreateResultSchema = schema.object(
   {
     item: dashboardItemSchema,
+  },
+  { unknowns: 'forbid' }
+);
+
+export const dashboardChangeAccessModeOptionsSchema = schema.object(
+  {
+    accessMode: schema.oneOf([schema.literal('read_only'), schema.literal('default')]),
+  },
+  { unknowns: 'forbid' }
+);
+
+export const dashboardChangeAccessModeResultSchema = schema.object(
+  {
+    objects: schema.arrayOf(
+      schema.object(
+        {
+          type: schema.string(),
+          id: schema.string(),
+          error: schema.maybe(apiError),
+        },
+        { unknowns: 'forbid' }
+      )
+    ),
   },
   { unknowns: 'forbid' }
 );

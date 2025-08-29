@@ -35,6 +35,8 @@ import type {
   DashboardUpdateOptions,
   DashboardUpdateOut,
   DashboardSearchOptions,
+  DashboardChangeAccessModeOptions,
+  DashboardChangeAccessModeOut,
 } from './latest';
 
 const getRandomColor = (): string => {
@@ -472,5 +474,42 @@ export class DashboardStorage {
     }
 
     return value;
+  }
+
+  async changeAccessMode(
+    ctx: StorageContext,
+    ids: string[],
+    options: DashboardChangeAccessModeOptions
+  ): Promise<DashboardChangeAccessModeOut> {
+    const soClient = await savedObjectClientFromRequest(ctx);
+
+    const soObjects = ids.map((id) => ({
+      type: DASHBOARD_SAVED_OBJECT_TYPE,
+      id,
+    }));
+
+    try {
+      const result = await soClient.changeAccessMode(soObjects, options);
+
+      return {
+        objects: result.objects.map((obj) => ({
+          type: 'dashboard',
+          id: obj.id,
+          error: obj.error,
+        })),
+      };
+    } catch (error) {
+      return {
+        objects: ids.map((id) => ({
+          type: 'dashboard',
+          id,
+          error: {
+            error: 'Internal Server Error',
+            message: error instanceof Error ? error.message : 'Unknown error occurred',
+            statusCode: 500,
+          },
+        })),
+      };
+    }
   }
 }

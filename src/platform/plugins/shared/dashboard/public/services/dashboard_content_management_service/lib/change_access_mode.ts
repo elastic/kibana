@@ -7,6 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const changeAccessMode = async () => {
-  // TODO: Implement this
+import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
+import { contentManagementService } from '../../kibana_services';
+import type { ChangeAccessModeProps } from '../types';
+
+export const changeAccessMode = async ({
+  ids,
+  accessMode,
+}: ChangeAccessModeProps): Promise<void> => {
+  const objects = ids.map((id) => ({
+    type: DASHBOARD_CONTENT_ID,
+    id,
+  }));
+
+  await contentManagementService.client.changeAccessMode({
+    version: 1,
+    objects,
+    options: {
+      accessMode,
+    },
+  });
 };

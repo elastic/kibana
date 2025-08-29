@@ -16,12 +16,11 @@ import { getStorageContext, getServiceObjectTransformFactory } from '../../utils
 
 export const changeAccessMode: ProcedureDefinition<Context, ChangeAccessModeIn> = {
   schemas: rpcSchemas.changeAccessMode,
-  fn: async (ctx, { objects, options }) => {
+  fn: async (ctx, { version, objects, options }) => {
     const changeAccessModeService = new ChangeAccessModeService({
       contentRegistry: ctx.contentRegistry,
     });
 
-    // Group objects by content type to get proper version context
     const objectsByType = objects.reduce((acc, obj) => {
       if (!acc[obj.type]) {
         acc[obj.type] = [];
@@ -30,11 +29,11 @@ export const changeAccessMode: ProcedureDefinition<Context, ChangeAccessModeIn> 
       return acc;
     }, {} as Record<string, Array<{ type: string; id: string }>>);
 
-    // Map objects to include proper StorageContext for each
     const objectsWithCtx = [];
     for (const [contentTypeId, typeObjects] of Object.entries(objectsByType)) {
       const storageContext = getStorageContext({
         contentTypeId,
+        version,
         request: ctx.request,
         ctx: {
           contentRegistry: ctx.contentRegistry,
