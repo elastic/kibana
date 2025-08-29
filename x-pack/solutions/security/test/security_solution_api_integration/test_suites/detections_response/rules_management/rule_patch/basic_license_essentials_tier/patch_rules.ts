@@ -23,6 +23,7 @@ import {
   updateUsername,
 } from '../../../utils';
 import {
+  MOCK_PKG_VERSION,
   PREBUILT_RULE_ASSET_A,
   PREBUILT_RULE_ASSET_B,
   PREBUILT_RULE_ID_A,
@@ -34,7 +35,6 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
-  const retryService = getService('retry');
 
   describe('@ess @serverless @serverlessQA patch_rules', () => {
     describe('patch rules', () => {
@@ -239,28 +239,16 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
-        await retryService.tryWithRetries(
-          'installSecurityDetectionEnginePackage',
-          async () => {
-            const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
-              packageName: PREBUILT_RULES_PACKAGE_NAME,
-              // Use a high version to avoid conflicts with real packages
-              // including mock bundled packages path configured via "xpack.fleet.developer.bundledPackageLocation"
-              packageSemver: '99.0.0',
-              prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
-            });
+        const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
+          packageName: PREBUILT_RULES_PACKAGE_NAME,
+          packageSemver: MOCK_PKG_VERSION,
+          prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
+        });
 
-            await installFleetPackageByUpload({
-              getService,
-              packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
-            });
-          },
-          {
-            retryCount: 5,
-            retryDelay: 5000,
-            timeout: 15000, // total timeout applied to all attempts altogether
-          }
-        );
+        await installFleetPackageByUpload({
+          getService,
+          packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
+        });
 
         await installPrebuiltRules(es, supertest);
 
