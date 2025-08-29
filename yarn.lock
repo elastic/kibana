@@ -7496,6 +7496,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-code-examples@link:x-pack/solutions/search/packages/kbn-search-code-examples":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-connectors@link:src/platform/packages/shared/kbn-search-connectors":
   version "0.0.0"
   uid ""
