@@ -224,19 +224,6 @@ export const useLookupIndexCommand = (
   // @ts-ignore
   const lookupIndexDocsUrl = docLinks?.links.apis.createIndex;
 
-  monaco.editor.registerCommand(
-    'esql.lookup_index.create',
-    async (_, args: { indexName: string; doesIndexExist?: boolean; canEditIndex?: boolean }) => {
-      const { indexName, doesIndexExist, canEditIndex } = args;
-      await openFlyout(indexName, doesIndexExist, canEditIndex);
-    }
-  );
-
-  /**
-   * Adds decorations to the editor to indicate which lookup indices are used in the query.
-   * Because we pass a callback once on mount, the reference has to be stable.
-   *
-   */
   const { run: addLookupIndicesDecorator } = useDebounceFn(
     async () => {
       const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
@@ -360,6 +347,24 @@ export const useLookupIndexCommand = (
     },
     [onFlyoutClose, uiActions]
   );
+
+  const openFlyoutRef = useRef(openFlyout);
+  useEffect(() => {
+    openFlyoutRef.current = openFlyout;
+  }, [openFlyout]);
+
+  useEffect(function registerCommandOnMount() {
+    const disposable = monaco.editor.registerCommand(
+      'esql.lookup_index.create',
+      async (_, args: { indexName: string; doesIndexExist?: boolean; canEditIndex?: boolean }) => {
+        const { indexName, doesIndexExist, canEditIndex } = args;
+        await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex);
+      }
+    );
+    return () => {
+      disposable.dispose();
+    };
+  }, []);
 
   return {
     addLookupIndicesDecorator,
