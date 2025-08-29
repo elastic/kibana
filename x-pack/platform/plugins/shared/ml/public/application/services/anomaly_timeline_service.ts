@@ -215,29 +215,29 @@ export class AnomalyTimelineService {
     if (viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL) {
       const jobIds =
         fieldValues !== undefined && fieldValues.length > 0 ? fieldValues : selectedJobIds;
-      response = await this.mlResultsService.getScoresByBucket(
+      response = await this.mlApi.results.getScoresByBucket({
         jobIds,
-        searchBounds.min.valueOf(),
-        searchBounds.max.valueOf(),
+        earliestMs: searchBounds.min.valueOf(),
+        latestMs: searchBounds.max.valueOf(),
         intervalMs,
         perPage,
         fromPage,
-        swimLaneSeverity
-      );
+        swimLaneSeverity,
+      });
     } else {
-      response = await this.mlResultsService.getInfluencerValueMaxScoreByTime(
-        selectedJobIds,
-        viewBySwimlaneFieldName,
-        fieldValues,
-        searchBounds.min.valueOf(),
-        searchBounds.max.valueOf(),
+      response = await this.mlApi.results.getInfluencerValueMaxScoreByTime({
+        jobIds: selectedJobIds,
+        influencerFieldName: viewBySwimlaneFieldName,
+        influencerFieldValues: fieldValues,
+        earliestMs: searchBounds.min.valueOf(),
+        latestMs: searchBounds.max.valueOf(),
         intervalMs,
-        swimlaneLimit,
+        maxResults: swimlaneLimit,
         perPage,
         fromPage,
         influencersFilterQuery,
-        swimLaneSeverity
-      );
+        swimLaneSeverity,
+      });
     }
 
     if (response === undefined) {
@@ -302,15 +302,15 @@ export class AnomalyTimelineService {
       }
       return topFieldValues;
     } else {
-      const resp = await this.mlResultsService.getScoresByBucket(
-        selectedJobIds,
+      const resp = await this.mlApi.results.getScoresByBucket({
+        jobIds: selectedJobIds,
         earliestMs,
         latestMs,
-        bucketInterval.asMilliseconds(),
+        intervalMs: bucketInterval.asMilliseconds(),
         perPage,
         fromPage,
-        swimLaneSeverity
-      );
+        swimLaneSeverity,
+      });
       return Object.keys(resp.results);
     }
   }

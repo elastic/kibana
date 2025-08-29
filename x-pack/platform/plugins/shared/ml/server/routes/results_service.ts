@@ -27,7 +27,15 @@ import {
 } from './schemas/results_service_schema';
 import type { MlClient } from '../lib/ml_client';
 import { getTopInfluencers } from '../models/results_service/top_influencers';
-import { getTopInfluencersSchema } from './schemas/results_service_schema';
+import {
+  getScoresByBucket,
+  getInfluencerValueMaxScoreByTime,
+} from '../models/results_service/view_by';
+import {
+  getTopInfluencersSchema,
+  getScoresByBucketSchema,
+  getInfluencerValueMaxScoreByTimeSchema,
+} from './schemas/results_service_schema';
 
 function getAnomaliesTableData(mlClient: MlClient, payload: any) {
   const rs = resultsServiceProvider(mlClient);
@@ -522,6 +530,52 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
           return response.ok({
             body: resp,
           });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/results/view_by/scores_by_bucket`,
+      access: 'internal',
+      security: { authz: { requiredPrivileges: ['ml:canGetJobs'] } },
+      summary: 'Get job scores by bucket',
+      description: 'Returns max bucket scores per job over time for swimlane.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: { request: { body: getScoresByBucketSchema } },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const result = await getScoresByBucket(mlClient, request.body as any);
+          return response.ok({ body: result });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/results/view_by/influencer_values_by_time`,
+      access: 'internal',
+      security: { authz: { requiredPrivileges: ['ml:canGetJobs'] } },
+      summary: 'Get influencer field value max score by time',
+      description: 'Returns per-value max influencer scores over time for swimlane.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: { request: { body: getInfluencerValueMaxScoreByTimeSchema } },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const result = await getInfluencerValueMaxScoreByTime(mlClient, request.body as any);
+          return response.ok({ body: result });
         } catch (e) {
           return response.customError(wrapError(e));
         }

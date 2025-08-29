@@ -162,3 +162,31 @@ export const getTopInfluencersSchema = schema.object({
   ),
   influencersFilterQuery: schema.maybe(schema.any()),
 });
+
+export const getScoresByBucketSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  earliestMs: schema.number(),
+  latestMs: schema.number(),
+  intervalMs: schema.number(),
+  perPage: schema.maybe(schema.number()),
+  fromPage: schema.maybe(schema.number()),
+  swimLaneSeverity: schema.maybe(
+    schema.arrayOf(schema.object({ min: schema.number(), max: schema.maybe(schema.number()) }))
+  ),
+});
+
+export const getInfluencerValueMaxScoreByTimeSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  influencerFieldName: schema.string(),
+  influencerFieldValues: schema.maybe(schema.arrayOf(schema.string())),
+  earliestMs: schema.number(),
+  latestMs: schema.number(),
+  intervalMs: schema.number(),
+  maxResults: schema.maybe(schema.number()),
+  perPage: schema.maybe(schema.number()),
+  fromPage: schema.maybe(schema.number()),
+  influencersFilterQuery: schema.maybe(schema.any()),
+  swimLaneSeverity: schema.maybe(
+    schema.arrayOf(schema.object({ min: schema.number(), max: schema.maybe(schema.number()) }))
+  ),
+});

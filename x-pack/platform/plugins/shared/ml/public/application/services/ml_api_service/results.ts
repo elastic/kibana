@@ -254,6 +254,52 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       version: '1',
     });
   },
+
+  getScoresByBucket(payload: {
+    jobIds: string[];
+    earliestMs: number;
+    latestMs: number;
+    intervalMs: number;
+    perPage?: number;
+    fromPage?: number;
+    swimLaneSeverity?: Array<{ min: number; max?: number }>;
+  }) {
+    const body = JSON.stringify(payload);
+    return httpService.http<{
+      results: Record<string, Record<number, number>>;
+      cardinality: number;
+    }>({
+      path: `${ML_INTERNAL_BASE_PATH}/results/view_by/scores_by_bucket`,
+      method: 'POST',
+      body,
+      version: '1',
+    });
+  },
+
+  getInfluencerValueMaxScoreByTime(payload: {
+    jobIds: string[];
+    influencerFieldName: string;
+    influencerFieldValues?: string[];
+    earliestMs: number;
+    latestMs: number;
+    intervalMs: number;
+    maxResults?: number;
+    perPage?: number;
+    fromPage?: number;
+    influencersFilterQuery?: unknown;
+    swimLaneSeverity?: Array<{ min: number; max?: number }>;
+  }) {
+    const body = JSON.stringify(payload);
+    return httpService.http<{
+      results: Record<string, Record<number, number>>;
+      cardinality: number;
+    }>({
+      path: `${ML_INTERNAL_BASE_PATH}/results/view_by/influencer_values_by_time`,
+      method: 'POST',
+      body,
+      version: '1',
+    });
+  },
 });
 
 export type ResultsApiService = ReturnType<typeof resultsApiProvider>;

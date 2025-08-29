@@ -31,6 +31,7 @@ export function resultsServiceProvider(mlApi) {
     // Pass an empty array or ['*'] to search over all job IDs.
     // Returned response contains a results property, with a key for job
     // which has results for the specified time range.
+    // TODO: Remove once all occurencies are refactored to use the new API
     getScoresByBucket(
       jobIds,
       earliestMs,
@@ -348,6 +349,7 @@ export function resultsServiceProvider(mlApi) {
     // values (pass an empty array to search over all field values).
     // Returned response contains a results property with influencer field values keyed
     // against max score by time.
+    // TODO: Remove once all occurencies are refactored to use the new API
     getInfluencerValueMaxScoreByTime(
       jobIds,
       influencerFieldName,
