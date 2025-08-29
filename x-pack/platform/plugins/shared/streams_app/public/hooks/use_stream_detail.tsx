@@ -107,3 +107,21 @@ export function useStreamDetail() {
   }
   return ctx;
 }
+
+export function useStreamDetailAsIngestStream() {
+  const ctx = React.useContext(StreamDetailContext);
+  if (!ctx) {
+    throw new Error('useStreamDetail must be used within a StreamDetailContextProvider');
+  }
+  if (
+    !Streams.WiredStream.GetResponse.is(ctx.definition) &&
+    !Streams.ClassicStream.GetResponse.is(ctx.definition)
+  ) {
+    throw new Error('useStreamDetailAsIngestStream can only be used with IngestStreams');
+  }
+  return ctx as {
+    definition: Streams.ingest.all.GetResponse;
+    loading: boolean;
+    refresh: () => void;
+  };
+}
