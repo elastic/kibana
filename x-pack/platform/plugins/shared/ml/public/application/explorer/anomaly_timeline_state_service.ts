@@ -648,7 +648,7 @@ export class AnomalyTimelineStateService extends StateService {
   }
 
   public getSwimLanePagination$(): Observable<SwimLanePagination> {
-    return this._swimLanePagination$.asObservable();
+    return this._swimLanePagination$.asObservable().pipe(distinctUntilChanged(isEqual));
   }
 
   public getSwimLanePagination(): SwimLanePagination {
