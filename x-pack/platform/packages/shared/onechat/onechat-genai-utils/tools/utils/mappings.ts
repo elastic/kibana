@@ -30,7 +30,15 @@ interface MappingProperties {
 /**
  * Returns a flattened representation of the mappings, with all fields at the top level.
  */
-export const flattenMappings = ({ mappings }: { mappings: MappingTypeMapping }): MappingField[] => {
+export const flattenMappings = ({
+  mappings,
+}: {
+  mappings: MappingTypeMapping;
+  /** if true, will include internal (_*) fields */
+  includeInternalFields?: boolean;
+  /** if true, will include non indexed fields */
+  includeNonIndexedFields?: boolean;
+}): MappingField[] => {
   const properties: MappingProperties = mappings.properties ?? {};
 
   function extractFields(obj: MappingProperties, prefix = ''): MappingField[] {
@@ -60,12 +68,21 @@ export const flattenMappings = ({ mappings }: { mappings: MappingTypeMapping }):
 };
 
 /**
- * Remove non-relevant mapping information such as `ignore_above` to reduce overall token length of response
- * @param mapping
+ * Cleanup the given index mapping, removing info supposedly not relevant to an LLM,
+ * such as `ignore_above` and such, to reduce the overall token length of response.
  */
 export const cleanupMapping = (mapping: MappingTypeMapping): MappingTypeMapping => {
   const recurseKeys = ['properties', 'fields'];
-  const fieldsToKeep = ['type', 'dynamic', '_meta', 'meta', 'briefing', 'description', 'enabled'];
+  const fieldsToKeep = [
+    'type',
+    'dynamic',
+    '_meta',
+    'meta',
+    'briefing',
+    'description',
+    'index',
+    'enabled',
+  ];
 
   function recursiveCleanup(obj: Record<string, any>): Record<string, any> {
     if (Array.isArray(obj)) {

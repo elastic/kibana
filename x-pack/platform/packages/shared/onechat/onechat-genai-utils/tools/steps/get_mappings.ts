@@ -45,14 +45,18 @@ export interface GetDataStreamMappingEntry {
 
 export type GetDataStreamMappingsResults = Record<string, GetDataStreamMappingEntry>;
 
-interface GetDataStreamMappingsResItem {
+export interface GetDataStreamMappingsResItem {
   name: string;
-  effective_mappings: {
-    _doc: MappingTypeMapping;
-  };
+  // in the documentation the mappings are supposed to be directly under that prop,
+  // in practice it's under a _doc property, so we check both just in case.
+  effective_mappings:
+    | MappingTypeMapping
+    | {
+        _doc: MappingTypeMapping;
+      };
 }
 
-interface GetDataStreamMappingsRes {
+export interface GetDataStreamMappingsRes {
   data_streams: GetDataStreamMappingsResItem[];
 }
 
@@ -74,7 +78,10 @@ export const getDatastreamMappings = async ({
   });
 
   return response.data_streams.reduce((res, datastream) => {
-    const mappings = datastream.effective_mappings._doc;
+    const mappings =
+      '_doc' in datastream.effective_mappings
+        ? datastream.effective_mappings._doc
+        : datastream.effective_mappings;
     res[datastream.name] = {
       mappings: cleanup ? cleanupMapping(mappings) : mappings,
     };
