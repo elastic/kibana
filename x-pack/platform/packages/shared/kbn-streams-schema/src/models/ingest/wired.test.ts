@@ -154,6 +154,7 @@ describe('WiredStream', () => {
       {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           ingest: {
