@@ -57,4 +57,7 @@ export interface SyntheticsMonitorSource {
   meta: {
     space_id: string[];
   };
+  service: {
+    name: string;
+  };
 }

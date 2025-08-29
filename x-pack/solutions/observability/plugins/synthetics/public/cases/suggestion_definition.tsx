@@ -8,13 +8,14 @@
 import type { SuggestionChildrenProps, SuggestionType } from '@kbn/cases-plugin/public';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { SYNTHETICS_SUGGESTION_COMPONENT_ID } from '../../common/constants/cases';
 import type { SyntheticsSuggestion } from '../../common/types';
 import { store } from '../apps/synthetics/state';
 
 // Use named export from the module; do not assume a default export.
 // Wrap it in the Provider only once inside the lazy factory.
 export const syntheticsSuggestionDefinition: SuggestionType<SyntheticsSuggestion> = {
-  id: 'synthetics',
+  id: SYNTHETICS_SUGGESTION_COMPONENT_ID,
   owner: 'observability',
   children: React.lazy(() =>
     import('./suggestion_component').then(({ SyntheticsSuggestionChildren }) => {

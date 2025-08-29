@@ -93,6 +93,7 @@ export function getMonitorByServiceName(
                           'status',
                           'observer.geo.name',
                           'observer.name',
+                          'service.name',
                           'monitor.id',
                           'config_id',
                           'url.full',
@@ -142,42 +143,41 @@ export function getMonitorByServiceName(
             }
           }
 
-          const monitorsOverviewMetaData: Array<OverviewStatusMetaData> = monitors.map(
-            (monitor) => {
-              const source = monitor.latest_run.hits.hits[0]._source;
-              const relatedSavedObjectAttr: EncryptedSyntheticsMonitorAttributes =
-                savedObjectsAttrHash[source.config_id];
-              return {
-                monitorQueryId: source.monitor.id,
-                configId: source.config_id,
-                status: source.monitor.status ?? 'unknown',
-                name: source.monitor.name,
-                isEnabled: relatedSavedObjectAttr.enabled,
-                isStatusAlertEnabled: relatedSavedObjectAttr.alert?.status?.enabled ?? false,
-                type: source.monitor.type,
-                schedule: relatedSavedObjectAttr.schedule.number,
-                tags: relatedSavedObjectAttr.tags ?? [],
-                maintenanceWindows: relatedSavedObjectAttr.maintenance_windows ?? [],
-                timestamp: source['@timestamp'],
-                spaces: source.meta.space_id,
-                locationLabel: source.observer.geo.name,
-                locationId: source.observer.name,
-                urls: source.url.full,
-                projectId: relatedSavedObjectAttr.project_id,
-              };
-            }
-          );
+          const monitorsOverviewMetaData: Array<
+            OverviewStatusMetaData & { service: { name: string } }
+          > = monitors.map((monitor) => {
+            const source = monitor.latest_run.hits.hits[0]._source;
+            const relatedSavedObjectAttr: EncryptedSyntheticsMonitorAttributes =
+              savedObjectsAttrHash[source.config_id];
+            return {
+              monitorQueryId: source.monitor.id,
+              configId: source.config_id,
+              service: { name: source.service.name },
+              status: source.monitor.status ?? 'unknown',
+              name: source.monitor.name,
+              isEnabled: relatedSavedObjectAttr.enabled,
+              isStatusAlertEnabled: relatedSavedObjectAttr.alert?.status?.enabled ?? false,
+              type: source.monitor.type,
+              schedule: relatedSavedObjectAttr.schedule.number,
+              tags: relatedSavedObjectAttr.tags ?? [],
+              maintenanceWindows: relatedSavedObjectAttr.maintenance_windows ?? [],
+              timestamp: source['@timestamp'],
+              spaces: source.meta.space_id,
+              locationLabel: source.observer.geo.name,
+              locationId: source.observer.name,
+              urls: source.url.full,
+              projectId: relatedSavedObjectAttr.project_id,
+            };
+          });
 
           const suggestions = monitorsOverviewMetaData.map((monitor) => {
             const url = locator?.getRedirectUrl({
               configId: monitor.configId,
               locationId: monitor.locationId,
-              spaceId: (monitor.spaces ?? [])[0],
+              spaceId: monitor.spaces ?? [],
             });
             const item: AttachmentItem<SyntheticsSuggestion> = {
-              description: `Synthetic ${monitor.name} is ${
-                monitor.status
-              } for the service: ${serviceNames.join(',')} `,
+              description: `Synthetic ${monitor.name} is ${monitor.status} for the service: ${monitor.service.name} `,
               payload: monitor,
               attachment: {
                 type: 'persistableState' as Extract<
@@ -200,12 +200,12 @@ export function getMonitorByServiceName(
               },
             };
             return {
-              id: `synthetics-monitors-suggestion-${monitor.monitorQueryId}-${monitor.locationId}`,
+              id: `synthetics-monitors-suggestion-${monitor.monitorQueryId}-${monitor.locationId}-${monitor.service.name}`,
               componentId: 'synthetics',
               description: i18n.translate('xpack.synthetics.addToCase.caseAttachmentDescription', {
                 defaultMessage:
                   'The synthetics monitor {monitorName} might be related to this case with service {serviceName}',
-                values: { monitorName: monitor.name, serviceName: serviceNames.join(', ') },
+                values: { monitorName: monitor.name, serviceName: monitor.service.name },
               }),
               data: [item],
             };

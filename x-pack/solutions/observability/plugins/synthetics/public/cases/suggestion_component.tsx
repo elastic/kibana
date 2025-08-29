@@ -16,16 +16,9 @@ import {
   trendStatsBatch,
 } from '../apps/synthetics/state';
 import type { SyntheticsSuggestion } from '../../common/types';
-import type { FlyoutParamProps } from '../apps/synthetics/components/monitors_page/overview/overview/types';
 import { quietFetchOverviewStatusAction } from '../apps/synthetics/state/overview_status';
 
-const MonitorItem = ({
-  monitor,
-  suggestionId,
-}: {
-  monitor: OverviewStatusMetaData;
-  suggestionId: string;
-}) => {
+const MonitorItem = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
   const dispatch = useDispatch();
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
 
@@ -48,15 +41,7 @@ const MonitorItem = ({
     dispatch(quietFetchOverviewStatusAction.get({ pageState }));
   }, [dispatch, pageState]);
 
-  return (
-    <MetricItem
-      style={{ width: '100%' }}
-      monitor={monitor}
-      onClick={function (_params: FlyoutParamProps): void {
-        throw new Error('Function not implemented.');
-      }}
-    />
-  );
+  return <MetricItem style={{ width: '100%' }} monitor={monitor} onClick={() => {}} />;
 };
 
 export function SyntheticsSuggestionChildren(props: SuggestionChildrenProps<SyntheticsSuggestion>) {
@@ -71,7 +56,5 @@ export function SyntheticsSuggestionChildren(props: SuggestionChildrenProps<Synt
 
   if (monitors.length === 0) return null;
 
-  return monitors.map((m) => (
-    <MonitorItem key={suggestion.id} monitor={m} suggestionId={suggestion.id} />
-  ));
+  return monitors.map((monitor) => <MonitorItem key={suggestion.id} monitor={monitor} />);
 }
