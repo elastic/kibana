@@ -2132,8 +2132,6 @@
       "@kbn/test-subj-selector/*": ["src/platform/packages/shared/kbn-test-subj-selector/*"],
       "@kbn/test-suites-src": ["src/platform/test"],
       "@kbn/test-suites-src/*": ["src/platform/test/*"],
-      "@kbn/test-suites-xpack": ["x-pack/test"],
-      "@kbn/test-suites-xpack/*": ["x-pack/test/*"],
       "@kbn/test-suites-xpack-chat": ["x-pack/solutions/chat/test"],
       "@kbn/test-suites-xpack-chat/*": ["x-pack/solutions/chat/test/*"],
       "@kbn/test-suites-xpack-observability": ["x-pack/solutions/observability/test"],
