@@ -9,9 +9,9 @@ import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { AnomalyDetectionSettings } from './anomaly_detection_settings';
 import { HelpMenu } from '../components/help_menu';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 

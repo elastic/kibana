@@ -10,11 +10,11 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { AnomalyResultsViewSelector } from '../components/anomaly_results_view_selector';
 import { JobSelector } from '../components/job_selector';
 
 import { HelpMenu } from '../components/help_menu';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 import { useAnnotationStyles, useTimeseriesExplorerStyles } from './styles';
