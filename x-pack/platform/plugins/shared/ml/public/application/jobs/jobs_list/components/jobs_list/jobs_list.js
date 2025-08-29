@@ -23,7 +23,7 @@ import {
 
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { toLocaleString } from '@kbn/ml-common-utils/string_utils';
+import { toLocaleString } from '@kbn/ml-common-utils/string_utils/to_locale_string';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
