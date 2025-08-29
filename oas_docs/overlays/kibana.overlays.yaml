@@ -114,11 +114,17 @@ actions:
       externalDocs:
         description: Automatic integrations synchronization documentation
         url: https://www.elastic.co/docs/reference/fleet/automatic-integrations-synchronization
-      x-state: 'Generally available; Added in 9.1.0'
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
     remove: true
+# Add availability for operations
+  - target: '$.paths["/api/fleet/remote_synced_integrations/{outputId}/remote_status"]["get"]'
+    update:
+      x-state: 'Generally available; added in 9.1.0'
+  - target: '$.paths["/api/fleet/remote_synced_integrations/status"]["get"]'
+    update:
+      x-state: 'Generally available; added in 9.1.0'
 # Examples that are not applicable to serverless
   - target: "$.paths['/api/spaces/_copy_saved_objects']['post']"
     description: "Add example to copy saved objects to space API"
