@@ -15,7 +15,6 @@ Tip: Look for a `README.md` in a folder to learn about its contents.
 
 Managed by the operations team to set up a new buildkite ci system. Can be ignored by folks outside the Operations team.
 
-
 ## [.github](https://github.com/elastic/kibana/tree/main/.github)
 
 Contains GitHub configuration settings. This file contains issue templates, and the [CODEOWNERS](https://github.com/elastic/kibana/blob/main/.github/CODEOWNERS) file. It's important for teams to keep the CODEOWNERS file up-to-date so the right team is pinged for a code owner review on PRs that edit certain files. Note that the `CODEOWNERS` file only exists on the main branch, and is not backported to other branches in the repo. To aid in making sure the `CODEOWNERS` file is always up-to-date "packages" in the Kibana repo are required to have an "owner" defined, those owners are then injected into the CODEOWNERS files automatically by the `node scripts/generate codeowners` command.
@@ -60,6 +59,7 @@ This is an empty folder in GitHub. It's where third party developers should put 
 
 Contains a bunch of developer scripts. These are usually very small files with just two lines that kick off a command, the logic of which resides elsewhere (sometimes `src/dev`, sometimes inside `packages`).
 Example:
+
 ```
 require('../src/setup_node_env');
 require('@kbn/es-archiver').runCli();
@@ -69,9 +69,9 @@ require('@kbn/es-archiver').runCli();
 
 This folder and the packages folder contain the most code and where developers usually find themselves. I'll touch on a few of the subfolder, the rest can generally be ignored, or are build/ops related code.
 
-### [src/cli*](https://github.com/elastic/kibana/tree/main/src/cli)
+### [src/cli\*](https://github.com/elastic/kibana/tree/main/src/cli)
 
-Maintained primarily by the Operations team, this folder contains code that initializes the Kibana runtime and a bit of work to handle authorization for interactive setup mode.  Most devs should be able to ignore this code.
+Maintained primarily by the Operations team, this folder contains code that initializes the Kibana runtime and a bit of work to handle authorization for interactive setup mode. Most devs should be able to ignore this code.
 
 ### [src/core](https://github.com/elastic/kibana/tree/main/src/core)
 
@@ -107,7 +107,8 @@ Contains all of the gold+ (non-basic) modules that are common to all Kibana solu
 
 ## [x-pack/solutions](https://github.com/elastic/kibana/tree/main/x-pack/solutions)
 
-[//]: # (BOOKMARK - List of Kibana solutions)
+[//]: # 'BOOKMARK - List of Kibana solutions'
+
 Contains all of the code that is specific to each Kibana solution. At the moment, we have a folder for [observability](https://github.com/elastic/kibana/tree/main/x-pack/solutions/observability), another for [security](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security), another for [search](https://github.com/elastic/kibana/tree/main/x-pack/solutions/search) and another for [chat](https://github.com/elastic/kibana/tree/main/x-pack/solutions/chat) (serverless only).
 
 These folders contain the modules that belong to each solution, and these modules are also categorised as plugins or packages.
@@ -133,6 +134,6 @@ Contains code for all the plugins that power our gold+ features.
 
 Maintained by the Ops team, this folder contains some scripts for running x-pack utilities, like the functional test runner that runs with a license higher than Basic.
 
-### [x-pack/test](https://github.com/elastic/kibana/tree/main/x-pack/test)
+### [x-pack/platform/test](https://github.com/elastic/kibana/tree/main/x-pack/platform/test)
 
 Functional tests for our gold+ features.
