@@ -24,7 +24,7 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-export const getEsQlQuery = ({
+export const getESQLQuery = ({
   params,
   apmIndexSettings,
 }: {
@@ -85,7 +85,7 @@ export function OpenSpanInDiscoverLink({
     spanId,
   };
 
-  const esqlQuery = getEsQlQuery({
+  const esqlQuery = getESQLQuery({
     params,
     apmIndexSettings: data.apmIndexSettings,
   });

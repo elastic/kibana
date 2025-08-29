@@ -32,7 +32,7 @@ import {
   ENVIRONMENT_NOT_DEFINED_VALUE,
 } from '../../../../../common/environment_filter_values';
 
-const getEsQlQuery = ({
+const getESQLQuery = ({
   params,
   apmIndexSettings,
 }: {
@@ -134,8 +134,6 @@ export function OpenInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
 
   const { rangeFrom, rangeTo, kuery, environment } = queryParams;
 
-  // we need to check if those fields exist before accessing them,
-  // since not all routes include them
   const transactionName =
     'transactionName' in queryParams ? queryParams.transactionName : undefined;
   const transactionType =
@@ -163,7 +161,7 @@ export function OpenInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
     spanName,
   };
 
-  const esqlQuery = getEsQlQuery({
+  const esqlQuery = getESQLQuery({
     params,
     apmIndexSettings: data.apmIndexSettings,
   });

@@ -190,6 +190,6 @@ describe('OpenErrorInDiscoverButton', () => {
     const button = getByTestId('testId');
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('href', 'http://test-discover-url');
-    expect(button).toHaveTextContent('Open error in Discover');
+    expect(button).toHaveTextContent('Open in Discover');
   });
 });
