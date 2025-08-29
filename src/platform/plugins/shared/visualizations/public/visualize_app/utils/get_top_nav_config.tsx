@@ -289,7 +289,7 @@ export const getTopNavConfig = (
   const showSaveButton =
     visualizeCapabilities.save || (!originatingApp && dashboardCapabilities.showWriteControls);
 
-  const showShareOptions = (anchorElement: HTMLElement, asExport?: boolean) => {
+  const showShareOptions = async (anchorElement: HTMLElement, asExport?: boolean) => {
     if (share) {
       const currentState = stateContainer.getState();
       const searchParams = parse(history.location.search);
@@ -308,7 +308,7 @@ export const getTopNavConfig = (
         savedSearchId: visInstance.savedSearch?.id ?? (searchParams.savedSearchId as string),
       };
       // TODO: support sharing in by-value mode
-      share.toggleShareContextMenu({
+      await share.toggleShareContextMenu({
         asExport,
         anchorElement,
         allowShortUrl: Boolean(visualizeCapabilities.createShortUrl),
