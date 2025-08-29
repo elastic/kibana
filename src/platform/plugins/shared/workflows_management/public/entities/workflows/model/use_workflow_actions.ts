@@ -23,7 +23,7 @@ export function useWorkflowActions() {
 
   const createWorkflow = useMutation<WorkflowDetailDto, Error, CreateWorkflowCommand>({
     networkMode: 'always',
-    mutationKey: ['POST', 'workflows', 'body'],
+    mutationKey: ['POST', 'workflows'],
     mutationFn: (workflow) => {
       return http!.post('/api/workflows', {
         body: JSON.stringify(workflow),
