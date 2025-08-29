@@ -227,7 +227,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
             color: 'primary',
             name: 'Run',
             icon: 'play',
-            description: 'Run workflow 1',
+            description: 'Run workflow',
             onClick: (item: WorkflowListItemDto) => setExecuteWorkflow(item),
           },
           {
