@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { AlertInstanceContext, RuleTypeState } from '@kbn/alerting-plugin/server';
+import type { AlertInstanceContext, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { PersistenceAlertType } from '@kbn/rule-registry-plugin/server';
+import type { PersistenceAlertType } from '@kbn/rule-registry-plugin/server';
 import { STREAMS_PRODUCER, STREAMS_RULE_REGISTRATION_CONTEXT } from '../../../../common/constants';
 import { getRuleExecutor } from './executor';
-import { EsqlRuleParams, esqlRuleParams } from './types';
+import type { EsqlRuleParams } from './types';
+import { esqlRuleParams } from './types';
 
 export function esqlRuleType(): PersistenceAlertType<
   EsqlRuleParams,

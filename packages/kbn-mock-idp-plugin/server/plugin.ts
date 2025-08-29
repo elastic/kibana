@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { existsSync } from 'fs';
 import { resolve } from 'path';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -18,12 +19,9 @@ import {
   SERVERLESS_ROLES_ROOT_PATH,
   STATEFUL_ROLES_ROOT_PATH,
 } from '@kbn/es';
-import {
-  createSAMLResponse,
-  getSAMLRequestId,
-  MOCK_IDP_LOGIN_PATH,
-  MOCK_IDP_LOGOUT_PATH,
-} from '@kbn/mock-idp-utils';
+import type { ServerlessProductTier } from '@kbn/es/src/utils';
+import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
+
 export interface PluginSetupDependencies {
   cloud: CloudSetup;
 }
@@ -33,7 +31,6 @@ const createSAMLResponseSchema = schema.object({
   full_name: schema.maybe(schema.nullable(schema.string())),
   email: schema.maybe(schema.nullable(schema.string())),
   roles: schema.arrayOf(schema.string()),
-  urlWithSAMLRequest: schema.maybe(schema.string()),
 });
 
 // BOOKMARK - List of Kibana project types
@@ -47,10 +44,25 @@ const projectToAlias = new Map<string, string>([
   // requires update of config/serverless.chat.yml (currently uses projectType 'search')
 ]);
 
-const readServerlessRoles = (projectType: string) => {
+const tierSpecificRolesFileExists = (filePath: string): boolean => {
+  try {
+    return existsSync(filePath);
+  } catch (e) {
+    return false;
+  }
+};
+
+const readServerlessRoles = (projectType: string, productTier?: ServerlessProductTier) => {
   if (projectToAlias.has(projectType)) {
     const alias = projectToAlias.get(projectType)!;
-    const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, alias, 'roles.yml');
+
+    const tierSpecificRolesResourcePath =
+      productTier && resolve(SERVERLESS_ROLES_ROOT_PATH, alias, productTier, 'roles.yml');
+    const rolesResourcePath =
+      tierSpecificRolesResourcePath && tierSpecificRolesFileExists(tierSpecificRolesResourcePath)
+        ? tierSpecificRolesResourcePath
+        : resolve(SERVERLESS_ROLES_ROOT_PATH, alias, 'roles.yml');
+
     return readRolesFromResource(rolesResourcePath);
   } else {
     throw new Error(`Unsupported projectType: ${projectType}`);
@@ -98,7 +110,10 @@ export const plugin: PluginInitializer<
         try {
           if (roles.length === 0) {
             const projectType = plugins.cloud?.serverless?.projectType;
-            roles.push(...(projectType ? readServerlessRoles(projectType) : readStatefulRoles()));
+            const productTier = plugins.cloud?.serverless?.productTier;
+            roles.push(
+              ...(projectType ? readServerlessRoles(projectType, productTier) : readStatefulRoles())
+            );
           }
           return response.ok({
             body: {
@@ -132,9 +147,6 @@ export const plugin: PluginInitializer<
               full_name: request.body.full_name ?? undefined,
               email: request.body.email ?? undefined,
               roles: request.body.roles,
-              authnRequestId: request.body.urlWithSAMLRequest
-                ? await getSAMLRequestId(request.body.urlWithSAMLRequest)
-                : undefined,
             }),
           },
         });

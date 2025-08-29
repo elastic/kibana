@@ -723,6 +723,7 @@ const CreateRulePageComponent: React.FC = () => {
             actionMessageParams={actionMessageParams}
             summaryActionMessageParams={actionMessageParams}
             form={actionsStepForm}
+            ruleInterval={scheduleStepData.interval}
           />
 
           <EuiHorizontalRule margin="m" />
@@ -776,6 +777,7 @@ const CreateRulePageComponent: React.FC = () => {
       ruleType,
       submitRuleDisabled,
       submitRuleEnabled,
+      scheduleStepData.interval,
     ]
   );
   const memoActionsStepExtraAction = useMemo(

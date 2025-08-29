@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParseOptions, Parser } from '../parser';
-import { createTag, makeSynthNode } from './tag';
+import type { ParseOptions } from '../parser';
+import { Parser } from '../parser';
+import { createTag } from './tag';
+import { SynthNode } from './synth_node';
 import type { SynthGenerator } from './types';
 import type { ESQLAstQueryExpression } from '../types';
 
@@ -17,9 +19,8 @@ const generator: SynthGenerator<ESQLAstQueryExpression> = (
   { withFormatting = true, ...rest }: ParseOptions = {}
 ): ESQLAstQueryExpression => {
   src = src.trimStart();
-  const { root: node } = Parser.parseQuery(src, { withFormatting, ...rest });
-
-  makeSynthNode(node);
+  const { root } = Parser.parseQuery(src, { withFormatting, ...rest });
+  const node = SynthNode.from(root);
 
   return node;
 };

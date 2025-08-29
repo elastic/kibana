@@ -14,7 +14,7 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 
 import { getErrorMessage } from '../../../common/errors';
 import { FullHeight, PanelFillContainer, QueryViewTitlePanel } from './styles';
-import { QueryTestResponse } from '../../types';
+import type { QueryTestResponse } from '../../types';
 
 const LOADING_MESSAGE = i18n.translate(
   'xpack.searchPlayground.viewQuery.queryOutput.loading.message',

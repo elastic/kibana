@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiPageTemplate } from '@elastic/eui';
 import { WATCH_TYPES } from '../../../../common/constants';
-import { BaseWatch } from '../../../../common/types/watch_types';
+import type { BaseWatch } from '../../../../common/types/watch_types';
 import { getPageErrorCode, PageError, SectionLoading } from '../../components';
 import { loadWatch } from '../../lib/api';
 import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../lib/breadcrumbs';

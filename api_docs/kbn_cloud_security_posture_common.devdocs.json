@@ -85,7 +85,7 @@
             "signature": [
               "(metricType: string, eventName: ",
               "CloudSecurityUiCounters",
-              ") => void"
+              ", appName?: string | undefined) => void"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/utils/ui_metrics.ts",
             "deprecated": false,
@@ -120,6 +120,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/cloud-security-posture-common",
+                "id": "def-common.UiMetricService.trackUiMetric.$3",
+                "type": "string",
+                "tags": [],
+                "label": "appName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/utils/ui_metrics.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1983,6 +1998,21 @@
         "description": [],
         "signature": [
           "\"logs-cloud_security_posture.findings-default*\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.GENERIC_ENTITY_INDEX_ENRICH_POLICY",
+        "type": "string",
+        "tags": [],
+        "label": "GENERIC_ENTITY_INDEX_ENRICH_POLICY",
+        "description": [],
+        "signature": [
+          "\"entity_store_field_retention_generic_<space>_v1.0.0\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
         "deprecated": false,

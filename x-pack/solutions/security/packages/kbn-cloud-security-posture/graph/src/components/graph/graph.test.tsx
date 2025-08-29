@@ -52,7 +52,7 @@ describe('<Graph />', () => {
 
     const nodeEl = container.querySelector('[data-id="1"]');
     expect(nodeEl).not.toBeNull();
-    expect(nodeEl?.textContent).toBe('Node 1');
+    expect(nodeEl).toHaveTextContent('Node 1');
   });
 
   it('should render label node', () => {
@@ -71,7 +71,7 @@ describe('<Graph />', () => {
 
     const nodeEl = container.querySelector('[data-id="2"]');
     expect(nodeEl).not.toBeNull();
-    expect(nodeEl?.textContent).toBe('Node 2');
+    expect(nodeEl).toHaveTextContent('Node 2');
   });
 
   it('should render 2 nodes connected', () => {
@@ -103,11 +103,11 @@ describe('<Graph />', () => {
 
     const srcNodeEl = container.querySelector('[data-id="1"]');
     expect(srcNodeEl).not.toBeNull();
-    expect(srcNodeEl?.textContent).toBe('Node 1');
+    expect(srcNodeEl).toHaveTextContent('Node 1');
 
     const targetNodeEl = container.querySelector('[data-id="2"]');
     expect(targetNodeEl).not.toBeNull();
-    expect(targetNodeEl?.textContent).toBe('Node 2');
+    expect(targetNodeEl).toHaveTextContent('Node 2');
 
     // TODO: Fix this test (currently it is not rendered in xyflow version 12) https://github.com/xyflow/xyflow/issues/716#issuecomment-2414721074
     // const edgeEl = container.querySelector('[data-id="a(1)-b(2)"]');

@@ -9,7 +9,7 @@
 
 import { getIndices, getIndicesViaResolve, responseToItemArray } from './get_indices';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { ResolveIndexResponseItemIndexAttrs } from '../types';
+import type { ResolveIndexResponseItemIndexAttrs } from '../types';
 
 export const successfulResolveResponse = {
   indices: [

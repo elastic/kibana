@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { SyntheticsPolicyCreateExtension } from './synthetics_policy_create_extension';
 
 /**

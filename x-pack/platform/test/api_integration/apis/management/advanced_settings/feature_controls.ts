@@ -11,7 +11,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { retryRequestIfConflicts } from './utils';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
@@ -144,6 +144,36 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
         const telemetryResult = await saveTelemetrySetting(username, password);
         await expectTelemetryResponse(telemetryResult, false);
+      } finally {
+        await security.role.delete(roleName);
+        await security.user.delete(username);
+      }
+    });
+
+    it(`settings cannot be saved with savedObjectsManagement: ["all"] but only advancedSettings: ["read"] privilege`, async () => {
+      const username = 'settings_so_all_settings_read';
+      const roleName = 'settings_so_all_settings_read';
+      const password = `${username}-password`;
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                savedObjectsManagement: ['all'],
+                advancedSettings: ['read'],
+              },
+            },
+          ],
+        });
+
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+
+        const regularSettingResult = await saveAdvancedSetting(username, password);
+        expect403(regularSettingResult);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);

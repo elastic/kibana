@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import { metrics } from './metrics';
 import { createInventoryModel } from '../shared/create_inventory_model';
-import { DataSchemaFormat } from '../types';
+import type { DataSchemaFormat } from '../types';
 import {
   DATASTREAM_DATASET,
   EVENT_MODULE,
@@ -55,7 +55,7 @@ export const host = createInventoryModel('host', {
     return [
       {
         bool:
-          schema === DataSchemaFormat.ECS
+          schema === 'ecs'
             ? {
                 should: [
                   {

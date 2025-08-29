@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, UiSettingsParams } from '@kbn/core/server';
+import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '@kbn/reporting-common';
 import { PLUGIN_ID } from '@kbn/reporting-server';

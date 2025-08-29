@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -37,6 +38,10 @@ describe(
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   function () {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     before(() => {
       login();
       deleteAlertsAndRules();

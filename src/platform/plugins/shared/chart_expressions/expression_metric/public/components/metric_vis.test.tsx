@@ -9,18 +9,24 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { act, render, screen, waitFor } from '@testing-library/react';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { MetricVis, MetricVisComponentProps } from './metric_vis';
-import { MetricWTrend } from '@elastic/charts';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
-import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
-import { MetricVisParam } from '../../common';
+import { screen } from '@testing-library/react';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { MetricVisComponentProps } from './metric_vis';
+import { MetricVis } from './metric_vis';
+import type { MetricWTrend } from '@elastic/charts';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
+import type { MetricVisParam } from '../../common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { PaletteOutput } from '@kbn/coloring';
+import type { PaletteOutput } from '@kbn/coloring';
 import { faker } from '@faker-js/faker';
-import { setupChartMocks, cleanChartMocks } from './chart_testing_utilities';
+import {
+  setupResizeObserverMock,
+  cleanResizeObserverMock,
+  renderChart,
+  waitForRenderComplete,
+} from '@kbn/chart-test-jest-helpers';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
@@ -224,12 +230,12 @@ type RenderChartPropsType = Partial<Omit<MetricVisComponentProps, 'config'>> &
 
 describe('MetricVisComponent', function () {
   beforeAll(() => {
-    setupChartMocks();
+    setupResizeObserverMock();
     jest.useFakeTimers();
   });
 
   afterAll(() => {
-    cleanChartMocks();
+    cleanResizeObserverMock();
     jest.useRealTimers();
   });
 
@@ -237,31 +243,19 @@ describe('MetricVisComponent', function () {
     mockDeserialize.mockClear();
   });
 
-  async function waitForChartToRender(renderComplete: MetricVisComponentProps['renderComplete']) {
-    // Interestingly we have to wrap this into an act() call to avoid
-    // issues with the React scheduling when testing
-    await act(async () => {
-      // wait for 1 rAF tick (~16ms)
-      jest.advanceTimersByTime(30);
-    });
-    // wait for render complete callback
-    await waitFor(() => expect(renderComplete).toHaveBeenCalled());
-  }
-
-  async function renderChart(props: RenderChartPropsType) {
+  async function renderMetricChart(props: RenderChartPropsType) {
     const defaultProps = getDefaultProps();
     const allProps = { ...defaultProps, data: table, ...props };
-    const result = render(<MetricVis {...allProps} />);
+    const { component: result } = await renderChart(allProps, MetricVis);
     // quick lifecycle check (this comes from the willRender callback)
     expect(allProps.fireEvent).toHaveBeenCalledWith(expect.objectContaining({ name: 'chartSize' }));
     // wait for render complete callback
-    await waitForChartToRender(defaultProps.renderComplete);
     return {
       ...result,
       props: allProps,
       rerender: async (newProps: Partial<RenderChartPropsType>) => {
         result.rerender(<MetricVis {...allProps} {...newProps} />);
-        await waitForChartToRender(allProps.renderComplete);
+        await waitForRenderComplete(allProps.renderComplete);
         return { props: { ...allProps, ...newProps } };
       },
     };
@@ -279,14 +273,14 @@ describe('MetricVisComponent', function () {
     };
 
     it('should render a single metric value', async () => {
-      await renderChart({ config });
+      await renderMetricChart({ config });
       // test that a metric is rendered
       expect(screen.getByText(table.columns[1].name)).toBeInTheDocument();
       expect(screen.getByText(table.rows[0][basePriceColumnId])).toBeInTheDocument();
     });
 
     it('should display subtitle', async () => {
-      await renderChart({
+      await renderMetricChart({
         config: {
           ...config,
           metric: { ...config.metric, subtitle: 'subtitle' },
@@ -301,7 +295,7 @@ describe('MetricVisComponent', function () {
     });
 
     it('should display secondary metric', async () => {
-      const { rerender } = await renderChart({
+      const { rerender } = await renderMetricChart({
         config: {
           ...config,
           metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: undefined },
@@ -329,7 +323,7 @@ describe('MetricVisComponent', function () {
     });
 
     it('should display progress bar if min and max provided', async () => {
-      const { rerender } = await renderChart({
+      const { rerender } = await renderMetricChart({
         config: {
           ...config,
           metric: {
@@ -422,7 +416,7 @@ describe('MetricVisComponent', function () {
         ],
       };
 
-      await renderChart({
+      await renderMetricChart({
         config: {
           ...config,
           metric: {
@@ -462,7 +456,7 @@ describe('MetricVisComponent', function () {
           [minPriceColumnId]: [String(row[minPriceColumnId]), String(10)],
         })),
       };
-      await renderChart({ config, data: newTable });
+      await renderMetricChart({ config, data: newTable });
 
       expect(screen.getByText(/\[text\-28\.984375, text\-100\]/i)).toBeInTheDocument();
     });
@@ -476,7 +470,7 @@ describe('MetricVisComponent', function () {
           [minPriceColumnId]: [row[minPriceColumnId], 10],
         })),
       };
-      await renderChart({ config, data: newTable });
+      await renderMetricChart({ config, data: newTable });
       expect(screen.getByText(/\[number\-28\.984375, number\-100\]/i)).toBeInTheDocument();
     });
 
@@ -485,7 +479,7 @@ describe('MetricVisComponent', function () {
         ...table,
         rows: [],
       };
-      await renderChart({ config, data: newTable });
+      await renderMetricChart({ config, data: newTable });
       const primaryLabel = table.columns.find((col) => col.id === basePriceColumnId)!.name;
       expect(screen.getByTitle(primaryLabel)).toBeInTheDocument();
       expect(screen.getByText('N/A')).toBeInTheDocument();
@@ -508,7 +502,7 @@ describe('MetricVisComponent', function () {
       ],
       rows: [{ [metricId]: null }],
     };
-    await renderChart({
+    await renderMetricChart({
       config: {
         metric: {
           ...defaultMetricParams,
@@ -538,7 +532,7 @@ describe('MetricVisComponent', function () {
     };
 
     it('should render a grid if breakdownBy dimension supplied', async () => {
-      await renderChart({ config });
+      await renderMetricChart({ config });
 
       // check for the labels
       expect(screen.getAllByRole('button', { name: /terms\-/ })).toHaveLength(table.rows.length);
@@ -552,7 +546,7 @@ describe('MetricVisComponent', function () {
     });
 
     it('should display secondary prefix or secondary metric', async () => {
-      const { rerender } = await renderChart({
+      const { rerender } = await renderMetricChart({
         config: {
           ...config,
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
@@ -590,7 +584,7 @@ describe('MetricVisComponent', function () {
 
     it('should respect maxCols and minTiles', async () => {
       // start with no constraints
-      const { rerender } = await renderChart({
+      const { rerender } = await renderMetricChart({
         config: {
           ...config,
           metric: {
@@ -642,7 +636,7 @@ describe('MetricVisComponent', function () {
     });
 
     it('should display progress bar if max provided', async () => {
-      await renderChart({
+      await renderMetricChart({
         config: {
           ...config,
           metric: {
@@ -706,7 +700,7 @@ describe('MetricVisComponent', function () {
         ],
       };
 
-      await renderChart({
+      await renderMetricChart({
         config: {
           ...config,
           metric: {
@@ -725,7 +719,7 @@ describe('MetricVisComponent', function () {
     });
 
     it('renders with no data', async () => {
-      await renderChart({
+      await renderMetricChart({
         config: { ...config, metric: { ...config.metric, minTiles: 6 } },
         data: { type: 'datatable', rows: [], columns: table.columns },
       });
@@ -741,7 +735,7 @@ describe('MetricVisComponent', function () {
 
   it('should constrain dimensions in edit mode', async () => {
     // single tile
-    const { rerender, props } = await renderChart({
+    const { rerender, props } = await renderMetricChart({
       config: {
         metric: {
           ...defaultMetricParams,
@@ -809,7 +803,7 @@ describe('MetricVisComponent', function () {
     }) => {
       // make it work with Jest fake timers
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      const { props } = await renderChart({
+      const { props } = await renderMetricChart({
         config: {
           metric: {
             ...defaultMetricParams,
@@ -886,7 +880,7 @@ describe('MetricVisComponent', function () {
       mockGetColorForValue.mockReturnValue(colorFromPalette);
 
       it('should fetch color from palette if provided', async () => {
-        await renderChart({
+        await renderMetricChart({
           config: {
             dimensions: {
               metric: basePriceColumnId,
@@ -919,7 +913,7 @@ describe('MetricVisComponent', function () {
           palette: PaletteOutput<CustomPaletteState>,
           dimensions: MetricVisComponentProps['config']['dimensions']
         ) =>
-          await renderChart({
+          await renderMetricChart({
             config: {
               dimensions,
               metric: {
@@ -988,7 +982,7 @@ describe('MetricVisComponent', function () {
       it('uses static color if no palette', async () => {
         const staticColor = faker.color.rgb();
 
-        await renderChart({
+        await renderMetricChart({
           config: {
             dimensions: {
               metric: basePriceColumnId,
@@ -1006,7 +1000,7 @@ describe('MetricVisComponent', function () {
       });
 
       it('defaults if no static color', async () => {
-        await renderChart({
+        await renderMetricChart({
           config: {
             dimensions: {
               metric: basePriceColumnId,
@@ -1046,7 +1040,7 @@ describe('MetricVisComponent', function () {
         },
       };
 
-      await renderChart({
+      await renderMetricChart({
         data: {
           type: 'datatable',
           columns: [
@@ -1176,7 +1170,7 @@ describe('MetricVisComponent', function () {
     });
 
     it('still call the string formatter for ES|QL keyword value', async () => {
-      await renderChart({
+      await renderMetricChart({
         data: {
           type: 'datatable',
           columns: [
@@ -1225,7 +1219,7 @@ describe('MetricVisComponent', function () {
   describe('overrides', () => {
     it('should apply overrides to the settings component', async () => {
       const color = faker.color.rgb();
-      await renderChart({
+      await renderMetricChart({
         config: {
           metric: {
             ...defaultMetricParams,

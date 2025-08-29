@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { GET_APM_SERVICES_LIST_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
 import type { FunctionRegistrationParameters } from '.';
 import { ServiceHealthStatus } from '../../common/service_health_status';
 import { getApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
@@ -21,7 +22,7 @@ export function registerGetApmServicesListFunction({
 }: FunctionRegistrationParameters) {
   registerFunction(
     {
-      name: 'get_apm_services_list',
+      name: GET_APM_SERVICES_LIST_FUNCTION_NAME,
       description: `Gets a list of services`,
       descriptionForUser: i18n.translate(
         'xpack.apm.observabilityAiAssistant.functions.registerGetApmServicesList.descriptionForUser',

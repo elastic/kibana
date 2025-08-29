@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { Connector } from '@kbn/search-connectors';
 
-import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
+import type { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_PATH } from '../../routes';
 import { ConnectorViewIndexLink } from '../../shared/connector_view_search_indices_details/connector_view_search_indices_details';
 import { generateEncodedPath } from '../../shared/encode_path_params';

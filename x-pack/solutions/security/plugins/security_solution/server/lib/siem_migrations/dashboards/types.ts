@@ -6,10 +6,15 @@
  */
 
 import type { IndexPatternAdapter } from '@kbn/index-adapter';
+import type {
+  SiemMigrationsClientDependencies,
+  SiemMigrationsCreateClientParams,
+} from '../common/types';
 
 export interface DashboardMigrationAdapters {
   migrations: IndexPatternAdapter;
   dashboards: IndexPatternAdapter;
+  resources: IndexPatternAdapter;
 }
 
 export type DashboardMigrationAdapterId = keyof DashboardMigrationAdapters;
@@ -19,3 +24,8 @@ export type DashboardMigrationIndexNameProviders = Record<
   DashboardMigrationAdapterId,
   DashboardMigrationIndexNameProvider
 >;
+
+export type DashboardMigrationsClientDependencies = SiemMigrationsClientDependencies;
+
+export type DashboardMigrationsCreateClientParams =
+  SiemMigrationsCreateClientParams<DashboardMigrationsClientDependencies>;

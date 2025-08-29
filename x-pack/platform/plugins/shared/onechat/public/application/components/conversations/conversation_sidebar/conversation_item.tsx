@@ -6,7 +6,7 @@
  */
 
 import { EuiListGroupItem } from '@elastic/eui';
-import { ConversationWithoutRounds } from '@kbn/onechat-common';
+import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React from 'react';
 import { useConversationId } from '../../../hooks/use_conversation_id';
 import { useNavigation } from '../../../hooks/use_navigation';

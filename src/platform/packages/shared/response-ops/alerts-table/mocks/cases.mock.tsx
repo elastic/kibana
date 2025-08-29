@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { Case } from '../apis/bulk_get_cases';
 import type { CasesService } from '../types';
@@ -33,6 +34,7 @@ export const getCasesMapMock = () =>
 
 export const openAddToExistingCaseModalMock = jest.fn();
 export const openAddToNewCaseFlyoutMock = jest.fn();
+export const openRemoveAlertFromCaseModalMock = jest.fn();
 
 const uiMock: jest.MockedObject<CasesService['ui']> = {
   getCasesContext: jest
@@ -46,6 +48,9 @@ const hooksMock: jest.MockedObject<CasesService['hooks']> = {
   })),
   useCasesAddToExistingCaseModal: jest.fn().mockImplementation(() => ({
     open: openAddToExistingCaseModalMock,
+  })),
+  useRemoveAlertFromCaseModal: jest.fn().mockImplementation(() => ({
+    open: openRemoveAlertFromCaseModalMock,
   })),
 };
 

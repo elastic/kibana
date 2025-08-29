@@ -8,7 +8,8 @@
  */
 
 import { parse } from '../../parser';
-import { WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import type { WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import { WrappingPrettyPrinter } from '../wrapping_pretty_printer';
 
 const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   const { root } = parse(src, { withFormatting: true });
@@ -109,13 +110,13 @@ FROM index
    * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
    * get back to it after 9.1 release.
    */
-  describe.skip('RERANK', () => {
+  describe('RERANK', () => {
     test('comments around all elements', () => {
       assertReprint(
         `FROM a
   | /*0*/ RERANK /*1*/ "query" /*2*/
         ON /*3*/ field /*4*/
-        WITH /*5*/ id /*6*/`
+        WITH /*5*/ {"id": "value"} /*6*/`
       );
     });
   });
@@ -603,6 +604,18 @@ FROM index
         const text = reprint(query).text;
 
         expect(text).toBe(`ROW 1 * /* 1 */ /* 2 */ 2 /* 3 */ /* 4 */`);
+      });
+
+      test('right from function call', () => {
+        const query = `FROM logs-*-* | WHERE QSTR("term") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */ | LIMIT 10`;
+        const text = reprint(query).text;
+
+        expect(text).toBe(
+          `FROM logs-*-*
+  | WHERE
+      QSTR("term") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */
+  | LIMIT 10`
+        );
       });
 
       test('first operand with top comment', () => {

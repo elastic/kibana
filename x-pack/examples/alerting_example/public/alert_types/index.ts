@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { registerNavigation as registerPeopleInSpaceNavigation } from './astros';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 

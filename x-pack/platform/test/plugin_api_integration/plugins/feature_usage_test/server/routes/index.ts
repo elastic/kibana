@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { FeatureUsageTestStartDependencies, FeatureUsageTestPluginStart } from '../plugin';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { FeatureUsageTestStartDependencies, FeatureUsageTestPluginStart } from '../plugin';
 
 import { registerFeatureHitRoute } from './hit';
 

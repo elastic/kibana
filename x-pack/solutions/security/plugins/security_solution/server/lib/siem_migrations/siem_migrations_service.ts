@@ -9,15 +9,17 @@ import type { LoggerFactory } from '@kbn/core/server';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type { ConfigType } from '../../config';
 import {
-  SiemRuleMigrationsService,
   type SiemRuleMigrationsClient,
+  SiemRuleMigrationsService,
 } from './rules/siem_rule_migrations_service';
+
 import type { SiemMigrationsSetupParams } from './types';
 import {
-  SiemDashboardMigrationsService,
   type SiemDashboardMigrationsClient,
+  SiemDashboardMigrationsService,
 } from './dashboards/siem_dashboard_migration_service';
-import type { SiemMigrationsCreateClientParams } from './common/types';
+import type { DashboardMigrationsCreateClientParams } from './dashboards/types';
+import type { RuleMigrationsCreateClientParams } from './rules/types';
 
 export class SiemMigrationsService {
   private pluginStop$: Subject<void>;
@@ -31,7 +33,6 @@ export class SiemMigrationsService {
       kibanaVersion,
       config.siemRuleMigrations?.elserInferenceId
     );
-
     this.dashboardsService = new SiemDashboardMigrationsService(
       logger,
       kibanaVersion,
@@ -42,18 +43,20 @@ export class SiemMigrationsService {
   setup(params: SiemMigrationsSetupParams) {
     if (!this.config.experimentalFeatures.siemMigrationsDisabled) {
       this.rulesService.setup({ ...params, pluginStop$: this.pluginStop$ });
-    }
 
-    if (this.config.experimentalFeatures.automaticDashboardsMigration) {
-      this.dashboardsService.setup({ ...params, pluginStop$: this.pluginStop$ });
+      if (this.config.experimentalFeatures.automaticDashboardsMigration) {
+        this.dashboardsService.setup({ ...params, pluginStop$: this.pluginStop$ });
+      }
     }
   }
 
-  createRulesClient(params: SiemMigrationsCreateClientParams): SiemRuleMigrationsClient {
+  createRulesClient(params: RuleMigrationsCreateClientParams): SiemRuleMigrationsClient {
     return this.rulesService.createClient(params);
   }
 
-  createDashboardsClient(params: SiemMigrationsCreateClientParams): SiemDashboardMigrationsClient {
+  createDashboardsClient(
+    params: DashboardMigrationsCreateClientParams
+  ): SiemDashboardMigrationsClient {
     return this.dashboardsService.createClient(params);
   }
 

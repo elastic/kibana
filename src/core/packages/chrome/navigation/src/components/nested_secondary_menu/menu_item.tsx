@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, useEuiTheme, IconType } from '@elastic/eui';
-import React, { ComponentProps, FC, ReactNode, useCallback } from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import type { ComponentProps, FC, ReactNode } from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 
 import { SecondaryMenu } from '../secondary_menu';
 import { useNestedMenu } from './use_nested_menu';
 
 export interface ItemProps
-  extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'isCurrent' | 'href'> {
+  extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'isActive' | 'href'> {
   children: ReactNode;
   hasSubmenu?: boolean;
   href?: string;
   iconType?: IconType;
-  isCurrent?: boolean;
+  isActive?: boolean;
   onClick?: () => void;
   submenuPanelId?: string;
 }
@@ -30,7 +32,7 @@ export const Item: FC<ItemProps> = ({
   hasSubmenu = false,
   href,
   id,
-  isCurrent = false,
+  isActive = false,
   onClick,
   submenuPanelId,
   ...props
@@ -62,7 +64,7 @@ export const Item: FC<ItemProps> = ({
     <SecondaryMenu.Item
       id={id}
       href={href || ''}
-      isCurrent={isCurrent}
+      isActive={isActive}
       onClick={handleClick}
       {...props}
       key={`nested-item-${id}`}

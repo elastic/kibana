@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/Either';
+import type { Either } from 'fp-ts/Either';
 import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
@@ -77,29 +77,40 @@ function isValidId(id: string): boolean {
   return validLength && /^[a-z0-9-_]+$/.test(id);
 }
 
-const sloDefinitionSchema = t.intersection([
-  t.type({
-    id: sloIdSchema,
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    timeWindow: timeWindowSchema,
-    budgetingMethod: budgetingMethodSchema,
-    objective: objectiveSchema,
-    settings: settingsSchema,
-    revision: t.number,
-    enabled: t.boolean,
-    tags: tagsSchema,
-    createdAt: dateType,
-    updatedAt: dateType,
-    groupBy: groupBySchema,
-    version: t.number,
-  }),
-  t.partial({
-    createdBy: t.string,
-    updatedBy: t.string,
-  }),
-]);
+const requiredSloFields = t.type({
+  id: sloIdSchema,
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  timeWindow: timeWindowSchema,
+  budgetingMethod: budgetingMethodSchema,
+  objective: objectiveSchema,
+  settings: settingsSchema,
+  revision: t.number,
+  enabled: t.boolean,
+  tags: tagsSchema,
+  createdAt: dateType,
+  updatedAt: dateType,
+  groupBy: groupBySchema,
+  version: t.number,
+});
+
+const optionalSloFields = t.partial({
+  createdBy: t.string,
+  updatedBy: t.string,
+});
+
+const baseSloSchema = t.intersection([requiredSloFields, optionalSloFields]);
+
+const dashboardsWithIdSchema = t.partial({ dashboards: t.array(t.type({ id: t.string })) });
+const dashboardsWithRefIdSchema = t.partial({ dashboards: t.array(t.type({ refId: t.string })) });
+
+const artifactsWithIdSchema = t.partial({ artifacts: dashboardsWithIdSchema });
+const artifactsWithRefIdSchema = t.partial({ artifacts: dashboardsWithRefIdSchema });
+
+const sloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithIdSchema]);
+
+const storedSloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithRefIdSchema]);
 
 export {
   budgetingMethodSchema,
@@ -109,6 +120,7 @@ export {
   optionalSettingsSchema,
   settingsSchema,
   sloDefinitionSchema,
+  storedSloDefinitionSchema,
   sloIdSchema,
   tagsSchema,
   targetSchema,

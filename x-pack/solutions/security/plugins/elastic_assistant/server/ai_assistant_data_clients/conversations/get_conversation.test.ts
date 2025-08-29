@@ -9,10 +9,10 @@ import type { Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getConversation } from './get_conversation';
 import type { estypes } from '@elastic/elasticsearch';
-import { EsConversationSchema } from './types';
+import type { EsConversationSchema } from './types';
 import { authenticatedUser } from '../../__mocks__/user';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { ConversationResponse } from '@kbn/elastic-assistant-common';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common';
 
 export const getConversationResponseMock = (): ConversationResponse => ({
   createdAt: '2020-04-20T15:25:31.830Z',
@@ -31,7 +31,8 @@ export const getConversationResponseMock = (): ConversationResponse => ({
     provider: 'Azure OpenAI',
   },
   summary: {
-    content: 'test',
+    timestamp: '2020-04-20T15:25:31.830Z',
+    semanticContent: 'test',
   },
   category: 'assistant',
   users: [
@@ -40,6 +41,10 @@ export const getConversationResponseMock = (): ConversationResponse => ({
       name: 'elastic',
     },
   ],
+  createdBy: {
+    id: '1111',
+    name: 'elastic',
+  },
   replacements: undefined,
 });
 
@@ -76,7 +81,8 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
             provider: 'Azure OpenAI',
           },
           summary: {
-            content: 'test',
+            '@timestamp': '2020-04-20T15:25:31.830Z',
+            semantic_content: 'test',
           },
           category: 'assistant',
           users: [
@@ -85,6 +91,10 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
               name: 'elastic',
             },
           ],
+          created_by: {
+            id: '1111',
+            name: 'elastic',
+          },
           replacements: undefined,
         },
       },
@@ -135,5 +145,45 @@ describe('getConversation', () => {
       user: mockUser1,
     });
     expect(conversation).toEqual(null);
+  });
+
+  test('calls search with the expected filter', async () => {
+    const data = getSearchConversationMock();
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockResponse(data);
+    await getConversation({
+      esClient,
+      conversationIndex: '.kibana-elastic-ai-assistant-conversations',
+      id: '1',
+      logger: loggerMock,
+      user: mockUser1,
+    });
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            must: [{ bool: { should: [{ term: { _id: '1' } }] } }],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      nested: {
+                        path: 'users',
+                        query: { bool: { must: [{ match: { 'users.name': 'elastic' } }] } },
+                      },
+                    },
+                    {
+                      bool: { must_not: [{ nested: { path: 'users', query: { match_all: {} } } }] },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
   });
 });

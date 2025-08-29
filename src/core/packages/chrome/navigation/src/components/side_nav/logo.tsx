@@ -7,70 +7,81 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HTMLAttributes } from 'react';
 import React from 'react';
-import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-export interface SideNavLogoProps {
+import { EuiToolTip, useEuiTheme } from '@elastic/eui';
+
+import { MenuItem } from '../menu_item';
+import type { SideNavLogo } from '../../../types';
+import { useTooltip } from '../../hooks/use_tooltip';
+
+export interface SideNavLogoProps extends HTMLAttributes<HTMLAnchorElement>, SideNavLogo {
+  id: string;
+  isActive: boolean;
   isCollapsed: boolean;
-  label: string;
-  logoType: string;
 }
 
 /**
- * It's not clickable or focusable.
  * It's used to communicate what solution the user is currently in.
  */
-export const SideNavLogo = ({ isCollapsed, label, logoType }: SideNavLogoProps): JSX.Element => {
+export const SideNavLogoComponent = ({
+  isActive,
+  isCollapsed,
+  label,
+  ...props
+}: SideNavLogoProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const { tooltipRef, handleMouseOut } = useTooltip();
 
-  return (
-    <div
-      css={css`
-        align-items: center;
-        border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
-        display: flex;
-        flex-direction: column;
-        // 3px is from Figma; there is no token
-        gap: 3px;
-        justify-content: center;
-        padding: ${euiTheme.size.s} ${euiTheme.size.s}
-          ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-      `}
-    >
-      <div
-        css={css`
-          align-items: center;
-          display: flex;
-          height: ${euiTheme.size.xl};
-          justify-content: center;
-          width: ${euiTheme.size.xl};
-        `}
+  /**
+   * In Figma, the logo icon is 20x20.
+   * `EuiIcon` supports `l` which is 24x24 and `m` which is 16x16.
+   */
+  const wrapperStyles = css`
+    border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+    padding-bottom: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+
+    .euiText {
+      font-weight: ${euiTheme.font.weight.bold};
+    }
+
+    svg {
+      height: 20px;
+      width: 20px;
+    }
+  `;
+
+  const menuItem = (
+    <div css={wrapperStyles}>
+      <MenuItem
+        aria-label={`${label} homepage`}
+        data-test-subj="sideNavLogo"
+        isActive={isActive}
+        isLabelVisible={!isCollapsed}
+        isTruncated={false}
+        {...props}
       >
-        {/**
-         * In Figma, the icon is 20x20
-         * `EuiIcon` supports `l` which is 24x24
-         * and `m` which is 16x16;
-         * Hence style override
-         */}
-        <EuiIcon
-          css={css`
-            height: 20px;
-            width: 20px;
-          `}
-          type={logoType}
-        />
-      </div>
-      {!isCollapsed && (
-        <EuiText
-          css={css`
-            font-weight: ${euiTheme.font.weight.medium};
-            font-size: 11px;
-          `}
-          size="xs"
-        >
-          {label}
-        </EuiText>
-      )}
+        {label}
+      </MenuItem>
     </div>
   );
+
+  if (isCollapsed) {
+    return (
+      <EuiToolTip
+        ref={tooltipRef}
+        content={label}
+        disableScreenReaderOutput
+        onMouseOut={handleMouseOut}
+        position="right"
+        repositionOnScroll
+      >
+        {menuItem}
+      </EuiToolTip>
+    );
+  }
+
+  return menuItem;
 };

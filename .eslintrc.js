@@ -185,7 +185,7 @@ const DEV_PATTERNS = [
   ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
   'src/platform/packages/shared/kbn-interpreter/tasks/**/*',
   'src/dev/**/*',
-  'x-pack/{dev-tools,tasks,test,test_serverless,build_chromium}/**/*',
+  'x-pack/{dev-tools,tasks,test,build_chromium}/**/*',
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
@@ -783,6 +783,7 @@ module.exports = {
         'x-pack/solutions/*/test/**/tests/**/*',
         'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
         'x-pack/solutions/*/test/alerting_api_integration/**/*',
+        'x-pack/solutions/*/test/serverless/*/configs/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
@@ -790,15 +791,13 @@ module.exports = {
         'x-pack/platform/test/upgrade_assistant_integration/**/*',
         'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
-        'x-pack/test_serverless/**/config*.ts',
         'x-pack/platform/test/serverless/shared/config*.ts',
         'x-pack/platform/test/serverless/*/test_suites/**/*',
         'x-pack/platform/test/serverless/functional/config*.ts',
         'x-pack/platform/test/serverless/*/configs/**/*',
-        'x-pack/test_serverless/*/test_suites/**/*',
         'x-pack/test/profiling_api_integration/**/*.ts',
-        'x-pack/test/security_solution_api_integration/*/test_suites/**/*',
-        'x-pack/test/security_solution_api_integration/**/config*.ts',
+        'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
+        'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
         '**/playwright.config.ts',
       ],
       rules: {
@@ -1183,9 +1182,6 @@ module.exports = {
         'x-pack/solutions/observability/plugins/profiling/**/*.{ts,tsx}',
         'x-pack/solutions/observability/plugins/profiling_data_access/**/*.{ts,tsx}',
       ],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
-      },
     },
 
     /**
@@ -1234,9 +1230,6 @@ module.exports = {
         'x-pack/platform/plugins/shared/automatic_import/public/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/automatic_import/common/**/*.{ts,tsx}',
       ],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
-      },
     },
 
     /**
@@ -1252,9 +1245,6 @@ module.exports = {
         'x-pack/platform/packages/private/ml/**/*.{ts,tsx}',
         'x-pack/platform/plugins/private/file_upload/**/*.{ts,tsx}',
       ],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
-      },
     },
 
     /**
@@ -1489,9 +1479,6 @@ module.exports = {
             'x-pack/solutions/security/packages/navigation/**/*.{ts,tsx}',
             'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
           ],
-          rules: {
-            '@typescript-eslint/consistent-type-imports': 'error',
-          },
         },
       ],
     },
@@ -1590,7 +1577,6 @@ module.exports = {
         'src/platform/test/*api_integration*/**/*.{js,ts}',
         'x-pack/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
         'x-pack/test/*api_integration*/**/*.{js,ts}',
-        'x-pack/test_serverless/{functional,api_integration}/test_suites/**/*.{js,ts}',
       ],
       extends: ['plugin:mocha/recommended'],
       plugins: ['mocha'],
@@ -1697,7 +1683,7 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'error',
+        'no-duplicate-imports': 'off',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -1826,9 +1812,6 @@ module.exports = {
         'x-pack/platform/test/rule_registry/**/*.{ts, tsx}',
         'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
-      },
     },
 
     /**
@@ -1864,9 +1847,6 @@ module.exports = {
         'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
         'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
       ],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
-      },
     },
 
     /**
@@ -2106,9 +2086,6 @@ module.exports = {
     },
     {
       files: ['x-pack/platform/plugins/shared/osquery/**/*.{ts,tsx}'],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
-      },
     },
     {
       // typescript and javascript for front end react performance
@@ -2211,9 +2188,6 @@ module.exports = {
         'x-pack/platform/plugins/shared/spaces/**/*.{ts,tsx}',
         'x-pack/platform/test/spaces_api_integration/**/*.{ts,tsx}',
       ],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 1,
-      },
     },
 
     /**
@@ -2333,7 +2307,6 @@ module.exports = {
 
         // For now, we keep the exception to let tests depend on anythying.
         // Ideally, we need to classify the solution specific ones to reduce CI times
-        'x-pack/test_serverless/**',
         'x-pack/test/**',
         'x-pack/platform/test/plugin_functional/plugins/resolver_test/**',
       ],
@@ -2450,6 +2423,18 @@ module.exports = {
             ],
           },
         ],
+      },
+    },
+    {
+      // Deployment-agnostic test files must use proper context and services
+      files: [
+        'x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
+        'x-pack/platform/test/api_integration_deployment_agnostic/services/**/*.{js,ts}',
+        'x-pack/solutions/**/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
+        'x-pack/solutions/**/test/api_integration_deployment_agnostic/services/**/*.{js,ts}',
+      ],
+      rules: {
+        '@kbn/eslint/deployment_agnostic_test_context': 'error',
       },
     },
   ],

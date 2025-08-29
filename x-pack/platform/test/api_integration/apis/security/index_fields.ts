@@ -7,7 +7,7 @@
 
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

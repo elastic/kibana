@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { SecuritySolutionConfigurableCypressTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const svlSharedConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-serverless/shared/config.base')
+    require.resolve('@kbn/test-suites-xpack-platform/serverless/shared/config.base')
   );
 
   return {
@@ -37,12 +37,25 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'bulkEditAlertSuppressionEnabled',
           'doesNotMatchForIndicatorMatchRuleEnabled',
+          'continueSuppressionWindowAdvancedSettingEnabled',
         ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
         '--xpack.fleet.agentless.enabled=true',
       ],
+      runOptions: {
+        wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,
+      },
     },
     testRunner: SecuritySolutionConfigurableCypressTestRunner,
   };
 }
+
+/**
+ * A log message indicating that Fleet plugin has completed any necessary setup logic
+ * to make sure test suites can run without race conditions with Fleet plugin initialization.
+ *
+ * The message must not be filtered out by the logging configuration. Subsequently higher log level is better.
+ * "Fleet setup completed" has the same "info" level as "Kibana server is ready" log message.
+ */
+const FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP = /Fleet setup completed/;

@@ -26,17 +26,16 @@ export const WorkflowSettingsSchema = z.object({
 });
 
 /* --- Triggers --- */
-export const DetectionRuleTriggerSchema = z.object({
-  type: z.literal('triggers.elastic.detectionRule'),
+export const AlertRuleTriggerSchema = z.object({
+  type: z.literal('alert'),
   enabled: z.boolean().optional().default(true),
-  with: z.union([
-    z.object({ rule_id: z.string().min(1) }),
-    z.object({ rule_name: z.string().min(1) }),
-  ]),
+  with: z
+    .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
+    .optional(),
 });
 
 export const ScheduledTriggerSchema = z.object({
-  type: z.literal('triggers.elastic.scheduled'),
+  type: z.literal('scheduled'),
   enabled: z.boolean().optional().default(true),
   with: z.union([
     z.object({
@@ -48,12 +47,12 @@ export const ScheduledTriggerSchema = z.object({
 });
 
 export const ManualTriggerSchema = z.object({
-  type: z.literal('triggers.elastic.manual'),
+  type: z.literal('manual'),
   enabled: z.boolean().optional().default(true),
 });
 
 export const TriggerSchema = z.discriminatedUnion('type', [
-  DetectionRuleTriggerSchema,
+  AlertRuleTriggerSchema,
   ScheduledTriggerSchema,
   ManualTriggerSchema,
 ]);
@@ -61,21 +60,25 @@ export const TriggerSchema = z.discriminatedUnion('type', [
 /* --- Steps --- */
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
-  delay: z.number().min(0),
+  delay: z
+    .string()
+    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
+    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
 });
+export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
 export const WorkflowOnFailureSchema = z.object({
-  retry: WorkflowRetrySchema,
-  'fallback-step': z.string().min(1),
+  retry: WorkflowRetrySchema.optional(),
+  'fallback-step': z.string().min(1).optional(),
   continue: z.boolean().optional(),
 });
+export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
 
 // Base step schema, with recursive steps property
 export const BaseStepSchema = z.object({
   name: z.string().min(1),
   if: z.string().optional(),
   foreach: z.string().optional(),
-  // next: z.string().optional(),
   'on-failure': WorkflowOnFailureSchema.optional(),
   timeout: z.number().optional(),
 });
@@ -88,6 +91,33 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
 });
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
+export const WaitStepSchema = BaseStepSchema.extend({
+  type: z.literal('wait'),
+  with: z.object({
+    duration: z.string().regex(/^\d+(ms|[smhdw])$/), // e.g., '5s', '1m', '2h'
+  }),
+});
+export type WaitStep = z.infer<typeof WaitStepSchema>;
+
+export const HttpStepSchema = BaseStepSchema.extend({
+  type: z.literal('http'),
+  with: z.object({
+    url: z.string().min(1),
+    method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH']).optional().default('GET'),
+    headers: z
+      .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+      .optional()
+      .default({}),
+    body: z.any().optional(),
+    timeout: z
+      .string()
+      .regex(/^\d+(ms|[smhdw])$/)
+      .optional()
+      .default('30s'), // e.g., '500ms', '5s', '1m'
+  }),
+});
+export type HttpStep = z.infer<typeof HttpStepSchema>;
+
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
   foreach: z.string(),
@@ -95,12 +125,19 @@ export const ForEachStepSchema = BaseStepSchema.extend({
 });
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
 
-export const getForEachStepSchema = (stepSchema: z.ZodType) => {
-  return BaseStepSchema.extend({
+export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = BaseStepSchema.extend({
     type: z.literal('foreach'),
     foreach: z.string(),
     steps: z.array(stepSchema).min(1),
   });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
 };
 
 export const IfStepSchema = BaseStepSchema.extend({
@@ -111,13 +148,20 @@ export const IfStepSchema = BaseStepSchema.extend({
 });
 export type IfStep = z.infer<typeof IfStepSchema>;
 
-export const getIfStepSchema = (stepSchema: z.ZodType) => {
-  return BaseStepSchema.extend({
+export const getIfStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = BaseStepSchema.extend({
     type: z.literal('if'),
     condition: z.string(),
     steps: z.array(stepSchema).min(1),
     else: z.array(stepSchema).optional(),
   });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
 };
 
 export const ParallelStepSchema = BaseStepSchema.extend({
@@ -131,11 +175,18 @@ export const ParallelStepSchema = BaseStepSchema.extend({
 });
 export type ParallelStep = z.infer<typeof ParallelStepSchema>;
 
-export const getParallelStepSchema = (stepSchema: z.ZodType) => {
-  return BaseStepSchema.extend({
+export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = BaseStepSchema.extend({
     type: z.literal('parallel'),
     branches: z.array(z.object({ name: z.string(), steps: z.array(stepSchema) })),
   });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
 };
 
 export const MergeStepSchema = BaseStepSchema.extend({
@@ -145,12 +196,19 @@ export const MergeStepSchema = BaseStepSchema.extend({
 });
 export type MergeStep = z.infer<typeof MergeStepSchema>;
 
-export const getMergeStepSchema = (stepSchema: z.ZodType) => {
-  return BaseStepSchema.extend({
+export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = BaseStepSchema.extend({
     type: z.literal('merge'),
     sources: z.array(z.string()), // references to branches or steps to merge
     steps: z.array(stepSchema), // steps to run after merge
   });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
 };
 
 /* --- Inputs --- */
@@ -208,6 +266,8 @@ const StepSchema = z.lazy(() =>
   z.discriminatedUnion('type', [
     ForEachStepSchema,
     IfStepSchema,
+    WaitStepSchema,
+    HttpStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,
@@ -216,6 +276,7 @@ const StepSchema = z.lazy(() =>
 
 /* --- Workflow --- */
 export const WorkflowSchema = z.object({
+  version: z.literal('1').default('1').describe('The version of the workflow schema'),
   name: z.string().min(1),
   description: z.string().optional(),
   settings: WorkflowSettingsSchema.optional(),
@@ -227,10 +288,48 @@ export const WorkflowSchema = z.object({
   steps: z.array(StepSchema).min(1),
 });
 
-export const WorkflowYamlSchema = z.object({
-  version: z.literal('1').default('1').describe('The version of the workflow schema'),
-  workflow: WorkflowSchema,
+export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
+
+export const WorkflowExecutionContextSchema = z.object({
+  id: z.string(),
+  isTestRun: z.boolean(),
+  startedAt: z.date(),
+});
+export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
+
+export const WorkflowDataContextSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  enabled: z.boolean(),
+  spaceId: z.string(),
+});
+export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
+
+export const WorkflowContextSchema = z.object({
+  event: z.any().optional(),
+  execution: WorkflowExecutionContextSchema,
+  workflow: WorkflowDataContextSchema,
+  consts: z.record(z.string(), z.any()).optional(),
+  now: z.date().optional(),
 });
 
-export type WorkflowYaml = z.infer<typeof WorkflowYamlSchema>;
-export type WorkflowSchema = z.infer<typeof WorkflowSchema>;
+export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
+
+export const StepContextSchema = WorkflowContextSchema.extend({
+  steps: z.record(
+    z.string(),
+    z.object({
+      output: z.any().optional(),
+      error: z.any().optional(),
+    })
+  ),
+  foreach: z
+    .object({
+      items: z.array(z.any()),
+      index: z.number().int(),
+      item: z.any(),
+      total: z.number().int(),
+    })
+    .optional(),
+});
+export type StepContext = z.infer<typeof StepContextSchema>;

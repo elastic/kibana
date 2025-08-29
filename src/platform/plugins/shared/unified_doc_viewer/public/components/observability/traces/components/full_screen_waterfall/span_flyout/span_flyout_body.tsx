@@ -8,10 +8,10 @@
  */
 
 import { EuiErrorBoundary, EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import SpanOverview from '../../../doc_viewer_span_overview';
 import TransactionOverview from '../../../doc_viewer_transaction_overview';
 import DocViewerTable from '../../../../../doc_viewer_table';
@@ -50,7 +50,6 @@ const tabs = [
 ];
 
 export interface SpanFlyoutProps {
-  tracesIndexPattern: string;
   hit: DataTableRecord | null;
   loading: boolean;
   dataView: DocViewRenderProps['dataView'];
