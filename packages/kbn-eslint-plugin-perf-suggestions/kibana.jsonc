@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/eslint-plugin-perf-suggestions",
+  "owner": "@elastic/obs-ux-infra_services-team",
+  "devOnly": true
+}
