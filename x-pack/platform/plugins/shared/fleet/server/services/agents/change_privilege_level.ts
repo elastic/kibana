@@ -18,7 +18,6 @@ export async function changeAgentPrivilegeLevel(
   soClient: SavedObjectsClientContract,
   agentId: string,
   options: {
-    unprivileged: boolean;
     userInfo?: {
       username?: string;
       groupname?: string;
@@ -43,11 +42,12 @@ export async function changeAgentPrivilegeLevel(
     );
   }
 
+  const data = { ...options, unprivileged: true };
   const res = await createAgentAction(esClient, {
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'PRIVILEGE_LEVEL_CHANGE',
-    data: options,
+    data,
   });
   return { actionId: res.id };
 }

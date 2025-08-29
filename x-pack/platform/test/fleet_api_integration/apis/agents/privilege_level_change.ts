@@ -125,7 +125,6 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/agent1/privilege_level_change`)
           .set('kbn-xsrf', 'xx')
           .send({
-            unprivileged: true,
             user_info: {
               username: 'user1',
               groupname: 'group1',
@@ -139,16 +138,18 @@ export default function (providerContext: FtrProviderContext) {
           sort: [{ '@timestamp': { order: 'desc' as const } }],
         });
         const action: any = actionsRes.hits.hits[0]._source;
-        expect(action.type).equal('PRIVILEGE_LEVEL_CHANGE');
+        expect(action.type).to.eql('PRIVILEGE_LEVEL_CHANGE');
+        expect(action.data).to.eql({
+          userInfo: { username: 'user1', groupname: 'group1', password: 'password' },
+          unprivileged: true,
+        });
       });
 
       it('should return 403 if agent needs root access', async () => {
         await supertest
           .post(`/api/fleet/agents/agent2/privilege_level_change`)
           .set('kbn-xsrf', 'xx')
-          .send({
-            unprivileged: true,
-          })
+          .send()
           .expect(403);
       });
 
@@ -156,9 +157,7 @@ export default function (providerContext: FtrProviderContext) {
         await supertest
           .post(`/api/fleet/agents/agent1337/privilege_level_change`)
           .set('kbn-xsrf', 'xx')
-          .send({
-            unprivileged: true,
-          })
+          .send()
           .expect(404);
       });
     });

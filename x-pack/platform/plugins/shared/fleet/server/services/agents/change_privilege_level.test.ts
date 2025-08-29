@@ -26,10 +26,6 @@ describe('changeAgentPrivilegeLevel', () => {
   const soClientMock = savedObjectsClientMock.create();
   const agentId = 'agent-id';
   const policyId = 'policy-id';
-  const options = {
-    unprivileged: true,
-    userInfo: { username: 'user', password: 'password' },
-  };
   mockedGetAgentById.mockResolvedValue({ policy_id: policyId } as any);
 
   it('should throw an error if the agent needs root access', async () => {
@@ -45,13 +41,13 @@ describe('changeAgentPrivilegeLevel', () => {
     ] as any);
 
     await expect(
-      changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, options)
+      changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
     ).rejects.toThrowError(
       `Agent policy ${policyId} contains integrations that require root access: Package 2`
     );
   });
 
-  it('should create a PRIVILEGE_LEVEL_CHANGE action if the agent can become unprivileged', async () => {
+  it('should create a PRIVILEGE_LEVEL_CHANGE action with minimal options if the agent can become unprivileged', async () => {
     mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
       {
         id: 'package-1',
@@ -69,13 +65,50 @@ describe('changeAgentPrivilegeLevel', () => {
       created_at: new Date().toISOString(),
     });
 
+    const res = await changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {});
+
+    expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, {
+      agents: [agentId],
+      created_at: expect.any(String),
+      type: 'PRIVILEGE_LEVEL_CHANGE',
+      data: {
+        unprivileged: true,
+      },
+    });
+    expect(res).toEqual({ actionId: 'test-action-id' });
+  });
+
+  it('should create a PRIVILEGE_LEVEL_CHANGE action with additional options if the agent can become unprivileged', async () => {
+    mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+      {
+        id: 'package-1',
+        package: { requires_root: false },
+      },
+      {
+        id: 'package-2',
+        package: { requires_root: false },
+      },
+    ] as any);
+    mockedCreateAgentAction.mockResolvedValue({
+      id: 'test-action-id',
+      type: 'PRIVILEGE_LEVEL_CHANGE',
+      agents: [agentId],
+      created_at: new Date().toISOString(),
+    });
+
+    const options = {
+      userInfo: { username: 'user', password: 'password' },
+    };
     const res = await changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, options);
 
     expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, {
       agents: [agentId],
       created_at: expect.any(String),
       type: 'PRIVILEGE_LEVEL_CHANGE',
-      data: options,
+      data: {
+        unprivileged: true,
+        userInfo: { username: 'user', password: 'password' },
+      },
     });
     expect(res).toEqual({ actionId: 'test-action-id' });
   });

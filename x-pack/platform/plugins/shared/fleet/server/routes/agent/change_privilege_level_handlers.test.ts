@@ -35,7 +35,6 @@ describe('Change privilege level handlers', () => {
 
     const agentId = 'agent-id';
     const options = {
-      unprivileged: true,
       user_info: { username: 'user', password: 'password' },
     };
     const mockActionResponse = { id: 'action-id' };
@@ -73,7 +72,6 @@ describe('Change privilege level handlers', () => {
       await changeAgentPrivilegeLevelHandler(mockContext, mockRequest, mockResponse);
 
       expect(changeAgentPrivilegeLevel).toHaveBeenCalledWith(esClientMock, soClientMock, agentId, {
-        unprivileged: options.unprivileged,
         userInfo: options.user_info,
       });
 
