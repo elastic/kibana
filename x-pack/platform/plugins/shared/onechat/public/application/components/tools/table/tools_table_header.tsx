@@ -9,7 +9,6 @@ import {
   EuiFlexGroup,
   EuiSkeletonLoading,
   EuiSkeletonText,
-  EuiSwitch,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -18,7 +17,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React, { useCallback } from 'react';
-import { useToolsPreferences } from '../../../context/tools_preferences_provider';
 import { useToolsActions } from '../../../context/tools_table_provider';
 import { labels } from '../../../utils/i18n';
 
@@ -40,7 +38,6 @@ export const ToolsTableHeader = ({
   setSelectedTools,
 }: ToolsTableHeaderProps) => {
   const { euiTheme } = useEuiTheme();
-  const { includeSystemTools, setIncludeSystemTools } = useToolsPreferences();
   const { bulkDeleteTools } = useToolsActions();
 
   const selectAll = useCallback(() => {
@@ -136,16 +133,6 @@ export const ToolsTableHeader = ({
             )}
           </EuiFlexGroup>
         }
-      />
-      <EuiSwitch
-        disabled={isLoading}
-        label={<EuiText size="s">{labels.tools.includeSystemToolsSwitchLabel}</EuiText>}
-        css={css`
-          align-items: center;
-        `}
-        compressed
-        checked={includeSystemTools}
-        onChange={() => setIncludeSystemTools(!includeSystemTools)}
       />
     </EuiFlexGroup>
   );
