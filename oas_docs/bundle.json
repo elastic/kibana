@@ -41852,9 +41852,9 @@
             }
           }
         },
-        "summary": "Get Fleet Remote synced integrations status",
+        "summary": "Get remote synced integrations status",
         "tags": [
-          "Fleet Remote synced integrations"
+          "Fleet remote synced integrations"
         ]
       }
     },
@@ -42047,9 +42047,9 @@
             }
           }
         },
-        "summary": "Get Fleet Remote synced integrations status by outputId",
+        "summary": "Get remote synced integrations status by outputId",
         "tags": [
-          "Fleet Remote synced integrations"
+          "Fleet remote synced integrations"
         ]
       }
     },
@@ -66045,7 +66045,7 @@
       "name": "Fleet proxies"
     },
     {
-      "name": "Fleet Remote synced integrations"
+      "name": "Fleet remote synced integrations"
     },
     {
       "name": "Fleet Server hosts"
