@@ -20,7 +20,10 @@ import {
   getRemoteSyncedIntegrationsInfoHandler,
 } from './handler';
 
-export const registerRoutes = (router: FleetAuthzRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter, isServerless?: boolean) => {
+  if (isServerless) {
+    return;
+  }
   router.versioned
     .get({
       path: REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.STATUS_PATTERN,
