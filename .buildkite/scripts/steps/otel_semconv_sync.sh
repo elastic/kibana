@@ -69,9 +69,9 @@ generate_typescript() {
   # Run ESLint fix
   echo "--- Running ESLint fix"
   
-  # Debug: Check for potential syntax issues before ESLint
-  echo "--- Debug: Checking for syntax issues around line 3220"
-  sed -n '3215,3225p' "$OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts" || echo "Could not read lines around 3220"
+  # Debug: Check for potential syntax issues around the actual ESLint error line
+  echo "--- Debug: Checking for syntax issues around line 1105 (where ESLint error occurs)"
+  sed -n '1100,1110p' "$OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts" || echo "Could not read lines around 1105"
   
   # Run ESLint and capture the error
   if ! yarn lint:es --fix "$OTEL_PACKAGE_DIR/src/generated/"; then
