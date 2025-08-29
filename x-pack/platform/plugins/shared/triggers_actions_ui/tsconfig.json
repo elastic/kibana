@@ -90,7 +90,6 @@
     "@kbn/elastic-assistant-common",
     "@kbn/ebt-tools",
     "@kbn/presentation-util",
-    "@kbn/triggers-actions-ui-plugin"
   ],
   "exclude": ["target/**/*"]
 }
