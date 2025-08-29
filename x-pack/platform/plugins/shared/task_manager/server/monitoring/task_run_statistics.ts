@@ -40,6 +40,7 @@ import {
   calculateFrequency,
   createRunningAveragedStat,
   createMapOfRunningAveragedStats,
+  filterOutliers,
 } from './task_run_calculators';
 import { HealthStatus } from './monitoring_stats_stream';
 import type { TaskPollingLifecycle } from '../polling_lifecycle';
@@ -398,9 +399,10 @@ export function summarizeTaskRunStat(
       load: calculateRunningAverage(load),
       execution: {
         duration: mapValues(duration, (typedDurations) => calculateRunningAverage(typedDurations)),
-        duration_by_persistence: mapValues(durationByPersistence, (typedDurations) =>
-          calculateRunningAverage(typedDurations)
-        ),
+        duration_by_persistence: mapValues(durationByPersistence, (typedDurations) => {
+          const filteredDurations = filterOutliers(typedDurations);
+          return calculateRunningAverage(filteredDurations);
+        }),
         persistence: {
           [TaskPersistence.Recurring]: 0,
           [TaskPersistence.NonRecurring]: 0,
