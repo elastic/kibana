@@ -14,12 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type {
-  ReindexOperation,
-  ReindexStatusResponse,
-  ReindexSavedObject,
-} from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus, type Version } from '@kbn/upgrade-assistant-pkg-common';
+import { type Version } from '@kbn/upgrade-assistant-pkg-common';
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
 import { ReindexWorker } from './worker';
@@ -30,7 +25,13 @@ import { error } from './error';
 import { sortAndOrderReindexOperations } from './op_utils';
 import type { GetBatchQueueResponse, PostBatchResponse } from '../../types';
 import { reindexHandler } from './reindex_handler';
-import type { ReindexArgs } from '../../../common';
+import type {
+  ReindexArgs,
+  ReindexOperation,
+  ReindexStatusResponse,
+  ReindexSavedObject,
+} from '../../../common';
+import { ReindexStatus } from '../../../common';
 
 export interface ReindexServiceScopedClientArgs {
   savedObjects: SavedObjectsClientContract;

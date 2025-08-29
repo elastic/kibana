@@ -6,7 +6,8 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { ReindexOperation, Version } from '@kbn/upgrade-assistant-pkg-common';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import type { ReindexOperation } from '../common';
 
 import type {
   ReindexServiceScopedClient,

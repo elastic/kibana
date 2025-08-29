@@ -16,8 +16,8 @@ import type {
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
-import type { ReindexOperation, Version } from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus, type ReindexOperation } from '../../../common';
 
 import { reindexActionsFactory } from './reindex_actions';
 import { reindexServiceFactory } from './reindex_service';

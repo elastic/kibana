@@ -6,7 +6,7 @@
  */
 
 import { flow } from 'fp-ts/function';
-import type { ReindexSavedObject } from '@kbn/upgrade-assistant-pkg-common';
+import type { ReindexSavedObject } from '../../../common';
 
 export interface SortedReindexSavedObjects {
   /**

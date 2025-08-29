@@ -14,12 +14,9 @@ import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import type {
-  ReindexOperation,
-  ReindexSavedObject,
-  Version,
-} from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import type { ReindexOperation, ReindexSavedObject } from '../../../common';
+import { ReindexStatus, ReindexStep } from '../../../common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 

@@ -15,7 +15,8 @@ import type {
   ReindexAction,
   UnfreezeAction,
 } from '../../../common/types';
-import { ReindexStep, ReindexStatus, DataStreamMigrationStatus } from '../../../common/types';
+import { DataStreamMigrationStatus } from '../../../common/types';
+import { ReindexStep, ReindexStatus } from '@kbn/reindex-service-plugin/common';
 import { setupEnvironment } from '../helpers';
 import type { ElasticsearchTestBed } from './es_deprecations.helpers';
 import { setupElasticsearchPage } from './es_deprecations.helpers';
