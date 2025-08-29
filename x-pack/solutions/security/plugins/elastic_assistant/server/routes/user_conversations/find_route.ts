@@ -15,6 +15,7 @@ import {
 import type { FindConversationsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { FindConversationsRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { getUserFilter } from './utils';
 import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import type { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
@@ -63,16 +64,19 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const currentUser = await checkResponse.currentUser;
 
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
-          const userFilter = currentUser?.username
-            ? `name: "${currentUser?.username}"`
-            : `id: "${currentUser?.profile_uid}"`;
+
+          const conversationUserFilter = getUserFilter({
+            isOwner: query.is_owner,
+            name: currentUser?.username,
+            id: currentUser?.profile_uid,
+          });
 
           const result = await dataClient?.findDocuments<EsConversationSchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
             sortOrder: query.sort_order,
-            filter: `users:{ ${userFilter} }${additionalFilter}`,
+            filter: `${conversationUserFilter}${additionalFilter}`,
             fields: query.fields ? transformFieldNamesToSourceScheme(query.fields) : undefined,
           });
 
