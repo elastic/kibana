@@ -117,6 +117,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         { sortField: sorting.sort.field === 'Title' ? 'title' : snakeCase(sorting.sort.field) }
       : {}),
     ...(sorting?.sort?.direction ? { sortOrder: sorting.sort.direction } : {}),
+    fields: ['id', 'title', 'apiConfig', 'updatedAt', 'createdBy', 'users'],
+    isConversationOwner: true,
   });
 
   const refetchAll = useCallback(() => {

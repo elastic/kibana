@@ -465,10 +465,10 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
       } as ContinueStep;
     }
 
-    if (onFailureConfig['fallback']) {
+    if (onFailureConfig.fallback) {
       // Wrap the current step in a fallback step
       // and remove the fallback-step from the current step's on-failure to avoid infinite nesting
-      const fallbackSteps = (currentStep as StepWithOnFailure)?.['on-failure']?.['fallback'];
+      const fallbackSteps = onFailureConfig.fallback;
       return {
         name: `fallback_${getNodeId(currentStep)}`,
         type: 'fall-back',
