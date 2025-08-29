@@ -100,6 +100,10 @@ export const getDefaultProfileState = ({
         stateUpdate.rowHeight = defaultState.rowHeight;
       }
 
+      if (resetDefaultProfileState.chartSectionHeight) {
+        stateUpdate.chartSectionHeight = defaultState.chartSectionHeight;
+      }
+
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
     },
   };

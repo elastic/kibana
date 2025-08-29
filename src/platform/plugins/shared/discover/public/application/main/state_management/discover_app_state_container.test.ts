@@ -300,6 +300,7 @@ describe('Test discover app state container', () => {
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
+        chartSectionHeight: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
@@ -307,6 +308,7 @@ describe('Test discover app state container', () => {
         hideChart: true,
         rowHeight: true,
         breakdownField: true,
+        chartSectionHeight: true,
       });
     });
 
@@ -319,6 +321,7 @@ describe('Test discover app state container', () => {
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
+        chartSectionHeight: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
@@ -326,6 +329,7 @@ describe('Test discover app state container', () => {
         hideChart: true,
         rowHeight: true,
         breakdownField: true,
+        chartSectionHeight: true,
       });
     });
 
@@ -338,6 +342,7 @@ describe('Test discover app state container', () => {
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
+        chartSectionHeight: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
@@ -345,6 +350,7 @@ describe('Test discover app state container', () => {
         hideChart: true,
         rowHeight: false,
         breakdownField: true,
+        chartSectionHeight: true,
       });
     });
 
@@ -357,6 +363,7 @@ describe('Test discover app state container', () => {
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
+        chartSectionHeight: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
@@ -364,6 +371,28 @@ describe('Test discover app state container', () => {
         hideChart: false,
         rowHeight: true,
         breakdownField: true,
+        chartSectionHeight: true,
+      });
+    });
+
+    it('should call setResetDefaultProfileState correctly with initial chart section height', () => {
+      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      stateStorageGetSpy.mockReturnValue({ chartSectionHeight: true });
+      const state = getStateContainer();
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: false,
+        hideChart: false,
+        rowHeight: false,
+        breakdownField: false,
+        chartSectionHeight: false,
+      });
+      state.initAndSync();
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: true,
+        hideChart: true,
+        rowHeight: true,
+        breakdownField: true,
+        chartSectionHeight: false,
       });
     });
 
@@ -382,6 +411,7 @@ describe('Test discover app state container', () => {
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
+        chartSectionHeight: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
@@ -389,6 +419,7 @@ describe('Test discover app state container', () => {
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
+        chartSectionHeight: false,
       });
     });
   });
