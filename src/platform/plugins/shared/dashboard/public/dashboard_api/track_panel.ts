@@ -17,7 +17,7 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
   const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const scrollToPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const scrollToBottom$ = new Subject<void>();
-  let scrollPosition: number | undefined;
+  const scrollPosition$ = new BehaviorSubject<number | undefined>(undefined);
 
   function setScrollToPanelId(id: string | undefined) {
     if (scrollToPanelId$.value !== id) scrollToPanelId$.next(id);
@@ -39,34 +39,34 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
       }
 
       setExpandedPanelId(panelId);
-      scrollPosition = window.scrollY;
+      scrollPosition$.next(window.scrollY);
     },
     focusedPanelId$,
     highlightPanelId$,
     highlightPanel: (panelRef: HTMLDivElement) => {
       const id = highlightPanelId$.value;
+      if (!id || !panelRef) return;
 
-      if (id && panelRef) {
-        untilLoaded(id).then(() => {
-          // Adds the highlight class in the next event loop to allow the DOM to update
-          setTimeout(() => panelRef.classList.add('dshDashboardGrid__item--highlighted'), 0);
-          // Removes the class after the highlight animation finishes
-          setTimeout(() => {
-            panelRef.classList.remove('dshDashboardGrid__item--highlighted');
-          }, highlightAnimationDuration);
-        });
-      }
+      untilLoaded(id).then(() => {
+        // Adds the highlight class in the next event loop to allow the DOM to update
+        setTimeout(() => panelRef.classList.add('dshDashboardGrid__item--highlighted'), 0);
+        // Removes the class after the highlight animation finishes
+        setTimeout(() => {
+          panelRef.classList.remove('dshDashboardGrid__item--highlighted');
+        }, highlightAnimationDuration);
+      });
+
       highlightPanelId$.next(undefined);
     },
     scrollToPanelId$,
     scrollToPanel: async (panelRef: HTMLDivElement) => {
       const id = scrollToPanelId$.value;
-      if (!id) return;
+      if (!id || !panelRef) return;
 
       untilLoaded(id).then(() => {
-        if (scrollPosition !== undefined) {
-          window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
-          scrollPosition = undefined;
+        if (scrollPosition$.value !== undefined) {
+          window.scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
+          scrollPosition$.next(undefined);
         } else {
           const dashboardTop =
             document.querySelector('.dashboardContainer')?.getBoundingClientRect().top || 0;
@@ -78,9 +78,11 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
             panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
           }
         }
+
         setScrollToPanelId(undefined);
       });
     },
+    scrollPosition$,
     scrollToTop: () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
