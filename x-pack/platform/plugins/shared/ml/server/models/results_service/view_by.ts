@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../../../common/constants/explorer';
 import type { MlClient } from '../../lib/ml_client';
 
 export interface GetScoresByBucketRequest {
@@ -176,7 +177,7 @@ export async function getInfluencerValueMaxScoreByTime(
         influencerFieldValues: {
           terms: {
             field: 'influencer_field_value',
-            size: !!maxResults ? maxResults : 1000, // TODO: Replace with const
+            size: !!maxResults ? maxResults : ANOMALY_SWIM_LANE_HARD_LIMIT,
             order: { maxAnomalyScore: 'desc' },
           },
           aggs: {

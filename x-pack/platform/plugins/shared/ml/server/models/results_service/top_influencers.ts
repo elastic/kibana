@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../../../common/constants/explorer';
 import type { MlClient } from '../../lib/ml_client';
 import type {
   GetTopInfluencersRequest as GetTopInfluencersParams,
@@ -75,7 +76,9 @@ export async function getTopInfluencers(
   }
 
   const maxValues =
-    typeof maxFieldValues === 'number' && maxFieldValues > 0 ? maxFieldValues : 1000; // TODO: Use CONST;
+    typeof maxFieldValues === 'number' && maxFieldValues > 0
+      ? maxFieldValues
+      : ANOMALY_SWIM_LANE_HARD_LIMIT;
   const pageSize = typeof perPage === 'number' && perPage > 0 ? perPage : 10;
   const pageIndex = typeof page === 'number' && page > 0 ? page : 1; // 1-based
   const from = (pageIndex - 1) * pageSize;
