@@ -58,28 +58,10 @@ bootstrap_kibana() {
 generate_typescript() {
   echo "--- Generating TypeScript definitions"
   
-  # Debug: Check current directory and file locations
-  echo "--- Debug: Current working directory: $(pwd)"
-  echo "--- Debug: Looking for resolved_semconv.yaml file"
-  ls -la otel-semconv/ | grep "resolved_semconv.yaml" || echo "❌ resolved_semconv.yaml not found in otel-semconv/"
-  ls -la otel-semconv/resolved_semconv.yaml || echo "❌ File otel-semconv/resolved_semconv.yaml does not exist"
+  # Verify the YAML file was already copied by main function
+  echo "--- Debug: Verifying YAML file is in package assets"
+  ls -la "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml" || echo "❌ resolved-semconv.yaml not found in assets directory"
   
-  # Check target directory
-  echo "--- Debug: Target directory: $OTEL_PACKAGE_DIR/assets/"
-  ls -la "$OTEL_PACKAGE_DIR/assets/" || echo "❌ Target assets directory does not exist"
-  
-  # Move generated YAML to package
-  if [ -f "otel-semconv/resolved_semconv.yaml" ]; then
-    cp otel-semconv/resolved_semconv.yaml "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
-    echo "✅ Successfully copied YAML file to package assets"
-    ls -la "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
-  else
-    echo "❌ Error: Cannot find otel-semconv/resolved_semconv.yaml to copy"
-    echo "--- Debug: Contents of otel-semconv directory:"
-    ls -la otel-semconv/ || echo "otel-semconv directory does not exist"
-    exit 1
-  fi
-
   # Generate TypeScript file
   echo "--- Running TypeScript generation"
   node scripts/generate_otel_semconv.js
