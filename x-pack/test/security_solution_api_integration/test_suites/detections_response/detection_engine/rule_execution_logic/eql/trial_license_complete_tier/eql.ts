@@ -835,7 +835,7 @@ export default ({ getService }: FtrProviderContext) => {
       const expectedWarning =
         'This rule reached the maximum alert limit for the rule execution. Some alerts were not created.';
 
-      it('specifying only timestamp_field results in alert creation with an expect.expected warning', async () => {
+      it('specifying only timestamp_field results in alert creation with an expected warning', async () => {
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['auditbeat-*']),
           timestamp_field: 'event.created',
@@ -853,7 +853,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect_(previewAlerts).not.toHaveLength(0);
       });
 
-      it('specifying only timestamp_override results in alert creation with an expect.expected warning', async () => {
+      it('specifying only timestamp_override results in alert creation with an expected warning', async () => {
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['auditbeat-*']),
           timestamp_override: 'event.created',
@@ -871,7 +871,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect_(previewAlerts).not.toHaveLength(0);
       });
 
-      it('specifying both timestamp_override and timestamp_field results in alert creation with an expect.expected warning', async () => {
+      it('specifying both timestamp_override and timestamp_field results in alert creation with an expected warning', async () => {
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['auditbeat-*']),
           timestamp_field: 'event.created',
