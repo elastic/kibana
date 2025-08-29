@@ -47,9 +47,8 @@ export async function getTopInfluencers(
 
   if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
     boolCriteria.push({
-      query_string: {
-        analyze_wildcard: false,
-        query: jobIds.map((j) => `job_id:${j}`).join(' OR '),
+      terms: {
+        job_id: jobIds,
       },
     });
   }
