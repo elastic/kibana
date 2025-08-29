@@ -54,11 +54,11 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
         // if source exists, update it (in case attrs changed), else create a new one
         if (source) {
           const res = await client.update({ id: source.id, ...attrs });
-          dataClient.log('info', `Updated source '${attrs.name}' (id: ${source.id})`);
+          dataClient.log('debug', `Updated source '${attrs.name}' (id: ${source.id})`);
           return res;
         } else {
           const res = await client.create(attrs);
-          dataClient.log('info', `Created new source '${attrs.name}'`);
+          dataClient.log('debug', `Created new source '${attrs.name}'`);
           return res;
         }
       })
