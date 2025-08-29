@@ -295,13 +295,14 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
 exports[`LoginPage page renders as expected 1`] = `
 <div>
   <div
-    class="loginWelcome login-form css-vvcdom-kbnFullScreenBgCss"
+    class="css-vvcdom-kbnFullScreenBgCss"
+    data-test-subj="loginForm"
   >
     <header
-      class="loginWelcome__header"
+      class="css-1uhsdzt-LoginPage"
     >
       <div
-        class="loginWelcome__content eui-textCenter"
+        class="css-das9jl-LoginPage"
       >
         <span
           class="loginWelcome__logo"
@@ -319,7 +320,7 @@ exports[`LoginPage page renders as expected 1`] = `
       </div>
     </header>
     <div
-      class="loginWelcome__content loginWelcome-body"
+      class="css-das9jl-LoginPage"
     >
       <div
         class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
@@ -475,13 +476,14 @@ exports[`LoginPage page renders as expected 1`] = `
 exports[`LoginPage page renders with custom branding 1`] = `
 <div>
   <div
-    class="loginWelcome login-form css-vvcdom-kbnFullScreenBgCss"
+    class="css-vvcdom-kbnFullScreenBgCss"
+    data-test-subj="loginForm"
   >
     <header
-      class="loginWelcome__header"
+      class="css-1uhsdzt-LoginPage"
     >
       <div
-        class="loginWelcome__content eui-textCenter"
+        class="css-das9jl-LoginPage"
       >
         <span
           class="loginWelcome__logo"
@@ -507,7 +509,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
       </div>
     </header>
     <div
-      class="loginWelcome__content loginWelcome-body"
+      class="css-das9jl-LoginPage"
     >
       <div
         class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
