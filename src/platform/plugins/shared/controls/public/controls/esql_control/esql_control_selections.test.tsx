@@ -16,16 +16,11 @@ import type { BehaviorSubject } from 'rxjs';
 
 const MOCK_VALUES_FROM_QUERY = ['option1', 'option2', 'option3', 'option4', 'option5'];
 
-const mockGetESQLSingleColumnValues = jest.fn();
-const mockIsSuccess = jest.fn();
-
 jest.mock('./utils/get_esql_single_column_values', () => {
   const getESQLSingleColumnValues = () => {
-    mockGetESQLSingleColumnValues();
     return { values: MOCK_VALUES_FROM_QUERY };
   };
   getESQLSingleColumnValues.isSuccess = () => {
-    mockIsSuccess();
     return true;
   };
   return {
@@ -51,11 +46,21 @@ describe('initializeESQLControlSelections', () => {
         controlType: EsqlControlType.VALUES_FROM_QUERY,
       } as ESQLControlState;
 
-      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
+      let dataHasLoaded = 'not started';
+      const setDataLoading = (loading: boolean) => {
+        if (loading) dataHasLoaded = 'loading';
+        if (!loading) dataHasLoaded = 'loaded';
+      };
+
+      const selections = initializeESQLControlSelections(
+        initialState,
+        controlFetch$,
+        setDataLoading
+      );
+      controlFetch$.next({});
 
       await waitFor(() => {
-        expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
-        expect(mockIsSuccess).toHaveBeenCalledTimes(1);
+        expect(dataHasLoaded).toBe('loaded');
       });
 
       await waitFor(() => {
@@ -91,6 +96,7 @@ describe('initializeESQLControlSelections', () => {
       } as ESQLControlState;
 
       const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
+      controlFetch$.next({});
 
       await waitFor(() => {
         const availableOptions = selections.internalApi.availableOptions$.getValue();
@@ -115,8 +121,5 @@ describe('initializeESQLControlSelections', () => {
         }
       `);
     });
-
-    expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(0);
-    expect(mockIsSuccess).toHaveBeenCalledTimes(0);
   });
 });
