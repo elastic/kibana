@@ -396,7 +396,8 @@ const componentStyles = {
         borderRadius: '2px',
       },
       '.template-variable-error': {
-        backgroundColor: euiTheme.colors.backgroundLightWarning,
+        backgroundColor: euiTheme.colors.vis.euiColorVisWarning1,
+        color: euiTheme.colors.severity.danger,
         borderRadius: '2px',
       },
       '.step-highlight': {
