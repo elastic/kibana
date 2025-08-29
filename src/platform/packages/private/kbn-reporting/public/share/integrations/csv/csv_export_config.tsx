@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { ShareContext, type ExportShare } from '@kbn/share-plugin/public';
 import { LocatorParams } from '@kbn/reporting-common/types';
-import { ReportParamsGetter, ReportParamsGetterOptions } from '../../types';
-import { getSearchCsvJobParams, CsvSearchModeParams } from '../shared/get_search_csv_job_params';
-import type { ExportModalShareOpts } from '.';
-import { checkLicense } from '../..';
+import { ReportParamsGetter, ReportParamsGetterOptions } from '../../../types';
+import {
+  getSearchCsvJobParams,
+  type CsvSearchModeParams,
+} from '../../shared/get_search_csv_job_params';
+import type { ExportModalShareOpts } from '../../share_context_menu';
 
 export const getCsvReportParams: ReportParamsGetter<
   ReportParamsGetterOptions & { forShareUrl?: boolean },
@@ -51,15 +53,15 @@ export const getCsvReportParams: ReportParamsGetter<
   };
 };
 
-export const reportingCsvExportProvider = ({
-  apiClient,
-  usesUiCapabilities,
-  startServices$,
-}: ExportModalShareOpts): ExportShare => {
-  const getShareMenuItems = ({
+/**
+ * @description Returns config for the CSV export integration
+ */
+export const getShareMenuItems =
+  ({ apiClient, startServices$ }: Pick<ExportModalShareOpts, 'apiClient' | 'startServices$'>) =>
+  ({
     objectType,
     sharingData,
-  }: ShareContext): ReturnType<ExportShare['config']> => {
+  }: ShareContext): ReturnType<ExportShare['config']> extends Promise<infer R> ? R : never => {
     const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams =>
       getCsvReportParams({ sharingData, forShareUrl });
 
@@ -168,34 +170,3 @@ export const reportingCsvExportProvider = ({
       },
     };
   };
-
-  return {
-    shareType: 'integration',
-    id: 'csvReports',
-    groupId: 'export',
-    config: getShareMenuItems,
-    prerequisiteCheck: ({ license, capabilities }) => {
-      if (!license) {
-        return false;
-      }
-
-      const licenseCheck = checkLicense(license.check('reporting', 'basic'));
-
-      const licenseHasCsvReporting = licenseCheck.showLinks;
-
-      let capabilityHasCsvReporting = false;
-
-      if (usesUiCapabilities) {
-        capabilityHasCsvReporting = capabilities.discover?.generateCsv === true;
-      } else {
-        capabilityHasCsvReporting = true; // deprecated
-      }
-
-      if (!(licenseHasCsvReporting && capabilityHasCsvReporting)) {
-        return false;
-      }
-
-      return true;
-    },
-  };
-};
