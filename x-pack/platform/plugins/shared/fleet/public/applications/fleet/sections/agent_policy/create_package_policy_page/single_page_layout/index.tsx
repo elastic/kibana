@@ -77,7 +77,7 @@ import { packageHasAtLeastOneSecret } from '../utils';
 
 import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
 
-import { agentPoliciesWithFipsAgents } from '../../../../hooks/use_agent_policies_with_fips';
+import { useAgentPoliciesWithFipsAgents } from '../../../../hooks/use_agent_policies_with_fips';
 
 import {
   AddIntegrationFlyoutConfigureHeader,
@@ -167,7 +167,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }, [packageInfoData]);
 
   const [agentCount, setAgentCount] = useState<number>(0);
-  const [policiesHaveFipsAgents, setPoliciesHaveFipsAgents] = useState<boolean>(false);
 
   const [integrationToEnable, setIntegrationToEnable] = useState<string | undefined>(integration);
   const integrationInfo = useMemo(() => {
@@ -295,15 +294,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     }
   }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled, agentPolicies]);
 
-  useEffect(() => {
-    const checkFipsAgents = async () => {
-      const fipsAgents = await agentPoliciesWithFipsAgents(agentPolicyIds);
-      setPoliciesHaveFipsAgents(fipsAgents);
-    };
-    if (agentPolicyIds.length > 0) {
-      checkFipsAgents();
-    }
-  }, [agentPolicies, agentPolicyIds]);
+  const policiesHaveFipsAgents = useAgentPoliciesWithFipsAgents(agentPolicyIds);
 
   useEffect(() => {
     if (
