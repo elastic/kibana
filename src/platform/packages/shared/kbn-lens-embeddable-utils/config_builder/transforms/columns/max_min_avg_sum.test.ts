@@ -15,6 +15,7 @@ import {
 } from './max_min_avg_sum';
 import type { AvgIndexPatternColumn, SumIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiMetricOperation, LensApiSumMetricOperation } from '../../schema/metric_ops';
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 
 describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
   describe('fromBasicMetricAPItoLensState', () => {
@@ -138,6 +139,7 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
         const input: LensApiSumMetricOperation = {
           operation: 'sum',
           field: 'revenue',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         };
 
         const expected: SumIndexPatternColumn = {
@@ -160,6 +162,7 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
           field: 'revenue',
           format: { type: 'percent', decimals: 5, compact: false },
           label: 'Total Revenue',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         };
 
         const result = fromSumMetricAPIToLensState(input);
@@ -185,6 +188,7 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
         const expected: LensApiSumMetricOperation = {
           operation: 'sum',
           field: 'revenue',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         };
 
         expect(fromSumMetricLensStateToAPI(input)).toEqual(expected);

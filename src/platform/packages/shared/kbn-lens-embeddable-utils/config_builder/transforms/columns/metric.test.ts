@@ -22,14 +22,25 @@ import type {
   LensApiUniqueCountMetricOperation,
   LensApiFormulaOperation,
 } from '../../schema/metric_ops';
-import { isAPIColumnOfType, isApiColumnOfReferableType } from './utils';
+import {
+  LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+  isAPIColumnOfType,
+  isApiColumnOfReferableType,
+} from './utils';
 
 describe('Metric Transforms', () => {
   describe('Type Guards', () => {
     describe('isAPIColumnOfType', () => {
       it('should identify correct operation types', () => {
-        const countOperation = { operation: 'count' as const };
-        const sumOperation = { operation: 'sum' as const, field: 'sales' };
+        const countOperation = {
+          operation: 'count' as const,
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        };
+        const sumOperation = {
+          operation: 'sum' as const,
+          field: 'sales',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        };
 
         expect(isAPIColumnOfType('count', countOperation)).toBe(true);
         expect(isAPIColumnOfType('sum', countOperation)).toBe(false);
@@ -40,8 +51,12 @@ describe('Metric Transforms', () => {
     describe('isApiColumnOfReferableType', () => {
       it('should identify referable operations', () => {
         const referableOps = [
-          { operation: 'sum' as const, field: 'sales' },
-          { operation: 'count' as const },
+          {
+            operation: 'sum' as const,
+            field: 'sales',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+          { operation: 'count' as const, empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE },
           { operation: 'average' as const, field: 'sales' },
         ];
 
@@ -49,7 +64,11 @@ describe('Metric Transforms', () => {
           { operation: 'formula' as const, formula: 'sales * 2' },
           {
             operation: 'moving_average' as const,
-            of: { operation: 'sum' as const, field: 'sales' },
+            of: {
+              operation: 'sum' as const,
+              field: 'sales',
+              empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+            },
             window: 7,
           },
         ];
@@ -70,6 +89,7 @@ describe('Metric Transforms', () => {
       it('should transform count operation', () => {
         const input: LensApiCountMetricOperation = {
           operation: 'count',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         };
 
         const [result] = fromMetricAPItoLensState(input);
@@ -80,6 +100,7 @@ describe('Metric Transforms', () => {
         const input: LensApiUniqueCountMetricOperation = {
           operation: 'unique_count',
           field: 'user_id',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         };
 
         const [result] = fromMetricAPItoLensState(input);
@@ -139,6 +160,7 @@ describe('Metric Transforms', () => {
         operation: 'unsupported' as any,
       };
 
+      // @ts-expect-error
       expect(() => fromMetricAPItoLensState(input)).toThrow('Unsupported metric operation');
     });
   });

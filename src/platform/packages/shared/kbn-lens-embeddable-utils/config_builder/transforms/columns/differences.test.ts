@@ -14,12 +14,14 @@ import type {
   LensApiFieldMetricOperations,
 } from '../../schema/metric_ops';
 import { capitalize } from 'lodash';
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 
 describe('Differences Transforms', () => {
   const apiColumnRef: LensApiFieldMetricOperations = {
     operation: 'sum',
     field: 'sales',
     label: 'Sum of Total Sales',
+    empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
   };
   const testRef: { id: string; field: string; label: string } = {
     id: 'sumId',
@@ -88,6 +90,7 @@ describe('Differences Transforms', () => {
       const referenceOp: LensApiFieldMetricOperations = {
         operation: 'sum',
         field: 'sales',
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       const expected: LensApiDifferencesOperation = {
@@ -114,6 +117,7 @@ describe('Differences Transforms', () => {
       const referenceOp: LensApiFieldMetricOperations = {
         operation: 'sum',
         field: 'sales',
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       const result = fromDifferencesLensStateToAPI(input, referenceOp, 'Sum of Total Sales');
@@ -139,10 +143,22 @@ describe('Differences Transforms', () => {
         { operation: 'median' as const, field: 'price' },
         { operation: 'max' as const, field: 'price' },
         { operation: 'min' as const, field: 'price' },
-        { operation: 'sum' as const, field: 'price' },
-        { operation: 'count' as const },
-        { operation: 'count' as const, field: 'price' },
-        { operation: 'unique_count' as const, field: 'price' },
+        {
+          operation: 'sum' as const,
+          field: 'price',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+        { operation: 'count' as const, empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE },
+        {
+          operation: 'count' as const,
+          field: 'price',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+        {
+          operation: 'unique_count' as const,
+          field: 'price',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
         { operation: 'standard_deviation' as const, field: 'price' },
         { operation: 'percentile' as const, field: 'price', percentile: 90 },
         { operation: 'percentile_rank' as const, field: 'price', rank: 90 },
