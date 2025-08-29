@@ -46,7 +46,7 @@ const alertAddedToCase: TelemetryEvent = {
     from: {
       type: 'keyword' as const,
       _meta: {
-        description: 'The table ID / Button from which the alert was added to the case',
+        description: 'from which the alert was added to the case',
         optional: false,
       },
     },

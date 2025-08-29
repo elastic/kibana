@@ -58,7 +58,7 @@ export function DashboardTile({
           {/* Allowing both href and onClick to allow telemetry to be reported */}
           {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiLink
-            data-test-subj={`alertDetailsPage_relatedDashboardTab_viewLinkedDashboard_${actionButtonProps?.ruleType}`}
+            data-test-subj={`alertDetails_relatedDashboard_viewLinkedDashboard_${actionButtonProps?.ruleType}`}
             href={dashboardLocator?.getRedirectUrl({
               dashboardId: dashboard.id,
               timeRange,

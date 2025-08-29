@@ -40,7 +40,7 @@ export function AddToCaseButton({
       const isNewCaseCreated = !updatedAt;
       telemetryClient.reportAlertAddedToCase(
         isNewCaseCreated,
-        'alertDetailsPage.header.addToCaseButton',
+        'alertDetails.addToCaseBtn',
         rule?.ruleTypeId || 'unknown'
       );
     },
