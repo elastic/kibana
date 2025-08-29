@@ -14,7 +14,7 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { extractMigrationInfo, getTypeHashes } from '@kbn/core-test-helpers-so-type-serializer';
+import { extractMigrationInfo } from '@kbn/core-test-helpers-so-type-serializer';
 
 import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
