@@ -37,7 +37,7 @@ export interface FetchEsqlQueryOpts {
     logger: Logger;
     share: SharePluginStart;
     ruleResultService?: PublicRuleResultService;
-    getAsyncSearch: RuleExecutorServices['getAsyncSearch'];
+    getAsyncSearchClient: RuleExecutorServices['getAsyncSearchClient'];
   };
   dateStart: string;
   dateEnd: string;
@@ -52,16 +52,16 @@ export async function fetchEsqlQuery({
   dateStart,
   dateEnd,
 }: FetchEsqlQueryOpts) {
-  const { logger, share, ruleResultService } = services;
+  const { logger, share, ruleResultService, getAsyncSearchClient } = services;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
-  const esqlAsyncSearch = services.getAsyncSearch<ESQLSearchParams>(ESQL_ASYNC_SEARCH_STRATEGY);
+  const asyncSearchClient = getAsyncSearchClient<ESQLSearchParams>(ESQL_ASYNC_SEARCH_STRATEGY);
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
   logger.debug(() => `ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
   let response: EsqlTable;
   try {
-    const asyncResponse = await esqlAsyncSearch({
+    const asyncResponse = await asyncSearchClient.search({
       request: { params: { query: query.query, filter: query.filter } },
     });
     response = asyncResponse.rawResponse;

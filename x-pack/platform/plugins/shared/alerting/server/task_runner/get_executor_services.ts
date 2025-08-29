@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidV4 } from 'uuid';
 import type {
   IUiSettingsClient,
   KibanaRequest,
@@ -137,7 +136,7 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
       let totalSearchDurationMs = 0;
 
       const client = context.data.search.asScoped(fakeRequest);
-      let id = uuidV4();
+      let id: string | undefined;
 
       return {
         getMetrics: () => {
@@ -148,20 +147,16 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
           };
         },
         async search({ request, options }) {
-          if (request.id) {
-            id = request.id;
-          }
           return lastValueFrom(
             client
-              .search(
-                { ...request, id },
-                {
-                  ...options,
-                  strategy,
-                }
-              )
+              .search(request, {
+                ...options,
+                strategy,
+                retrieveResults: true,
+              })
               .pipe(
                 map((response) => {
+                  id = response.id;
                   return response;
                 }),
                 tap((result) => {
@@ -174,9 +169,11 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
           );
         },
         async cancel(options) {
+          if (!id) return;
           await client.cancel(id, options);
         },
         async extend(keepAlive, options) {
+          if (!id) return;
           await client.extend(id, keepAlive, options);
         },
       };
