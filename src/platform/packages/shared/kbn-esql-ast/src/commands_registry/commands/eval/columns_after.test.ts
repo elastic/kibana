@@ -22,13 +22,13 @@ describe('EVAL > columnsAfter', () => {
     const result = columnsAfter(command, baseColumns, '');
 
     expect(result).toEqual([
-      ...baseColumns,
       {
         name: 'baz',
         type: 'integer',
         location: { min: 0, max: 0 },
         userDefined: true,
       },
+      ...baseColumns,
     ]);
   });
 
@@ -37,7 +37,6 @@ describe('EVAL > columnsAfter', () => {
     const result = columnsAfter(command, baseColumns, '');
 
     expect(result).toEqual([
-      ...baseColumns,
       {
         name: 'baz',
         type: 'integer',
@@ -50,6 +49,7 @@ describe('EVAL > columnsAfter', () => {
         location: { min: 0, max: 0 },
         userDefined: true,
       },
+      ...baseColumns,
     ]);
   });
 
@@ -67,13 +67,13 @@ describe('EVAL > columnsAfter', () => {
     const result = columnsAfter(command, baseColumns, queryString);
 
     expect(result).toEqual([
-      ...baseColumns,
       {
         name: 'foo + 1',
         type: 'integer',
         location: { min: 18, max: 24 },
         userDefined: true,
       },
+      ...baseColumns,
     ]);
   });
 
@@ -91,7 +91,6 @@ describe('EVAL > columnsAfter', () => {
     const result = columnsAfter(command, baseColumns, queryString);
 
     expect(result).toEqual([
-      ...baseColumns,
       {
         name: 'baz',
         type: 'integer',
@@ -104,6 +103,7 @@ describe('EVAL > columnsAfter', () => {
         location: { min: 33, max: 41 },
         userDefined: true,
       },
+      ...baseColumns,
     ]);
   });
 
@@ -112,5 +112,25 @@ describe('EVAL > columnsAfter', () => {
     const result = columnsAfter(command, baseColumns, '');
 
     expect(result).toEqual(baseColumns);
+  });
+
+  it('handles overwriting columns', () => {
+    const command = synth.cmd`EVAL foo = "", bar = 23`;
+    const result = columnsAfter(command, baseColumns, '');
+
+    expect(result).toEqual([
+      {
+        name: 'foo',
+        type: 'keyword',
+        location: { min: 0, max: 0 },
+        userDefined: true,
+      },
+      {
+        name: 'bar',
+        type: 'integer',
+        location: { min: 0, max: 0 },
+        userDefined: true,
+      },
+    ]);
   });
 });

@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { synth } from '../../../..';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
+import type { ESQLColumnData } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('KEEP', () => {
-  const context = {
-    userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([]),
-    fields: new Map<string, ESQLFieldWithMetadata>([
-      ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
-      ['count', { name: 'count', type: 'double', userDefined: false }],
-    ]),
-  };
+  const columns = new Map<string, ESQLColumnData>([
+    ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
+    ['count', { name: 'count', type: 'double', userDefined: false }],
+  ]);
+  const context = { columns };
   it('should return the correct fields after the command', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword', userDefined: false },

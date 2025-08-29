@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { uniqBy } from 'lodash';
 import { getExpressionType } from '../../../definitions/utils';
 import { isAssignment, isColumn } from '../../../ast/is';
 import type { ESQLAstItem, ESQLCommand } from '../../../types';
@@ -46,5 +47,5 @@ export const columnsAfter = (
     }
   }
 
-  return [...previousColumns, ...newColumns];
+  return uniqBy([...newColumns, ...previousColumns], 'name');
 };
