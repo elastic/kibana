@@ -7,7 +7,7 @@
 
 export {
   esqlResponseToJson,
-  flattenMappings,
+  flattenMapping,
   cleanupMapping,
   type MappingField,
 } from './tools/utils';

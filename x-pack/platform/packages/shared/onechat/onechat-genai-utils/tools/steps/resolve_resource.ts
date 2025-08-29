@@ -11,7 +11,7 @@ import { isNotFoundError } from '@kbn/es-errors';
 import { EsResourceType } from '@kbn/onechat-common';
 import { getIndexMappings, getDatastreamMappings } from './get_mappings';
 import type { MappingField } from '../utils';
-import { processFieldCapsResponse, flattenMappings } from '../utils';
+import { processFieldCapsResponse, flattenMapping } from '../utils';
 
 export interface ResolveResourceResponse {
   /** type of the resource*/
@@ -64,7 +64,7 @@ export const resolveResource = async ({
     const indexName = resolveRes.indices[0].name;
     const mappingRes = await getIndexMappings({ indices: [indexName], esClient, cleanup: true });
     const mappings = mappingRes[indexName].mappings;
-    const fields = flattenMappings({ mappings });
+    const fields = flattenMapping(mappings);
     return {
       type: EsResourceType.index,
       fields,
@@ -80,7 +80,7 @@ export const resolveResource = async ({
       cleanup: true,
     });
     const mappings = mappingRes[datastream].mappings;
-    const fields = flattenMappings({ mappings });
+    const fields = flattenMapping(mappings);
     return {
       type: EsResourceType.dataStream,
       fields,

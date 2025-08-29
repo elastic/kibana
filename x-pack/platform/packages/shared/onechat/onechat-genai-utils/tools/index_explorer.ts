@@ -19,7 +19,7 @@ import type {
 } from './steps/list_search_sources';
 import { listSearchSources } from './steps/list_search_sources';
 import { getDatastreamMappings, getIndexMappings } from './steps/get_mappings';
-import { flattenMappings } from './utils/mappings';
+import { flattenMapping } from './utils/mappings';
 
 export interface RelevantResource {
   type: EsResourceType;
@@ -53,7 +53,7 @@ const createIndexSummaries = async ({
 
   return indices.map<ResourceDescriptor>(({ name: indexName }) => {
     const indexMappings = allMappings[indexName];
-    const flattened = flattenMappings({ mappings: indexMappings.mappings });
+    const flattened = flattenMapping(indexMappings.mappings);
     return {
       type: EsResourceType.index,
       name: indexName,
@@ -93,7 +93,7 @@ const createDatastreamSummaries = async ({
 
   return datastreams.map<ResourceDescriptor>(({ name }) => {
     const mappings = allMappings[name];
-    const flattened = flattenMappings({ mappings: mappings.mappings });
+    const flattened = flattenMapping(mappings.mappings);
     return {
       type: EsResourceType.dataStream,
       name,

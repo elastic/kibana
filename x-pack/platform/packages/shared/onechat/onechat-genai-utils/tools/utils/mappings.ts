@@ -30,16 +30,8 @@ interface MappingProperties {
 /**
  * Returns a flattened representation of the mappings, with all fields at the top level.
  */
-export const flattenMappings = ({
-  mappings,
-}: {
-  mappings: MappingTypeMapping;
-  /** if true, will include internal (_*) fields */
-  includeInternalFields?: boolean;
-  /** if true, will include non indexed fields */
-  includeNonIndexedFields?: boolean;
-}): MappingField[] => {
-  const properties: MappingProperties = mappings.properties ?? {};
+export const flattenMapping = (mapping: MappingTypeMapping): MappingField[] => {
+  const properties: MappingProperties = mapping.properties ?? {};
 
   function extractFields(obj: MappingProperties, prefix = ''): MappingField[] {
     let fields: MappingField[] = [];

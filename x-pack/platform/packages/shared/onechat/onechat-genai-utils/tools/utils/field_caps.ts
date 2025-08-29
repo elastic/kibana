@@ -38,14 +38,15 @@ export const processFieldCapsResponse = (
 
   const fields = Object.entries(fieldCapsRes.fields)
     .filter(([path, entry]) => {
-      // exclude internal fields
-      if (path.startsWith('_')) {
-        return false;
-      }
       // exclude conflicting fields
       if (Object.keys(entry).length !== 1) {
         return false;
       }
+      // exclude fields with internal types
+      if (Object.keys(entry)[0].startsWith('_')) {
+        return false;
+      }
+
       return true;
     })
     .map(([path, entry]) => {
@@ -60,15 +61,15 @@ const processField = (
   entry: Record<string, FieldCapsFieldCapability>
 ): MappingField => {
   // filtered by caller
-  if (Object.keys(entry).length > 0 || Object.keys(entry).length === 0) {
+  if (Object.keys(entry).length > 1 || Object.keys(entry).length === 0) {
     throw new Error(`Trying to process field with conflicting types: ${path}`);
   }
 
   const fieldCaps = Object.values(entry)[0];
 
-  const meta: Record<string, string> = {};
+  let meta: Record<string, string> = {};
   if (fieldCaps.meta) {
-    Object.entries(fieldCaps.meta).reduce((acc, [key, value]) => {
+    meta = Object.entries(fieldCaps.meta).reduce((acc, [key, value]) => {
       acc[key] = Array.isArray(value) ? value.join(',') : `${value}`;
       return acc;
     }, {} as Record<string, string>);
