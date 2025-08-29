@@ -36,6 +36,7 @@
     "@kbn/core-feature-flags-server",
     "@kbn/core-pricing-server",
     "@kbn/core-di",
+    "@kbn/core-data-streams-server",
   ],
   "exclude": [
     "target/**/*",
