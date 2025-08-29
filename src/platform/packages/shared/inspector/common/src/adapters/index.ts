@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './request';
-export type * from './types';
+export type { Adapters, Request, RequestStatistic, RequestStatistics } from './types';
+export { RequestStatus } from './types';
+export { RequestAdapter } from './request_adapter';
+export { RequestResponder } from './request_responder';
