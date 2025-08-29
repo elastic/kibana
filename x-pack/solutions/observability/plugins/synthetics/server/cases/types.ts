@@ -15,7 +15,7 @@ export interface SyntheticsAggregationsResponse {
   };
 }
 
-export interface MonitorBucket {
+interface MonitorBucket {
   key: string; // monitor name
   doc_count: number;
   latest_run: {
@@ -36,7 +36,7 @@ export interface MonitorBucket {
   };
 }
 
-export interface SyntheticsMonitorSource {
+interface SyntheticsMonitorSource {
   monitor: {
     name: string;
     type: string;
