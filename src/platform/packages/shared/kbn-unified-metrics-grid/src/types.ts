@@ -16,7 +16,7 @@ export interface MetricField {
   unit?: string;
   description?: string;
   source?: string;
-  stability?: string;
+  stability?: 'stable' | 'beta' | 'experimental';
   display?: string;
   noData?: boolean;
 }
