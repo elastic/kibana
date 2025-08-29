@@ -24,9 +24,9 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { NodeDeploymentStatsResponse } from '@kbn/ml-common-types/trained_models';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { getMemoryItemColor } from '../memory_item_colors';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 
 interface MemoryPreviewChartProps {
   memoryOverview: NodeDeploymentStatsResponse['memory_overview'];

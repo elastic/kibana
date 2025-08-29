@@ -10,8 +10,8 @@ import React from 'react';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import { useDashboardService } from '../../services/dashboard_service';
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useDashboardService } from '../../services/dashboard_service';
 import { CustomUrls } from './custom_urls';
 
 export interface CustomUrlsWrapperProps {

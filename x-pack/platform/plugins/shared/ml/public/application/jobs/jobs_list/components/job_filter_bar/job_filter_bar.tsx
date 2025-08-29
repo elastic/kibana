@@ -12,8 +12,8 @@ import type { SearchFilterConfig, EuiSearchBarProps, Query } from '@elastic/eui'
 import { EuiSearchBar, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { JobGroup } from '../job_group';
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import { JobGroup } from '../job_group';
 
 interface JobFilterBarProps {
   setFilters: (query: Query | null) => void;

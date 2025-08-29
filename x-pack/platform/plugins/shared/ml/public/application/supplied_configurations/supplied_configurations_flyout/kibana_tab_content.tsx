@@ -21,8 +21,8 @@ import {
 import { useEuiTheme } from '@elastic/eui';
 import { asyncForEach } from '@kbn/std';
 import type { Module } from '@kbn/ml-common-types/modules';
-import { useDashboardService } from '../../services/dashboard_service';
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useDashboardService } from '../../services/dashboard_service';
 import { LABELS, type LabelId } from './overview_tab_content';
 import type { KibanaAssetType } from './flyout';
 

@@ -21,7 +21,8 @@ import type {
 } from '@kbn/ml-common-types/locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { AppPageState } from '@kbn/ml-common-types/common';
-import { getGroupQueryText, getJobQueryText } from '@kbn/ml-common-utils/string_utils';
+import { getGroupQueryText } from '@kbn/ml-common-utils/string_utils/get_group_query_text';
+import { getJobQueryText } from '@kbn/ml-common-utils/string_utils/get_job_query_text';
 
 import { formatGenericMlUrl } from './common';
 /**
