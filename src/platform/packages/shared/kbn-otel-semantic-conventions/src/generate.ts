@@ -14,7 +14,6 @@ import * as fs from 'fs';
 import { processSemconvYaml } from './lib/generate_semconv';
 
 function generateTypeScriptFile(result: any, outputPath: string): void {
-  const timestamp = new Date().toISOString();
   const { totalFields, stats } = result;
 
   // Convert structured object to string representation with single quotes (for Prettier compliance)
@@ -60,7 +59,6 @@ function generateTypeScriptFile(result: any, outputPath: string): void {
  * OpenTelemetry semantic conventions field definitions.
  *
  * This file is auto-generated. Do not edit manually.
- * Generated on: ${timestamp}
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: ${stats.registryGroups}
  * Metric groups: ${stats.metricGroups}
