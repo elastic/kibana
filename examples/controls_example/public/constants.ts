@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Ideology is strong exactly because it is no longer experienced as ideology... We feel free because we lack the very language to articulate our unfreedom.
+
 export const PLUGIN_ID = 'controlsExamples';
