@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { v4 as uuidV4 } from 'uuid';
 import type {
   IUiSettingsClient,
   KibanaRequest,
@@ -60,7 +60,14 @@ export interface AsyncSearchClient<T extends AsyncSearchParams> {
     request: IKibanaSearchRequest<T>;
     options?: ISearchOptions;
   }) => Promise<IKibanaSearchResponse>;
+  cancel: (options?: ISearchOptions) => Promise<void>;
+  extend: (keepAlive: string, options?: ISearchOptions) => Promise<void>;
 }
+
+export type PublicAsyncSearchClient<T extends AsyncSearchParams> = Omit<
+  AsyncSearchClient<T>,
+  'getMetrics'
+>;
 
 export interface ExecutorServices {
   ruleMonitoringService: PublicRuleMonitoringService;
@@ -130,6 +137,7 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
       let totalSearchDurationMs = 0;
 
       const client = context.data.search.asScoped(fakeRequest);
+      let id = uuidV4();
 
       return {
         getMetrics: () => {
@@ -139,13 +147,19 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
             totalSearchDurationMs,
           };
         },
-        search: ({ request, options }) => {
+        async search({ request, options }) {
+          if (request.id) {
+            id = request.id;
+          }
           return lastValueFrom(
             client
-              .search(request, {
-                ...options,
-                strategy,
-              })
+              .search(
+                { ...request, id },
+                {
+                  ...options,
+                  strategy,
+                }
+              )
               .pipe(
                 map((response) => {
                   return response;
@@ -158,6 +172,12 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
                 })
               )
           );
+        },
+        async cancel(options) {
+          await client.cancel(id, options);
+        },
+        async extend(keepAlive, options) {
+          await client.extend(id, keepAlive, options);
         },
       };
     },

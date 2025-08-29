@@ -68,7 +68,7 @@ import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import type { PublicAlertsClient } from './alerts_client/types';
 import type { GetTimeRangeResult } from './lib/get_time_range';
 import type { AlertDeletionClient } from './alert_deletion';
-import type { AsyncSearchClient } from './task_runner/get_executor_services';
+import type { PublicAsyncSearchClient } from './task_runner/get_executor_services';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
@@ -138,9 +138,9 @@ export interface RuleExecutorServices<
   shouldStopExecution: () => boolean;
   shouldWriteAlerts: () => boolean;
   uiSettingsClient: IUiSettingsClient;
-  getAsyncSearch: <T extends AsyncSearchParams>(
+  getAsyncSearchClient: <T extends AsyncSearchParams>(
     strategy: AsyncSearchStrategies
-  ) => AsyncSearchClient<T>['search'];
+  ) => PublicAsyncSearchClient<T>;
 }
 
 export type AsyncSearchStrategies =

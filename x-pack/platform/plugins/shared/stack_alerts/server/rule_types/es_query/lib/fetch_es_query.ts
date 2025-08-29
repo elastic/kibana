@@ -38,7 +38,7 @@ export interface FetchEsQueryOpts {
     share: SharePluginStart;
     logger: Logger;
     ruleResultService?: PublicRuleResultService;
-    getAsyncSearch: RuleExecutorServices['getAsyncSearch'];
+    getAsyncSearchClient: RuleExecutorServices['getAsyncSearchClient'];
   };
   alertLimit?: number;
   dateStart: string;
@@ -59,9 +59,11 @@ export async function fetchEsQuery({
   dateStart,
   dateEnd,
 }: FetchEsQueryOpts) {
-  const { logger, ruleResultService, share, getAsyncSearch } = services;
+  const { logger, ruleResultService, share, getAsyncSearchClient } = services;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
-  const esAsyncSearch = getAsyncSearch<IAsyncSearchRequestParams>(ENHANCED_ES_SEARCH_STRATEGY);
+  const asyncSearchClient = getAsyncSearchClient<IAsyncSearchRequestParams>(
+    ENHANCED_ES_SEARCH_STRATEGY
+  );
 
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
@@ -140,7 +142,7 @@ export async function fetchEsQuery({
     () => `es query rule ${ES_QUERY_ID}:${ruleId} "${name}" query - ${JSON.stringify(sortedQuery)}`
   );
 
-  const asyncResponse = await esAsyncSearch({
+  const asyncResponse = await asyncSearchClient.search({
     request: {
       params: {
         ...sortedQuery,

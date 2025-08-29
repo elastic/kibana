@@ -257,11 +257,11 @@ export class RuleTypeRunner<
                   shouldWriteAlerts: () =>
                     this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout),
                   uiSettingsClient: executorServices.uiSettingsClient,
-                  getAsyncSearch: (strategy: AsyncSearchStrategies) => {
+                  getAsyncSearchClient: (strategy: AsyncSearchStrategies) => {
                     if (!asyncSearchClient) {
                       asyncSearchClient = executorServices.getAsyncSearchClient(strategy);
                     }
-                    return asyncSearchClient.search;
+                    return asyncSearchClient;
                   },
                 },
                 params: validatedParams,
