@@ -71,7 +71,7 @@ import type {
   ControlsContext,
 } from './types';
 import { useRestorableState, withRestorableState } from './restorable_state';
-import { useCanCreateLookupIndex, useCreateLookupIndexCommand } from './custom_commands';
+import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -679,7 +679,7 @@ const ESQLEditorInternal = function ESQLEditor({
     [kibana.services?.esql, onQueryUpdate, queryValidation]
   );
 
-  const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useCreateLookupIndexCommand(
+  const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editor1,
     editorModel,
     kibana.services?.esql?.getJoinIndicesAutocomplete,
