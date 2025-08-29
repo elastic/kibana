@@ -11,8 +11,8 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { Y_AXIS_LABEL_WIDTH } from '../constants';
 
 export interface AnomalyDetectionAlertsOverviewChart {
