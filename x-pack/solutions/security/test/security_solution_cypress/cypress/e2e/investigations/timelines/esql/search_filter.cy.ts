@@ -20,6 +20,7 @@ import {
   DISCOVER_RESULT_HITS,
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
   DISCOVER_ESQL_INPUT_TEXT_CONTAINER,
+  TIMELINE_DISCOVER_TAB,
 } from '../../../../screens/discover';
 import {
   addDiscoverEsqlQuery,
@@ -33,6 +34,7 @@ import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { deleteTimelines } from '../../../../tasks/api_calls/timelines';
 import { openActiveTimeline, createNewTimeline, goToEsqlTab } from '../../../../tasks/timeline';
+import { waitForAlerts } from '../../../../tasks/alerts';
 
 const DEFAULT_DATE = '~ 15 minutes ago';
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
@@ -50,6 +52,7 @@ describe(
       login();
       deleteTimelines();
       visitWithTimeRange(ALERTS_URL);
+      waitForAlerts();
       openActiveTimeline();
       cy.window().then((win) => {
         win.onbeforeunload = null;
@@ -69,10 +72,8 @@ describe(
       addDiscoverEsqlQuery(`${esqlQuery} | limit 1`);
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       waitForDiscoverFieldsToLoad();
-      cy.get(DISCOVER_CONTAINER).within(() => {
-        addFieldToTable('host.name');
-        addFieldToTable('user.name');
-      });
+      addFieldToTable('host.name', TIMELINE_DISCOVER_TAB);
+      addFieldToTable('user.name', TIMELINE_DISCOVER_TAB);
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('be.visible');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('user.name')).should('be.visible');
     });

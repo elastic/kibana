@@ -8,15 +8,24 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type { IfStep, ForEachStep, WorkflowYaml, WaitStep, ConnectorStep } from '../../spec/schema';
 import type {
-  EnterIfNode,
-  ExitIfNode,
-  EnterForeachNode,
-  ExitForeachNode,
-  EnterConditionBranchNode,
-  ExitConditionBranchNode,
+  ConnectorStep,
+  ForEachStep,
+  HttpStep,
+  IfStep,
+  WaitStep,
+  WorkflowOnFailure,
+  WorkflowYaml,
+} from '../../spec/schema';
+import type {
   AtomicGraphNode,
+  EnterConditionBranchNode,
+  EnterForeachNode,
+  EnterIfNode,
+  ExitConditionBranchNode,
+  ExitForeachNode,
+  ExitIfNode,
+  HttpGraphNode,
   WaitGraphNode,
 } from '../../types/execution';
 import { convertToWorkflowGraph } from './build_execution_graph';
@@ -130,6 +139,78 @@ describe('convertToWorkflowGraph', () => {
           with: { duration: '1s' },
         },
       } as WaitGraphNode);
+    });
+  });
+
+  describe('http step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testAtomicStep1',
+          type: 'slack',
+          connectorId: 'slack',
+          with: {
+            message: 'Hello from atomic step 1',
+          },
+        } as ConnectorStep,
+        {
+          name: 'testHttpStep',
+          type: 'http',
+          with: {
+            url: 'https://api.example.com/test',
+            method: 'GET',
+            headers: {
+              Authorization: 'Bearer token',
+            },
+            timeout: '30s',
+          },
+        } as HttpStep,
+        {
+          name: 'testAtomicStep2',
+          type: 'slack',
+          connectorId: 'slack',
+          with: {
+            message: 'Hello from atomic step 2',
+          },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should return nodes for http step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(3);
+      expect(topSort).toEqual(['testAtomicStep1', 'testHttpStep', 'testAtomicStep2']);
+    });
+
+    it('should return correct edges for http step graph', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual([
+        { v: 'testAtomicStep1', w: 'testHttpStep' },
+        { v: 'testHttpStep', w: 'testAtomicStep2' },
+      ]);
+    });
+
+    it('should configure the http step correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const node = executionGraph.node('testHttpStep');
+      expect(node).toEqual({
+        id: 'testHttpStep',
+        type: 'http',
+        configuration: {
+          name: 'testHttpStep',
+          type: 'http',
+          with: {
+            url: 'https://api.example.com/test',
+            method: 'GET',
+            headers: {
+              Authorization: 'Bearer token',
+            },
+            timeout: '30s',
+          },
+        },
+      } as HttpGraphNode);
     });
   });
 
@@ -704,6 +785,80 @@ describe('convertToWorkflowGraph', () => {
     });
   });
 
+  describe('on-failure configuration', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testRetryConnectorStep',
+          type: 'slack',
+          connectorId: 'slack',
+          'on-failure': {
+            retry: {
+              'max-attempts': 3,
+              delay: '5s',
+            },
+            continue: true,
+          } as WorkflowOnFailure,
+          with: {
+            message: 'Hello from retry step',
+          },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should have correct topological order for step with retry', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topsort = graphlib.alg.topsort(executionGraph);
+      expect(topsort).toEqual([
+        'continue_testRetryConnectorStep',
+        'retry_testRetryConnectorStep',
+        'testRetryConnectorStep',
+        'exitRetry(retry_testRetryConnectorStep)',
+        'exitContinue(continue_testRetryConnectorStep)',
+      ]);
+    });
+
+    it('should have correct edges for step with retry', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual(
+        expect.arrayContaining([
+          { v: 'continue_testRetryConnectorStep', w: 'retry_testRetryConnectorStep' },
+          { v: 'retry_testRetryConnectorStep', w: 'testRetryConnectorStep' },
+          { v: 'testRetryConnectorStep', w: 'exitRetry(retry_testRetryConnectorStep)' },
+          {
+            v: 'exitRetry(retry_testRetryConnectorStep)',
+            w: 'exitContinue(continue_testRetryConnectorStep)',
+          },
+        ])
+      );
+    });
+
+    it('should configure retry node correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const retryNode = executionGraph.node('retry_testRetryConnectorStep');
+      expect(retryNode).toEqual({
+        id: 'retry_testRetryConnectorStep',
+        type: 'enter-retry',
+        exitNodeId: 'exitRetry(retry_testRetryConnectorStep)',
+        configuration: {
+          'max-attempts': 3,
+          delay: '5s',
+        },
+      });
+    });
+
+    it('should configure continue node correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const retryNode = executionGraph.node('continue_testRetryConnectorStep');
+      expect(retryNode).toEqual({
+        id: 'continue_testRetryConnectorStep',
+        type: 'enter-continue',
+        exitNodeId: 'exitContinue(continue_testRetryConnectorStep)',
+      });
+    });
+  });
+
   describe('complex workflow', () => {
     const workflowDefinition = {
       steps: [
@@ -845,6 +1000,48 @@ describe('convertToWorkflowGraph', () => {
         'exitForeach(foreach_testForeachConnectorStep)',
         'exitThen(testIfStep)',
         'exitCondition(testIfStep)',
+      ]);
+    });
+  });
+
+  describe('step level operations', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testForeachConnectorStep',
+          type: 'slack',
+          connectorId: 'slack',
+          if: 'false',
+          foreach: '["item1", "item2", "item3"]',
+          'on-failure': {
+            retry: {
+              'max-attempts': 10,
+              delay: '2s',
+            },
+            continue: true,
+          },
+          with: {
+            message: 'Hello from foreach nested step 1',
+          },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should have correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topsort = graphlib.alg.topsort(executionGraph);
+      expect(topsort).toEqual([
+        'continue_testForeachConnectorStep',
+        'retry_testForeachConnectorStep',
+        'if_testForeachConnectorStep',
+        'enterThen(if_testForeachConnectorStep)',
+        'foreach_testForeachConnectorStep',
+        'testForeachConnectorStep',
+        'exitForeach(foreach_testForeachConnectorStep)',
+        'exitThen(if_testForeachConnectorStep)',
+        'exitCondition(if_testForeachConnectorStep)',
+        'exitRetry(retry_testForeachConnectorStep)',
+        'exitContinue(continue_testForeachConnectorStep)',
       ]);
     });
   });

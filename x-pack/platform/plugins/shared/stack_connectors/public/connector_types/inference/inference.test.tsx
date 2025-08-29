@@ -91,7 +91,7 @@ describe('OpenAI action params validation', () => {
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        body: ['Messages is required.'],
+        body: ['The request body is not in a valid JSON format.'],
         inputType: [],
         query: [],
         subAction: [],
