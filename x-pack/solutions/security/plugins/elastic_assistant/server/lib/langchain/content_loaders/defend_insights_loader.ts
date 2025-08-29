@@ -104,6 +104,7 @@ export const getDefendInsightsDocsCount = async ({
   logger: Logger;
 }): Promise<number> => {
   try {
+    // @ts-expect-error incorrect type for Array.fromAsync
     const files = await Array.fromAsync(
       glob('**/*.{md,txt}', {
         cwd: resolve(__dirname, '../../../knowledge_base/defend_insights'),

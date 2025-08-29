@@ -73,6 +73,7 @@ export const loadSecurityLabs = async (
 
 export const getSecurityLabsDocsCount = async ({ logger }: { logger: Logger }): Promise<number> => {
   try {
+    // @ts-expect-error missing type for Array.fromAsync
     const files = await Array.fromAsync(
       glob(ENCODED_FILE_MICROMATCH_PATTERN, {
         cwd: resolve(__dirname, '../../../knowledge_base/security_labs'),
