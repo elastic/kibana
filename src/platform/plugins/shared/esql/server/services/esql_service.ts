@@ -29,7 +29,6 @@ export class EsqlService {
     const { client } = this.options;
 
     const indices: IndexAutocompleteItem[] = [];
-    const indexNames: string[] = [];
 
     // It doesn't return hidden indices
     const sources = (await client.indices.resolveIndex({
@@ -40,7 +39,6 @@ export class EsqlService {
     sources.indices?.forEach((index) => {
       if (index.mode === mode) {
         indices.push({ name: index.name, mode, aliases: index.aliases ?? [] });
-        indexNames.push(index.name);
       }
     });
 
