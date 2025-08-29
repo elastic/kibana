@@ -29,8 +29,8 @@ import type {
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlFeatures } from '@kbn/ml-common-constants/app';
-import type { RouteGuard } from './lib/route_guard';
 import type { MlLicense } from '@kbn/ml-license';
+import type { RouteGuard } from './lib/route_guard';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;

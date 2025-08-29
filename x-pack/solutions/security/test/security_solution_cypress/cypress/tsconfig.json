@@ -36,7 +36,6 @@
     "@kbn/security-plugin",
     "@kbn/management-settings-ids",
     "@kbn/es-query",
-    "@kbn/ml-plugin",
     "@kbn/license-management-plugin",
     "@kbn/actions-plugin",
     "@kbn/alerts-ui-shared",
@@ -45,6 +44,8 @@
     "@kbn/elastic-assistant-common",
     "@kbn/cloud-security-posture-common",
     "@kbn/security-plugin-types-common",
-    "@kbn/securitysolution-utils"
+    "@kbn/securitysolution-utils",
+    "@kbn/ml-common-constants",
+    "@kbn/ml-common-types"
   ]
 }

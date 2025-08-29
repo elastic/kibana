@@ -27,6 +27,7 @@ import type {
   MlJobWithTimeRange,
 } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 // @ts-ignore
 import { JobSelectorTable } from './job_selector_table';
@@ -35,7 +36,6 @@ import {
   getTimeRangeFromSelection,
   normalizeTimes,
 } from './job_select_service_utils';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { JobSelectionMaps } from './job_selector';
 
 export const BADGE_LIMIT = 10;

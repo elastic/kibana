@@ -9,8 +9,8 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import { HelpMenu } from '../../../components/help_menu';
 import { MlPageHeader } from '../../../components/page_header';
 import { SourceSelection } from '../analytics_management/components/source_selection';
 import { PageTitle } from '../../../components/page_title';

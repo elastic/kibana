@@ -7,8 +7,8 @@
 
 import { useCallback, useEffect } from 'react';
 import { ML_APP_NAME } from '@kbn/ml-common-constants/app';
-import type { MlRoute } from './router';
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import type { MlRoute } from './router';
 
 /**
  * Handles document title automatically based on the active route.
