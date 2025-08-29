@@ -12,7 +12,7 @@ import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
-import { detectorToString } from '@kbn/ml-common-utils/string_utils';
+import { detectorToString } from '@kbn/ml-common-utils/string_utils/detector_to_string';
 
 export class EditDetectorsTab extends Component {
   static contextType = context;

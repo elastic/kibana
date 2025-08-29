@@ -10,7 +10,7 @@ import { each, get } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { ML_MEDIAN_PERCENTS } from '@kbn/ml-common-utils/job_utils';
-import { escapeForElasticsearchQuery } from '@kbn/ml-common-utils/string_utils';
+import { escapeForElasticsearchQuery } from '@kbn/ml-common-utils/string_utils/escape_for_elasticsearch_query';
 import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
   SWIM_LANE_DEFAULT_PAGE_SIZE,

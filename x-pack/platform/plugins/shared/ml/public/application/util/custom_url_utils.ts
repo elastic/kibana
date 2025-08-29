@@ -20,10 +20,8 @@ import type {
 } from '@kbn/ml-anomaly-utils';
 import type { DataGridItem } from '@kbn/ml-data-grid';
 import { parseInterval } from '@kbn/ml-parse-interval';
-import {
-  escapeForElasticsearchQuery,
-  replaceStringTokens,
-} from '@kbn/ml-common-utils/string_utils';
+import { escapeForElasticsearchQuery } from '@kbn/ml-common-utils/string_utils/escape_for_elasticsearch_query';
+import { replaceStringTokens } from '@kbn/ml-common-utils/string_utils/replace_string_tokens';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
 // depending on the context in which the URL is being opened.
