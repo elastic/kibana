@@ -19,7 +19,7 @@ export function useWorkflowExecutions(
 
   return useQuery<WorkflowExecutionListDto>({
     networkMode: 'always',
-    queryKey: ['workflowExecutions', workflowId],
+    queryKey: ['workflows', workflowId, 'executions'],
     queryFn: () =>
       http!.get(`/api/workflowExecutions`, {
         query: {
