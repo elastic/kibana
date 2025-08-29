@@ -565,15 +565,6 @@ export class IndexUpdateService {
           next: ({ updates, response, bulkOperations, exitAfterFlush, docs, savingDocs }) => {
             this._isSaving$.next(false);
 
-            if (!bulkOperations.length) {
-              this.setError(IndexEditorErrors.NO_DATA_TO_SAVE_ERROR);
-              this.addAction('saved', {
-                response,
-                updates: [],
-              });
-              return;
-            }
-
             if (!response.errors) {
               if (exitAfterFlush) {
                 this.destroy();
