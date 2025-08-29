@@ -84,30 +84,35 @@ export const ConsoleTutorialsGroup = () => {
                 paddingSize="s"
                 title={tutorial.title}
                 titleSize="xs"
-                description={
-                  <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center" wrap>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">
-                        <EuiText size="relative" color="subdued">
-                          ~{tutorial.duration} min
-                        </EuiText>
-                      </EuiBadge>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="relative">{tutorial.description}</EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
                 textAlign="left"
               >
-                <TryInConsoleButton
-                  request={tutorial.request}
-                  application={application}
-                  consolePlugin={consolePlugin}
-                  sharePlugin={share}
-                  telemetryId={tutorial.dataTestSubj}
-                  data-test-subj={tutorial.dataTestSubj}
-                />
+                <EuiFlexGroup
+                  gutterSize="s"
+                  direction="column"
+                  justifyContent="center"
+                  alignItems="flexStart"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">
+                      <EuiText size="relative" color="subdued">
+                        ~{tutorial.duration} min
+                      </EuiText>
+                    </EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="relative">{tutorial.description}</EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <TryInConsoleButton
+                      request={tutorial.request}
+                      application={application}
+                      consolePlugin={consolePlugin}
+                      sharePlugin={share}
+                      telemetryId={tutorial.dataTestSubj}
+                      data-test-subj={tutorial.dataTestSubj}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiCard>
             </EuiFlexItem>
           ))}
