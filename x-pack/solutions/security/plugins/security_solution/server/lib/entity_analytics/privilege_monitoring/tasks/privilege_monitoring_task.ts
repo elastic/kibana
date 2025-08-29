@@ -44,6 +44,7 @@ interface RegisterParams {
   taskManager: TaskManagerSetupContract | undefined;
   experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
+  config: ConfigType;
 }
 
 interface RunParams {
@@ -76,6 +77,7 @@ export const registerPrivilegeMonitoringTask = ({
   taskManager,
   kibanaVersion,
   experimentalFeatures,
+  config,
 }: RegisterParams) => {
   if (!taskManager) {
     logger.info(
@@ -125,6 +127,7 @@ export const registerPrivilegeMonitoringTask = ({
         experimentalFeatures,
         getStartServices,
         getPrivilegedUserMonitoringDataClient,
+        config,
       }),
     },
   });
@@ -139,14 +142,15 @@ const createPrivilegeMonitoringTaskRunnerFactory =
     getPrivilegedUserMonitoringDataClient: (
       namespace: string
     ) => Promise<undefined | PrivilegeMonitoringDataClient>;
+    config: ConfigType;
   }): TaskRunCreatorFunction =>
   ({ taskInstance }) => {
     let cancelled = false;
     const isCancelled = () => cancelled;
     return {
       run: async () => {
-        const [core, plugins] = await deps.getStartServices();
-        const config = plugins.securitySolution.config;
+        const [core] = await deps.getStartServices();
+        const config = deps.config;
         return runPrivilegeMonitoringTask({
           isCancelled,
           logger: deps.logger,
