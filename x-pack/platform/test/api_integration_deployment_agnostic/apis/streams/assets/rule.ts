@@ -71,7 +71,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.status).to.eql(200);
-
         expect(response.body.rules?.length).to.eql(1);
       });
 
@@ -81,7 +80,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.status).to.eql(200);
-
         expect(response.body.rules.length).to.eql(1);
       });
 
@@ -100,7 +98,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           expect(response.status).to.eql(200);
-
           expect(response.body.rules?.length).to.eql(2);
         });
 
@@ -110,7 +107,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           expect(response.status).to.eql(200);
-
           expect(response.body.rules.length).to.eql(2);
         });
 
@@ -122,7 +118,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           expect(response.status).to.eql(200);
-
           expect(response.body.rules.length).to.eql(1);
         });
       });
@@ -140,7 +135,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           expect(response.status).to.eql(200);
-
           expect(response.body.rules.length).to.eql(0);
         });
 
@@ -152,7 +146,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           expect(response.status).to.eql(200);
-
           expect(response.body.rules.length).to.eql(1);
         });
       });
@@ -178,9 +171,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: { path: { name: 'logs' } },
           });
 
-          // When a linked rule is deleted, the streams API returns 404 because
-          // it tries to fetch the rule details and the rule no longer exists
-          expect(response.status).to.eql(404);
+          expect(response.status).to.eql(200);
+          expect(response.body.rules.length).to.eql(0);
         });
       });
     });
