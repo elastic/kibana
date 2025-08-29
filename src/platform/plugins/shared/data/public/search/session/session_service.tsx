@@ -31,7 +31,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { ISearchOptions } from '@kbn/search-types';
-import { EuiCallOut } from '@elastic/eui';
+import { BackgroundSearchCallout } from './background_search_callout';
 import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
 import type {
@@ -716,12 +716,7 @@ export class SessionService {
       return null;
     }
     // Note that there are more bgSearch states we need to check for
-    return (
-      <EuiCallOut size="s">
-        You are viewing cached data from a specific time range from a background search. Changing
-        the time range or query will re-run the session.
-      </EuiCallOut>
-    );
+    return <BackgroundSearchCallout bgsState={this.state$} />;
   }
 
   private async refreshSearchSessionSavedObject() {
