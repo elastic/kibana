@@ -48,21 +48,19 @@ export function SimilarSpans({
         })}
         esqlQuery={!latencyChart.hasError && esqlQuery ? esqlQuery : undefined}
       >
-        {(latencyChart.loading || latencyChart.data) && (
-          <DurationDistributionChart
-            data={latencyChart.data?.spanDistributionChartData ?? []}
-            markerValue={latencyChart.data?.percentileThresholdValue ?? 0}
-            markerCurrentEvent={spanDuration}
-            hasData={!!latencyChart.data?.spanDistributionChartData?.length}
-            loading={latencyChart.loading}
-            hasError={latencyChart.hasError}
-            eventType={ProcessorEvent.span}
-            showAxisTitle={false}
-            showLegend={false}
-            isOtelData={isOtelSpan}
-            data-test-subj="docViewerSimilarSpansDurationDistributionChart"
-          />
-        )}
+        <DurationDistributionChart
+          data={latencyChart.data?.spanDistributionChartData ?? []}
+          markerValue={latencyChart.data?.percentileThresholdValue ?? 0}
+          markerCurrentEvent={spanDuration}
+          hasData={!!latencyChart.data?.spanDistributionChartData?.length}
+          loading={latencyChart.loading}
+          hasError={latencyChart.hasError}
+          eventType={ProcessorEvent.span}
+          showAxisTitle={false}
+          showLegend={false}
+          isOtelData={isOtelSpan}
+          data-test-subj="docViewerSimilarSpansDurationDistributionChart"
+        />
       </ContentFrameworkChart>
     </ContentFrameworkSection>
   );

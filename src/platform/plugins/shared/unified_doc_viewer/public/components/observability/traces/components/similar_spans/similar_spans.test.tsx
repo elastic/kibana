@@ -114,18 +114,4 @@ describe('SimilarSpans', () => {
     expect(screen.getByTestId('DurationDistributionChart')).toBeInTheDocument();
     expect(screen.getByText('HasError: true')).toBeInTheDocument();
   });
-
-  it('does not render DurationDistributionChart if not loading and no data', () => {
-    render(
-      <SimilarSpans
-        {...defaultProps}
-        latencyChart={{
-          data: null,
-          loading: false,
-          hasError: false,
-        }}
-      />
-    );
-    expect(screen.queryByTestId('DurationDistributionChart')).not.toBeInTheDocument();
-  });
 });
