@@ -96,6 +96,10 @@ async function runCheck(check: string, cleanCache: boolean = false): Promise<Che
       cwd: REPO_ROOT,
       stdio: 'pipe',
       timeout: check === 'type_check' ? 1200000 : 300000, // 20 minutes for type_check, 5 minutes for others
+      env: {
+        ...process.env,
+        PATH: `${REPO_ROOT}/node_modules/.bin:${process.env.PATH || ''}`,
+      },
     });
     const duration = Date.now() - startTime;
 
