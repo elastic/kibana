@@ -93,7 +93,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
       if (!groupNodeData) {
         return;
       }
-      actions.updateRowGroupNodeData({
+      actions.setRowGroupNodeData({
         id: rowId,
         data: groupNodeData,
       });
