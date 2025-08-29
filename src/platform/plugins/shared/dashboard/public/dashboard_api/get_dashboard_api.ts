@@ -58,7 +58,7 @@ export function getDashboardApi({
   const viewModeManager = initializeViewModeManager(incomingEmbeddable, savedObjectResult);
   const trackPanel = initializeTrackPanel(async (id: string) => {
     await layoutManager.api.getChildApi(id);
-  }, dashboardContainerRef$.value);
+  }, dashboardContainerRef$);
 
   const references$ = new BehaviorSubject<Reference[] | undefined>(initialState.references);
   const getReferences = (id: string) => {

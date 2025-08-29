@@ -48,7 +48,7 @@ export function initializeTrackPanel(
     highlightPanelId$,
     highlightPanel: (panelRef: HTMLDivElement) => {
       const id = highlightPanelId$.value;
-      if (!id || !panelRef) return;
+      if (!id) return;
 
       untilLoaded(id).then(() => {
         // Adds the highlight class in the next event loop to allow the DOM to update
@@ -64,7 +64,7 @@ export function initializeTrackPanel(
     scrollToPanelId$,
     scrollToPanel: async (panelRef: HTMLDivElement) => {
       const id = scrollToPanelId$.value;
-      if (!id || !panelRef) return;
+      if (!id) return;
 
       untilLoaded(id).then(() => {
         if (scrollPosition$.value !== undefined) {
@@ -72,6 +72,8 @@ export function initializeTrackPanel(
           scrollPosition$.next(undefined);
         } else {
           const dashboardTop = dashboardContainerRef$.value?.getBoundingClientRect().top || 0;
+
+          console.log({ dashboardTop });
           const clientBottom = window.innerHeight;
           const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
 

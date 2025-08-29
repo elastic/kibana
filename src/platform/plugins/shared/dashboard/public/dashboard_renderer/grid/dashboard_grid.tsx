@@ -49,8 +49,6 @@ export const DashboardGrid = () => {
       dashboardInternalApi.dashboardContainerRef$
     );
 
-  console.log('dashboard-grid', { topOffset });
-
   useEffect(() => {
     const newTopOffset =
       dashboardContainerRef?.getBoundingClientRect().top ?? DEFAULT_DASHBOARD_DRAG_TOP_OFFSET;
