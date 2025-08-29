@@ -30,8 +30,19 @@ generate_resolved_yaml() {
     --registry=/home/weaver/source \
     --output=/home/weaver/out/resolved_semconv.yaml
 
+  # Debug: Check what files were generated
+  echo "--- Debug: Checking generated files"
+  ls -la ./weaver_output/ || echo "weaver_output directory not found"
+  
   # Move the generated file to the expected location
-  cp ./weaver_output/resolved_semconv.yaml ./resolved_semconv.yaml
+  if [ -f "./weaver_output/resolved_semconv.yaml" ]; then
+    cp ./weaver_output/resolved_semconv.yaml ./resolved_semconv.yaml
+    echo "✅ Successfully copied resolved_semconv.yaml"
+    ls -la ./resolved_semconv.yaml
+  else
+    echo "❌ Error: resolved_semconv.yaml not found in weaver_output"
+    exit 1
+  fi
 
   # Clean up the temporary directory
   rm -rf ./weaver_output
@@ -46,13 +57,35 @@ bootstrap_kibana() {
 
 generate_typescript() {
   echo "--- Generating TypeScript definitions"
+  
+  # Debug: Check current directory and file locations
+  echo "--- Debug: Current working directory: $(pwd)"
+  echo "--- Debug: Looking for resolved_semconv.yaml file"
+  ls -la otel-semconv/ | grep "resolved_semconv.yaml" || echo "❌ resolved_semconv.yaml not found in otel-semconv/"
+  ls -la otel-semconv/resolved_semconv.yaml || echo "❌ File otel-semconv/resolved_semconv.yaml does not exist"
+  
+  # Check target directory
+  echo "--- Debug: Target directory: $OTEL_PACKAGE_DIR/assets/"
+  ls -la "$OTEL_PACKAGE_DIR/assets/" || echo "❌ Target assets directory does not exist"
+  
   # Move generated YAML to package
-  cp otel-semconv/resolved_semconv.yaml "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
+  if [ -f "otel-semconv/resolved_semconv.yaml" ]; then
+    cp otel-semconv/resolved_semconv.yaml "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
+    echo "✅ Successfully copied YAML file to package assets"
+    ls -la "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
+  else
+    echo "❌ Error: Cannot find otel-semconv/resolved_semconv.yaml to copy"
+    echo "--- Debug: Contents of otel-semconv directory:"
+    ls -la otel-semconv/ || echo "otel-semconv directory does not exist"
+    exit 1
+  fi
 
   # Generate TypeScript file
+  echo "--- Running TypeScript generation"
   node scripts/generate_otel_semconv.js
 
   # Run ESLint fix
+  echo "--- Running ESLint fix"
   yarn lint:es --fix "$OTEL_PACKAGE_DIR/src/generated/" || true
 }
 
