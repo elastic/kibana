@@ -81,6 +81,15 @@ tags:
       url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
     x-displayName: Cases
   - name: CCR Remote synced integrations
+    x-displayName: Fleet remote synced integrations
+    description: |
+      Use the Fleet remote synced integrations API to check the status of the automatic integrations synchronization on a remote cluster:
+      * On the management cluster, use the `/api/fleet/remote_synced_integrations/{outputId}/remote_status` endpoint to query the synchronization status of the integrations installed on the remote cluster by the ID of the configured remote Elasticsearch output.
+      * On the remote cluster, use the `/api/fleet/remote_synced_integrations/status` endpoint to query the synchronization status of the installed integrations.
+    externalDocs:
+      description: Automatic integrations synchronization documentation
+      url: https://www.elastic.co/docs/reference/fleet/automatic-integrations-synchronization
+    x-state: Generally available; Added in 9.1.0
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.

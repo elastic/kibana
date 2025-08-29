@@ -102,16 +102,15 @@ actions:
         externalDocs:
           description: Synthetic monitoring
           url: https://www.elastic.co/docs/solutions/observability/synthetics
-  - target: '$.tags[?(@.name=="CCR Remote synced integrations")]'
+  - target: '$.tags[?(@.name=="Fleet remote synced integrations")]'
     description: Change tag description and displayName
     update:
-      x-displayName: 'Fleet remote synced integrations'
       description: >
         Use the Fleet remote synced integrations API to check the status of the automatic integrations synchronization on a remote cluster:
 
-        * On the management cluster, use the `/api/fleet/remote_synced_integrations/{outputId}/remote_status` endpoint to query the synchronization status of the integrations installed on the remote cluster by the ID of the configured remote Elasticsearch output.
+        * Use the `/api/fleet/remote_synced_integrations/{outputId}/remote_status` endpoint on the management cluster to query the synchronization status of the integrations installed on the remote cluster by the ID of the configured remote Elasticsearch output.
         
-        * On the remote cluster, use the `/api/fleet/remote_synced_integrations/status` endpoint to query the synchronization status of the installed integrations.
+        * Use the `/api/fleet/remote_synced_integrations/status` endpoint on the remote cluster to query the synchronization status of the installed integrations.
       externalDocs:
         description: Automatic integrations synchronization documentation
         url: https://www.elastic.co/docs/reference/fleet/automatic-integrations-synchronization
