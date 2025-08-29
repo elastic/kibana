@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { OverviewTab } from './overview_tab';
@@ -29,16 +29,14 @@ const EsqlQueryTabName = i18n.translate('metricsExperience.metricFlyout.esqlQuer
   defaultMessage: 'ES|QL Query',
 });
 
-const tabs = (metric: MetricField, esqlQuery: string) => [
+const tabs = [
   {
     id: tabIds.OVERVIEW,
     name: OverviewTabName,
-    content: <OverviewTab metric={metric} />,
   },
   {
     id: tabIds.ESQL_QUERY,
     name: EsqlQueryTabName,
-    content: <EsqlQueryTab esqlQuery={esqlQuery} metric={metric} />,
   },
 ];
 
@@ -49,17 +47,13 @@ interface MetricFlyoutContentProps {
 
 export const MetricFlyoutContent = ({ metric, esqlQuery }: MetricFlyoutContentProps) => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(tabIds.OVERVIEW);
-  const metricTabs = useMemo(() => tabs(metric, esqlQuery), [esqlQuery, metric]);
-  const selectedTabContent = useMemo(() => {
-    return metricTabs.find((obj) => obj.id === selectedTabId)?.content;
-  }, [metricTabs, selectedTabId]);
 
   const onSelectedTabChanged = (id: TabId) => {
     setSelectedTabId(id);
   };
 
   const renderTabs = () => {
-    return metricTabs.map((tab, index) => (
+    return tabs.map((tab, index) => (
       <EuiTab
         key={index}
         onClick={() => onSelectedTabChanged(tab.id)}
@@ -73,7 +67,10 @@ export const MetricFlyoutContent = ({ metric, esqlQuery }: MetricFlyoutContentPr
   return (
     <>
       <EuiTabs size="s">{renderTabs()}</EuiTabs>
-      {selectedTabContent}
+      {selectedTabId === tabIds.OVERVIEW && <OverviewTab metric={metric} />}
+      {selectedTabId === tabIds.ESQL_QUERY && (
+        <EsqlQueryTab esqlQuery={esqlQuery} metric={metric} />
+      )}
     </>
   );
 };
