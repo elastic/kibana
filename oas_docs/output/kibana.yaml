@@ -58250,11 +58250,16 @@ paths:
                                       items:
                                         type: string
                                       type: array
+                                    metadata:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
                                     tags:
                                       items:
                                         type: string
                                       type: array
                                   required:
+                                    - metadata
                                     - tags
                                     - members
                               required:
@@ -58531,11 +58536,16 @@ paths:
                       items:
                         type: string
                       type: array
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
                     tags:
                       items:
                         type: string
                       type: array
                   required:
+                    - metadata
                     - tags
                     - members
               required:
