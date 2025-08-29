@@ -10,7 +10,7 @@ import { each } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parseInterval } from '@kbn/ml-parse-interval';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
-import { stringMatch } from '@kbn/ml-common-utils/string_utils';
+import { stringMatch } from '@kbn/ml-common-utils/string_utils/string_match';
 import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-common-constants/states';
 import { JOB_ACTION } from '@kbn/ml-common-constants/job_actions';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';

@@ -44,7 +44,7 @@ import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import { escapeKueryForEmbeddableFieldValuePair } from '@kbn/ml-common-utils/string_utils';
+import { escapeKueryForEmbeddableFieldValuePair } from '@kbn/ml-common-utils/string_utils/escape_kuery_for_embeddable_field_value_pair';
 
 import { useTableSeverity } from '../components/controls/select_severity';
 import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../embeddables/anomaly_charts/anomaly_charts_initializer';

@@ -9,7 +9,7 @@ import d3 from 'd3';
 import moment from 'moment';
 
 import { getAnomalyScoreExplanationImpactValue } from '@kbn/ml-anomaly-utils/anomaly_utils';
-import { calculateTextWidth } from '@kbn/ml-common-utils/string_utils';
+import { calculateTextWidth } from '@kbn/ml-common-utils/string_utils/calculate_text_width';
 import { CHART_TYPE } from '@kbn/ml-common-constants/explorer_constants';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 

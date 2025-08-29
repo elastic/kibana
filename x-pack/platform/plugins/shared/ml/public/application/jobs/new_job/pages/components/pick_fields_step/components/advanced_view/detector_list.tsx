@@ -24,7 +24,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import { detectorToString } from '@kbn/ml-common-utils/string_utils';
+import { detectorToString } from '@kbn/ml-common-utils/string_utils/detector_to_string';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';

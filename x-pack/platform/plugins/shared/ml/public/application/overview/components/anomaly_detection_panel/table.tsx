@@ -16,7 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import { toLocaleString } from '@kbn/ml-common-utils/string_utils';
+import { toLocaleString } from '@kbn/ml-common-utils/string_utils/to_locale_string';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import { useGroupActions } from './actions';

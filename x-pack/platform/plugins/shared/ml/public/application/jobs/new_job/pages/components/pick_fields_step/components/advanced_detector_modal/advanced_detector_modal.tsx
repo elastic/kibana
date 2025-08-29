@@ -24,7 +24,7 @@ import type { Field, Aggregation } from '@kbn/ml-anomaly-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
 import { mlCategory } from '@kbn/ml-anomaly-utils/fields';
 import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
-import { detectorToString } from '@kbn/ml-common-utils/string_utils';
+import { detectorToString } from '@kbn/ml-common-utils/string_utils/detector_to_string';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
