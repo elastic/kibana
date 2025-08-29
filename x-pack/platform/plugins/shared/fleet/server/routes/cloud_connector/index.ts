@@ -50,6 +50,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           response: {
             200: {
               body: () => CreateCloudConnectorResponseSchema,
+              description: 'Indicates a successful call.',
             },
             400: {
               body: genericErrorResponse,
