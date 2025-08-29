@@ -75,7 +75,7 @@ export const PendingActionsSelector = memo<
         agentType,
         endpointId,
         page: 1,
-        pageSize: 100,
+        pageSize: 200,
       }}
       transformToOptions={transformPendingActionsToOptions}
       config={PENDING_ACTIONS_CONFIG}

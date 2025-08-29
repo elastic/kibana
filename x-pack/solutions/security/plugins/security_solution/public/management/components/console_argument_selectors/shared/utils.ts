@@ -38,8 +38,8 @@ export const createSelectionHandler = <T extends BaseSelectorState>(
         selectedOption: changedOption.data,
       };
       onChange({
-        value: changedOption.label,
-        valueText: changedOption.label,
+        value: changedOption.value,
+        valueText: changedOption.value,
         store: newState,
       });
       onSelectionChange?.(changedOption, newState);
@@ -80,6 +80,7 @@ export const transformCustomScriptsToOptions = (
     const isChecked = script.name === selectedValue;
     return {
       label: script.name,
+      value: script.name,
       description: script.description,
       checked: isChecked ? 'on' : undefined,
       data: script,
@@ -88,7 +89,9 @@ export const transformCustomScriptsToOptions = (
 };
 
 /**
- * Transform pending actions response (using standard ActionListApiResponse) to selectable options
+ * Transform pending actions response (using standard ActionListApiResponse) to selectable options.
+ * Labels are formatted as "CommandName - ActionId" for better user context, while values remain as action IDs
+ * for compatibility with existing cancel action workflows.
  */
 export const transformPendingActionsToOptions = (
   response: ActionListApiResponse[],
@@ -124,7 +127,8 @@ export const transformPendingActionsToOptions = (
     } by ${createdBy} at ${timestamp}`;
 
     return {
-      label: action.id,
+      label: `${action.command} - ${action.id}`,
+      value: action.id,
       description,
       actionItem: action,
       checked: isChecked ? 'on' : undefined,
