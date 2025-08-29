@@ -669,7 +669,6 @@ export function HistoryAndStarredQueriesTabs({
                           defaultMessage: 'Showing {queryCount} queries',
                           values: {
                             queryCount: displayCount,
-                            storageSizeKB: stats.storageSizeKB,
                           },
                         });
                       })()
