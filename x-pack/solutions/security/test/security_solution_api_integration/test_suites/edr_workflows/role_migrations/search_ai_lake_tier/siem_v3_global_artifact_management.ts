@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FeaturesPrivileges, Role } from '@kbn/security-plugin-types-common';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -52,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
     );
 
     // migrating from `siem` adds timeline and notes, but in this test it is irrelevant
-    return role.kibana[0].feature.siemV3;
+    return role.kibana[0].feature[SECURITY_FEATURE_ID];
   };
 
   describe('@serverless @skipInServerlessMKI Role migrations towards siemV3 without Endpoint product line', () => {
