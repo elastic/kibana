@@ -51,7 +51,6 @@ const MonitorItem = ({
   return (
     <MetricItem
       style={{ width: '100%' }}
-      key={`${suggestionId}-${monitor.configId}-${monitor.locationId}`}
       monitor={monitor}
       onClick={function (_params: FlyoutParamProps): void {
         throw new Error('Function not implemented.');
