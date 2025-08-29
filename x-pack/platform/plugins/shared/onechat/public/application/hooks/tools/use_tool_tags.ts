@@ -17,7 +17,7 @@ export const useToolsTags = () => {
     // Return unique tags across all tools
     return [
       ...tools.reduce((tagsSet, tool) => {
-        tool.tags.forEach((tag) => tagsSet.add(tag));
+        tool.tags.forEach((tag) => tagsSet.add(tag.value));
         return tagsSet;
       }, new Set<string>()),
     ];

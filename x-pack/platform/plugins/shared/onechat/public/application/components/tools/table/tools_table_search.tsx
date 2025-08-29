@@ -7,8 +7,7 @@
 
 import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
 import { EuiSearchBar } from '@elastic/eui';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import type { ToolType } from '@kbn/onechat-common';
+import type { DisplayToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { countBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToolsTags } from '../../../hooks/tools/use_tool_tags';
@@ -28,11 +27,9 @@ const toValidSearchQuery = (query: string | null): string => {
 };
 
 const getToolsTableSearchConfig = ({
-  matchesByType,
   matchesByTag,
   tags,
 }: {
-  matchesByType: Record<ToolType, number>;
   matchesByTag: Record<string, number>;
   tags: string[];
 }): EuiSearchBarProps => {
@@ -62,13 +59,13 @@ const getToolsTableSearchConfig = ({
 
 export interface ToolsTableSearch {
   searchConfig: Search;
-  results: ToolDefinitionWithSchema[];
+  results: DisplayToolDefinitionWithSchema[];
 }
 
 export const useToolsTableSearch = (): ToolsTableSearch => {
   const { tools } = useToolsService();
   const { tags } = useToolsTags();
-  const [results, setResults] = useState<ToolDefinitionWithSchema[]>(tools);
+  const [results, setResults] = useState<DisplayToolDefinitionWithSchema[]>(tools);
   const [searchQuery, setSearchQuery] = useQueryState('search', {
     defaultValue: '',
     parse: toValidSearchQuery,
@@ -96,21 +93,17 @@ export const useToolsTableSearch = (): ToolsTableSearch => {
     [tools, setSearchQuery]
   );
 
-  const matchesByType = useMemo(() => {
-    return countBy(tools, 'type') as Record<ToolType, number>;
-  }, [tools]);
-
   const matchesByTag = useMemo(() => {
-    return countBy(tools.flatMap((tool) => tool.tags));
+    return countBy(tools.flatMap((tool) => tool.tags.map((tag) => tag.value)));
   }, [tools]);
 
   const searchConfig: Search = useMemo(
     () => ({
-      ...getToolsTableSearchConfig({ matchesByType, matchesByTag, tags }),
+      ...getToolsTableSearchConfig({ matchesByTag, tags }),
       onChange: handleChange,
       query: searchQuery,
     }),
-    [handleChange, matchesByType, matchesByTag, tags, searchQuery]
+    [handleChange, matchesByTag, tags, searchQuery]
   );
   return {
     searchConfig,

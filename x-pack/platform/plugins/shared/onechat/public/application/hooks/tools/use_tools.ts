@@ -10,7 +10,6 @@ import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { ToolType } from '@kbn/onechat-common';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import produce from 'immer';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useOnechatServices } from '../use_onechat_service';
@@ -19,10 +18,27 @@ import { useToasts } from '../use_toasts';
 const getTypeTag = (type: ToolType) => {
   switch (type) {
     case ToolType.builtin:
-      return labels.tools.builtinLabel;
+      return {
+        inherent: true,
+        value: labels.tools.builtinLabel,
+      };
     default:
       return null;
   }
+};
+
+const transformTags = (tools: ToolDefinitionWithSchema[]) => {
+  return tools.map((tool) => {
+    const tags = tool.tags.map((tag) => ({ inherent: false, value: tag }));
+    const typeTag = getTypeTag(tool.type);
+    if (typeTag) {
+      tags.unshift(typeTag);
+    }
+    return {
+      ...tool,
+      tags,
+    };
+  });
 };
 
 export const useToolsService = () => {
@@ -31,16 +47,7 @@ export const useToolsService = () => {
   const { data, isLoading, error, isError } = useQuery({
     queryKey: queryKeys.tools.all,
     queryFn: () => toolsService.list(),
-    select: (tools) => {
-      return tools.map((tool) =>
-        produce(tool, (draft) => {
-          const typeTag = getTypeTag(tool.type);
-          if (typeTag) {
-            draft.tags.unshift(typeTag);
-          }
-        })
-      );
-    },
+    select: transformTags,
   });
 
   return { tools: data ?? [], isLoading, error, isError };

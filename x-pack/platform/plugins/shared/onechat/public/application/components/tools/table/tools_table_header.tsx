@@ -14,8 +14,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
+import type { DisplayToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { useCallback } from 'react';
 import { useToolsActions } from '../../../context/tools_table_provider';
 import { labels } from '../../../utils/i18n';
@@ -23,10 +22,10 @@ import { labels } from '../../../utils/i18n';
 export interface ToolsTableHeaderProps {
   isLoading: boolean;
   pageIndex: number;
-  tools: ToolDefinitionWithSchema[];
+  tools: DisplayToolDefinitionWithSchema[];
   total: number;
-  selectedTools: ToolDefinitionWithSchema[];
-  setSelectedTools: (tools: ToolDefinitionWithSchema[]) => void;
+  selectedTools: DisplayToolDefinitionWithSchema[];
+  setSelectedTools: (tools: DisplayToolDefinitionWithSchema[]) => void;
 }
 
 export const ToolsTableHeader = ({
@@ -41,7 +40,7 @@ export const ToolsTableHeader = ({
   const { bulkDeleteTools } = useToolsActions();
 
   const selectAll = useCallback(() => {
-    setSelectedTools(tools.filter(isEsqlTool));
+    setSelectedTools(tools);
   }, [setSelectedTools, tools]);
 
   const clearSelection = useCallback(() => {

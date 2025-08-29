@@ -6,18 +6,19 @@
  */
 
 import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
+import type { ToolTag } from '@kbn/onechat-common/tools';
 import React from 'react';
 
 interface OnechatToolTagsProps {
-  tags: string[];
+  tags: ToolTag[];
 }
 
 export const OnechatToolTags: React.FC<OnechatToolTagsProps> = ({ tags }) => {
   return (
     <EuiBadgeGroup>
       {tags.map((tag) => (
-        <EuiBadge key={tag} color="hollow">
-          {tag}
+        <EuiBadge key={tag.value} color={tag.inherent ? 'subdued' : 'hollow'}>
+          {tag.value}
         </EuiBadge>
       ))}
     </EuiBadgeGroup>

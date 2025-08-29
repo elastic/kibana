@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DisplayToolDefinitionWithSchema } from './definition';
 import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
 
 /**
@@ -46,8 +47,13 @@ export type EsqlToolConfig = {
 export type EsqlToolDefinition = ToolDefinition<EsqlToolConfig>;
 export type EsqlToolDefinitionWithSchema = ToolDefinitionWithSchema<EsqlToolConfig>;
 
+export type DisplayEsqlToolDefinitionWithSchema = DisplayToolDefinitionWithSchema<EsqlToolConfig>;
+
+export function isEsqlTool(
+  tool: DisplayToolDefinitionWithSchema
+): tool is DisplayEsqlToolDefinitionWithSchema;
 export function isEsqlTool(tool: ToolDefinitionWithSchema): tool is EsqlToolDefinitionWithSchema;
 export function isEsqlTool(tool: ToolDefinition): tool is EsqlToolDefinition;
-export function isEsqlTool(tool: ToolDefinition): boolean {
+export function isEsqlTool(tool: { type: ToolType }): boolean {
   return tool.type === ToolType.esql;
 }

@@ -7,13 +7,13 @@
 
 import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { DisplayToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React from 'react';
 import { useToolsActions } from '../../../context/tools_table_provider';
 import { labels } from '../../../utils/i18n';
 
 export interface ToolQuickActionsProps {
-  tool: ToolDefinitionWithSchema;
+  tool: DisplayToolDefinitionWithSchema;
 }
 
 export const toolQuickActionsHoverStyles = css`
