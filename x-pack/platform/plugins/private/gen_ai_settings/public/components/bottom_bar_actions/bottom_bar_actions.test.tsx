@@ -34,7 +34,8 @@ describe('bottom_bar_actions', () => {
         unsavedChangesCount={5}
         saveLabel="Save Changes"
         appTestSubj="genAiSettings"
-      />, { wrapper: Providers }
+      />,
+      { wrapper: Providers }
     );
 
     expect(screen.getByTestId('genAiSettingsBottomBar')).toBeInTheDocument();
