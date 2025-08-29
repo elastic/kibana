@@ -14624,6 +14624,42 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/init</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/entity_analytics/monitoring/engine/schedule_now:
+    post:
+      operationId: ScheduleMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    description: Indicates the scheduling was successful
+                    type: boolean
+          description: Successful response
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    description: Error message indicating the engine is already running
+                    type: string
+          description: Conflict - Monitoring engine is already running
+      summary: Schedule the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/schedule_now</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/entity_analytics/monitoring/privileges/health:
     get:
       operationId: PrivMonHealth
@@ -49251,6 +49287,14 @@ paths:
             example: 20
             minimum: 0
             type: integer
+        - description: Whether to return conversations that the current user owns. If true, only conversations owned by the user are returned.
+          in: query
+          name: is_owner
+          required: false
+          schema:
+            default: false
+            example: true
+            type: boolean
       responses:
         '200':
           content:
@@ -53512,6 +53556,11 @@ paths:
                                                     properties:
                                                       destination:
                                                         minLength: 1
+                                                        type: string
+                                                      status:
+                                                        enum:
+                                                          - enabled
+                                                          - disabled
                                                         type: string
                                                       where:
                                                         anyOf:
@@ -58248,6 +58297,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                status:
+                  enum:
+                    - enabled
+                    - disabled
+                  type: string
                 stream:
                   additionalProperties: false
                   type: object
@@ -60021,6 +60075,11 @@ paths:
                                     properties:
                                       destination:
                                         minLength: 1
+                                        type: string
+                                      status:
+                                        enum:
+                                          - enabled
+                                          - disabled
                                         type: string
                                       where:
                                         anyOf:
@@ -64551,17 +64610,17 @@ paths:
                     bcc:
                       default: []
                       items:
-                        - type: string
+                        type: string
                       type: array
                     cc:
                       default: []
                       items:
-                        - type: string
+                        type: string
                       type: array
                     to:
                       default: []
                       items:
-                        - type: string
+                        type: string
                       type: array
                 heartbeatIndices:
                   default: heartbeat-*
@@ -74093,14 +74152,6 @@ components:
         - insights
       example: assistant
       type: string
-    Security_AI_Assistant_API_ConversationConfidence:
-      description: The conversation confidence.
-      enum:
-        - low
-        - medium
-        - high
-      example: high
-      type: string
     Security_AI_Assistant_API_ConversationCreateProps:
       type: object
       properties:
@@ -74145,6 +74196,9 @@ components:
           description: The time conversation was created.
           example: '2025-04-30T14:00:00Z'
           type: string
+        createdBy:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          description: The user who created the conversation.
         excludeFromLastConversationStorage:
           description: Exclude from last conversation storage.
           type: boolean
@@ -74181,28 +74235,33 @@ components:
         - id
         - title
         - createdAt
+        - createdBy
         - users
         - namespace
         - category
     Security_AI_Assistant_API_ConversationSummary:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummaryBase'
+        - type: object
+          properties:
+            timestamp:
+              $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
+              description: The timestamp summary was updated.
+              example: '2025-04-30T16:00:00Z'
+          required:
+            - timestamp
+    Security_AI_Assistant_API_ConversationSummaryBase:
       type: object
       properties:
-        confidence:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationConfidence'
-          description: How confident you are about this being a correct and useful learning.
-          example: high
-        content:
+        semanticContent:
           description: Summary text of the conversation over time.
           example: This conversation covered how to configure the Security AI Assistant.
           type: string
-        public:
-          description: Define if summary is marked as publicly available.
-          example: true
-          type: boolean
-        timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
-          description: The timestamp summary was updated.
-          example: '2025-04-30T16:00:00Z'
+        summarizedMessageIds:
+          description: The list of summarized messages.
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          type: array
     Security_AI_Assistant_API_ConversationUpdateProps:
       type: object
       properties:
@@ -74226,11 +74285,15 @@ components:
         replacements:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
         summary:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummary'
+          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummaryBase'
         title:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
           type: string
+        users:
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          type: array
       required:
         - id
     Security_AI_Assistant_API_DeleteResponseFields:
@@ -74827,6 +74890,9 @@ components:
           description: Message content.
           example: Hello, how can I assist you today?
           type: string
+        id:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          description: Message id
         isError:
           description: Is error message.
           example: false
@@ -74848,6 +74914,9 @@ components:
         traceData:
           $ref: '#/components/schemas/Security_AI_Assistant_API_TraceData'
           description: Trace data
+        user:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          description: The user who sent the message.
       required:
         - timestamp
         - content

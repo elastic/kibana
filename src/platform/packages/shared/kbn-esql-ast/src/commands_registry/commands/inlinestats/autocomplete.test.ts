@@ -306,7 +306,7 @@ describe('INLINESTATS Autocomplete', () => {
           'from a | inlinestats avg(',
           [
             ...expectedFieldsAvg,
-            ...getFunctionSignaturesByReturnType(Location.EVAL, AVG_TYPES, {
+            ...getFunctionSignaturesByReturnType(Location.STATS, AVG_TYPES, {
               scalar: true,
             }),
           ],
@@ -314,7 +314,13 @@ describe('INLINESTATS Autocomplete', () => {
         );
         await inlineStatsExpectSuggestions(
           'TS a | inlinestats avg(',
-          [...expectedFieldsAvg, 'FUNC($0)'],
+          [
+            ...expectedFieldsAvg,
+            ...getFunctionSignaturesByReturnType(Location.STATS, AVG_TYPES, {
+              scalar: true,
+            }),
+            'FUNC($0)',
+          ],
           mockCallbacks
         );
         await inlineStatsExpectSuggestions(
