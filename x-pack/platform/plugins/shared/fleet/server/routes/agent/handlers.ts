@@ -359,6 +359,9 @@ export const getAgentDataHandler: RequestHandler<
       appContextService
         .getLogger()
         .warn(`Failed to get package info for ${pkgName}@${pkgVersion}: ${error.message}`);
+      return response.ok({
+        body: { items: agentsIds.map((id) => ({ [id]: { data: false } })), dataPreview: [] },
+      });
     }
   }
 
