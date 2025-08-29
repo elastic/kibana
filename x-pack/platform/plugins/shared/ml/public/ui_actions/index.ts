@@ -16,8 +16,6 @@ import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 
 import type { MlStartDependencies } from '../plugin';
-import { createClearSelectionAction } from './clear_selection_action';
-import { createVisToADJobAction } from './open_vis_in_ml_action';
 
 // avoid importing from plugin root
 // import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public/';
@@ -40,11 +38,17 @@ export function registerMlUiActions(
   uiActions: UiActionsSetup,
   core: CoreSetup<MlStartDependencies, MlPluginStart>
 ) {
-  // Initialize actions
-  const clearSelectionAction = createClearSelectionAction(core.getStartServices);
-  const visToAdJobAction = createVisToADJobAction(core.getStartServices);
-
   // Register actions
+  uiActions.registerActionAsync('CLEAR_SELECTION_ACTION', async () => {
+    const { createClearSelectionAction } = await import('./clear_selection_action');
+    const clearSelectionAction = createClearSelectionAction(core.getStartServices);
+    return clearSelectionAction;
+  });
+  uiActions.registerActionAsync('CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION', async () => {
+    const { createVisToADJobAction } = await import('./open_vis_in_ml_action');
+    const visToAdJobAction = createVisToADJobAction(core.getStartServices);
+    return visToAdJobAction;
+  });
   uiActions.registerActionAsync('APPLY_ENTITY_FIELD_FILTER_ACTION', async () => {
     const { createApplyEntityFieldFiltersAction } = await import('./apply_entity_filters_action');
     const applyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(core.getStartServices);
@@ -190,7 +194,15 @@ export function registerMlUiActions(
       return openInSingleMetricViewerAction;
     }
   );
-  uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, clearSelectionAction);
+  uiActions.addTriggerActionAsync(
+    SWIM_LANE_SELECTION_TRIGGER,
+    'CLEAR_SELECTION_ACTION',
+    async () => {
+      const { createClearSelectionAction } = await import('./clear_selection_action');
+      const clearSelectionAction = createClearSelectionAction(core.getStartServices);
+      return clearSelectionAction;
+    }
+  );
   uiActions.addTriggerActionAsync(
     EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
     'ACTION_EXPLORER_ENTITY_FIELD_SELECTION',
@@ -214,7 +226,15 @@ export function registerMlUiActions(
       return smvApplyEntityFieldFilterAction;
     }
   );
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, visToAdJobAction);
+  uiActions.addTriggerActionAsync(
+    CONTEXT_MENU_TRIGGER,
+    'CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION',
+    async () => {
+      const { createVisToADJobAction } = await import('./open_vis_in_ml_action');
+      const visToAdJobAction = createVisToADJobAction(core.getStartServices);
+      return visToAdJobAction;
+    }
+  );
   uiActions.addTriggerActionAsync(
     CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
     'CATEGORIZATION_AD_JOB_ACTION',
