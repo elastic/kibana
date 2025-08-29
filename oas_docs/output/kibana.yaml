@@ -52055,8 +52055,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -53761,8 +53766,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -55243,8 +55253,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -56745,8 +56760,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -58227,8 +58247,13 @@ paths:
                                 required:
                                   - kql
                           type: array
+                        rules:
+                          items:
+                            type: string
+                          type: array
                       required:
                         - dashboards
+                        - rules
                         - queries
                     - type: object
                       properties:
@@ -62212,6 +62237,140 @@ paths:
                 - kql
       responses: {}
       summary: Upsert a query to a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/streams/{name}/rules:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/rules</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Fetches all rules linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.
+      operationId: get-streams-name-rules
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get stream rules
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/streams/{name}/rules/{ruleId}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/rules/{ruleId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.
+      operationId: delete-streams-name-rules-ruleid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: ruleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Unlink a rule from a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/rules/{ruleId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Links a rule to a stream. Noop if the rule is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.
+      operationId: put-streams-name-rules-ruleid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: ruleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Link a rule to a stream
       tags:
         - streams
       x-state: Technical Preview
