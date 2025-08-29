@@ -1,0 +1,64 @@
+openapi: 3.0.0
+info:
+  title: Risk Score Summary API
+  version: '1'
+paths:
+  /internal/risk_score/risk_summary:
+    post:
+      operationId: RiskScoreSummary
+      x-codegen-enabled: true
+      description: Explain the risk score for a given entity using an LLM connector.
+      summary: Generate a textual explanation of how the risk score was calculate for a given entity
+      tags:
+        - entity_analytics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - identifier
+                - identifierKey
+                - connectorId
+              properties:
+                identifier:
+                  type: string
+                identifierKey:
+                  type: string
+                connectorId:
+                  type: string
+                  description: LLM API connector.                                
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - summary
+                  - detailedExplanation
+                  - recommendations
+                properties:
+                  summary:
+                    type: string
+                  detailedExplanation:
+                    type: string
+                  recommendations: 
+                    type: string
+                  
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
