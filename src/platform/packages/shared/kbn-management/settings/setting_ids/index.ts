@@ -129,6 +129,7 @@ export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExc
 export const OBSERVABILITY_ENABLE_STREAMS_UI = 'observability:enableStreamsUI';
 export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS =
   'observability:streamsEnableSignificantEvents';
+export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streamsEnableGroupStreams';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings
@@ -160,6 +161,8 @@ export const SECURITY_SOLUTION_NEWS_FEED_URL_ID = 'securitySolution:newsFeedUrl'
 export const SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID = 'securitySolution:ipReputationLinks';
 export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
   'securitySolution:showRelatedIntegrations';
+export const SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
+  'securitySolution:suppressionBehaviorOnAlertClosure' as const;
 export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
 export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =

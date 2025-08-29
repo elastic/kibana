@@ -60,14 +60,19 @@ export const TriggerSchema = z.discriminatedUnion('type', [
 /* --- Steps --- */
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
-  delay: z.number().min(0),
+  delay: z
+    .string()
+    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
+    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
 });
+export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
 export const WorkflowOnFailureSchema = z.object({
-  retry: WorkflowRetrySchema,
-  'fallback-step': z.string().min(1),
+  retry: WorkflowRetrySchema.optional(),
+  'fallback-step': z.string().min(1).optional(),
   continue: z.boolean().optional(),
 });
+export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
 
 // Base step schema, with recursive steps property
 export const BaseStepSchema = z.object({
@@ -93,6 +98,25 @@ export const WaitStepSchema = BaseStepSchema.extend({
   }),
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
+
+export const HttpStepSchema = BaseStepSchema.extend({
+  type: z.literal('http'),
+  with: z.object({
+    url: z.string().min(1),
+    method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH']).optional().default('GET'),
+    headers: z
+      .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+      .optional()
+      .default({}),
+    body: z.any().optional(),
+    timeout: z
+      .string()
+      .regex(/^\d+(ms|[smhdw])$/)
+      .optional()
+      .default('30s'), // e.g., '500ms', '5s', '1m'
+  }),
+});
+export type HttpStep = z.infer<typeof HttpStepSchema>;
 
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
@@ -243,6 +267,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    HttpStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,
@@ -265,10 +290,32 @@ export const WorkflowSchema = z.object({
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 
+export const WorkflowExecutionContextSchema = z.object({
+  id: z.string(),
+  isTestRun: z.boolean(),
+  startedAt: z.date(),
+});
+export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
+
+export const WorkflowDataContextSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  enabled: z.boolean(),
+  spaceId: z.string(),
+});
+export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
+
 export const WorkflowContextSchema = z.object({
-  workflowRunId: z.string(),
   event: z.any().optional(),
+  execution: WorkflowExecutionContextSchema,
+  workflow: WorkflowDataContextSchema,
   consts: z.record(z.string(), z.any()).optional(),
+  now: z.date().optional(),
+});
+
+export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
+
+export const StepContextSchema = WorkflowContextSchema.extend({
   steps: z.record(
     z.string(),
     z.object({
@@ -278,10 +325,11 @@ export const WorkflowContextSchema = z.object({
   ),
   foreach: z
     .object({
+      items: z.array(z.any()),
+      index: z.number().int(),
       item: z.any(),
+      total: z.number().int(),
     })
     .optional(),
-  now: z.date().optional(),
 });
-
-export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
+export type StepContext = z.infer<typeof StepContextSchema>;

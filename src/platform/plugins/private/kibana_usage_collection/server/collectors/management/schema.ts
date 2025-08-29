@@ -38,6 +38,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:suppressionBehaviorOnAlertClosure': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'xpackReporting:customPdfLogo': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -678,6 +682,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable significant events in streams.',
+    },
+  },
+  'observability:streamsEnableGroupStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Group streams in Streams',
     },
   },
   'observability:enableDiagnosticMode': {
