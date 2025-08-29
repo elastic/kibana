@@ -97,11 +97,6 @@ export function registerMlUiActions(
     const addSwimlanePanelAction = createAddSwimlanePanelAction(core.getStartServices);
     return addSwimlanePanelAction;
   });
-  uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_ADD_PANEL, async () => {
-    const { createAddAnomalyChartsPanelAction } = await import('./create_anomaly_chart');
-    const addAnomalyChartsPanelAction = createAddAnomalyChartsPanelAction(core.getStartServices);
-    return addAnomalyChartsPanelAction;
-  });
 
   uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, 'ACTION_CONTEXT_MENU', async () => {
     const { createOpenInExplorerAction } = await import('./open_in_anomaly_explorer_action');
