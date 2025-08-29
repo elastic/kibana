@@ -48,7 +48,6 @@ export function DashboardRenderer({
   onApiAvailable,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
-  const dashboardContainerRef = useRef<HTMLElement | null>(null);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const [dashboardInternalApi, setDashboardInternalApi] = useState<
     DashboardInternalApi | undefined
@@ -131,7 +130,7 @@ export function DashboardRenderer({
         className="dashboardContainer"
         data-test-subj="dashboardContainer"
         css={styles.renderer}
-        ref={(e) => (dashboardContainerRef.current = e)}
+        ref={dashboardInternalApi.setDashboardContainerRef}
       >
         <GlobalPrintStyles />
         <ExitFullScreenButtonKibanaProvider
@@ -139,7 +138,7 @@ export function DashboardRenderer({
         >
           <DashboardContext.Provider value={dashboardApi}>
             <DashboardInternalContext.Provider value={dashboardInternalApi}>
-              <DashboardViewport dashboardContainerRef={dashboardContainerRef} />
+              <DashboardViewport />
             </DashboardInternalContext.Provider>
           </DashboardContext.Provider>
         </ExitFullScreenButtonKibanaProvider>

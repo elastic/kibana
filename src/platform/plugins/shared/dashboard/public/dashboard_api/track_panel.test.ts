@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expectationFailed } from '@hapi/boom';
 import { initializeTrackPanel } from './track_panel';
 
 describe('track panel', () => {
+  const mockDashboardContainerRef = document.createElement('div');
+  mockDashboardContainerRef.getBoundingClientRect = jest.fn(() => ({ top: 96 } as DOMRect));
   const {
     expandPanel,
     expandedPanelId$,
@@ -25,22 +26,9 @@ describe('track panel', () => {
     setScrollToPanelId,
     scrollToTop,
     scrollToBottom,
-  } = initializeTrackPanel(async (id: string) => undefined);
+  } = initializeTrackPanel(async (id: string) => undefined, mockDashboardContainerRef);
 
   const scrollToSpy = jest.spyOn(window, 'scrollTo');
-
-  const querySelectorSpy = jest
-    .spyOn(document, 'querySelector')
-    .mockImplementation((selector: string) => {
-      switch (selector) {
-        case '.dashboardContainer':
-          const dashboardContainer = document.createElement('div');
-          dashboardContainer.getBoundingClientRect = jest.fn(() => ({ top: 96 } as DOMRect));
-          return dashboardContainer;
-        default:
-          return null;
-      }
-    });
 
   afterAll(() => {
     jest.restoreAllMocks();
@@ -90,7 +78,7 @@ describe('track panel', () => {
       expect(scrollPosition$.value).toBe(undefined);
     });
 
-    it('should scroll to panel when panel is below viewport', async () => {
+    it('should scroll to panel when panel is below the viewport', async () => {
       setScrollToPanelId('scroll-to-panel-id');
       const mockPanelRef = document.createElement('div');
       mockPanelRef.getBoundingClientRect = jest.fn(
@@ -105,7 +93,7 @@ describe('track panel', () => {
       expect(scrollPosition$.value).toBe(undefined);
 
       await scrollToPanel(mockPanelRef);
-      expect(querySelectorSpy).toHaveBeenCalledWith('.dashboardContainer');
+      expect(mockDashboardContainerRef.getBoundingClientRect).toHaveBeenCalled();
       expect(mockPanelRef.getBoundingClientRect).toHaveBeenCalled();
       expect(mockPanelRef.scrollIntoView).toHaveBeenCalledWith({
         block: 'start',
@@ -114,7 +102,7 @@ describe('track panel', () => {
       expect(scrollToPanelId$.value).toBe(undefined);
     });
 
-    it('should scroll to panel when panel is above viewport', async () => {
+    it('should scroll to panel when panel is above the viewport', async () => {
       setScrollToPanelId('scroll-to-panel-id');
       const mockPanelRef = document.createElement('div');
       mockPanelRef.getBoundingClientRect = jest.fn(
@@ -129,7 +117,7 @@ describe('track panel', () => {
       expect(scrollPosition$.value).toBe(undefined);
 
       await scrollToPanel(mockPanelRef);
-      expect(querySelectorSpy).toHaveBeenCalledWith('.dashboardContainer');
+      expect(mockDashboardContainerRef.getBoundingClientRect).toHaveBeenCalled();
       expect(mockPanelRef.getBoundingClientRect).toHaveBeenCalled();
       expect(mockPanelRef.scrollIntoView).toHaveBeenCalledWith({
         block: 'start',
@@ -154,7 +142,7 @@ describe('track panel', () => {
       window.innerHeight = 600;
 
       await scrollToPanel(mockPanelRef);
-      expect(querySelectorSpy).toHaveBeenCalledWith('.dashboardContainer');
+      expect(mockDashboardContainerRef.getBoundingClientRect).toHaveBeenCalled();
       expect(mockPanelRef.getBoundingClientRect).toHaveBeenCalled();
       expect(mockPanelRef.scrollIntoView).not.toHaveBeenCalled();
       expect(scrollToPanelId$.value).toBe(undefined);

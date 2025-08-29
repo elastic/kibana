@@ -11,7 +11,10 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 export const highlightAnimationDuration = 2000;
 
-export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefined>) {
+export function initializeTrackPanel(
+  untilLoaded: (id: string) => Promise<undefined>,
+  dashboardContainerRef$: BehaviorSubject<HTMLElement | null>
+) {
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -68,8 +71,7 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
           window.scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
           scrollPosition$.next(undefined);
         } else {
-          const dashboardTop =
-            document.querySelector('.dashboardContainer')?.getBoundingClientRect().top || 0;
+          const dashboardTop = dashboardContainerRef$.value?.getBoundingClientRect().top || 0;
           const clientBottom = window.innerHeight;
           const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
 
