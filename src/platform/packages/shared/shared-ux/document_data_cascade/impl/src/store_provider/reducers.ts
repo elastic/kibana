@@ -31,7 +31,7 @@ export type LeafNode = DocWithId;
 export type ColumnGroups = Array<keyof Omit<GroupNode, 'children' | 'id'>>;
 
 export interface IStoreState<G extends GroupNode, L extends LeafNode> {
-  table: TableState;
+  readonly table: TableState;
   /**
    * Record of group nodes that can be displayed in the table.
    */
@@ -59,11 +59,19 @@ export function createStoreReducers<G extends GroupNode, L extends LeafNode>() {
     },
     setActiveCascadeGroups(state: IStoreState<G, L>, payload: ColumnGroups) {
       return produce(state, (draft) => {
+        // verify the payload columns exist in the available groupByColumns
+        for (const column of payload) {
+          if (!draft.groupByColumns.includes(column)) {
+            throw new Error(`Invalid column: ${column}`);
+          }
+        }
+
         draft.currentGroupByColumns = castDraft(payload);
         // close out any previously expanded leaf row on group changes
-        // since that render would be invalid with the new group change
+        // since the previous render would be invalid with the new group change
         for (const cacheKey of draft.leafNodes.keys()) {
           const leafId = getLeafIdFromCacheKey(cacheKey);
+
           if (
             draft.table.expanded &&
             typeof draft.table.expanded !== 'boolean' &&
@@ -82,7 +90,7 @@ export function createStoreReducers<G extends GroupNode, L extends LeafNode>() {
         });
       });
     },
-    updateRowGroupNodeData(state: IStoreState<G, L>, payload: { id: string; data: G[] }) {
+    setRowGroupNodeData(state: IStoreState<G, L>, payload: { id: string; data: G[] }) {
       return produce(state, (draft) => {
         const stack: GroupNode[] = Array.isArray(draft.groupNodes)
           ? [...draft.groupNodes]
@@ -99,7 +107,7 @@ export function createStoreReducers<G extends GroupNode, L extends LeafNode>() {
         }
       });
     },
-    updateRowGroupLeafData(state: IStoreState<G, L>, payload: { cacheKey: string; data: L[] }) {
+    setRowGroupLeafData(state: IStoreState<G, L>, payload: { cacheKey: string; data: L[] }) {
       return produce(state, (draft) => {
         const { cacheKey, data } = payload;
         draft.leafNodes.set(cacheKey, castDraft(data));
