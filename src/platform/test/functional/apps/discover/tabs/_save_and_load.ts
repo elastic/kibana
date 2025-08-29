@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
       const esqlTabHitCount = '50';
 
-      it('should allow saving a multi-tab Discover session', async () => {
+      it('should support saving a multi-tab Discover session', async () => {
         // Persisted data view tab
         await timePicker.setAbsoluteRange(persistedTabTime.start, persistedTabTime.end);
         await queryBar.setQuery(persistedTabQuery);
@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await timePicker.getTimeConfig()).to.eql(esqlTabTime);
       });
 
-      it('should allow loading a multi-tab Discover session', async () => {
+      it('should support loading a multi-tab Discover session', async () => {
         // Load the Discover session
         await discover.loadSavedSearch(sessionName);
         await discover.waitUntilTabIsLoaded();
@@ -255,6 +255,92 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.getHitCount()).to.be(esqlTabHitCount);
         expect(await monacoEditor.getCodeEditorValue()).to.be(esqlTabQuery);
         expect(await timePicker.getTimeConfig()).to.eql(esqlTabTime);
+      });
+
+      it('should locally persist unsaved changes to a multi-tab Discover session', async () => {
+        // Load the Discover session
+        await discover.loadSavedSearch(sessionName);
+        await discover.waitUntilTabIsLoaded();
+
+        // Prepare unsaved changes per tab
+        const persistedUnsaved = {
+          time: { start: 'Sep 20, 2015 @ 01:00:00.000', end: 'Sep 22, 2015 @ 01:00:00.000' },
+          query: 'test and extension : png',
+          columns: ['referer', 'bytes'],
+        };
+        const adHocUnsaved = {
+          time: { start: 'Sep 20, 2015 @ 07:00:00.000', end: 'Sep 22, 2015 @ 07:00:00.000' },
+          query: 'extension : png',
+          columns: ['geo.src', 'bytes'],
+        };
+        const esqlUnsaved = {
+          time: { start: 'Sep 20, 2015 @ 13:00:00.000', end: 'Sep 22, 2015 @ 13:00:00.000' },
+          query: 'from logstash-* | limit 25',
+        };
+
+        // Persisted data view tab
+        await timePicker.setAbsoluteRange(persistedUnsaved.time.start, persistedUnsaved.time.end);
+        await queryBar.setQuery(persistedUnsaved.query);
+        await queryBar.submitQuery();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedFieldList.clickFieldListItemAdd('bytes');
+        const persistedUnsavedCount = await discover.getHitCount();
+
+        // Ad hoc data view tab
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await timePicker.setAbsoluteRange(adHocUnsaved.time.start, adHocUnsaved.time.end);
+        await queryBar.setQuery(adHocUnsaved.query);
+        await queryBar.submitQuery();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedFieldList.clickFieldListItemAdd('bytes');
+        const adHocUnsavedCount = await discover.getHitCount();
+
+        // ES|QL tab
+        await unifiedTabs.selectTab(2);
+        await discover.waitUntilTabIsLoaded();
+        await timePicker.setAbsoluteRange(esqlUnsaved.time.start, esqlUnsaved.time.end);
+        await monacoEditor.setCodeEditorValue(esqlUnsaved.query);
+        await queryBar.clickQuerySubmitButton();
+        await discover.waitUntilTabIsLoaded();
+        const esqlUnsavedCount = await discover.getHitCount();
+
+        // Unsaved changes badge should be visible after making changes
+        await testSubjects.existOrFail('unsavedChangesBadge');
+
+        // Refresh and ensure the unsaved changes are restored
+        await browser.refresh();
+        await discover.waitUntilTabIsLoaded();
+
+        // Validate persisted data view tab
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        expect(await queryBar.getQueryString()).to.be(persistedUnsaved.query);
+        expect(await timePicker.getTimeConfig()).to.eql(persistedUnsaved.time);
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql(
+          persistedUnsaved.columns
+        );
+        expect(await discover.getHitCount()).to.be(persistedUnsavedCount);
+
+        // Validate ad hoc data view tab
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        expect(await queryBar.getQueryString()).to.be(adHocUnsaved.query);
+        expect(await timePicker.getTimeConfig()).to.eql(adHocUnsaved.time);
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql(
+          adHocUnsaved.columns
+        );
+        expect(await discover.getHitCount()).to.be(adHocUnsavedCount);
+
+        // Validate ES|QL tab
+        await unifiedTabs.selectTab(2);
+        await discover.waitUntilTabIsLoaded();
+        expect(await monacoEditor.getCodeEditorValue()).to.be(esqlUnsaved.query);
+        expect(await timePicker.getTimeConfig()).to.eql(esqlUnsaved.time);
+        expect(await discover.getHitCount()).to.be(esqlUnsavedCount);
+
+        // Unsaved badge should still be visible after refresh
+        await testSubjects.existOrFail('unsavedChangesBadge');
       });
 
       it('should clear all tabs when starting a new session', async () => {
@@ -316,10 +402,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('confirmSaveSavedObjectButton');
         };
 
-        // Case A: Only persisted DV tab is time based; ad hoc DV is non-time-based; ES|QL is non-time-based
-        // Initial tab uses default time-based DV
+        // Case A: Only persisted data view tab is time based; ad hoc data view is non-time-based; ES|QL is non-time-based
+        // Initial tab uses default time-based data view
 
-        // Tab 2: ad hoc DV without time field
+        // Tab 2: ad hoc data view without time field
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
         await dataViews.createFromSearchBar({
@@ -337,7 +423,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.clickQuerySubmitButton();
         await discover.waitUntilTabIsLoaded();
 
-        // Visit the time-based tab (persisted DV) and check
+        // Visit the time-based tab (persisted data view) and check
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
         await expectTimeSwitchVisible();
@@ -348,14 +434,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         await expectTimeSwitchVisible();
 
-        // Case B: Only ad hoc DV tab is time based; persisted DV is non-time-based; ES|QL is non-time-based
-        // Reset to a fresh session, then make Tab 1 persisted DV non-time-based
+        // Case B: Only ad hoc data view tab is time based; persisted data view is non-time-based; ES|QL is non-time-based
+        // Reset to a fresh session, then make Tab 1 persisted data view non-time-based
         await discover.clickNewSearchButton();
         await discover.waitUntilTabIsLoaded();
         await dataViews.switchToAndValidate(persistedWithoutTimeRange);
         await discover.waitUntilTabIsLoaded();
 
-        // Tab 2: ad hoc DV with time field (time-based)
+        // Tab 2: ad hoc data view with time field (time-based)
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
         await dataViews.createFromSearchBar({
@@ -373,7 +459,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.clickQuerySubmitButton();
         await discover.waitUntilTabIsLoaded();
 
-        // Visit the time-based tab (ad hoc DV) and check
+        // Visit the time-based tab (ad hoc data view) and check
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
         await expectTimeSwitchVisible();
@@ -384,8 +470,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         await expectTimeSwitchVisible();
 
-        // Case C: Only ES|QL tab is time based; both DV tabs non-time-based
-        // Reset and build non-time-based DV tabs
+        // Case C: Only ES|QL tab is time based; both data view tabs non-time-based
+        // Reset and build non-time-based data view tabs
         await discover.clickNewSearchButton();
         await discover.waitUntilTabIsLoaded();
         await dataViews.switchToAndValidate(persistedWithoutTimeRange);
@@ -428,11 +514,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('confirmSaveSavedObjectButton');
         };
 
-        // Tab 1: persisted DV without time field
+        // Tab 1: persisted data view without time field
         await dataViews.switchToAndValidate(persistedWithoutTimeRange);
         await discover.waitUntilTabIsLoaded();
 
-        // Tab 2: ad hoc DV without time field
+        // Tab 2: ad hoc data view without time field
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
         await dataViews.createFromSearchBar({
