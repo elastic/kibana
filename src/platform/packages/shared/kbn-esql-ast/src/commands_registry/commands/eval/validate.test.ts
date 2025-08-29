@@ -49,8 +49,8 @@ describe('EVAL Validation', () => {
     evalExpectErrors('from a_index | eval col0=null', []);
   });
   test('raises error on unknown field', () => {
-    evalExpectErrors('from a_index | eval col0=b', ['Unknown column [b]']);
-    evalExpectErrors('from a_index | eval col0=round', ['Unknown column [round]']);
+    evalExpectErrors('from a_index | eval col0=b', ['Unknown column "b"']);
+    evalExpectErrors('from a_index | eval col0=round', ['Unknown column "round"']);
   });
   test('validates IS NULL', () => {
     evalExpectErrors(`from a_index | eval doubleField IS NULL`, []);

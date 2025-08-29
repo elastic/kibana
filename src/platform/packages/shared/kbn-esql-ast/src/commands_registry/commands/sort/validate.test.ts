@@ -35,7 +35,7 @@ describe('SORT Validation', () => {
       userDefinedColumns: newUserDefinedColumns,
     };
     sortExpectErrors('from a_index | sort "field" ', []);
-    sortExpectErrors('from a_index | sort wrongField ', ['Unknown column [wrongField]']);
+    sortExpectErrors('from a_index | sort wrongField ', ['Unknown column "wrongField"']);
     sortExpectErrors('from a_index | sort doubleField, textField', []);
     for (const dir of ['desc', 'asc']) {
       sortExpectErrors(`from a_index | sort "field" ${dir} `, []);
