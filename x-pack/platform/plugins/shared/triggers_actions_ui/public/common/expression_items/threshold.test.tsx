@@ -79,7 +79,7 @@ describe('threshold expression', () => {
     expect(await screen.findByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
     expect(screen.getByTestId('alertThresholdInput0')).toBeInTheDocument();
 
-    const thresholdInput = screen.getByTestId('alertThresholdInput0') as HTMLInputElement;
+    const thresholdInput = screen.getByTestId('alertThresholdInput0');
 
     // Use a single change event instead of per-character typing to avoid multiple handler calls
     fireEvent.change(thresholdInput, { target: { value: '1000' } });
@@ -91,7 +91,7 @@ describe('threshold expression', () => {
 
     jest.clearAllMocks();
 
-    const comparatorSelect = screen.getByTestId('comparatorOptionsComboBox') as HTMLSelectElement;
+    const comparatorSelect = screen.getByTestId('comparatorOptionsComboBox');
     await user.selectOptions(comparatorSelect, '<');
 
     expect(onChangeSelectedThreshold).not.toHaveBeenCalled();
@@ -137,7 +137,7 @@ describe('threshold expression', () => {
     expect(await screen.findByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
     expect(screen.getByTestId('alertThresholdInput0')).toBeInTheDocument();
 
-    const comparatorSelect = screen.getByTestId('comparatorOptionsComboBox') as HTMLSelectElement;
+    const comparatorSelect = screen.getByTestId('comparatorOptionsComboBox');
     await user.selectOptions(comparatorSelect, 'between');
 
     expect(await screen.findByTestId('alertThresholdInput1')).toBeInTheDocument();

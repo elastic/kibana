@@ -12,17 +12,25 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import type { Rule } from '../../../../types';
 import { ViewInApp } from './view_in_app';
-import { useKibana } from '../../../../common/lib/kibana';
+import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockGetNavigation = jest.fn();
+const mockNavigateToUrl = jest.fn();
 
-jest.mock('../../../../common/lib/kibana');
+const mockStartServices = createStartServicesMock();
+mockStartServices.alerting!.getNavigation = mockGetNavigation;
+mockStartServices.application.navigateToUrl = mockNavigateToUrl;
+mockStartServices.http.basePath.prepend = jest.fn((p: string) => p);
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockStartServices,
+  })),
+}));
 jest.mock('../../../lib/capabilities', () => ({
   hasSaveRulesCapability: jest.fn(() => true),
 }));
-
-const getNavigation = jest.fn();
-const navigateToUrl = jest.fn();
 
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(
@@ -32,60 +40,36 @@ const renderWithIntl = (ui: React.ReactElement) => {
   );
 };
 
-describe('view in app', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+describe('view in app, link to the app that created the rule', () => {
+  it('is disabled when there is no navigation', async () => {
+    const rule = mockRule();
+    mockGetNavigation.mockResolvedValueOnce(undefined);
 
-    mockUseKibana.mockReturnValue({
-      services: {
-        application: {
-          navigateToUrl,
-          navigateToApp: jest.fn(),
-        },
-        http: {
-          basePath: {
-            prepend: jest.fn((path: string) => path),
-          },
-        },
-        alerting: {
-          getNavigation,
-        },
-      },
-    } as unknown as ReturnType<typeof useKibana>);
+    renderWithIntl(<ViewInApp rule={rule} />);
+    const button = await screen.findByRole('button', { name: /view in app/i });
+
+    expect(button).toBeDisabled();
+    expect(button).toHaveTextContent('View in app');
+
+    await waitFor(() => expect(mockGetNavigation).toBeCalledWith(rule.id));
   });
 
-  describe('link to the app that created the rule', () => {
-    it('is disabled when there is no navigation', async () => {
-      const rule = mockRule();
-      getNavigation.mockResolvedValueOnce(null);
+  it('enabled when there is navigation', async () => {
+    const user = userEvent.setup();
 
-      renderWithIntl(<ViewInApp rule={rule} />);
-      const button = await screen.findByRole('button', { name: /view in app/i });
+    const rule = mockRule({ id: 'rule-with-nav', consumer: 'siem' });
 
-      expect(button).toBeDisabled();
-      expect(button).toHaveTextContent('View in app');
+    mockGetNavigation.mockResolvedValueOnce('/rule');
 
-      expect(getNavigation).toBeCalledWith(rule.id);
+    renderWithIntl(<ViewInApp rule={rule} />);
+    const button = screen.getByRole('button', { name: /view in app/i });
+
+    await waitFor(() => {
+      expect(button).not.toBeDisabled();
     });
 
-    it('enabled when there is navigation', async () => {
-      const user = userEvent.setup();
-
-      const rule = mockRule({ id: 'rule-with-nav', consumer: 'siem' });
-
-      getNavigation.mockResolvedValueOnce('/rule');
-
-      renderWithIntl(<ViewInApp rule={rule} />);
-      const button = screen.getByRole('button', { name: /view in app/i });
-
-      await waitFor(() => {
-        expect(button).not.toBeDisabled();
-      });
-
-      await user.click(button);
-
-      expect(navigateToUrl).toBeCalledWith('/rule');
-    });
+    await user.click(button);
+    expect(mockNavigateToUrl).toBeCalledWith('/rule');
   });
 });
 
