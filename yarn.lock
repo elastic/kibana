@@ -31700,6 +31700,11 @@ tldts-core@^6.1.46, tldts-core@^6.1.78:
   resolved "https://registry.yarnpkg.com/tldts-core/-/tldts-core-6.1.78.tgz#47b477d9742870daa01dbd5ff9a598a48379728c"
   integrity sha512-jS0svNsB99jR6AJBmfmEWuKIgz91Haya91Z43PATaeHJ24BkMoNRb/jlaD37VYjb0mYf6gRL/HOnvS1zEnYBiw==
 
+tldts-core@^7.0.12:
+  version "7.0.12"
+  resolved "https://registry.yarnpkg.com/tldts-core/-/tldts-core-7.0.12.tgz#b471e773dc23ff881a9d187ec145e36edde57c27"
+  integrity sha512-3K76aXywJFduGRsOYoY5JzINLs/WMlOkeDwPL+8OCPq2Rh39gkSDtWAxdJQlWjpun/xF/LHf29yqCi6VC/rHDA==
+
 tldts-icann@^6.1.16:
   version "6.1.78"
   resolved "https://registry.yarnpkg.com/tldts-icann/-/tldts-icann-6.1.78.tgz#82909d0a1d9a278956aecaa6d49b3789bfd2130f"
@@ -31713,6 +31718,13 @@ tldts@^6.1.32:
   integrity sha512-fw81lXV2CijkNrZAZvee7wegs+EOlTyIuVl/z4q6OUzZHQ1jGL2xQzKXq9geYf/1tzo9LZQLrkcko2m8HLh+rg==
   dependencies:
     tldts-core "^6.1.46"
+
+tldts@^7.0.5:
+  version "7.0.12"
+  resolved "https://registry.yarnpkg.com/tldts/-/tldts-7.0.12.tgz#e11008e9a3f27448e7aecb8d0fa51f929ec9549d"
+  integrity sha512-M9ZQBPp6FyqhMcl233vHYyYRkxXOA1SKGlnq13S0mJdUhRSwr2w6I8rlchPL73wBwRlyIZpFvpu2VcdSMWLYXw==
+  dependencies:
+    tldts-core "^7.0.12"
 
 tmp@^0.0.33:
   version "0.0.33"
@@ -31835,12 +31847,19 @@ tough-cookie@^4.1.2, tough-cookie@^4.1.4:
     universalify "^0.2.0"
     url-parse "^1.5.3"
 
-tough-cookie@^5.0.0, tough-cookie@^5.1.2:
+tough-cookie@^5.0.0:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-5.1.2.tgz#66d774b4a1d9e12dc75089725af3ac75ec31bed7"
   integrity sha512-FVDYdxtnj0G6Qm/DhNPSb8Ju59ULcup3tuJxkFb5K8Bv2pUXILbf0xZWU8PX8Ov19OXljbUyveOFwRMwkXzO+A==
   dependencies:
     tldts "^6.1.32"
+
+tough-cookie@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-6.0.0.tgz#11e418b7864a2c0d874702bc8ce0f011261940e5"
+  integrity sha512-kXuRi1mtaKMrsLUxz3sQYvVl37B0Ns6MzfrtV5DvJceE9bPyspOqk9xxv7XbZWcfLWbFmm997vl83qUWVJA64w==
+  dependencies:
+    tldts "^7.0.5"
 
 tr46@^1.0.1:
   version "1.0.1"
