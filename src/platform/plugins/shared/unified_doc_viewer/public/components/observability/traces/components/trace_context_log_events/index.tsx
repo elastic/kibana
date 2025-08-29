@@ -52,7 +52,7 @@ export function TraceContextLogEvents({
 
   const LogEvents = discoverShared.features.registry.getById('observability-log-events');
 
-  if (!LogEvents) {
+  if (!LogEvents || !indexes.logs) {
     return null;
   }
 
