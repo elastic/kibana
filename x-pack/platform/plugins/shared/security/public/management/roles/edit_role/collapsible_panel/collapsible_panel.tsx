@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './collapsible_panel.scss';
-
 import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -17,6 +15,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React, { Component, Fragment } from 'react';
 
@@ -63,8 +62,11 @@ export class CollapsiblePanel extends Component<React.PropsWithChildren<Props>, 
                 <Fragment>
                   <EuiIcon
                     type={this.props.iconType}
-                    size={'xl'}
-                    className={'collapsiblePanel__logo'}
+                    size="xl"
+                    css={({ euiTheme }) => css`
+                      margin-right: ${euiTheme.size.s};
+                      vertical-align: text-bottom;
+                    `}
                   />{' '}
                 </Fragment>
               )}

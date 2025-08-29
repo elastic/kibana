@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import './authentication_state_page.scss';
-
-import { EuiIcon, EuiImage, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiIcon, EuiImage, EuiSpacer, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { css, type SerializedStyles } from '@emotion/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
@@ -17,14 +16,24 @@ interface Props {
   className?: string;
   title: React.ReactNode;
   logo?: string;
+  cssStyles?: SerializedStyles;
 }
 
 export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => {
   const kbnFullScreenBgCss = useKbnFullScreenBgCss();
+  const theme = useEuiTheme();
+  const { euiTheme } = theme;
+  const euiBottomShadowM = useEuiShadow('m');
 
   return (
-    <div className={`secAuthenticationStatePage ${props.className || ''}`} css={kbnFullScreenBgCss}>
-      <header className="secAuthenticationStatePage__header">
+    <div css={kbnFullScreenBgCss}>
+      <header
+        css={css`
+          position: relative;
+          padding: ${euiTheme.size.xl};
+          z-index: 10;
+        `}
+      >
         <div className="secAuthenticationStatePage__content eui-textCenter">
           <EuiSpacer size="xxl" />
           <span className="secAuthenticationStatePage__logo">
@@ -40,7 +49,59 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
           <EuiSpacer size="xl" />
         </div>
       </header>
-      <div className="secAuthenticationStatePage__content eui-textCenter">{props.children}</div>
+      <header
+        css={css`
+          position: relative;
+          padding: ${euiTheme.size.xl};
+          z-index: 10;
+        `}
+      >
+        <div
+          css={css`
+            position: relative;
+            margin: auto;
+            max-width: 460px;
+            padding-left: ${euiTheme.size.xl};
+            padding-right: ${euiTheme.size.xl};
+            z-index: 10;
+            text-align: center;
+            ${props.cssStyles || ''}
+          `}
+        >
+          <EuiSpacer size="xxl" />
+          <span
+            css={css`
+              margin-bottom: ${euiTheme.size.xl};
+              display: inline-block;
+              ${euiBottomShadowM};
+            `}
+          >
+            {props.logo ? (
+              <EuiImage src={props.logo} size={40} alt={'logo'} />
+            ) : (
+              <EuiIcon type="logoElastic" size="xxl" />
+            )}
+          </span>
+          <EuiTitle size="l">
+            <h1>{props.title}</h1>
+          </EuiTitle>
+          <EuiSpacer size="xl" />
+        </div>
+      </header>
+      <div
+        css={css`
+          position: relative;
+          margin: auto;
+          max-width: 460px;
+          padding-left: ${euiTheme.size.xl};
+          padding-right: ${euiTheme.size.xl};
+          z-index: 10;
+          text-align: center;
+          ${props.cssStyles || ''}
+        `}
+      >
+        {props.children}
+      </div>
     </div>
   );
 };

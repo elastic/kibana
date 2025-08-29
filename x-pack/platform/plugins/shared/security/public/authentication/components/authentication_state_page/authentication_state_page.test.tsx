@@ -43,15 +43,4 @@ describe('AuthenticationStatePage', () => {
     const icon = logoWrapper?.querySelector('[data-euiicon-type="logoElastic"]');
     expect(icon).toBeInTheDocument();
   });
-
-  it('renders with custom CSS class', () => {
-    const { container } = renderWithI18n(
-      <AuthenticationStatePage className="customClassName" title={'foo'}>
-        <span>hello world</span>
-      </AuthenticationStatePage>
-    );
-    expect(
-      container.querySelector('.secAuthenticationStatePage.customClassName')
-    ).toBeInTheDocument();
-  });
 });
