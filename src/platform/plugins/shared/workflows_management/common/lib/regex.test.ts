@@ -55,6 +55,15 @@ describe('Mustache regex patterns', () => {
       });
     });
 
+    it('should match incomplete expressions ending with a dot', () => {
+      const incompleteExpressions = ['{{ steps.', '{{consts.templates[0].'];
+      incompleteExpressions.forEach((expr) => {
+        VARIABLE_REGEX_GLOBAL.lastIndex = 0;
+        const matches = [...expr.matchAll(VARIABLE_REGEX_GLOBAL)];
+        expect(matches).toHaveLength(0);
+      });
+    });
+
     it('should match variables with nunjucks filters with different spacing', () => {
       const text =
         '{{ steps.getUser.output.id|toLowerCase }}, {{ steps.getUser.output.id | title }}, {{steps.getUser.output.id | capitalize}}, {{steps.getUser.output.id|replace("foo", "bar")}}';
@@ -87,6 +96,22 @@ describe('Mustache regex patterns', () => {
 
       expect(matches).toHaveLength(1);
       expect(matches[0].groups?.key).toBe('steps.');
+    });
+
+    it('should match unfinished expressions with trailing dot in array', () => {
+      const text = '{{ consts.templates[0].';
+      const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
+
+      expect(matches).toHaveLength(1);
+      expect(matches[0].groups?.key).toBe('consts.templates[0].');
+    });
+
+    it('should match unfinished expressions with brackets access in object', () => {
+      const text = "{{ steps.fetchUser['profile";
+      const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
+
+      expect(matches).toHaveLength(1);
+      expect(matches[0].groups?.key).toBe("steps.fetchUser['profile");
     });
   });
 
