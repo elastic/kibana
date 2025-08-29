@@ -31,7 +31,7 @@ export const fromUniqueCountAPItoLensState = (
     ...getLensStateMetricSharedProps(options, ofName(field)),
     params: {
       format: fromFormatAPIToLensState(format),
-      emptyAsNull: empty_as_null || LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+      emptyAsNull: empty_as_null,
     },
   };
 };
@@ -44,10 +44,8 @@ export const fromUniqueCountLensStateToAPI = (
   return {
     operation: 'unique_count',
     field: sourceField,
+    empty_as_null: Boolean(emptyAsNull),
     ...getLensAPIMetricSharedProps(options, ofName(options.sourceField)),
     ...(format ? { format: fromFormatLensStateToAPI(format) } : {}),
-    ...(emptyAsNull != null && emptyAsNull !== LENS_EMPTY_AS_NULL_DEFAULT_VALUE
-      ? { empty_as_null: emptyAsNull }
-      : {}),
   };
 };
