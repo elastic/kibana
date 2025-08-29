@@ -30,6 +30,14 @@ export const EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER = 'EXPLORER_ENTITY_FIELD_SE
 export const SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER =
   'SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER';
 
+async function createEntityFieldFilterAction(
+  getStartServices: CoreSetup<MlStartDependencies, MlPluginStart>['getStartServices'],
+  controllerFilter?: string
+) {
+  const { createApplyEntityFieldFiltersAction } = await import('./apply_entity_filters_action');
+  return createApplyEntityFieldFiltersAction(getStartServices, controllerFilter);
+}
+
 /**
  * Register ML UI actions
  */
@@ -49,17 +57,13 @@ export function registerMlUiActions(
     return visToAdJobAction;
   });
   uiActions.registerActionAsync('APPLY_ENTITY_FIELD_FILTER_ACTION', async () => {
-    const { createApplyEntityFieldFiltersAction } = await import('./apply_entity_filters_action');
-    const applyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(core.getStartServices);
-    return applyEntityFieldFilterAction;
+    return createEntityFieldFilterAction(core.getStartServices);
   });
   uiActions.registerActionAsync('SMV_APPLY_ENTITY_FIELD_FILTER_ACTION', async () => {
-    const { createApplyEntityFieldFiltersAction } = await import('./apply_entity_filters_action');
-    const smvApplyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(
+    return createEntityFieldFilterAction(
       core.getStartServices,
       CONTROLLED_BY_SINGLE_METRIC_VIEWER_FILTER
     );
-    return smvApplyEntityFieldFilterAction;
   });
   uiActions.registerActionAsync('APPLY_TIME_RANGE_SELECTION_ACTION', async () => {
     const { createApplyTimeRangeSelectionAction } = await import('./apply_time_range_action');
@@ -205,23 +209,17 @@ export function registerMlUiActions(
     EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
     'ACTION_EXPLORER_ENTITY_FIELD_SELECTION',
     async () => {
-      const { createApplyEntityFieldFiltersAction } = await import('./apply_entity_filters_action');
-      const applyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(
-        core.getStartServices
-      );
-      return applyEntityFieldFilterAction;
+      return createEntityFieldFilterAction(core.getStartServices);
     }
   );
   uiActions.addTriggerActionAsync(
     SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
     'ACTION_SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION',
     async () => {
-      const { createApplyEntityFieldFiltersAction } = await import('./apply_entity_filters_action');
-      const smvApplyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(
+      return createEntityFieldFilterAction(
         core.getStartServices,
         CONTROLLED_BY_SINGLE_METRIC_VIEWER_FILTER
       );
-      return smvApplyEntityFieldFilterAction;
     }
   );
   uiActions.addTriggerActionAsync(
