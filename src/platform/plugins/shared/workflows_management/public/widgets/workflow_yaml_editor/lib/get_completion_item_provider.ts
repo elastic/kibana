@@ -15,9 +15,9 @@ import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_g
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import {
-  MUSTACHE_REGEX_GLOBAL,
+  VARIABLE_REGEX_GLOBAL,
   PROPERTY_PATH_REGEX,
-  UNFINISHED_MUSTACHE_REGEX_GLOBAL,
+  UNFINISHED_VARIABLE_REGEX_GLOBAL,
 } from '../../../../common/lib/regex';
 import { getSchemaAtPath, getZodTypeName, parsePath } from '../../../../common/lib/zod_utils';
 
@@ -51,7 +51,7 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   }
 
   // Try unfinished mustache (e.g., "{{ consts.api" at end of line)
-  const unfinishedMatch = [...lineUpToCursor.matchAll(UNFINISHED_MUSTACHE_REGEX_GLOBAL)].pop();
+  const unfinishedMatch = [...lineUpToCursor.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)].pop();
   if (unfinishedMatch) {
     const fullKey = cleanKey(unfinishedMatch.groups?.key ?? '');
     return {
@@ -63,7 +63,7 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   }
 
   // Try complete mustache (e.g., "{{ consts.apiUrl }}")
-  const completeMatch = [...lineUpToCursor.matchAll(MUSTACHE_REGEX_GLOBAL)].pop();
+  const completeMatch = [...lineUpToCursor.matchAll(VARIABLE_REGEX_GLOBAL)].pop();
   if (completeMatch) {
     const fullKey = cleanKey(completeMatch.groups?.key ?? '');
     return {
