@@ -12,7 +12,7 @@ import type {
 } from '@kbn/core/server';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { tap, map, lastValueFrom } from 'rxjs';
-import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ESQL_SEARCH_STRATEGY, isRunningResponse } from '@kbn/data-plugin/common';
 import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -59,8 +59,6 @@ export interface AsyncSearchClient<T extends AsyncSearchParams> {
     request: IKibanaSearchRequest<T>;
     options?: ISearchOptions;
   }) => Promise<IKibanaSearchResponse>;
-  cancel: (options?: ISearchOptions) => Promise<void>;
-  extend: (keepAlive: string, options?: ISearchOptions) => Promise<void>;
 }
 
 export type PublicAsyncSearchClient<T extends AsyncSearchParams> = Omit<
@@ -136,8 +134,6 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
       let totalSearchDurationMs = 0;
 
       const client = context.data.search.asScoped(fakeRequest);
-      let id: string | undefined;
-
       return {
         getMetrics: () => {
           return {
@@ -152,29 +148,22 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
               .search(request, {
                 ...options,
                 strategy,
-                retrieveResults: true,
+                abortSignal: abortController.signal,
               })
               .pipe(
                 map((response) => {
-                  id = response.id;
                   return response;
                 }),
-                tap((result) => {
-                  const durationMs = Date.now() - start;
-                  numSearches++;
-                  esSearchDurationMs += result.rawResponse.took ?? 0;
-                  totalSearchDurationMs += durationMs;
+                tap((response) => {
+                  if (!isRunningResponse(response)) {
+                    const durationMs = Date.now() - start;
+                    numSearches++;
+                    esSearchDurationMs += response.rawResponse.took ?? 0;
+                    totalSearchDurationMs += durationMs;
+                  }
                 })
               )
           );
-        },
-        async cancel(options) {
-          if (!id) return;
-          await client.cancel(id, options);
-        },
-        async extend(keepAlive, options) {
-          if (!id) return;
-          await client.extend(id, keepAlive, options);
         },
       };
     },
