@@ -6,7 +6,10 @@
  */
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
-import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
+import {
+  API_VERSIONS,
+  PRIVMON_PRIVILEGE_CHECK_API,
+} from '@kbn/security-solution-plugin/common/constants';
 
 export const privilegeMonitoringRouteHelpersFactoryNoAuth = (
   supertestWithoutAuth: SupertestWithoutAuthProviderType

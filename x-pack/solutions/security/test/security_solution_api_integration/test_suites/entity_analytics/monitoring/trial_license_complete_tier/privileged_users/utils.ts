@@ -9,8 +9,13 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common/src/constants';
-import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
-import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/list.gen';
+import {
+  API_VERSIONS,
+  MONITORING_ENGINE_INIT_URL,
+  MONITORING_ENGINE_SCHEDULE_NOW_URL,
+  MONITORING_USERS_CSV_UPLOAD_URL,
+} from '@kbn/security-solution-plugin/common/constants';
+import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
