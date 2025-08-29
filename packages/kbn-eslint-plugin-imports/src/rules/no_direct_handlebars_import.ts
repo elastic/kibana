@@ -31,6 +31,12 @@ export const NoDirectHandlebarsImportRule: Rule.RuleModule = {
         return;
       }
 
+      // Skip the rule for files within the kbn-handlebars package itself
+      const filename = context.getFilename();
+      if (filename.includes('/kbn-handlebars/') || filename.includes('\\kbn-handlebars\\')) {
+        return;
+      }
+
       // Check for direct imports from 'handlebars' package
       if (req === 'handlebars' || req.startsWith('handlebars/')) {
         // Replace 'handlebars' with '@kbn/handlebars' in the import request

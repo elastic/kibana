@@ -3,18 +3,18 @@
  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.
  */
 
+import Handlebars from 'handlebars';
 import {
   createProtoAccessControl,
   resultIsAllowed,
   // @ts-expect-error: Could not find a declaration file for module
-} from '@kbn/handlebars/dist/cjs/handlebars/internal/proto-access';
+} from 'handlebars/dist/cjs/handlebars/internal/proto-access';
 // @ts-expect-error: Could not find a declaration file for module
-import AST from '@kbn/handlebars/dist/cjs/handlebars/compiler/ast';
+import AST from 'handlebars/dist/cjs/handlebars/compiler/ast';
 // @ts-expect-error: Could not find a declaration file for module
-import { indexOf, createFrame } from '@kbn/handlebars/dist/cjs/handlebars/utils';
+import { indexOf, createFrame } from 'handlebars/dist/cjs/handlebars/utils';
 // @ts-expect-error: Could not find a declaration file for module
-import { moveHelperToHooks } from '@kbn/handlebars/dist/cjs/handlebars/helpers';
-import Handlebars from '..';
+import { moveHelperToHooks } from 'handlebars/dist/cjs/handlebars/helpers';
 
 import type {
   AmbiguousHelperOptions,
