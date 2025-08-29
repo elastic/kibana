@@ -28,15 +28,20 @@ export function getSignaturesWithMatchingArity(
   fnDef: FunctionDefinition,
   astFunction: ESQLFunction
 ) {
-  return fnDef.signatures.filter((def) => {
-    if (def.minParams) {
-      return astFunction.args.length >= def.minParams;
-    }
-    return (
-      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
-      astFunction.args.length <= def.params.length
-    );
-  });
+  return fnDef.signatures.filter((sig) => matchesArity(sig, astFunction.args.length));
+}
+
+export function matchesArity(
+  signature: FunctionDefinition['signatures'][number],
+  arity: number
+): boolean {
+  if (signature.minParams) {
+    return arity >= signature.minParams;
+  }
+  return (
+    arity >= signature.params.filter(({ optional }) => !optional).length &&
+    arity <= signature.params.length
+  );
 }
 
 /**
@@ -167,6 +172,9 @@ export function getExpressionType(
       return lastArg.literalType;
     }
     if (!column) {
+      return 'unknown';
+    }
+    if ('hasConflict' in column && column.hasConflict) {
       return 'unknown';
     }
     return column.type;
