@@ -46,26 +46,16 @@ describe('initializeESQLControlSelections', () => {
         controlType: EsqlControlType.VALUES_FROM_QUERY,
       } as ESQLControlState;
 
-      let dataHasLoaded = 'not started';
-      const setDataLoading = (loading: boolean) => {
-        if (loading) dataHasLoaded = 'loading';
-        if (!loading) dataHasLoaded = 'loaded';
-      };
-
-      const selections = initializeESQLControlSelections(
-        initialState,
-        controlFetch$,
-        setDataLoading
-      );
+      let dataHasLoaded = false;
+      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
       controlFetch$.next({});
 
-      await waitFor(() => {
-        expect(dataHasLoaded).toBe('loaded');
+      selections.internalApi.availableOptions$.subscribe((result) => {
+        if (result?.length === 5) dataHasLoaded = true;
       });
 
       await waitFor(() => {
-        const availableOptions = selections.internalApi.availableOptions$.getValue();
-        expect(availableOptions?.length).toBe(5);
+        expect(dataHasLoaded).toBe(true);
       });
 
       const latestState = selections.getLatestState();
