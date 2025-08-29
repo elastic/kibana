@@ -99,6 +99,7 @@ import { bulkMigrateAgentsHandler, migrateSingleAgentHandler } from './migrate_h
 import { changeAgentPrivilegeLevelHandler } from './change_privilege_level_handlers';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
   // Get one
   router.versioned
     .get({
@@ -133,7 +134,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     );
 
   // Migrate
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
   if (experimentalFeatures.enableAgentMigrations) {
     // Single agent migration
     router.versioned
@@ -963,36 +963,38 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     );
 
   // Change agent privilege level
-  router.versioned
-    .post({
-      path: AGENT_API_ROUTES.PRIVILEGE_LEVEL_CHANGE_PATTERN,
-      security: {
-        authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+  if (experimentalFeatures.enableAgentMigrations) {
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.PRIVILEGE_LEVEL_CHANGE_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
         },
-      },
-      summary: `Change agent privilege level`,
-      description: `Change the privilege level of a single agent.`,
-      options: {
-        tags: ['oas-tag:Elastic Agents'],
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: {
-          request: ChangeAgentPrivilegeLevelRequestSchema,
-          response: {
-            200: {
-              body: () => ChangeAgentPrivilegeLevelResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
+        summary: `Change agent privilege level`,
+        description: `Change the privilege level of a single agent.`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: ChangeAgentPrivilegeLevelRequestSchema,
+            response: {
+              200: {
+                body: () => ChangeAgentPrivilegeLevelResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
             },
           },
         },
-      },
 
-      changeAgentPrivilegeLevelHandler
-    );
+        changeAgentPrivilegeLevelHandler
+      );
+    }
 };
