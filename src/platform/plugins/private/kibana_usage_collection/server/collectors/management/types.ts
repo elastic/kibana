@@ -180,4 +180,5 @@ export interface UsageStats {
   'observability:streamsEnableSignificantEvents': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
+  'observability:streamsEnableGroupStreams': boolean;
 }
