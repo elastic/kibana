@@ -6,7 +6,13 @@
  */
 
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
+import type {
+  SavedObjectsClientContract,
+  KibanaRequest,
+  SavedObject,
+  RequestHandlerContext,
+} from '@kbn/core/server';
+import { CONTENT_ID, LATEST_VERSION } from '@kbn/dashboard-plugin/common/content_management';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
@@ -45,6 +51,8 @@ interface InstallTranslatedProps {
    * The request object for content management client
    */
   request: KibanaRequest;
+
+  context: RequestHandlerContext;
 }
 
 export const installTranslated = async ({
@@ -54,6 +62,7 @@ export const installTranslated = async ({
   contentManagement,
   savedObjectsClient,
   request,
+  context,
 }: InstallTranslatedProps): Promise<number> => {
   const dashboardMigrationsClient = securitySolutionContext.siemMigrations.getDashboardsClient();
 
@@ -61,9 +70,10 @@ export const installTranslated = async ({
   const installationErrors: Error[] = [];
 
   // Get installable dashboard migrations
-  const dashboardBatches = dashboardMigrationsClient.data.dashboards.searchBatches(migrationId, {
-    filters: { ids, installable: true },
-  });
+  const dashboardBatches = await dashboardMigrationsClient.data.dashboards.searchBatches(
+    migrationId,
+    { ids, installable: true }
+  );
 
   let dashboardsToInstall = await dashboardBatches.next();
   while (dashboardsToInstall.length) {
@@ -72,7 +82,8 @@ export const installTranslated = async ({
       securitySolutionContext,
       contentManagement,
       savedObjectsClient,
-      request
+      request,
+      context
     );
     installedCount += dashboardsToUpdate.length;
     installationErrors.push(...errors);
@@ -93,7 +104,8 @@ const installDashboards = async (
   securitySolutionContext: SecuritySolutionApiRequestHandlerContext,
   contentManagement: ContentManagementServerSetup,
   savedObjectsClient: SavedObjectsClientContract,
-  request: KibanaRequest
+  request: KibanaRequest,
+  context: RequestHandlerContext
 ): Promise<{
   dashboardsToUpdate: Array<{ id: string; elastic_dashboard: { id: string } }>;
   errors: Error[];
@@ -113,9 +125,9 @@ const installDashboards = async (
         const client = contentManagement.contentClient
           .getForRequest({
             request,
-            requestHandlerContext: securitySolutionContext,
+            requestHandlerContext: context,
           })
-          .for('dashboard', '1');
+          .for<SavedObject>(CONTENT_ID, LATEST_VERSION);
 
         const { result } = await client.create(
           {
@@ -134,7 +146,7 @@ const installDashboards = async (
         dashboardsToUpdate.push({
           id: dashboard.id,
           elastic_dashboard: {
-            id: result.id,
+            id: result.item?.id ?? '',
           },
         });
       } catch (error) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger, RequestHandlerContext } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import { SIEM_DASHBOARD_MIGRATION_INSTALL_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
@@ -85,6 +85,7 @@ export const registerSiemDashboardMigrationsInstallRoute = (
                 contentManagement,
                 savedObjectsClient,
                 request: req,
+                context: ctx as unknown as RequestHandlerContext,
               });
 
               return res.ok({ body: { installed } });
