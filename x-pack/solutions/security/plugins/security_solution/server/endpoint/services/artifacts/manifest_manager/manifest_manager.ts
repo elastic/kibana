@@ -156,16 +156,22 @@ export class ManifestManager {
    * @private
    */
   private shouldRetrieveExceptions(listId: ArtifactListId): boolean {
+    // endpointHostIsolationExceptions includes full CRUD support for Host Isolation Exceptions
+    // Host Isolation Exceptions require feature enablement (serverless).
     const isHostIsolationWithFeatureEnabled =
       listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
       this.productFeaturesService.isEnabled(ProductFeatureKey.endpointHostIsolationExceptions);
 
+    // Trusted Devices requires enterprise license (ess) or feature enablement (serverless).
+    // In serverless .isEnterprise() will always yield true, in ESS feature check .isEnabled() will also always yield true.
+    // Therefore both conditions must be met in both environments.
     const isTrustedDevicesWithFeatureAndEnterpriseLicense =
       listId === ENDPOINT_ARTIFACT_LISTS.trustedDevices.id &&
       this.experimentalFeatures.trustedDevices &&
       this.productFeaturesService.isEnabled(ProductFeatureKey.endpointTrustedDevices) &&
       this.licenseService.isEnterprise();
 
+    // endpointArtifactManagement includes full CRUD support for all other exception lists + RD support for Host Isolation Exceptions
     const isOtherArtifactWithFeatureEnabled =
       listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
       listId !== ENDPOINT_ARTIFACT_LISTS.trustedDevices.id &&
@@ -198,11 +204,8 @@ export class ManifestManager {
   }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       let itemsByListId: ExceptionListItemSchema[] = [];
-      // endpointHostIsolationExceptions includes full CRUD support for Host Isolation Exceptions
-      // endpointArtifactManagement includes full CRUD support for all other exception lists + RD support for Host Isolation Exceptions
-      // endpointTrustedDevices requires enterprise license and feature enablement
-      // If there are host isolation exceptions in place but there is a downgrade scenario, those shouldn't be taken into account when generating artifacts.
-      // If there are trusted devices in place but there is a license downgrade scenario (not enterprise), those shouldn't be taken into account when generating artifacts.
+      // If there are host isolation exceptions in place but there is a downgrade scenario (serverless), those shouldn't be taken into account when generating artifacts.
+      // If there are trusted devices in place but there is a downgrade scenario (ess/serverless), those shouldn't be taken into account when generating artifacts.
       if (this.shouldRetrieveExceptions(listId)) {
         itemsByListId = await getAllItemsFromEndpointExceptionList({
           elClient,
