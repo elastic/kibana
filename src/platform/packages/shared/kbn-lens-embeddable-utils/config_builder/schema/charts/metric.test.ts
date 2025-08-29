@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import { metricStateSchema } from './metric';
 
 describe('Metric Schema', () => {
@@ -32,6 +33,7 @@ describe('Metric Schema', () => {
           field: 'test_field',
           fit: false,
           sub_label: 'Count of records',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           alignments: {
             labels: 'left' as const,
             value: 'right' as const,
@@ -50,6 +52,7 @@ describe('Metric Schema', () => {
           operation: 'sum' as const,
           field: 'price',
           fit: false,
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           icon: {
             name: 'visMetric',
             align: 'left' as const,
@@ -123,12 +126,14 @@ describe('Metric Schema', () => {
           field: 'revenue',
           fit: false,
           alignments: { labels: 'left', value: 'left' },
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         secondary_metric: {
           operation: 'sum' as const,
           field: 'cost',
           prefix: '$',
           compare_to: 'previous_period',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
       };
 
@@ -143,12 +148,14 @@ describe('Metric Schema', () => {
           operation: 'sum' as const,
           field: 'revenue',
           fit: false,
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           alignments: { labels: 'left', value: 'left' },
         },
         secondary_metric: {
           operation: 'sum' as const,
           field: 'profit',
           prefix: '',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           color: {
             type: 'static' as const,
             color: '#green',
@@ -169,6 +176,7 @@ describe('Metric Schema', () => {
           operation: 'sum' as const,
           field: 'sales',
           fit: false,
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           alignments: { labels: 'left', value: 'left' },
         },
         breakdown_by: {
@@ -194,6 +202,7 @@ describe('Metric Schema', () => {
           operation: 'sum' as const,
           field: 'sales',
           fit: false,
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           alignments: { labels: 'left', value: 'left' },
         },
         breakdown_by: {
@@ -265,6 +274,7 @@ describe('Metric Schema', () => {
           field: 'sales',
           sub_label: 'Total Sales',
           fit: false,
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           alignments: {
             labels: 'left' as const,
             value: 'right' as const,
@@ -292,6 +302,7 @@ describe('Metric Schema', () => {
           field: 'profit',
           prefix: '$',
           compare_to: 'previous_year',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         breakdown_by: {
           operation: 'terms' as const,

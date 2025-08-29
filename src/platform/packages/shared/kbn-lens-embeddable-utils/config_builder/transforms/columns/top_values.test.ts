@@ -10,10 +10,16 @@
 import { fromTermsLensApiToLensState, fromTermsLensStateToAPI } from './top_values';
 import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiTermsOperation } from '../../schema/bucket_ops';
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 
 describe('Top Values Transforms', () => {
   const columns = [
-    { id: 'metricCol1', operation: 'sum' as const, field: 'value' },
+    {
+      id: 'metricCol1',
+      operation: 'sum' as const,
+      field: 'value',
+      empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+    },
     { id: 'metricCol2', operation: 'average' as const, field: 'score' },
   ];
   const getMetricColumnIdByIndex = (index: number) => columns[index]?.id;

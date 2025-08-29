@@ -14,6 +14,7 @@ import type {
   LensApiFieldMetricOperations,
 } from '../../schema/metric_ops';
 import { LENS_MOVING_AVERAGE_DEFAULT_WINDOW } from '../../schema/constants';
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 
 describe('Moving Average Transforms', () => {
   const testRef = {
@@ -26,6 +27,7 @@ describe('Moving Average Transforms', () => {
     operation: 'sum',
     field: 'sales',
     label: 'Sum of Total Sales',
+    empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
   };
 
   describe('fromMovingAverageAPItoLensState', () => {
@@ -105,6 +107,7 @@ describe('Moving Average Transforms', () => {
     const referenceOp: LensApiFieldMetricOperations = {
       operation: 'sum',
       field: 'sales',
+      empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
     };
 
     it('should transform basic moving average configuration', () => {

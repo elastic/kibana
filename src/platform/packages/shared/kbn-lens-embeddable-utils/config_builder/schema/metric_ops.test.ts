@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../transforms/columns/utils';
 import {
   LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
   LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
@@ -179,6 +180,7 @@ describe('Metric Operations Schemas', () => {
         of: {
           operation: 'sum' as const,
           field: 'value',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
       };
 
@@ -192,6 +194,7 @@ describe('Metric Operations Schemas', () => {
         of: {
           operation: 'sum' as const,
           field: 'value',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         window: 7,
       };
@@ -206,6 +209,7 @@ describe('Metric Operations Schemas', () => {
         of: {
           operation: 'sum' as const,
           field: 'value',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
       };
 
@@ -219,6 +223,7 @@ describe('Metric Operations Schemas', () => {
         of: {
           operation: 'sum' as const,
           field: 'value',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         window: undefined,
       };
@@ -293,10 +298,12 @@ describe('Metric Operations Schemas', () => {
         {
           operation: 'count' as const,
           field: 'my_field',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         {
           operation: 'sum' as const,
           field: 'value',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         {
           operation: 'percentile' as const,

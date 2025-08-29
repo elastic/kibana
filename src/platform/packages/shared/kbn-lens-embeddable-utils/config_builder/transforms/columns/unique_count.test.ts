@@ -18,6 +18,7 @@ describe('Unique Count Transforms', () => {
       const input: LensApiUniqueCountMetricOperation = {
         operation: 'unique_count',
         field: 'user_id',
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       const expected: CardinalityIndexPatternColumn = {
@@ -49,6 +50,7 @@ describe('Unique Count Transforms', () => {
           decimals: 2,
           compact: false,
         },
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       const result = fromUniqueCountAPItoLensState(input);
@@ -78,6 +80,7 @@ describe('Unique Count Transforms', () => {
         operation: 'unique_count',
         field: 'user_id',
         label: 'Active Users',
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       const result = fromUniqueCountAPItoLensState(input);
@@ -102,6 +105,7 @@ describe('Unique Count Transforms', () => {
       const expected: LensApiUniqueCountMetricOperation = {
         operation: 'unique_count',
         field: 'user_id',
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       expect(fromUniqueCountLensStateToAPI(input)).toEqual(expected);
