@@ -17,12 +17,12 @@ import {
   Streams,
   getIndexPatternsForStream,
 } from '@kbn/streams-schema';
+import type { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import React from 'react';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
-import { useDatasetQualityController } from '../../hooks/use_dataset_quality_controller';
 
 const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ children }) => (
   <EuiToolTip
@@ -174,12 +174,11 @@ export function DiscoverBadgeButton({
 }
 
 export function StreamDetailDataQualityIndicator({
-  definition,
+  controller,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  controller: DatasetQualityDetailsController | undefined;
 }) {
   const { datasetQuality } = useKibana().dependencies.start;
-  const controller = useDatasetQualityController(definition, false);
 
   return controller ? (
     <datasetQuality.DatasetQualityIndicator controller={controller} />

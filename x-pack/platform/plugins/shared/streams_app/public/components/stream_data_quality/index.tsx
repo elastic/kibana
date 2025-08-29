@@ -8,16 +8,17 @@
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import type { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { useKibana } from '../../hooks/use_kibana';
-import { useDatasetQualityController } from '../../hooks/use_dataset_quality_controller';
 
 export function StreamDetailDataQuality({
+  controller,
   definition,
 }: {
+  controller: DatasetQualityDetailsController | undefined;
   definition: Streams.ingest.all.GetResponse;
 }) {
   const { datasetQuality } = useKibana().dependencies.start;
-  const controller = useDatasetQualityController(definition);
 
   return controller ? (
     <datasetQuality.DatasetQualityDetails controller={controller} />

@@ -19,6 +19,7 @@ import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailDataQualityIndicator } from '../../stream_badges';
+import { useDatasetQualityController } from '../../../hooks/use_dataset_quality_controller';
 
 const classicStreamManagementSubTabs = [
   'enrich',
@@ -49,6 +50,8 @@ export function ClassicStreamDetailManagement({
     definition,
     refreshDefinition,
   });
+
+  const dataQualityController = useDatasetQualityController(definition);
 
   if (!definition.data_stream_exists) {
     return (
@@ -117,7 +120,7 @@ export function ClassicStreamDetailManagement({
   }
 
   tabs.dataQuality = {
-    content: <StreamDetailDataQuality definition={definition} />,
+    content: <StreamDetailDataQuality controller={dataQualityController} definition={definition} />,
     label: (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
@@ -133,7 +136,7 @@ export function ClassicStreamDetailManagement({
             </span>
           </EuiToolTip>
         </EuiFlexItem>
-        <StreamDetailDataQualityIndicator definition={definition} />
+        <StreamDetailDataQualityIndicator controller={dataQualityController} />
         <EuiFlexItem />
       </EuiFlexGroup>
     ),

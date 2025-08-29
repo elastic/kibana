@@ -8,40 +8,43 @@
 import type { DatasetQualityDetailsPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import * as rt from 'io-ts';
 import { deepCompactObject } from '../../../common/utils/deep_compact_object';
-import { datasetQualityDetailsUrlSchemaV2 } from '../../../common/url_schema';
+import { datasetQualityDetailsUrlSchemaV1 } from '../../../common/url_schema';
 
 export const getStateFromUrlValue = (
-  urlValue: datasetQualityDetailsUrlSchemaV2.UrlSchema
+  urlValue: datasetQualityDetailsUrlSchemaV1.UrlSchema
 ): DatasetQualityDetailsPublicStateUpdate =>
   deepCompactObject<DatasetQualityDetailsPublicStateUpdate>({
     dataStream: urlValue.dataStream,
     timeRange: urlValue.timeRange,
-    qualityIssues: urlValue.qualityIssues,
+    qualityIssues: urlValue.degradedFields,
     breakdownField: urlValue.breakdownField,
     showCurrentQualityIssues: urlValue.showCurrentQualityIssues,
-    qualityIssuesChart: urlValue.qualityIssuesChart,
-    expandedQualityIssue: urlValue.expandedQualityIssue,
-    view: 'classic',
+    qualityIssuesChart: 'degraded',
+    expandedQualityIssue: urlValue.expandedDegradedField
+      ? {
+          name: urlValue.expandedDegradedField,
+          type: 'degraded',
+        }
+      : undefined,
   });
 
 export const getUrlValueFromState = (
   state: DatasetQualityDetailsPublicStateUpdate
-): datasetQualityDetailsUrlSchemaV2.UrlSchema =>
-  deepCompactObject<datasetQualityDetailsUrlSchemaV2.UrlSchema>({
+): datasetQualityDetailsUrlSchemaV1.UrlSchema =>
+  deepCompactObject<datasetQualityDetailsUrlSchemaV1.UrlSchema>({
     dataStream: state.dataStream,
     timeRange: state.timeRange,
-    qualityIssues: state.qualityIssues,
+    degradedFields: state.qualityIssues,
     breakdownField: state.breakdownField,
+    expandedDegradedField: state.expandedQualityIssue?.name,
     showCurrentQualityIssues: state.showCurrentQualityIssues,
-    qualityIssuesChart: state.qualityIssuesChart,
-    expandedQualityIssue: state.expandedQualityIssue,
-    v: 2,
+    v: 1,
   });
 
 const stateFromUrlSchemaRT = new rt.Type<
   DatasetQualityDetailsPublicStateUpdate,
-  datasetQualityDetailsUrlSchemaV2.UrlSchema,
-  datasetQualityDetailsUrlSchemaV2.UrlSchema
+  datasetQualityDetailsUrlSchemaV1.UrlSchema,
+  datasetQualityDetailsUrlSchemaV1.UrlSchema
 >(
   'stateFromUrlSchemaRT',
   rt.never.is,
@@ -50,4 +53,4 @@ const stateFromUrlSchemaRT = new rt.Type<
 );
 
 export const stateFromUntrustedUrlRT =
-  datasetQualityDetailsUrlSchemaV2.urlSchemaRT.pipe(stateFromUrlSchemaRT);
+  datasetQualityDetailsUrlSchemaV1.urlSchemaRT.pipe(stateFromUrlSchemaRT);

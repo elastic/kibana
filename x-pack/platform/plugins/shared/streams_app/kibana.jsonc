@@ -29,7 +29,7 @@
       "unifiedDocViewer"
     ],
     "optionalPlugins": ["observabilityAIAssistant"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant", "dataQuality"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"],
     "extraPublicDirs": ["common"]
   }
 }

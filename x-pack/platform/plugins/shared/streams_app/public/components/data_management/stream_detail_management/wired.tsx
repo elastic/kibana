@@ -17,6 +17,7 @@ import { Wrapper } from './wrapper';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailDataQualityIndicator } from '../../stream_badges';
+import { useDatasetQualityController } from '../../../hooks/use_dataset_quality_controller';
 
 const wiredStreamManagementSubTabs = [
   'route',
@@ -48,6 +49,8 @@ export function WiredStreamDetailManagement({
     definition,
     refreshDefinition,
   });
+
+  const dataQualityController = useDatasetQualityController(definition);
 
   const tabs = {
     lifecycle: {
@@ -88,7 +91,9 @@ export function WiredStreamDetailManagement({
       }),
     },
     dataQuality: {
-      content: <StreamDetailDataQuality definition={definition} />,
+      content: (
+        <StreamDetailDataQuality controller={dataQualityController} definition={definition} />
+      ),
       label: (
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
@@ -104,7 +109,7 @@ export function WiredStreamDetailManagement({
               </span>
             </EuiToolTip>
           </EuiFlexItem>
-          <StreamDetailDataQualityIndicator definition={definition} />
+          <StreamDetailDataQualityIndicator controller={dataQualityController} />
           <EuiFlexItem />
         </EuiFlexGroup>
       ),

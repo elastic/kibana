@@ -45,7 +45,7 @@ export type DatasetQualityDetailsPublicStateUpdate = Partial<
     table?: DatasetQualityIssuesTableOptions;
   };
 } & {
-  view: DatasetQualityView;
+  view?: DatasetQualityView;
 };
 
 export interface DatasetQualityDetailsController {

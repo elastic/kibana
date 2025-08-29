@@ -15,7 +15,7 @@ import type {
 import {
   getDatasetQualityDetailsStateFromUrl,
   updateUrlFromDatasetQualityDetailsState,
-} from '@kbn/data-quality-plugin/public';
+} from '../util/url_state_storage_service';
 import { useKibana } from './use_kibana';
 import { useKbnUrlStateStorageFromRouterContext } from '../util/kbn_url_state_context';
 

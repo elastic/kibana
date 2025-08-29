@@ -8,44 +8,39 @@
 import type { DatasetQualityDetailsPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import * as rt from 'io-ts';
 import { deepCompactObject } from '../../../common/utils/deep_compact_object';
-import { datasetQualityDetailsUrlSchemaV1 } from '../../../common/url_schema';
+import { datasetQualityDetailsUrlSchemaV2 } from '../../../common/url_schema';
 
 export const getStateFromUrlValue = (
-  urlValue: datasetQualityDetailsUrlSchemaV1.UrlSchema
+  urlValue: datasetQualityDetailsUrlSchemaV2.UrlSchema
 ): DatasetQualityDetailsPublicStateUpdate =>
   deepCompactObject<DatasetQualityDetailsPublicStateUpdate>({
     dataStream: urlValue.dataStream,
     timeRange: urlValue.timeRange,
-    qualityIssues: urlValue.degradedFields,
+    qualityIssues: urlValue.qualityIssues,
     breakdownField: urlValue.breakdownField,
     showCurrentQualityIssues: urlValue.showCurrentQualityIssues,
-    qualityIssuesChart: 'degraded',
-    expandedQualityIssue: urlValue.expandedDegradedField
-      ? {
-          name: urlValue.expandedDegradedField,
-          type: 'degraded',
-        }
-      : undefined,
-    view: 'classic',
+    qualityIssuesChart: urlValue.qualityIssuesChart,
+    expandedQualityIssue: urlValue.expandedQualityIssue,
   });
 
 export const getUrlValueFromState = (
   state: DatasetQualityDetailsPublicStateUpdate
-): datasetQualityDetailsUrlSchemaV1.UrlSchema =>
-  deepCompactObject<datasetQualityDetailsUrlSchemaV1.UrlSchema>({
+): datasetQualityDetailsUrlSchemaV2.UrlSchema =>
+  deepCompactObject<datasetQualityDetailsUrlSchemaV2.UrlSchema>({
     dataStream: state.dataStream,
     timeRange: state.timeRange,
-    degradedFields: state.qualityIssues,
+    qualityIssues: state.qualityIssues,
     breakdownField: state.breakdownField,
-    expandedDegradedField: state.expandedQualityIssue?.name,
     showCurrentQualityIssues: state.showCurrentQualityIssues,
-    v: 1,
+    qualityIssuesChart: state.qualityIssuesChart,
+    expandedQualityIssue: state.expandedQualityIssue,
+    v: 2,
   });
 
 const stateFromUrlSchemaRT = new rt.Type<
   DatasetQualityDetailsPublicStateUpdate,
-  datasetQualityDetailsUrlSchemaV1.UrlSchema,
-  datasetQualityDetailsUrlSchemaV1.UrlSchema
+  datasetQualityDetailsUrlSchemaV2.UrlSchema,
+  datasetQualityDetailsUrlSchemaV2.UrlSchema
 >(
   'stateFromUrlSchemaRT',
   rt.never.is,
@@ -54,4 +49,4 @@ const stateFromUrlSchemaRT = new rt.Type<
 );
 
 export const stateFromUntrustedUrlRT =
-  datasetQualityDetailsUrlSchemaV1.urlSchemaRT.pipe(stateFromUrlSchemaRT);
+  datasetQualityDetailsUrlSchemaV2.urlSchemaRT.pipe(stateFromUrlSchemaRT);
