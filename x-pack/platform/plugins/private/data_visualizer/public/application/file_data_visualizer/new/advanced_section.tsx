@@ -7,12 +7,13 @@
 
 import {
   EuiAccordion,
-  EuiCheckbox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  EuiSwitch,
+  EuiTitle,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
@@ -46,7 +47,27 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
   } = useFileUploadContext();
   const [combinedFields, setCombinedFields] = useState<CombinedField[]>([]);
   return (
-    <EuiAccordion id={'advancedSection'} buttonContent="Advanced" paddingSize="m">
+    <EuiAccordion
+      id={'advancedSection'}
+      buttonContent={
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.advancedOptionsTitle"
+          defaultMessage="Advanced options"
+        />
+      }
+      paddingSize="m"
+    >
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.mappingsTitle"
+            defaultMessage="Mappings"
+          />
+        </h3>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
+
       <EuiFlexGroup>
         <EuiFlexItem>
           <Mappings
@@ -67,10 +88,35 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
 
       <EuiSpacer />
 
+      <CombinedFieldsForm
+        mappings={mappings!.json as MappingTypeMapping}
+        onMappingsChange={(m) => fileUploadManager.updateMappings(m)}
+        pipelines={pipelines as IngestPipeline[]}
+        onPipelinesChange={(p) => fileUploadManager.updatePipelines(p)}
+        combinedFields={combinedFields}
+        onCombinedFieldsChange={(f) => setCombinedFields(f)}
+        isDisabled={false}
+        filesStatus={filesStatus}
+        // isDisabled={initialized === true}
+      />
+
       {indexCreateMode === UPLOAD_TYPE.NEW ? (
         <>
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.dataViewTitle"
+                defaultMessage="Data view"
+              />
+            </h3>
+          </EuiTitle>
+
+          <EuiSpacer size="s" />
+
           <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
-            <EuiCheckbox
+            <EuiSwitch
               id="createDataView"
               label={
                 <FormattedMessage
@@ -93,6 +139,12 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
                 defaultMessage="Data view name"
               />
             }
+            helpText={
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.advancedImportSettings.dataViewNameHelpText"
+                defaultMessage="By default data view will have the same name as the new index."
+              />
+            }
             isInvalid={dataViewNameError !== ''}
             error={[dataViewNameError]}
           >
@@ -108,18 +160,6 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
           <EuiSpacer />
         </>
       ) : null}
-
-      <CombinedFieldsForm
-        mappings={mappings!.json as MappingTypeMapping}
-        onMappingsChange={(m) => fileUploadManager.updateMappings(m)}
-        pipelines={pipelines as IngestPipeline[]}
-        onPipelinesChange={(p) => fileUploadManager.updatePipelines(p)}
-        combinedFields={combinedFields}
-        onCombinedFieldsChange={(f) => setCombinedFields(f)}
-        isDisabled={false}
-        filesStatus={filesStatus}
-        // isDisabled={initialized === true}
-      />
     </EuiAccordion>
   );
 };

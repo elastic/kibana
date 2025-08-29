@@ -10,13 +10,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 
 import {
-  EuiFormRow,
   EuiPopover,
-  EuiContextMenu,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import type { IngestPipeline } from '@kbn/file-upload-plugin/common';
@@ -41,7 +42,8 @@ interface Props {
 }
 
 interface State {
-  isPopoverOpen: boolean;
+  isGeoPopoverOpen: boolean;
+  isSemanticPopoverOpen: boolean;
 }
 
 export type AddCombinedField = (
@@ -52,18 +54,28 @@ export type AddCombinedField = (
 
 export class CombinedFieldsForm extends Component<Props, State> {
   state: State = {
-    isPopoverOpen: false,
+    isGeoPopoverOpen: false,
+    isSemanticPopoverOpen: false,
   };
 
-  togglePopover = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
+  togglePopover = (popover: 'geo' | 'semantic') => {
+    if (popover === 'geo') {
+      this.setState((prevState) => ({
+        isGeoPopoverOpen: !prevState.isGeoPopoverOpen,
+        isSemanticPopoverOpen: false,
+      }));
+    } else {
+      this.setState((prevState) => ({
+        isSemanticPopoverOpen: !prevState.isSemanticPopoverOpen,
+        isGeoPopoverOpen: false,
+      }));
+    }
   };
 
   closePopover = () => {
     this.setState({
-      isPopoverOpen: false,
+      isGeoPopoverOpen: false,
+      isSemanticPopoverOpen: false,
     });
   };
 
@@ -121,108 +133,125 @@ export class CombinedFieldsForm extends Component<Props, State> {
   };
 
   render() {
-    const geoPointLabel = i18n.translate(
-      'xpack.dataVisualizer.file.geoPointForm.combinedFieldLabel',
-      {
-        defaultMessage: 'Add geo point field',
-      }
-    );
-
-    const semanticTextLabel = i18n.translate(
-      'xpack.dataVisualizer.file.semanticTextForm.combinedFieldLabel',
-      {
-        defaultMessage: 'Add semantic text field',
-      }
-    );
-    const panels = [
-      {
-        id: 0,
-        items: [
-          {
-            name: geoPointLabel,
-            panel: 1,
-          },
-          {
-            name: semanticTextLabel,
-            panel: 2,
-          },
-        ],
-      },
-      {
-        id: 1,
-        title: geoPointLabel,
-        content: (
-          <GeoPointForm
-            addCombinedField={this.addCombinedField}
-            hasNameCollision={this.hasNameCollision}
-            results={this.props.filesStatus ? this.props.filesStatus[0].results! : undefined}
-          />
-        ),
-      },
-      {
-        id: 2,
-        title: semanticTextLabel,
-        content: (
-          <SemanticTextForm
-            addCombinedField={this.addCombinedField}
-            hasNameCollision={this.hasNameCollision}
-            mappings={this.props.mappings}
-          />
-        ),
-      },
-    ];
     return (
-      <EuiFormRow
-        label={i18n.translate('xpack.dataVisualizer.combinedFieldsLabel', {
-          defaultMessage: 'Automatically created fields',
-        })}
-      >
-        <div>
-          {this.props.combinedFields.map((combinedField: CombinedField, idx: number) => (
-            <EuiFlexGroup key={idx} gutterSize="s">
-              <EuiFlexItem>
-                <CombinedFieldLabel combinedField={combinedField} />
-              </EuiFlexItem>
-              {!this.props.isDisabled && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="trash"
-                    color="danger"
-                    onClick={this.removeCombinedField.bind(null, idx)}
-                    title={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
-                      defaultMessage: 'Remove combined field',
-                    })}
-                    aria-label={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
-                      defaultMessage: 'Remove combined field',
-                    })}
+      <>
+        <EuiTitle size="xxs">
+          <h4>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.combinedFieldsForm.title"
+              defaultMessage="Add Smarter search fields to the mappings"
+            />
+          </h4>
+        </EuiTitle>
+
+        <EuiSpacer size="s" />
+
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.combinedFieldsForm.description"
+              defaultMessage="Add a Geo Point field for map-based searches, or a Semantic Text field for meaning-based searches to find related content — not just exact matches."
+            />
+          </p>
+        </EuiText>
+
+        <EuiSpacer size="m" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButton
+                  onClick={this.togglePopover.bind(null, 'semantic')}
+                  size="s"
+                  color="text"
+                  iconType="plusInCircleFilled"
+                  isDisabled={this.props.isDisabled}
+                >
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.semanticTextForm.combinedFieldLabel"
+                    defaultMessage="Semantic text field"
                   />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          ))}
-          <EuiPopover
-            id="combineFieldsPopover"
-            button={
-              <EuiButtonEmpty
-                onClick={this.togglePopover}
-                size="xs"
-                iconType="plusInCircleFilled"
-                isDisabled={this.props.isDisabled}
-              >
+                </EuiButton>
+              }
+              isOpen={this.state.isSemanticPopoverOpen}
+              closePopover={this.closePopover}
+            >
+              <SemanticTextForm
+                addCombinedField={this.addCombinedField}
+                hasNameCollision={this.hasNameCollision}
+                mappings={this.props.mappings}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButton
+                  onClick={this.togglePopover.bind(null, 'geo')}
+                  size="s"
+                  color="text"
+                  iconType="plusInCircleFilled"
+                  isDisabled={this.props.isDisabled}
+                >
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.geoFieldLabel"
+                    defaultMessage="Geo point field"
+                  />
+                </EuiButton>
+              }
+              isOpen={this.state.isGeoPopoverOpen}
+              closePopover={this.closePopover}
+            >
+              <GeoPointForm
+                addCombinedField={this.addCombinedField}
+                hasNameCollision={this.hasNameCollision}
+                results={this.props.filesStatus ? this.props.filesStatus[0].results! : undefined}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        {this.props.combinedFields.length ? (
+          <>
+            <EuiSpacer size="m" />
+
+            <EuiTitle size="xxs">
+              <h4>
                 <FormattedMessage
-                  id="xpack.dataVisualizer.addCombinedFieldsLabel"
-                  defaultMessage="Add additional field"
+                  id="xpack.dataVisualizer.file.combinedFieldsForm.title"
+                  defaultMessage="Already added fields"
                 />
-              </EuiButtonEmpty>
-            }
-            isOpen={this.state.isPopoverOpen}
-            closePopover={this.closePopover}
-            anchorPosition="rightCenter"
-          >
-            <EuiContextMenu initialPanelId={0} panels={panels} />
-          </EuiPopover>
-        </div>
-      </EuiFormRow>
+              </h4>
+            </EuiTitle>
+
+            <EuiSpacer size="s" />
+
+            {this.props.combinedFields.map((combinedField: CombinedField, idx: number) => (
+              <EuiFlexGroup key={idx} gutterSize="s" css={{ maxWidth: '350px' }}>
+                <EuiFlexItem>
+                  <CombinedFieldLabel combinedField={combinedField} />
+                </EuiFlexItem>
+                {!this.props.isDisabled && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="trash"
+                      color="danger"
+                      onClick={this.removeCombinedField.bind(null, idx)}
+                      title={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
+                        defaultMessage: 'Remove combined field',
+                      })}
+                      aria-label={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
+                        defaultMessage: 'Remove combined field',
+                      })}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            ))}
+          </>
+        ) : null}
+      </>
     );
   }
 }

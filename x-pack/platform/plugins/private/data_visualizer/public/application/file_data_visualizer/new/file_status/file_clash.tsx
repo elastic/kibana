@@ -112,7 +112,7 @@ export const FileClashResult: FC<Props> = ({ fileClash }) => {
             <EuiText size="xs">
               <FormattedMessage
                 id="xpack.dataVisualizer.file.fileStatus.missingFields"
-                defaultMessage="File is missing {count} fields which are present in the index"
+                defaultMessage="File is missing {count} fields which are present in the selected index"
                 values={{ count: fileClash.missingFields.length }}
               />
             </EuiText>
