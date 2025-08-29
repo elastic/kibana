@@ -400,6 +400,7 @@ export class WorkflowsService {
       if (!parsedYaml.success) {
         updateData = {
           ...rest,
+          yaml,
           definition: null,
           lastUpdatedBy: getAuthenticatedUser(request, this.security),
           valid: false,
