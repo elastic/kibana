@@ -27,15 +27,15 @@ function generateTypeScriptFile(result: any, outputPath: string): void {
     const lines = entries.map(([key, value]) => {
       const { name, description, type, example } = value;
 
-      // Escape single quotes in strings
-      const escapedName = name.replace(/'/g, "\\'");
-      const escapedDescription = description.replace(/'/g, "\\'");
-      const escapedType = type.replace(/'/g, "\\'");
+      // Properly escape both backslashes and single quotes in strings
+      const escapedName = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const escapedDescription = description.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const escapedType = type.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
       let fieldObject = `    name: '${escapedName}',\n    description: '${escapedDescription}',\n    type: '${escapedType}',`;
 
       if (example !== undefined) {
-        const escapedExample = String(example).replace(/'/g, "\\'");
+        const escapedExample = String(example).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         fieldObject += `\n    example: '${escapedExample}',`;
       }
 

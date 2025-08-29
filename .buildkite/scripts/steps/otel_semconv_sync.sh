@@ -14,16 +14,28 @@ clone_otel_repository() {
 generate_resolved_yaml() {
   echo "--- Generating resolved YAML with Docker weaver"
   cd otel-semconv
+  
+  # Create output directory with proper permissions for the mapped user
+  mkdir -p ./weaver_output
+  chmod 755 ./weaver_output
+  
   docker run --rm \
     --user $(id -u):$(id -g) \
     --env USER=weaver \
     --env HOME=/home/weaver \
     --mount type=bind,source=./model,target=/home/weaver/source,readonly \
-    --mount type=bind,source="$(pwd)",target=/home/weaver/out \
+    --mount type=bind,source=./weaver_output,target=/home/weaver/out \
     docker.io/otel/weaver:v0.17.1@sha256:32523b5e44fb44418786347e9f7dde187d8797adb6d57a2ee99c245346c3cdfe \
     registry resolve \
     --registry=/home/weaver/source \
     --output=/home/weaver/out/resolved_semconv.yaml
+    
+  # Move the generated file to the expected location
+  cp ./weaver_output/resolved_semconv.yaml ./resolved_semconv.yaml
+  
+  # Clean up the temporary directory
+  rm -rf ./weaver_output
+  
   cd ..
 }
 
