@@ -29,8 +29,7 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "esUiShared",
-      "data"
+      "esUiShared"
     ]
   }
 }
