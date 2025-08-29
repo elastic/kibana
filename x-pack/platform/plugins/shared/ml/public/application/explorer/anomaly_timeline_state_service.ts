@@ -338,7 +338,10 @@ export class AnomalyTimelineStateService extends StateService {
 
   private _initViewBySwimLaneData() {
     return combineLatest([
-      this._overallSwimLaneData$.pipe(skipWhile((v) => !v)),
+      this._overallSwimLaneData$.pipe(
+        skipWhile((v) => !v),
+        distinctUntilChanged(isEqual)
+      ),
       this.anomalyExplorerCommonStateService.selectedJobs$,
       this.anomalyExplorerCommonStateService.influencerFilterQuery$,
       this._swimLaneSeverity$,
