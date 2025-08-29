@@ -63,7 +63,7 @@ interface ContinueStep extends BaseStep {
 
 interface FallbackStep extends BaseStep {
   name: string;
-  type: 'fall-back';
+  type: 'fallback';
   normalPathSteps: BaseStep[];
   fallbackPathSteps: BaseStep[];
 }
@@ -101,7 +101,7 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
     return visitRetryStep(graph, previousStep, modifiedCurrentStep as RetryStep);
   }
 
-  if ((modifiedCurrentStep as FallbackStep).type === 'fall-back') {
+  if ((modifiedCurrentStep as FallbackStep).type === 'fallback') {
     return visitFallbackStep(graph, previousStep, modifiedCurrentStep as FallbackStep);
   }
 
@@ -471,7 +471,7 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
       const fallbackSteps = onFailureConfig.fallback;
       return {
         name: `fallback_${getNodeId(currentStep)}`,
-        type: 'fall-back',
+        type: 'fallback',
         normalPathSteps: [
           handleStepLevelOperations({
             ...currentStep,
