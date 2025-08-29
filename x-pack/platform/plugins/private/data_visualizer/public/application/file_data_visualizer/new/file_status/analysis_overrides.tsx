@@ -41,8 +41,7 @@ export const AnalysisOverrides: FC<Props> = ({ fileStatus, analyzeFileWithOverri
         setOverrides={analyzeFileWithOverrides}
         closeEditFlyout={() => setIsEditFlyoutVisible(false)}
         isFlyoutVisible={isEditFlyoutVisible}
-        originalSettings={fileStatus.serverSettings}
-        overrides={fileStatus.overrides}
+        fileStatus={fileStatus}
         fields={fields}
       />
     </>

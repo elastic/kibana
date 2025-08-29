@@ -33,6 +33,10 @@ export const AnalysisExplanation: FC<Props> = ({ fileStatus }) => {
   const modalTitleId = useGeneratedHtmlId();
   const results = fileStatus.results;
 
+  if (fileStatus.results === null) {
+    return null;
+  }
+
   return (
     <>
       <EuiButtonIcon
@@ -40,9 +44,8 @@ export const AnalysisExplanation: FC<Props> = ({ fileStatus }) => {
         iconType="inspect"
         size="xs"
         color="text"
-        disabled={results === null}
-        aria-label={i18n.translate('xpack.dataVisualizer.file.analysisSummary.editButtonLabel', {
-          defaultMessage: 'Override settings',
+        aria-label={i18n.translate('xpack.dataVisualizer.file.analysisSummary.inspectButtonLabel', {
+          defaultMessage: 'Analysis explanation',
         })}
       />
 

@@ -137,21 +137,30 @@ export const FileStatus: FC<Props> = ({
               }
               extraAction={
                 <>
-                  <AnalysisExplanation fileStatus={fileStatus} />
+                  {fileStatus.results !== null ? (
+                    <>
+                      <AnalysisExplanation fileStatus={fileStatus} />
 
-                  <AnalysisOverrides
-                    fileStatus={fileStatus}
-                    analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(index)}
-                  />
-                  <EuiButtonIcon
-                    onClick={() => deleteFile(index)}
-                    iconType="trash"
-                    size="xs"
-                    color="danger"
-                    aria-label={i18n.translate('xpack.dataVisualizer.file.fileStatus.deleteFile', {
-                      defaultMessage: 'Remove file',
-                    })}
-                  />
+                      <AnalysisOverrides
+                        fileStatus={fileStatus}
+                        analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(index)}
+                      />
+
+                      {/* TODO, remove button should be stop if analysis is in progress */}
+                      <EuiButtonIcon
+                        onClick={() => deleteFile(index)}
+                        iconType="trash"
+                        size="xs"
+                        color="danger"
+                        aria-label={i18n.translate(
+                          'xpack.dataVisualizer.file.fileStatus.deleteFile',
+                          {
+                            defaultMessage: 'Remove file',
+                          }
+                        )}
+                      />
+                    </>
+                  ) : null}
                 </>
               }
               paddingSize="s"

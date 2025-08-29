@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 
 import {
   EuiComboBox,
-  EuiCheckbox,
+  EuiSwitch,
   EuiFieldNumber,
   EuiFieldText,
   EuiForm,
@@ -21,6 +21,7 @@ import {
   EuiText,
   EuiTitle,
   EuiTextArea,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import { FILE_FORMATS, NO_TIME_FORMAT } from '@kbn/file-upload-common';
@@ -322,6 +323,15 @@ class OverridesUI extends Component {
 
     return (
       <EuiForm>
+        <SectionTitle
+          title={
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.editFlyout.overrides.generalSettingsTitle"
+              defaultMessage="General"
+            />
+          }
+        />
+
         <EuiFormRow
           error={this.linesToSampleErrors}
           isInvalid={linesToSampleValid === false}
@@ -404,7 +414,7 @@ class OverridesUI extends Component {
             </EuiFormRow>
 
             <EuiFormRow>
-              <EuiCheckbox
+              <EuiSwitch
                 id={'hasHeaderRow'}
                 label={
                   <FormattedMessage
@@ -418,7 +428,7 @@ class OverridesUI extends Component {
             </EuiFormRow>
 
             <EuiFormRow>
-              <EuiCheckbox
+              <EuiSwitch
                 id={'shouldTrimFields'}
                 label={
                   <FormattedMessage
@@ -452,8 +462,8 @@ class OverridesUI extends Component {
         )}
 
         <EuiFormRow>
-          <EuiCheckbox
-            id={'shouldTrimFields'}
+          <EuiSwitch
+            id={'containsTimeField'}
             label={
               <FormattedMessage
                 id="xpack.dataVisualizer.file.editFlyout.overrides.containsTimeFieldLabel"
@@ -465,8 +475,18 @@ class OverridesUI extends Component {
           />
         </EuiFormRow>
 
+        <EuiHorizontalRule />
+
         {containsTimeField ? (
           <>
+            <SectionTitle
+              title={
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.editFlyout.overrides.dateAndTimeTitle"
+                  defaultMessage="Date & Time"
+                />
+              }
+            />
             <EuiFormRow
               helpText={timestampFormatHelp}
               label={
@@ -518,20 +538,21 @@ class OverridesUI extends Component {
                 isClearable={false}
               />
             </EuiFormRow>
+
+            <EuiHorizontalRule />
           </>
         ) : null}
 
         {format === FILE_FORMATS.DELIMITED && originalColumnNames.length > 0 && (
           <React.Fragment>
-            <EuiSpacer />
-            <EuiTitle size="s">
-              <h3>
+            <SectionTitle
+              title={
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.editFlyout.overrides.editFieldNamesTitle"
-                  defaultMessage="Edit field names"
+                  defaultMessage="Field names"
                 />
-              </h3>
-            </EuiTitle>
+              }
+            />
 
             {originalColumnNames.map((f, i) => (
               <EuiFormRow label={f} key={f}>
@@ -546,15 +567,14 @@ class OverridesUI extends Component {
 
         {format === FILE_FORMATS.SEMI_STRUCTURED_TEXT && originalGrokFieldNames.length > 0 && (
           <React.Fragment>
-            <EuiSpacer />
-            <EuiTitle size="s">
-              <h3>
+            <SectionTitle
+              title={
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.editFlyout.overrides.editFieldNamesTitle"
                   defaultMessage="Edit field names"
                 />
-              </h3>
-            </EuiTitle>
+              }
+            />
 
             {originalGrokFieldNames.map((f, i) => (
               <EuiFormRow label={f} key={f}>
@@ -569,6 +589,18 @@ class OverridesUI extends Component {
       </EuiForm>
     );
   }
+}
+
+function SectionTitle({ title }) {
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h3>{title}</h3>
+      </EuiTitle>
+
+      <EuiSpacer size="m" />
+    </>
+  );
 }
 
 export const Overrides = withKibana(OverridesUI);
