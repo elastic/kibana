@@ -396,6 +396,7 @@ export function defineRoutes(
           name: workflow.name,
           enabled: workflow.enabled,
           definition: workflow.definition,
+          yaml: workflow.yaml,
         };
         const workflowExecutionId = await api.runWorkflow(workflowForExecution, spaceId, inputs);
         return response.ok({
