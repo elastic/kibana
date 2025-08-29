@@ -46,6 +46,7 @@ import {
   isSecondaryTrendConfigInvalid,
 } from './helpers';
 import { getAccessorType } from '../../shared_components';
+import { convertToRunTimeState } from './runtime_state';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -350,30 +351,6 @@ const removeBreakdownByDimension = (state: MetricVisualizationState) => {
   delete state.maxCols;
 };
 
-/**
- * Checks if the given MetricVisualizationState contains any legacy properties
- * that require migration to the latest state shape.
- */
-const hasLegacyStateProperties = (state: MetricVisualizationState) => {
-  return (
-    typeof state.secondaryPrefix !== 'undefined' || typeof state.valuesTextAlign !== 'undefined'
-  );
-};
-
-const migrateLegacyStateIfNeeded = (state: MetricVisualizationState) => {
-  if (hasLegacyStateProperties(state)) {
-    const { secondaryPrefix, valuesTextAlign, ...restState } = state;
-    return {
-      ...restState,
-      secondaryLabel:
-        secondaryPrefix && !state.secondaryLabel ? secondaryPrefix : state.secondaryLabel,
-      primaryAlign: state.primaryAlign ?? valuesTextAlign,
-      secondaryAlign: state.secondaryAlign ?? valuesTextAlign,
-    };
-  }
-  return state;
-};
-
 export const getMetricVisualization = ({
   paletteService,
   theme,
@@ -424,14 +401,13 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    if (!state) {
-      return {
-        layerId: addNewLayer(),
-        layerType: layerTypes.DATA,
-        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-      };
-    }
-    return migrateLegacyStateIfNeeded(state);
+    if (state) return convertToRunTimeState(state);
+
+    return {
+      layerId: addNewLayer(),
+      layerType: layerTypes.DATA,
+      palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+    };
   },
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
