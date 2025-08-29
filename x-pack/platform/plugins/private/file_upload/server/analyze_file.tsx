@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { NdjsonReader, MessageReader, TikaReader, FILE_FORMATS } from '@kbn/file-upload-common';
 import type {
   IngestSimulateResponse,
@@ -22,6 +22,7 @@ const PREVIEW_DOC_LIMIT = 20;
 
 export async function analyzeFile(
   client: IScopedClusterClient,
+  logger: Logger,
   data: InputData,
   overrides: InputOverrides,
   includePreview: boolean
@@ -46,20 +47,21 @@ export async function analyzeFile(
       const reader = getReader(results);
       const arrayBuffer = new Uint8Array(Buffer.from(data));
       const docs = reader.read(arrayBuffer).slice(0, PREVIEW_DOC_LIMIT);
-
-      previewDocs = await client.asInternalUser.ingest.simulate({
-        pipeline,
-        docs: docs.map((doc: any) => {
-          return {
-            _source: doc,
-          };
-        }),
-      });
+      if (results.format === FILE_FORMATS.NDJSON) {
+        previewDocs = { docs: docs.map((doc: any) => ({ doc: { _source: JSON.parse(doc) } })) };
+      } else {
+        previewDocs = await client.asInternalUser.ingest.simulate({
+          pipeline,
+          docs: docs.map((doc: any) => {
+            return {
+              _source: doc,
+            };
+          }),
+        });
+      }
     } catch (error) {
       // preview failed, just log the error
-      // TODO: log it properly
-      // eslint-disable-next-line no-console
-      console.error(error);
+      logger.warn(`Unable to generate preview documents, error: ${error.message}`);
     }
   }
 

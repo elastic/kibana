@@ -123,6 +123,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           const { includePreview } = request.query;
           const result = await analyzeFile(
             esClient,
+            logger,
             request.body,
             omit(request.query, 'includePreview'),
             includePreview === true
