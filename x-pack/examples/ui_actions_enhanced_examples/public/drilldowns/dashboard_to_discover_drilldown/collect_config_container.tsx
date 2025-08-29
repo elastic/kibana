@@ -30,7 +30,7 @@ export const CollectConfigContainer: React.FC<CollectConfigContainerProps> = ({
       if (!isMounted()) return;
       setIndexPatterns(
         indexPatternSavedObjects
-          ? indexPatternSavedObjects.map((indexPattern: any) => ({
+          ? indexPatternSavedObjects.map((indexPattern) => ({
               id: indexPattern.id,
               title: indexPattern.attributes.title,
             }))
