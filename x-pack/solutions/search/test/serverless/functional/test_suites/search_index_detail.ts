@@ -49,6 +49,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('index details page - search solution', function () {
+    // fails on MKI, see https://github.com/elastic/kibana/issues/233476
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await createIndices();
     });
