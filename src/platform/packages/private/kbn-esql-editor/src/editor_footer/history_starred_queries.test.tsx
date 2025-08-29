@@ -283,6 +283,24 @@ describe('Starred and History queries components', () => {
       );
     });
 
+    it('should not render the history queries help text for small sized', () => {
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={1024}
+            isSpaceReduced={true}
+            onUpdateAndSubmit={jest.fn()}
+            height={200}
+          />
+        </KibanaContextProvider>
+      );
+      expect(screen.getByTestId('ESQLEditor-queryHistory')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('ESQLEditor-history-starred-queries-helpText')
+      ).not.toBeInTheDocument();
+    });
+
     it('should render the starred queries if the corresponding btn is clicked', () => {
       render(
         <KibanaContextProvider services={services}>

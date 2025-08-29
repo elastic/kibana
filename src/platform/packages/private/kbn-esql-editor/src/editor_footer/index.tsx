@@ -336,6 +336,7 @@ export const EditorFooter = memo(function EditorFooter({
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={measuredContainerWidth}
             height={resizableContainerHeight}
+            isSpaceReduced={isSpaceReduced}
           />
         </EuiFlexItem>
       )}
