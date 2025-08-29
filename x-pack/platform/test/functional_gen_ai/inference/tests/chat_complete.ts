@@ -176,7 +176,7 @@ export const chatCompleteSuite = (
           type: 'error',
           code: 'requestError',
           message:
-            "An error occur fetching connectors for id 'do-not-exist'\\nSaved object [action/do-not-exist] not found",
+            "No connector found for id 'do-not-exist'\\nSaved object [action/do-not-exist] not found",
         });
       });
 
@@ -338,7 +338,7 @@ export const chatCompleteSuite = (
             error: {
               code: 'requestError',
               message:
-                "An error occur fetching connectors for id 'do-not-exist'\\nSaved object [action/do-not-exist] not found",
+                "No connector found for id 'do-not-exist'\\nSaved object [action/do-not-exist] not found",
               meta: {
                 status: 400,
               },
