@@ -54,7 +54,6 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   waitForRuleFailure,
-  waitForRulePartialFailure,
   routeWithNamespace,
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
