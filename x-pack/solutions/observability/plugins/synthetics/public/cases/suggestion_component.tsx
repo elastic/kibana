@@ -72,10 +72,6 @@ export function SyntheticsSuggestionChildren(props: SuggestionChildrenProps<Synt
   if (monitors.length === 0) return null;
 
   return monitors.map((m) => (
-    <MonitorItem
-      key={suggestion.id}
-      monitor={m}
-      suggestionId={suggestion.id}
-    />
+    <MonitorItem key={suggestion.id} monitor={m} suggestionId={suggestion.id} />
   ));
 }
