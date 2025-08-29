@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -33,7 +32,6 @@ export const DocumentMatchFilterControls = ({
   matchedDocumentPercentage,
   isDisabled = false,
 }: DocumentMatchFilterControlsProps) => {
-  const { euiTheme } = useEuiTheme();
   const [selectedFilter, setSelectedFilter] = useState<DocumentMatchFilterOptions>(initialFilter);
 
   const isIdleState = useStreamsRoutingSelector((snapshot) => snapshot).matches({
@@ -70,7 +68,6 @@ export const DocumentMatchFilterControls = ({
               )}
               hasActiveFilters={selectedFilter === 'matched'}
               onClick={() => handleFilterChanged('matched')}
-              isSelected={selectedFilter === 'matched'}
               numActiveFilters={
                 isNaN(matchedDocumentPercentage) ? '' : `${matchedDocumentPercentage}%`
               }
@@ -91,7 +88,6 @@ export const DocumentMatchFilterControls = ({
               )}
               hasActiveFilters={selectedFilter === 'unmatched'}
               onClick={() => handleFilterChanged('unmatched')}
-              isSelected={selectedFilter === 'unmatched'}
               numActiveFilters={
                 isNaN(matchedDocumentPercentage) ? '' : `${100 - matchedDocumentPercentage}%`
               }
