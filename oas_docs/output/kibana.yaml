@@ -49287,6 +49287,14 @@ paths:
             example: 20
             minimum: 0
             type: integer
+        - description: Whether to return conversations that the current user owns. If true, only conversations owned by the user are returned.
+          in: query
+          name: is_owner
+          required: false
+          schema:
+            default: false
+            example: true
+            type: boolean
       responses:
         '200':
           content:
@@ -64602,17 +64610,17 @@ paths:
                     bcc:
                       default: []
                       items:
-                        - type: string
+                        type: string
                       type: array
                     cc:
                       default: []
                       items:
-                        - type: string
+                        type: string
                       type: array
                     to:
                       default: []
                       items:
-                        - type: string
+                        type: string
                       type: array
                 heartbeatIndices:
                   default: heartbeat-*
@@ -74188,6 +74196,9 @@ components:
           description: The time conversation was created.
           example: '2025-04-30T14:00:00Z'
           type: string
+        createdBy:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          description: The user who created the conversation.
         excludeFromLastConversationStorage:
           description: Exclude from last conversation storage.
           type: boolean
@@ -74224,6 +74235,7 @@ components:
         - id
         - title
         - createdAt
+        - createdBy
         - users
         - namespace
         - category
@@ -74278,6 +74290,10 @@ components:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
           type: string
+        users:
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          type: array
       required:
         - id
     Security_AI_Assistant_API_DeleteResponseFields:
@@ -74855,6 +74871,7 @@ components:
       description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
       enum:
         - security_labs
+        - defend_insights
         - user
       example: security_labs
       type: string
@@ -74898,6 +74915,9 @@ components:
         traceData:
           $ref: '#/components/schemas/Security_AI_Assistant_API_TraceData'
           description: Trace data
+        user:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          description: The user who sent the message.
       required:
         - timestamp
         - content

@@ -7,7 +7,6 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { useSendMessage } from '../context/send_message_context';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
@@ -38,7 +37,7 @@ const useConversation = () => {
 
 export const useAgentId = () => {
   const { conversation } = useConversation();
-  return conversation?.agent_id ?? oneChatDefaultAgentId;
+  return conversation?.agent_id;
 };
 
 export const useConversationTitle = () => {
