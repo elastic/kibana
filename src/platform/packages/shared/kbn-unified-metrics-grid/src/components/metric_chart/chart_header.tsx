@@ -18,6 +18,7 @@ import {
   EuiTextTruncate,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { MetricField } from '../../types';
 import { MetricInsightsFlyout } from '../metric_flyout/metrics_insights_flyout';
 
@@ -83,7 +84,10 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
               iconType="inspect"
               size="s"
               color="text"
-              aria-label="Explore this metric"
+              aria-label={i18n.translate(
+                'metricsExperience.chartHeader.euiButtonIcon.exploreThisMetricLabel',
+                { defaultMessage: 'Explore this metric' }
+              )}
               onClick={handleExplore}
             />
           </EuiToolTip>
@@ -96,7 +100,10 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
               iconType="sparkles"
               size="s"
               color="text"
-              aria-label="Metric insights"
+              aria-label={i18n.translate(
+                'metricsExperience.chartHeader.euiButtonIcon.metricInsightsLabel',
+                { defaultMessage: 'Metric insights' }
+              )}
               onClick={handleInsights}
             />
           </EuiToolTip>

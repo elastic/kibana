@@ -43,8 +43,8 @@ export const useFlyoutA11y = ({ isXlScreen }: { isXlScreen: boolean }) => {
     },
     screenReaderDescription: isXlScreen && (
       <EuiScreenReaderOnly>
-        <p id={descriptionId} data-test-subj="unifiedDocViewerScreenReaderDescription">
-          {i18n.translate('unifiedDocViewer.flyout.screenReaderDescription', {
+        <p id={descriptionId} data-test-subj="metricsExperienceFlyoutScreenReaderDescription">
+          {i18n.translate('metricsExperience.flyout.screenReaderDescription', {
             defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
           })}
         </p>

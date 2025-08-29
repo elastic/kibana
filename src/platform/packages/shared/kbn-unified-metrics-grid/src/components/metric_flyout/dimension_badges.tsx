@@ -9,6 +9,7 @@
 
 import { EuiBadge, EuiToken, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface Dimension {
   name: string;
@@ -85,7 +86,11 @@ export const DimensionBadges = ({
       })}
       {remainingCount > 0 && (
         <EuiText size="xs" style={{ marginTop: '4px' }}>
-          ... {remainingCount} more
+          {'...'}
+          {remainingCount}{' '}
+          {i18n.translate('metricsExperience.dimensionBadges.moreTextLabel', {
+            defaultMessage: 'more',
+          })}
         </EuiText>
       )}
     </div>

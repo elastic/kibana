@@ -9,6 +9,7 @@
 
 import { EuiFlexItem, EuiText, EuiLoadingChart } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { TimeSeriesChart } from './time_series_chart';
 
 interface ChartContentProps {
@@ -54,7 +55,11 @@ export const ChartContent: React.FC<ChartContentProps> = ({
   if (!isSupported) {
     return (
       <EuiText color="subdued" textAlign="center">
-        <p>This metric type is unsupported</p>
+        <p>
+          {i18n.translate('metricsExperience.chartContent.p.thisMetricTypeIsLabel', {
+            defaultMessage: 'This metric type is unsupported',
+          })}
+        </p>
       </EuiText>
     );
   }

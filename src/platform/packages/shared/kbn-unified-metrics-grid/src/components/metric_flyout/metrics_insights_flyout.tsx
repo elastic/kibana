@@ -22,6 +22,7 @@ import {
   keys,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { MetricField } from '../../types';
 import { MetricFlyoutContent } from './metric_flyout_content';
@@ -41,8 +42,7 @@ export const MetricInsightsFlyout = ({
   onClose,
 }: MetricInsightsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
-  const DEFAULT_WIDTH = euiTheme.base * 34;
-  const defaultWidth = DEFAULT_WIDTH; // Give enough room to search bar to not wrap
+  const defaultWidth = euiTheme.base * 34;
   const isXlScreen = useIsWithinMinBreakpoint('xl');
   const [flyoutWidth, setFlyoutWidth] = useLocalStorage(
     'metricInsightsFlyout:flyoutWidth',
@@ -97,12 +97,16 @@ export const MetricInsightsFlyout = ({
       onKeyDown={onKeyDown}
       pushMinBreakpoint="xl"
       data-test-subj="metricViewerFlyout"
+      aria-label={i18n.translate(
+        'metricsExperience.metricInsightsFlyout.euiFlyoutResizable.metricInsightsFlyoutLabel',
+        { defaultMessage: 'Metric Insights Flyout' }
+      )}
       ownFocus
       minWidth={minWidth}
       maxWidth={maxWidth}
       onResize={setFlyoutWidth}
       css={{
-        maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
+        maxWidth: `${isXlScreen ? `calc(100vw - ${defaultWidth}px)` : '90vw'} !important`,
       }}
       paddingSize="m"
       {...a11yProps}
@@ -112,7 +116,11 @@ export const MetricInsightsFlyout = ({
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiText size="m">
-              <strong>Metric</strong>
+              <strong>
+                {i18n.translate('metricsExperience.metricInsightsFlyout.strong.metricLabel', {
+                  defaultMessage: 'Metric',
+                })}
+              </strong>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -122,7 +130,9 @@ export const MetricInsightsFlyout = ({
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty iconType="cross" onClick={onClose}>
-          Close
+          {i18n.translate('metricsExperience.metricInsightsFlyout.closeButtonEmptyLabel', {
+            defaultMessage: 'Close',
+          })}
         </EuiButtonEmpty>
       </EuiFlyoutFooter>
     </EuiFlyoutResizable>

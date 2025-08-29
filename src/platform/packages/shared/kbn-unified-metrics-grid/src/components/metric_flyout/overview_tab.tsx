@@ -9,6 +9,7 @@
 
 import { EuiBadge, EuiText, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { DimensionBadges } from './dimension_badges';
 import type { MetricField } from '../../types';
 import { categorizeDimensions } from '../../utils';
@@ -30,7 +31,12 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
       {metric.source === 'otel' && metric.stability && (
         <>
           <EuiText size="s">
-            <strong>OpenTelemetry Semantic Conventions</strong>
+            <strong>
+              {i18n.translate(
+                'metricsExperience.overviewTab.strong.opentelemetrySemanticConventionsLabel',
+                { defaultMessage: 'OpenTelemetry Semantic Conventions' }
+              )}
+            </strong>
           </EuiText>
           <EuiSpacer size="xs" />
           <EuiDescriptionList
@@ -38,7 +44,13 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
             compressed
             listItems={[
               {
-                title: <EuiText size="xs">Stability</EuiText>,
+                title: (
+                  <EuiText size="xs">
+                    {i18n.translate('metricsExperience.overviewTab.stabilityTextLabel', {
+                      defaultMessage: 'Stability',
+                    })}
+                  </EuiText>
+                ),
                 description: (
                   <EuiBadge
                     color={
@@ -67,7 +79,11 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
           {
             title: (
               <EuiText size="s">
-                <strong>Data stream</strong>
+                <strong>
+                  {i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
+                    defaultMessage: 'Data stream',
+                  })}
+                </strong>
               </EuiText>
             ),
             description: <EuiText color="primary">{metric.index}</EuiText>,
@@ -75,7 +91,11 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
           {
             title: (
               <EuiText size="s">
-                <strong>Field type</strong>
+                <strong>
+                  {i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
+                    defaultMessage: 'Field type',
+                  })}
+                </strong>
                 <EuiSpacer size="xs" />
               </EuiText>
             ),
@@ -86,7 +106,11 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
                 {
                   title: (
                     <EuiText size="s">
-                      <strong>Metric unit</strong>
+                      <strong>
+                        {i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
+                          defaultMessage: 'Metric unit',
+                        })}
+                      </strong>
                       <EuiSpacer size="xs" />
                     </EuiText>
                   ),
@@ -99,7 +123,11 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
                 {
                   title: (
                     <EuiText size="s">
-                      <strong>Metric type</strong>
+                      <strong>
+                        {i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
+                          defaultMessage: 'Metric type',
+                        })}
+                      </strong>
                       <EuiSpacer size="xs" />
                     </EuiText>
                   ),
@@ -117,7 +145,11 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
           {requiredDimensions.length > 0 && (
             <>
               <EuiText size="s">
-                <strong>Required dimensions</strong>
+                <strong>
+                  {i18n.translate('metricsExperience.overviewTab.strong.requiredDimensionsLabel', {
+                    defaultMessage: 'Required dimensions',
+                  })}
+                </strong>
               </EuiText>
               <EuiSpacer size="xs" />
               <DimensionBadges
@@ -131,7 +163,12 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
           {optionalDimensions.length > 0 && (
             <>
               <EuiText size="s">
-                <strong>Additional dimensions</strong>
+                <strong>
+                  {i18n.translate(
+                    'metricsExperience.overviewTab.strong.additionalDimensionsLabel',
+                    { defaultMessage: 'Additional dimensions' }
+                  )}
+                </strong>
               </EuiText>
               <EuiSpacer size="xs" />
               <DimensionBadges

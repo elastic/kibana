@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, EuiFlexItem, EuiLoadingChart, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { MetricChart } from './metric_chart';
 
@@ -79,7 +80,10 @@ export const MetricsGrid = ({
   if (pivotOn === 'metric' && fields.length === 0) {
     return (
       <EuiText textAlign="center" color="subdued">
-        No metrics found matching &quot;{searchTerm}&quot;
+        {i18n.translate('metricsExperience.metricsGrid.noMetricsFoundMatchingTextLabel', {
+          defaultMessage: 'No metrics found matching "{searchTerm}"',
+          values: { searchTerm },
+        })}
       </EuiText>
     );
   }
