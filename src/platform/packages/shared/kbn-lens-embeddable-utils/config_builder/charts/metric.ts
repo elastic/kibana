@@ -22,6 +22,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
+  isLensLegacyFormat,
   mapToFormula,
 } from '../utils';
 import {
@@ -31,6 +32,7 @@ import {
   getValueColumn,
 } from '../columns';
 import type { LensApiState } from '../schema';
+import { fromMetricLensStateToApi } from '../transforms/charts/metric';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -210,9 +212,12 @@ function getValueColumns(layer: LensMetricConfig) {
 }
 
 export async function buildMetric(
-  config: LensMetricConfig,
+  config: LensMetricConfig | Extract<LensApiState, { type: 'metric' }>,
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {
+  if (!isLensLegacyFormat(config)) {
+    return fromMetricLensStateToApi(config);
+  }
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
     buildFormulaLayer(cfg as LensMetricConfig, i, dataView, formulaAPI);
@@ -237,20 +242,4 @@ export async function buildMetric(
       adHocDataViews: getAdhocDataviews(dataviews),
     },
   };
-}
-
-export function fromMetricLegacyToAPI(
-  config: LensAttributes,
-  { dataViewsAPI, formulaAPI }: BuildDependencies
-): Extract<LensApiState, { type: 'metric' }> {
-  return {
-    type: 'metric',
-    dataset: {
-      type: 'dataView',
-      name: '',
-    },
-    metric: {
-      operation: 'count',
-    },
-  } as Extract<LensApiState, { type: 'metric' }>;
 }

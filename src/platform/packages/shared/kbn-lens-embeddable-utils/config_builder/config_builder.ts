@@ -20,10 +20,10 @@ import {
   buildTable,
   buildXY,
   buildPartitionChart,
-  fromMetricLegacyToAPI,
 } from './charts';
 import type { LensApiState } from './schema';
 import { isLensLegacyFormat } from './utils';
+import { fromMetricLensStateToAPI } from './transforms/charts/metric';
 
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
@@ -43,7 +43,7 @@ export class LensConfigBuilder {
   };
 
   private apiConvertersByChart = {
-    metric: fromMetricLegacyToAPI,
+    metric: fromMetricLensStateToAPI,
   };
   private formulaAPI: FormulaPublicApi | undefined;
   private dataViewsAPI: DataViewsCommon;
