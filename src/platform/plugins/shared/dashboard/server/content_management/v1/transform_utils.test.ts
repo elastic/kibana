@@ -56,6 +56,7 @@ describe('savedObjectToItem', () => {
       ]),
       optionsJSON: JSON.stringify({
         hidePanelTitles: true,
+        fetchOnlyVisible: true,
         useMargins: false,
         syncColors: false,
         syncTooltips: false,

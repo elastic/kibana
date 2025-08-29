@@ -20,24 +20,30 @@ export const usePresentationPanelVisibilityManager = <
 
   const visibilityTrackerRef = useRef<HTMLDivElement | null>(null);
   const intersectionObserverRef = useRef(
-    new window.IntersectionObserver(
-      ([value]) => {
-        updateIntersection(value);
-      },
-      {
-        root: visibilityTrackerRef.current,
-      }
-    )
+    window.IntersectionObserver
+      ? new window.IntersectionObserver(
+          ([value]) => {
+            updateIntersection(value);
+          },
+          {
+            root: visibilityTrackerRef.current,
+          }
+        )
+      : undefined
   );
 
   useEffect(() => {
     const { current: intersectionObserver } = intersectionObserverRef;
+    if (!intersectionObserver) {
+      onVisibilityChange(api, true);
+      return;
+    }
     intersectionObserver.disconnect();
     const { current: visibilityTracker } = visibilityTrackerRef;
     if (visibilityTracker) intersectionObserver.observe(visibilityTracker);
 
     return () => intersectionObserver.disconnect();
-  }, [visibilityTrackerRef]);
+  }, [visibilityTrackerRef, api]);
 
   useEffect(() => {
     onVisibilityChange(api, Boolean(intersection?.isIntersecting));

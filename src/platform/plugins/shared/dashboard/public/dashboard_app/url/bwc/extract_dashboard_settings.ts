@@ -24,6 +24,10 @@ export function extractSettings(state: { [key: string]: unknown }): Partial<Dash
     settings.syncColors = state.syncColors;
   }
 
+  if (typeof state.fetchOnlyVisible === 'boolean') {
+    settings.fetchOnlyVisible = state.fetchOnlyVisible;
+  }
+
   if (typeof state.syncTooltips === 'boolean') {
     settings.syncTooltips = state.syncTooltips;
   }
