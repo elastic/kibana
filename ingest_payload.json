@@ -1,0 +1,103 @@
+{
+  "ingest": {
+    "lifecycle": {
+      "dsl": {}
+    },
+    "processing": {
+      "steps": []
+    },
+    "wired": {
+      "fields": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "stream.name": {
+          "type": "system"
+        },
+        "scope.dropped_attributes_count": {
+          "type": "long"
+        },
+        "dropped_attributes_count": {
+          "type": "long"
+        },
+        "resource.dropped_attributes_count": {
+          "type": "long"
+        },
+        "resource.schema_url": {
+          "type": "keyword"
+        },
+        "scope.name": {
+          "type": "keyword"
+        },
+        "scope.schema_url": {
+          "type": "keyword"
+        },
+        "scope.version": {
+          "type": "keyword"
+        },
+        "trace_id": {
+          "type": "keyword"
+        },
+        "span_id": {
+          "type": "keyword"
+        },
+        "event_name": {
+          "type": "keyword"
+        },
+        "severity_text": {
+          "type": "keyword"
+        },
+        "body.text": {
+          "type": "match_only_text"
+        },
+        "severity_number": {
+          "type": "long"
+        },
+        "resource.attributes.host.name": {
+          "type": "keyword"
+        },
+        "resource.attributes.service.name": {
+          "type": "keyword"
+        }
+      },
+      "routing": [
+        {
+          "destination": "logs.child",
+          "where": {
+            "field": "attributes.data_stream.dataset",
+            "eq": "synth.1"
+          },
+          "status": "enabled"
+        },
+        {
+          "destination": "logs.child2",
+          "where": {
+            "never": {}
+          },
+          "status": "disabled"
+        },
+        {
+          "destination": "logs.child3",
+          "where": {
+            "never": {}
+          },
+          "status": "enabled"
+        },
+        {
+          "destination": "logs.child4",
+          "where": {
+            "field": "sad",
+            "eq": "dsa"
+          },
+          "status": "enabled"
+        },
+        {
+          "destination": "logs.child5",
+          "where": {
+            "never": {}
+          }
+        }
+      ]
+    }
+  }
+}
