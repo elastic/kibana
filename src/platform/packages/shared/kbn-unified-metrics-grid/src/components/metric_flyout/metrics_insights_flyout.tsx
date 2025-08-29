@@ -25,7 +25,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { MetricField } from '../../types';
-import { MetricFlyoutContent } from './metric_flyout_content';
+import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from '../../hooks/use_flyout_a11y';
 import { css } from '@emotion/react';
 
@@ -134,7 +134,7 @@ export const MetricInsightsFlyout = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <MetricFlyoutContent metric={metric} esqlQuery={esqlQuery} />
+        <MetricFlyoutBody metric={metric} esqlQuery={esqlQuery} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty iconType="cross" onClick={onClose}>

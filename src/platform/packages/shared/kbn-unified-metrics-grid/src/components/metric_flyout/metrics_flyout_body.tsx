@@ -40,12 +40,12 @@ const tabs = [
   },
 ];
 
-interface MetricFlyoutContentProps {
+interface MetricFlyoutBodyProps {
   metric: MetricField;
   esqlQuery: string;
 }
 
-export const MetricFlyoutContent = ({ metric, esqlQuery }: MetricFlyoutContentProps) => {
+export const MetricFlyoutBody = ({ metric, esqlQuery }: MetricFlyoutBodyProps) => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(tabIds.OVERVIEW);
 
   const onSelectedTabChanged = (id: TabId) => {
