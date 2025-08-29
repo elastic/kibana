@@ -29,7 +29,7 @@ import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import { escapeKueryForFieldValuePair } from '@kbn/ml-common-utils/string_utils';
+import { escapeKueryForFieldValuePair } from '@kbn/ml-common-utils/string_utils/escape_kuery_for_field_value_pair';
 
 import { useCssMlExplorerChartContainer } from './explorer_chart_styles';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';

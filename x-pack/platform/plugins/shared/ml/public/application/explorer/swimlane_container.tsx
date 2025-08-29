@@ -44,7 +44,7 @@ import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
 import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
 import { SWIMLANE_TYPE } from '@kbn/ml-common-constants/explorer';
-import { mlEscape } from '@kbn/ml-common-utils/string_utils';
+import { mlEscape } from '@kbn/ml-common-utils/string_utils/ml_escape';
 
 import { SwimLanePagination } from './swimlane_pagination';
 import type {
