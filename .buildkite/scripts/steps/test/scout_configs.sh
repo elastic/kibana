@@ -70,13 +70,14 @@ if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
   fi
 fi
 
-if [ "$configs" == "" ] && [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
+# Only download scout configuration if we don't have retry configs
+if [ "$configs" == "" ] && [ "$SCOUT_CONFIG_GROUP_KEY" != "" ] && [[ ${#retry_configs[@]} -eq 0 ]]; then
   echo "--- downloading scout test configuration"
   download_artifact scout_playwright_configs.json .
   configs=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].configs[]' scout_playwright_configs.json)
 fi
 
-if [ "$configs" == "" ]; then
+if [ "$configs" == "" ] && [[ ${#retry_configs[@]} -eq 0 ]]; then
   echo "unable to determine configs to run"
   exit 1
 fi
