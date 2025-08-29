@@ -885,17 +885,18 @@ export function generateOtelcolConfig(inputs: FullAgentPolicyInput[] | TemplateA
     filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE).
     flatMap((input) => {
       const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((inputStream) => {
+        const suffix = input.id + "." + inputStream.id
         return {
-          ...(inputStream?.extensions ? { extensions: inputStream.extensions } : {}),
-          ...(inputStream?.receivers ? { receivers: inputStream.receivers } : {}),
-          ...(inputStream?.processors ? { processors: inputStream.processors } : {}),
-          ...(inputStream?.connectors ? { connectors: inputStream.connectors } : {}),
-          ...(inputStream?.exporters ? { exporters: inputStream.exporters } : {}),
+          ...addSuffixToOtelcolComponentsConfig('extensions', inputStream?.extensions, suffix),
+          ...addSuffixToOtelcolComponentsConfig('receivers',  inputStream?.receivers,  suffix),
+          ...addSuffixToOtelcolComponentsConfig('processors', inputStream?.processors, suffix),
+          ...addSuffixToOtelcolComponentsConfig('connectors', inputStream?.connectors, suffix),
+          ...addSuffixToOtelcolComponentsConfig('exporters',  inputStream?.exporters,  suffix),
           ...(inputStream?.service ? { service: {
             ...inputStream.service,
-            pipelines: {
-              ...inputStream.service.pipelines,
-            },
+            ...addSuffixToOtelcolComponentsConfig('pipelines',
+                addSuffixToOtelcolPipelinesComponents(inputStream.service.pipelines, suffix),
+                input.id),
           }} : {}),
         };
       });
@@ -910,6 +911,31 @@ export function generateOtelcolConfig(inputs: FullAgentPolicyInput[] | TemplateA
 
   const config = mergeOtelcolConfigs(otelConfigs);
   return attachExporter(config, dataOutput);
+}
+
+function addSuffixToOtelcolComponentsConfig(type: string, components: {[key:string]:any}, suffix: string) {
+  if (!components) {
+    return {}
+  }
+
+  let generated : {[key:string]:any} = {};
+  Object.entries(components).forEach(([id, config]) => {
+    generated[id + "/" + suffix] = { ...config};
+  })
+
+  return { [type]: generated }
+}
+
+function addSuffixToOtelcolPipelinesComponents(pipelines: any, suffix: string) {
+  let result : {[key:string]:any} = {};
+  Object.entries(pipelines as {[key:string]:{[key:string]:string[]}}).forEach(([pipelineID,pipeline]) => {
+    let newPipeline : {[key:string]:string[]} = {};
+    Object.entries(pipeline).forEach(([type,componentIDs]) => {
+      newPipeline[type] = componentIDs.map((id) => id + "/" + suffix);
+    });
+    result[pipelineID] = newPipeline;
+  });
+  return result;
 }
 
 function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]) {

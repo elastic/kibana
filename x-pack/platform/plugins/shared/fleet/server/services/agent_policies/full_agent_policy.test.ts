@@ -2273,8 +2273,8 @@ describe('generateOtelcolConfig', () => {
 
   const otelInput1 : FullAgentPolicyInput = {
     type: OTEL_COLLECTOR_INPUT_TYPE,
-    id: 'test1',
-    name: 'test1',
+    id: 'test-1',
+    name: 'test-1',
     revision: 0,
     data_stream: {
       namespace: 'default'
@@ -2283,13 +2283,13 @@ describe('generateOtelcolConfig', () => {
     package_policy_id: 'somepolicy',
     streams: [
       {
-        id: 'someid',
+        id: 'stream-id-1',
         data_stream: {
           dataset: 'somedataset',
           type: 'metrics',
         },
         receivers: {
-          "httpcheck/1": {
+          httpcheck: {
             targets: [
               {
                 endpoints: ['https://epr.elastic.co'],
@@ -2298,7 +2298,7 @@ describe('generateOtelcolConfig', () => {
           },
         },
         processors: {
-          "transform/1": {
+          transform: {
             metrics_statements: [
               'set(metric.description, "Sum") where metric.type == "Sum"',
             ],
@@ -2306,9 +2306,9 @@ describe('generateOtelcolConfig', () => {
         },
         service: {
           pipelines: {
-            "metrics/1": {
-              receivers: ["httpcheck/1"],
-              processors: ["transform/1"],
+            metrics: {
+              receivers: ["httpcheck"],
+              processors: ["transform"],
             },
           },
         },
@@ -2318,8 +2318,8 @@ describe('generateOtelcolConfig', () => {
 
   const otelInput2 : FullAgentPolicyInput = {
     type: OTEL_COLLECTOR_INPUT_TYPE,
-    id: 'test2',
-    name: 'test2',
+    id: 'test-2',
+    name: 'test-2',
     revision: 0,
     data_stream: {
       namespace: 'default'
@@ -2328,13 +2328,13 @@ describe('generateOtelcolConfig', () => {
     package_policy_id: 'otherpolicy',
     streams: [
       {
-        id: 'someid',
+        id: 'stream-id-1',
         data_stream: {
           dataset: 'somedataset',
           type: 'metrics',
         },
         receivers: {
-          "httpcheck/2": {
+          httpcheck: {
             targets: [
               {
                 endpoints: ['https://www.elastic.co'],
@@ -2343,7 +2343,7 @@ describe('generateOtelcolConfig', () => {
           },
         },
         processors: {
-          "transform/2": {
+          transform: {
             metrics_statements: [
               'set(metric.description, "Sum") where metric.type == "Sum"',
             ],
@@ -2351,9 +2351,9 @@ describe('generateOtelcolConfig', () => {
         },
         service: {
           pipelines: {
-            "metrics/2": {
-              receivers: ["httpcheck/2"],
-              processors: ["transform/2"],
+            metrics: {
+              receivers: ["httpcheck"],
+              processors: ["transform"],
             },
           },
         },
@@ -2374,146 +2374,146 @@ describe('generateOtelcolConfig', () => {
   it('should return the otel config when there is one', () => {
     const inputs : FullAgentPolicyInput[] = [otelInput1];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
-        receivers: {
-          "httpcheck/1": {
-            targets: [
-              {
-                endpoints: ['https://epr.elastic.co'],
-              },
-            ],
-          },
-        },
-        processors: {
-          "transform/1": {
-            metrics_statements: [
-              'set(metric.description, "Sum") where metric.type == "Sum"',
-            ],
-          },
-        },
-        connectors: {
-          "forward": {},
-        },
-        exporters: {
-          elasticsearch: {
-            endpoints: ['http://localhost:9200'],
-          },
-        },
-        service: {
-          pipelines: {
-            "metrics/1": {
-              receivers: ["httpcheck/1"],
-              processors: ["transform/1"],
-              exporters: ["forward"],
+      receivers: {
+        "httpcheck/test-1.stream-id-1": {
+          targets: [
+            {
+              endpoints: ['https://epr.elastic.co'],
             },
-            metrics: {
-              receivers: ["forward"],
-              exporters: ["elasticsearch"],
-            },
+          ],
+        },
+      },
+      processors: {
+        "transform/test-1.stream-id-1": {
+          metrics_statements: [
+            'set(metric.description, "Sum") where metric.type == "Sum"',
+          ],
+        },
+      },
+      connectors: {
+        "forward": {},
+      },
+      exporters: {
+        elasticsearch: {
+          endpoints: ['http://localhost:9200'],
+        },
+      },
+      service: {
+        pipelines: {
+          "metrics/test-1": {
+            receivers: ["httpcheck/test-1.stream-id-1"],
+            processors: ["transform/test-1.stream-id-1"],
+            exporters: ["forward"],
+          },
+          metrics: {
+            receivers: ["forward"],
+            exporters: ["elasticsearch"],
           },
         },
+      },
     });
   });
 
   it('should return the otel config if there is any', () => {
     const inputs : FullAgentPolicyInput[] = [logInput, otelInput1];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
-        receivers: {
-          "httpcheck/1": {
-            targets: [
-              {
-                endpoints: ['https://epr.elastic.co'],
-              },
-            ],
-          },
-        },
-        processors: {
-          "transform/1": {
-            metrics_statements: [
-              'set(metric.description, "Sum") where metric.type == "Sum"',
-            ],
-          },
-        },
-        connectors: {
-          "forward": {},
-        },
-        exporters: {
-          elasticsearch: {
-            endpoints: ['http://localhost:9200'],
-          },
-        },
-        service: {
-          pipelines: {
-            "metrics/1": {
-              receivers: ["httpcheck/1"],
-              processors: ["transform/1"],
-              exporters: ["forward"],
+      receivers: {
+        "httpcheck/test-1.stream-id-1": {
+          targets: [
+            {
+              endpoints: ['https://epr.elastic.co'],
             },
-            metrics: {
-              receivers: ["forward"],
-              exporters: ["elasticsearch"],
-            },
+          ],
+        },
+      },
+      processors: {
+        "transform/test-1.stream-id-1": {
+          metrics_statements: [
+            'set(metric.description, "Sum") where metric.type == "Sum"',
+          ],
+        },
+      },
+      connectors: {
+        "forward": {},
+      },
+      exporters: {
+        elasticsearch: {
+          endpoints: ['http://localhost:9200'],
+        },
+      },
+      service: {
+        pipelines: {
+          "metrics/test-1": {
+            receivers: ["httpcheck/test-1.stream-id-1"],
+            processors: ["transform/test-1.stream-id-1"],
+            exporters: ["forward"],
+          },
+          metrics: {
+            receivers: ["forward"],
+            exporters: ["elasticsearch"],
           },
         },
+      },
     });
   });
 
   it('should merge otel configs', () => {
     const inputs : FullAgentPolicyInput[] = [logInput, otelInput1, otelInput2];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
-        receivers: {
-          "httpcheck/1": {
-            targets: [
-              {
-                endpoints: ['https://epr.elastic.co'],
-              },
-            ],
-          },
-          "httpcheck/2": {
-            targets: [
-              {
-                endpoints: ['https://www.elastic.co'],
-              },
-            ],
-          },
-        },
-        processors: {
-          "transform/1": {
-            metrics_statements: [
-              'set(metric.description, "Sum") where metric.type == "Sum"',
-            ],
-          },
-          "transform/2": {
-            metrics_statements: [
-              'set(metric.description, "Sum") where metric.type == "Sum"',
-            ],
-          },
-        },
-        connectors: {
-          "forward": {},
-        },
-        exporters: {
-          elasticsearch: {
-            endpoints: ['http://localhost:9200'],
-          },
-        },
-        service: {
-          pipelines: {
-            "metrics/1": {
-              receivers: ["httpcheck/1"],
-              processors: ["transform/1"],
-              exporters: ["forward"],
+      receivers: {
+        "httpcheck/test-1.stream-id-1": {
+          targets: [
+            {
+              endpoints: ['https://epr.elastic.co'],
             },
-            "metrics/2": {
-              receivers: ["httpcheck/2"],
-              processors: ["transform/2"],
-              exporters: ["forward"],
+          ],
+        },
+        "httpcheck/test-2.stream-id-1": {
+          targets: [
+            {
+              endpoints: ['https://www.elastic.co'],
             },
-            metrics: {
-              receivers: ["forward"],
-              exporters: ["elasticsearch"],
-            },
+          ],
+        },
+      },
+      processors: {
+        "transform/test-1.stream-id-1": {
+          metrics_statements: [
+            'set(metric.description, "Sum") where metric.type == "Sum"',
+          ],
+        },
+        "transform/test-2.stream-id-1": {
+          metrics_statements: [
+            'set(metric.description, "Sum") where metric.type == "Sum"',
+          ],
+        },
+      },
+      connectors: {
+        "forward": {},
+      },
+      exporters: {
+        elasticsearch: {
+          endpoints: ['http://localhost:9200'],
+        },
+      },
+      service: {
+        pipelines: {
+          "metrics/test-1": {
+            receivers: ["httpcheck/test-1.stream-id-1"],
+            processors: ["transform/test-1.stream-id-1"],
+            exporters: ["forward"],
+          },
+          "metrics/test-2": {
+            receivers: ["httpcheck/test-2.stream-id-1"],
+            processors: ["transform/test-2.stream-id-1"],
+            exporters: ["forward"],
+          },
+          metrics: {
+            receivers: ["forward"],
+            exporters: ["elasticsearch"],
           },
         },
+      },
     });
   })
 });
