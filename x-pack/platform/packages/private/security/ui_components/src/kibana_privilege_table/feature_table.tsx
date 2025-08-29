@@ -337,7 +337,7 @@ export class FeatureTable extends Component<Props, State> {
 
     const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
     const buttonContent = (
-      <FeatureTableCell hasSubFeturePrivileges={hasSubFeaturePrivileges} feature={feature} />
+      <FeatureTableCell hasSubFeaturePrivileges={hasSubFeaturePrivileges} feature={feature} />
     );
 
     const extraAction = (

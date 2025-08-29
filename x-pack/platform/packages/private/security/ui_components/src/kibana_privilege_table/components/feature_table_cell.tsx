@@ -13,10 +13,10 @@ import type { SecuredFeature } from '@kbn/security-role-management-model';
 
 interface Props {
   feature: SecuredFeature;
-  hasSubFeturePrivileges?: boolean;
+  hasSubFeaturePrivileges?: boolean;
 }
 
-export const FeatureTableCell = ({ feature, hasSubFeturePrivileges }: Props) => {
+export const FeatureTableCell = ({ feature, hasSubFeaturePrivileges }: Props) => {
   const { euiTheme } = useEuiTheme();
   let tooltipElement = null;
   if (feature.getPrivilegesTooltip()) {
@@ -40,7 +40,7 @@ export const FeatureTableCell = ({ feature, hasSubFeturePrivileges }: Props) => 
   return (
     <EuiFlexGroup
       css={
-        !hasSubFeturePrivileges &&
+        !hasSubFeaturePrivileges &&
         css`
           margin-left: calc(${euiTheme.size.l} + ${euiTheme.size.xs});
         `
