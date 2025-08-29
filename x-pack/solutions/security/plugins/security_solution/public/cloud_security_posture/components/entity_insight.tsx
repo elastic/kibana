@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
-
-import React from 'react';
+import {
+  EuiAccordion,
+  EuiCallOut,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { i18n } from '@kbn/i18n';
 import type { EntityIdentifierFields } from '../../../common/entity_analytics/types';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
@@ -46,12 +54,15 @@ export const EntityInsight = <T,>({
   const { euiTheme } = useEuiTheme();
   const insightContent: React.ReactElement[] = [];
 
-  const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
+  const {
+    hasMisconfigurationFindings: showMisconfigurationsPreview,
+    has3PMisconfigurationFindings,
+  } = useHasMisconfigurations(field, value);
+
+  const { hasVulnerabilitiesFindings, has3PVulnerabilitiesFindings } = useHasVulnerabilities(
     field,
     value
   );
-
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, value);
 
   const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && field === 'host.name';
 
@@ -64,6 +75,13 @@ export const EntityInsight = <T,>({
     from,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
   });
+
+  const [showCallOut, setShowCallOut] = useState(!localStorage.getItem('InsightCallOutOnDismiss'));
+
+  const onDismiss = () => {
+    setShowCallOut(false);
+    localStorage.setItem('EuiCallOutOnDismissDemo', 'hidden');
+  };
 
   if (showAlertsPreview) {
     insightContent.push(
@@ -130,7 +148,43 @@ export const EntityInsight = <T,>({
               </EuiTitle>
             }
           >
-            <EuiSpacer size="m" />
+            {(has3PMisconfigurationFindings || has3PVulnerabilitiesFindings) && showCallOut ? (
+              <>
+                <EuiSpacer size="m" />
+
+                <EuiCallOut
+                  title={i18n.translate(
+                    'xpack.securitySolution.flyout.entityDetails.callOutTitle',
+                    {
+                      defaultMessage: '3rd party insights',
+                    }
+                  )}
+                  color="success"
+                  iconType="cheer"
+                  onDismiss={onDismiss}
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.callOutText"
+                    defaultMessage="Some insights are from an external cloud security product. {learnMoreLink}"
+                    values={{
+                      learnMoreLink: (
+                        <EuiLink
+                          href="https://www.elastic.co/docs/solutions/security/cloud/ingest-third-party-cloud-security-data"
+                          target="_blank"
+                          external
+                        >
+                          {'Learn more'}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiCallOut>
+
+                <EuiSpacer size="m" />
+              </>
+            ) : (
+              <EuiSpacer size="m" />
+            )}
             {insightContent}
           </EuiAccordion>
           <EuiHorizontalRule />
