@@ -22,18 +22,32 @@ export const useMigrationNameStep = ({
   setMigrationName,
   migrationName: storedMigrationName,
 }: MigrationNameStepProps): EuiStepProps => {
-  const { data: currentUserProfile } = useGetCurrentUserProfile();
+  const { data: currentUserProfile, isLoading } = useGetCurrentUserProfile();
 
   const migrationName = useMemo(() => {
     if (storedMigrationName) {
       return storedMigrationName;
     }
-    if (currentUserProfile?.user.username) {
-      const datetime = moment(Date.now()).format('llll'); // localized date and time (e.g., "Wed, 01 Jan 2025 12:00 PM")
-      return `${currentUserProfile.user.username}'s migration on ${datetime}`;
+    if (isLoading) {
+      return undefined; // profile is still loading
     }
-    return undefined; // profile loading
-  }, [storedMigrationName, currentUserProfile?.user.username]);
+
+    // localized date and time according to the locale including seconds
+    const datetime = moment(Date.now()).format('ddd , ll, LTS');
+
+    const userName = currentUserProfile?.user.full_name || currentUserProfile?.user.username;
+
+    if (userName) {
+      return `${userName}'s migration on ${datetime}`;
+    }
+
+    return `Migration created on ${datetime}`;
+  }, [
+    storedMigrationName,
+    currentUserProfile?.user.username,
+    currentUserProfile?.user.full_name,
+    isLoading,
+  ]);
 
   return {
     title: i18n.MIGRATION_NAME_INPUT_TITLE,

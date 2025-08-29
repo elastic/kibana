@@ -20,7 +20,6 @@ import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
 import {
   retrieveFields,
-  retrieveFieldsFromStringSources,
   retrievePolicies,
   retrievePoliciesFields,
   retrieveSources,
@@ -80,7 +79,7 @@ export async function validateQuery(
  * @internal
  */
 export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
-  getColumnsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
+  getColumnsFor: ['unknownColumn', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
   getPreferences: [],
@@ -130,21 +129,6 @@ async function validateAst(
       callbacks
     );
     fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
-  }
-
-  if (rootCommands.some(({ name }) => ['grok', 'dissect'].includes(name))) {
-    const fieldsFromGrokOrDissect = await retrieveFieldsFromStringSources(
-      queryString,
-      rootCommands,
-      callbacks
-    );
-    fieldsFromGrokOrDissect.forEach((value, key) => {
-      // if the field is already present, do not overwrite it
-      // Note: this can also overlap with some userDefinedColumns
-      if (!availableFields.has(key)) {
-        availableFields.set(key, value);
-      }
-    });
   }
 
   const userDefinedColumns = collectUserDefinedColumns(rootCommands, availableFields, queryString);

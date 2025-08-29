@@ -142,6 +142,8 @@
       "@kbn/canvas-plugin/*": ["x-pack/platform/plugins/private/canvas/*"],
       "@kbn/capture-oas-snapshot-cli": ["packages/kbn-capture-oas-snapshot-cli"],
       "@kbn/capture-oas-snapshot-cli/*": ["packages/kbn-capture-oas-snapshot-cli/*"],
+      "@kbn/cases-ai": ["x-pack/platform/packages/shared/cases-ai"],
+      "@kbn/cases-ai/*": ["x-pack/platform/packages/shared/cases-ai/*"],
       "@kbn/cases-api-integration-test-plugin": ["x-pack/platform/test/cases_api_integration/common/plugins/cases"],
       "@kbn/cases-api-integration-test-plugin/*": ["x-pack/platform/test/cases_api_integration/common/plugins/cases/*"],
       "@kbn/cases-components": ["src/platform/packages/shared/kbn-cases-components"],
@@ -342,6 +344,12 @@
       "@kbn/core-custom-branding-server-internal/*": ["src/core/packages/custom-branding/server-internal/*"],
       "@kbn/core-custom-branding-server-mocks": ["src/core/packages/custom-branding/server-mocks"],
       "@kbn/core-custom-branding-server-mocks/*": ["src/core/packages/custom-branding/server-mocks/*"],
+      "@kbn/core-data-streams-server": ["src/core/packages/data-streams/server"],
+      "@kbn/core-data-streams-server/*": ["src/core/packages/data-streams/server/*"],
+      "@kbn/core-data-streams-server-internal": ["src/core/packages/data-streams/server-internal"],
+      "@kbn/core-data-streams-server-internal/*": ["src/core/packages/data-streams/server-internal/*"],
+      "@kbn/core-data-streams-server-mocks": ["src/core/packages/data-streams/server-mocks"],
+      "@kbn/core-data-streams-server-mocks/*": ["src/core/packages/data-streams/server-mocks/*"],
       "@kbn/core-deprecations-browser": ["src/core/packages/deprecations/browser"],
       "@kbn/core-deprecations-browser/*": ["src/core/packages/deprecations/browser/*"],
       "@kbn/core-deprecations-browser-internal": ["src/core/packages/deprecations/browser-internal"],
@@ -784,6 +792,10 @@
       "@kbn/data-service-server/*": ["src/platform/packages/shared/kbn-data-service-server/*"],
       "@kbn/data-stream-adapter": ["x-pack/solutions/security/packages/data-stream-adapter"],
       "@kbn/data-stream-adapter/*": ["x-pack/solutions/security/packages/data-stream-adapter/*"],
+      "@kbn/data-streams": ["src/platform/packages/private/kbn-data-streams"],
+      "@kbn/data-streams/*": ["src/platform/packages/private/kbn-data-streams/*"],
+      "@kbn/data-streams-example-plugin": ["examples/data_streams_example"],
+      "@kbn/data-streams-example-plugin/*": ["examples/data_streams_example/*"],
       "@kbn/data-usage-plugin": ["x-pack/platform/plugins/private/data_usage"],
       "@kbn/data-usage-plugin/*": ["x-pack/platform/plugins/private/data_usage/*"],
       "@kbn/data-view-editor-plugin": ["src/platform/plugins/shared/data_view_editor"],
@@ -1026,6 +1038,8 @@
       "@kbn/expressions-explorer-plugin/*": ["examples/expressions_explorer/*"],
       "@kbn/expressions-plugin": ["src/platform/plugins/shared/expressions"],
       "@kbn/expressions-plugin/*": ["src/platform/plugins/shared/expressions/*"],
+      "@kbn/extract-plugin-translations": ["packages/kbn-extract-plugin-translations"],
+      "@kbn/extract-plugin-translations/*": ["packages/kbn-extract-plugin-translations/*"],
       "@kbn/failed-test-reporter-cli": ["packages/kbn-failed-test-reporter-cli"],
       "@kbn/failed-test-reporter-cli/*": ["packages/kbn-failed-test-reporter-cli/*"],
       "@kbn/failure-store-modal": ["x-pack/platform/packages/shared/kbn-failure-store-modal"],
@@ -1110,16 +1124,14 @@
       "@kbn/grid-example-plugin/*": ["examples/grid_example/*"],
       "@kbn/grid-layout": ["src/platform/packages/private/kbn-grid-layout"],
       "@kbn/grid-layout/*": ["src/platform/packages/private/kbn-grid-layout/*"],
+      "@kbn/grok-heuristics": ["x-pack/platform/packages/shared/kbn-grok-heuristics"],
+      "@kbn/grok-heuristics/*": ["x-pack/platform/packages/shared/kbn-grok-heuristics/*"],
       "@kbn/grok-ui": ["src/platform/packages/shared/kbn-grok-ui"],
       "@kbn/grok-ui/*": ["src/platform/packages/shared/kbn-grok-ui/*"],
       "@kbn/grokdebugger-plugin": ["x-pack/platform/plugins/private/grokdebugger"],
       "@kbn/grokdebugger-plugin/*": ["x-pack/platform/plugins/private/grokdebugger/*"],
       "@kbn/grouping": ["src/platform/packages/shared/kbn-grouping"],
       "@kbn/grouping/*": ["src/platform/packages/shared/kbn-grouping/*"],
-      "@kbn/guided-onboarding": ["src/platform/packages/shared/kbn-guided-onboarding"],
-      "@kbn/guided-onboarding/*": ["src/platform/packages/shared/kbn-guided-onboarding/*"],
-      "@kbn/guided-onboarding-plugin": ["src/platform/plugins/shared/guided_onboarding"],
-      "@kbn/guided-onboarding-plugin/*": ["src/platform/plugins/shared/guided_onboarding/*"],
       "@kbn/handlebars": ["src/platform/packages/private/kbn-handlebars"],
       "@kbn/handlebars/*": ["src/platform/packages/private/kbn-handlebars/*"],
       "@kbn/hapi-mocks": ["src/platform/packages/private/kbn-hapi-mocks"],
@@ -1514,6 +1526,8 @@
       "@kbn/osquery-io-ts-types/*": ["src/platform/packages/shared/kbn-osquery-io-ts-types/*"],
       "@kbn/osquery-plugin": ["x-pack/platform/plugins/shared/osquery"],
       "@kbn/osquery-plugin/*": ["x-pack/platform/plugins/shared/osquery/*"],
+      "@kbn/otel-semantic-conventions": ["src/platform/packages/shared/kbn-otel-semantic-conventions"],
+      "@kbn/otel-semantic-conventions/*": ["src/platform/packages/shared/kbn-otel-semantic-conventions/*"],
       "@kbn/paertial-results-example-plugin": ["examples/partial_results_example"],
       "@kbn/paertial-results-example-plugin/*": ["examples/partial_results_example/*"],
       "@kbn/page-attachment-schema": ["x-pack/platform/packages/shared/kbn-page-attachment-schema"],
@@ -2116,8 +2130,6 @@
       "@kbn/test-jest-helpers/*": ["src/platform/packages/shared/kbn-test-jest-helpers/*"],
       "@kbn/test-subj-selector": ["src/platform/packages/shared/kbn-test-subj-selector"],
       "@kbn/test-subj-selector/*": ["src/platform/packages/shared/kbn-test-subj-selector/*"],
-      "@kbn/test-suites-serverless": ["x-pack/test_serverless"],
-      "@kbn/test-suites-serverless/*": ["x-pack/test_serverless/*"],
       "@kbn/test-suites-src": ["src/platform/test"],
       "@kbn/test-suites-src/*": ["src/platform/test/*"],
       "@kbn/test-suites-xpack": ["x-pack/test"],
@@ -2304,8 +2316,6 @@
       "@kbn/wc-framework-types-common/*": ["x-pack/solutions/chat/packages/wc-framework-types-common/*"],
       "@kbn/wc-framework-types-server": ["x-pack/solutions/chat/packages/wc-framework-types-server"],
       "@kbn/wc-framework-types-server/*": ["x-pack/solutions/chat/packages/wc-framework-types-server/*"],
-      "@kbn/wc-genai-utils": ["x-pack/solutions/chat/packages/wc-genai-utils"],
-      "@kbn/wc-genai-utils/*": ["x-pack/solutions/chat/packages/wc-genai-utils/*"],
       "@kbn/wc-index-schema-builder": ["x-pack/solutions/chat/packages/wc-index-schema-builder"],
       "@kbn/wc-index-schema-builder/*": ["x-pack/solutions/chat/packages/wc-index-schema-builder/*"],
       "@kbn/wc-integration-utils": ["x-pack/solutions/chat/packages/wc-integration-utils"],
@@ -2348,13 +2358,23 @@
       "@kbn/zod-helpers/*": ["src/platform/packages/shared/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"],
+      "@emotion/core": [
+        "typings/@emotion"
+      ],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
-      "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
-      "@opentelemetry/semantic-conventions/incubating": ["typings/@opentelemetry/semantic-conventions/incubating"],
-      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
-      "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"],
+      "@elastic/opentelemetry-node/sdk": [
+        "typings/@elastic/opentelemetry-node/sdk"
+      ],
+      "@opentelemetry/semantic-conventions/incubating": [
+        "typings/@opentelemetry/semantic-conventions/incubating"
+      ],
+      "@typescript-eslint/parser": [
+        "typings/@typescript-eslint/parser"
+      ],
+      "@a2a-js/sdk/server": [
+        "typings/@a2a-js-sdk/server"
+      ],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
