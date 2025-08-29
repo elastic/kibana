@@ -3606,20 +3606,20 @@
   resolved "https://registry.yarnpkg.com/@inversifyjs/common/-/common-1.5.2.tgz#6836287fef1c25dddbdf6af345a33a6d6caf6835"
   integrity sha512-WlzR9xGadABS9gtgZQ+luoZ8V6qm4Ii6RQfcfC9Ho2SOlE6ZuemFo7PKJvKI0ikm8cmKbU8hw5UK6E4qovH21w==
 
-"@inversifyjs/container@1.12.1":
-  version "1.12.1"
-  resolved "https://registry.yarnpkg.com/@inversifyjs/container/-/container-1.12.1.tgz#6c1b142365074c5cd8766b0ec90092f02a7cddf4"
-  integrity sha512-E64SnmsJhbKA6idh/8zJNsBhMX52tjBrlFGfDfrNf63YLjF3hfOXqobWY/6Xln1jGxX79F7Z+WHrn4xNF12lzA==
+"@inversifyjs/container@1.12.6":
+  version "1.12.6"
+  resolved "https://registry.yarnpkg.com/@inversifyjs/container/-/container-1.12.6.tgz#205176e5f9b19970373d90a46a0a60aba8360b98"
+  integrity sha512-P0RWN5tkLPZG6HMa4zQCpiMfyzjI5JHJc/ZlHPcyXLO9FIrmB0sXi6Oa4ic3+GEO/L/mz+a5k8RRCsa7mQ94eg==
   dependencies:
     "@inversifyjs/common" "1.5.2"
-    "@inversifyjs/core" "6.0.1"
+    "@inversifyjs/core" "7.2.0"
     "@inversifyjs/plugin" "0.2.0"
     "@inversifyjs/reflect-metadata-utils" "1.3.0"
 
-"@inversifyjs/core@6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/@inversifyjs/core/-/core-6.0.1.tgz#be7e9ea30b5a94fb33214217066d51f6c797d977"
-  integrity sha512-i0T9eSdYSZCx9b3izzlC3NIuHV03RQ1vwEa3vXgvk2vPIgW11DqMQefEVmxVx1pQZoS1EOK3ENZfHqZ/omWlzg==
+"@inversifyjs/core@7.2.0":
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/@inversifyjs/core/-/core-7.2.0.tgz#d34d1b6a9072df9cf6f0c02a9694635ef4042ba5"
+  integrity sha512-rOmtf31TGTeO5BNZhobV0hoV5F0yGwVJFm8mWyoLJbemOH1ugZRMYlVyKXvSDZfMCi/MSU4EEasSi/NFaq4qeA==
   dependencies:
     "@inversifyjs/common" "1.5.2"
     "@inversifyjs/prototype-utils" "0.1.2"
@@ -22172,14 +22172,14 @@ invariant@^2.1.0, invariant@^2.2.4:
   dependencies:
     loose-envify "^1.0.0"
 
-inversify@^7.7.0:
-  version "7.7.0"
-  resolved "https://registry.yarnpkg.com/inversify/-/inversify-7.7.0.tgz#e25fab3547377a7cf966e80acb58c2ace2ff7e26"
-  integrity sha512-CLw7WbwULppLMNp6jPliwLbapnf996Bdju3VvtW0wrfI0LTuxv0h9uqrFh1RE3QO23+r4JK0hCarETJjDN4LFw==
+inversify@^7.9.0:
+  version "7.9.0"
+  resolved "https://registry.yarnpkg.com/inversify/-/inversify-7.9.0.tgz#f4a8ddc44298fbeaae32ed6520551ed7f96f62cc"
+  integrity sha512-bq5om1H9i5wXUoWfoubnNnSpD8Aw+uci6sH751M4RZHPKdccuniRNFO6pQf5AsPdO/Tcy4WPFx8FxaETsaQlhw==
   dependencies:
     "@inversifyjs/common" "1.5.2"
-    "@inversifyjs/container" "1.12.1"
-    "@inversifyjs/core" "6.0.1"
+    "@inversifyjs/container" "1.12.6"
+    "@inversifyjs/core" "7.2.0"
 
 invert-kv@^1.0.0:
   version "1.0.0"

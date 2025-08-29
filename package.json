@@ -1266,7 +1266,7 @@
     "icalendar": "0.7.1",
     "immer": "^9.0.21",
     "inquirer": "^8.2.7",
-    "inversify": "^7.7.0",
+    "inversify": "^7.9.0",
     "io-ts": "^2.2.22",
     "ipaddr.js": "2.0.0",
     "isbinaryfile": "4.0.2",
