@@ -29,8 +29,8 @@ export const LENS_ICON = 'lensApp';
 export const STAGE_ID = 'production';
 
 export const LENS_API_CONTENT_MANAGEMENT_VERSION = LENS_ITEM_VERSION_V1;
-export const LENS_API_VERSION = '1';
-export const LENS_API_ACCESS = 'internal';
+export const LENS_API_VERSION = '2023-10-31';
+export const LENS_API_ACCESS = 'public';
 export const LENS_API_PATH = '/api/lens';
 export const LENS_VIS_API_PATH = `${LENS_API_PATH}/visualizations`;
 
