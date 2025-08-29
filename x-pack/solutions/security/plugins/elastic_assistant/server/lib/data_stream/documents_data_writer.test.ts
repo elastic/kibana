@@ -16,6 +16,160 @@ import { DocumentsDataWriter } from './documents_data_writer';
 
 describe('DocumentsDataWriter', () => {
   const mockUser1 = authenticatedUser;
+
+  // Common test constants
+  const COMMON_SEARCH_PARAMS = {
+    _source: false,
+    ignore_unavailable: true,
+    seq_no_primary_term: true,
+    size: 1000,
+  };
+
+  const USER_FILTER = {
+    bool: {
+      should: [
+        {
+          bool: {
+            must_not: {
+              nested: {
+                path: 'users',
+                query: {
+                  exists: {
+                    field: 'users',
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          nested: {
+            path: 'users',
+            query: {
+              bool: {
+                should: [
+                  { term: { 'users.id': 'my_profile_uid' } },
+                  { term: { 'users.name': 'elastic' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          },
+        },
+      ],
+    },
+  };
+
+  const USER_FILTER_FOR_CONVERSATION = {
+    bool: {
+      should: [
+        {
+          bool: {
+            must: [
+              {
+                exists: { field: 'created_by' },
+              },
+              {
+                bool: {
+                  should: [
+                    { term: { 'created_by.id': 'my_profile_uid' } },
+                    { term: { 'created_by.name': 'elastic' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          bool: {
+            must: [
+              {
+                bool: {
+                  must_not: [
+                    {
+                      exists: { field: 'created_by' },
+                    },
+                  ],
+                },
+              },
+              {
+                nested: {
+                  path: 'users',
+                  query: {
+                    bool: {
+                      should: [
+                        { term: { 'users.id': 'my_profile_uid' } },
+                        { term: { 'users.name': 'elastic' } },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+
+  const USER_WITHOUT_PROFILE_FILTER = {
+    bool: {
+      should: [
+        {
+          bool: {
+            must_not: {
+              nested: {
+                path: 'users',
+                query: {
+                  exists: {
+                    field: 'users',
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          nested: {
+            path: 'users',
+            query: {
+              bool: {
+                should: [{ term: { 'users.name': 'elastic' } }],
+                minimum_should_match: 1,
+              },
+            },
+          },
+        },
+      ],
+    },
+  };
+
+  // Helper function to build complete search query
+  const buildSearchQuery = (filter?: { bool: { should: unknown[] } }) => ({
+    query: {
+      bool: {
+        must: [
+          {
+            bool: {
+              should: [
+                {
+                  ids: {
+                    values: ['1'],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        ...(filter && { filter }),
+      },
+    },
+    ...COMMON_SEARCH_PARAMS,
+  });
+
   describe('#bulk', () => {
     let writer: DocumentsDataWriter;
     let esClientMock: ElasticsearchClient;
@@ -223,43 +377,10 @@ describe('DocumentsDataWriter', () => {
           authenticatedUser: mockUser1,
         });
 
-        expect(esClientMock.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            query: expect.objectContaining({
-              bool: expect.objectContaining({
-                filter: expect.objectContaining({
-                  bool: expect.objectContaining({
-                    should: expect.arrayContaining([
-                      expect.objectContaining({
-                        bool: expect.objectContaining({
-                          must_not: expect.objectContaining({
-                            nested: expect.objectContaining({
-                              path: 'users',
-                            }),
-                          }),
-                        }),
-                      }),
-                      expect.objectContaining({
-                        nested: expect.objectContaining({
-                          path: 'users',
-                          query: expect.objectContaining({
-                            bool: expect.objectContaining({
-                              should: expect.arrayContaining([
-                                { term: { 'users.id': 'my_profile_uid' } },
-                                { term: { 'users.name': 'elastic' } },
-                              ]),
-                              minimum_should_match: 1,
-                            }),
-                          }),
-                        }),
-                      }),
-                    ]),
-                  }),
-                }),
-              }),
-            }),
-          })
-        );
+        expect(esClientMock.search).toHaveBeenCalledWith({
+          ...buildSearchQuery(USER_FILTER),
+          index: '.kibana-elastic-ai-assistant-knowledge-base-default',
+        });
       });
     });
 
@@ -293,30 +414,10 @@ describe('DocumentsDataWriter', () => {
           authenticatedUser: mockUser1,
         });
 
-        expect(esClientMock.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            query: expect.objectContaining({
-              bool: expect.objectContaining({
-                filter: expect.objectContaining({
-                  bool: expect.objectContaining({
-                    should: expect.arrayContaining([
-                      expect.objectContaining({
-                        bool: expect.objectContaining({
-                          must: expect.arrayContaining([
-                            expect.objectContaining({
-                              exists: { field: 'created_by' },
-                            }),
-                          ]),
-                        }),
-                      }),
-                    ]),
-                    minimum_should_match: 1,
-                  }),
-                }),
-              }),
-            }),
-          })
-        );
+        expect(esClientMock.search).toHaveBeenCalledWith({
+          ...buildSearchQuery(USER_FILTER_FOR_CONVERSATION),
+          index: '.kibana-elastic-ai-assistant-conversations-default',
+        });
       });
     });
 
@@ -349,29 +450,10 @@ describe('DocumentsDataWriter', () => {
           authenticatedUser: mockUser1,
         });
 
-        expect(esClientMock.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            query: expect.objectContaining({
-              bool: expect.objectContaining({
-                filter: expect.objectContaining({
-                  bool: expect.objectContaining({
-                    should: expect.arrayContaining([
-                      expect.objectContaining({
-                        bool: expect.objectContaining({
-                          must_not: expect.objectContaining({
-                            nested: expect.objectContaining({
-                              path: 'users',
-                            }),
-                          }),
-                        }),
-                      }),
-                    ]),
-                  }),
-                }),
-              }),
-            }),
-          })
-        );
+        expect(esClientMock.search).toHaveBeenCalledWith({
+          ...buildSearchQuery(USER_FILTER),
+          index: '.kibana-elastic-ai-assistant-knowledge-base-default',
+        });
       });
     });
 
@@ -404,30 +486,10 @@ describe('DocumentsDataWriter', () => {
           authenticatedUser: mockUser1,
         });
 
-        expect(esClientMock.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            query: expect.objectContaining({
-              bool: expect.objectContaining({
-                filter: expect.objectContaining({
-                  bool: expect.objectContaining({
-                    should: expect.arrayContaining([
-                      expect.objectContaining({
-                        bool: expect.objectContaining({
-                          must: expect.arrayContaining([
-                            expect.objectContaining({
-                              exists: { field: 'created_by' },
-                            }),
-                          ]),
-                        }),
-                      }),
-                    ]),
-                    minimum_should_match: 1,
-                  }),
-                }),
-              }),
-            }),
-          })
-        );
+        expect(esClientMock.search).toHaveBeenCalledWith({
+          ...buildSearchQuery(USER_FILTER_FOR_CONVERSATION),
+          index: '.kibana-elastic-ai-assistant-conversations-default',
+        });
       });
     });
 
@@ -469,32 +531,10 @@ describe('DocumentsDataWriter', () => {
           authenticatedUser: userWithoutProfileUid,
         });
 
-        expect(esClientMock.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            query: expect.objectContaining({
-              bool: expect.objectContaining({
-                filter: expect.objectContaining({
-                  bool: expect.objectContaining({
-                    should: expect.arrayContaining([
-                      expect.objectContaining({
-                        nested: expect.objectContaining({
-                          query: expect.objectContaining({
-                            bool: expect.objectContaining({
-                              should: expect.arrayContaining([
-                                { term: { 'users.name': 'elastic' } },
-                              ]),
-                              minimum_should_match: 1,
-                            }),
-                          }),
-                        }),
-                      }),
-                    ]),
-                  }),
-                }),
-              }),
-            }),
-          })
-        );
+        expect(esClientMock.search).toHaveBeenCalledWith({
+          ...buildSearchQuery(USER_WITHOUT_PROFILE_FILTER),
+          index: '.kibana-elastic-ai-assistant-knowledge-base-default',
+        });
       });
     });
 
@@ -515,28 +555,10 @@ describe('DocumentsDataWriter', () => {
           getUpdateScript: (doc) => ({ doc }),
         });
 
-        expect(esClientMock.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            query: expect.objectContaining({
-              bool: expect.objectContaining({
-                must: expect.arrayContaining([
-                  expect.objectContaining({
-                    bool: expect.objectContaining({
-                      should: expect.arrayContaining([
-                        expect.objectContaining({
-                          ids: expect.objectContaining({
-                            values: ['1'],
-                          }),
-                        }),
-                      ]),
-                    }),
-                  }),
-                ]),
-                // Should not have filter property when no authenticated user
-              }),
-            }),
-          })
-        );
+        expect(esClientMock.search).toHaveBeenCalledWith({
+          ...buildSearchQuery(),
+          index: 'documents-default',
+        });
       });
 
       it('does not apply user filtering for conversation documents', async () => {
@@ -563,28 +585,10 @@ describe('DocumentsDataWriter', () => {
           getUpdateScript: (doc) => ({ doc }),
         });
 
-        expect(esClientMock.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            query: expect.objectContaining({
-              bool: expect.objectContaining({
-                must: expect.arrayContaining([
-                  expect.objectContaining({
-                    bool: expect.objectContaining({
-                      should: expect.arrayContaining([
-                        expect.objectContaining({
-                          ids: expect.objectContaining({
-                            values: ['1'],
-                          }),
-                        }),
-                      ]),
-                    }),
-                  }),
-                ]),
-                // Should not have filter property when no authenticated user
-              }),
-            }),
-          })
-        );
+        expect(esClientMock.search).toHaveBeenCalledWith({
+          ...buildSearchQuery(),
+          index: '.kibana-elastic-ai-assistant-conversations-default',
+        });
       });
     });
   });
