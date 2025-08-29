@@ -5,7 +5,6 @@ building, traversal, pretty-printing, and manipulation features on top of a
 custom compact AST representation, which is designed to be resilient to many
 grammar changes.
 
-
 ### Contents of the package
 
 At the lowest level, the package provides a parser that converts ES|QL text into
@@ -15,7 +14,7 @@ manually:
 - [`parser` &mdash; Contains text to ES|QL AST parsing code](./src/parser/README.md).
 - [`builder` &mdash; Contains the `Builder` class for AST node construction](./src/builder/README.md).
 
-The *Traversal API* lets you walk the AST. The `Walker` class is a simple
+The _Traversal API_ lets you walk the AST. The `Walker` class is a simple
 to use, but the `Visitor` class is more powerful and flexible:
 
 - [`walker` &mdash; Contains the ES|QL AST `Walker` utility](./src/walker/README.md).
@@ -27,15 +26,18 @@ allow you to traverse and modify the AST, or to easily construct AST nodes:
 - [`mutate` &mdash; Contains code for traversing and mutating the AST](./src/mutate/README.md).
 - [`synth` &mdash; Ability to construct AST nodes from template strings](./src/synth/README.md).
 
-The *Pretty-printing API* lets you format the AST to text. There are two
+The _Pretty-printing API_ lets you format the AST to text. There are two
 implementations &mdash; a basic pretty-printer and a wrapping pretty-printer:
 
 - [`pretty_print` &mdash; Contains code for formatting AST to text](./src/pretty_print/README.md).
 
-The *Commands registry* allows you to register a new command:
+The _Commands registry_ allows you to register a new command:
 
 - [`commands_registry` &mdash; Provides a centralized system for managing and interacting with ES|QL commands](./src/commands_registry/README.md).
 
+The _Composer API_ provides a high-level, secure, and developer-friendly way to build ES|QL queries:
+
+- [`composer` &mdash; ES|QL query composer with secure parameter handling and fluent API](./src/composer/README.md).
 
 ## Demo
 
@@ -46,14 +48,13 @@ can run it in Storybook, using the following command:
 yarn storybook esql_ast_inspector
 ```
 
-Alternatively, you can start Kibana with *Example Plugins* enabled, using:
+Alternatively, you can start Kibana with _Example Plugins_ enabled, using:
 
 ```bash
 yarn start --run-examples
 ```
 
-Then navigate to the *ES|QL AST Inspector* plugin in the Kibana UI.
-
+Then navigate to the _ES|QL AST Inspector_ plugin in the Kibana UI.
 
 ## Keeping ES|QL AST library up to date
 

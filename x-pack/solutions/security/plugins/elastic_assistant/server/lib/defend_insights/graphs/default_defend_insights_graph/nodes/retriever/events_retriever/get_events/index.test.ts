@@ -77,6 +77,7 @@ describe('getAnonymizedEvents', () => {
       insightType: null as unknown as DefendInsightType,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
+      kbDataClient: null,
     });
 
     expect(result).toEqual([]);
@@ -90,6 +91,7 @@ describe('getAnonymizedEvents', () => {
       insightType: DefendInsightType.Enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
+      kbDataClient: null,
     });
 
     expect(result).toEqual([]);
@@ -100,6 +102,7 @@ describe('getAnonymizedEvents', () => {
       insightType: DefendInsightType.Enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
+      kbDataClient: null,
     });
 
     expect(mockEsClient.search).toHaveBeenCalled();
@@ -112,6 +115,7 @@ describe('getAnonymizedEvents', () => {
       insightType: DefendInsightType.Enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
+      kbDataClient: null,
     });
 
     expect(mockedGetRawDataOrDefault).toHaveBeenCalledWith({
@@ -128,6 +132,7 @@ describe('getAnonymizedEvents', () => {
       insightType: DefendInsightType.Enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
+      kbDataClient: null,
       anonymizationFields: mockAnonymizationFields,
       onNewReplacements,
     });
@@ -147,6 +152,7 @@ describe('getAnonymizedEvents', () => {
       insightType: DefendInsightType.Enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
+      kbDataClient: null,
       anonymizationFields: mockAnonymizationFields,
       replacements: mockAnonymizedEventsReplacements,
       onNewReplacements,
@@ -167,6 +173,7 @@ describe('getAnonymizedEvents', () => {
       insightType: DefendInsightType.Enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
+      kbDataClient: null,
       start,
       end,
     });
@@ -198,6 +205,7 @@ describe('getAnonymizedEvents', () => {
       insightType: DefendInsightType.Enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
+      kbDataClient: null,
       size,
     });
 
@@ -233,6 +241,7 @@ describe('getAnonymizedEvents', () => {
         insightType: DefendInsightType.Enum.incompatible_antivirus,
         endpointIds: ['test-endpoint'],
         esClient: mockEsClient,
+        kbDataClient: null,
       })
     ).rejects.toThrow(error);
   });
@@ -250,6 +259,7 @@ describe('getAnonymizedEvents', () => {
       insightType: DefendInsightType.Enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
+      kbDataClient: null,
     });
 
     expect(result).toEqual([]);
@@ -263,6 +273,7 @@ describe('getAnonymizedEvents', () => {
       insightType: DefendInsightType.Enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
+      kbDataClient: null,
       anonymizationFields: mockAnonymizationFields,
     });
 
