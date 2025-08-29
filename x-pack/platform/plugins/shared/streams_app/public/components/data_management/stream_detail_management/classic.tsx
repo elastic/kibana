@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import type { ManagementTabs } from './wrapper';
@@ -68,6 +68,7 @@ export function ClassicStreamDetailManagement({
               <EuiBadgeGroup gutterSize="s">
                 {Streams.ClassicStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
                 <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+                <StreamDetailDataQualityIndicator controller={dataQualityController} />
               </EuiBadgeGroup>
             </EuiFlexGroup>
           }
@@ -123,23 +124,17 @@ export function ClassicStreamDetailManagement({
   tabs.dataQuality = {
     content: <StreamDetailDataQuality controller={dataQualityController} definition={definition} />,
     label: (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem>
-          <EuiToolTip
-            content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
-              defaultMessage: 'View details about this classic stream’s data quality',
-            })}
-          >
-            <span>
-              {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
-                defaultMessage: 'Data quality',
-              })}
-            </span>
-          </EuiToolTip>
-        </EuiFlexItem>
-        <StreamDetailDataQualityIndicator controller={dataQualityController} />
-        <EuiFlexItem />
-      </EuiFlexGroup>
+      <EuiToolTip
+        content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
+          defaultMessage: 'View details about this classic stream’s data quality',
+        })}
+      >
+        <span>
+          {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+            defaultMessage: 'Data quality',
+          })}
+        </span>
+      </EuiToolTip>
     ),
   };
 
@@ -176,5 +171,7 @@ export function ClassicStreamDetailManagement({
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'enrich' } }} />;
   }
 
-  return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
+  return (
+    <Wrapper tabs={tabs} streamId={key} tab={tab} dataQualityController={dataQualityController} />
+  );
 }

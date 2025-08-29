@@ -17,12 +17,18 @@ import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
+import type { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import type { ReactNode } from 'react';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../stream_badges';
+import {
+  ClassicStreamBadge,
+  DiscoverBadgeButton,
+  LifecycleBadge,
+  StreamDetailDataQualityIndicator,
+} from '../../stream_badges';
 import { FeatureFlagStreamsContentPackUIEnabled } from '../../../../common/feature_flags';
 import { ExportContentPackFlyout } from '../content/export_flyout';
 import { ImportContentPackFlyout } from '../content/import_flyout';
@@ -39,10 +45,12 @@ export function Wrapper({
   tabs,
   streamId,
   tab,
+  dataQualityController,
 }: {
   tabs: ManagementTabs;
   streamId: string;
   tab: string;
+  dataQualityController: DatasetQualityDetailsController | undefined;
 }) {
   const router = useStreamsAppRouter();
   const { definition, refresh: refreshDefinition } = useStreamDetail();
@@ -108,6 +116,9 @@ export function Wrapper({
                   {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
                   {Streams.ingest.all.GetResponse.is(definition) && (
                     <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+                  )}
+                  {dataQualityController && (
+                    <StreamDetailDataQualityIndicator controller={dataQualityController} />
                   )}
                 </EuiFlexGroup>
               </EuiFlexItem>

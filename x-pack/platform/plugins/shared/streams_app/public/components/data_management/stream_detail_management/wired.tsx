@@ -122,5 +122,7 @@ export function WiredStreamDetailManagement({
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'route' } }} />;
   }
 
-  return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
+  return (
+    <Wrapper tabs={tabs} streamId={key} tab={tab} dataQualityController={dataQualityController} />
+  );
 }
