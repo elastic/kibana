@@ -7,6 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
+import { API_BASE_PATH_REINDEX_SERVICE } from '@kbn/reindex-service-plugin/server';
 import { API_BASE_PATH } from '../../../common/constants';
 import type {
   CloudBackupStatus,
@@ -111,13 +112,14 @@ const registerHttpRequestMockHelpers = (
     indexName: string,
     response?: Record<string, any>,
     error?: ResponseError
-  ) => mockResponse('GET', `${API_BASE_PATH}/reindex/${indexName}`, response, error);
+  ) =>
+    mockResponse('GET', `${API_BASE_PATH_REINDEX_SERVICE}/reindex/${indexName}`, response, error);
 
   const setStartReindexingResponse = (
     indexName: string,
     response?: object,
     error?: ResponseError
-  ) => mockResponse('POST', `${API_BASE_PATH}/reindex`, response, error);
+  ) => mockResponse('POST', `${API_BASE_PATH_REINDEX_SERVICE}/reindex`, response, error);
 
   const setDeleteMlSnapshotResponse = (
     jobId: string,

@@ -6,4 +6,4 @@
  */
 
 //
-export const API_BASE_PATH_UPRGRADE_ASSISTANT = '/api/reindex_service';
+export const API_BASE_PATH_REINDEX_SERVICE = '/api/reindex_service';

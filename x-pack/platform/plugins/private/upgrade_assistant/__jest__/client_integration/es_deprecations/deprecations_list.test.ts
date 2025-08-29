@@ -17,6 +17,7 @@ import type {
 } from '../../../common/types';
 import { DataStreamMigrationStatus } from '../../../common/types';
 import { ReindexStep, ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { API_BASE_PATH_REINDEX_SERVICE } from '@kbn/reindex-service-plugin/server';
 import { setupEnvironment } from '../helpers';
 import type { ElasticsearchTestBed } from './es_deprecations.helpers';
 import { setupElasticsearchPage } from './es_deprecations.helpers';
@@ -96,7 +97,7 @@ describe('ES deprecations table', () => {
       expect.anything()
     );
     expect(httpSetup.get).toHaveBeenCalledWith(
-      `${API_BASE_PATH}/reindex/${reindexDeprecation.index}`,
+      `${API_BASE_PATH_REINDEX_SERVICE}/reindex/${reindexDeprecation.index}`,
       expect.anything()
     );
 
