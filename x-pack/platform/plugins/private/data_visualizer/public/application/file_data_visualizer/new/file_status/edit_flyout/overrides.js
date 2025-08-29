@@ -364,7 +364,7 @@ class OverridesUI extends Component {
           />
         </EuiFormRow>
         {format === FILE_FORMATS.DELIMITED && (
-          <React.Fragment>
+          <>
             <EuiFormRow
               label={
                 <FormattedMessage
@@ -438,10 +438,10 @@ class OverridesUI extends Component {
                 onChange={this.onShouldTrimFieldsChange}
               />
             </EuiFormRow>
-          </React.Fragment>
+          </>
         )}
         {format === FILE_FORMATS.SEMI_STRUCTURED_TEXT && (
-          <React.Fragment>
+          <>
             <EuiFormRow
               label={
                 <FormattedMessage
@@ -456,27 +456,13 @@ class OverridesUI extends Component {
                 onChange={this.grokPatternChange}
               />
             </EuiFormRow>
-          </React.Fragment>
+          </>
         )}
 
-        <EuiFormRow>
-          <EuiSwitch
-            id={'containsTimeField'}
-            label={
-              <FormattedMessage
-                id="xpack.dataVisualizer.file.editFlyout.overrides.containsTimeFieldLabel"
-                defaultMessage="Contains time field"
-              />
-            }
-            checked={containsTimeField}
-            onChange={this.onContainsTimeFieldChange}
-          />
-        </EuiFormRow>
-
-        <EuiHorizontalRule />
-
-        {containsTimeField ? (
+        {format === FILE_FORMATS.DELIMITED || format === FILE_FORMATS.SEMI_STRUCTURED_TEXT ? (
           <>
+            <EuiHorizontalRule />
+
             <SectionTitle>
               <FormattedMessage
                 id="xpack.dataVisualizer.file.editFlyout.overrides.dateAndTimeTitle"
@@ -484,64 +470,82 @@ class OverridesUI extends Component {
               />
             </SectionTitle>
 
-            <EuiFormRow
-              helpText={timestampFormatHelp}
-              label={
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.editFlyout.overrides.timestampFormatFormRowLabel"
-                  defaultMessage="Timestamp format"
-                />
-              }
-            >
-              <EuiComboBox
-                options={timestampFormatOptions}
-                selectedOptions={selectedOption(timestampFormat)}
-                onChange={this.onTimestampFormatChange}
-                singleSelection={{ asPlainText: true }}
-                isClearable={false}
-              />
-            </EuiFormRow>
-            {timestampFormat === CUSTOM_DROPDOWN_OPTION && (
-              <EuiFormRow
-                error={timestampFormatErrorsList}
-                isInvalid={timestampFormatValid === false}
+            <EuiFormRow>
+              <EuiSwitch
+                id={'containsTimeField'}
                 label={
                   <FormattedMessage
-                    id="xpack.dataVisualizer.file.editFlyout.overrides.customTimestampFormatFormRowLabel"
-                    defaultMessage="Custom timestamp format"
+                    id="xpack.dataVisualizer.file.editFlyout.overrides.containsTimeFieldLabel"
+                    defaultMessage="Contains time field"
                   />
                 }
-              >
-                <EuiFieldText
-                  value={customTimestampFormat}
-                  onChange={this.onCustomTimestampFormatChange}
-                  isInvalid={timestampFormatValid === false}
-                />
-              </EuiFormRow>
-            )}
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.editFlyout.overrides.timeFieldFormRowLabel"
-                  defaultMessage="Time field"
-                />
-              }
-            >
-              <EuiComboBox
-                options={fieldOptions}
-                selectedOptions={selectedOption(timestampField)}
-                onChange={this.onTimestampFieldChange}
-                singleSelection={{ asPlainText: true }}
-                isClearable={false}
+                checked={containsTimeField}
+                onChange={this.onContainsTimeFieldChange}
               />
             </EuiFormRow>
 
-            <EuiHorizontalRule />
+            {containsTimeField ? (
+              <>
+                <EuiFormRow
+                  helpText={timestampFormatHelp}
+                  label={
+                    <FormattedMessage
+                      id="xpack.dataVisualizer.file.editFlyout.overrides.timestampFormatFormRowLabel"
+                      defaultMessage="Timestamp format"
+                    />
+                  }
+                >
+                  <EuiComboBox
+                    options={timestampFormatOptions}
+                    selectedOptions={selectedOption(timestampFormat)}
+                    onChange={this.onTimestampFormatChange}
+                    singleSelection={{ asPlainText: true }}
+                    isClearable={false}
+                  />
+                </EuiFormRow>
+                {timestampFormat === CUSTOM_DROPDOWN_OPTION && (
+                  <EuiFormRow
+                    error={timestampFormatErrorsList}
+                    isInvalid={timestampFormatValid === false}
+                    label={
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.file.editFlyout.overrides.customTimestampFormatFormRowLabel"
+                        defaultMessage="Custom timestamp format"
+                      />
+                    }
+                  >
+                    <EuiFieldText
+                      value={customTimestampFormat}
+                      onChange={this.onCustomTimestampFormatChange}
+                      isInvalid={timestampFormatValid === false}
+                    />
+                  </EuiFormRow>
+                )}
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.dataVisualizer.file.editFlyout.overrides.timeFieldFormRowLabel"
+                      defaultMessage="Time field"
+                    />
+                  }
+                >
+                  <EuiComboBox
+                    options={fieldOptions}
+                    selectedOptions={selectedOption(timestampField)}
+                    onChange={this.onTimestampFieldChange}
+                    singleSelection={{ asPlainText: true }}
+                    isClearable={false}
+                  />
+                </EuiFormRow>
+              </>
+            ) : null}
           </>
         ) : null}
 
         {format === FILE_FORMATS.DELIMITED && originalColumnNames.length > 0 && (
-          <React.Fragment>
+          <>
+            <EuiHorizontalRule />
+
             <SectionTitle>
               <FormattedMessage
                 id="xpack.dataVisualizer.file.editFlyout.overrides.editFieldNamesTitle"
@@ -557,15 +561,17 @@ class OverridesUI extends Component {
                 />
               </EuiFormRow>
             ))}
-          </React.Fragment>
+          </>
         )}
 
         {format === FILE_FORMATS.SEMI_STRUCTURED_TEXT && originalGrokFieldNames.length > 0 && (
-          <React.Fragment>
+          <>
+            <EuiHorizontalRule />
+
             <SectionTitle>
               <FormattedMessage
                 id="xpack.dataVisualizer.file.editFlyout.overrides.editFieldNamesTitle"
-                defaultMessage="Edit field names"
+                defaultMessage="Field names"
               />
             </SectionTitle>
 
@@ -577,7 +583,7 @@ class OverridesUI extends Component {
                 />
               </EuiFormRow>
             ))}
-          </React.Fragment>
+          </>
         )}
       </EuiForm>
     );
