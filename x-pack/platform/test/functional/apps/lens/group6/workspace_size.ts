@@ -223,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.switchToVisualization('lnsMetric');
       });
 
-      await assertWorkspaceDimensions('300px', '300px');
+      await assertWorkspaceDimensions('310px', '310px');
 
       await lens.configureDimension({
         dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
