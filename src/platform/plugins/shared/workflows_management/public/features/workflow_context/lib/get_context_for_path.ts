@@ -8,7 +8,8 @@
  */
 
 import { z } from '@kbn/zod';
-import type { WorkflowContext, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowYaml, StepContext } from '@kbn/workflows';
+import { WorkflowExecutionContextSchema, WorkflowDataContextSchema } from '@kbn/workflows';
 import { getStepId } from '@kbn/workflows';
 import _ from 'lodash';
 import { getAllPredecessors } from '../../../shared/lib/graph_utils';
@@ -18,7 +19,8 @@ import { getSchemaAtPath, inferZodType } from '../../../../common/lib/zod_utils'
 
 function getRootContextSchema(definition: WorkflowYaml) {
   return z.object({
-    workflowRunId: z.string(),
+    execution: WorkflowExecutionContextSchema,
+    workflow: WorkflowDataContextSchema,
     now: z.date(),
     event: EventSchema,
     steps: z.object({}),
@@ -90,8 +92,9 @@ export function getContextSchemaForPath(
       steps: outputsSchema,
     });
   }
+  // TODO: search graph for foreach steps, which contain this step in their steps array
+  // const somePredecessorIsForEach =
   if (nearestStep.foreach) {
-    // TODO: add foreach item type
     let itemSchema: z.ZodType = z.any();
     if (nearestStep.foreach.startsWith('steps.') || nearestStep.foreach.startsWith('consts.')) {
       const schema = getSchemaAtPath(contextSchema, nearestStep.foreach);
@@ -103,5 +106,5 @@ export function getContextSchemaForPath(
       foreach: z.object({ item: itemSchema }),
     });
   }
-  return contextSchema satisfies z.ZodType<WorkflowContext>;
+  return contextSchema satisfies z.ZodType<StepContext>;
 }
