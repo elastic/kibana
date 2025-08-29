@@ -19,6 +19,7 @@ import {
   EuiSkeletonTitle,
   EuiSwitch,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
@@ -40,6 +41,7 @@ export interface WorkflowDetailHeaderProps {
   handleToggleWorkflow: () => void;
   canTestWorkflow: boolean;
   handleTestClick: () => void;
+  isValid: boolean;
 }
 
 export const WorkflowDetailHeader = ({
@@ -55,6 +57,7 @@ export const WorkflowDetailHeader = ({
   canTestWorkflow,
   handleTestClick,
   handleTabChange,
+  isValid,
 }: WorkflowDetailHeaderProps) => {
   const styles = useMemoCss(componentStyles);
 
@@ -115,20 +118,24 @@ export const WorkflowDetailHeader = ({
           }}
         >
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m">
-            <EuiSwitch
-              disabled={!canSaveWorkflow || isLoading}
-              checked={isEnabled}
-              onChange={() => handleToggleWorkflow()}
-              label={
-                isEnabled
-                  ? i18n.translate('workflows.workflowDetailHeader.enabled', {
-                      defaultMessage: 'Enabled',
+            <EuiToolTip
+              content={
+                !isValid
+                  ? i18n.translate('workflows.workflowDetailHeader.invalid', {
+                      defaultMessage: 'Fix errors to enable workflow',
                     })
-                  : i18n.translate('workflows.workflowDetailHeader.disabled', {
-                      defaultMessage: 'Disabled',
-                    })
+                  : undefined
               }
-            />
+            >
+              <EuiSwitch
+                disabled={isLoading || !canSaveWorkflow || !isValid}
+                checked={isEnabled}
+                onChange={() => handleToggleWorkflow()}
+                label={i18n.translate('workflows.workflowDetailHeader.enabled', {
+                  defaultMessage: 'Enabled',
+                })}
+              />
+            </EuiToolTip>
             <div css={styles.separator} />
             <EuiButtonIcon
               display="base"

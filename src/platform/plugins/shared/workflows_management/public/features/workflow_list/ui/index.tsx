@@ -9,7 +9,6 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiFlexGroup,
@@ -25,14 +24,14 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelative } from '@kbn/i18n-react';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
 import type { WorkflowsSearchParams } from '../../../types';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import { getExecutionStatusIcon } from '../../../shared/ui';
+import { WorkflowStatus, getExecutionStatusIcon } from '../../../shared/ui';
 import { getStatusLabel } from '../../../shared/translations';
 
 interface WorkflowListProps {
@@ -197,15 +196,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         name: 'Valid',
         field: 'valid',
         render: (value: boolean) => {
-          return (
-            <EuiBadge color={value ? 'default' : 'warning'} iconType={value ? 'check' : 'warning'}>
-              {value ? (
-                <FormattedMessage id="workflows.workflowList.valid" defaultMessage="Valid" />
-              ) : (
-                <FormattedMessage id="workflows.workflowList.invalid" defaultMessage="Invalid" />
-              )}
-            </EuiBadge>
-          );
+          return <WorkflowStatus valid={value} />;
         },
       },
       {

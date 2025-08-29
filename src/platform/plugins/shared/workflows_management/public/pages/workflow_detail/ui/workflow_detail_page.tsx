@@ -54,6 +54,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
 
+  const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
+
   chrome!.setBreadcrumbs([
     {
       text: i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
@@ -68,12 +70,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   ]);
 
   const { updateWorkflow, runWorkflow } = useWorkflowActions();
-  const canSaveWorkflow =
-    Boolean(application?.capabilities.workflowsManagement.updateWorkflow) && hasChanges;
+  const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow =
     Boolean(application?.capabilities.workflowsManagement.executeWorkflow) &&
     Boolean(workflow?.enabled);
   const canTestWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
+  const canToggleWorkflow =
+    Boolean(application?.capabilities.workflowsManagement.updateWorkflow) &&
+    Boolean(workflow?.valid);
 
   const handleSave = () => {
     if (!id) {
@@ -206,6 +210,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         activeTab={activeTab}
         canRunWorkflow={canRunWorkflow}
         canSaveWorkflow={canSaveWorkflow}
+        isValid={workflow?.valid ?? true}
         isEnabled={workflow?.enabled ?? false}
         handleRunClick={handleRunClick}
         handleSave={handleSave}
