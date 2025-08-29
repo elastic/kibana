@@ -33,8 +33,7 @@ export const manualRuleRun = async ({
     .send([
       {
         rule_id: ruleId,
-        start,
-        end,
+        ranges: [{ start, end }],
       },
     ]);
 
