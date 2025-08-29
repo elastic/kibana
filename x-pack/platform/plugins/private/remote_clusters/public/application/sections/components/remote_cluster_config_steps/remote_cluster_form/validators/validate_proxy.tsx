@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { isAddressValid, isPortValid } from './validate_address';
+import { isAddressValid, isPortValid } from '../../../../../../../common/lib';
 
 export function validateProxy(proxy?: string): null | JSX.Element {
   if (!proxy) {

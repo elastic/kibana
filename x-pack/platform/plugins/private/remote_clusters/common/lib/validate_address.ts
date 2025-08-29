@@ -40,10 +40,6 @@ function isValidIPv4(host: string): boolean {
   return IP4_RE.test(host) && IPv4.isValid(host);
 }
 
-function unbracketIPv6Host(host: string): string {
-  return host.startsWith('[') && host.endsWith(']') ? host.slice(1, -1) : host;
-}
-
 /**
  * Parses a seed node string into address and port components
  * Handles IPv4, IPv6 (bracketed and unbracketed), and hostnames

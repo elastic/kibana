@@ -41,7 +41,7 @@ describe('Cloud remote address', () => {
       expect(actual).toBe(false);
     });
 
-    it('false when proxy address is the same as server name', () => {
+    it('false when proxy address is the same as server name (hostname)', () => {
       const actual = isCloudAdvancedOptionsEnabled({
         name: 'test',
         proxyAddress: 'some-proxy:9400',
@@ -50,10 +50,46 @@ describe('Cloud remote address', () => {
       });
       expect(actual).toBe(false);
     });
-    it('true when proxy address is not the same as server name', () => {
+    it('false when proxy address is the same as server name (IPv4)', () => {
+      const actual = isCloudAdvancedOptionsEnabled({
+        name: 'test',
+        proxyAddress: '1.1.1.1:9400',
+        serverName: '1.1.1.1',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
+      });
+      expect(actual).toBe(false);
+    });
+    it('false when proxy address is the same as server name (IPv6)', () => {
+      const actual = isCloudAdvancedOptionsEnabled({
+        name: 'test',
+        proxyAddress: '[2001:db8::1]:1234',
+        serverName: '[2001:db8::1]',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
+      });
+      expect(actual).toBe(false);
+    });
+    it('true when proxy address is not the same as server name (hostname)', () => {
       const actual = isCloudAdvancedOptionsEnabled({
         name: 'test',
         proxyAddress: 'some-proxy:9400',
+        serverName: 'some-server-name',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
+      });
+      expect(actual).toBe(true);
+    });
+    it('true when proxy address is not the same as server name (IPv4)', () => {
+      const actual = isCloudAdvancedOptionsEnabled({
+        name: 'test',
+        proxyAddress: '1.1.1.1:9400',
+        serverName: 'some-server-name',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
+      });
+      expect(actual).toBe(true);
+    });
+    it('true when proxy address is not the same as server name (IPv6)', () => {
+      const actual = isCloudAdvancedOptionsEnabled({
+        name: 'test',
+        proxyAddress: '[2001:db8::1]:1234',
         serverName: 'some-server-name',
         securityModel: SECURITY_MODEL.CERTIFICATE,
       });

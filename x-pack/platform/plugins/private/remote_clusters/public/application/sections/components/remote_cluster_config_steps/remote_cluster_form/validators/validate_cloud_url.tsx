@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Cluster } from '../../../../../../../common/lib';
-import { isAddressValid, extractHostAndPort } from './validate_address';
+import { isAddressValid, extractHostAndPort } from '../../../../../../../common/lib';
 
 export const i18nTexts = {
   urlEmpty: (
@@ -39,9 +39,9 @@ export const isCloudAdvancedOptionsEnabled = (cluster?: Cluster): boolean => {
   if (!proxyAddress) {
     return false;
   }
-  const proxyAddressWithoutPort = (proxyAddress ?? '').split(':')[0];
+  const { host } = extractHostAndPort(proxyAddress) ?? {};
   return (
-    proxyAddressWithoutPort !== serverName ||
+    host !== serverName ||
     (proxySocketConnections != null && proxySocketConnections !== DEFAULT_SOCKET_CONNECTIONS)
   );
 };
