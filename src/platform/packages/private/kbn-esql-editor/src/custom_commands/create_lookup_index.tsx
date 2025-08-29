@@ -29,6 +29,7 @@ import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { isEqual, memoize } from 'lodash';
 import { useDebounceFn } from '@kbn/react-hooks';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLEditorDeps } from '../types';
 
 /**
@@ -145,10 +146,7 @@ export function appendIndexToJoinCommand(
   return BasicPrettyPrinter.multiline(root);
 }
 
-export type IndexPrivileges = Record<
-  string,
-  { read: boolean; write: boolean; create_index: boolean }
->;
+export type IndexPrivileges = SecurityHasPrivilegesResponse['index'];
 
 /**
  * Extracts and returns a list of unique lookup indices from the provided ESQL query by parsing the query and traversing its AST.
