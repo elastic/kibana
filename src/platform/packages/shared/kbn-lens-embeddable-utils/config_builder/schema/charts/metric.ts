@@ -61,7 +61,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
   /**
    * Sub label
    */
-  sub_label: schema.string({ defaultValue: '', meta: { description: 'Sub label' } }),
+  sub_label: schema.maybe(schema.string({ meta: { description: 'Sub label' } })),
   /**
    * Alignments of the labels and values for the primary metric.
    * For example, align the labels to the left and the values to the right.
@@ -104,21 +104,23 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
   /**
    * Icon configuration
    */
-  icon: schema.object({
-    /**
-     * Icon name
-     */
-    name: schema.string({ meta: { description: 'Icon name' } }),
-    /**
-     * Icon alignment. Possible values:
-     * - 'right': Icon is aligned to the right
-     * - 'left': Icon is aligned to the left
-     */
-    align: schema.oneOf([schema.literal('right'), schema.literal('left')], {
-      meta: { description: 'Icon alignment' },
-      defaultValue: 'right',
-    }),
-  }),
+  icon: schema.maybe(
+    schema.object({
+      /**
+       * Icon name
+       */
+      name: schema.string({ meta: { description: 'Icon name' } }),
+      /**
+       * Icon alignment. Possible values:
+       * - 'right': Icon is aligned to the right
+       * - 'left': Icon is aligned to the left
+       */
+      align: schema.oneOf([schema.literal('right'), schema.literal('left')], {
+        meta: { description: 'Icon alignment' },
+        defaultValue: 'right',
+      }),
+    })
+  ),
   /**
    * Color configuration
    */

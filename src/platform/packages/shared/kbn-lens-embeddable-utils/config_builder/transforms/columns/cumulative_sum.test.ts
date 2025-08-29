@@ -51,6 +51,7 @@ describe('Cumulative Sum Transforms', () => {
         format: {
           type: 'number',
           decimals: 2,
+          compact: false,
         },
       };
 
@@ -128,6 +129,8 @@ describe('Cumulative Sum Transforms', () => {
       const result = fromCumulativeSumLensStateToAPI(input, columnRef);
       expect(result.format).toEqual({
         type: 'number',
+        decimals: 2,
+        compact: false,
       });
     });
 

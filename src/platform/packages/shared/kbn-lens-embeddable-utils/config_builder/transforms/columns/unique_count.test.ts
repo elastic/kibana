@@ -47,6 +47,7 @@ describe('Unique Count Transforms', () => {
         format: {
           type: 'number',
           decimals: 2,
+          compact: false,
         },
       };
 
@@ -128,6 +129,8 @@ describe('Unique Count Transforms', () => {
 
       expect(result.format).toEqual({
         type: 'number',
+        decimals: 2,
+        compact: false,
       });
     });
 

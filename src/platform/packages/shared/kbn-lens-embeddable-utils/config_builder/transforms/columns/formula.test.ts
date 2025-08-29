@@ -52,6 +52,7 @@ describe('Formula Transforms', () => {
         format: {
           type: 'number',
           decimals: 2,
+          compact: false,
         },
       };
 
@@ -136,6 +137,8 @@ describe('Formula Transforms', () => {
       const result = fromFormulaLensStateToAPI(input);
       expect(result.format).toEqual({
         type: 'number',
+        decimals: 2,
+        compact: false,
       });
     });
   });

@@ -104,7 +104,7 @@ describe('Last Value Transforms', () => {
         operation: 'last_value',
         field: 'status',
         sort_by: '@timestamp',
-        show_array_values: true,
+        show_array_values: false,
       };
 
       expect(fromLastValueLensStateToAPI(input)).toEqual(expected);
@@ -132,6 +132,8 @@ describe('Last Value Transforms', () => {
       const result = fromLastValueLensStateToAPI(input);
       expect(result.format).toEqual({
         type: 'number',
+        decimals: 2,
+        compact: false,
       });
     });
 

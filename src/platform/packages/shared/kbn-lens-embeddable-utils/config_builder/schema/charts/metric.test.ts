@@ -30,6 +30,7 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'count' as const,
           field: 'test_field',
+          fit: false,
           sub_label: 'Count of records',
           alignments: {
             labels: 'left' as const,
@@ -48,15 +49,20 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'sum' as const,
           field: 'price',
+          fit: false,
           icon: {
             name: 'visMetric',
             align: 'left' as const,
           },
+          alignments: { labels: 'left', value: 'left' },
         },
       };
 
       const validated = metricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      expect(validated).toEqual({
+        ...defaultValues,
+        ...input,
+      });
     });
 
     it('validates metric with color configuration', () => {
@@ -65,6 +71,8 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'average' as const,
           field: 'temperature',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
           color: {
             type: 'dynamic' as const,
             min: 0,
@@ -88,6 +96,8 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'max' as const,
           field: 'cpu_usage',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
           background_chart: {
             type: 'bar' as const,
             direction: 'horizontal' as const,
@@ -111,6 +121,8 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'sum' as const,
           field: 'revenue',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
         },
         secondary_metric: {
           operation: 'sum' as const,
@@ -130,10 +142,13 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'sum' as const,
           field: 'revenue',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
         },
         secondary_metric: {
           operation: 'sum' as const,
           field: 'profit',
+          prefix: '',
           color: {
             type: 'static' as const,
             color: '#green',
@@ -153,6 +168,8 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'sum' as const,
           field: 'sales',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
         },
         breakdown_by: {
           operation: 'terms' as const,
@@ -176,6 +193,8 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'sum' as const,
           field: 'sales',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
         },
         breakdown_by: {
           operation: 'date_histogram' as const,
@@ -245,6 +264,7 @@ describe('Metric Schema', () => {
           operation: 'sum' as const,
           field: 'sales',
           sub_label: 'Total Sales',
+          fit: false,
           alignments: {
             labels: 'left' as const,
             value: 'right' as const,

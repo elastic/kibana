@@ -55,6 +55,7 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
         format: {
           type: 'number',
           decimals: 2,
+          compact: false,
         },
       };
 
@@ -125,6 +126,8 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
       const result = fromBasicMetricLensStateToAPI(input);
       expect(result.format).toEqual({
         type: 'number',
+        decimals: 2,
+        compact: false,
       });
     });
   });
@@ -155,7 +158,7 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
         const input: LensApiSumMetricOperation = {
           operation: 'sum',
           field: 'revenue',
-          format: { type: 'percent', decimals: 5 },
+          format: { type: 'percent', decimals: 5, compact: false },
           label: 'Total Revenue',
         };
 

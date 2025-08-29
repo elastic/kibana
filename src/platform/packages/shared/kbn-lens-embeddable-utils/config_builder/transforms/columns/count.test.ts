@@ -131,6 +131,7 @@ describe('Count Transforms', () => {
       expect(result.format).toEqual({
         type: 'number',
         decimals: 0,
+        compact: false,
       });
     });
 
