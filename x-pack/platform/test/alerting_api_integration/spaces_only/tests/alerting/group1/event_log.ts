@@ -412,7 +412,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   outcome: 'success',
                   shouldHaveTask: true,
                   ruleTypeId: response.body.rule_type_id,
-                  rule: undefined,
+                  rule: { id: alertId },
                   consumer: 'alertsFixture',
                   source: 'alert',
                 });
