@@ -551,7 +551,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const result = await getScoresByBucket(mlClient, request.body as any);
+          const result = await getScoresByBucket(mlClient, request.body);
           return response.ok({ body: result });
         } catch (e) {
           return response.customError(wrapError(e));
@@ -574,7 +574,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const result = await getInfluencerValueMaxScoreByTime(mlClient, request.body as any);
+          const result = await getInfluencerValueMaxScoreByTime(mlClient, request.body);
           return response.ok({ body: result });
         } catch (e) {
           return response.customError(wrapError(e));
