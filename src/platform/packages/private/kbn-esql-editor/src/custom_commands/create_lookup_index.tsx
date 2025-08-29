@@ -30,6 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { isEqual, memoize } from 'lodash';
 import { useDebounceFn } from '@kbn/react-hooks';
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import { getLookupIndicesFromQuery } from '@kbn/esql-utils';
 import type { ESQLEditorDeps } from '../types';
 
 /**
@@ -147,30 +148,6 @@ export function appendIndexToJoinCommand(
 }
 
 export type IndexPrivileges = SecurityHasPrivilegesResponse['index'];
-
-/**
- * Extracts and returns a list of unique lookup indices from the provided ESQL query by parsing the query and traversing its AST.
- *
- * @param {string} esqlQuery - The ESQL query string to parse and analyze for lookup indices.
- * @return {string[]} An array of unique lookup index names found in the query.
- */
-export function getLookupIndicesFromQuery(esqlQuery: string): string[] {
-  const indexNames: string[] = [];
-
-  // parse esql query and find lookup indices in the query, traversing the AST
-  const { root } = Parser.parse(esqlQuery);
-  // find all join commands
-  root.commands.forEach((command) => {
-    if (command.name === 'join') {
-      const indexName = command.args.find<ESQLSource>(isSource);
-      if (indexName) {
-        indexNames.push(indexName.name);
-      }
-    }
-  });
-
-  return Array.from(new Set(indexNames));
-}
 
 /** Helper to determine if a privilege is granted either globally (*) or for the specific index */
 const hasPrivilege = (
