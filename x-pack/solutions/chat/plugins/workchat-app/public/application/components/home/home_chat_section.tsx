@@ -17,9 +17,10 @@ import {
   EuiAvatar,
   useEuiTheme,
 } from '@elastic/eui';
-import { getDefaultConnector } from '@kbn/wc-genai-utils';
+
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
+import { getDefaultConnector } from '@kbn/inference-plugin/public';
 import { useAgentList } from '../../hooks/use_agent_list';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useInitialMessage } from '../../context/initial_message_context';

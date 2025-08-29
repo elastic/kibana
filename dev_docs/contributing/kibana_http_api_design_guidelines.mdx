@@ -70,6 +70,10 @@ GET /api/my_domain/my_resource_bs?page=1
   We categorize HTTP APIs as either **internal** or **public** to further reinforce the different purposes they serve. See the [Internal vs Public APIs](#internal-vs-public-apis) section for more details.
 </DocCallOut>
 
+<DocCallOut title="Unit, Integration and E2E tests">
+  All HTTP APIs must have <DocLink id="kibDevTutorialTestingPlugins" section="integration-tests" text="E2E or integration test coverage" /> giving confidence the basic functionality works as intended.
+</DocCallOut>
+
 ### Commitment
 
 Exposing a public HTTP API is a long-term commitment to users and is not easily reversible. We must carefully design and plan APIs before they are made public, and then maintain them and ensure they work as expected.
