@@ -2603,31 +2603,17 @@ describe('ManifestManager', () => {
         manifestManager = new ManifestManager(context);
       });
 
-      test('should return true for exceptions artifacts', () => {
-        const shouldRetrieve = (
-          manifestManager as unknown as ManifestManagerWithPrivateMethods
-        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id);
-        expect(shouldRetrieve).toBe(true);
-      });
+      const nonLicensedArtifacts = [
+        { name: 'exceptions', id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id },
+        { name: 'trusted apps', id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id },
+        { name: 'event filters', id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id },
+        { name: 'blocklists', id: ENDPOINT_ARTIFACT_LISTS.blocklists.id },
+      ];
 
-      test('should return true for trusted apps artifacts', () => {
+      test.each(nonLicensedArtifacts)('should return true for $name artifacts', ({ id }) => {
         const shouldRetrieve = (
           manifestManager as unknown as ManifestManagerWithPrivateMethods
-        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedApps.id);
-        expect(shouldRetrieve).toBe(true);
-      });
-
-      test('should return true for event filters artifacts', () => {
-        const shouldRetrieve = (
-          manifestManager as unknown as ManifestManagerWithPrivateMethods
-        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.eventFilters.id);
-        expect(shouldRetrieve).toBe(true);
-      });
-
-      test('should return true for blocklists artifacts', () => {
-        const shouldRetrieve = (
-          manifestManager as unknown as ManifestManagerWithPrivateMethods
-        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.blocklists.id);
+        ).shouldRetrieveExceptions(id);
         expect(shouldRetrieve).toBe(true);
       });
     });
