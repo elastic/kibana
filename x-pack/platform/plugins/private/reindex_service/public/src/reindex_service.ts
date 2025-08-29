@@ -17,7 +17,7 @@ import type {
 // same as -
 // import { UA_BASE_PATH } from '@kbn/upgrade-assistant-pkg-common';
 // bundle size is smaller if its duplicated
-const UA_BASE_PATH = '/api/upgrade_assistant';
+const UA_BASE_PATH = '/api/reindex_service';
 
 export class ReindexService {
   private client: HttpSetup;
