@@ -276,7 +276,7 @@
     {
       "query": "ROW a=1::LONG | LOOKUP JOIN t ON a",
       "error": [
-        "[t] index is not a valid JOIN index. Please use a \"lookup\" mode index JOIN commands."
+        "\"t\" is not a valid JOIN index. Please use a \"lookup\" mode index."
       ],
       "warning": []
     },
@@ -284,7 +284,7 @@
       "query": "from index | drop ",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column []"
+        "Unknown column \"\""
       ],
       "warning": []
     },
@@ -295,14 +295,14 @@
         "SyntaxError: token recognition error at: '5'",
         "SyntaxError: mismatched input '.' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [.]"
+        "Unknown column \".\""
       ],
       "warning": []
     },
     {
       "query": "from index | drop missingField, doubleField, dateField",
       "error": [
-        "Unknown column [missingField]"
+        "Unknown column \"missingField\""
       ],
       "warning": []
     },
@@ -346,7 +346,7 @@
       "query": "from a_index | rename textField as",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "[as] expected 2 arguments, but got 1."
+        "AS expected 2 arguments, but got 1."
       ],
       "warning": []
     },
@@ -584,7 +584,7 @@
       "query": "from a_index | enrich _:",
       "error": [
         "SyntaxError: token recognition error at: ':'",
-        "Unknown policy [_]"
+        "Unknown policy \"_\""
       ],
       "warning": []
     },
@@ -647,7 +647,7 @@
     {
       "query": "from a_index | eval trim(\"23\"::double)",
       "error": [
-        "The arguments to [trim] don't match a valid call signature.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
+        "Invalid input types for TRIM.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
       ],
       "warning": []
     },
@@ -679,14 +679,14 @@
     {
       "query": "from a_index | eval 1 + \"2\"",
       "error": [
-        "The arguments to [+] don't match a valid call signature.\n\nReceived (integer, keyword).\n\nExpected one of:\n  - (date, date_period)\n  - (date, time_duration)\n  - (date_nanos, date_period)\n  - (date_nanos, time_duration)\n  - (date_period, date)\n  - (date_period, date_nanos)\n  - (date_period, date_period)\n  - (double, double)\n  - (double, integer)\n  - (double, long)\n  - (integer, double)\n  - (integer, integer)\n  - (integer, long)\n  - (long, double)\n  - (long, integer)\n  - (long, long)\n  - (time_duration, date)\n  - (time_duration, date_nanos)\n  - (time_duration, time_duration)\n  - (unsigned_long, unsigned_long)\n  - (time_duration, date)\n  - (date, time_duration)"
+        "Invalid input types for +.\n\nReceived (integer, keyword).\n\nExpected one of:\n  - (date, date_period)\n  - (date, time_duration)\n  - (date_nanos, date_period)\n  - (date_nanos, time_duration)\n  - (date_period, date)\n  - (date_period, date_nanos)\n  - (date_period, date_period)\n  - (double, double)\n  - (double, integer)\n  - (double, long)\n  - (integer, double)\n  - (integer, integer)\n  - (integer, long)\n  - (long, double)\n  - (long, integer)\n  - (long, long)\n  - (time_duration, date)\n  - (time_duration, date_nanos)\n  - (time_duration, time_duration)\n  - (unsigned_long, unsigned_long)\n  - (time_duration, date)\n  - (date, time_duration)"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval trim(to_double(\"23\")::keyword::double::long::keyword::double)",
       "error": [
-        "The arguments to [trim] don't match a valid call signature.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
+        "Invalid input types for TRIM.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
       ],
       "warning": []
     },
@@ -753,28 +753,28 @@
     {
       "query": "from a_index | eval true AND 0",
       "error": [
-        "The arguments to [and] don't match a valid call signature.\n\nReceived (boolean, integer).\n\nExpected one of:\n  - (boolean, boolean)"
+        "Invalid input types for AND.\n\nReceived (boolean, integer).\n\nExpected one of:\n  - (boolean, boolean)"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval to_lower(trim(doubleField)::keyword)",
       "error": [
-        "The arguments to [trim] don't match a valid call signature.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
+        "Invalid input types for TRIM.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval to_upper(trim(doubleField)::keyword::keyword::keyword::keyword)",
       "error": [
-        "The arguments to [trim] don't match a valid call signature.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
+        "Invalid input types for TRIM.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval to_lower(to_upper(trim(doubleField)::keyword)::keyword)",
       "error": [
-        "The arguments to [trim] don't match a valid call signature.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
+        "Invalid input types for TRIM.\n\nReceived (double).\n\nExpected one of:\n  - (keyword)\n  - (text)"
       ],
       "warning": []
     },
@@ -782,7 +782,7 @@
       "query": "from a_index | keep unsupportedField",
       "error": [],
       "warning": [
-        "Field [unsupportedField] cannot be retrieved, it is unsupported or not indexed; returning null"
+        "Field \"unsupportedField\" cannot be retrieved, it is unsupported or not indexed; returning null"
       ]
     }
   ]
