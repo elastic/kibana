@@ -24,7 +24,6 @@ const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 // avoid importing from plugin root
 // import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 const ADD_PANEL_TRIGGER = 'ADD_PANEL_TRIGGER';
-const ACTION_ADD_PANEL = 'ACTION_ADD_PANEL';
 
 export const SWIM_LANE_SELECTION_TRIGGER = 'SWIM_LANE_SELECTION_TRIGGER';
 export const EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER = 'EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER';
@@ -83,16 +82,20 @@ export function registerMlUiActions(
   });
 
   // Assign triggers
-  uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_ADD_PANEL, async () => {
-    const { createAddSingleMetricViewerPanelAction } = await import(
-      './create_single_metric_viewer'
-    );
-    const addSingleMetricViewerPanelAction = createAddSingleMetricViewerPanelAction(
-      core.getStartServices
-    );
-    return addSingleMetricViewerPanelAction;
-  });
-  uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_ADD_PANEL, async () => {
+  uiActions.addTriggerActionAsync(
+    ADD_PANEL_TRIGGER,
+    'ACTION_ADD_SINGLE_METRIC_VIEWER_PANEL',
+    async () => {
+      const { createAddSingleMetricViewerPanelAction } = await import(
+        './create_single_metric_viewer'
+      );
+      const addSingleMetricViewerPanelAction = createAddSingleMetricViewerPanelAction(
+        core.getStartServices
+      );
+      return addSingleMetricViewerPanelAction;
+    }
+  );
+  uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, 'ACTION_ADD_SWIMLANE_PANEL', async () => {
     const { createAddSwimlanePanelAction } = await import('./create_swim_lane');
     const addSwimlanePanelAction = createAddSwimlanePanelAction(core.getStartServices);
     return addSwimlanePanelAction;
