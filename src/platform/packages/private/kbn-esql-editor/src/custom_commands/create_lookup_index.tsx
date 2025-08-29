@@ -23,6 +23,7 @@ import {
   type ESQLSource,
   mutate,
   Parser,
+  isSource,
 } from '@kbn/esql-ast';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
@@ -86,7 +87,7 @@ export function appendIndexToJoinCommand(
     const firstArg = joinCmd.args[0]; // may be undefined
     let src: ESQLSource | undefined;
 
-    if (isESQLSourceItem(firstArg)) {
+    if (isSource(firstArg)) {
       src = firstArg;
     } else if (!Array.isArray(firstArg) && firstArg.type === 'option' && firstArg.name === 'as') {
       // "AS" clause: first argument is the underlying source
@@ -144,10 +145,6 @@ export function appendIndexToJoinCommand(
   return BasicPrettyPrinter.multiline(root);
 }
 
-function isESQLSourceItem(arg: unknown): arg is ESQLSource {
-  return typeof arg === 'object' && arg !== null && 'type' in arg && arg.type === 'source';
-}
-
 export type IndexPrivileges = Record<
   string,
   { read: boolean; write: boolean; create_index: boolean }
@@ -167,7 +164,7 @@ export function getLookupIndicesFromQuery(esqlQuery: string): string[] {
   // find all join commands
   root.commands.forEach((command) => {
     if (command.name === 'join') {
-      const indexName = command.args.find<ESQLSource>(isESQLSourceItem);
+      const indexName = command.args.find<ESQLSource>(isSource);
       if (indexName) {
         indexNames.push(indexName.name);
       }
