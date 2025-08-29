@@ -144,6 +144,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/licensing-types",
     "@kbn/esql-composer",
+    "@kbn/discover-shared-plugin"
   ],
   "exclude": ["target/**/*"]
 }
