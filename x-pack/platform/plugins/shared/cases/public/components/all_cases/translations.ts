@@ -98,6 +98,8 @@ export const SELECT = i18n.translate('xpack.cases.caseTable.select', {
 
 export const ALREADY_ATTACHED = i18n.translate('xpack.cases.caseTable.alreadyAttached', {
   defaultMessage: 'Added',
+  description:
+    'In this context, "Added" is letting the user know that all of their selected alerts were previously added to the case in question, and the "Add to case" button is disabled',
 });
 
 export const REQUIRES_UPDATE = i18n.translate('xpack.cases.caseTable.requiresUpdate', {
