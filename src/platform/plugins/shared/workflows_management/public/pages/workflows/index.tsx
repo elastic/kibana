@@ -26,7 +26,7 @@ import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../../features/workflow_list/
 import type { WorkflowsSearchParams } from '../../types';
 import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
 import { useWorkflows } from '../../entities/workflows/model/use_workflows';
-import { WorkflowList } from '../../features/workflow_list/ui';
+import { WorkflowList } from '../../features/workflow_list';
 import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/workflow_search_field';
