@@ -19,5 +19,11 @@
  * graph issues.
  */
 
-export type { Adapters, Request, RequestStatistic, RequestStatistics } from '@kbn/inspector-common';
-export { RequestAdapter, RequestStatus, RequestResponder } from '@kbn/inspector-common';
+export type {
+  Adapters,
+  Request,
+  RequestStatistic,
+  RequestStatistics,
+  RequestResponder,
+} from '@kbn/inspector-common';
+export { RequestAdapter, RequestStatus } from '@kbn/inspector-common';
