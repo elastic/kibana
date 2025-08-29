@@ -30,7 +30,7 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
       to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
       name,
     },
-    preferredSchema: searchCriteria?.preferredSchema,
+    preferredSchema: searchCriteria?.preferredSchema ?? 'semconv',
   });
 
   const providerName = cloudProvider ?? 'Unknown';
