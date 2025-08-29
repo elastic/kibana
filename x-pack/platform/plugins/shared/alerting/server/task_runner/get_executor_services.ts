@@ -127,7 +127,7 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
       });
     },
 
-    getAsyncSearchClient: (strategy = ESQL_SEARCH_STRATEGY) => {
+    getAsyncSearchClient: (strategy) => {
       const start = Date.now();
       let numSearches = 0;
       let esSearchDurationMs = 0;
