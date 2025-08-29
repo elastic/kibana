@@ -24,7 +24,7 @@ export { suggest } from './src/autocomplete/autocomplete';
 export { collectUserDefinedColumns } from './src/shared/user_defined_columns';
 
 export {
-  getFieldsByTypeHelper,
+  getColumnsByTypeHelper as getFieldsByTypeHelper,
   getPolicyHelper,
   getSourcesHelper,
 } from './src/shared/resources_helpers';

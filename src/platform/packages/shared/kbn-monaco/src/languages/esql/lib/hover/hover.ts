@@ -12,7 +12,6 @@ import {
   ENRICH_MODES,
   modeDescription,
 } from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
-import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import {
   getFunctionDefinition,
   getFunctionSignatures,
@@ -26,7 +25,7 @@ import {
   type ESQLSource,
 } from '@kbn/esql-ast/src/types';
 import { collectUserDefinedColumns, type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
-import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
+import { getColumnsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
 import { getQueryForFields } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
 import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { i18n } from '@kbn/i18n';
@@ -187,19 +186,19 @@ async function getHintForFunctionArg(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ) {
-  const queryForFields = getQueryForFields(query, root);
-  const { getFieldsMap } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
+  const queryForColumns = getQueryForFields(query, root);
+  const { getColumnMap } = getColumnsByTypeRetriever(queryForColumns, resourceRetriever);
 
   const fnDefinition = getFunctionDefinition(fnNode.name);
   // early exit on no hit
   if (!fnDefinition) {
     return [];
   }
-  const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
-  const anyUserDefinedColumns = collectUserDefinedColumns(root.commands, fieldsMap, query);
+  const columnsMap = await getColumnMap();
+  const anyUserDefinedColumns = collectUserDefinedColumns(root.commands, columnsMap, query);
 
   const references = {
-    fields: fieldsMap,
+    columns: columnsMap,
     userDefinedColumns: anyUserDefinedColumns,
   };
 

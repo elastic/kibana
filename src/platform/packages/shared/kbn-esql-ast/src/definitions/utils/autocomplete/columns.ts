@@ -63,11 +63,7 @@ function addUserDefinedColumnFromAssignment(
   fields: Map<string, ESQLFieldWithMetadata>
 ) {
   if (isColumn(assignOperation.args[0])) {
-    const rightHandSideArgType = getExpressionType(
-      assignOperation.args[1],
-      fields,
-      userDefinedColumns
-    );
+    const rightHandSideArgType = getExpressionType(assignOperation.args[1], fields);
     addToUserDefinedColumnOccurrences(userDefinedColumns, {
       name: assignOperation.args[0].parts.join('.'),
       type: rightHandSideArgType /* fallback to number */,
@@ -87,7 +83,7 @@ function addUserDefinedColumnFromExpression(
       expressionOperation.location.min,
       expressionOperation.location.max + 1
     );
-    const expressionType = getExpressionType(expressionOperation, fields, userDefinedColumns);
+    const expressionType = getExpressionType(expressionOperation, fields);
     addToUserDefinedColumnOccurrences(userDefinedColumns, {
       name: expressionText,
       type: expressionType,

@@ -25,14 +25,10 @@ export const validate = (
   const valueArg = command.args[0];
   if (isColumn(valueArg)) {
     const columnName = valueArg.name;
-    // look up for columns in userDefinedColumns and existing fields
     let valueColumnType: string | undefined;
-    const userDefinedColumnRef = context?.userDefinedColumns.get(columnName);
-    if (userDefinedColumnRef) {
-      valueColumnType = userDefinedColumnRef.find((v) => v.name === columnName)?.type;
-    } else {
-      const fieldRef = context?.fields.get(columnName);
-      valueColumnType = fieldRef?.type;
+
+    if (context?.columns.has(columnName)) {
+      valueColumnType = context?.columns.get(columnName)?.type;
     }
 
     if (valueColumnType && !isNumericType(valueColumnType)) {
@@ -52,7 +48,7 @@ export const validate = (
   // validate ON column
   const defaultOnColumnName = '@timestamp';
   const onColumn = command.args.find((arg) => isOptionNode(arg) && arg.name === 'on');
-  const hasDefaultOnColumn = context?.fields.has(defaultOnColumnName);
+  const hasDefaultOnColumn = context?.columns.has(defaultOnColumnName);
   if (!onColumn && !hasDefaultOnColumn) {
     messages.push({
       location: command.location,
@@ -71,9 +67,12 @@ export const validate = (
     // populate userDefinedColumns references to prevent the common check from failing with unknown column
     asArg.args.forEach((arg, index) => {
       if (isColumn(arg)) {
-        context?.userDefinedColumns.set(arg.name, [
-          { name: arg.name, location: arg.location, type: index === 0 ? 'keyword' : 'long' },
-        ]);
+        // TODO - can we remove this?
+        context?.columns.set(arg.name, {
+          name: arg.name,
+          location: arg.location,
+          type: index === 0 ? 'keyword' : 'long',
+        });
       }
     });
   }

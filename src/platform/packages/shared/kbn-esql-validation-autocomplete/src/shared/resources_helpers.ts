@@ -62,8 +62,8 @@ async function cacheColumnsForQuery(queryText: string) {
   }
 }
 
-export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
-  const getFields = async () => {
+export function getColumnsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
+  const getColumns = async () => {
     // in some cases (as in the case of ROW or SHOW) the query is not set
     if (!queryText) {
       return;
@@ -85,12 +85,12 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
   };
 
   return {
-    getFieldsByType: async (
+    getColumnsByType: async (
       expectedType: Readonly<string> | Readonly<string[]> = 'any',
       ignored: string[] = []
     ): Promise<ESQLColumnData[]> => {
       const types = Array.isArray(expectedType) ? expectedType : [expectedType];
-      await getFields();
+      await getColumns();
       const queryTextForCacheSearch = toSingleLine(queryText);
       const cachedFields = getValueInsensitive(queryTextForCacheSearch);
       return (
@@ -105,8 +105,8 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
         }) || []
       );
     },
-    getFieldsMap: async (): Promise<Map<string, ESQLColumnData>> => {
-      await getFields();
+    getColumnMap: async (): Promise<Map<string, ESQLColumnData>> => {
+      await getColumns();
       const queryTextForCacheSearch = toSingleLine(queryText);
       const cachedFields = getValueInsensitive(queryTextForCacheSearch);
       const cacheCopy = new Map<string, ESQLColumnData>();

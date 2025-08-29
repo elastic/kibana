@@ -11,7 +11,7 @@ import { isSource, type ESQLCommand } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata, ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
 import { createMapFromList, nonNullable } from '../shared/helpers';
 import {
-  getFieldsByTypeHelper,
+  getColumnsByTypeHelper,
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
@@ -67,5 +67,5 @@ export async function retrievePoliciesFields(
   const customQuery = buildQueryForFieldsInPolicies(
     policyNames.map((name) => policies.get(name)) as ESQLPolicy[]
   );
-  return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
+  return await getColumnsByTypeHelper(customQuery, callbacks).getColumnMap();
 }

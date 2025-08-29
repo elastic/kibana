@@ -17,7 +17,6 @@ import type {
 import type { LicenseType } from '@kbn/licensing-types';
 
 import type { ESQLCallbacks } from '../shared/types';
-import { collectUserDefinedColumns } from '../shared/user_defined_columns';
 import {
   retrievePolicies,
   // retrievePoliciesFields,
@@ -25,7 +24,7 @@ import {
 } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getQueryForFields } from '../autocomplete/helper';
-import { getFieldsByTypeHelper } from '../shared/resources_helpers';
+import { getColumnsByTypeHelper } from '../shared/resources_helpers';
 
 /**
  * ES|QL validation public API
@@ -128,12 +127,17 @@ async function validateAst(
   //   fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
   // }
 
-  const sourceFields = await getFieldsByTypeHelper(
+  const sourceFields = await getColumnsByTypeHelper(
     queryString.split('|')[0],
     callbacks
-  ).getFieldsMap();
+  ).getColumnMap();
 
-  messages.push(...validateUnsupportedTypeFields(sourceFields, rootCommands));
+  messages.push(
+    ...validateUnsupportedTypeFields(
+      sourceFields as Map<string, ESQLFieldWithMetadata>,
+      rootCommands
+    )
+  );
 
   const license = await callbacks?.getLicense?.();
   const hasMinimumLicenseRequired = license?.hasAtLeast;
@@ -146,19 +150,13 @@ async function validateAst(
       Builder.expression.query(previousCommands)
     );
 
-    const { getFieldsMap } = getFieldsByTypeHelper(queryForFields, callbacks);
+    const { getColumnMap: getFieldsMap } = getColumnsByTypeHelper(queryForFields, callbacks);
     const availableFields = await getFieldsMap();
-    const userDefinedColumns = collectUserDefinedColumns(
-      previousCommands,
-      availableFields,
-      queryString
-    );
 
     const references: ReferenceMaps = {
       sources,
-      fields: availableFields,
+      columns: availableFields,
       policies: availablePolicies,
-      userDefinedColumns,
       query: queryString,
       joinIndices: joinIndices?.indices || [],
     };
@@ -227,9 +225,8 @@ function validateCommand(
   }
 
   const context = {
-    fields: references.fields,
+    columns: references.columns,
     policies: references.policies,
-    userDefinedColumns: references.userDefinedColumns,
     sources: [...references.sources].map((source) => ({
       name: source,
     })),

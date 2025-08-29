@@ -12,7 +12,7 @@ import { unescapeColumnName } from '../../../definitions/utils/shared';
 import * as mutate from '../../../mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
-import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/utils/functions';
+import { buildColumnSuggestions } from '../../../definitions/utils/functions';
 import type { ICommand } from '../../registry';
 import type { ESQLAstJoinCommand, ESQLCommand, ESQLCommandOption } from '../../../types';
 import type {
@@ -111,7 +111,7 @@ export const getFieldSuggestions = async (
   ]);
 
   const supportsControls = context?.supportsControls ?? false;
-  const joinFields = buildFieldsDefinitionsWithMetadata(
+  const joinFields = buildColumnSuggestions(
     lookupIndexFields.filter((f) => !ignoredFields.includes(f.name)),
     [],
     { supportsControls },

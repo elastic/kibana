@@ -132,14 +132,12 @@ export interface ESQLPolicy {
 export interface ICommandCallbacks {
   getByType?: GetColumnsByTypeFn;
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
-  getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
+  getColumnsForQuery?: (query: string) => Promise<ESQLColumnData[]>;
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
 }
 
 export interface ICommandContext {
-  // TODO collapse userDefinedColumns and fields into one
-  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-  fields: Map<string, ESQLFieldWithMetadata>;
+  columns: Map<string, ESQLColumnData>;
   sources?: ESQLSourceResult[];
   joinSources?: IndexAutocompleteItem[];
   timeSeriesSources?: IndexAutocompleteItem[];

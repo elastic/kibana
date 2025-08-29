@@ -20,8 +20,7 @@ export const columnsAfter = (
   const columnMap = new Map<string, ESQLColumnData>();
   previousColumns.forEach((col) => columnMap.set(col.name, col)); // TODO make this more efficient
 
-  const typeOf = (thing: ESQLAstItem) =>
-    getExpressionType(thing, columnMap, context?.userDefinedColumns);
+  const typeOf = (thing: ESQLAstItem) => getExpressionType(thing, columnMap);
 
   const newColumns = [];
 

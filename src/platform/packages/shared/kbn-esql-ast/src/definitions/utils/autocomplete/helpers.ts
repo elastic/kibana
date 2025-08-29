@@ -380,11 +380,7 @@ export async function suggestForExpression({
     case 'after_literal':
     case 'after_column':
     case 'after_function':
-      const expressionType = getExpressionType(
-        expressionRoot,
-        context?.fields,
-        context?.userDefinedColumns
-      );
+      const expressionType = getExpressionType(expressionRoot, context?.columns);
 
       if (!isParameterType(expressionType)) {
         break;
@@ -472,8 +468,7 @@ export async function suggestForExpression({
           location,
           rootOperator: rightmostOperator,
           preferredExpressionType,
-          getExpressionType: (expression) =>
-            getExpressionType(expression, context?.fields, context?.userDefinedColumns),
+          getExpressionType: (expression) => getExpressionType(expression, context?.columns),
           getColumnsByType,
           hasMinimumLicenseRequired,
           activeProduct,
