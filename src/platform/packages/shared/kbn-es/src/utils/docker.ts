@@ -234,11 +234,11 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 // Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
 if (process.arch === 'arm64') {
   DEFAULT_SERVERLESS_ESARGS.push(
-    ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m -XX:UseSVE=0'],
+    ['ES_JAVA_OPTS', '-Xms1g -Xmx1g -XX:UseSVE=0'],
     ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
   );
 } else {
-  DEFAULT_SERVERLESS_ESARGS.push(['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m']);
+  DEFAULT_SERVERLESS_ESARGS.push(['ES_JAVA_OPTS', '-Xms1g -Xmx1g']);
 }
 
 const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
@@ -281,8 +281,8 @@ export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
     ],
     esArgs: [
       ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-
       ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+      ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
     ],
   },
   {
@@ -302,7 +302,6 @@ export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
     ],
     esArgs: [
       ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-
       ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
     ],
   },
