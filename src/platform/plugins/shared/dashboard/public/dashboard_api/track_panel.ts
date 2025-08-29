@@ -72,8 +72,6 @@ export function initializeTrackPanel(
           scrollPosition$.next(undefined);
         } else {
           const dashboardTop = dashboardContainerRef$.value?.getBoundingClientRect().top || 0;
-
-          console.log({ dashboardTop });
           const clientBottom = window.innerHeight;
           const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
 

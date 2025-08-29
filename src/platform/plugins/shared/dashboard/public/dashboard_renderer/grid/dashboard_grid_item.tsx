@@ -108,7 +108,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
     const dashboardContainerTopOffset = dashboardContainerRef?.offsetTop || 0;
-    console.log('grid-item', { dashboardContainerTopOffset });
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
     const styles = useMemoCss(dashboardGridItemStyles);
 
