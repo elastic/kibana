@@ -67,7 +67,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
         return;
       }
 
-      actions.updateRowGroupLeafData({
+      actions.setRowGroupLeafData({
         cacheKey: leafCacheKey,
         data: groupLeafData,
       });

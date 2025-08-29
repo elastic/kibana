@@ -124,7 +124,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     });
 
   return (
-    <div css={styles.container}>
+    <div data-test-subj="data-cascade" css={styles.container}>
       <EuiAutoSizer>
         {(containerSize) => (
           <div ref={scrollElementRef} css={overflowYAuto} style={{ ...containerSize }}>
@@ -188,6 +188,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                             size,
                             innerRef: rowVirtualizer.measureElement,
                             isActiveSticky,
+                            enableRowSelection,
                             rowInstance: row,
                             virtualRow: virtualItem,
                             virtualRowStyle: getGridRowPositioningStyle(
