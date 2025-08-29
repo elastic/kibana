@@ -14,11 +14,11 @@ clone_otel_repository() {
 generate_resolved_yaml() {
   echo "--- Generating resolved YAML with Docker weaver"
   cd otel-semconv
-  
+
   # Create output directory with proper permissions for the mapped user
   mkdir -p ./weaver_output
-  chmod 755 ./weaver_output
-  
+  chmod 777 ./weaver_output
+
   docker run --rm \
     --user $(id -u):$(id -g) \
     --env USER=weaver \
@@ -29,13 +29,13 @@ generate_resolved_yaml() {
     registry resolve \
     --registry=/home/weaver/source \
     --output=/home/weaver/out/resolved_semconv.yaml
-    
+
   # Move the generated file to the expected location
   cp ./weaver_output/resolved_semconv.yaml ./resolved_semconv.yaml
-  
+
   # Clean up the temporary directory
   rm -rf ./weaver_output
-  
+
   cd ..
 }
 
@@ -48,10 +48,10 @@ generate_typescript() {
   echo "--- Generating TypeScript definitions"
   # Move generated YAML to package
   cp otel-semconv/resolved_semconv.yaml "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
-  
+
   # Generate TypeScript file
   node scripts/generate_otel_semconv.js
-  
+
   # Run ESLint fix
   yarn lint:es --fix "$OTEL_PACKAGE_DIR/src/generated/" || true
 }
@@ -61,7 +61,7 @@ create_pull_request() {
 
   # Configure Git with machine user
   KIBANA_MACHINE_USERNAME="kibanamachine"
-  
+
   # Define PR details
   PR_TITLE='[One Discover][Logs UX] Update OpenTelemetry Semantic Conventions'
   PR_BODY='This PR updates the OpenTelemetry semantic conventions definitions to the latest version.
@@ -95,7 +95,7 @@ create_pull_request() {
     echo "=== LABELS ==="
     echo "- Team:obs-ux-logs"
     echo "- release_note:skip"
-    echo "- backport:skip" 
+    echo "- backport:skip"
     echo "- otel-semantic-conventions"
     echo ""
     echo "=== ASSIGNEES & REVIEWERS ==="
@@ -124,7 +124,7 @@ create_pull_request() {
     echo "Update OpenTelemetry semantic conventions"
     echo ""
     echo "- Updated resolved-semconv.yaml with latest OTel conventions"
-    echo "- Regenerated TypeScript definitions with new field metadata"  
+    echo "- Regenerated TypeScript definitions with new field metadata"
     echo "- Generated automatically by Buildkite workflow"
     echo ""
     echo "🔍 DRY_RUN: All PR data collected - no git operations or PR creation performed"
@@ -151,7 +151,7 @@ create_pull_request() {
   # Add the changed files
   git add "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
   git add "$OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts"
-  
+
   # Create commit with descriptive message
   git commit -m "Update OpenTelemetry semantic conventions
 
@@ -189,33 +189,33 @@ main() {
 
   report_main_step "Cloning OpenTelemetry semantic conventions repository"
   clone_otel_repository
-  
-  report_main_step "Generating resolved YAML with Docker weaver"  
+
+  report_main_step "Generating resolved YAML with Docker weaver"
   generate_resolved_yaml
-  
+
   cd "$KIBANA_DIR"
-  
+
   report_main_step "Checking for YAML changes"
   # Copy new YAML and check for immediate changes
   cp "$PARENT_DIR/otel-semconv/resolved_semconv.yaml" "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
-  
+
   # Check if YAML actually changed
   set +e
   git diff --exit-code --quiet "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
   yaml_changed=$?
   set -e
-  
+
   if [ $yaml_changed -eq 0 ]; then
     echo "No changes in semantic conventions YAML. Our work is done here."
     exit 0
   fi
-  
+
   report_main_step "YAML changes detected. Bootstrapping Kibana"
   bootstrap_kibana
-  
+
   report_main_step "Generating TypeScript definitions"
   generate_typescript
-  
+
   report_main_step "Performing final change detection"
   # Final change detection
   set +e
@@ -225,7 +225,7 @@ main() {
     exit 0
   fi
   set -e
-  
+
   report_main_step "Creating pull request"
   create_pull_request
 }
