@@ -167,5 +167,6 @@
     "@kbn/licensing-types",
     "@kbn/product-intercept-plugin",
     "@kbn/onechat-common",
+    "@kbn/reindex-service-plugin",
   ]
 }
