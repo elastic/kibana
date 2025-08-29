@@ -29,6 +29,10 @@ const renderWithServices = (ui: React.ReactElement) =>
   render(<DiscoverTestProvider services={discoverServiceMock}>{ui}</DiscoverTestProvider>);
 
 describe('ErrorCallout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   afterEach(() => {
     mockRenderSearchError.mockReset();
   });
@@ -39,9 +43,9 @@ describe('ErrorCallout', () => {
 
     renderWithServices(<ErrorCallout error={ERROR} title={TITLE} />);
 
-    expect(screen.getByText(TITLE)).toBeInTheDocument();
-    expect(screen.getByText(ERROR.message)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /view details/i })).toBeInTheDocument();
+    expect(screen.getByText(TITLE)).toBeVisible();
+    expect(screen.getByText(ERROR.message)).toBeVisible();
+    expect(screen.getByRole('button', { name: /view details/i })).toBeVisible();
   });
 
   it('should render with override display', () => {
@@ -52,14 +56,13 @@ describe('ErrorCallout', () => {
     mockRenderSearchError.mockReturnValue({ body: OVERWRITE_DISPLAY, title: OVERWRITE_TITLE });
     renderWithServices(<ErrorCallout error={ERROR} title="Original title" />);
 
-    expect(screen.getByText(OVERWRITE_TITLE)).toBeInTheDocument();
-    expect(screen.getByTestId('discoverErrorCalloutBody')).toBeInTheDocument();
+    expect(screen.getByText(OVERWRITE_TITLE)).toBeVisible();
+    expect(screen.getByTestId('discoverErrorCalloutBody')).toBeVisible();
     expect(screen.queryByText(ERROR.message)).not.toBeInTheDocument();
-    expect(screen.queryByTestId('discoverErrorCalloutShowDetailsButton')).toBeNull();
+    expect(screen.queryByTestId('discoverErrorCalloutShowDetailsButton')).not.toBeInTheDocument();
   });
 
   it('should call showErrorDialog when the button is clicked', async () => {
-    (discoverServiceMock.core.notifications.showErrorDialog as jest.Mock).mockClear();
     const ERROR = new Error('My error');
     const TITLE = 'Error title';
     const user = userEvent.setup();
@@ -67,7 +70,6 @@ describe('ErrorCallout', () => {
     renderWithServices(<ErrorCallout error={ERROR} title={TITLE} />);
 
     const actionButton = screen.getByRole('button', { name: /view details/i });
-    expect(actionButton).toBeInTheDocument();
     await user.click(actionButton);
 
     expect(discoverServiceMock.core.notifications.showErrorDialog).toHaveBeenCalledWith({
@@ -77,7 +79,6 @@ describe('ErrorCallout', () => {
   });
 
   it('should not render the "View details" button for ES|QL', () => {
-    (discoverServiceMock.core.notifications.showErrorDialog as jest.Mock).mockClear();
     const ERROR = new Error('My error');
     const TITLE = 'Error title';
 
@@ -87,12 +88,11 @@ describe('ErrorCallout', () => {
   });
 
   it('should render the "ES|QL reference" button for ES|QL', () => {
-    (discoverServiceMock.core.notifications.showErrorDialog as jest.Mock).mockClear();
     const ERROR = new Error('My error');
     const TITLE = 'Error title';
 
     renderWithServices(<ErrorCallout error={ERROR} isEsqlMode title={TITLE} />);
 
-    expect(screen.getByRole('link', { name: /open es\|ql reference/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /open es\|ql reference/i })).toBeVisible();
   });
 });

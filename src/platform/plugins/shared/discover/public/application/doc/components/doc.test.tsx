@@ -28,6 +28,8 @@ jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
   useEsDocSearch: jest.fn(),
 }));
 
+const mockUseDocSearch = jest.mocked(useEsDocSearch);
+
 jest.mock('./single_doc_viewer', () => ({
   SingleDocViewer: () => <div data-test-subj="singleDocViewerMock" />,
 }));
@@ -55,55 +57,56 @@ describe('Test of <Doc /> of Discover', () => {
   });
 
   it('renders Loading msg', () => {
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Loading, null]);
+    mockUseDocSearch.mockReturnValue([ElasticRequestState.Loading, null, jest.fn()]);
 
     setupDoc();
 
-    expect(screen.getByText(/single document - #1/i)).toBeInTheDocument();
-    expect(screen.getByRole('progressbar', { name: /loading/i })).toBeInTheDocument();
-    expect(screen.getByText(/loading…/i)).toBeInTheDocument();
+    expect(screen.getByText(/single document - #1/i)).toBeVisible();
+    expect(screen.getByRole('progressbar', { name: /loading/i })).toBeVisible();
+    expect(screen.getByText(/loading…/i)).toBeVisible();
   });
 
   it('renders NotFound msg', () => {
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.NotFound, null]);
+    mockUseDocSearch.mockReturnValue([ElasticRequestState.NotFound, null, jest.fn()]);
 
     setupDoc();
 
-    expect(screen.getByText(/single document - #1/i)).toBeInTheDocument();
-    expect(screen.getByText(/cannot find document/i)).toBeInTheDocument();
-    expect(screen.getByText(/no documents match that ID./i)).toBeInTheDocument();
+    expect(screen.getByText(/single document - #1/i)).toBeVisible();
+    expect(screen.getByText(/cannot find document/i)).toBeVisible();
+    expect(screen.getByText(/no documents match that ID./i)).toBeVisible();
   });
 
   it('renders NotFoundDataView msg', () => {
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.NotFoundDataView, null]);
+    mockUseDocSearch.mockReturnValue([ElasticRequestState.NotFoundDataView, null, jest.fn()]);
 
     setupDoc();
 
-    expect(screen.getByText(/single document - #1/i)).toBeInTheDocument();
-    expect(screen.getByText(/no data view matches id/i)).toBeInTheDocument();
+    expect(screen.getByText(/single document - #1/i)).toBeVisible();
+    expect(screen.getByText(/no data view matches id/i)).toBeVisible();
   });
 
   it('renders Error msg', () => {
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Error, null]);
+    mockUseDocSearch.mockReturnValue([ElasticRequestState.Error, null, jest.fn()]);
 
     setupDoc();
 
-    expect(screen.getByText(/single document - #1/i)).toBeInTheDocument();
-    expect(screen.getByText(/cannot run search/i)).toBeInTheDocument();
-    expect(screen.getByText(`${INDEX_NAME} is missing.`)).toBeInTheDocument();
-    expect(screen.getByText(/please ensure the index exists./i)).toBeInTheDocument();
+    expect(screen.getByText(/single document - #1/i)).toBeVisible();
+    expect(screen.getByText(/cannot run search/i)).toBeVisible();
+    expect(screen.getByText(`${INDEX_NAME} is missing.`)).toBeVisible();
+    expect(screen.getByText(/please ensure the index exists./i)).toBeVisible();
   });
 
   it('renders elasticsearch hit', () => {
-    (useEsDocSearch as jest.Mock).mockReturnValue([
+    mockUseDocSearch.mockReturnValue([
       ElasticRequestState.Found,
       getDataTableRecordMock(),
+      jest.fn(),
     ]);
 
     setupDoc();
 
-    expect(screen.getByText(/single document - #1/i)).toBeInTheDocument();
-    expect(screen.getByTestId('doc-hit')).toBeInTheDocument();
-    expect(screen.getByTestId('singleDocViewerMock')).toBeInTheDocument();
+    expect(screen.getByText(/single document - #1/i)).toBeVisible();
+    expect(screen.getByTestId('doc-hit')).toBeVisible();
+    expect(screen.getByTestId('singleDocViewerMock')).toBeVisible();
   });
 });

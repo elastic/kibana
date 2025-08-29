@@ -20,7 +20,7 @@ describe('Loading spinner', function () {
       </DiscoverTestProvider>
     );
 
-    expect(screen.getByText(/searching/i)).toBeInTheDocument();
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.getByText(/searching/i)).toBeVisible();
+    expect(screen.getByRole('progressbar')).toBeVisible();
   });
 });

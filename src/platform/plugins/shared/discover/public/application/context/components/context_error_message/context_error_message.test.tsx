@@ -39,7 +39,7 @@ describe('loading spinner', () => {
   it('ContextErrorMessage renders just the title if the reason is not specifically handled', () => {
     renderWithI18n(<ContextErrorMessage status={{ value: LoadingStatus.FAILED }} />);
 
-    expect(screen.getByText(DEFAULT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(DEFAULT_TITLE)).toBeVisible();
     expect(screen.queryByText(DEFAULT_BODY)).not.toBeInTheDocument();
   });
 
@@ -50,7 +50,7 @@ describe('loading spinner', () => {
       />
     );
 
-    expect(screen.getByText(DEFAULT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(DEFAULT_TITLE)).toBeVisible();
     expect(screen.queryByText(DEFAULT_BODY)).not.toBeInTheDocument();
   });
 
@@ -61,7 +61,7 @@ describe('loading spinner', () => {
       />
     );
 
-    expect(screen.getByText(DEFAULT_TITLE)).toBeInTheDocument();
-    expect(screen.getByText(DEFAULT_BODY)).toBeInTheDocument();
+    expect(screen.getByText(DEFAULT_TITLE)).toBeVisible();
+    expect(screen.getByText(DEFAULT_BODY)).toBeVisible();
   });
 });
