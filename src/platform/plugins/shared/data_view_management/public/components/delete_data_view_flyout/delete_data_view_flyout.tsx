@@ -90,7 +90,11 @@ export const DeleteDataViewFlyout = ({
   }, [reviewedItems, selectedRelationships]);
 
   return (
-    <EuiFlyout onClose={onModalClose} aria-label="delete-data-view-flyout">
+    <EuiFlyout
+      onClose={onModalClose}
+      data-test-subj="deleteDataViewFlyout"
+      aria-label="deleteDataViewFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={complicatedFlyoutTitleId}>
@@ -119,7 +123,13 @@ export const DeleteDataViewFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={deleteDataViews} color="danger" fill disabled={disableDeleteButton}>
+            <EuiButton
+              onClick={deleteDataViews}
+              color="danger"
+              fill
+              disabled={disableDeleteButton}
+              data-test-subj="confirmFlyoutConfirmButton"
+            >
               {i18n.translate('indexPatternManagement.deleteDataView.deleteButton', {
                 defaultMessage: 'Delete',
               })}

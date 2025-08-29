@@ -298,7 +298,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('index pattern deletion', function indexDelete() {
       before(function () {
-        const expectedAlertText = 'Delete data view';
+        const expectedAlertText =
+          'Delete Data View\nDeleting a data view affects every saved object that uses it, and it is deleted from every space it is shared in. This action cannot be undone.\nSuccessfully deleted 1 data view.\nData view\nSpaces\nIndex Star\n1\nCancel\nDelete';
         return PageObjects.settings.removeIndexPattern().then(function (alertText) {
           expect(alertText).to.be(expectedAlertText);
         });
