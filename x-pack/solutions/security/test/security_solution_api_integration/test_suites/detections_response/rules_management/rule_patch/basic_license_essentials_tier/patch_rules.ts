@@ -7,33 +7,22 @@
 
 import expect from 'expect';
 
-import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
-  createPrebuiltRulesPackage,
   getCustomQueryRuleParams,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
-  installFleetPackageByUpload,
-  installPrebuiltRules,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
 } from '../../../utils';
-import {
-  MOCK_PKG_VERSION,
-  PREBUILT_RULE_ASSET_A,
-  PREBUILT_RULE_ASSET_B,
-  PREBUILT_RULE_ID_A,
-} from '../../prebuilt_rules/common/configs/edge_cases/ess_air_gapped_with_bundled_packages.config';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
-  const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless @serverlessQA patch_rules', () => {
@@ -236,32 +225,6 @@ export default ({ getService }: FtrProviderContext) => {
           status_code: 404,
           message: 'rule_id: "fake_id" not found',
         });
-      });
-
-      it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
-        const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
-          packageName: PREBUILT_RULES_PACKAGE_NAME,
-          packageSemver: MOCK_PKG_VERSION,
-          prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
-        });
-
-        await installFleetPackageByUpload({
-          getService,
-          packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
-        });
-
-        await installPrebuiltRules(es, supertest);
-
-        const { body } = await securitySolutionApi
-          .patchRule({
-            body: {
-              rule_id: PREBUILT_RULE_ID_A,
-              author: ['new user'],
-            },
-          })
-          .expect(400);
-
-        expect(body.message).toEqual('Cannot update "author" field for prebuilt rules');
       });
 
       describe('max signals', () => {

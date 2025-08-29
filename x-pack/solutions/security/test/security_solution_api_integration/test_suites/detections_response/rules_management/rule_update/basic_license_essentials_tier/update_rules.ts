@@ -7,7 +7,6 @@
 
 import expect from 'expect';
 
-import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRuleOutput,
@@ -19,9 +18,6 @@ import {
   getSimpleMlRuleUpdate,
   getSimpleRule,
   updateUsername,
-  installFleetPackageByUpload,
-  createPrebuiltRulesPackage,
-  installPrebuiltRules,
 } from '../../../utils';
 import {
   createAlertsIndex,
@@ -29,12 +25,6 @@ import {
   createRule,
   deleteAllAlerts,
 } from '../../../../../config/services/detections_response';
-import {
-  MOCK_PKG_VERSION,
-  PREBUILT_RULE_ASSET_A,
-  PREBUILT_RULE_ASSET_B,
-  PREBUILT_RULE_ID_A,
-} from '../../prebuilt_rules/common/configs/edge_cases/ess_air_gapped_with_bundled_packages.config';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -318,40 +308,6 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(updatedRuleResponse).toMatchObject(expectedRule);
         });
-      });
-
-      it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
-        const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
-          packageName: PREBUILT_RULES_PACKAGE_NAME,
-          packageSemver: MOCK_PKG_VERSION,
-          prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
-        });
-
-        await installFleetPackageByUpload({
-          getService,
-          packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
-        });
-
-        await installPrebuiltRules(es, supertest);
-
-        const { body: existingRule } = await securitySolutionApi
-          .readRule({
-            query: { rule_id: PREBUILT_RULE_ID_A },
-          })
-          .expect(200);
-
-        const { body } = await securitySolutionApi
-          .updateRule({
-            body: getCustomQueryRuleParams({
-              ...existingRule,
-              rule_id: PREBUILT_RULE_ID_A,
-              id: undefined,
-              license: 'new license',
-            }),
-          })
-          .expect(400);
-
-        expect(body.message).toEqual('Cannot update "license" field for prebuilt rules');
       });
     });
   });
