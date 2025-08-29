@@ -996,5 +996,5 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
 
         changeAgentPrivilegeLevelHandler
       );
-    }
+  }
 };

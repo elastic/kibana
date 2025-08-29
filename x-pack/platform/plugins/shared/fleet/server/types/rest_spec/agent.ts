@@ -787,15 +787,17 @@ export const ChangeAgentPrivilegeLevelRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
-  body: schema.nullable(schema.object({
-    user_info: schema.maybe(
-      schema.object({
-        username: schema.maybe(schema.string()),
-        groupname: schema.maybe(schema.string()),
-        password: schema.maybe(schema.string()),
-      })
-    ),
-  })),
+  body: schema.nullable(
+    schema.object({
+      user_info: schema.maybe(
+        schema.object({
+          username: schema.maybe(schema.string()),
+          groupname: schema.maybe(schema.string()),
+          password: schema.maybe(schema.string()),
+        })
+      ),
+    })
+  ),
 };
 export const ChangeAgentPrivilegeLevelResponseSchema = schema.object({
   actionId: schema.string(),
