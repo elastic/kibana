@@ -12,7 +12,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import type { Rule } from '../../../../types';
 import { ViewInApp } from './view_in_app';
-import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 const mockGetNavigation = jest.fn();
 const mockNavigateToUrl = jest.fn();
