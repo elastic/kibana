@@ -35,7 +35,6 @@ export const useCanCreateLookupIndex = () => {
 
   const { run } = useDebounceFn(
     async (indexName: string) => {
-      if (!indexName) return false;
       try {
         const permissions = await getPermissions([indexName]);
         return permissions[indexName]?.canCreateIndex ?? false;
@@ -71,6 +70,7 @@ export const useLookupIndexCommand = (
   const { getPermissions } = useLookupIndexPrivileges();
 
   const inQueryLookupIndices = useRef<string[]>([]);
+  const decorationIdsRef = useRef<string[]>([]);
 
   useEffect(
     function parseIndicesOnChange() {
@@ -107,19 +107,9 @@ export const useLookupIndexCommand = (
   const { run: addLookupIndicesDecorator } = useDebounceFn(
     async () => {
       const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
-
       const lookupIndices: string[] = inQueryLookupIndices.current;
       const permissions = await getPermissions(lookupIndices);
-
-      // we need to remove the previous decorations first
-      const lineCount = editorModel.current?.getLineCount() || 1;
-      for (let i = 1; i <= lineCount; i++) {
-        const decorations = editorRef.current?.getLineDecorations(i) ?? [];
-        const lookupIndexDecorations = decorations.filter((decoration) =>
-          decoration.options.inlineClassName?.includes(lookupIndexBaseBadgeClassName)
-        );
-        editorRef?.current?.removeDecorations(lookupIndexDecorations.map((d) => d.id));
-      }
+      const newDecorations: monaco.editor.IModelDeltaDecoration[] = [];
 
       for (let i = 0; i < lookupIndices.length; i++) {
         const lookupIndex = lookupIndices[i];
@@ -153,31 +143,35 @@ export const useLookupIndexCommand = (
         if (!actionLabel) continue;
 
         matches.forEach((match) => {
-          editorRef?.current?.createDecorationsCollection([
-            {
-              range: match.range,
-              options: {
-                isWholeLine: false,
-                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-                hoverMessage: {
-                  value: `[${actionLabel}](command:esql.lookup_index.create?${encodeURIComponent(
-                    JSON.stringify({
-                      indexName: lookupIndex,
-                      doesIndexExist: isExistingIndex,
-                      canEditIndex,
-                    })
-                  )})`,
-                  isTrusted: true,
-                },
-
-                inlineClassName:
-                  lookupIndexBaseBadgeClassName +
-                  ' ' +
-                  (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
+          newDecorations.push({
+            range: match.range,
+            options: {
+              isWholeLine: false,
+              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+              hoverMessage: {
+                value: `[${actionLabel}](command:esql.lookup_index.create?${encodeURIComponent(
+                  JSON.stringify({
+                    indexName: lookupIndex,
+                    doesIndexExist: isExistingIndex,
+                    canEditIndex,
+                  })
+                )})`,
+                isTrusted: true,
               },
+
+              inlineClassName:
+                lookupIndexBaseBadgeClassName +
+                ' ' +
+                (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
             },
-          ]);
+          });
         });
+      }
+      if (editorModel.current) {
+        decorationIdsRef.current = editorModel.current.deltaDecorations(
+          decorationIdsRef.current,
+          newDecorations
+        );
       }
     },
     { wait: 500 }
