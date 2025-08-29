@@ -37,7 +37,6 @@ import { appContextService } from '../../..';
 
 import { tagKibanaAssets } from './tag_assets';
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
-import { fillAlertDefaults } from './alert';
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 200;
 
@@ -82,7 +81,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.securityRule]: KibanaSavedObjectType.securityRule,
   [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
     KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
-  [KibanaAssetType.alert]: KibanaSavedObjectType.alert,
+  [KibanaAssetType.alertingRuleTemplate]: KibanaSavedObjectType.alertingRuleTemplate,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
@@ -97,16 +96,12 @@ export function createSavedObjectKibanaAsset(
   context: InstallAssetContext
 ): SavedObjectToBe {
   // convert that to an object
-  let so: Partial<SavedObjectToBe> = {
+  const so: Partial<SavedObjectToBe> = {
     type: asset.type,
     id: asset.id,
     attributes: asset.attributes,
     references: asset.references || [],
   };
-
-  if (asset.type === KibanaSavedObjectType.alert) {
-    so = fillAlertDefaults(so, context);
-  }
 
   // migrating deprecated migrationVersion to typeMigrationVersion
   if (asset.migrationVersion && asset.migrationVersion[asset.type]) {
@@ -400,7 +395,7 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
       }
 
       if (
-        soType === KibanaSavedObjectType.alert &&
+        soType === KibanaSavedObjectType.alertingRuleTemplate &&
         !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
       ) {
         return;
