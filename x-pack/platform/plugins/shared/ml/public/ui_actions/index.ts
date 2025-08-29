@@ -145,7 +145,7 @@ export function registerMlUiActions(
 
   uiActions.addTriggerActionAsync(
     SWIM_LANE_SELECTION_TRIGGER,
-    'ACTION_SWIM_LANE_SELECTION',
+    'ACTION_APPLY_INFLUENCER_FILTERS',
     async () => {
       const { createApplyInfluencerFiltersAction } = await import(
         './apply_influencer_filters_action'
@@ -169,7 +169,7 @@ export function registerMlUiActions(
   );
   uiActions.addTriggerActionAsync(
     SWIM_LANE_SELECTION_TRIGGER,
-    'ACTION_SWIM_LANE_SELECTION',
+    'ACTION_OPEN_IN_EXPLORER',
     async () => {
       const { createOpenInExplorerAction } = await import('./open_in_anomaly_explorer_action');
       const openInExplorerAction = createOpenInExplorerAction(core.getStartServices);
