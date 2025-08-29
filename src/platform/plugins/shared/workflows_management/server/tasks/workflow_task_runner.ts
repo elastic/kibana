@@ -59,6 +59,7 @@ export function createWorkflowTaskRunner({
             name: workflow.name,
             enabled: workflow.enabled,
             definition: workflow.definition,
+            yaml: workflow.yaml,
           };
 
           // Execute the workflow
