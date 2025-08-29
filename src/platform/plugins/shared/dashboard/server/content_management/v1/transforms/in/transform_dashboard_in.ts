@@ -13,22 +13,15 @@ import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved
 import { transformPanelsIn } from './transform_panels_in';
 import { transformControlGroupIn } from './transform_control_group_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
+import { transformTagsIn } from './transform_tags_in';
 
-export const transformDashboardIn = async ({
+export const transformDashboardIn = ({
   dashboardState,
-  replaceTagReferencesByName,
-  incomingReferences = [],
+  references = [],
 }: {
   dashboardState: DashboardAttributes;
-  incomingReferences?: SavedObjectReference[];
-  replaceTagReferencesByName?: ({
-    references,
-    newTagNames,
-  }: {
-    references: SavedObjectReference[];
-    newTagNames: string[];
-  }) => Promise<SavedObjectReference[]>;
-}): Promise<
+  references?: SavedObjectReference[];
+}): 
   | {
       attributes: DashboardSavedObjectAttributes;
       references: SavedObjectReference[];
@@ -38,19 +31,15 @@ export const transformDashboardIn = async ({
       attributes: null;
       references: null;
       error: Error;
-    }
-> => {
+    } => {
   try {
-    const tagReferences =
-      replaceTagReferencesByName && dashboardState.tags && dashboardState.tags.length
-        ? await replaceTagReferencesByName({
-            references: incomingReferences,
-            newTagNames: dashboardState.tags,
-          })
-        : incomingReferences;
-
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } =
       dashboardState;
+
+    const tagReferences = transformTagsIn({
+      tags,
+      references,
+    });
     const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
 
     const { searchSourceJSON, references: searchSourceReferences } =
