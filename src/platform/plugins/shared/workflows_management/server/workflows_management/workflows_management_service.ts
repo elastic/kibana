@@ -323,7 +323,7 @@ export class WorkflowsService {
     if (!parsedYaml.success) {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
     }
-    // The type of parsedYaml.data is validated by WORKFLOW_ZOD_SCHEMA_LOOSE, so this assertion is safe.
+    // The type of parsedYaml.data is validated by WORKFLOW_ZOD_SCHEMA_LOOSE, so this assertion is partially safe.
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
 
     const authenticatedUser = getAuthenticatedUser(request, this.security);
@@ -407,8 +407,10 @@ export class WorkflowsService {
           enabled: false,
         };
       } else {
-        // @ts-expect-error - TODO: fix this
-        const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data) as any;
+        // parsedYaml.data is validated by WORKFLOW_ZOD_SCHEMA_LOOSE, so this assertion is partially safe.
+        const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(
+          parsedYaml.data as WorkflowYaml
+        );
         updateData = {
           name: updatedWorkflow.name,
           description: updatedWorkflow.description,
@@ -420,12 +422,12 @@ export class WorkflowsService {
           valid: true,
         };
         // Update scheduled tasks if triggers changed
-        if (this.taskScheduler && updatedWorkflow.definition?.workflow?.triggers) {
+        if (this.taskScheduler && updatedWorkflow.definition?.triggers) {
           // Remove existing scheduled tasks for this workflow
           await this.taskScheduler.unscheduleWorkflowTasks(id);
 
           // Add new scheduled tasks
-          for (const trigger of updatedWorkflow.definition.workflow.triggers) {
+          for (const trigger of updatedWorkflow.definition.triggers) {
             if (trigger.type === 'scheduled') {
               await this.taskScheduler.scheduleWorkflowTask(id, 'default', trigger);
             }
