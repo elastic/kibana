@@ -72,53 +72,51 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
     getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,
     onExpandedChange: (updater) => {
-      const newExpandedState =
+      const proposedExpandedState =
         typeof updater === 'function' ? updater(state.table.expanded) : updater;
 
       if (allowMultipleRowToggle) {
-        return actions.setExpandedRows(newExpandedState);
+        return actions.setExpandedRows(proposedExpandedState);
       }
 
       const previousExpandedRows = Object.keys(state.table.expanded ?? {});
-      const newlyExpandedRows = Object.keys(newExpandedState ?? {});
+      const proposedExpandedRows = Object.keys(proposedExpandedState ?? {});
 
       // escape early if it's just one row that is expanded, or no rows are expanded
-      if (newlyExpandedRows.length <= 1) {
-        return actions.setExpandedRows(newExpandedState);
+      if (proposedExpandedRows.length <= 1) {
+        return actions.setExpandedRows(proposedExpandedState);
       }
 
-      // Compute the rows to keep, comparing the newly expanded rows with the previous expanded rows
-      const rowsToKeep = newlyExpandedRows.reduce((acc, id) => {
+      // Compute the new expanded rows, comparing the proposed expanded rows with the previous expanded rows
+      const newExpandedRows = proposedExpandedRows.reduce((acc, id) => {
         const row = tableRef.current!.getRow?.(id);
 
         if (
           // when the row is root, and its id is not in previousExpandedRows we want to keep it
-          (!row?.parentId && !previousExpandedRows.includes(row?.id ?? '')) ||
-          // when row is a child, and its parentId is not in previousExpandedRows we want to keep it
-          (row?.parentId && !previousExpandedRows.includes(row?.parentId))
+          !row?.parentId &&
+          !previousExpandedRows.includes(row?.id ?? '')
         ) {
           acc[id] = true;
         } else if (row?.parentId && previousExpandedRows.includes(row?.parentId)) {
-          // when row is a child, and its parent id is in previous expanded row, we need to check if it has a sibling then apply a fitting treatment
+          // when row is a child, and its parent id is in previous expanded row,
+          // we need to check if it has a sibling then apply a fitting treatment
           const siblings = tableRef.current!.getRow?.(row?.parentId)?.getLeafRows() ?? [];
           const expandedRowSibling = siblings.find(
-            (sibling) => newlyExpandedRows.includes(sibling.id) && sibling.id !== id
+            (sibling) => proposedExpandedRows.includes(sibling.id) && sibling.id !== id
           );
 
-          if (!expandedRowSibling) {
+          // we want to keep the row when it either has no sibling in the newly expanded rows,
+          // or has a sibling but it isn't present in the previously expanded rows
+          if (!expandedRowSibling || (expandedRowSibling && !previousExpandedRows.includes(id))) {
             acc[id] = true;
-            acc[row.parentId] = true; // keep the parent as well
-          } else if (expandedRowSibling && !previousExpandedRows.includes(id)) {
-            // keep the row if it has a sibling that is expanded but it was not in previousExpandedRows
-            acc[id] = true;
-            acc[row.parentId] = true; // keep the parent as well
+            acc[row.parentId] = true; // we keep the parent as well
           }
         }
 
         return acc;
       }, {} as Record<string, boolean>);
 
-      return actions.setExpandedRows(rowsToKeep);
+      return actions.setExpandedRows(newExpandedRows);
     },
     getRowId: (rowData) => rowData.id,
     getSubRows: (row) => row.children as G[],
