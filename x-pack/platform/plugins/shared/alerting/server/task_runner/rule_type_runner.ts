@@ -342,6 +342,9 @@ export class RuleTypeRunner<
         if (wrappedSearchSourceClient) {
           metrics.push(wrappedSearchSourceClient.getMetrics());
         }
+        if (asyncSearchClient) {
+          metrics.push(asyncSearchClient.getMetrics());
+        }
         context.ruleRunMetricsStore.setSearchMetrics(metrics);
 
         return {
