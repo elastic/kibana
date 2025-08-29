@@ -95,7 +95,7 @@ export const DeleteDataViewFlyout = ({
       data-test-subj="deleteDataViewFlyout"
       aria-label="deleteDataViewFlyout"
     >
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader hasBorder data-test-subj="deleteDataViewFlyoutHeader">
         <EuiTitle size="m">
           <h2 id={complicatedFlyoutTitleId}>
             {i18n.translate('indexPatternManagement.deleteDataView.flyoutTitle', {
