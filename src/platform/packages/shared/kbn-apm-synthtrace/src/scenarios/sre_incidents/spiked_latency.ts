@@ -8,12 +8,11 @@
  */
 
 /**
- * This scenario simulates an intermittent latency spike in a service.
+ * Simulates a service with intermittent and constant high-latency transactions.
  *
- * The story: The `spikey-frontend` and `spikey-backend` services have several
- * endpoints. One endpoint, `/always-spike`, is always slow. Another,
- * `/sometimes-spike`, is slow approximately 1% of the time. This can be used
- * to test the effectiveness of anomaly detection on transaction latency.
+ * The `spikey-frontend` and `spikey-backend` services have several endpoints.
+ * One endpoint, `/always-spike`, is always slow, while another, `/sometimes-spike`,
+ * is intermittently slow, providing data to test anomaly detection.
  */
 
 import { random } from 'lodash';

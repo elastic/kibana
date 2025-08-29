@@ -8,13 +8,11 @@
  */
 
 /**
- * This scenario simulates a cascading failure incident.
+ * Simulates a cascading failure caused by a slow downstream dependency.
  *
- * The story: A slow database query in the `inventory-service` causes a timeout.
- * This latency cascades up to the `product-recommendation` service and finally
- * to the user-facing `frontend-web` service, causing a full site outage for
- * a period of time. This provides a realistic example of how a downstream
- * dependency can impact the entire application stack.
+ * A slow database query in the `inventory-service` causes timeouts that cascade
+ * up to the `product-recommendation` and user-facing `frontend-web` services,
+ * resulting in a partial site outage.
  */
 
 import type { ApmFields, LogDocument } from '@kbn/apm-synthtrace-client';

@@ -99,34 +99,31 @@ const scenario: Scenario<InfraDocument | ApmFields> = async (runOptions) => {
         .rate(1)
         .generator((timestamp) => {
           const isDegraded = timestamp > midPoint.getTime();
-          const cpuTotalValue = isDegraded ? 0.9 : 0.1;
+          const cpuTotalValue = isDegraded ? 0.95 : 0.15;
+
+          const defaults = {
+            'agent.id': 'metricbeat-agent',
+            'host.hostname': hostName,
+            'host.name': hostName,
+          };
 
           return [
             host
               .cpu({
-                'process.cpu.pct': isDegraded ? 0.9 : 0.1,
-                'system.cpu.nice.pct': isDegraded ? 0.9 : 0.1,
-                'system.cpu.system.pct': cpuTotalValue * 0.2,
                 'system.cpu.total.norm.pct': cpuTotalValue,
-                'system.cpu.user.pct': cpuTotalValue * 0.2,
+                'system.cpu.user.pct': cpuTotalValue * 0.6,
+                'system.cpu.system.pct': cpuTotalValue * 0.3,
+                'process.cpu.pct': cpuTotalValue * 0.8,
+                'system.cpu.nice.pct': 0.1,
               })
+              .defaults(defaults)
               .timestamp(timestamp),
-            host.memory().timestamp(timestamp),
-            host.network().timestamp(timestamp),
-            host.load().timestamp(timestamp),
-            host.filesystem().timestamp(timestamp),
-            host.diskio().timestamp(timestamp),
-          ].map((metric) =>
-            metric.defaults({
-              'host.name': host.fields['host.name'],
-              'host.hostname': host.fields['host.name'],
-              'agent.id': 'some-agent',
-              'service.name': 'batch-processing-service',
-              'system.memory.actual.free': 500 + Math.floor(Math.random() * 500),
-              'system.memory.total': 1000,
-              'system.cpu.total.norm.pct': 0.5 + Math.random() * 0.25,
-            })
-          );
+            host.memory().defaults(defaults).timestamp(timestamp),
+            host.network().defaults(defaults).timestamp(timestamp),
+            host.load().defaults(defaults).timestamp(timestamp),
+            host.filesystem().defaults(defaults).timestamp(timestamp),
+            host.diskio().defaults(defaults).timestamp(timestamp),
+          ];
         });
 
       return [

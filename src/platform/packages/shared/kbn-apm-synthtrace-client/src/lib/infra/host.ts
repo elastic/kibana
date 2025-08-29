@@ -116,13 +116,18 @@ export class Host extends Entity<HostDocument> {
     });
   }
 
-  diskio() {
+  diskio(fields?: {
+    'system.diskio.read.count'?: number;
+    'system.diskio.write.count'?: number;
+    'system.diskio.read.bytes'?: number;
+    'system.diskio.write.bytes'?: number;
+  }) {
     return new HostMetrics({
       ...this.fields,
-      'system.diskio.read.count': 3538413,
-      'system.diskio.write.count': 4694333,
-      'system.diskio.read.bytes': 33147297792,
-      'system.diskio.write.bytes': 48595652608,
+      'system.diskio.read.count': fields?.['system.diskio.read.count'] ?? 3538413,
+      'system.diskio.write.count': fields?.['system.diskio.write.count'] ?? 4694333,
+      'system.diskio.read.bytes': fields?.['system.diskio.read.bytes'] ?? 33147297792,
+      'system.diskio.write.bytes': fields?.['system.diskio.write.bytes'] ?? 48595652608,
       'metricset.period': 10000,
       'metricset.name': 'diskio',
     });
