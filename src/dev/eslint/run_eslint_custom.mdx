@@ -1,0 +1,28 @@
+---
+id: kibDevDocsOpsEslintCustom
+slug: /kibana-dev-docs/ops/eslint-custom
+title: 'ESLint Custom'
+description: Runs ESLint with your own ESlint config
+tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'ts']
+---
+
+This allows you to do an ESLint pass with an optional config that you define, and offers a configurable formatter where you can do something with the results ESLint gives you.
+
+## Usage
+
+```
+node scripts/eslint_custom_config --help
+```
+
+This will run ESLint with a custom config, on all packages inside `x-pack` with 10 workers and will format the results in a summary report.
+
+```
+node scripts/eslint_custom_config --concurrency=10 --formatter=packages/kbn-eslint-plugin-perf-suggestions/format_perf_summary.ts --eslint_conf=packages/kbn-eslint-plugin-perf-suggestions/.eslintrc.js x-pack/
+```
+
+Available flags:
+
+- --concurrency (optionally set the amount of workers you want to use)
+- --formatter (optionally pass in the path to a formatter which will format the results of ESLint)
+- --eslint_conf (optionally pass in the path to an eslint config)
+- [optional folder path to which you want to limit the checking]
