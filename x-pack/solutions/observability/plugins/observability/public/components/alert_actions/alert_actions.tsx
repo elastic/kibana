@@ -84,7 +84,7 @@ export function AlertActions({
     ({ isNewCase }: { isNewCase: boolean }) => {
       telemetryClient.reportAlertAddedToCase(
         isNewCase,
-        tableId || 'observability-unknown',
+        tableId || 'unknown',
         observabilityAlert.fields['kibana.alert.rule.rule_type_id']
       );
 
