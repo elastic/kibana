@@ -47,12 +47,10 @@ const MonitorItem = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
 export function SyntheticsSuggestionChildren(props: SuggestionChildrenProps<SyntheticsSuggestion>) {
   const { suggestion } = props;
 
-  const monitors = useMemo(() => {
-    const items = Array.isArray(suggestion.data) ? suggestion.data : [];
-    return items
-      .map((monitorSuggestion) => monitorSuggestion?.payload as OverviewStatusMetaData | undefined)
-      .filter((m): m is OverviewStatusMetaData => !!m);
-  }, [suggestion.data]);
+  const monitors = useMemo<OverviewStatusMetaData[]>(
+    () => suggestion.data.map((m) => m.payload),
+    [suggestion.data]
+  );
 
   if (monitors.length === 0) return null;
 

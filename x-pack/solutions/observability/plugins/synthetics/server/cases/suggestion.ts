@@ -63,6 +63,11 @@ export function getMonitorByServiceName(
                       'meta.space_id': [spaceId],
                     },
                   },
+                  {
+                    terms: {
+                      'summary.final_attempt': [true],
+                    },
+                  },
                 ],
               },
             },
@@ -166,7 +171,7 @@ export function getMonitorByServiceName(
               spaces: source.meta.space_id,
               locationLabel: source.observer.geo.name,
               locationId: source.observer.name,
-              urls: source?.url?.full || '',
+              urls: source.url.full,
               projectId: relatedSavedObjectAttr.project_id,
             };
           });
