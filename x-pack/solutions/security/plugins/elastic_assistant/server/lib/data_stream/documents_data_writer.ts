@@ -13,6 +13,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { UUID } from '@kbn/elastic-assistant-common';
+import { getResourceName } from '../../ai_assistant_service';
 
 export interface BulkOperationError {
   message: string;
@@ -118,6 +119,46 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         should: [
           {
             bool: {
+              must_not: {
+                nested: {
+                  path: 'users',
+                  query: {
+                    exists: {
+                      field: 'users',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            nested: {
+              path: 'users',
+              query: {
+                bool: {
+                  should: [
+                    // Match on users.id if profile_uid exists
+                    ...(authenticatedUser.profile_uid
+                      ? [{ term: { 'users.id': authenticatedUser.profile_uid } }]
+                      : []),
+                    // Always try to match on users.name
+                    { term: { 'users.name': authenticatedUser.username } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  });
+  getFilterByConversationUser = (authenticatedUser: AuthenticatedUser) => ({
+    filter: {
+      bool: {
+        should: [
+          {
+            bool: {
               must: [
                 {
                   exists: { field: 'created_by' },
@@ -179,6 +220,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     authenticatedUser?: AuthenticatedUser
   ) => {
     const updatedAt = new Date().toISOString();
+    const isConversationUpdate = this.options.index.includes(getResourceName('conversation'));
     const responseToUpdate = await this.options.esClient.search({
       query: {
         bool: {
@@ -195,7 +237,11 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               },
             },
           ],
-          ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
+          ...(authenticatedUser
+            ? isConversationUpdate
+              ? this.getFilterByConversationUser(authenticatedUser)
+              : this.getFilterByUser(authenticatedUser)
+            : {}),
         },
       },
       _source: false,
@@ -226,6 +272,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     documentsToDelete: string[],
     authenticatedUser?: AuthenticatedUser
   ) => {
+    const isConversationUpdate = this.options.index.includes(getResourceName('conversation'));
     const responseToDelete = await this.options.esClient.search({
       query: {
         bool: {
@@ -242,7 +289,11 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               },
             },
           ],
-          ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
+          ...(authenticatedUser
+            ? isConversationUpdate
+              ? this.getFilterByConversationUser(authenticatedUser)
+              : this.getFilterByUser(authenticatedUser)
+            : {}),
         },
       },
       _source: false,

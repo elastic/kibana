@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, AuthenticatedUser } from '@kbn/core/server';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   getCreateConversationSchemaMock,
@@ -190,6 +190,401 @@ describe('DocumentsDataWriter', () => {
           docs_updated: [],
           took: 0,
         });
+      });
+    });
+
+    describe('when updating documents in knowledge base index', () => {
+      let knowledgeBaseWriter: DocumentsDataWriter;
+
+      beforeEach(() => {
+        knowledgeBaseWriter = new DocumentsDataWriter({
+          esClient: esClientMock,
+          logger: loggerMock,
+          index: '.kibana-elastic-ai-assistant-knowledge-base-default',
+          spaceId: 'default',
+          user: { name: 'test' },
+        });
+      });
+
+      it('uses getFilterByUser for knowledge base documents', async () => {
+        (esClientMock.search as jest.Mock).mockResolvedValue({
+          hits: {
+            hits: [{ _id: '1', _index: '.kibana-elastic-ai-assistant-knowledge-base-default' }],
+          },
+        });
+        (esClientMock.bulk as jest.Mock).mockResolvedValue({
+          items: [{ update: { status: 200, _id: '1' } }],
+          took: 10,
+        });
+
+        await knowledgeBaseWriter.bulk({
+          documentsToUpdate: [{ id: '1', title: 'test' }],
+          getUpdateScript: (doc) => ({ doc }),
+          authenticatedUser: mockUser1,
+        });
+
+        expect(esClientMock.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                filter: expect.objectContaining({
+                  bool: expect.objectContaining({
+                    should: expect.arrayContaining([
+                      expect.objectContaining({
+                        bool: expect.objectContaining({
+                          must_not: expect.objectContaining({
+                            nested: expect.objectContaining({
+                              path: 'users',
+                            }),
+                          }),
+                        }),
+                      }),
+                      expect.objectContaining({
+                        nested: expect.objectContaining({
+                          path: 'users',
+                          query: expect.objectContaining({
+                            bool: expect.objectContaining({
+                              should: expect.arrayContaining([
+                                { term: { 'users.id': 'my_profile_uid' } },
+                                { term: { 'users.name': 'elastic' } },
+                              ]),
+                              minimum_should_match: 1,
+                            }),
+                          }),
+                        }),
+                      }),
+                    ]),
+                  }),
+                }),
+              }),
+            }),
+          })
+        );
+      });
+    });
+
+    describe('when updating documents in conversations index', () => {
+      let conversationsWriter: DocumentsDataWriter;
+
+      beforeEach(() => {
+        conversationsWriter = new DocumentsDataWriter({
+          esClient: esClientMock,
+          logger: loggerMock,
+          index: '.kibana-elastic-ai-assistant-conversations-default',
+          spaceId: 'default',
+          user: { name: 'test' },
+        });
+      });
+
+      it('uses getFilterByConversationUser for conversation documents', async () => {
+        (esClientMock.search as jest.Mock).mockResolvedValue({
+          hits: {
+            hits: [{ _id: '1', _index: '.kibana-elastic-ai-assistant-conversations-default' }],
+          },
+        });
+        (esClientMock.bulk as jest.Mock).mockResolvedValue({
+          items: [{ update: { status: 200, _id: '1' } }],
+          took: 10,
+        });
+
+        await conversationsWriter.bulk({
+          documentsToUpdate: [{ id: '1', title: 'test' }],
+          getUpdateScript: (doc) => ({ doc }),
+          authenticatedUser: mockUser1,
+        });
+
+        expect(esClientMock.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                filter: expect.objectContaining({
+                  bool: expect.objectContaining({
+                    should: expect.arrayContaining([
+                      expect.objectContaining({
+                        bool: expect.objectContaining({
+                          must: expect.arrayContaining([
+                            expect.objectContaining({
+                              exists: { field: 'created_by' },
+                            }),
+                          ]),
+                        }),
+                      }),
+                    ]),
+                    minimum_should_match: 1,
+                  }),
+                }),
+              }),
+            }),
+          })
+        );
+      });
+    });
+
+    describe('when deleting documents in knowledge base index', () => {
+      let knowledgeBaseWriter: DocumentsDataWriter;
+
+      beforeEach(() => {
+        knowledgeBaseWriter = new DocumentsDataWriter({
+          esClient: esClientMock,
+          logger: loggerMock,
+          index: '.kibana-elastic-ai-assistant-knowledge-base-default',
+          spaceId: 'default',
+          user: { name: 'test' },
+        });
+      });
+
+      it('uses getFilterByUser for knowledge base document deletion', async () => {
+        (esClientMock.search as jest.Mock).mockResolvedValue({
+          hits: {
+            hits: [{ _id: '1', _index: '.kibana-elastic-ai-assistant-knowledge-base-default' }],
+          },
+        });
+        (esClientMock.bulk as jest.Mock).mockResolvedValue({
+          items: [{ delete: { status: 200, _id: '1' } }],
+          took: 10,
+        });
+
+        await knowledgeBaseWriter.bulk({
+          documentsToDelete: ['1'],
+          authenticatedUser: mockUser1,
+        });
+
+        expect(esClientMock.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                filter: expect.objectContaining({
+                  bool: expect.objectContaining({
+                    should: expect.arrayContaining([
+                      expect.objectContaining({
+                        bool: expect.objectContaining({
+                          must_not: expect.objectContaining({
+                            nested: expect.objectContaining({
+                              path: 'users',
+                            }),
+                          }),
+                        }),
+                      }),
+                    ]),
+                  }),
+                }),
+              }),
+            }),
+          })
+        );
+      });
+    });
+
+    describe('when deleting documents in conversations index', () => {
+      let conversationsWriter: DocumentsDataWriter;
+
+      beforeEach(() => {
+        conversationsWriter = new DocumentsDataWriter({
+          esClient: esClientMock,
+          logger: loggerMock,
+          index: '.kibana-elastic-ai-assistant-conversations-default',
+          spaceId: 'default',
+          user: { name: 'test' },
+        });
+      });
+
+      it('uses getFilterByConversationUser for conversation document deletion', async () => {
+        (esClientMock.search as jest.Mock).mockResolvedValue({
+          hits: {
+            hits: [{ _id: '1', _index: '.kibana-elastic-ai-assistant-conversations-default' }],
+          },
+        });
+        (esClientMock.bulk as jest.Mock).mockResolvedValue({
+          items: [{ delete: { status: 200, _id: '1' } }],
+          took: 10,
+        });
+
+        await conversationsWriter.bulk({
+          documentsToDelete: ['1'],
+          authenticatedUser: mockUser1,
+        });
+
+        expect(esClientMock.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                filter: expect.objectContaining({
+                  bool: expect.objectContaining({
+                    should: expect.arrayContaining([
+                      expect.objectContaining({
+                        bool: expect.objectContaining({
+                          must: expect.arrayContaining([
+                            expect.objectContaining({
+                              exists: { field: 'created_by' },
+                            }),
+                          ]),
+                        }),
+                      }),
+                    ]),
+                    minimum_should_match: 1,
+                  }),
+                }),
+              }),
+            }),
+          })
+        );
+      });
+    });
+
+    describe('when user has no profile_uid', () => {
+      let writerWithoutProfileUid: DocumentsDataWriter;
+      const userWithoutProfileUid = {
+        username: 'elastic',
+        profile_uid: undefined,
+        authentication_realm: {
+          type: 'my_realm_type',
+          name: 'my_realm_name',
+        },
+      } as AuthenticatedUser;
+
+      beforeEach(() => {
+        writerWithoutProfileUid = new DocumentsDataWriter({
+          esClient: esClientMock,
+          logger: loggerMock,
+          index: '.kibana-elastic-ai-assistant-knowledge-base-default',
+          spaceId: 'default',
+          user: { name: 'test' },
+        });
+      });
+
+      it('only matches on username when profile_uid is not available', async () => {
+        (esClientMock.search as jest.Mock).mockResolvedValue({
+          hits: {
+            hits: [{ _id: '1', _index: '.kibana-elastic-ai-assistant-knowledge-base-default' }],
+          },
+        });
+        (esClientMock.bulk as jest.Mock).mockResolvedValue({
+          items: [{ update: { status: 200, _id: '1' } }],
+          took: 10,
+        });
+
+        await writerWithoutProfileUid.bulk({
+          documentsToUpdate: [{ id: '1', title: 'test' }],
+          getUpdateScript: (doc) => ({ doc }),
+          authenticatedUser: userWithoutProfileUid,
+        });
+
+        expect(esClientMock.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                filter: expect.objectContaining({
+                  bool: expect.objectContaining({
+                    should: expect.arrayContaining([
+                      expect.objectContaining({
+                        nested: expect.objectContaining({
+                          query: expect.objectContaining({
+                            bool: expect.objectContaining({
+                              should: expect.arrayContaining([
+                                { term: { 'users.name': 'elastic' } },
+                              ]),
+                              minimum_should_match: 1,
+                            }),
+                          }),
+                        }),
+                      }),
+                    ]),
+                  }),
+                }),
+              }),
+            }),
+          })
+        );
+      });
+    });
+
+    describe('when no authenticated user is provided', () => {
+      it('does not apply user filtering for knowledge base documents', async () => {
+        (esClientMock.search as jest.Mock).mockResolvedValue({
+          hits: {
+            hits: [{ _id: '1', _index: '.kibana-elastic-ai-assistant-knowledge-base-default' }],
+          },
+        });
+        (esClientMock.bulk as jest.Mock).mockResolvedValue({
+          items: [{ update: { status: 200, _id: '1' } }],
+          took: 10,
+        });
+
+        await writer.bulk({
+          documentsToUpdate: [{ id: '1', title: 'test' }],
+          getUpdateScript: (doc) => ({ doc }),
+        });
+
+        expect(esClientMock.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                must: expect.arrayContaining([
+                  expect.objectContaining({
+                    bool: expect.objectContaining({
+                      should: expect.arrayContaining([
+                        expect.objectContaining({
+                          ids: expect.objectContaining({
+                            values: ['1'],
+                          }),
+                        }),
+                      ]),
+                    }),
+                  }),
+                ]),
+                // Should not have filter property when no authenticated user
+              }),
+            }),
+          })
+        );
+      });
+
+      it('does not apply user filtering for conversation documents', async () => {
+        const conversationsWriter = new DocumentsDataWriter({
+          esClient: esClientMock,
+          logger: loggerMock,
+          index: '.kibana-elastic-ai-assistant-conversations-default',
+          spaceId: 'default',
+          user: { name: 'test' },
+        });
+
+        (esClientMock.search as jest.Mock).mockResolvedValue({
+          hits: {
+            hits: [{ _id: '1', _index: '.kibana-elastic-ai-assistant-conversations-default' }],
+          },
+        });
+        (esClientMock.bulk as jest.Mock).mockResolvedValue({
+          items: [{ update: { status: 200, _id: '1' } }],
+          took: 10,
+        });
+
+        await conversationsWriter.bulk({
+          documentsToUpdate: [{ id: '1', title: 'test' }],
+          getUpdateScript: (doc) => ({ doc }),
+        });
+
+        expect(esClientMock.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                must: expect.arrayContaining([
+                  expect.objectContaining({
+                    bool: expect.objectContaining({
+                      should: expect.arrayContaining([
+                        expect.objectContaining({
+                          ids: expect.objectContaining({
+                            values: ['1'],
+                          }),
+                        }),
+                      ]),
+                    }),
+                  }),
+                ]),
+                // Should not have filter property when no authenticated user
+              }),
+            }),
+          })
+        );
       });
     });
   });
