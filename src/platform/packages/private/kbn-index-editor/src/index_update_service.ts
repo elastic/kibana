@@ -173,7 +173,7 @@ export class IndexUpdateService {
   public readonly isSaving$: Observable<boolean> = this._isSaving$.asObservable();
 
   /** Subject to manually flush changes, e.g. on user click */
-  private readonly _flush$ = new Subject<number>();
+  private readonly _flush$ = new Subject<{ exitAfterFlush: boolean }>();
 
   private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
   public readonly isFetching$: Observable<boolean> = this._isFetching$.asObservable();
@@ -314,8 +314,8 @@ export class IndexUpdateService {
   private readonly _hasUnsavedChanges$ = new BehaviorSubject<boolean>(false);
   public readonly hasUnsavedChanges$: Observable<boolean> = this._hasUnsavedChanges$.asObservable();
 
-  public flush() {
-    this._flush$.next(Date.now());
+  public flush({ exitAfterFlush = false } = {}) {
+    this._flush$.next({ exitAfterFlush });
     return this;
   }
 
@@ -522,28 +522,52 @@ export class IndexUpdateService {
           exhaustMap((updates) => {
             return from(this.bulkUpdate(updates)).pipe(
               catchError((errors) => {
-                return of({ errors: true } as BulkResponse);
+                return of({
+                  bulkOperations: [],
+                  bulkResponse: { errors: true } as BulkResponse,
+                });
               }),
               map((response) => {
-                return { updates, response };
+                return {
+                  updates,
+                  response: response.bulkResponse,
+                  bulkOperations: response.bulkOperations,
+                };
               })
             );
           }),
-          withLatestFrom(this._docs$, this.dataView$, this._savingDocs$),
-          switchMap(([{ updates, response }, docs, dataView, savingDocs]) =>
-            // Refresh the data view fields to get new columns types if any
-            from(this.data.dataViews.refreshFields(dataView, false, true)).pipe(
-              map(() => ({ updates, response, docs, savingDocs }))
-            )
+          withLatestFrom(this._flush$, this._docs$, this.dataView$, this._savingDocs$),
+          switchMap(
+            ([
+              { updates, response, bulkOperations },
+              { exitAfterFlush },
+              docs,
+              dataView,
+              savingDocs,
+            ]) =>
+              // Refresh the data view fields to get new columns types if any
+              from(this.data.dataViews.refreshFields(dataView, false, true)).pipe(
+                map(() => ({ updates, response, bulkOperations, exitAfterFlush, docs, savingDocs }))
+              )
           )
         )
         .subscribe({
-          next: ({ updates: bulkUpdateOperations, response, docs, savingDocs }) => {
+          next: ({ updates, response, bulkOperations, exitAfterFlush, docs, savingDocs }) => {
             this._isSaving$.next(false);
 
+            if (!bulkOperations.length) {
+              this.setError(IndexEditorErrors.NO_DATA_TO_SAVE_ERROR);
+              this.addAction('saved', {
+                response,
+                updates: [],
+              });
+              return;
+            }
+
             if (!response.errors) {
-              this.destroy();
-              // Close the flyout after successful save
+              if (exitAfterFlush) {
+                this.destroy();
+              }
             } else {
               const errorDetail = response.items
                 .map((item) => Object.values(item)[0])
@@ -554,28 +578,58 @@ export class IndexUpdateService {
               this.setError(IndexEditorErrors.PARTIAL_SAVING_ERROR, errorDetail);
             }
 
-            const savedIds = new Set(
+            const updatedIds = new Set(
               response.items
                 .filter((v) => !v.delete && Object.values(v)[0].status === 200)
                 .map((v) => Object.values(v)[0]._id)
             );
 
-            this._docs$.next(
-              docs.map((row) => {
+            const deletedIds = response.items
+              .filter((v) => v.delete && v.delete?.status === 200)
+              .map((v) => v.delete!._id);
+
+            const updatedDocs = docs
+              .map((row) => {
                 const update =
-                  savedIds.has(row.id) && savingDocs.has(row.id)
-                    ? savingDocs.get(row.id) ?? {}
+                  updatedIds.has(row.id) && savingDocs.has(row.id)
+                    ? (savingDocs.get(row.id) as PendingDocUpdate).update ?? {}
                     : {};
                 const mergedSource = { ...row.raw, ...update };
-
                 return { ...row, raw: mergedSource, flattened: mergedSource };
               })
+              .filter((row) => !deletedIds.includes(row.id));
+
+            const newDocs: DataTableRecord[] = response.items.reduce<DataTableRecord[]>(
+              (acc, item, index) => {
+                if (item.index && item.index?.status === 201 && item.index._id) {
+                  const newDocValue = (bulkOperations as any)?.[index]?.[1] as Record<
+                    string,
+                    unknown
+                  >;
+                  if (newDocValue) {
+                    const newDoc: DataTableRecord = {
+                      id: item.index._id,
+                      flattened: newDocValue,
+                      raw: newDocValue,
+                    };
+                    return [...acc, newDoc];
+                  }
+                }
+                return acc;
+              },
+              []
             );
+
+            newDocs.forEach((doc: DataTableRecord) => {
+              updatedDocs.unshift(doc);
+            });
+
+            this._docs$.next(updatedDocs);
 
             // Clear the buffer after successful update
             this.addAction('saved', {
               response,
-              updates: bulkUpdateOperations.filter(isDocUpdate).map((update) => update.payload),
+              updates: updates.filter(isDocUpdate).map((update) => update.payload),
             });
           },
           error: () => {
@@ -783,7 +837,10 @@ export class IndexUpdateService {
    * Sends a bulk update request to an index.
    * @param updates
    */
-  public bulkUpdate(updates: BulkUpdateOperations): Promise<BulkResponse> {
+  public async bulkUpdate(updates: BulkUpdateOperations): Promise<{
+    bulkOperations: Exclude<BulkRequest['operations'], undefined>;
+    bulkResponse: BulkResponse;
+  }> {
     const deletingDocIds: string[] = updates
       .filter(isDocDelete)
       .map((v) => v.payload.ids)
@@ -838,12 +895,17 @@ export class IndexUpdateService {
       operations: operations.flat(),
     });
 
-    return this.http.post<BulkResponse>(
+    const bulkResponse = await this.http.post<BulkResponse>(
       `/internal/esql/lookup_index/${this.getIndexName()}/update`,
       {
         body,
       }
     );
+
+    return {
+      bulkResponse,
+      bulkOperations: operations,
+    };
   }
 
   /** Cancel the latest update operation */
@@ -907,17 +969,14 @@ export class IndexUpdateService {
     this.data.dataViews.clearInstanceCache();
   }
 
-  public async createIndex() {
+  public async createIndex({ exitAfterFlush = false }) {
     try {
       this._isSaving$.next(true);
 
-      const updates = await firstValueFrom(this.bufferState$);
-
       await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
-      await this.bulkUpdate(updates);
 
       this.setIndexCreated(true);
-      this.addAction('discard-unsaved-changes');
+      this.flush({ exitAfterFlush });
     } catch (error) {
       throw error;
     } finally {

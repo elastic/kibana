@@ -117,6 +117,6 @@ describe('IndexUpdateService', () => {
 
   it('throws when calling bulkUpdate with empty operations', async () => {
     service.setIndexName('idx');
-    expect(() => service.bulkUpdate([] as any)).toThrow('empty operations');
+    await expect(service.bulkUpdate([] as any)).rejects.toThrow('empty operations');
   });
 });

@@ -39,22 +39,26 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
   );
   const hasUnsavedChanges = useObservable(indexUpdateService.hasUnsavedChanges$, false);
 
-  const { uploadStatus, onImportClick, canImport } = useFileUploadContext();
+  const indexName = useObservable(indexUpdateService.indexName$, indexUpdateService.getIndexName());
+
+  const { uploadStatus, onImportClick, canImport, setExistingIndexName } = useFileUploadContext();
 
   const onImport = useCallback(async () => {
     indexUpdateService.setIsSaving(true);
     await onImportClick();
   }, [indexUpdateService, onImportClick]);
 
-  const onSave = async () => {
+  const onSave = async ({ exitAfterFlush = false }) => {
     if (isIndexCreated) {
-      indexUpdateService.flush();
+      indexUpdateService.flush({ exitAfterFlush });
       return;
     }
 
     try {
-      await indexUpdateService.createIndex();
-      onClose();
+      await indexUpdateService.createIndex({ exitAfterFlush });
+      if (!exitAfterFlush) {
+        setExistingIndexName(indexName);
+      }
     } catch (error) {
       notifications.toasts.addError(error as Error, {
         title: i18n.translate('indexEditor.saveIndex.ErrorTitle', {
@@ -86,17 +90,34 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {isSaveButtonVisible ? (
-              <EuiFlexItem grow={false}>
-                <EuiButton data-test-subj="indexEditorSaveChangesButton" onClick={onSave}>
-                  <FormattedMessage
-                    id="indexEditor.flyout.footer.primaryButtonLabel.saveIndex"
-                    defaultMessage="Save changes"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="indexEditorSaveAndCloseButton"
+                    onClick={() => onSave({ exitAfterFlush: true })}
+                  >
+                    <FormattedMessage
+                      id="indexEditor.flyout.footer.primaryButtonLabel.saveAndClose"
+                      defaultMessage="Save and close"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="indexEditorSaveChangesButton"
+                    fill
+                    onClick={() => onSave({ exitAfterFlush: false })}
+                  >
+                    <FormattedMessage
+                      id="indexEditor.flyout.footer.primaryButtonLabel.saveIndex"
+                      defaultMessage="Save"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </>
             ) : null}
 
-            {uploadStatus.overallImportStatus === STATUS.NOT_STARTED && canImport ? (
+            {uploadStatus.overallImportStatus !== STATUS.STARTED && canImport ? (
               <EuiFlexItem grow={false}>
                 <EuiButton data-test-subj="indexEditorImportButton" onClick={onImport}>
                   <FormattedMessage

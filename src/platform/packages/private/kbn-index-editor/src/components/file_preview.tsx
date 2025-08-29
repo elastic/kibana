@@ -176,7 +176,7 @@ export const FilesPreview: FC = () => {
 
   if (!filePreviewItems.length) return null;
 
-  return uploadStatus.overallImportStatus === STATUS.NOT_STARTED && filesStatus.length > 0 ? (
+  return filesStatus.length > 0 ? (
     <div>
       {filePreviewItems.map((filePreviewItem, i) => {
         const tabs: EuiTabbedContentTab[] = [];

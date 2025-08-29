@@ -24,6 +24,7 @@ import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import type { FileUploadResults } from '@kbn/file-upload-common';
 import { ErrorCallout } from './error_callout';
 import { isPlaceholderColumn } from '../utils';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
@@ -56,7 +57,16 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     deps.data,
     coreStart.application,
     coreStart.http,
-    coreStart.notifications
+    coreStart.notifications,
+    // onUploadComplete
+    (results: FileUploadResults | null) => {
+      if (results) {
+        fileUploadContextValue.setExistingIndexName(results.index);
+        results.files.forEach((_, index) => {
+          deps.fileManager.removeFile(index);
+        });
+      }
+    }
   );
 
   const columnsWithoutPlaceholders = dataViewColumns?.filter(
