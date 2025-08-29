@@ -102,9 +102,13 @@ export function Wrapper({
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
               <EuiFlexItem grow={true}>
                 <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <DiscoverBadgeButton definition={definition} />
+                  {Streams.ingest.all.GetResponse.is(definition) && (
+                    <DiscoverBadgeButton definition={definition} />
+                  )}
                   {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-                  <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+                  {Streams.ingest.all.GetResponse.is(definition) && (
+                    <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
 
