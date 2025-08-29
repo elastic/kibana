@@ -71,14 +71,14 @@ export type ExitNormalPathNode = z.infer<typeof ExitNormalPathNodeSchema>;
 
 export const EnterFallbackPathNodeSchema = z.object({
   id: z.string(),
-  type: z.literal('enter-failure-path'),
+  type: z.literal('enter-fallback-path'),
   enterZoneNodeId: z.string(),
 });
 export type EnterFallbackPathNode = z.infer<typeof EnterFallbackPathNodeSchema>;
 
 export const ExitFallbackPathNodeSchema = z.object({
   id: z.string(),
-  type: z.literal('exit-failure-path'),
+  type: z.literal('exit-fallback-path'),
   exitOnFailureZoneNodeId: z.string(),
   enterNodeId: z.string(),
 });

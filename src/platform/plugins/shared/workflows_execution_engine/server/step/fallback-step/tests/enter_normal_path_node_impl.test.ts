@@ -96,43 +96,6 @@ describe('EnterNormalPathNodeImpl', () => {
       });
     });
 
-    describe('when error already exists in step state', () => {
-      const existingError = new Error('Existing error');
-
-      beforeEach(() => {
-        workflowRuntime.getStepState = jest.fn().mockReturnValue({
-          error: existingError,
-        });
-      });
-
-      it('should log error message', async () => {
-        await underTest.catchError();
-        expect(workflowLogger.logError).toHaveBeenCalledWith(
-          'Error caught by the OnFailure zone. Redirecting to the fallback path'
-        );
-      });
-
-      it('should get step state for current node', async () => {
-        await underTest.catchError();
-        expect(workflowRuntime.getStepState).toHaveBeenCalledWith(step.id);
-      });
-
-      it('should not set step state when error already exists', async () => {
-        await underTest.catchError();
-        expect(workflowRuntime.setStepState).not.toHaveBeenCalled();
-      });
-
-      it('should not clear workflow error when error already exists', async () => {
-        await underTest.catchError();
-        expect(workflowRuntime.setWorkflowError).not.toHaveBeenCalled();
-      });
-
-      it('should not redirect to failure path when error already exists', async () => {
-        await underTest.catchError();
-        expect(workflowRuntime.goToStep).not.toHaveBeenCalled();
-      });
-    });
-
     describe('when step state is null/undefined', () => {
       beforeEach(() => {
         workflowRuntime.getStepState = jest.fn().mockReturnValue(null);

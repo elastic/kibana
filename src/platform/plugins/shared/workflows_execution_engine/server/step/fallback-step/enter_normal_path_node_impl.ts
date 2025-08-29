@@ -30,14 +30,6 @@ export class EnterNormalPathNodeImpl implements StepImplementation, StepErrorCat
     );
     const stepState = this.wfExecutionRuntimeManager.getStepState(this.node.id) || {};
 
-    if (stepState.error) {
-      // if error is already in state, and we catch error again, that means failure path was executed
-      // and we have to throw error because even though fallback completes,
-      // we still need to throw error
-      // if the user wants to continue execution, he will need to set ``continue: true`` for the step.
-      return Promise.resolve();
-    }
-
     this.wfExecutionRuntimeManager.setStepState(this.node.enterZoneNodeId, {
       ...stepState,
       error: this.wfExecutionRuntimeManager.getWorkflowExecution().error, // save error to the state of the enter node

@@ -19,7 +19,7 @@ describe('ExitFallbackPathNodeImpl', () => {
   beforeEach(() => {
     step = {
       id: 'exitFailurePath1',
-      type: 'exit-normal-path',
+      type: 'exit-fallback-path',
       exitOnFailureZoneNodeId: 'exitOnFailureZone1',
       enterNodeId: 'enterFailurePath1',
     };

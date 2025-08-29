@@ -289,7 +289,7 @@ export function visitFallbackStep(
   if (fallbackPathSteps?.length > 0) {
     const enterFallbackPathNode: EnterFallbackPathNode = {
       id: enterFallbackPathNodeId,
-      type: 'enter-failure-path',
+      type: 'enter-fallback-path',
       enterZoneNodeId: enterTryBlockNode.id,
     };
     graph.setNode(enterFallbackPathNode.id, enterFallbackPathNode);
@@ -301,7 +301,7 @@ export function visitFallbackStep(
     );
     const exitFallbackPathNode: ExitFallbackPathNode = {
       id: exitFallbackPathNodeId,
-      type: 'exit-failure-path',
+      type: 'exit-fallback-path',
       enterNodeId: enterFallbackPathNodeId,
       exitOnFailureZoneNodeId: exitTryBlockNode.id,
     };

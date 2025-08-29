@@ -85,11 +85,11 @@ export class StepFactory {
         return new ExitTryBlockNodeImpl(step as any, this.workflowRuntime);
       case 'enter-normal-path':
         return new EnterNormalPathNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
-      case 'enter-failure-path':
+      case 'enter-fallback-path':
         return new EnterFallbackPathNodeImpl(this.workflowRuntime);
       case 'exit-normal-path':
         return new ExitNormalPathNodeImpl(step as any, this.workflowRuntime);
-      case 'exit-failure-path':
+      case 'exit-fallback-path':
         return new ExitFallbackPathNodeImpl(step as any, this.workflowRuntime);
       case 'enter-if':
         return new EnterIfNodeImpl(

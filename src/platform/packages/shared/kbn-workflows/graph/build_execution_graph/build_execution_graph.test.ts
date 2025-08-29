@@ -972,7 +972,7 @@ describe('convertToWorkflowGraph', () => {
         );
         expect(enterFallbackPathNode).toEqual({
           id: 'fallbackPath_fallback_testRetryConnectorStep',
-          type: 'enter-failure-path',
+          type: 'enter-fallback-path',
           enterZoneNodeId: 'fallback_testRetryConnectorStep',
         });
       });
@@ -984,7 +984,7 @@ describe('convertToWorkflowGraph', () => {
         );
         expect(exitFallbackPathNode).toEqual({
           id: 'exit_fallbackPath_fallback_testRetryConnectorStep',
-          type: 'exit-failure-path',
+          type: 'exit-fallback-path',
           enterNodeId: 'fallbackPath_fallback_testRetryConnectorStep',
           exitOnFailureZoneNodeId: 'exitTryBlock(fallback_testRetryConnectorStep)',
         });
