@@ -279,7 +279,7 @@ describe('Starred and History queries components', () => {
       );
       expect(screen.getByTestId('ESQLEditor-queryHistory')).toBeInTheDocument();
       expect(screen.getByTestId('ESQLEditor-history-starred-queries-helpText')).toHaveTextContent(
-        'Showing 3 queries (1KB used)'
+        'Showing 3 queries'
       );
     });
 
@@ -446,7 +446,7 @@ describe('Starred and History queries components', () => {
 
       // Initially shows total count
       expect(screen.getByTestId('ESQLEditor-history-starred-queries-helpText')).toHaveTextContent(
-        'Showing 3 queries (1KB used)'
+        'Showing 3 queries'
       );
 
       // Filter to show only 1 result
@@ -454,7 +454,7 @@ describe('Starred and History queries components', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('ESQLEditor-history-starred-queries-helpText')).toHaveTextContent(
-          'Showing 1 queries (1KB used)'
+          'Showing 1 queries'
         );
       });
     });

@@ -663,7 +663,7 @@ export function HistoryAndStarredQueriesTabs({
                         ? filteredHistoryItems.length
                         : stats.queryCount;
                       return i18n.translate('esqlEditor.history.historyItemsStorage', {
-                        defaultMessage: 'Showing {queryCount} queries ({storageSizeKB}KB used)',
+                        defaultMessage: 'Showing {queryCount} queries',
                         values: {
                           queryCount: displayCount,
                           storageSizeKB: stats.storageSizeKB,
