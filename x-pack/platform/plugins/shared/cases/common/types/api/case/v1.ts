@@ -543,6 +543,12 @@ export const FindCasesContainingAllAlertsRequestRt = rt.exact(
   })
 );
 
+export const FindCasesContainingAllAlertsResponseRt = rt.exact(
+  rt.type({
+    casesWithAllAttachments: rt.array(rt.string),
+  })
+);
+
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
@@ -570,4 +576,7 @@ export type SimilarCasesSearchRequest = rt.TypeOf<typeof SimilarCasesSearchReque
 export type CasesSimilarResponse = rt.TypeOf<typeof CasesSimilarResponseRt>;
 export type FindCasesContainingAllAlertsRequest = rt.TypeOf<
   typeof FindCasesContainingAllAlertsRequestRt
+>;
+export type FindCasesContainingAllAlertsResponse = rt.TypeOf<
+  typeof FindCasesContainingAllAlertsResponseRt
 >;
