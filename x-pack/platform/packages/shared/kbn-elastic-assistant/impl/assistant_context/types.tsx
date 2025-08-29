@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, Message, Replacements, User } from '@kbn/elastic-assistant-common';
 import type { EuiCommentProps } from '@elastic/eui';
-import type { UserAvatar } from '.';
 
 export interface MessagePresentation {
   delay?: number;
@@ -29,16 +28,14 @@ export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
 export interface Conversation {
   '@timestamp'?: string;
   apiConfig?: ApiConfig;
-  user?: {
-    id?: string;
-    name?: string;
-  };
+  createdBy: User;
+  users: User[];
   category: string;
   id: string;
   title: string;
   messages: ClientMessage[];
   updatedAt?: string;
-  createdAt?: string;
+  createdAt: string;
   replacements: Replacements;
   excludeFromLastConversationStorage?: boolean;
 }
@@ -81,16 +78,19 @@ export interface AssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  // When true, the Assistant Sharing feature is enabled
+  // keep type loose to avoid updating mocks as temp property
+  isAssistantSharingEnabled?: boolean;
 }
 
 export type GetAssistantMessages = (commentArgs: {
   abortStream: () => void;
   currentConversation?: Conversation;
+  isConversationOwner: boolean;
   isFetchingResponse: boolean;
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
-  currentUserAvatar?: UserAvatar;
   setIsStreaming: (isStreaming: boolean) => void;
   systemPromptContent?: string;
   contentReferencesVisible: boolean;

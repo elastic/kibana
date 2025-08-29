@@ -66,7 +66,7 @@ describe('useAssistantAvailability', () => {
           aiAssistantManagementSelection$: jest.fn(),
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
+          getBooleanValue: jest.fn().mockReturnValue(undefined),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -125,7 +125,7 @@ describe('useAssistantAvailability', () => {
           aiAssistantManagementSelection$: jest.fn(),
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
+          getBooleanValue: jest.fn().mockReturnValue(undefined),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -177,7 +177,7 @@ describe('useAssistantAvailability', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(false),
+          getBooleanValue: jest.fn().mockReturnValue(undefined),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -229,7 +229,7 @@ describe('useAssistantAvailability', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
+          getBooleanValue: jest.fn().mockReturnValue(undefined),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -261,7 +261,7 @@ describe('useAssistantAvailability', () => {
           capabilities: {},
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
+          getBooleanValue: jest.fn().mockReturnValue(undefined),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);

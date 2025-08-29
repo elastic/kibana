@@ -26,7 +26,10 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     ELASTIC_AI_ASSISTANT_SUMMARIZATION_ENABLED_FEATURE_FLAG,
     false
   );
-
+  const isAssistantSharingEnabled = featureFlags.getBooleanValue(
+    'elasticAssistant.assistantSharingEnabled',
+    false
+  );
   const hasAssistantPrivilege = capabilities[ASSISTANT_FEATURE_ID]?.['ai-assistant'] === true;
   const hasUpdateAIAssistantAnonymization =
     capabilities[ASSISTANT_FEATURE_ID]?.updateAIAssistantAnonymization === true;
@@ -51,6 +54,7 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     hasAssistantPrivilege,
     hasConnectorsAllPrivilege,
     hasConnectorsReadPrivilege,
+    isAssistantSharingEnabled,
     isAssistantEnabled: isEnterprise,
     isAssistantVisible: isEnterprise && isVisible,
     isAssistantManagementEnabled: isEnterprise && hasManageAssistantPrivilege,
