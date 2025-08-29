@@ -142,7 +142,7 @@ export type HttpStep = z.infer<typeof HttpStepSchema>;
 
 export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
   const schema = WorkflowOnFailureSchema.extend({
-    fallback: stepSchema.optional(),
+    fallback: z.array(stepSchema).optional(),
   });
 
   if (loose) {

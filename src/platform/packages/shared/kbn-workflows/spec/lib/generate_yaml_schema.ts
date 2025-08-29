@@ -15,9 +15,9 @@ import {
   getHttpStepSchema,
   getIfStepSchema,
   getMergeStepSchema,
+  getOnFailureStepSchema,
   getParallelStepSchema,
   WaitStepSchema,
-  WorkflowOnFailureSchema,
   WorkflowSchema,
 } from '../schema';
 
@@ -37,9 +37,7 @@ function generateStepSchemaForConnector(
     type: z.literal(connector.type),
     'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
     with: connector.paramsSchema,
-    'on-failure': WorkflowOnFailureSchema.extend({
-      fallback: z.array(stepSchema).optional(),
-    }).optional(),
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
   });
 }
 
