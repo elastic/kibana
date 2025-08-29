@@ -20,7 +20,7 @@ export const WARNING_QUALITY_MINIMUM_PERCENTAGE = 0;
 export const DEFAULT_SORT_FIELD = 'title';
 export const DEFAULT_SORT_DIRECTION = 'asc';
 
-export const DEFAULT_QUALITY_ISSUE_SORT_FIELD = 'count';
+export const DEFAULT_QUALITY_ISSUE_SORT_FIELD = 'lastOccurrence';
 export const DEFAULT_QUALITY_ISSUE_SORT_DIRECTION = 'desc';
 
 export const DEFAULT_FAILED_DOCS_ERROR_SORT_FIELD = 'type';
