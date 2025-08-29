@@ -65,7 +65,7 @@ export const useLookupIndexPrivileges = () => {
   const getPermissions = useCallback(async (indexNames: string[] = []) => {
     const privileges = await memoizedFetchPrivileges.current(indexNames);
 
-    const permissions = indexNames.reduce((acc, indexName) => {
+    const permissions = (indexNames.length ? indexNames : ['*']).reduce((acc, indexName) => {
       acc[indexName] = {
         canCreateIndex: hasPrivilege(privileges, indexName, 'create_index'),
         canEditIndex: hasPrivilege(privileges, indexName, 'write'),

@@ -58,8 +58,6 @@ describe('useLookupIndexPrivileges', () => {
 
   it('should fetch all permissions when no index names are provided', async () => {
     const mockPrivileges = {
-      'index-1': { create_index: true, write: true, read: true },
-      'index-2': { create_index: false, write: false, read: true },
       '*': { create_index: false, write: false, read: false },
     };
     services.http.get.mockResolvedValue(mockPrivileges);
@@ -73,8 +71,6 @@ describe('useLookupIndexPrivileges', () => {
 
     expect(services.http.get).toHaveBeenCalledWith('/internal/esql/lookup_index/privileges', {});
     expect(permissions).toEqual({
-      'index-1': { canCreateIndex: true, canEditIndex: true, canReadIndex: true },
-      'index-2': { canCreateIndex: false, canEditIndex: false, canReadIndex: true },
       '*': { canCreateIndex: false, canEditIndex: false, canReadIndex: false },
     });
   });
@@ -88,8 +84,9 @@ describe('useLookupIndexPrivileges', () => {
       permissions = await result.current.getPermissions([]);
     });
 
-    expect(services.http.get).toHaveBeenCalledWith('/internal/esql/lookup_index/privileges', {});
-    expect(permissions).toEqual({});
+    expect(permissions).toEqual({
+      '*': { canCreateIndex: false, canEditIndex: false, canReadIndex: false },
+    });
   });
 
   it('should use cache for subsequent calls with the same index names', async () => {
