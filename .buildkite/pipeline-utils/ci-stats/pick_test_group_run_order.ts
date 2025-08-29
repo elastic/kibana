@@ -502,9 +502,7 @@ export async function pickTestGroupRunOrder() {
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 0 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
+                ...(JEST_CONFIGS_RETRY_COUNT > 0 ? [{ exit_status: '*', limit: 0 }] : []),
               ],
             },
           }
