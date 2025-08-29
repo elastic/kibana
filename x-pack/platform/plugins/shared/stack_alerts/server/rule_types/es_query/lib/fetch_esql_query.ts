@@ -10,15 +10,20 @@ import {
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/common';
-import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
+import type {
+  PublicRuleResultService,
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server/types';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type { ESQLSearchParams } from '@kbn/es-types';
 import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams } from '../types';
@@ -30,9 +35,9 @@ export interface FetchEsqlQueryOpts {
   spacePrefix: string;
   services: {
     logger: Logger;
-    scopedClusterClient: IScopedClusterClient;
     share: SharePluginStart;
     ruleResultService?: PublicRuleResultService;
+    getAsyncSearch: RuleExecutorServices['getAsyncSearch'];
   };
   dateStart: string;
   dateEnd: string;
@@ -47,20 +52,19 @@ export async function fetchEsqlQuery({
   dateStart,
   dateEnd,
 }: FetchEsqlQueryOpts) {
-  const { logger, scopedClusterClient, share, ruleResultService } = services;
+  const { logger, share, ruleResultService } = services;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
-  const esClient = scopedClusterClient.asCurrentUser;
+  const esqlAsyncSearch = services.getAsyncSearch<ESQLSearchParams>(ESQL_ASYNC_SEARCH_STRATEGY);
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
   logger.debug(() => `ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
   let response: EsqlTable;
   try {
-    response = await esClient.transport.request<EsqlTable>({
-      method: 'POST',
-      path: '/_query',
-      body: query,
+    const asyncResponse = await esqlAsyncSearch({
+      request: { params: { query: query.query, filter: query.filter } },
     });
+    response = asyncResponse.rawResponse;
   } catch (e) {
     if (e.message?.includes('verification_exception')) {
       throw createTaskRunError(e, TaskErrorSource.USER);

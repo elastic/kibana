@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { IAsyncSearchRequestParams } from '@kbn/data-plugin/server/search';
+import type { ESQLSearchParams } from '@kbn/es-types';
 import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IRouter,
@@ -15,7 +17,13 @@ import type {
 } from '@kbn/core/server';
 import type { z } from '@kbn/zod';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  EqlRequestParams,
+  ISearchStartSearchSource,
+} from '@kbn/data-plugin/common';
 import type { LicenseType } from '@kbn/licensing-types';
 import type {
   IScopedClusterClient,
@@ -60,6 +68,8 @@ import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import type { PublicAlertsClient } from './alerts_client/types';
 import type { GetTimeRangeResult } from './lib/get_time_range';
 import type { AlertDeletionClient } from './alert_deletion';
+import type { AsyncSearchClient } from './task_runner/get_executor_services';
+
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -128,7 +138,17 @@ export interface RuleExecutorServices<
   shouldStopExecution: () => boolean;
   shouldWriteAlerts: () => boolean;
   uiSettingsClient: IUiSettingsClient;
+  getAsyncSearch: <T extends AsyncSearchParams>(
+    strategy: AsyncSearchStrategies
+  ) => AsyncSearchClient<T>['search'];
 }
+
+export type AsyncSearchStrategies =
+  | typeof ESQL_ASYNC_SEARCH_STRATEGY // ESQL
+  | typeof EQL_SEARCH_STRATEGY // EQL
+  | typeof ENHANCED_ES_SEARCH_STRATEGY; // search
+
+export type AsyncSearchParams = ESQLSearchParams | IAsyncSearchRequestParams | EqlRequestParams;
 
 export interface RuleExecutorOptions<
   Params extends RuleTypeParams = never,

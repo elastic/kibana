@@ -12,6 +12,13 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { tap, map, lastValueFrom } from 'rxjs';
+import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/search-types';
 import { RULE_SAVED_OBJECT_TYPE } from '..';
 import { getEsRequestTimeout } from '../lib';
 import type { WrappedScopedClusterClient } from '../lib/wrap_scoped_cluster_client';
@@ -20,7 +27,12 @@ import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client
 import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import type { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import type { RuleResultService } from '../monitoring/rule_result_service';
-import type { PublicRuleMonitoringService, PublicRuleResultService } from '../types';
+import type {
+  AsyncSearchParams,
+  AsyncSearchStrategies,
+  PublicRuleMonitoringService,
+  PublicRuleResultService,
+} from '../types';
 import { withAlertingSpan } from './lib';
 import type { TaskRunnerContext } from './types';
 
@@ -35,6 +47,21 @@ interface GetExecutorServicesOpts {
   ruleTaskTimeout?: string;
 }
 
+export interface AsyncSearchClient<T extends AsyncSearchParams> {
+  getMetrics: () => {
+    numSearches: number;
+    esSearchDurationMs: number;
+    totalSearchDurationMs: number;
+  };
+  search: ({
+    request,
+    options,
+  }: {
+    request: IKibanaSearchRequest<T>;
+    options?: ISearchOptions;
+  }) => Promise<IKibanaSearchResponse>;
+}
+
 export interface ExecutorServices {
   ruleMonitoringService: PublicRuleMonitoringService;
   ruleResultService: PublicRuleResultService;
@@ -43,9 +70,12 @@ export interface ExecutorServices {
   wrappedScopedClusterClient: WrappedScopedClusterClient;
   getDataViews: () => Promise<DataViewsContract>;
   getWrappedSearchSourceClient: () => Promise<WrappedSearchSourceClient>;
+  getAsyncSearchClient: <T extends AsyncSearchParams>(
+    strategy: AsyncSearchStrategies
+  ) => AsyncSearchClient<T>;
 }
 
-export const getExecutorServices = (opts: GetExecutorServicesOpts) => {
+export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServices => {
   const { context, abortController, fakeRequest, logger, ruleData, ruleTaskTimeout } = opts;
 
   const wrappedClientOptions = {
@@ -91,6 +121,45 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts) => {
         ...wrappedClientOptions,
         searchSourceClient,
       });
+    },
+
+    getAsyncSearchClient: (strategy = ESQL_SEARCH_STRATEGY) => {
+      const start = Date.now();
+      let numSearches = 0;
+      let esSearchDurationMs = 0;
+      let totalSearchDurationMs = 0;
+
+      const client = context.data.search.asScoped(fakeRequest);
+
+      return {
+        getMetrics: () => {
+          return {
+            numSearches,
+            esSearchDurationMs,
+            totalSearchDurationMs,
+          };
+        },
+        search: ({ request, options }) => {
+          return lastValueFrom(
+            client
+              .search(request, {
+                ...options,
+                strategy,
+              })
+              .pipe(
+                map((response) => {
+                  return response;
+                }),
+                tap((result) => {
+                  const durationMs = Date.now() - start;
+                  numSearches++;
+                  esSearchDurationMs += result.rawResponse.took ?? 0;
+                  totalSearchDurationMs += durationMs;
+                })
+              )
+          );
+        },
+      };
     },
   };
 };

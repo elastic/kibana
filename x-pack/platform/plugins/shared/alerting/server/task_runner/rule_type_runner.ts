@@ -20,9 +20,16 @@ import type { IAlertsClient } from '../alerts_client/types';
 import { ErrorWithReason } from '../lib';
 import { getTimeRange } from '../lib/get_time_range';
 import type { NormalizedRuleType } from '../rule_type_registry';
-import type { RuleAlertData, RuleTypeParams, RuleTypeState, SanitizedRule } from '../types';
+import type {
+  AsyncSearchParams,
+  AsyncSearchStrategies,
+  RuleAlertData,
+  RuleTypeParams,
+  RuleTypeState,
+  SanitizedRule,
+} from '../types';
 import { DEFAULT_FLAPPING_SETTINGS, RuleExecutionStatusErrorReasons } from '../types';
-import type { ExecutorServices } from './get_executor_services';
+import type { AsyncSearchClient, ExecutorServices } from './get_executor_services';
 import type { TaskRunnerTimer } from './task_runner_timer';
 import { TaskRunnerTimerSpan } from './task_runner_timer';
 import type {
@@ -202,6 +209,7 @@ export class RuleTypeRunner<
 
         let executorResult: { state: RuleState } | undefined;
         let wrappedSearchSourceClient: WrappedSearchSourceClient | undefined;
+        let asyncSearchClient: AsyncSearchClient<AsyncSearchParams> | undefined;
         try {
           const ctx = {
             type: 'alert',
@@ -249,6 +257,12 @@ export class RuleTypeRunner<
                   shouldWriteAlerts: () =>
                     this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout),
                   uiSettingsClient: executorServices.uiSettingsClient,
+                  getAsyncSearch: (strategy: AsyncSearchStrategies) => {
+                    if (!asyncSearchClient) {
+                      asyncSearchClient = executorServices.getAsyncSearchClient(strategy);
+                    }
+                    return asyncSearchClient.search;
+                  },
                 },
                 params: validatedParams,
                 state: ruleTypeState as RuleState,
