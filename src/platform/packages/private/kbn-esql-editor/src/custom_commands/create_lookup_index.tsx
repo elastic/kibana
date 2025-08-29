@@ -29,11 +29,58 @@ import {
 } from './append_index_to_join_command';
 import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
 
+/**
+ * monaco editor command ID for opening the lookup index flyout.
+ */
+export const COMMAND_ID = 'esql.lookup_index.create';
+
 async function isCurrentAppSupported(
   currentAppId$: ApplicationStart['currentAppId$'] | undefined
 ): Promise<boolean> {
   const currentApp = await firstValueFrom(currentAppId$ ?? of(undefined));
   return currentApp === 'discover';
+}
+
+/**
+ * Creates a command string for the lookup index badge in the ESQL editor.
+ */
+export function getMonacoCommandString(
+  indexName: string,
+  isExistingIndex: boolean,
+  indexPrivileges: any
+): string | undefined {
+  const { canEditIndex, canReadIndex, canCreateIndex } = indexPrivileges;
+
+  let actionLabel = '';
+  if (isExistingIndex) {
+    if (canEditIndex) {
+      actionLabel = i18n.translate('esqlEditor.lookupIndex.edit', {
+        defaultMessage: 'Edit lookup index',
+      });
+    } else if (canReadIndex) {
+      actionLabel = i18n.translate('esqlEditor.lookupIndex.view', {
+        defaultMessage: 'View lookup index',
+      });
+    }
+  } else {
+    if (canCreateIndex) {
+      actionLabel = i18n.translate('esqlEditor.lookupIndex.create', {
+        defaultMessage: 'Create lookup index',
+      });
+    }
+  }
+
+  if (!actionLabel) {
+    return;
+  }
+
+  return `[${actionLabel}](command:${COMMAND_ID}?${encodeURIComponent(
+    JSON.stringify({
+      indexName,
+      doesIndexExist: isExistingIndex,
+      canEditIndex,
+    })
+  )})`;
 }
 
 /**
@@ -132,32 +179,16 @@ export const useLookupIndexCommand = (
         const lookupIndex = lookupIndices[i];
 
         const isExistingIndex = existingIndices.indices.some((index) => index.name === lookupIndex);
-        const { canCreateIndex, canReadIndex, canEditIndex } = permissions[lookupIndex];
-
         const matches =
           editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
 
-        let actionLabel = '';
-        if (isExistingIndex) {
-          if (canEditIndex) {
-            actionLabel = i18n.translate('esqlEditor.lookupIndex.edit', {
-              defaultMessage: 'Edit lookup index',
-            });
-          } else if (canReadIndex) {
-            actionLabel = i18n.translate('esqlEditor.lookupIndex.view', {
-              defaultMessage: 'View lookup index',
-            });
-          }
-        } else {
-          if (canCreateIndex) {
-            actionLabel = i18n.translate('esqlEditor.lookupIndex.create', {
-              defaultMessage: 'Create lookup index',
-            });
-          }
-        }
+        const commandString = getMonacoCommandString(
+          lookupIndex,
+          isExistingIndex,
+          permissions[lookupIndex]
+        );
 
-        // Don't add decorations if the lookup index is not found in the query'
-        if (!actionLabel) continue;
+        if (!commandString) continue;
 
         matches.forEach((match) => {
           newDecorations.push({
@@ -166,13 +197,7 @@ export const useLookupIndexCommand = (
               isWholeLine: false,
               stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
               hoverMessage: {
-                value: `[${actionLabel}](command:esql.lookup_index.create?${encodeURIComponent(
-                  JSON.stringify({
-                    indexName: lookupIndex,
-                    doesIndexExist: isExistingIndex,
-                    canEditIndex,
-                  })
-                )})`,
+                value: commandString,
                 isTrusted: true,
               },
 
@@ -251,7 +276,7 @@ export const useLookupIndexCommand = (
 
   useEffect(function registerCommandOnMount() {
     const disposable = monaco.editor.registerCommand(
-      'esql.lookup_index.create',
+      COMMAND_ID,
       async (_, args: { indexName: string; doesIndexExist?: boolean; canEditIndex?: boolean }) => {
         const { indexName, doesIndexExist, canEditIndex } = args;
         await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex);
