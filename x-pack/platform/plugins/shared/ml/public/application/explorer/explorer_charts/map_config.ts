@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE, VectorLayerDescriptor } from '@kbn/maps-plugin/common';
+import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common';
+import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '@kbn/maps-plugin/common';
 import { getMlSeverityColorRampValue } from '@kbn/ml-anomaly-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { AnomaliesTableData } from '../explorer_utils';
