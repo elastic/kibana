@@ -54,6 +54,8 @@ export type {
   ExitForeachNode,
   ExitIfNode,
   ExitRetryNode,
+  EnterContinueNode,
+  ExitContinueNode,
   HttpGraphNode,
   HttpGraphNodeSchema,
   WaitGraphNode,

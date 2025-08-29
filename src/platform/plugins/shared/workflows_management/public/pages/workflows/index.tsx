@@ -93,7 +93,11 @@ export function WorkflowsPage() {
   return (
     <EuiPageTemplate offset={0} css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}>
       {/* negative margin to compensate for header's bottom padding and reduce space between header and content */}
-      <EuiPageTemplate.Header bottomBorder={false} css={{ marginBottom: `-${euiTheme.size.l}` }}>
+      <EuiPageTemplate.Header
+        bottomBorder={false}
+        css={{ marginBottom: `-${euiTheme.size.l}` }}
+        restrictWidth={false}
+      >
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem>
             <EuiPageHeader

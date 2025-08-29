@@ -26,6 +26,7 @@ import { useConversation } from './use_conversation';
 import type { AIConnector } from '../connectorland/connector_selector';
 import type { FetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { welcomeConvo } from '../mock/conversation';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
@@ -39,15 +40,12 @@ jest.mock('./api/anonymization_fields/use_fetch_anonymization_fields');
 jest.mock('./use_conversation');
 const apiConfig = { connectorId: '123' };
 const fullWelcomeConversation = {
+  ...welcomeConvo,
   id: 'welcome_id',
-  title: 'Welcome',
-  category: 'assistant',
-  messages: [],
   apiConfig,
-  replacements: {},
-  updatedAt: '2024-09-10T22:07:44.915Z',
 };
 const fullSheepConversation = {
+  ...welcomeConvo,
   id: 'electric_sheep_id',
   title: 'electric sheep',
   category: 'assistant',
@@ -58,18 +56,8 @@ const fullSheepConversation = {
 };
 
 const mockData = {
-  welcome_id: {
-    id: fullWelcomeConversation.id,
-    title: fullWelcomeConversation.title,
-    apiConfig: fullWelcomeConversation.apiConfig,
-    updatedAt: fullWelcomeConversation.updatedAt,
-  },
-  electric_sheep_id: {
-    id: fullSheepConversation.id,
-    title: fullSheepConversation.title,
-    apiConfig: fullSheepConversation.apiConfig,
-    updatedAt: fullSheepConversation.updatedAt,
-  },
+  welcome_id: fullWelcomeConversation,
+  electric_sheep_id: fullSheepConversation,
 };
 
 const renderAssistant = async (extraProps = {}) => {
@@ -195,8 +183,13 @@ describe('Assistant', () => {
       });
     });
     it('should refetchCurrentUserConversations after clear chat history button click', async () => {
+      const getConversation = jest.fn().mockResolvedValue(fullSheepConversation);
+      (useConversation as jest.Mock).mockReturnValue({
+        ...mockUseConversation,
+        getConversation,
+      });
       await renderAssistant();
-      fireEvent.click(screen.getByTestId('chat-context-menu'));
+      fireEvent.click(screen.getByTestId('conversation-settings-menu'));
       fireEvent.click(screen.getByTestId('clear-chat'));
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       await waitFor(() => {
