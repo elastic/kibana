@@ -33,6 +33,7 @@ export interface EsWorkflowExecution {
   status: ExecutionStatus;
   context: Record<string, any>;
   workflowDefinition: WorkflowYaml;
+  yaml: string;
   currentNodeId?: string; // The node currently being executed
   stack: string[];
   createdAt: string;
@@ -104,9 +105,10 @@ export interface WorkflowExecutionDto {
   stepExecutions: EsWorkflowStepExecution[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
+  yaml: string;
 }
 
-export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecutions'>;
+export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecutions' | 'yaml'>;
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
@@ -217,7 +219,7 @@ export interface WorkflowListDto {
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
-  extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition'> {
+  extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition' | 'yaml'> {
   isTestRun?: boolean;
 }
 
