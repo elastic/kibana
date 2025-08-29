@@ -8,10 +8,14 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { EuiButton, EuiPageTemplate, EuiTitle, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import type { NoDataCardComponentProps as Props } from '@kbn/shared-ux-card-no-data-types';
 import { ElasticAgentCardIllustration } from './elastic_agent_card_illustration';
+
+export const NO_DATA_CARD_MAX_WIDTH = 400;
 
 const defaultTitle = i18n.translate('sharedUXPackages.card.noData.title', {
   defaultMessage: 'Add Data to get started',
@@ -62,7 +66,9 @@ export const NoDataCard = ({
   return (
     <EuiPageTemplate.EmptyPrompt
       data-test-subj={dataTestSubj}
-      style={{ maxWidth: 400 }}
+      css={css`
+        max-width: ${NO_DATA_CARD_MAX_WIDTH}px;
+      `}
       title={
         <EuiTitle size="m">
           <h2>{canAccessFleet ? title || defaultTitle : noPermissionTitle}</h2>

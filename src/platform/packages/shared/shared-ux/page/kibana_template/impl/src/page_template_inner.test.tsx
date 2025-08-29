@@ -22,13 +22,11 @@ describe('KibanaPageTemplateInner', () => {
   };
 
   describe('isEmpty', () => {
-    test('pageHeader & children - renders both header and children', () => {
+    test('renders both pageHeader and children', () => {
       render(
-        <KibanaPageTemplateInner
-          isEmptyState={true}
-          pageHeader={pageHeader}
-          children={<div data-test-subj="child">Child element</div>}
-        />
+        <KibanaPageTemplateInner isEmptyState={true} pageHeader={pageHeader}>
+          <div data-test-subj="child">Child element</div>
+        </KibanaPageTemplateInner>
       );
 
       // Should render the child element when both pageHeader and children exist
@@ -62,12 +60,12 @@ describe('KibanaPageTemplateInner', () => {
         <KibanaPageTemplateInner
           isEmptyState={true}
           pageHeader={undefined}
-          emptyPageBody={<div data-test-subj="custom-empty">custom empty page body</div>}
+          emptyPageBody={<div data-test-subj="custom-empty-body">custom empty page body</div>}
         />
       );
 
       // Should render the custom empty page body
-      expect(screen.getByTestId('custom-empty')).toBeInTheDocument();
+      expect(screen.getByTestId('custom-empty-body')).toBeInTheDocument();
       expect(screen.getByText('custom empty page body')).toBeInTheDocument();
     });
   });

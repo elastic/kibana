@@ -38,7 +38,7 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
     },
 
     async expectNoDataPage() {
-      await testSubjects.existOrFail('NoDataPage');
+      await testSubjects.existOrFail('kbnNoDataPage');
     },
 
     async expectCreateCase() {

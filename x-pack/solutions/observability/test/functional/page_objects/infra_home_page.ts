@@ -287,11 +287,11 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async noDataPromptExists() {
-      return testSubjects.existOrFail('NoDataPage');
+      return testSubjects.existOrFail('kbnNoDataPage');
     },
 
     async noDataPromptAddDataClick() {
-      return testSubjects.click('noDataDefaultFooterAction');
+      return testSubjects.click('noDataDefaultActionButton');
     },
 
     async getNoMetricsDataPrompt() {

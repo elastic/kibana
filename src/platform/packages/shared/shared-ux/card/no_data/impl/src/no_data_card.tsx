@@ -16,14 +16,7 @@ import { NoDataCard as Component } from './no_data_card.component';
 
 import { useServices } from './services';
 
-export const NoDataCard = ({
-  href: srcHref,
-  description,
-  title,
-  button,
-  docsLink,
-  ...props
-}: Props) => {
+export const NoDataCard = ({ href: srcHref, ...props }: Props) => {
   const { canAccessFleet, addBasePath } = useServices();
 
   const href = useMemo(() => {
@@ -43,10 +36,6 @@ export const NoDataCard = ({
         {...{
           ...props,
           href,
-          description,
-          title,
-          button,
-          docsLink,
           canAccessFleet: props.canAccessFleet ?? canAccessFleet,
         }}
       />

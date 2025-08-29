@@ -64,7 +64,7 @@ describe('AnalyticsNoDataPageComponent', () => {
     describe('kibana flavor', () => {
       it('renders add integrations card', async () => {
         renderWithI18n(
-          <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
+          <AnalyticsNoDataPageProvider {...services}>
             <AnalyticsNoDataPage
               {...services}
               onDataViewCreated={onDataViewCreated}
@@ -82,7 +82,6 @@ describe('AnalyticsNoDataPageComponent', () => {
           <AnalyticsNoDataPageProvider
             {...{
               ...services,
-              hasESData: async () => false,
               canAccessFleet: false,
             }}
           >
@@ -106,7 +105,7 @@ describe('AnalyticsNoDataPageComponent', () => {
 
       it('renders Add Data card', async () => {
         renderWithI18n(
-          <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
+          <AnalyticsNoDataPageProvider {...services}>
             <AnalyticsNoDataPage
               {...services}
               onDataViewCreated={onDataViewCreated}
@@ -126,7 +125,7 @@ describe('AnalyticsNoDataPageComponent', () => {
 
       it('renders Add Data card', async () => {
         renderWithI18n(
-          <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
+          <AnalyticsNoDataPageProvider {...services}>
             <AnalyticsNoDataPage
               {...services}
               onDataViewCreated={onDataViewCreated}

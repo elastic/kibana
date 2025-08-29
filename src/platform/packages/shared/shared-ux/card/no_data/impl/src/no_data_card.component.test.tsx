@@ -14,7 +14,7 @@ import '@testing-library/jest-dom';
 import { NoDataCard } from './no_data_card.component';
 
 describe('NoDataCardComponent', () => {
-  test('renders with default content when canAccessFleet is true which is the default behavior', () => {
+  test('renders with defaults', () => {
     render(<NoDataCard canAccessFleet={true} />);
 
     expect(screen.getByTestId('noDataCard')).toBeInTheDocument();
