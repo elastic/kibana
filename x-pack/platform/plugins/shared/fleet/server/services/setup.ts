@@ -69,6 +69,7 @@ import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_co
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
+import { initializeKnowledgeBaseIndex } from './epm/packages/knowledge_base_index';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -181,6 +182,12 @@ async function createSetupSideEffects(
   let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
   await ensureFleetGlobalEsAssets(soClient, esClient);
   stepSpan?.end();
+
+  logger.debug('Initializing knowledge base index (async)');
+  // Initialize knowledge base index asynchronously without blocking setup
+  initializeKnowledgeBaseIndex(esClient).catch((error) => {
+    logger.warn('Knowledge base index initialization failed', error);
+  });
 
   // Ensure that required packages are always installed even if they're left out of the config
   const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
