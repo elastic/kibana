@@ -26,6 +26,7 @@ describe('COMPLETION', () => {
     const result = columnsAfter(
       synth.cmd`COMPLETION "prompt" WITH {"inference_id": "my-inference-id"}`,
       previousCommandColumns,
+      '',
       context
     );
 
@@ -45,6 +46,7 @@ describe('COMPLETION', () => {
     const result = columnsAfter(
       synth.cmd`COMPLETION customField = "prompt" WITH {"inference_id": "my-inference-id"}`,
       previousCommandColumns,
+      '',
       context
     );
 

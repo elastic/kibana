@@ -36,7 +36,12 @@ describe('STATS', () => {
       ]),
     };
 
-    const result = columnsAfter(synth.cmd`STATS var0=AVG(field2)`, previousCommandFields, context);
+    const result = columnsAfter(
+      synth.cmd`STATS var0=AVG(field2)`,
+      previousCommandFields,
+      '',
+      context
+    );
 
     expect(result).toEqual([{ name: 'var0', type: 'double', userDefined: false }]);
   });
@@ -67,7 +72,7 @@ describe('STATS', () => {
       ]),
     };
 
-    const result = columnsAfter(synth.cmd`STATS AVG(field2)`, previousCommandFields, context);
+    const result = columnsAfter(synth.cmd`STATS AVG(field2)`, previousCommandFields, '', context);
 
     expect(result).toEqual([{ name: 'AVG(field2)', type: 'double', userDefined: false }]);
   });
@@ -101,6 +106,7 @@ describe('STATS', () => {
     const result = columnsAfter(
       synth.cmd`STATS AVG(field2) BY field1`,
       previousCommandFields,
+      '',
       context
     );
 
@@ -151,6 +157,7 @@ describe('STATS', () => {
     const result = columnsAfter(
       synth.cmd`STATS AVG(field2) BY buckets=BUCKET(@timestamp,50,?_tstart,?_tend)`,
       previousCommandFields,
+      '',
       context
     );
 

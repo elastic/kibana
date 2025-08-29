@@ -36,6 +36,7 @@ export function extractDissectColumnNames(pattern: string): string[] {
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
+  query: string,
   context?: ICommandContext
 ) => {
   const columns: string[] = [];

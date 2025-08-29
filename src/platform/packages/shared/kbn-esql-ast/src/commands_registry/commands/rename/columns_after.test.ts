@@ -24,7 +24,12 @@ describe('RENAME', () => {
       { name: 'field2', type: 'double', userDefined: false },
     ] as ESQLFieldWithMetadata[];
 
-    const result = columnsAfter(synth.cmd`RENAME field1 as meow`, previousCommandFields, context);
+    const result = columnsAfter(
+      synth.cmd`RENAME field1 as meow`,
+      previousCommandFields,
+      '',
+      context
+    );
 
     expect(result).toEqual([
       { name: 'meow', type: 'keyword' },
@@ -38,7 +43,12 @@ describe('RENAME', () => {
       { name: 'field2', type: 'double' },
     ] as ESQLFieldWithMetadata[];
 
-    const result = columnsAfter(synth.cmd`RENAME meow = field1`, previousCommandFields, context);
+    const result = columnsAfter(
+      synth.cmd`RENAME meow = field1`,
+      previousCommandFields,
+      '',
+      context
+    );
 
     expect(result).toEqual([
       { name: 'meow', type: 'keyword', userDefined: false },
@@ -55,6 +65,7 @@ describe('RENAME', () => {
     const result = columnsAfter(
       synth.cmd`RENAME meow = field1, field2 as woof`,
       previousCommandFields,
+      '',
       context
     );
 

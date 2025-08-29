@@ -26,6 +26,7 @@ describe('CHANGE_POINT > columnsAfter', () => {
     const result = columnsAfter(
       synth.cmd`CHANGE_POINT count ON field1`,
       previousCommandFields,
+      '',
       context
     );
 
@@ -46,6 +47,7 @@ describe('CHANGE_POINT > columnsAfter', () => {
     const result = columnsAfter(
       synth.cmd`CHANGE_POINT count ON field1 AS changePointType, pValue`,
       previousCommandFields,
+      '',
       context
     );
 

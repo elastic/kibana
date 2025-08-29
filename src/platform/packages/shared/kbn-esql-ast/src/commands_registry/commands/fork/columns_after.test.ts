@@ -27,6 +27,7 @@ describe('FORK', () => {
     const result = columnsAfter(
       synth.cmd`FORK (LIMIT 10 ) (LIMIT 1000 ) `,
       previousCommandFields,
+      '',
       context
     );
 

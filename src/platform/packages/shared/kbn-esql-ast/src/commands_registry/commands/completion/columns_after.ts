@@ -19,6 +19,7 @@ import type {
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
+  query: string,
   context?: ICommandContext
 ) => {
   const { targetField } = command as ESQLAstCompletionCommand;

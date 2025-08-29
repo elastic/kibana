@@ -83,6 +83,7 @@ describe('DISSECT', () => {
       const result = columnsAfter(
         synth.cmd`DISSECT agent "%{firstWord}"`,
         previousColumns,
+        '',
         context
       );
 

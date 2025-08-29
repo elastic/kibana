@@ -14,6 +14,7 @@ import type { ESQLColumnData, ICommandContext } from '../../types';
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
+  query: string,
   context?: ICommandContext
 ) => {
   const { target } = command as ESQLAstChangePointCommand;

@@ -56,6 +56,7 @@ describe('GROK', () => {
       const result = columnsAfter(
         synth.cmd`GROK agent "%{WORD:firstWord}"`,
         previousCommandFields,
+        '',
         context
       );
 

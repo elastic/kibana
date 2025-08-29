@@ -53,8 +53,9 @@ const getUserDefinedColumns = (
 };
 
 export const columnsAfter = (
-  _command: ESQLCommand,
+  command: ESQLCommand,
   previousColumns: ESQLColumnData[],
+  query: string,
   context?: ICommandContext
 ) => {
   const columnMap = new Map<string, ESQLColumnData>();
@@ -63,5 +64,5 @@ export const columnsAfter = (
   const typeOf = (thing: ESQLAstItem) => getExpressionType(thing, columnMap);
 
   // TODO - is this uniqby helpful? Does it do what we expect?
-  return uniqBy([...previousColumns, ...getUserDefinedColumns(_command, typeOf)], 'name');
+  return uniqBy([...previousColumns, ...getUserDefinedColumns(command, typeOf)], 'name');
 };

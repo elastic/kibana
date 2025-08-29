@@ -23,7 +23,7 @@ describe('DROP', () => {
       { name: 'field2', type: 'double', userDefined: false },
     ];
 
-    const result = columnsAfter(synth.cmd`DROP field1`, previousColumns, context);
+    const result = columnsAfter(synth.cmd`DROP field1`, previousColumns, '', context);
 
     expect(result).toEqual([{ name: 'field2', type: 'double', userDefined: false }]);
   });
