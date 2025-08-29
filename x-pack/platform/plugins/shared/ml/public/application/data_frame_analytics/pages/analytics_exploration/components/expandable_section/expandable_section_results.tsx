@@ -40,7 +40,7 @@ import {
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import { replaceStringTokens } from '@kbn/ml-common-utils/string_utils';
+import { replaceStringTokens } from '@kbn/ml-common-utils/string_utils/replace_string_tokens';
 
 import type { useColorRange } from '../../../../../components/color_range_legend';
 import { ColorRangeLegend } from '../../../../../components/color_range_legend';

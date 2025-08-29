@@ -36,10 +36,8 @@ import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getPartitioningFieldNames, getFiltersForDSLQuery } from '@kbn/ml-common-utils/job_utils';
-import {
-  replaceStringTokens,
-  escapeForElasticsearchQuery,
-} from '@kbn/ml-common-utils/string_utils';
+import { escapeForElasticsearchQuery } from '@kbn/ml-common-utils/string_utils/escape_for_elasticsearch_query';
+import { replaceStringTokens } from '@kbn/ml-common-utils/string_utils/replace_string_tokens';
 
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 

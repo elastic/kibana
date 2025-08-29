@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiLink } from '@elastic/eui';
 
-import { detectorToString } from '@kbn/ml-common-utils/string_utils';
+import { detectorToString } from '@kbn/ml-common-utils/string_utils/detector_to_string';
 import { i18n } from '@kbn/i18n';
 
 import { EditAlertRule } from '../../../../../alerting/ml_alerting_flyout';

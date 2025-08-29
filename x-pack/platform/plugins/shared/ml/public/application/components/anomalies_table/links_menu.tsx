@@ -54,10 +54,8 @@ import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_ch
 import { useMlIndexUtils } from '@kbn/ml-hooks/use_ml_index_utils';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import { getFiltersForDSLQuery } from '@kbn/ml-common-utils/job_utils';
-import {
-  escapeKueryForFieldValuePair,
-  replaceStringTokens,
-} from '@kbn/ml-common-utils/string_utils';
+import { escapeKueryForFieldValuePair } from '@kbn/ml-common-utils/string_utils/escape_kuery_for_field_value_pair';
+import { replaceStringTokens } from '@kbn/ml-common-utils/string_utils/replace_string_tokens';
 
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
