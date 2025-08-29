@@ -22,7 +22,6 @@ export const integrationsSourceIndex = (namespace: string, integrationName: stri
 export const PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API =
   '/api/entity_analytics/monitoring/privileges/privileges';
 
-// Could the below be in its own file?
 export const INTEGRATION_TYPES = ['okta', 'ad'] as const;
 export type IntegrationType = (typeof INTEGRATION_TYPES)[number];
 
@@ -35,8 +34,8 @@ export const getStreamPatternFor = (integration: IntegrationType, namespace: str
   STREAM_INDEX_PATTERNS[integration](namespace);
 
 export interface Matcher {
-  fields: string[];
   values: string[];
+  fields: string[];
 }
 
 export const OKTA_ADMIN_ROLES: string[] = [
@@ -49,6 +48,7 @@ export const OKTA_ADMIN_ROLES: string[] = [
   'Report Administrator',
   'API Access Management Administrator',
   'Group Membership Administrator',
+  'Read-only Administrator',
 ];
 
 export const AD_ADMIN_ROLES: string[] = ['Domain Admins', 'Enterprise Admins'];
