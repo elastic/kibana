@@ -15,17 +15,17 @@ import { SearchStatus } from './types';
 function requestByStrategy({
   session,
   asyncId,
-  asUserClient,
+  esClient,
 }: {
   session: SearchSessionRequestInfo;
   asyncId: string;
-  asUserClient: ElasticsearchClient;
+  esClient: ElasticsearchClient;
 }) {
   if (session.strategy === 'esql_async') {
-    return asUserClient.esql.asyncQueryGet({ id: asyncId }, { meta: true });
+    return esClient.esql.asyncQueryGet({ id: asyncId }, { meta: true });
   }
 
-  return asUserClient.asyncSearch.status(
+  return esClient.asyncSearch.status(
     {
       id: asyncId,
     },
@@ -36,11 +36,11 @@ function requestByStrategy({
 export async function getSearchStatus({
   session,
   asyncId,
-  asUserClient,
+  esClient,
 }: {
   session: SearchSessionRequestInfo;
   asyncId: string;
-  asUserClient: ElasticsearchClient;
+  esClient: ElasticsearchClient;
 }): Promise<SearchSessionRequestStatus> {
   // TODO: Handle strategies other than the default one
   // https://github.com/elastic/kibana/issues/127880
@@ -48,7 +48,7 @@ export async function getSearchStatus({
     const apiResponse = await requestByStrategy({
       session,
       asyncId,
-      asUserClient,
+      esClient,
     });
 
     const response = apiResponse.body;

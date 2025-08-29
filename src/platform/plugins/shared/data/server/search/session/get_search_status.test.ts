@@ -12,7 +12,7 @@ import { getSearchStatus } from './get_search_status';
 import type { SearchSessionRequestInfo } from '../../../common';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-const getAsUserClientMock = (asyncQueryGet = jest.fn(), status = jest.fn()) => {
+const getEsClientMock = (asyncQueryGet = jest.fn(), status = jest.fn()) => {
   const client = elasticsearchClientMock.createElasticsearchClient();
   return {
     ...client,
@@ -50,7 +50,7 @@ describe('getSearchStatus', () => {
 
       const status = jest.fn().mockResolvedValue(response);
       const asyncQueryGet = jest.fn().mockResolvedValue(response);
-      const mockAsUserClient = getAsUserClientMock(asyncQueryGet, status);
+      const mockEsClient = getEsClientMock(asyncQueryGet, status);
 
       const mockFunctions: Record<string, jest.Mock> = {
         asyncQueryGet,
@@ -59,7 +59,7 @@ describe('getSearchStatus', () => {
 
       // When
       const res = await getSearchStatus({
-        asUserClient: mockAsUserClient,
+        esClient: mockEsClient,
         asyncId: '123',
         session: getSession({ strategy }),
       });
@@ -84,7 +84,7 @@ describe('getSearchStatus', () => {
 
       const status = jest.fn().mockResolvedValue(response);
       const asyncQueryGet = jest.fn().mockResolvedValue(response);
-      const mockAsUserClient = getAsUserClientMock(asyncQueryGet, status);
+      const mockEsClient = getEsClientMock(asyncQueryGet, status);
 
       const mockFunctions: Record<string, jest.Mock> = {
         asyncQueryGet,
@@ -93,7 +93,7 @@ describe('getSearchStatus', () => {
 
       // When
       const res = await getSearchStatus({
-        asUserClient: mockAsUserClient,
+        esClient: mockEsClient,
         asyncId: '123',
         session: getSession({ strategy }),
       });
@@ -118,7 +118,7 @@ describe('getSearchStatus', () => {
 
       const status = jest.fn().mockResolvedValue(response);
       const asyncQueryGet = jest.fn().mockResolvedValue(response);
-      const mockAsUserClient = getAsUserClientMock(asyncQueryGet, status);
+      const mockEsClient = getEsClientMock(asyncQueryGet, status);
 
       const mockFunctions: Record<string, jest.Mock> = {
         asyncQueryGet,
@@ -127,7 +127,7 @@ describe('getSearchStatus', () => {
 
       // When
       const res = await getSearchStatus({
-        asUserClient: mockAsUserClient,
+        esClient: mockEsClient,
         asyncId: '123',
         session: getSession({ strategy }),
       });
@@ -144,7 +144,7 @@ describe('getSearchStatus', () => {
       // Given
       const status = jest.fn().mockRejectedValue(new Error('O_o'));
       const asyncQueryGet = jest.fn().mockRejectedValue(new Error('O_o'));
-      const mockAsUserClient = getAsUserClientMock(asyncQueryGet, status);
+      const mockEsClient = getEsClientMock(asyncQueryGet, status);
 
       const mockFunctions: Record<string, jest.Mock> = {
         asyncQueryGet,
@@ -153,7 +153,7 @@ describe('getSearchStatus', () => {
 
       // When
       const res = await getSearchStatus({
-        asUserClient: mockAsUserClient,
+        esClient: mockEsClient,
         asyncId: '123',
         session: getSession({ strategy }),
       });
@@ -178,7 +178,7 @@ describe('getSearchStatus', () => {
 
       const status = jest.fn().mockResolvedValue(response);
       const asyncQueryGet = jest.fn().mockResolvedValue(response);
-      const mockAsUserClient = getAsUserClientMock(asyncQueryGet, status);
+      const mockEsClient = getEsClientMock(asyncQueryGet, status);
 
       const mockFunctions: Record<string, jest.Mock> = {
         asyncQueryGet,
@@ -187,7 +187,7 @@ describe('getSearchStatus', () => {
 
       // When
       const res = await getSearchStatus({
-        asUserClient: mockAsUserClient,
+        esClient: mockEsClient,
         asyncId: '123',
         session: getSession({ strategy }),
       });
@@ -212,7 +212,7 @@ describe('getSearchStatus', () => {
 
       const status = jest.fn().mockResolvedValue(response);
       const asyncQueryGet = jest.fn().mockResolvedValue(response);
-      const mockAsUserClient = getAsUserClientMock(asyncQueryGet, status);
+      const mockEsClient = getEsClientMock(asyncQueryGet, status);
 
       const mockFunctions: Record<string, jest.Mock> = {
         asyncQueryGet,
@@ -221,7 +221,7 @@ describe('getSearchStatus', () => {
 
       // When
       const res = await getSearchStatus({
-        asUserClient: mockAsUserClient,
+        esClient: mockEsClient,
         asyncId: '123',
         session: getSession({ strategy }),
       });

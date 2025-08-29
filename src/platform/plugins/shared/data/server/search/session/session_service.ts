@@ -192,7 +192,7 @@ export class SearchSessionService implements ISearchSessionService {
       findResponse.saved_objects.map(async (so) => {
         const sessionStatus = await getSessionStatus(
           {
-            asUserClient: asCurrentUserElasticsearchClient,
+            esClient: asCurrentUserElasticsearchClient,
           },
           so.attributes,
           this.sessionConfig
@@ -373,7 +373,7 @@ export class SearchSessionService implements ISearchSessionService {
 
     const sessionStatus = await getSessionStatus(
       {
-        asUserClient: deps.asCurrentUserElasticsearchClient,
+        esClient: deps.asCurrentUserElasticsearchClient,
       },
       session.attributes,
       this.sessionConfig
