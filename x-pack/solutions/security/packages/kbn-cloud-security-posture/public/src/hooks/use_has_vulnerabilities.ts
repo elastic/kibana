@@ -35,7 +35,7 @@ export const useHasVulnerabilities = (field: string, value: string) => {
 
   const hasVulnerabilitiesFindings = hasVulnerabilitiesData(counts);
 
-  const has3PVulnerabilitiesFindings = vulnerabilitiesData?.vendor.some(
+  const has3PVulnerabilitiesFindings = vulnerabilitiesData?.data_stream?.some(
     (item) => item !== 'cloud_security_posture.vulnerabilities'
   );
 

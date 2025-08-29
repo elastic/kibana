@@ -68,7 +68,11 @@ export const EntityInsight = <T,>({
 
   const { to, from } = useGlobalTime();
 
-  const { hasNonClosedAlerts: showAlertsPreview, filteredAlertsData } = useNonClosedAlerts({
+  const {
+    hasNonClosedAlerts: showAlertsPreview,
+    filteredAlertsData,
+    alertHas3rdPartyData,
+  } = useNonClosedAlerts({
     field,
     value,
     to,
@@ -148,7 +152,10 @@ export const EntityInsight = <T,>({
               </EuiTitle>
             }
           >
-            {(has3PMisconfigurationFindings || has3PVulnerabilitiesFindings) && showCallOut ? (
+            {(has3PMisconfigurationFindings ||
+              has3PVulnerabilitiesFindings ||
+              alertHas3rdPartyData) &&
+            showCallOut ? (
               <>
                 <EuiSpacer size="m" />
 

@@ -52,7 +52,7 @@ export const useVulnerabilitiesPreview = (options: UseCspOptions) => {
 
       return {
         count: getVulnerabilitiesAggregationCount(aggregations?.count?.buckets),
-        vendor: Array.isArray(aggregations?.by_datastream_dataset?.buckets)
+        data_stream: Array.isArray(aggregations?.by_datastream_dataset?.buckets)
           ? aggregations.by_datastream_dataset.buckets.map((bucket) => bucket.key)
           : [],
       };

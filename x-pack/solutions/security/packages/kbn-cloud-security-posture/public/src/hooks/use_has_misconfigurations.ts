@@ -21,7 +21,7 @@ export const useHasMisconfigurations = (field: string, value: string) => {
 
   const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 
-  const has3PMisconfigurationFindings = data?.vendor.some(
+  const has3PMisconfigurationFindings = data?.data_stream?.some(
     (item) => item !== 'cloud_security_posture.findings'
   );
 
