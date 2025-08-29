@@ -7,15 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { rawRuleSchemaLatest } from '../raw_rule/latest';
+import { rawRuleSchema } from '../raw_rule/v6';
 
 export const rawRuleTemplateSchema = schema.object({
-  name: rawRuleSchemaLatest.getPropSchemas().name,
-  tags: rawRuleSchemaLatest.getPropSchemas().tags,
-  ruleTypeId: rawRuleSchemaLatest.getPropSchemas().alertTypeId,
-  consumer: rawRuleSchemaLatest.getPropSchemas().consumer,
-  schedule: rawRuleSchemaLatest.getPropSchemas().schedule,
-  flapping: rawRuleSchemaLatest.getPropSchemas().flapping,
-  alertDelay: rawRuleSchemaLatest.getPropSchemas().alertDelay,
-  params: rawRuleSchemaLatest.getPropSchemas().params,
+  name: rawRuleSchema.getPropSchemas().name,
+  tags: rawRuleSchema.getPropSchemas().tags,
+  ruleTypeId: rawRuleSchema.getPropSchemas().alertTypeId,
+  consumer: rawRuleSchema.getPropSchemas().consumer,
+  schedule: rawRuleSchema.getPropSchemas().schedule,
+  flapping: rawRuleSchema.getPropSchemas().flapping,
+  alertDelay: rawRuleSchema.getPropSchemas().alertDelay,
+  params: rawRuleSchema.getPropSchemas().params,
 });
