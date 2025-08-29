@@ -18,6 +18,7 @@ describe('Count Transforms', () => {
       const input: LensApiCountMetricOperation = {
         operation: 'count',
         field: 'events',
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       const expected: CountIndexPatternColumn = {
@@ -39,6 +40,7 @@ describe('Count Transforms', () => {
     it('should handle empty field', () => {
       const input: LensApiCountMetricOperation = {
         operation: 'count',
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       const result = fromCountAPItoLensState(input);
@@ -55,6 +57,7 @@ describe('Count Transforms', () => {
           decimals: 0,
           compact: false,
         },
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       const result = fromCountAPItoLensState(input);
@@ -82,6 +85,7 @@ describe('Count Transforms', () => {
         operation: 'count',
         field: 'events',
         label: 'Total Events',
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       const result = fromCountAPItoLensState(input);
@@ -105,6 +109,7 @@ describe('Count Transforms', () => {
       const expected: LensApiCountMetricOperation = {
         operation: 'count',
         field: 'events',
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       expect(fromCountLensStateToAPI(input)).toEqual(expected);
@@ -174,6 +179,7 @@ describe('Count Transforms', () => {
     it('should generate correct label for undefined field', () => {
       const input: LensApiCountMetricOperation = {
         operation: 'count',
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       const result = fromCountAPItoLensState(input);
@@ -184,6 +190,7 @@ describe('Count Transforms', () => {
       const input: LensApiCountMetricOperation = {
         operation: 'count',
         field: 'user_sessions',
+        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
       const result = fromCountAPItoLensState(input);
