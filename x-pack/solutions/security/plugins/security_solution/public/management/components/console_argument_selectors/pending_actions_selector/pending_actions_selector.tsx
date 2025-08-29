@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IHttpFetchError } from '@kbn/core/public';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
 import type { CommandArgumentValueSelectorProps } from '../../console/types';
 import { useGetPendingActions } from '../../../hooks/response_actions/use_get_pending_actions';
 import { BaseArgumentSelector } from '../shared/base_argument_selector';
 import { PENDING_ACTIONS_CONFIG } from '../shared/constants';
-import { useGenericErrorToast, transformPendingActionsToOptions } from '../shared';
+import {
+  useGenericErrorToast,
+  transformPendingActionsToOptions,
+  checkActionCancelPermission,
+} from '../shared';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 /**
  * State for the pending actions selector component
@@ -60,6 +66,19 @@ export const PendingActionsSelector = memo<
   const agentType = command.commandDefinition.meta?.agentType as ResponseActionAgentType;
   const endpointId = command.commandDefinition.meta?.endpointId;
 
+  const userPrivileges = useUserPrivileges();
+  const privilegeChecker = useMemo(
+    () => (actionCommand: string) =>
+      checkActionCancelPermission(actionCommand, userPrivileges.endpointPrivileges),
+    [userPrivileges.endpointPrivileges]
+  );
+
+  const transformToOptionsWithPrivileges = useMemo(
+    () => (response: ActionListApiResponse[], selectedValue?: string) =>
+      transformPendingActionsToOptions(response, selectedValue, privilegeChecker),
+    [privilegeChecker]
+  );
+
   return (
     <BaseArgumentSelector
       value={value}
@@ -77,7 +96,7 @@ export const PendingActionsSelector = memo<
         page: 1,
         pageSize: 200,
       }}
-      transformToOptions={transformPendingActionsToOptions}
+      transformToOptions={transformToOptionsWithPrivileges}
       config={PENDING_ACTIONS_CONFIG}
       useErrorToast={usePendingActionsErrorToast}
     />

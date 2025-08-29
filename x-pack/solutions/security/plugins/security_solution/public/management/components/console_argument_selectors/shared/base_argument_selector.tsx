@@ -86,10 +86,12 @@ const BaseArgumentSelectorComponent = <
   const renderOption = useCallback(
     (option: EuiSelectableOption<TOption>) => {
       const hasDescription = 'description' in option && option.description;
+      const hasToolTipContent = 'toolTipContent' in option && option.toolTipContent;
       const testId = testIdPrefix ? `${testIdPrefix}-` : '';
       const descriptionText = hasDescription ? String(option.description) : '';
+      const toolTipText = hasToolTipContent ? String(option.toolTipContent) : '';
 
-      return (
+      const content = (
         <div data-test-subj={`${testId}script`}>
           <EuiText size="s" css={SHARED_TRUNCATION_STYLE}>
             <strong data-test-subj={`${option.label}-label`}>{option.label}</strong>
@@ -103,6 +105,17 @@ const BaseArgumentSelectorComponent = <
           ) : null}
         </div>
       );
+
+      // If the option has toolTipContent (typically for disabled options), wrap in tooltip
+      if (hasToolTipContent) {
+        return (
+          <EuiToolTip position="right" content={toolTipText}>
+            {content}
+          </EuiToolTip>
+        );
+      }
+
+      return content;
     },
     [testIdPrefix]
   );

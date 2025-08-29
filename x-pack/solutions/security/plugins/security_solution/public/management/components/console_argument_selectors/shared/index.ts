@@ -24,5 +24,6 @@ export {
   transformPendingActionsToOptions,
   createSelectionHandler,
   createKeyDownHandler,
+  checkActionCancelPermission,
 } from './utils';
 export type { PendingActionItem } from './utils';

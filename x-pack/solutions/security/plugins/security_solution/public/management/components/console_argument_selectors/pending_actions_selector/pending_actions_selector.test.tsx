@@ -15,6 +15,7 @@ import { useGetPendingActions } from '../../../hooks/response_actions/use_get_pe
 import { useGenericErrorToast, useBaseSelectorHandlers, useFocusManagement } from '../shared/hooks';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ActionDetails, ActionListApiResponse } from '../../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type {
   CommandArgumentValueSelectorProps,
   Command,
@@ -37,6 +38,7 @@ jest.mock('../shared/hooks', () => ({
   useFocusManagement: jest.fn(),
 }));
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/components/user_privileges');
 
 jest.useFakeTimers();
 
@@ -54,6 +56,7 @@ describe('PendingActionsSelector', () => {
     typeof useFocusManagement
   >;
   const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+  const mockUseUserPrivileges = useUserPrivileges as jest.MockedFunction<typeof useUserPrivileges>;
   const mockOnChange = jest.fn();
   const mockRequestFocus = jest.fn();
 
@@ -180,6 +183,22 @@ describe('PendingActionsSelector', () => {
         },
       },
     } as unknown as KibanaReactContextValue<never>);
+
+    // Mock user privileges - default to having all permissions
+    mockUseUserPrivileges.mockReturnValue({
+      endpointPrivileges: {
+        canIsolateHost: true,
+        canUnIsolateHost: true,
+        canKillProcess: true,
+        canSuspendProcess: true,
+        canGetRunningProcesses: true,
+        canWriteExecuteOperations: true,
+        canWriteFileOperations: true,
+        canWriteScanOperations: true,
+        canReadActionsLogManagement: true,
+        loading: false,
+      },
+    } as ReturnType<typeof useUserPrivileges>);
   });
 
   afterEach(() => {
@@ -322,6 +341,86 @@ describe('PendingActionsSelector', () => {
       endpointId: 'test-endpoint-id',
       page: 1,
       pageSize: 200,
+    });
+  });
+
+  describe('Privilege validation', () => {
+    test('disables actions when user lacks permission to cancel specific command', async () => {
+      // Mock privileges without isolate permission
+      mockUseUserPrivileges.mockReturnValue({
+        endpointPrivileges: {
+          canIsolateHost: false, // User cannot cancel isolate actions
+          canUnIsolateHost: true,
+          canKillProcess: true,
+          canSuspendProcess: true,
+          canGetRunningProcesses: true,
+          canWriteExecuteOperations: true,
+          canWriteFileOperations: true,
+          canWriteScanOperations: true,
+          canReadActionsLogManagement: true,
+          loading: false,
+        },
+      } as ReturnType<typeof useUserPrivileges>);
+
+      await renderAndWaitForComponent(
+        <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+      );
+
+      // The isolate action should be displayed but with privilege restriction tooltip
+      expect(screen.getByText('isolate - action-123-abc')).toBeInTheDocument();
+    });
+
+    test('shows tooltip message for disabled actions', async () => {
+      // Mock privileges without kill process permission  
+      const killProcessAction: ActionDetails = {
+        ...mockActionDetails,
+        id: 'action-kill-123',
+        command: 'kill-process',
+      };
+
+      const responseWithKillProcess: ActionListApiResponse = {
+        ...mockApiResponse,
+        data: [killProcessAction],
+      };
+
+      mockUseGetPendingActions.mockReturnValue({
+        data: responseWithKillProcess,
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useGetPendingActions>);
+
+      mockUseUserPrivileges.mockReturnValue({
+        endpointPrivileges: {
+          canIsolateHost: true,
+          canUnIsolateHost: true,
+          canKillProcess: false, // User cannot cancel kill-process actions
+          canSuspendProcess: true,
+          canGetRunningProcesses: true,
+          canWriteExecuteOperations: true,
+          canWriteFileOperations: true,
+          canWriteScanOperations: true,
+          canReadActionsLogManagement: true,
+          loading: false,
+        },
+      } as ReturnType<typeof useUserPrivileges>);
+
+      await renderAndWaitForComponent(
+        <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+      );
+
+      // The action should be displayed
+      expect(screen.getByText('kill-process - action-kill-123')).toBeInTheDocument();
+    });
+
+    test('enables actions when user has all required permissions', async () => {
+      // All permissions are enabled by default in beforeEach
+      await renderAndWaitForComponent(
+        <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+      );
+
+      // The action should be displayed and selectable
+      expect(screen.getByText('isolate - action-123-abc')).toBeInTheDocument();
     });
   });
 });

@@ -10,8 +10,12 @@ import type {
   ActionListApiResponse,
   ActionDetails,
   ResponseActionScript,
+  EndpointAuthz,
 } from '../../../../../common/endpoint/types';
 import type { BaseSelectorState } from './types';
+import { getRequiredCancelPermissions } from '../../../../../common/endpoint/service/authz/authz';
+import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 
 /**
  * Type representing a pending action item for cancellation
@@ -89,13 +93,47 @@ export const transformCustomScriptsToOptions = (
 };
 
 /**
+ * Check if user has permission to cancel a specific action
+ */
+export const checkActionCancelPermission = (
+  command: string,
+  endpointPrivileges: EndpointAuthz
+): { canCancel: boolean; reason?: string } => {
+  const displayCommand =
+    RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command as ResponseActionsApiCommandNames] ||
+    command;
+
+  try {
+    const requiredPermission = getRequiredCancelPermissions(
+      command as ResponseActionsApiCommandNames
+    );
+    const canCancel = endpointPrivileges[requiredPermission] || false;
+
+    if (!canCancel) {
+      return {
+        canCancel: false,
+        reason: `You don't have permission to run ${displayCommand} action.`,
+      };
+    }
+
+    return { canCancel: true };
+  } catch (error) {
+    return {
+      canCancel: false,
+      reason: `Unable to verify permissions for ${displayCommand} action cancellation.`,
+    };
+  }
+};
+
+/**
  * Transform pending actions response (using standard ActionListApiResponse) to selectable options.
  * Labels are formatted as "CommandName - ActionId" for better user context, while values remain as action IDs
  * for compatibility with existing cancel action workflows.
  */
 export const transformPendingActionsToOptions = (
   response: ActionListApiResponse[],
-  selectedValue?: string
+  selectedValue?: string,
+  privilegeChecker?: (command: string) => { canCancel: boolean; reason?: string }
 ): EuiSelectableOption<Partial<{ description: string; actionItem: ActionDetails }>>[] => {
   // The hook returns a single response object, but our data parameter is an array
   // So we need to handle both cases
@@ -122,16 +160,29 @@ export const transformPendingActionsToOptions = (
     const timestamp = new Date(action.startedAt).toLocaleString();
     const command = action.command;
     const createdBy = action.createdBy;
-    const description = `${command} on ${
+
+    // Use the console command name for display (e.g., 'release' instead of 'unisolate')
+    const displayCommand =
+      RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[
+        command as ResponseActionsApiCommandNames
+      ] || command;
+
+    const description = `${displayCommand} on ${
       hostName || 'Unknown host'
     } by ${createdBy} at ${timestamp}`;
 
+    // Check if user has permission to cancel this action
+    const permissionCheck = privilegeChecker ? privilegeChecker(command) : { canCancel: true };
+    const isDisabled = !permissionCheck.canCancel;
+
     return {
-      label: `${action.command} - ${action.id}`,
+      label: `${displayCommand} - ${action.id}`,
       value: action.id,
       description,
       actionItem: action,
       checked: isChecked ? 'on' : undefined,
+      disabled: isDisabled,
+      toolTipContent: isDisabled ? permissionCheck.reason : undefined,
     };
   });
 };

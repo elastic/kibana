@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import type { 
-  ActionListApiResponse, 
-  ActionDetails, 
-  ResponseActionScript 
+import type {
+  ActionListApiResponse,
+  ActionDetails,
+  ResponseActionScript,
+  EndpointAuthz,
 } from '../../../../../common/endpoint/types';
-import { transformPendingActionsToOptions, transformCustomScriptsToOptions } from './utils';
+import {
+  transformPendingActionsToOptions,
+  transformCustomScriptsToOptions,
+  checkActionCancelPermission,
+} from './utils';
 
 describe('utils', () => {
   describe('transformPendingActionsToOptions', () => {
@@ -132,6 +137,27 @@ describe('utils', () => {
       });
     });
 
+    it('should map unisolate command to release display name', () => {
+      const unisolateAction: ActionDetails = {
+        ...mockActionDetails,
+        id: 'action-unisolate-123',
+        command: 'unisolate',
+      };
+
+      const unisolateResponse: ActionListApiResponse = {
+        ...mockApiResponse,
+        data: [unisolateAction],
+      };
+
+      const result = transformPendingActionsToOptions([unisolateResponse]);
+
+      expect(result[0]).toMatchObject({
+        label: 'release - action-unisolate-123',
+        value: 'action-unisolate-123',
+      });
+      expect(result[0].description).toContain('release on test-host by test-user at');
+    });
+
     it('should handle unknown host gracefully', () => {
       const actionWithoutHost: ActionDetails = {
         ...mockActionDetails,
@@ -187,6 +213,55 @@ describe('utils', () => {
       // The timestamp should be formatted as a locale string
       expect(result[0].description).toMatch(/isolate on test-host by test-user at \d+\/\d+\/\d+/);
     });
+
+    describe('with privilege checking', () => {
+      const privilegeCheckerAllowed = () => ({ canCancel: true });
+      const privilegeCheckerDenied = (command: string) => ({
+        canCancel: false,
+        reason: `No permission to cancel ${command}`,
+      });
+
+      it('should set disabled: false and no tooltip for allowed actions', () => {
+        const result = transformPendingActionsToOptions(
+          [mockApiResponse],
+          undefined,
+          privilegeCheckerAllowed
+        );
+
+        expect(result[0]).toMatchObject({
+          label: 'isolate - action-123-abc',
+          value: 'action-123-abc',
+          disabled: false,
+          toolTipContent: undefined,
+        });
+      });
+
+      it('should set disabled: true and tooltip for denied actions', () => {
+        const result = transformPendingActionsToOptions(
+          [mockApiResponse],
+          undefined,
+          privilegeCheckerDenied
+        );
+
+        expect(result[0]).toMatchObject({
+          label: 'isolate - action-123-abc',
+          value: 'action-123-abc',
+          disabled: true,
+          toolTipContent: 'No permission to cancel isolate',
+        });
+      });
+
+      it('should work without privilege checker (defaults to enabled)', () => {
+        const result = transformPendingActionsToOptions([mockApiResponse]);
+
+        expect(result[0]).toMatchObject({
+          label: 'isolate - action-123-abc',
+          value: 'action-123-abc',
+          disabled: false,
+          toolTipContent: undefined,
+        });
+      });
+    });
   });
 
   describe('transformCustomScriptsToOptions', () => {
@@ -220,6 +295,126 @@ describe('utils', () => {
     it('should handle empty scripts array', () => {
       const result = transformCustomScriptsToOptions([]);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('checkActionCancelPermission', () => {
+    const mockEndpointPrivileges: EndpointAuthz = {
+      canWriteSecuritySolution: true,
+      canReadSecuritySolution: true,
+      canAccessFleet: true,
+      canReadFleetAgentPolicies: true,
+      canReadFleetAgents: true,
+      canWriteFleetAgents: true,
+      canWriteIntegrationPolicies: true,
+      canAccessEndpointManagement: true,
+      canAccessEndpointActionsLogManagement: true,
+      canCreateArtifactsByPolicy: true,
+      canWriteEndpointList: true,
+      canReadEndpointList: true,
+      canWritePolicyManagement: true,
+      canReadPolicyManagement: true,
+      canWriteActionsLogManagement: true,
+      canReadActionsLogManagement: true,
+      canIsolateHost: true,
+      canUnIsolateHost: true,
+      canKillProcess: true,
+      canSuspendProcess: true,
+      canGetRunningProcesses: true,
+      canAccessResponseConsole: true,
+      canWriteExecuteOperations: true,
+      canWriteFileOperations: true,
+      canWriteScanOperations: true,
+      canWriteTrustedApplications: true,
+      canReadTrustedApplications: true,
+      canWriteTrustedDevices: true,
+      canReadTrustedDevices: true,
+      canWriteHostIsolationExceptions: true,
+      canReadHostIsolationExceptions: true,
+      canAccessHostIsolationExceptions: true,
+      canDeleteHostIsolationExceptions: true,
+      canWriteBlocklist: true,
+      canReadBlocklist: true,
+      canWriteEventFilters: true,
+      canReadEventFilters: true,
+      canReadEndpointExceptions: true,
+      canWriteEndpointExceptions: true,
+      canManageGlobalArtifacts: true,
+      canWriteWorkflowInsights: true,
+      canReadWorkflowInsights: true,
+      canReadAdminData: true,
+      canWriteAdminData: true,
+    };
+
+    describe('with valid permissions', () => {
+      test('returns canCancel: true for isolate command when user has canIsolateHost permission', () => {
+        const result = checkActionCancelPermission('isolate', mockEndpointPrivileges);
+        expect(result).toEqual({ canCancel: true });
+      });
+
+      test('returns canCancel: true for unisolate command when user has canUnIsolateHost permission', () => {
+        const result = checkActionCancelPermission('unisolate', mockEndpointPrivileges);
+        expect(result).toEqual({ canCancel: true });
+      });
+
+      test('returns canCancel: true for kill-process command when user has canKillProcess permission', () => {
+        const result = checkActionCancelPermission('kill-process', mockEndpointPrivileges);
+        expect(result).toEqual({ canCancel: true });
+      });
+
+      test('returns canCancel: true for execute command when user has canWriteExecuteOperations permission', () => {
+        const result = checkActionCancelPermission('execute', mockEndpointPrivileges);
+        expect(result).toEqual({ canCancel: true });
+      });
+    });
+
+    describe('without required permissions', () => {
+      test('returns canCancel: false for isolate command when user lacks canIsolateHost permission', () => {
+        const privilegesWithoutIsolate = {
+          ...mockEndpointPrivileges,
+          canIsolateHost: false,
+        };
+
+        const result = checkActionCancelPermission('isolate', privilegesWithoutIsolate);
+
+        expect(result.canCancel).toBe(false);
+        expect(result.reason).toContain("You don't have permission to run isolate action");
+      });
+
+      test('returns canCancel: false for kill-process command when user lacks canKillProcess permission', () => {
+        const privilegesWithoutKillProcess = {
+          ...mockEndpointPrivileges,
+          canKillProcess: false,
+        };
+
+        const result = checkActionCancelPermission('kill-process', privilegesWithoutKillProcess);
+
+        expect(result.canCancel).toBe(false);
+        expect(result.reason).toContain("You don't have permission to run kill-process action");
+      });
+
+      test('returns canCancel: false for get-file command when user lacks canWriteFileOperations permission', () => {
+        const privilegesWithoutFileOps = {
+          ...mockEndpointPrivileges,
+          canWriteFileOperations: false,
+        };
+
+        const result = checkActionCancelPermission('get-file', privilegesWithoutFileOps);
+
+        expect(result.canCancel).toBe(false);
+        expect(result.reason).toContain("You don't have permission to run get-file action");
+      });
+    });
+
+    describe('with unknown commands', () => {
+      test('returns canCancel: false for unknown command', () => {
+        const result = checkActionCancelPermission('unknown-command', mockEndpointPrivileges);
+
+        expect(result.canCancel).toBe(false);
+        expect(result.reason).toContain(
+          'Unable to verify permissions for unknown-command action cancellation'
+        );
+      });
     });
   });
 });
