@@ -43,6 +43,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'A Group stream',
                   group: {
+                    metadata: {},
                     tags: [],
                     members: ['logs'],
                   },
@@ -62,6 +63,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 group: {
+                  metadata: {},
                   tags: [],
                   members: ['logs'],
                 },
@@ -96,6 +98,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs'],
                     },
@@ -140,6 +143,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs.test'],
                     },
@@ -194,6 +198,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs', 'logs.test'],
                     },
@@ -213,6 +218,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['test-group'],
                     },
@@ -258,6 +264,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['test-group'],
                     },
@@ -279,6 +286,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['non-existent-stream'],
                     },
@@ -300,6 +308,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs', 'logs'],
                     },
@@ -325,6 +334,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs'],
                     },
@@ -346,6 +356,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs'],
                     },
@@ -367,6 +378,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 path: { name: 'test-group' },
                 body: {
                   group: {
+                    metadata: {},
                     tags: [],
                     members: ['logs.test2'],
                   },
