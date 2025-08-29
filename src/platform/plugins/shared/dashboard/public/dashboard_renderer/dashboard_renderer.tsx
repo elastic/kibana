@@ -65,7 +65,7 @@ export function DashboardRenderer({
     if (dashboardInternalApi) {
       dashboardInternalApi.setDashboardContainerRef(dashboardContainerRef.current);
     }
-  }, [dashboardInternalApi, dashboardContainerRef]);
+  }, [dashboardInternalApi]);
 
   useEffect(() => {
     if (error) setError(undefined);
@@ -139,7 +139,9 @@ export function DashboardRenderer({
         data-test-subj="dashboardContainer"
         css={styles.renderer}
         ref={(e) => {
-          if (dashboardInternalApi) dashboardInternalApi.setDashboardContainerRef(e);
+          if (dashboardInternalApi) {
+            dashboardInternalApi.setDashboardContainerRef(e);
+          }
           dashboardContainerRef.current = e;
         }}
       >
