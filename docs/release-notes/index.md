@@ -18,12 +18,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Features and enhancements [kibana-X.X.X-features-enhancements]
 % *
 
-% ### Fixes [kibana-X.X.X-fixes]
-% *
-
-% FEATURES, ENHANCEMENTS, FIXES
-% Paste in index.md
-
 ## 9.0.6 [kibana-9.0.6-release-notes]
 
 :::{important}
