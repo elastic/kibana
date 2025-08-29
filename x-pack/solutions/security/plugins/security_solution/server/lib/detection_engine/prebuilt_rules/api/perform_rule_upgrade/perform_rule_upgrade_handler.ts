@@ -59,6 +59,7 @@ export const performRuleUpgradeHandler = async (
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
+    const analytics = ctx.securitySolution.analytics;
 
     const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
     const defaultPickVersion = isRulesCustomizationEnabled
@@ -189,6 +190,8 @@ export const performRuleUpgradeHandler = async (
         upgradeableRules,
         requestBody: request.body,
         defaultPickVersion,
+        analytics,
+        sendTelemetry: !isDryRun,
       });
       ruleErrors.push(...processingErrors);
 

@@ -26,6 +26,60 @@ import type {
   HealthDiagnosticQueryStats,
 } from '../diagnostic/health_diagnostic_service.types';
 
+export const DETECTION_RULE_UPGRADE_FIELD_CONFLICT_EVENT: EventTypeOpts<{
+  ruleId: string;
+  hasMissingBaseVersion: boolean;
+  totalFieldsWithConflict: {
+    count: number;
+    prepopulated: number;
+    notPrepopulated: number;
+  };
+  customizedFields: Array<{
+    fieldName: string;
+    selectedVersion: 'base' | 'target' | 'merged' | 'resolved';
+    conflict: string;
+    prepopulatedFinalVersion: boolean;
+  }>;
+}> = {
+  eventType: 'detection_rule_upgrade_field_conflict',
+  schema: {
+    ruleId: { type: 'keyword', _meta: { description: 'Rule ID' } },
+    hasMissingBaseVersion: {
+      type: 'boolean',
+      _meta: { description: 'True if base version is missing for this rule' },
+    },
+    totalFieldsWithConflict: {
+      properties: {
+        count: { type: 'long', _meta: { description: 'Number of fields with conflict' } },
+        prepopulated: {
+          type: 'long',
+          _meta: { description: 'Number of fields with conflict and prepopulated final version' },
+        },
+        notPrepopulated: {
+          type: 'long',
+          _meta: {
+            description: 'Number of fields with conflict and without prepopulated final version',
+          },
+        },
+      },
+    },
+    customizedFields: {
+      type: 'array',
+      items: {
+        properties: {
+          fieldName: { type: 'keyword', _meta: { description: 'Field name' } },
+          selectedVersion: { type: 'keyword', _meta: { description: 'Selected field version' } },
+          conflict: { type: 'text', _meta: { description: 'Type of the conflict' } },
+          prepopulatedFinalVersion: {
+            type: 'boolean',
+            _meta: { description: 'True if final version was prepopulated' },
+          },
+        },
+      },
+    },
+  },
+};
+
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
   taskDurationInSeconds: number;
@@ -1617,6 +1671,7 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
 };
 
 export const events = [
+  DETECTION_RULE_UPGRADE_FIELD_CONFLICT_EVENT,
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,

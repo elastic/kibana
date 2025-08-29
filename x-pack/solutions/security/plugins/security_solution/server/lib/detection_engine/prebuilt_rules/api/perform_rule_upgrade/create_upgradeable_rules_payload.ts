@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { pickBy } from 'lodash';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
+import { DETECTION_RULE_UPGRADE_FIELD_CONFLICT_EVENT } from '../../../../telemetry/event_based/events';
 import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import { withSecuritySpanSync } from '../../../../../utils/with_security_span';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
@@ -14,7 +16,17 @@ import {
   type AllFieldsDiff,
   MissingVersion,
 } from '../../../../../../common/api/detection_engine';
-import type { UpgradeConflictResolution } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type {
+  ThreeWayDiffConflict,
+  ThreeWayMergeOutcome,
+  UpgradeConflictResolution,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+
+export interface BasicDiffInfo {
+  conflict: ThreeWayDiffConflict;
+  merge_outcome?: ThreeWayMergeOutcome;
+}
+export type BasicRuleFieldsDiff = Record<string, BasicDiffInfo>;
 import { UpgradeConflictResolutionEnum } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
@@ -29,6 +41,8 @@ interface CreateModifiedPrebuiltRuleAssetsProps {
   upgradeableRules: RuleTriad[];
   requestBody: PerformRuleUpgradeRequestBody;
   defaultPickVersion: PickVersionValues;
+  analytics: AnalyticsServiceStart;
+  sendTelemetry: boolean;
 }
 
 interface ProcessedRules {
@@ -36,10 +50,28 @@ interface ProcessedRules {
   processingErrors: Array<PromisePoolError<{ rule_id: string }>>;
 }
 
+interface RuleTelemetry {
+  ruleId: string;
+  hasMissingBaseVersion: boolean;
+  totalFieldsWithConflict: {
+    count: number;
+    prepopulated: number;
+    notPrepopulated: number;
+  };
+  customizedFields: Array<{
+    fieldName: string;
+    selectedVersion: ThreeWayMergeOutcome | undefined;
+    conflict: ThreeWayDiffConflict;
+    prepopulatedFinalVersion: boolean;
+  }>;
+}
+
 export const createModifiedPrebuiltRuleAssets = ({
   upgradeableRules,
   requestBody,
   defaultPickVersion,
+  analytics,
+  sendTelemetry,
 }: CreateModifiedPrebuiltRuleAssetsProps) => {
   return withSecuritySpanSync(createModifiedPrebuiltRuleAssets.name, () => {
     const {
@@ -107,6 +139,15 @@ export const createModifiedPrebuiltRuleAssets = ({
 
             processedRules.modifiedPrebuiltRuleAssets.push(modifiedPrebuiltRuleAsset);
 
+            if (sendTelemetry && isCustomized) {
+              reportRuleUpgradeTelemetry({
+                analytics,
+                calculatedRuleDiff,
+                ruleId,
+                upgradeableRule,
+              });
+            }
+
             return processedRules;
           } catch (err) {
             processedRules.processingErrors.push({
@@ -169,3 +210,51 @@ const getFieldsDiffConflicts = (
       ? diff.conflict !== 'NONE' && diff.conflict !== 'SOLVABLE'
       : diff.conflict !== 'NONE'
   );
+
+interface ReportRuleUpgradeTelemetryParams {
+  analytics: AnalyticsServiceStart;
+  calculatedRuleDiff: BasicRuleFieldsDiff;
+  ruleId: string;
+  upgradeableRule: RuleTriad;
+}
+
+export function reportRuleUpgradeTelemetry({
+  analytics,
+  calculatedRuleDiff,
+  ruleId,
+  upgradeableRule,
+}: ReportRuleUpgradeTelemetryParams) {
+  const customizedFields: RuleTelemetry['customizedFields'] = [];
+  let prepopulated = 0;
+  let notPrepopulated = 0;
+
+  for (const [fieldName, diff] of Object.entries(calculatedRuleDiff)) {
+    if (diff.conflict && diff.conflict !== 'NONE') {
+      customizedFields.push({
+        fieldName,
+        selectedVersion: diff.merge_outcome,
+        conflict: diff.conflict,
+        prepopulatedFinalVersion: diff.conflict !== 'NON_SOLVABLE',
+      });
+      if (diff.conflict !== 'NON_SOLVABLE') {
+        prepopulated++;
+      } else {
+        notPrepopulated++;
+      }
+    }
+  }
+
+  if (customizedFields.length > 0) {
+    const ruleEvent: RuleTelemetry = {
+      ruleId,
+      hasMissingBaseVersion: upgradeableRule.base == null,
+      totalFieldsWithConflict: {
+        count: customizedFields.length,
+        prepopulated,
+        notPrepopulated,
+      },
+      customizedFields,
+    };
+    analytics.reportEvent(DETECTION_RULE_UPGRADE_FIELD_CONFLICT_EVENT.eventType, ruleEvent);
+  }
+}
