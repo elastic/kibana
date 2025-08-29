@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { columnsAfter } from './columns_after';
+import { columnsAfter } from '../stats/columns_after';
 import { autocomplete } from '../stats/autocomplete';
 import { validate } from '../stats/validate';
 import type { ICommandContext } from '../../types';
