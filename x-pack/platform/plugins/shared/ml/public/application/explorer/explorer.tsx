@@ -760,7 +760,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
                       <EuiSpacer size={'m'} />
 
-                      <EuiSkeletonText lines={10} isLoading={loading || influencersLoading}>
+                      <EuiSkeletonText lines={10} isLoading={influencersLoading}>
                         <InfluencersList influencers={influencers} influencerFilter={applyFilter} />
                       </EuiSkeletonText>
                     </div>
