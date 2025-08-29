@@ -187,6 +187,26 @@ paths:
       summary: Download a file
       tags:
         - Security Endpoint Management API
+  /api/endpoint/action/cancel:
+    post:
+      description: Cancel a running or pending response action.
+      operationId: CancelAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelActionRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Cancel a response action
+      tags:
+        - Security Endpoint Management API
   /api/endpoint/action/execute:
     post:
       description: Run a shell command on an endpoint.
@@ -689,6 +709,23 @@ components:
         type: string
       minItems: 1
       type: array
+    CancelActionRequestBody:
+      type: object
+      properties:
+        comment:
+          description: Optional comment explaining the reason for canceling the action
+          example: Action no longer needed due to resolved incident
+          type: string
+        id:
+          description: >-
+            The unique identifier of the response action to cancel. This should
+            be the internal Kibana action ID, not the external system's action
+            ID.
+          example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+          minLength: 1
+          type: string
+      required:
+        - id
     CaseIds:
       description: Case IDs to be updated (cannot contain empty strings)
       example:
@@ -699,23 +736,6 @@ components:
         type: string
       minItems: 1
       type: array
-    CloudFileScriptParameters:
-      type: object
-      properties:
-        cloudFile:
-          description: Script name in cloud storage.
-          minLength: 1
-          type: string
-        commandLine:
-          description: Command line arguments.
-          minLength: 1
-          type: string
-        timeout:
-          description: Timeout in seconds.
-          minimum: 1
-          type: integer
-      required:
-        - cloudFile
     Command:
       description: The command to be executed (cannot be an empty string)
       enum:
@@ -742,6 +762,62 @@ components:
       description: Optional comment
       example: This is a comment
       type: string
+    CrowdStrikeRunScriptCloudFileParameters:
+      type: object
+      properties:
+        cloudFile:
+          description: Script name in cloud storage
+          minLength: 1
+          type: string
+        commandLine:
+          description: Command line arguments
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in milliseconds before the command is killed
+          minimum: 1
+          type: integer
+      required:
+        - cloudFile
+    CrowdStrikeRunScriptHostPathParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments
+          minLength: 1
+          type: string
+        hostPath:
+          description: Absolute or relative path of script on host machine
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in milliseconds before the command is killed
+          minimum: 1
+          type: integer
+      required:
+        - hostPath
+    CrowdStrikeRunScriptParameters:
+      oneOf:
+        - $ref: '#/components/schemas/CrowdStrikeRunScriptRawParameters'
+        - $ref: '#/components/schemas/CrowdStrikeRunScriptHostPathParameters'
+        - $ref: '#/components/schemas/CrowdStrikeRunScriptCloudFileParameters'
+    CrowdStrikeRunScriptRawParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments
+          minLength: 1
+          type: string
+        raw:
+          description: Raw script content to execute
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in milliseconds before the command is killed
+          minimum: 1
+          type: integer
+      required:
+        - raw
     EndDate:
       description: An end date in ISO format or Date Math format.
       example: '2023-10-31T23:59:59.999Z'
@@ -1102,23 +1178,6 @@ components:
           wasSuccessful: true
       type: object
       properties: {}
-    HostPathScriptParameters:
-      type: object
-      properties:
-        commandLine:
-          description: Command line arguments.
-          minLength: 1
-          type: string
-        hostPath:
-          description: Absolute or relative path of script on host machine.
-          minLength: 1
-          type: string
-        timeout:
-          description: Timeout in seconds.
-          minimum: 1
-          type: integer
-      required:
-        - hostPath
     HostStatuses:
       description: A set of agent health statuses to filter by.
       example:
@@ -1421,6 +1480,19 @@ components:
         total: 2
       type: object
       properties: {}
+    MSDefenderRunScriptParameters:
+      type: object
+      properties:
+        args:
+          description: Optional arguments for the script
+          minLength: 1
+          type: string
+        scriptName:
+          description: The path to the script in the cloud to run
+          minLength: 1
+          type: string
+      required:
+        - scriptName
     Page:
       default: 1
       description: Page number
@@ -1468,35 +1540,58 @@ components:
       properties:
         note:
           type: string
-    RawScriptParameters:
-      type: object
-      properties:
-        commandLine:
-          description: Command line arguments.
-          minLength: 1
-          type: string
-        raw:
-          description: Raw script content.
-          minLength: 1
-          type: string
-        timeout:
-          description: Timeout in seconds.
-          minimum: 1
-          type: integer
-      required:
-        - raw
     RunScriptRouteRequestBody:
       type: object
       properties:
-        parameters:
+        agent_type:
+          default: endpoint
+          description: Type of agent to execute the script on
+          enum:
+            - endpoint
+            - sentinel_one
+            - crowdstrike
+            - microsoft_defender_endpoint
+          type: string
+        alert_ids:
+          description: If defined, any case associated with the given IDs will be updated
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        case_ids:
+          description: Case IDs to be updated
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        comment:
+          description: Optional comment for the action
+          type: string
+        endpoint_ids:
           description: >-
-            Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided.
-            CommandLine and Timeout are optional for all.
+            A list of endpoint IDs whose hosts will run the script (Fleet Agent
+            IDs will be retrieved for these)
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        parameters:
+          description: Script execution parameters that vary by agent type
+          discriminator:
+            mapping:
+              crowdstrike: '#/components/schemas/CrowdStrikeRunScriptParameters'
+              microsoft_defender_endpoint: '#/components/schemas/MSDefenderRunScriptParameters'
+              sentinel_one: '#/components/schemas/SentinelOneRunScriptParameters'
+            propertyName: agent_type
           oneOf:
-            - $ref: '#/components/schemas/RawScriptParameters'
-            - $ref: '#/components/schemas/HostPathScriptParameters'
-            - $ref: '#/components/schemas/CloudFileScriptParameters'
+            - $ref: '#/components/schemas/CrowdStrikeRunScriptParameters'
+            - $ref: '#/components/schemas/MSDefenderRunScriptParameters'
+            - $ref: '#/components/schemas/SentinelOneRunScriptParameters'
       required:
+        - endpoint_ids
         - parameters
     ScanRouteRequestBody:
       allOf:
@@ -1561,6 +1656,19 @@ components:
           wasSuccessful: false
       type: object
       properties: {}
+    SentinelOneRunScriptParameters:
+      type: object
+      properties:
+        scriptId:
+          description: The SentinelOne Script ID to be executed
+          minLength: 1
+          type: string
+        scriptInput:
+          description: Any input arguments for the selected script
+          minLength: 1
+          type: string
+      required:
+        - scriptId
     SortDirection:
       description: Determines the sort order.
       enum:

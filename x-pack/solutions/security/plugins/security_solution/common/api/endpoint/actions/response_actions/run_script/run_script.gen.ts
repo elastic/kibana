@@ -18,60 +18,125 @@ import { z } from '@kbn/zod';
 
 import { SuccessResponse } from '../../../model/schema/common.gen';
 
-export type RawScriptParameters = z.infer<typeof RawScriptParameters>;
-export const RawScriptParameters = z.object({
+export type CrowdStrikeRunScriptRawParameters = z.infer<typeof CrowdStrikeRunScriptRawParameters>;
+export const CrowdStrikeRunScriptRawParameters = z.object({
   /**
-   * Raw script content.
+   * Raw script content to execute
    */
   raw: z.string().min(1),
   /**
-   * Command line arguments.
+   * Command line arguments
    */
   commandLine: z.string().min(1).optional(),
   /**
-   * Timeout in seconds.
+   * Timeout in milliseconds before the command is killed
    */
   timeout: z.number().int().min(1).optional(),
 });
 
-export type HostPathScriptParameters = z.infer<typeof HostPathScriptParameters>;
-export const HostPathScriptParameters = z.object({
+export type CrowdStrikeRunScriptHostPathParameters = z.infer<
+  typeof CrowdStrikeRunScriptHostPathParameters
+>;
+export const CrowdStrikeRunScriptHostPathParameters = z.object({
   /**
-   * Absolute or relative path of script on host machine.
+   * Absolute or relative path of script on host machine
    */
   hostPath: z.string().min(1),
   /**
-   * Command line arguments.
+   * Command line arguments
    */
   commandLine: z.string().min(1).optional(),
   /**
-   * Timeout in seconds.
+   * Timeout in milliseconds before the command is killed
    */
   timeout: z.number().int().min(1).optional(),
 });
 
-export type CloudFileScriptParameters = z.infer<typeof CloudFileScriptParameters>;
-export const CloudFileScriptParameters = z.object({
+export type CrowdStrikeRunScriptCloudFileParameters = z.infer<
+  typeof CrowdStrikeRunScriptCloudFileParameters
+>;
+export const CrowdStrikeRunScriptCloudFileParameters = z.object({
   /**
-   * Script name in cloud storage.
+   * Script name in cloud storage
    */
   cloudFile: z.string().min(1),
   /**
-   * Command line arguments.
+   * Command line arguments
    */
   commandLine: z.string().min(1).optional(),
   /**
-   * Timeout in seconds.
+   * Timeout in milliseconds before the command is killed
    */
   timeout: z.number().int().min(1).optional(),
+});
+
+export const CrowdStrikeRunScriptParametersInternal = z.union([
+  CrowdStrikeRunScriptRawParameters,
+  CrowdStrikeRunScriptHostPathParameters,
+  CrowdStrikeRunScriptCloudFileParameters,
+]);
+
+export type CrowdStrikeRunScriptParameters = z.infer<typeof CrowdStrikeRunScriptParametersInternal>;
+export const CrowdStrikeRunScriptParameters =
+  CrowdStrikeRunScriptParametersInternal as z.ZodType<CrowdStrikeRunScriptParameters>;
+
+export type MSDefenderRunScriptParameters = z.infer<typeof MSDefenderRunScriptParameters>;
+export const MSDefenderRunScriptParameters = z.object({
+  /**
+   * The path to the script in the cloud to run
+   */
+  scriptName: z.string().min(1),
+  /**
+   * Optional arguments for the script
+   */
+  args: z.string().min(1).optional(),
+});
+
+export type SentinelOneRunScriptParameters = z.infer<typeof SentinelOneRunScriptParameters>;
+export const SentinelOneRunScriptParameters = z.object({
+  /**
+   * The SentinelOne Script ID to be executed
+   */
+  scriptId: z.string().min(1),
+  /**
+   * Any input arguments for the selected script
+   */
+  scriptInput: z.string().min(1).optional(),
 });
 
 export type RunScriptRouteRequestBody = z.infer<typeof RunScriptRouteRequestBody>;
 export const RunScriptRouteRequestBody = z.object({
   /**
-   * Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided. CommandLine and Timeout are optional for all.
+   * A list of endpoint IDs whose hosts will run the script (Fleet Agent IDs will be retrieved for these)
    */
-  parameters: z.union([RawScriptParameters, HostPathScriptParameters, CloudFileScriptParameters]),
+  endpoint_ids: z.array(z.string().min(1)).min(1),
+  /**
+   * If defined, any case associated with the given IDs will be updated
+   */
+  alert_ids: z.array(z.string().min(1)).min(1).optional(),
+  /**
+   * Case IDs to be updated
+   */
+  case_ids: z.array(z.string().min(1)).min(1).optional(),
+  /**
+   * Optional comment for the action
+   */
+  comment: z.string().optional(),
+  /**
+   * Type of agent to execute the script on
+   */
+  agent_type: z
+    .enum(['endpoint', 'sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])
+    .optional()
+    .default('endpoint'),
+  /**
+   * Script execution parameters that vary by agent type
+   */
+  parameters: z.discriminatedUnion('agent_type', [
+    CrowdStrikeRunScriptParameters,
+    MSDefenderRunScriptParameters,
+    SentinelOneRunScriptParameters,
+  ]),
 });
 
 export type RunScriptActionRequestBody = z.infer<typeof RunScriptActionRequestBody>;
