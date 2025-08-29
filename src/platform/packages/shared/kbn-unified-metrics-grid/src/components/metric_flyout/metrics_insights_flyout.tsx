@@ -53,33 +53,10 @@ export const MetricInsightsFlyout = ({
 
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
-      if (ev.target instanceof HTMLElement && ev.target.closest('.euiDataGrid__content')) {
-        // ignore events triggered from the data grid
-        return;
-      }
-
       if (isDOMNode(ev.target) && ev.currentTarget.contains(ev.target) && ev.key === keys.ESCAPE) {
         ev.preventDefault();
         ev.stopPropagation();
         onClose();
-      }
-
-      if (ev.target instanceof HTMLInputElement) {
-        // ignore events triggered from the search input
-        return;
-      }
-
-      const isTabButton = (ev.target as HTMLElement).getAttribute('role') === 'tab';
-      if (isTabButton) {
-        // ignore events triggered when the tab buttons are focused
-        return;
-      }
-
-      const isResizableButton =
-        (ev.target as HTMLElement).getAttribute('data-test-subj') === 'euiResizableButton';
-      if (isResizableButton) {
-        // ignore events triggered when the resizable button is focused
-        return;
       }
     },
     [onClose]
