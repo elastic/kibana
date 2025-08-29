@@ -68,22 +68,7 @@ generate_typescript() {
 
   # Run ESLint fix
   echo "--- Running ESLint fix"
-  
-  # Debug: Check for potential syntax issues around the actual ESLint error line
-  echo "--- Debug: Checking for syntax issues around line 1105 (where ESLint error occurs)"
-  sed -n '1100,1110p' "$OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts" || echo "Could not read lines around 1105"
-  
-  # Run ESLint and capture the error
-  if ! yarn lint:es --fix "$OTEL_PACKAGE_DIR/src/generated/"; then
-    echo "--- ESLint failed! Showing more context around the error"
-    echo "--- Lines 3210-3230 of generated file:"
-    sed -n '3210,3230p' "$OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts" || echo "Could not read file"
-    
-    echo "--- Searching for unterminated strings in the file:"
-    grep -n "'" "$OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts" | grep -v "'.*'," | head -10 || echo "No obvious unterminated strings found"
-    
-    # Don't exit here, let the script continue to see what else might be wrong
-  fi
+  yarn lint:es --fix "$OTEL_PACKAGE_DIR/src/generated/" || true
 }
 
 create_pull_request() {
@@ -241,6 +226,12 @@ main() {
     echo "No changes in semantic conventions YAML. Our work is done here."
     exit 0
   fi
+  
+  echo "--- YAML changes detected! Git diff summary:"
+  git diff --stat "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml" || echo "Could not show diff stat"
+  echo "--- First 20 lines of diff:"
+  git diff "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml" | head -20 || echo "Could not show diff details"
+  echo "--- End of diff preview"
 
   report_main_step "YAML changes detected. Bootstrapping Kibana"
   bootstrap_kibana
