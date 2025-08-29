@@ -8,12 +8,12 @@
  */
 import { uniqBy } from 'lodash';
 import { type ESQLCommand } from '../../../types';
-import type { ESQLFieldWithMetadata } from '../../types';
+import type { ESQLColumnData, ESQLFieldWithMetadata } from '../../types';
 import type { ICommandContext } from '../../types';
 
 export const columnsAfter = (
   command: ESQLCommand,
-  previousColumns: ESQLFieldWithMetadata[],
+  previousColumns: ESQLColumnData[],
   context?: ICommandContext
 ) => {
   return uniqBy(

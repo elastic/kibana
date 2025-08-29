@@ -14,14 +14,14 @@ describe('RENAME', () => {
   const context = {
     userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([]),
     fields: new Map<string, ESQLFieldWithMetadata>([
-      ['field1', { name: 'field1', type: 'keyword' }],
-      ['count', { name: 'count', type: 'double' }],
+      ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
+      ['count', { name: 'count', type: 'double', userDefined: false }],
     ]),
   };
   it('renames the given columns with the new names using AS', () => {
     const previousCommandFields = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'field2', type: 'double' },
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
     ] as ESQLFieldWithMetadata[];
 
     const result = columnsAfter(synth.cmd`RENAME field1 as meow`, previousCommandFields, context);
@@ -41,8 +41,8 @@ describe('RENAME', () => {
     const result = columnsAfter(synth.cmd`RENAME meow = field1`, previousCommandFields, context);
 
     expect(result).toEqual([
-      { name: 'meow', type: 'keyword' },
-      { name: 'field2', type: 'double' },
+      { name: 'meow', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
     ]);
   });
 
@@ -59,8 +59,8 @@ describe('RENAME', () => {
     );
 
     expect(result).toEqual([
-      { name: 'meow', type: 'keyword' },
-      { name: 'woof', type: 'double' },
+      { name: 'meow', type: 'keyword', userDefined: false },
+      { name: 'woof', type: 'double', userDefined: false },
     ]);
   });
 });

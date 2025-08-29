@@ -72,6 +72,7 @@ export const validate = (
           name: arg.name,
           location: arg.location,
           type: index === 0 ? 'keyword' : 'long',
+          userDefined: true,
         });
       }
     });

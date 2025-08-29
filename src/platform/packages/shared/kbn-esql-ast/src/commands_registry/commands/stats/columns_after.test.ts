@@ -25,19 +25,20 @@ describe('STATS', () => {
               name: 'var0',
               type: 'double',
               location: { min: 0, max: 10 },
+              userDefined: true,
             },
           ],
         ],
       ]),
       fields: new Map<string, ESQLFieldWithMetadata>([
-        ['field1', { name: 'field1', type: 'keyword' }],
-        ['count', { name: 'count', type: 'double' }],
+        ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
+        ['count', { name: 'count', type: 'double', userDefined: false }],
       ]),
     };
 
     const result = columnsAfter(synth.cmd`STATS var0=AVG(field2)`, previousCommandFields, context);
 
-    expect(result).toEqual([{ name: 'var0', type: 'double' }]);
+    expect(result).toEqual([{ name: 'var0', type: 'double', userDefined: false }]);
   });
 
   it('adds the escaped column, when no grouping is given', () => {
@@ -55,19 +56,20 @@ describe('STATS', () => {
               name: 'AVG(field2)',
               type: 'double',
               location: { min: 0, max: 10 },
+              userDefined: true,
             },
           ],
         ],
       ]),
       fields: new Map<string, ESQLFieldWithMetadata>([
-        ['field1', { name: 'field1', type: 'keyword' }],
-        ['count', { name: 'count', type: 'double' }],
+        ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
+        ['count', { name: 'count', type: 'double', userDefined: false }],
       ]),
     };
 
     const result = columnsAfter(synth.cmd`STATS AVG(field2)`, previousCommandFields, context);
 
-    expect(result).toEqual([{ name: 'AVG(field2)', type: 'double' }]);
+    expect(result).toEqual([{ name: 'AVG(field2)', type: 'double', userDefined: false }]);
   });
 
   it('adds the escaped and grouping columns', () => {
@@ -85,13 +87,14 @@ describe('STATS', () => {
               name: 'AVG(field2)',
               type: 'double',
               location: { min: 0, max: 10 },
+              userDefined: true,
             },
           ],
         ],
       ]),
       fields: new Map<string, ESQLFieldWithMetadata>([
-        ['field1', { name: 'field1', type: 'keyword' }],
-        ['count', { name: 'count', type: 'double' }],
+        ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
+        ['count', { name: 'count', type: 'double', userDefined: false }],
       ]),
     };
 
@@ -102,8 +105,8 @@ describe('STATS', () => {
     );
 
     expect(result).toEqual([
-      { name: 'field1', type: 'keyword' },
-      { name: 'AVG(field2)', type: 'double' },
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'AVG(field2)', type: 'double', userDefined: false },
     ]);
   });
 
@@ -123,6 +126,7 @@ describe('STATS', () => {
               name: 'AVG(field2)',
               type: 'double',
               location: { min: 0, max: 10 },
+              userDefined: true,
             },
           ],
         ],
@@ -133,13 +137,14 @@ describe('STATS', () => {
               name: 'buckets',
               type: 'unknown',
               location: { min: 0, max: 10 },
+              userDefined: true,
             },
           ],
         ],
       ]),
       fields: new Map<string, ESQLFieldWithMetadata>([
-        ['field1', { name: 'field1', type: 'keyword' }],
-        ['count', { name: 'count', type: 'double' }],
+        ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
+        ['count', { name: 'count', type: 'double', userDefined: false }],
       ]),
     };
 
@@ -150,8 +155,8 @@ describe('STATS', () => {
     );
 
     expect(result).toEqual([
-      { name: 'AVG(field2)', type: 'double' },
-      { name: 'buckets', type: 'unknown' },
+      { name: 'AVG(field2)', type: 'double', userDefined: false },
+      { name: 'buckets', type: 'unknown', userDefined: false },
     ]);
   });
 });

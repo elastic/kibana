@@ -157,8 +157,7 @@ export async function autocomplete(
           callbacks?.getByType,
           {
             functions: true,
-            fields: true,
-            userDefinedColumns: context?.userDefinedColumns,
+            columns: true,
           },
           {},
           callbacks?.hasMinimumLicenseRequired,

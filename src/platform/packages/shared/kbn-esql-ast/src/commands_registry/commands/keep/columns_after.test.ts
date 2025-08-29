@@ -14,14 +14,14 @@ describe('KEEP', () => {
   const context = {
     userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([]),
     fields: new Map<string, ESQLFieldWithMetadata>([
-      ['field1', { name: 'field1', type: 'keyword' }],
-      ['count', { name: 'count', type: 'double' }],
+      ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
+      ['count', { name: 'count', type: 'double', userDefined: false }],
     ]),
   };
   it('should return the correct fields after the command', () => {
     const previousCommandFields = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'field2', type: 'double' },
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
     ] as ESQLFieldWithMetadata[];
 
     const result = columnsAfter(synth.cmd`KEEP field1`, previousCommandFields, context);

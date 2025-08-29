@@ -101,7 +101,7 @@ export type GetColumnsByTypeFn = (
 export interface ESQLFieldWithMetadata {
   name: string;
   type: FieldType;
-  userDefined?: false; // TODO consider making required property
+  userDefined: false;
   isEcs?: boolean;
   hasConflict?: boolean;
   metadata?: {

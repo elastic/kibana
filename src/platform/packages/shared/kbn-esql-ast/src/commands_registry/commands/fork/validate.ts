@@ -71,6 +71,7 @@ export const validate = (
   context?.columns.set('_fork', {
     name: '_fork',
     type: 'keyword',
+    userDefined: false,
   });
 
   return messages;

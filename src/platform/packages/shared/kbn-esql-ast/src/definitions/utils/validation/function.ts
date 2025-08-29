@@ -74,9 +74,7 @@ class FunctionValidator {
   ) {
     this.definition = getFunctionDefinition(fn.name);
     for (const arg of this.fn.args) {
-      this.argTypes.push(
-        getExpressionType(arg, this.context.fields, this.context.userDefinedColumns)
-      );
+      this.argTypes.push(getExpressionType(arg, this.context.columns));
       this.argLiteralsMask.push(isLiteral(arg));
     }
   }
