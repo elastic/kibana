@@ -9,6 +9,8 @@ import React, { useMemo } from 'react';
 
 import {
   EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormControlLayout,
   EuiFormRow,
   EuiSpacer,
@@ -74,12 +76,21 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
       allowContextWindowLength ? (
         <>
           <EuiTitle size="xxs" data-test-subj="context-window-length-details-label">
-            <h4>
-              <FormattedMessage
-                id="xpack.inferenceEndpointUICommon.components.additionalInfo.contextWindowLengthLabel"
-                defaultMessage="Context window length"
-              />
-            </h4>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <h4>
+                  <FormattedMessage
+                    id="xpack.inferenceEndpointUICommon.components.additionalInfo.contextWindowLengthLabel"
+                    defaultMessage="Context window length"
+                  />
+                </h4>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="xs">
+                  {LABELS.OPTIONALTEXT}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
@@ -253,7 +264,6 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
     >
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
-        {contextWindowLengthSettings}
         {taskTypeSettings}
         <EuiSpacer size="m" />
         <EuiTitle size="xxs" data-test-subj="inference-endpoint-details-label">
@@ -326,6 +336,8 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             );
           }}
         </UseField>
+        <EuiSpacer size="m" />
+        {contextWindowLengthSettings}
       </EuiPanel>
     </EuiAccordion>
   );
