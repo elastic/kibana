@@ -10,7 +10,7 @@
 import { cloneDeep } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { getChartHidden } from '@kbn/unified-histogram';
+import { getChartHidden, getTopPanelHeight } from '@kbn/unified-histogram';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -49,6 +49,7 @@ export function getStateDefaults({
   const sort = getSortArray(savedSearch?.sort ?? [], dataView!, isEsqlQuery);
   const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
+  const chartSectionHeight = getTopPanelHeight(storage, 'discover');
   const dataSource = isEsqlQuery
     ? createEsqlDataSource()
     : dataView?.id
@@ -70,7 +71,7 @@ export function getStateDefaults({
     interval: 'auto',
     filters: cloneDeep(searchSource?.getOwnField('filter')) as DiscoverAppState['filters'],
     hideChart: chartHidden,
-    chartSectionHeight: undefined,
+    chartSectionHeight,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
