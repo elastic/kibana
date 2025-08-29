@@ -103,6 +103,7 @@ export class ElasticAssistantPlugin
         .getStartServices()
         .then(([_, { productDocBase }]) => productDocBase.management),
       pluginStop$: this.pluginStop$,
+      telemetry: core.analytics,
     });
 
     const adhocAttackDiscoveryDataClient = this.initializeAttackDiscovery({

@@ -14,6 +14,7 @@ import type {
   ElasticsearchClient,
   KibanaRequest,
   SavedObjectsClientContract,
+  AnalyticsServiceSetup,
 } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -86,6 +87,7 @@ export interface AIAssistantServiceOpts {
   taskManager: TaskManagerSetupContract;
   pluginStop$: Subject<void>;
   productDocManager: Promise<ProductDocBaseStartContract['management']>;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export interface CreateAIAssistantClientParams {
@@ -589,6 +591,7 @@ export class AIAssistantService {
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
       getTrainedModelsProvider: opts.getTrainedModelsProvider,
+      telemetry: this.options.telemetry,
     });
   }
 

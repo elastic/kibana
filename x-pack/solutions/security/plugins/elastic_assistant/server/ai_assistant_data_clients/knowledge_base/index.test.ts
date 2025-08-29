@@ -28,9 +28,11 @@ import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/imp
 import { KnowledgeBaseResource } from '@kbn/elastic-assistant-common';
 import { createTrainedModelsProviderMock } from '@kbn/ml-plugin/server/shared_services/providers/__mocks__/trained_models';
 import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
+import { ensureIntegrationKnowledgeIndexEntry } from '../../ai_assistant_service/integration_knowledge_helper';
 
 jest.mock('@kbn/ml-plugin/server/lib/node_utils');
 jest.mock('../../lib/langchain/content_loaders/security_labs_loader');
+jest.mock('../../ai_assistant_service/integration_knowledge_helper');
 jest.mock('p-retry');
 const date = '2023-03-28T22:27:28.159Z';
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
@@ -41,6 +43,11 @@ const mockUser1 = authenticatedUser;
 const mockedPRetry = pRetry as jest.MockedFunction<typeof pRetry>;
 mockedPRetry.mockResolvedValue({});
 const telemetry = coreMock.createSetup().analytics;
+
+const mockEnsureIntegrationKnowledgeIndexEntry =
+  ensureIntegrationKnowledgeIndexEntry as jest.MockedFunction<
+    typeof ensureIntegrationKnowledgeIndexEntry
+  >;
 
 describe('AIAssistantKnowledgeBaseDataClient', () => {
   let mockOptions: KnowledgeBaseDataClientParams;
@@ -54,6 +61,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
     jest.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     mockLoadSecurityLabs.mockClear();
+    mockEnsureIntegrationKnowledgeIndexEntry.mockResolvedValue(true);
     ml = mlPluginMock.createSetupContract() as unknown as MlPluginSetup; // Missing SharedServices mock, so manually mocking trainedModelsProvider
     mockOptions = {
       logger,
@@ -71,6 +79,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       setIsKBSetupInProgress: jest.fn().mockImplementation(() => {}),
       manageGlobalKnowledgeBaseAIAssistant: true,
       getTrainedModelsProvider: () => trainedModelsProviderMock,
+      telemetry,
     };
     esClientMock.search.mockReturnValue(
       // @ts-expect-error not full response interface
@@ -301,6 +310,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       await client.setupKnowledgeBase({});
 
+      expect(mockEnsureIntegrationKnowledgeIndexEntry).toHaveBeenCalled();
       expect(loadSecurityLabs).toHaveBeenCalled();
     });
 

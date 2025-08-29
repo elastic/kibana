@@ -9,6 +9,7 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
+  analyticsServiceMock,
 } from '@kbn/core/server/mocks';
 import type {
   IndicesDataStream,
@@ -141,6 +142,7 @@ describe('AI Assistant Service', () => {
         update: jest.fn(),
         uninstall: jest.fn(),
       }),
+      telemetry: analyticsServiceMock.createAnalyticsServiceSetup(),
     };
   });
 
