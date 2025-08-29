@@ -231,7 +231,7 @@ if [[ ${#failedConfigs[@]} -gt 0 ]]; then
   
   echo "=== DEBUG: Preparing to store failed data for retry ==="
   failed_data=""
-  local first=true
+  first=true
   for config_path in "${!failed_config_map[@]}"; do
     [[ "$first" == true ]] && first=false || failed_data+="|"
     failed_data+="$config_path:${failed_config_map[$config_path]}"
