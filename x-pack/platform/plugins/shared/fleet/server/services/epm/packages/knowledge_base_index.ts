@@ -246,26 +246,25 @@ export async function initializeKnowledgeBaseIndex(esClient: ElasticsearchClient
   const logger = appContextService.getLogger();
 
   try {
-    // Check if the index already exists
-    const indexExists = await esClient.indices.exists({
-      index: INTEGRATION_KNOWLEDGE_INDEX,
-    });
-
-    if (indexExists) {
-      // Check if there are any documents in the index
-      const countResponse = await esClient.count({
+    // Check if the dummy document already exists
+    try {
+      const existingDoc = await esClient.get({
         index: INTEGRATION_KNOWLEDGE_INDEX,
+        id: FLEET_SYSTEM_DOC_CONFIG.documentId,
       });
 
-      if (countResponse.count > 0) {
-        logger.debug(
-          `Knowledge base index ${INTEGRATION_KNOWLEDGE_INDEX} already contains documents`
-        );
+      if (existingDoc.found) {
+        logger.debug(`Knowledge base index ${INTEGRATION_KNOWLEDGE_INDEX} already initialized`);
         return;
+      }
+    } catch (error: any) {
+      // If we get a 404, the document doesn't exist, which is expected for first run
+      if (error.statusCode !== 404) {
+        throw error;
       }
     }
 
-    // Create a dummy document to initialize the index
+    // Create the dummy document to initialize the index
     const dummyDocument = {
       package_name: FLEET_SYSTEM_DOC_CONFIG.packageName,
       filename: FLEET_SYSTEM_DOC_CONFIG.filename,
@@ -288,8 +287,9 @@ export async function initializeKnowledgeBaseIndex(esClient: ElasticsearchClient
     logger.debug(
       `Initialized knowledge base index ${INTEGRATION_KNOWLEDGE_INDEX} with dummy document`
     );
-  } catch (error) {
+  } catch (error: any) {
     logger.warn(`Failed to initialize knowledge base index: ${error.message}`);
-    // Don't throw error to avoid breaking Fleet setup
+    // Don't throw error to avoid breaking Fleet setup.
+    // This will happen if the user doesnt have the correct license (and for other reasons), but shouldnt block setup of fleet
   }
 }

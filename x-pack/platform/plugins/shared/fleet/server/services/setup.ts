@@ -183,12 +183,6 @@ async function createSetupSideEffects(
   await ensureFleetGlobalEsAssets(soClient, esClient);
   stepSpan?.end();
 
-  logger.debug('Initializing knowledge base index (async)');
-  // Initialize knowledge base index asynchronously without blocking setup
-  initializeKnowledgeBaseIndex(esClient).catch((error) => {
-    logger.warn('Knowledge base index initialization failed', error);
-  });
-
   // Ensure that required packages are always installed even if they're left out of the config
   const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
 
@@ -286,6 +280,13 @@ async function createSetupSideEffects(
   logger.debug('Create CCS index patterns for remote clusters');
   const { savedObjectsImporter } = getSpaceAwareSaveobjectsClients();
   await createCCSIndexPatterns(esClient, soClient, savedObjectsImporter);
+
+  logger.debug('Initializing knowledge base index (async)');
+  // Initialize knowledge base index asynchronously after main setup is complete
+  // This ensures ES permissions and indices are properly set up before trying to index documents
+  initializeKnowledgeBaseIndex(esClient).catch((error) => {
+    logger.warn('Knowledge base index initialization failed', error);
+  });
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
