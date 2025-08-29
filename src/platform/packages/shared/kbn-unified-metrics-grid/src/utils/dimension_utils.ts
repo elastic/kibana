@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export interface Dimension {
+  name: string;
+  type: string;
+  description?: string;
+}
+
 export const categorizeDimensions = (
-  dimensions: Array<{ name: string; type: string }>,
+  dimensions: Dimension[],
   metricName: string
 ) => {
   const topLevelNamespace = metricName.split('.')[0] + '.';
@@ -26,8 +32,6 @@ export const categorizeDimensions = (
   return { requiredDimensions, optionalDimensions };
 };
 
-const getTopLevelNamespace = (metricName: string) => metricName.split('.')[0] + '.';
-
 const getSortPriority = (name: string, topLevelNamespace: string): number => {
   if (name.startsWith('attributes.')) {
     return 0;
@@ -39,11 +43,9 @@ const getSortPriority = (name: string, topLevelNamespace: string): number => {
 };
 
 export const sortDimensions = (
-  dimensions: Array<{ name: string; type: string }>,
-  metricName: string
+  dimensions: Dimension[],
+  topLevelNamespace: string
 ) => {
-  const topLevelNamespace = getTopLevelNamespace(metricName);
-
   return [...dimensions].sort((a, b) => {
     const priorityDiff =
       getSortPriority(a.name, topLevelNamespace) - getSortPriority(b.name, topLevelNamespace);

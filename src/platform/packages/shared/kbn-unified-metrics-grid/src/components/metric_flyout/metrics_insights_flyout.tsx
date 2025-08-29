@@ -10,7 +10,6 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
@@ -20,6 +19,7 @@ import {
   EuiFlyoutFooter,
   isDOMNode,
   keys,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +27,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { MetricField } from '../../types';
 import { MetricFlyoutContent } from './metric_flyout_content';
 import { useFlyoutA11y } from '../../hooks/use_flyout_a11y';
+import { css } from '@emotion/react';
 
 interface MetricInsightsFlyoutProps {
   metric: MetricField;
@@ -115,13 +116,20 @@ export const MetricInsightsFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiText size="m">
-              <strong>
-                {i18n.translate('metricsExperience.metricInsightsFlyout.strong.metricLabel', {
-                  defaultMessage: 'Metric',
-                })}
-              </strong>
-            </EuiText>
+              <EuiTitle
+                size="xs"
+                data-test-subj="docViewerRowDetailsTitle"
+                css={css`
+                  white-space: nowrap;
+                `}
+              >
+                <h2>
+                  {i18n.translate('metricsExperience.metricInsightsFlyout.strong.metricLabel', {
+                    defaultMessage: 'Metric',
+                  })}
+                </h2>
+              </EuiTitle>
+
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>

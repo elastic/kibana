@@ -8,3 +8,4 @@
  */
 
 export { MetricsGridSection } from './src/components/metrics_grid_section';
+export { MetricsGrid } from './src/components/metrics_grid';

@@ -10,12 +10,7 @@
 import { EuiBadge, EuiToken, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-
-interface Dimension {
-  name: string;
-  type: string;
-  description?: string;
-}
+import { Dimension, sortDimensions } from '../../utils';
 
 interface DimensionBadgesProps {
   dimensions: Dimension[];
@@ -34,21 +29,7 @@ export const DimensionBadges = ({
   const topLevelNamespace = metricName.split('.')[0] + '.';
 
   // Sort dimensions to prioritize attributes.* and top-level namespace
-  const sortedDimensions = [...dimensions].sort((a, b) => {
-    const aIsAttributes = a.name.startsWith('attributes.');
-    const bIsAttributes = b.name.startsWith('attributes.');
-    const aIsTopLevel = a.name.startsWith(topLevelNamespace);
-    const bIsTopLevel = b.name.startsWith(topLevelNamespace);
-
-    // Priority: attributes.* first, then top-level namespace, then others
-    if (aIsAttributes && !bIsAttributes) return -1;
-    if (!aIsAttributes && bIsAttributes) return 1;
-    if (aIsTopLevel && !bIsTopLevel && !aIsAttributes && !bIsAttributes) return -1;
-    if (!aIsTopLevel && bIsTopLevel && !aIsAttributes && !bIsAttributes) return 1;
-
-    // Alphabetical for same priority
-    return a.name.localeCompare(b.name);
-  });
+  const sortedDimensions = sortDimensions(dimensions, topLevelNamespace);
 
   const displayedDimensions = sortedDimensions.slice(0, maxDisplay);
   const remainingCount = dimensions.length - maxDisplay;
@@ -63,7 +44,7 @@ export const DimensionBadges = ({
 
         const badgeContent = (
           <EuiBadge
-            key={index}
+            key={dimension.name}
             color={badgeColor}
             style={{ marginRight: euiTheme.size.xs, marginBottom: euiTheme.size.xxs }}
           >
@@ -82,7 +63,7 @@ export const DimensionBadges = ({
         // Show tooltip only if description is available
         if (dimension.description) {
           return (
-            <EuiToolTip key={index} content={dimension.description}>
+            <EuiToolTip key={dimension.name} content={dimension.description}>
               {badgeContent}
             </EuiToolTip>
           );
