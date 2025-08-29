@@ -26,7 +26,7 @@ import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils/get_formatted_s
 import { getSeverityWithLow } from '@kbn/ml-anomaly-utils/anomaly_utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
-import { mlEscape } from '@kbn/ml-common-utils/string_utils';
+import { mlEscape } from '@kbn/ml-common-utils/string_utils/ml_escape';
 
 import { getTableItemClosestToTimestamp } from '../../../../../common/util/anomalies_table_utils';
 
