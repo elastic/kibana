@@ -9,9 +9,11 @@ import { flowRouteRepository } from './flow/route';
 import { kubernetesOnboardingRouteRepository } from './kubernetes/route';
 import { firehoseOnboardingRouteRepository } from './firehose/route';
 import { otelHostOnboardingRouteRepository } from './otel_host/route';
+import { testOasGeneration } from './zod';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
   const repository = {
+    ...testOasGeneration,
     ...flowRouteRepository,
     ...kubernetesOnboardingRouteRepository,
     ...firehoseOnboardingRouteRepository,
