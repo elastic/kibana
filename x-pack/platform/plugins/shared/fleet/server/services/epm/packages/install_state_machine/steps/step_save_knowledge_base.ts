@@ -22,6 +22,7 @@ import {
 } from '../../../../../../common/types/models/epm';
 import { updateEsAssetReferences } from '../../es_assets_reference';
 import type { KnowledgeBaseItem } from '../../../../../../common/types/models/epm';
+import { licenseService } from '../../../../license';
 export const KNOWLEDGE_BASE_PATH = 'docs/knowledge_base/';
 
 /**
@@ -66,6 +67,13 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
   logger.debug(
     `Knowledge base step: Starting for package ${packageInfo.name}@${packageInfo.version}`
   );
+
+  // Check if user has appropriate license for knowledge base functionality
+  // You can adjust the license requirement as needed (e.g., isGoldPlus(), isPlatinum(), isEnterprise())
+  if (!licenseService.isEnterprise()) {
+    logger.debug(`Knowledge base step: Skipping knowledge base save - requires Enterprise license`);
+    return;
+  }
 
   // Extract knowledge base content directly from the archive
   const knowledgeBaseItems = await extractKnowledgeBaseFromArchive(
