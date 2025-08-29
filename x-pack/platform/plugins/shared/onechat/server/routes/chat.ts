@@ -13,7 +13,6 @@ import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConversationUpdatedEvent, ConversationCreatedEvent } from '@kbn/onechat-common';
 import {
-  AgentMode,
   oneChatDefaultAgentId,
   isRoundCompleteEvent,
   isConversationUpdatedEvent,
@@ -38,15 +37,6 @@ export function registerChatRoutes({
 
   const conversePayloadSchema = schema.object({
     agent_id: schema.string({ defaultValue: oneChatDefaultAgentId }),
-    mode: schema.oneOf(
-      [
-        schema.literal(AgentMode.normal),
-        schema.literal(AgentMode.reason),
-        schema.literal(AgentMode.plan),
-        schema.literal(AgentMode.research),
-      ],
-      { defaultValue: AgentMode.normal }
-    ),
     connector_id: schema.maybe(schema.string()),
     conversation_id: schema.maybe(schema.string()),
     input: schema.string(),
@@ -65,7 +55,6 @@ export function registerChatRoutes({
   }) => {
     const {
       agent_id: agentId,
-      mode,
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
@@ -73,7 +62,6 @@ export function registerChatRoutes({
 
     return chatService.converse({
       agentId,
-      mode,
       connectorId,
       conversationId,
       abortSignal,

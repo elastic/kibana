@@ -2099,7 +2099,7 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => void; } & { url: ",
+              ") => Promise<void>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
