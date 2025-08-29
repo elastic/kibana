@@ -24,7 +24,7 @@ import { getSchemaAtPath, getZodTypeName, parsePath } from '../../../../common/l
 export interface LineParseResult {
   fullKey: string;
   pathSegments: string[] | null;
-  matchType: 'at' | 'bracket-unfinished' | 'mustache-complete' | 'mustache-unfinished' | null;
+  matchType: 'at' | 'bracket-unfinished' | 'variable-complete' | 'variable-unfinished' | null;
   match: RegExpMatchArray | null;
 }
 
@@ -57,7 +57,7 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
     return {
       fullKey,
       pathSegments: parsePath(fullKey),
-      matchType: 'mustache-unfinished',
+      matchType: 'variable-unfinished',
       match: unfinishedMatch,
     };
   }
@@ -69,7 +69,7 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
     return {
       fullKey,
       pathSegments: parsePath(fullKey),
-      matchType: 'mustache-complete',
+      matchType: 'variable-complete',
       match: completeMatch,
     };
   }
