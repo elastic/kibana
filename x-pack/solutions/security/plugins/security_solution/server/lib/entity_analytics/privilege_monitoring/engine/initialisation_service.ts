@@ -8,7 +8,6 @@
 import moment from 'moment';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { INTEGRATION_TYPES } from '../../../../../common/entity_analytics/privilege_monitoring/constants';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { InitMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import type { PrivilegeMonitoringDataClient } from './data_client';
@@ -109,21 +108,12 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
     return descriptor;
   };
 
-  interface Descriptor {
-    id: string;
-    name: string;
-  }
-
   const createOrUpdateDefaultDataSource = async (
     monitoringIndexSourceClient: MonitoringEntitySourceDescriptorClient
   ) => {
     dataClient.log('info', 'Creating default index source for privilege monitoring.');
     try {
-      await InitSourceCreationService.upsertSources(monitoringIndexSourceClient, {
-        namespace: deps.namespace,
-        indexName: dataClient.index,
-        integrations: [...INTEGRATION_TYPES],
-      });
+      await InitSourceCreationService.upsertSources(monitoringIndexSourceClient);
     } catch (e) {
       dataClient.log(
         'error',
