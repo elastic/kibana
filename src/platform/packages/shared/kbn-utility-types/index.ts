@@ -178,8 +178,3 @@ export type RecursivePartial<T> = {
     : RecursivePartial<T[P]>;
 };
 type NonAny = number | boolean | string | symbol | null;
-
-/**
- * Utility type for making all properties of an object nullable.
- */
-export type Nullable<T extends object> = { [K in keyof T]: T[K] | null };
