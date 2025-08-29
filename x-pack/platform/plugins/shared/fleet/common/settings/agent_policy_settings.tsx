@@ -188,12 +188,15 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   },
   {
     name: 'agent.logging.files.interval',
-    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalitle', {
-      defaultMessage: 'Agent logging number of files',
-    }),
+    title: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalTitle',
+      {
+        defaultMessage: 'Agent logging number of files',
+      }
+    ),
     description: (
       <FormattedMessage
-        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalescription"
+        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalDescription"
         defaultMessage="Enable log file rotation on time intervals in addition to size-based rotation, i.e. 24h, 7d."
       />
     ),
@@ -208,7 +211,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   {
     name: 'agent.monitoring._runtime_experimental',
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeTitle', {
-      defaultMessage: 'Monitoring Runtime (experimental)',
+      defaultMessage: 'Monitoring runtime (experimental)',
     }),
     description: (
       <FormattedMessage
@@ -242,9 +245,12 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       },
       {
         value: 'otel',
-        text: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeLabel', {
-          defaultMessage: 'OTel',
-        }),
+        text: i18n.translate(
+          'xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeOtelLabel',
+          {
+            defaultMessage: 'OTel',
+          }
+        ),
       },
     ],
   },
