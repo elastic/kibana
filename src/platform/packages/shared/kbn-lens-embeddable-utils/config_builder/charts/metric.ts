@@ -33,6 +33,7 @@ import {
 } from '../columns';
 import type { LensApiState } from '../schema';
 import { fromMetricLensStateToApi } from '../transforms/charts/metric';
+import { metricStateSchema } from '../schema/charts/metric';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -216,7 +217,8 @@ export async function buildMetric(
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   if (!isLensLegacyFormat(config)) {
-    return fromMetricLensStateToApi(config);
+    const validatedConfig = metricStateSchema.validate(config);
+    return fromMetricLensStateToApi(validatedConfig);
   }
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
