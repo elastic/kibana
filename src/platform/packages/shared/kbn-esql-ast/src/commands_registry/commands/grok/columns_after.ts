@@ -64,6 +64,8 @@ export const columnsAfter = (
 
   return [
     ...previousColumns,
-    ...columns.map((column) => ({ name: column, type: 'keyword' as const, userDefined: false })),
+    ...columns.map(
+      (column) => ({ name: column, type: 'keyword' as const, userDefined: false } as ESQLColumnData)
+    ),
   ];
 };

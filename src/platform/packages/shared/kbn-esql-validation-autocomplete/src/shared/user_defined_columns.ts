@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
+import type { ESQLAst, ESQLAstItem, ESQLCommand } from '@kbn/esql-ast';
 import { isColumn, isFunctionExpression } from '@kbn/esql-ast';
-import { getExpressionType } from '@kbn/esql-ast/src/definitions/utils';
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { Visitor } from '@kbn/esql-ast/src/visitor';
 import type {
   ESQLUserDefinedColumn,
@@ -72,45 +70,6 @@ export function excludeUserDefinedColumnsFromCurrentCommand(
   return resultUserDefinedColumns;
 }
 
-function addUserDefinedColumnFromAssignment(
-  assignOperation: ESQLFunction,
-  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
-  fields: Map<string, ESQLFieldWithMetadata>
-) {
-  if (isColumn(assignOperation.args[0])) {
-    const rightHandSideArgType = getExpressionType(
-      assignOperation.args[1],
-      fields,
-      userDefinedColumns
-    );
-    addToUserDefinedColumnOccurrences(userDefinedColumns, {
-      name: assignOperation.args[0].parts.join('.'),
-      type: rightHandSideArgType /* fallback to number */,
-      location: assignOperation.args[0].location,
-    });
-  }
-}
-
-function addUserDefinedColumnFromExpression(
-  expressionOperation: ESQLFunction,
-  queryString: string,
-  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
-  fields: Map<string, ESQLFieldWithMetadata>
-) {
-  if (!expressionOperation.text.includes(EDITOR_MARKER)) {
-    const expressionText = queryString.substring(
-      expressionOperation.location.min,
-      expressionOperation.location.max + 1
-    );
-    const expressionType = getExpressionType(expressionOperation, fields, userDefinedColumns);
-    addToUserDefinedColumnOccurrences(userDefinedColumns, {
-      name: expressionText,
-      type: expressionType,
-      location: expressionOperation.location,
-    });
-  }
-}
-
 export function collectUserDefinedColumns(
   ast: ESQLAst,
   fields: Map<string, ESQLFieldWithMetadata>,
@@ -123,23 +82,6 @@ export function collectUserDefinedColumns(
       // TODO - add these as userDefinedColumns
     })
     .on('visitExpression', (_ctx) => {}) // required for the types :shrug:
-    .on('visitFunctionCallExpression', (ctx) => {
-      const node = ctx.node;
-
-      if (node.subtype === 'binary-expression' && node.name === 'where') {
-        ctx.visitArgument(0, undefined);
-        return;
-      }
-
-      if (node.name === 'as') {
-        const [oldArg, newArg] = ctx.node.args;
-        addToUserDefinedColumns(oldArg, newArg, fields, userDefinedColumns);
-      } else if (node.name === '=') {
-        addUserDefinedColumnFromAssignment(node, userDefinedColumns, fields);
-      } else {
-        addUserDefinedColumnFromExpression(node, queryString, userDefinedColumns, fields);
-      }
-    })
     .on('visitCommandOption', (ctx) => {
       if (ctx.node.name === 'with') {
         for (const assignFn of ctx.node.args) {
@@ -155,10 +97,7 @@ export function collectUserDefinedColumns(
     })
     .on('visitCommand', (ctx) => {
       const ret = [];
-      if (['row', 'ts', 'rename'].includes(ctx.node.name)) {
-        ret.push(...ctx.visitArgs());
-      }
-      if (['stats', 'inlinestats', 'enrich'].includes(ctx.node.name)) {
+      if (['enrich'].includes(ctx.node.name)) {
         // BY and WITH can contain userDefinedColumns
         ret.push(...ctx.visitOptions());
       }
