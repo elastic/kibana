@@ -33,7 +33,7 @@ generate_resolved_yaml() {
   # Debug: Check what files were generated
   echo "--- Debug: Checking generated files"
   ls -la ./weaver_output/ || echo "weaver_output directory not found"
-  
+
   # Move the generated file to the expected location
   if [ -f "./weaver_output/resolved_semconv.yaml" ]; then
     cp ./weaver_output/resolved_semconv.yaml ./resolved_semconv.yaml
@@ -57,11 +57,11 @@ bootstrap_kibana() {
 
 generate_typescript() {
   echo "--- Generating TypeScript definitions"
-  
+
   # Verify the YAML file was already copied by main function
   echo "--- Debug: Verifying YAML file is in package assets"
   ls -la "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml" || echo "❌ resolved-semconv.yaml not found in assets directory"
-  
+
   # Generate TypeScript file
   echo "--- Running TypeScript generation"
   node scripts/generate_otel_semconv.js
@@ -90,7 +90,6 @@ create_pull_request() {
 - ✅ TypeScript compilation successful
 - ✅ Package tests passing
 - ✅ ESLint formatting applied
-- ✅ Generated files follow Kibana coding standards
 
 🤖 Generated automatically by Buildkite workflow'
 
@@ -188,8 +187,7 @@ create_pull_request() {
     --label 'Team:obs-ux-logs' \
     --label 'release_note:skip' \
     --label 'backport:skip' \
-    --label 'otel-semantic-conventions' \
-    --assignee 'achyutjhunjhunwala'
+    --label 'otel-semantic-conventions'
 
   echo "✅ Pull request created successfully!"
 }
@@ -218,14 +216,14 @@ main() {
   git diff --exit-code --quiet "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
   yaml_changed=$?
   set -e
-  
+
   echo "--- Git diff exit code: $yaml_changed (0=no changes, 1=changes detected)"
 
   if [ $yaml_changed -eq 0 ]; then
     echo "No changes in semantic conventions YAML. Our work is done here."
     exit 0
   fi
-  
+
   echo "--- YAML changes detected! Git diff summary:"
   git diff --stat "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml" || echo "Could not show diff stat"
   echo "--- First 20 lines of diff:"
