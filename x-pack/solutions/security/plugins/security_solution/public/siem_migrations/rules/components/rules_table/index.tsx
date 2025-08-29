@@ -200,17 +200,21 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     });
     const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
 
+    const [isTableLoading, setTableLoading] = useState(false);
+
     const onSubmitMissingIndexPattern = useCallback(
-      (indexPattern: string) => {
-        updateIndexPattern({
+      async (indexPattern: string) => {
+        setTableLoading(true);
+        await updateIndexPattern({
           migrationId,
           indexPattern,
           ids: selectedMigrationRules.map((rule) => rule.id),
         });
+        setTableLoading(false);
       },
-      [migrationId, updateIndexPattern, selectedMigrationRules]
+      [migrationId, updateIndexPattern, selectedMigrationRules, setTableLoading]
     );
-    const [isTableLoading, setTableLoading] = useState(false);
+
     const installSingleRule = useCallback(
       async (migrationRule: RuleMigrationRule, enabled?: boolean) => {
         setTableLoading(true);
