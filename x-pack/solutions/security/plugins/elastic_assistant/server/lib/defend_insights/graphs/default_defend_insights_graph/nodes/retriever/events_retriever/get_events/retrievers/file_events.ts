@@ -5,12 +5,35 @@
  * 2.0.
  */
 
-import type { SearchRequest, DateMath } from '@elastic/elasticsearch/lib/api/types';
+import type { DateMath, SearchResponse, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+
+import type { EventRetrieverOptions } from '.';
+
+interface AggregationResponse {
+  unique_process_executable: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      latest_event: {
+        hits: {
+          hits: Array<{
+            _id: string;
+            _source: {
+              agent: { id: string };
+              process: { executable: string };
+            };
+          }>;
+        };
+      };
+    }>;
+  };
+}
 
 const FILE_EVENTS_INDEX_PATTERN = 'logs-endpoint.events.file-*';
 const SIZE = 1500;
 
-export function getFileEventsQuery({
+function getFileEventsQuery({
   endpointIds,
   size,
   gte,
@@ -34,8 +57,7 @@ export function getFileEventsQuery({
           {
             range: {
               '@timestamp': {
-                gte: gte ?? 'now-14d',
-                // gte: gte ?? 'now-24h',
+                gte: gte ?? 'now-24h',
                 lte: lte ?? 'now',
               },
             },
@@ -71,4 +93,17 @@ export function getFileEventsQuery({
     ignore_unavailable: true,
     index: [FILE_EVENTS_INDEX_PATTERN],
   };
+}
+
+export async function getFileEvents(esClient: ElasticsearchClient, options: EventRetrieverOptions) {
+  const query = getFileEventsQuery(options);
+  const result = await esClient.search<SearchResponse, AggregationResponse>(query);
+  return (result.aggregations?.unique_process_executable.buckets ?? []).map((bucket) => {
+    const latestEvent = bucket.latest_event.hits.hits[0];
+    return {
+      _id: [latestEvent._id],
+      'agent.id': [latestEvent._source.agent.id],
+      'process.executable': [latestEvent._source.process.executable],
+    };
+  });
 }

@@ -10,11 +10,11 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import { mockAnonymizationFields } from '../../../mock/mock_anonymization_fields';
-import { getAnonymizedEvents } from './get_anonymized_events';
+import { getAnonymizedEvents } from './get_events';
 import { mockAnonymizedEvents } from '../../../mock/mock_anonymized_events';
 import { AnonymizedEventsRetriever } from '.';
 
-jest.mock('./get_anonymized_events', () => ({
+jest.mock('./get_events', () => ({
   getAnonymizedEvents: jest.fn(),
 }));
 
@@ -35,6 +35,7 @@ describe('AnonymizedEventsRetriever', () => {
       endpointIds: ['endpoint-1'],
       anonymizationFields: mockAnonymizationFields,
       esClient,
+      kbDataClient: null,
       size: 10,
     });
 
@@ -65,6 +66,7 @@ describe('AnonymizedEventsRetriever', () => {
       endpointIds: ['endpoint-1'],
       anonymizationFields: mockAnonymizationFields,
       esClient,
+      kbDataClient: null,
       onNewReplacements,
       replacements: mockReplacements,
       size: 10,
@@ -77,6 +79,7 @@ describe('AnonymizedEventsRetriever', () => {
       endpointIds: ['endpoint-1'],
       anonymizationFields: mockAnonymizationFields,
       esClient,
+      kbDataClient: null,
       onNewReplacements,
       replacements: mockReplacements,
       size: 10,
@@ -91,6 +94,7 @@ describe('AnonymizedEventsRetriever', () => {
       endpointIds: ['endpoint-1'],
       anonymizationFields: mockAnonymizationFields,
       esClient,
+      kbDataClient: null,
       size: 10,
     });
 
