@@ -53,6 +53,14 @@ export const appendConversationMessages = async ({
             ...params,
           },
           source: `
+            /**
+            * Legacy conversations will not have created_by field,
+            * so before making updates we need to assign the fields from the single user in the users list,
+            * which we can safely assume is the creator of the conversation. The messages[0].user field is also updated if missing below
+            */
+            if (ctx._source.created_by == null && ctx._source.users != null && ctx._source.users.length == 1) {
+              ctx._source.created_by = ctx._source.users[0];
+            }
             if (params.assignEmpty == true || params.containsKey('messages')) {
               def messages = [];
               for (message in params.messages) {
@@ -63,6 +71,12 @@ export const appendConversationMessages = async ({
                 newMessage.is_error = message.is_error;
                 newMessage.reader = message.reader;
                 newMessage.role = message.role;
+                if (message.user != null) {
+                  newMessage.user = message.user;
+                }
+                if (newMessage.user == null && newMessage.role == 'user' && ctx._source.created_by != null) {
+                  newMessage.user = ctx._source.created_by;
+                }
                 if (message.trace_data != null) {
                   newMessage.trace_data = message.trace_data;
                 }
@@ -136,6 +150,7 @@ export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) 
       is_error: message.isError,
       reader: message.reader,
       role: message.role,
+      user: message.user,
       ...(message.metadata
         ? {
             metadata: {

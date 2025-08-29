@@ -342,6 +342,17 @@ export interface ValidationErrors {
       requiredLicense: string;
     };
   };
+  changePointWrongFieldType: {
+    message: string;
+    type: {
+      columnName: string;
+      givenType: string;
+    };
+  };
+  dropTimestampWarning: {
+    message: string;
+    type: {};
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;
