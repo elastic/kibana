@@ -45,7 +45,10 @@ function NoFilterListsCallOut() {
             to create the list of values you want to include or exclude in the job rule."
           values={{
             filterListsLink: (
-              <EuiLink onClick={redirectToFilterManagementPage}>
+              <EuiLink
+                onClick={redirectToFilterManagementPage}
+                data-test-subj="mlScopeNoFilterListsLink"
+              >
                 <FormattedMessage
                   id="xpack.ml.ruleEditor.scopeSection.createFilterListsDescription.filterListsLinkText"
                   defaultMessage="Filter Lists"
@@ -128,6 +131,7 @@ export function ScopeSection({
       <EuiSpacer size="s" />
       <EuiCheckbox
         id="enable_scope_checkbox"
+        data-test-subj="mlScopeEnableCheckbox"
         label={
           <FormattedMessage
             id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
