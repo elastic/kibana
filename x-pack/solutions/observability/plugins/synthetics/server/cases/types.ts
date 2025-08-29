@@ -43,7 +43,7 @@ interface SyntheticsMonitorSource {
     id: string;
     status?: string;
   };
-  url: {
+  url?: {
     full: string;
   };
   observer: {

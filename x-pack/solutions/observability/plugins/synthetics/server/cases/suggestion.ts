@@ -149,6 +149,7 @@ export function getMonitorByServiceName(
             const source = monitor.latest_run.hits.hits[0]._source;
             const relatedSavedObjectAttr: EncryptedSyntheticsMonitorAttributes =
               savedObjectsAttrHash[source.config_id];
+
             return {
               monitorQueryId: source.monitor.id,
               configId: source.config_id,
@@ -165,7 +166,7 @@ export function getMonitorByServiceName(
               spaces: source.meta.space_id,
               locationLabel: source.observer.geo.name,
               locationId: source.observer.name,
-              urls: source.url.full,
+              urls: source?.url?.full || '',
               projectId: relatedSavedObjectAttr.project_id,
             };
           });
