@@ -30,15 +30,15 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
     id: builtinToolIds.indexExplorer,
     description: `List relevant indices, aliases and datastreams based on a natural language query.
 
-                  The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
-                  This should *only* be used if you know what you're doing (e.g. if the user explicitly specified a pattern).
-                  Otherwise, leave it empty to search against all indices.
+The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
+This should *only* be used if you know what you're doing (e.g. if the user explicitly specified a pattern).
+Otherwise, leave it empty to search against all indices.
 
-                  *Example:*
-                  User: "Show me my latest alerts"
-                  You: call tool 'index_explorer' with { query: 'indices containing user alerts' }
-                  Tool result: [{ type: "index", name: '.alerts' }]
-                  `,
+*Example:*
+User: "Show me my latest alerts"
+You: call tool 'index_explorer' with { query: 'indices containing user alerts' }
+Tool result: [{ type: "index", name: '.alerts' }]
+`,
     schema: indexExplorerSchema,
     handler: async (
       { query: nlQuery, indexPattern = '*', limit = 1 },
