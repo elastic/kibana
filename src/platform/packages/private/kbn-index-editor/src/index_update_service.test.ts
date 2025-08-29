@@ -68,7 +68,6 @@ describe('IndexUpdateService', () => {
     service.setIndexName('my-index');
 
     const updates = [
-      { type: 'add-doc', payload: { id: 'abc123', value: { a: 1 } } },
       {
         type: 'add-doc',
         payload: { id: `${ROW_PLACEHOLDER_PREFIX}xyz`, value: { b: 2 } },

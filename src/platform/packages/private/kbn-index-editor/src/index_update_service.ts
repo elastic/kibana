@@ -269,7 +269,19 @@ export class IndexUpdateService {
         case 'add-doc':
           return [...acc, action];
         case 'delete-doc':
-          return [...acc, action];
+          // if a doc is deleted we need to remove any pending updates to it
+          const idsToDelete = new Set(action.payload.ids);
+          const updatedAcc = acc.filter(
+            (docUpdate) => !isDocUpdate(docUpdate) || !idsToDelete.has(docUpdate.payload.id)
+          );
+          // Only add the delete action if at least one of the ids is not a placeholder row
+          const isDeletingAnySavedColumn = action.payload.ids.some(
+            (id) => !id.startsWith(ROW_PLACEHOLDER_PREFIX)
+          );
+          if (isDeletingAnySavedColumn) {
+            updatedAcc.push(action);
+          }
+          return updatedAcc;
         case 'undo':
           return acc.slice(0, -1); // remove last
         case 'saved':
@@ -462,9 +474,7 @@ export class IndexUpdateService {
         .pipe(
           map((actions) =>
             actions.some((action) =>
-              (
-                ['add-column', 'add-doc', 'delete-column', 'delete-doc'] as Array<keyof ActionMap>
-              ).includes(action.type)
+              (['add-doc', 'delete-doc'] as Array<keyof ActionMap>).includes(action.type)
             )
           )
         )
@@ -845,12 +855,8 @@ export class IndexUpdateService {
       .filter(isDocDelete)
       .map((v) => v.payload.ids)
       .flat();
-    const deletingDocIdsSet = new Set(deletingDocIds);
 
-    // Filter out deleted docs
-    const indexActions = updates
-      .filter(isDocUpdate)
-      .filter((action) => !deletingDocIdsSet.has(action.payload.id));
+    const indexActions = updates.filter(isDocUpdate);
 
     // First split updates into index and delete operations
     const groupedOperations = groupBy(
@@ -879,11 +885,9 @@ export class IndexUpdateService {
     const operations: BulkRequest['operations'] = [
       ...updateOperations,
       ...newDocOperations,
-      ...deletingDocIds
-        .filter((v) => !v.startsWith(ROW_PLACEHOLDER_PREFIX))
-        .map((id) => {
-          return [{ delete: { _id: id } }];
-        }),
+      ...deletingDocIds.map((id) => {
+        return [{ delete: { _id: id } }];
+      }),
     ];
 
     if (!operations.length) {
