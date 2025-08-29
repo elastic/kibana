@@ -36,27 +36,33 @@ export const useLookupIndexPrivileges = () => {
   const memoizedFetchPrivileges = useRef(
     memoize(
       async (indexNames: string[]): Promise<IndexPrivileges> => {
-        if (indexNames.length === 0) {
-          return {};
-        }
+        const options =
+          indexNames.length > 0
+            ? {
+                query: {
+                  indexName: indexNames.join(','),
+                },
+              }
+            : {};
         try {
-          return await http!.get<IndexPrivileges>('/internal/esql/lookup_index/privileges', {
-            query: { indexName: indexNames },
-          });
+          return await http!.get<IndexPrivileges>(
+            '/internal/esql/lookup_index/privileges',
+            options
+          );
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error('Error fetching user privileges:', error);
           return {};
         }
       },
-      (indexNames: string[]) => JSON.stringify([...indexNames].sort())
+      (indexNames?: string[]) => (indexNames ? JSON.stringify([...indexNames].sort()) : 'all')
     )
   );
 
   // Use the shared cache for all instances of this hook.
   memoizedFetchPrivileges.current.cache = sharedCache;
 
-  const getPermissions = useCallback(async (indexNames: string[]) => {
+  const getPermissions = useCallback(async (indexNames: string[] = []) => {
     const privileges = await memoizedFetchPrivileges.current(indexNames);
 
     const permissions = indexNames.reduce((acc, indexName) => {

@@ -34,10 +34,11 @@ export const useCanCreateLookupIndex = () => {
   const { getPermissions } = useLookupIndexPrivileges();
 
   const { run } = useDebounceFn(
-    async (indexName: string) => {
+    async (indexName?: string) => {
       try {
-        const permissions = await getPermissions([indexName]);
-        return permissions[indexName]?.canCreateIndex ?? false;
+        const resultIndexName = indexName || '*';
+        const permissions = await getPermissions([resultIndexName]);
+        return permissions[resultIndexName]?.canCreateIndex ?? false;
       } catch (e) {
         return false;
       }

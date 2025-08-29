@@ -25,7 +25,7 @@ export function getLookupIndicesFromQuery(esqlQuery: string): string[] {
   root.commands.forEach((command) => {
     if (command.name === 'join') {
       const indexName = command.args.find<ESQLSource>(isSource);
-      if (indexName) {
+      if (indexName?.name) {
         indexNames.push(indexName.name);
       }
     }

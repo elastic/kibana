@@ -20,6 +20,13 @@ describe('getLookupIndicesFromQuery', () => {
     expect(getLookupIndicesFromQuery(query)).toEqual([]);
   });
 
+  it('should return an empty array for a query with join commands but no indices', () => {
+    const query = `FROM kibana_sample_data_ecommerce
+  | EVAL customer_id = TO_LONG(customer_id)
+  | LOOKUP JOIN `;
+    expect(getLookupIndicesFromQuery(query)).toEqual([]);
+  });
+
   it('should extract a single lookup index from a simple join query', () => {
     const query = 'FROM my_index | LOOKUP JOIN lookup_index ON id';
     expect(getLookupIndicesFromQuery(query)).toEqual(['lookup_index']);
