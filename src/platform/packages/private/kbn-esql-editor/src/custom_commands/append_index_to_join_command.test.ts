@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { appendIndexToJoinCommand } from './create_lookup_index';
 import type { monaco } from '@kbn/monaco';
+import {
+  appendIndexToJoinCommandByName,
+  appendIndexToJoinCommandByPosition,
+} from './append_index_to_join_command';
 
-describe('appendIndexToJoinCommand', () => {
+describe('appendIndexToJoinCommandByName', () => {
   it('replaces existing index argument', () => {
-    const result = appendIndexToJoinCommand(
+    const result = appendIndexToJoinCommandByName(
       `FROM kibana_sample_data_ecommerce
   | EVAL customer_id = TO_LONG(customer_id)
   | LOOKUP JOIN customer_data ON customer_id | LOOKUP JOIN test1123`,
@@ -24,9 +27,11 @@ describe('appendIndexToJoinCommand', () => {
   | LOOKUP JOIN customer_data ON customer_id
   | LOOKUP JOIN new_index`);
   });
+});
 
+describe('appendIndexToJoinCommandByPosition', () => {
   it('should append an index name to the join command', () => {
-    const result = appendIndexToJoinCommand(
+    const result = appendIndexToJoinCommandByPosition(
       'FROM kibana_sample_data_logs | LOOKUP JOIN  | LIMIT 10',
       { lineNumber: 1, column: 44 } as monaco.Position,
       'new_index'
@@ -37,7 +42,7 @@ describe('appendIndexToJoinCommand', () => {
   });
 
   it('should append an index name to the join command in a multi-line query', () => {
-    const result = appendIndexToJoinCommand(
+    const result = appendIndexToJoinCommandByPosition(
       `FROM kibana_sample_data_logs
   | LOOKUP JOIN\u0020
   | LIMIT 10`,
@@ -50,7 +55,7 @@ describe('appendIndexToJoinCommand', () => {
   });
 
   it('should append an index name to the correct join command', () => {
-    const result = appendIndexToJoinCommand(
+    const result = appendIndexToJoinCommandByPosition(
       'FROM kibana_sample_data_logs | LOOKUP JOIN new_index ON some_field | LOOKUP JOIN  | LIMIT 10',
       { lineNumber: 1, column: 82 } as monaco.Position,
       'another_index'
@@ -62,7 +67,7 @@ describe('appendIndexToJoinCommand', () => {
   });
 
   it('should not append an index name if an index argument with the same name is already present', () => {
-    const result = appendIndexToJoinCommand(
+    const result = appendIndexToJoinCommandByPosition(
       'FROM kibana_sample_data_logs | LOOKUP JOIN new_index | LIMIT 10',
       { lineNumber: 1, column: 53 } as monaco.Position,
       'new_index'
@@ -71,7 +76,7 @@ describe('appendIndexToJoinCommand', () => {
   });
 
   it('should replace the existing index argument', () => {
-    const result = appendIndexToJoinCommand(
+    const result = appendIndexToJoinCommandByPosition(
       'FROM kibana_sample_data_logs | LOOKUP JOIN new_index | LIMIT 10',
       { lineNumber: 1, column: 53 } as monaco.Position,
       'new_index_2'

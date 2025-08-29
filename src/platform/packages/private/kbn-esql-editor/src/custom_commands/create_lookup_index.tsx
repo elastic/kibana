@@ -7,145 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AggregateQuery } from '@kbn/es-query';
+import type { IndexAutocompleteItem } from '@kbn/esql-types';
+import { getLookupIndicesFromQuery } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
 import type { EditLookupIndexContentContext } from '@kbn/index-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
+import { useDebounceFn } from '@kbn/react-hooks';
+import { isEqual } from 'lodash';
 import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
-import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
-import {
-  BasicPrettyPrinter,
-  type ESQLAstItem,
-  type ESQLAstJoinCommand,
-  type ESQLSingleAstItem,
-  type ESQLSource,
-  mutate,
-  Parser,
-  isSource,
-} from '@kbn/esql-ast';
-import type { IndexAutocompleteItem } from '@kbn/esql-types';
-import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
-import { useDebounceFn } from '@kbn/react-hooks';
-import { getLookupIndicesFromQuery } from '@kbn/esql-utils';
 import type { ESQLEditorDeps } from '../types';
+import {
+  appendIndexToJoinCommandByName,
+  appendIndexToJoinCommandByPosition,
+} from './append_index_to_join_command';
 import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
-
-/**
- * Replace the index name in a join command.
- *
- * @param query             - full ES|QL query
- * @param initialIndexOrPos - either the index name we want to replace OR a Monaco
- *                            cursor Position pointing at that name
- * @param createdIndexName – new lookup-index name
- *
- * @returns {string} Query with appended index name to the join command
- */
-export function appendIndexToJoinCommand(
-  query: string,
-  initialIndexOrPos: string | monaco.Position,
-  createdIndexName: string
-): string {
-  if (!createdIndexName) return query; // nothing to do
-
-  // Resolve the “target” index name
-  let targetName: string | undefined;
-
-  if (typeof initialIndexOrPos === 'string') {
-    targetName = initialIndexOrPos.trim();
-  }
-
-  // If we came through name-path, and it equals new name – nothing to do
-  if (typeof initialIndexOrPos === 'string' && targetName === createdIndexName) {
-    return query;
-  }
-
-  // Parse and walk the AST
-  const { root } = Parser.parse(query);
-
-  // Compute cursor offset once (if needed)
-  const cursorOffset: number | undefined =
-    typeof initialIndexOrPos === 'object'
-      ? (() => {
-          const { lineNumber, column } = initialIndexOrPos;
-          const lines = query.split('\n');
-          let off = 0;
-          for (let i = 0; i < lineNumber - 1; i++) {
-            off += lines[i].length + 1;
-          }
-          return off + column - 1;
-        })()
-      : undefined;
-
-  // Pick the JOIN command to modify
-  let selectedJoin:
-    | { joinCmd: ESQLAstJoinCommand; src: ESQLSource | undefined; firstArg: ESQLAstItem }
-    | undefined;
-  let smallestDistance = Number.MAX_SAFE_INTEGER;
-
-  for (const joinCmd of mutate.commands.join.list(root)) {
-    const firstArg = joinCmd.args[0]; // may be undefined
-    let src: ESQLSource | undefined;
-
-    if (isSource(firstArg)) {
-      src = firstArg;
-    } else if (!Array.isArray(firstArg) && firstArg.type === 'option' && firstArg.name === 'as') {
-      // "AS" clause: first argument is the underlying source
-      src = firstArg.args[0] as unknown as ESQLSource; // AS (<source>, <alias>)
-    }
-
-    const matchesByName = targetName !== undefined && src?.name === targetName;
-
-    if (matchesByName) {
-      selectedJoin = { joinCmd, src, firstArg };
-      break;
-    }
-
-    if (cursorOffset !== undefined && joinCmd.location) {
-      const { min, max } = joinCmd.location;
-      let distance = 0;
-      if (cursorOffset < min) distance = min - cursorOffset;
-      else if (cursorOffset > max) distance = cursorOffset - max;
-
-      if (distance < smallestDistance) {
-        smallestDistance = distance;
-        selectedJoin = { joinCmd, src, firstArg };
-      }
-    }
-  }
-
-  if (!selectedJoin) return query; // no join found
-
-  const { joinCmd, src, firstArg } = selectedJoin;
-
-  // If existing source already equals new name, nothing to do
-  if (src && src.name === createdIndexName) return query;
-
-  const newSource: ESQLSource = {
-    type: 'source',
-    sourceType: 'index',
-    incomplete: false,
-    location: src?.location ?? {
-      min: joinCmd.location?.min ?? 0,
-      max: (joinCmd.location?.min ?? 0) + createdIndexName.length,
-    },
-    text: createdIndexName,
-    name: createdIndexName,
-  };
-
-  if (src) {
-    const idx = joinCmd.args.indexOf(firstArg);
-    // remove the original argument (source or AS option) from the JOIN command
-    mutate.generic.commands.args.remove(root, firstArg as unknown as ESQLSingleAstItem);
-    mutate.generic.commands.args.insert(joinCmd, newSource, idx);
-  } else {
-    mutate.generic.commands.args.insert(joinCmd, newSource, 0);
-  }
-
-  return BasicPrettyPrinter.multiline(root);
-}
 
 /**
  * Hook to determine if the current user has the necessary privileges to create a lookup index.
@@ -317,11 +197,16 @@ export const useLookupIndexCommand = (
         throw new Error('Could not find a cursor position in the editor');
       }
 
-      const resultQuery = appendIndexToJoinCommand(
-        query.esql,
-        initialIndexName || cursorPosition!,
-        resultIndexName
-      );
+      let resultQuery: string;
+      if (initialIndexName) {
+        resultQuery = appendIndexToJoinCommandByName(query.esql, initialIndexName, resultIndexName);
+      } else {
+        resultQuery = appendIndexToJoinCommandByPosition(
+          query.esql,
+          cursorPosition!,
+          resultIndexName
+        );
+      }
 
       await onIndexCreated(resultQuery);
 
