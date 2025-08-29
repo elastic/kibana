@@ -229,4 +229,89 @@ describe('kbn-babel-require-transformer (deferRequire)', () => {
     expect(decl.id.type).toBe('Identifier');
     expect(isRequireCall(decl.init, './x')).toBe(true);
   });
+
+  it('skips transforming *.test.ts files (jest test gating)', () => {
+    const code = `const x = require('./x');`;
+
+    const {
+      ast: {
+        program: { body },
+      },
+    } = transform(code, '/tmp/project/src/foo.test.ts');
+
+    // No helper should be injected
+    const helper = body.find(
+      (n) =>
+        n.type === 'FunctionDeclaration' && (n as t.FunctionDeclaration).id?.name === 'deferRequire'
+    );
+    expect(helper).toBeFalsy();
+
+    const first = body[0] as t.VariableDeclaration;
+    const decl = first.declarations[0];
+    expect(decl.id.type).toBe('Identifier');
+    expect(isRequireCall(decl.init, './x')).toBe(true);
+  });
+
+  it('skips transforming *.spec.ts files (jest spec gating)', () => {
+    const code = `const x = require('./x');`;
+
+    const {
+      ast: {
+        program: { body },
+      },
+    } = transform(code, '/tmp/project/src/foo.spec.ts');
+
+    const helper = body.find(
+      (n) =>
+        n.type === 'FunctionDeclaration' && (n as t.FunctionDeclaration).id?.name === 'deferRequire'
+    );
+    expect(helper).toBeFalsy();
+
+    const first = body[0] as t.VariableDeclaration;
+    const decl = first.declarations[0];
+    expect(decl.id.type).toBe('Identifier');
+    expect(isRequireCall(decl.init, './x')).toBe(true);
+  });
+
+  it('skips transforming files inside __tests__ folders', () => {
+    const code = `const x = require('./x');`;
+
+    const {
+      ast: {
+        program: { body },
+      },
+    } = transform(code, '/tmp/project/src/__tests__/foo.ts');
+
+    const helper = body.find(
+      (n) =>
+        n.type === 'FunctionDeclaration' && (n as t.FunctionDeclaration).id?.name === 'deferRequire'
+    );
+    expect(helper).toBeFalsy();
+
+    const first = body[0] as t.VariableDeclaration;
+    const decl = first.declarations[0];
+    expect(decl.id.type).toBe('Identifier');
+    expect(isRequireCall(decl.init, './x')).toBe(true);
+  });
+
+  it('skips transforming *.mocks.ts files (jest mocks gating)', () => {
+    const code = `const x = require('./x');`;
+
+    const {
+      ast: {
+        program: { body },
+      },
+    } = transform(code, '/tmp/project/src/service.test.mocks.ts');
+
+    const helper = body.find(
+      (n) =>
+        n.type === 'FunctionDeclaration' && (n as t.FunctionDeclaration).id?.name === 'deferRequire'
+    );
+    expect(helper).toBeFalsy();
+
+    const first = body[0] as t.VariableDeclaration;
+    const decl = first.declarations[0];
+    expect(decl.id.type).toBe('Identifier');
+    expect(isRequireCall(decl.init, './x')).toBe(true);
+  });
 });

@@ -36,6 +36,20 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
 
     if (f.includes('/node_modules/')) return false;
 
+    // Skip tests/specs and mocks to avoid interfering with Jest's hoisting/mocking
+    // Common patterns: *.test.ts, *.test.tsx, *.spec.ts, *.spec.tsx, __tests__ folders, and *.mocks.ts files
+    const lower = f.toLowerCase();
+    if (
+      /[.](test|spec)[.][tj]sx?$/.test(lower) ||
+      lower.includes('/__tests__/') ||
+      lower.endsWith('.mocks.ts') ||
+      lower.endsWith('.mocks.tsx') ||
+      lower.endsWith('.mocks.js') ||
+      lower.endsWith('.mocks.jsx')
+    ) {
+      return false;
+    }
+
     // This package is not supported at the moment.
     if (f.includes('/src/platform/packages/shared/kbn-safer-lodash-set/')) return false;
 
@@ -166,7 +180,16 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
                 ])
               ),
               t.expressionStatement(t.callExpression(loadFnId, [])),
-              t.returnStatement(t.memberExpression(cacheId, propId, true)),
+              t.ifStatement(
+                t.binaryExpression('in', propId, cacheId),
+                t.returnStatement(t.memberExpression(cacheId, propId, true)),
+                t.returnStatement(
+                  t.callExpression(
+                    t.memberExpression(t.identifier('Reflect'), t.identifier('get')),
+                    [targetId, propId, receiverId]
+                  )
+                )
+              ),
             ])
           ),
 
@@ -195,7 +218,13 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
             [targetId, propId],
             t.blockStatement([
               t.expressionStatement(t.callExpression(loadFnId, [])),
-              t.returnStatement(t.binaryExpression('in', propId, cacheId)),
+              t.returnStatement(
+                t.logicalExpression(
+                  '||',
+                  t.binaryExpression('in', propId, cacheId),
+                  t.binaryExpression('in', propId, targetId)
+                )
+              ),
             ])
           ),
 
@@ -206,12 +235,28 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
             [targetId],
             t.blockStatement([
               t.expressionStatement(t.callExpression(loadFnId, [])),
-              t.returnStatement(
-                t.callExpression(
-                  t.memberExpression(t.identifier('Reflect'), t.identifier('ownKeys')),
-                  [cacheId]
-                )
-              ),
+              t.variableDeclaration('const', [
+                t.variableDeclarator(
+                  t.identifier('__keys'),
+                  t.newExpression(t.identifier('Set'), [
+                    t.arrayExpression([
+                      t.spreadElement(
+                        t.callExpression(
+                          t.memberExpression(t.identifier('Reflect'), t.identifier('ownKeys')),
+                          [targetId]
+                        )
+                      ),
+                      t.spreadElement(
+                        t.callExpression(
+                          t.memberExpression(t.identifier('Reflect'), t.identifier('ownKeys')),
+                          [cacheId]
+                        )
+                      ),
+                    ]),
+                  ])
+                ),
+              ]),
+              t.returnStatement(t.arrayExpression([t.spreadElement(t.identifier('__keys'))])),
             ])
           ),
 
@@ -222,8 +267,12 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
             [targetId, propId],
             t.blockStatement([
               t.expressionStatement(t.callExpression(loadFnId, [])),
-              t.variableDeclaration('const', [
-                t.variableDeclarator(
+              t.variableDeclaration('let', [
+                t.variableDeclarator(t.identifier('d'), t.nullLiteral()),
+              ]),
+              t.expressionStatement(
+                t.assignmentExpression(
+                  '=',
                   t.identifier('d'),
                   t.callExpression(
                     t.memberExpression(
@@ -232,8 +281,8 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
                     ),
                     [cacheId, propId]
                   )
-                ),
-              ]),
+                )
+              ),
               t.ifStatement(
                 t.identifier('d'),
                 t.blockStatement([
@@ -244,9 +293,18 @@ module.exports = function inlineCommonJsRequire({ types: t }) {
                       t.booleanLiteral(true)
                     )
                   ),
+                  t.returnStatement(t.identifier('d')),
                 ])
               ),
-              t.returnStatement(t.identifier('d')),
+              t.returnStatement(
+                t.callExpression(
+                  t.memberExpression(
+                    t.identifier('Object'),
+                    t.identifier('getOwnPropertyDescriptor')
+                  ),
+                  [targetId, propId]
+                )
+              ),
             ])
           ),
         ])
