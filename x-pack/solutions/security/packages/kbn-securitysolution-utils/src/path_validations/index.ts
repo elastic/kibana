@@ -63,6 +63,32 @@ export type EntryTypes = 'match' | 'wildcard' | 'match_any';
 export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
 export type EventFiltersTypes = EntryTypes | 'exists' | 'nested';
 
+export const TRUSTED_DEVICE_OS_FIELD_AVAILABILITY = {
+  /** Fields available for all supported operating systems */
+  ALL_OS: [
+    TrustedDeviceConditionEntryField.HOST,
+    TrustedDeviceConditionEntryField.DEVICE_ID,
+    TrustedDeviceConditionEntryField.MANUFACTURER,
+    TrustedDeviceConditionEntryField.PRODUCT_ID,
+  ] as const,
+
+  /** Fields available only for Windows OS exclusively */
+  WINDOWS_ONLY: [TrustedDeviceConditionEntryField.USERNAME] as const,
+} as const;
+
+export function isTrustedDeviceFieldAvailableForOs(
+  field: TrustedDeviceConditionEntryField,
+  osTypes: readonly string[]
+): boolean {
+  // USERNAME field is only available for Windows-only OS selection
+  if (field === TrustedDeviceConditionEntryField.USERNAME) {
+    return osTypes.length === 1 && osTypes.includes(OperatingSystem.WINDOWS);
+  }
+
+  // All other fields are available for any OS combination
+  return TRUSTED_DEVICE_OS_FIELD_AVAILABILITY.ALL_OS.includes(field);
+}
+
 export const validatePotentialWildcardInput = ({
   field = '',
   os,
