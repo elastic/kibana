@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import { DataCascade, DataCascadeRow, DataCascadeRowCell, type LeafNode } from '.';
+import type { MockGroupData } from './src/__fixtures__/types';
 import { getESQLStatsQueryMeta } from './src/lib/parse_esql';
 
 /**
@@ -38,12 +39,6 @@ export const CascadeGridImplementation: StoryObj<
 > = {
   render: function DataCascadeWrapper(args) {
     const { groupByFields } = getESQLStatsQueryMeta(args.query);
-
-    interface MockGroupData {
-      [index: string]: string | number;
-      id: string;
-      count: number;
-    }
 
     const generateGroupFieldRecord = (
       nodePath?: string[],
