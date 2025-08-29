@@ -53,6 +53,7 @@ describe('Count Transforms', () => {
         format: {
           type: 'number',
           decimals: 0,
+          compact: false,
         },
       };
 
