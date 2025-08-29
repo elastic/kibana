@@ -23,33 +23,6 @@ export interface EsqlServiceOptions {
 export class EsqlService {
   constructor(public readonly options: EsqlServiceOptions) {}
 
-  protected async getIndexAliases(indices: string[]): Promise<Record<string, string[]>> {
-    const result: Record<string, string[]> = {};
-    const { client } = this.options;
-
-    // Execute: GET /<index1,index2,...>/_alias
-    interface AliasesResponse {
-      [indexName: string]: {
-        aliases: {
-          [aliasName: string]: {};
-        };
-      };
-    }
-    const response = (await client.indices.getAlias({
-      index: indices,
-    })) as AliasesResponse;
-
-    for (const [indexName, { aliases }] of Object.entries(response)) {
-      const aliasNames = Object.keys(aliases ?? {});
-
-      if (aliasNames.length > 0) {
-        result[indexName] = aliasNames;
-      }
-    }
-
-    return result;
-  }
-
   public async getIndicesByIndexMode(
     mode: 'lookup' | 'time_series'
   ): Promise<IndicesAutocompleteResult> {
@@ -66,17 +39,10 @@ export class EsqlService {
 
     sources.indices?.forEach((index) => {
       if (index.mode === mode) {
-        indices.push({ name: index.name, mode, aliases: [] });
+        indices.push({ name: index.name, mode, aliases: index.aliases ?? [] });
         indexNames.push(index.name);
       }
     });
-
-    if (indexNames.length) {
-      const aliases = await this.getIndexAliases(indexNames);
-      for (const index of indices) {
-        index.aliases = aliases[index.name] ?? [];
-      }
-    }
 
     const result: IndicesAutocompleteResult = {
       indices,
