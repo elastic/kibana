@@ -54,6 +54,7 @@ import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedul
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
 import type { ConfigSchema } from '../config_schema';
 import { deleteAllConversationsRoute } from './user_conversations/delete_all_route';
+import { suggestUsersRoute } from './users/suggest';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -100,6 +101,9 @@ export const registerRoutes = (
   // Evaluate
   getEvaluateRoute(router);
   postEvaluateRoute(router);
+
+  // Users
+  suggestUsersRoute(router, logger);
 
   // Prompts
   bulkPromptsRoute(router, logger);
