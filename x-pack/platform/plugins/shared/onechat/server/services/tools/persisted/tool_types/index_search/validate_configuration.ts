@@ -10,6 +10,8 @@ import type { IndexSearchToolConfig } from '@kbn/onechat-common/tools';
 import { createBadRequestError } from '@kbn/onechat-common';
 import { listSearchSources } from '@kbn/onechat-genai-utils';
 
+const CCS_TOKEN = ':';
+
 export const validateConfig = async ({
   config,
   esClient,
@@ -17,6 +19,11 @@ export const validateConfig = async ({
   config: IndexSearchToolConfig;
   esClient: ElasticsearchClient;
 }) => {
+  const { pattern } = config;
+  if (pattern.includes(CCS_TOKEN)) {
+    throw createBadRequestError(`Cross-cluster search is not supported by the index_search tool`);
+  }
+
   const {
     indices,
     aliases,
