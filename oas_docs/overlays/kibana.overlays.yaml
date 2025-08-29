@@ -103,7 +103,7 @@ actions:
           description: Synthetic monitoring
           url: https://www.elastic.co/docs/solutions/observability/synthetics
   - target: '$.tags[?(@.name=="Fleet remote synced integrations")]'
-    description: Change tag description and displayName
+    description: Change tag description and add external docs link
     update:
       description: >
         Use the Fleet remote synced integrations API to check the status of the automatic integrations synchronization on a remote cluster:
