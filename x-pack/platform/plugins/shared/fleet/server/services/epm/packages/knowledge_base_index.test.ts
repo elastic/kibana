@@ -57,11 +57,11 @@ describe('knowledge_base_index', () => {
     it('should save knowledge base content successfully', async () => {
       const beforeCall = new Date().toISOString();
 
-      // Mock the bulk response to return document IDs
+      // Mock the bulk response to return expected document IDs
       mockEsClient.bulk.mockResolvedValue({
         items: [
-          { index: { _id: 'generated-id-1', status: 201 } },
-          { index: { _id: 'generated-id-2', status: 201 } },
+          { index: { _id: 'test-package-test1.md', status: 201 } },
+          { index: { _id: 'test-package-test2.md', status: 201 } },
         ],
       } as any);
 
@@ -83,7 +83,7 @@ describe('knowledge_base_index', () => {
 
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
         operations: [
-          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: expect.any(String) } },
+          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: 'test-package-test1.md' } },
           {
             package_name: 'test-package',
             filename: 'test1.md',
@@ -91,7 +91,7 @@ describe('knowledge_base_index', () => {
             version: '1.0.0',
             installed_at: expect.any(String),
           },
-          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: expect.any(String) } },
+          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: 'test-package-test2.md' } },
           {
             package_name: 'test-package',
             filename: 'test2.md',
@@ -103,19 +103,16 @@ describe('knowledge_base_index', () => {
         refresh: 'wait_for',
       });
 
-      // Verify the function returns the document IDs
-      expect(result).toEqual(['generated-id-1', 'generated-id-2']);
+      // Verify the function returns the expected document IDs
+      expect(result).toEqual(['test-package-test1.md', 'test-package-test2.md']);
 
-      // Verify the document IDs used in bulk operation are generated
+      // Verify the document IDs used in bulk operation follow packageName-fileName pattern
       const bulkCall = (mockEsClient.bulk as jest.Mock).mock.calls[0][0];
       const bulkId1 = bulkCall.operations[0].index._id;
       const bulkId2 = bulkCall.operations[2].index._id;
 
-      expect(bulkId1).toBeDefined();
-      expect(bulkId2).toBeDefined();
-      expect(typeof bulkId1).toBe('string');
-      expect(typeof bulkId2).toBe('string');
-      expect(bulkId1).not.toBe(bulkId2); // Should be different UUIDs
+      expect(bulkId1).toBe('test-package-test1.md');
+      expect(bulkId2).toBe('test-package-test2.md');
 
       // Verify the installed_at timestamp is reasonable (between before and after the call)
       const installedAt1 = bulkCall.operations[1].installed_at;

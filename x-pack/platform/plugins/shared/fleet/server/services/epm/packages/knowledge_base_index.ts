@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
-import { v4 as uuidv4 } from 'uuid';
 
 import type { KnowledgeBaseItem } from '../../../../common/types';
 import { appContextService } from '../../app_context';
@@ -125,11 +124,9 @@ export async function saveKnowledgeBaseContentToIndex({
   const documentIds: string[] = [];
 
   for (const item of knowledgeBaseContent) {
-    // Generate document ID upfront for consistent retries. This stops
-    // the creation of new IDs for retried documents, ensuring the same
-    // ID is used and avoids an issue where retries could timeout but still cause
-    // docs to get indexed resulting in duplicated documents.
-    const documentId = uuidv4();
+    // Generate document ID based on package name and filename for consistent behavior
+    // This ensures the same document ID is used for retries and prevents duplicates
+    const documentId = `${pkgName}-${item.fileName}`;
     documentIds.push(documentId);
 
     operations.push(

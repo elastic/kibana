@@ -39,6 +39,13 @@ jest.mock('../../utils', () => ({
   withPackageSpan: jest.fn().mockImplementation((description, fn) => fn()),
 }));
 
+// Mock the license service
+jest.mock('../../../../license', () => ({
+  licenseService: {
+    isEnterprise: jest.fn().mockReturnValue(true),
+  },
+}));
+
 let esClient: jest.Mocked<ElasticsearchClient>;
 let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 
@@ -48,11 +55,14 @@ describe('stepSaveKnowledgeBase', () => {
     savedObjectsClient = savedObjectsClientMock.create();
     jest.clearAllMocks();
 
-    // Mock saveKnowledgeBaseContentToIndex to return mock document IDs
+    // Mock saveKnowledgeBaseContentToIndex to return expected document IDs
     const mockSaveKnowledgeBase = saveKnowledgeBaseContentToIndex as jest.MockedFunction<
       typeof saveKnowledgeBaseContentToIndex
     >;
-    mockSaveKnowledgeBase.mockResolvedValue(['mock-id-1', 'mock-id-2']);
+    mockSaveKnowledgeBase.mockResolvedValue([
+      'test-package-guide.md',
+      'test-package-troubleshooting.md',
+    ]);
   });
 
   const createMockArchiveIterator = (entries: ArchiveEntry[]): ArchiveIterator => ({
@@ -386,8 +396,8 @@ describe('stepSaveKnowledgeBase', () => {
     it('should update ES asset references with knowledge base assets', async () => {
       const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
       updateEsAssetReferences.mockResolvedValueOnce([
-        { id: 'mock-id-1', type: 'knowledge_base' },
-        { id: 'mock-id-2', type: 'knowledge_base' },
+        { id: 'test-package-guide.md', type: 'knowledge_base' },
+        { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
       ]);
 
       const entries: ArchiveEntry[] = [
@@ -408,15 +418,15 @@ describe('stepSaveKnowledgeBase', () => {
 
       expect(updateEsAssetReferences).toHaveBeenCalledWith(savedObjectsClient, 'test-package', [], {
         assetsToAdd: [
-          { id: 'mock-id-1', type: 'knowledge_base' },
-          { id: 'mock-id-2', type: 'knowledge_base' },
+          { id: 'test-package-guide.md', type: 'knowledge_base' },
+          { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
         ],
       });
 
       // Check that context was updated with new references
       expect(context.esReferences).toEqual([
-        { id: 'mock-id-1', type: 'knowledge_base' },
-        { id: 'mock-id-2', type: 'knowledge_base' },
+        { id: 'test-package-guide.md', type: 'knowledge_base' },
+        { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
       ]);
     });
 
@@ -523,6 +533,71 @@ describe('stepSaveKnowledgeBase', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('License Validation', () => {
+    it('should skip knowledge base processing when Enterprise license is not available', async () => {
+      // Mock license service to return false for Enterprise license
+      const { licenseService } = jest.requireMock('../../../../license');
+      licenseService.isEnterprise.mockReturnValue(false);
+
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# User Guide\n\nThis is a comprehensive guide.', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      await stepSaveKnowledgeBase(context);
+
+      // Verify that saveKnowledgeBaseContentToIndex was NOT called due to license restriction
+      expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
+
+      // Verify that updateEsAssetReferences was NOT called
+      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      expect(updateEsAssetReferences).not.toHaveBeenCalled();
+
+      // Reset the mock back to true for other tests
+      licenseService.isEnterprise.mockReturnValue(true);
+    });
+
+    it('should process knowledge base when Enterprise license is available', async () => {
+      // Ensure license service returns true for Enterprise license
+      const { licenseService } = jest.requireMock('../../../../license');
+      licenseService.isEnterprise.mockReturnValue(true);
+
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# User Guide\n\nThis is a comprehensive guide.', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      await stepSaveKnowledgeBase(context);
+
+      // Verify that saveKnowledgeBaseContentToIndex WAS called with Enterprise license
+      expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+        esClient,
+        pkgName: 'test-package',
+        pkgVersion: '1.0.0',
+        knowledgeBaseContent: [
+          {
+            fileName: 'guide.md',
+            content: '# User Guide\n\nThis is a comprehensive guide.',
+          },
+        ],
+      });
+
+      // Verify that updateEsAssetReferences WAS called
+      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      expect(updateEsAssetReferences).toHaveBeenCalled();
     });
   });
 });
