@@ -8,11 +8,21 @@
 import { render, screen } from '@testing-library/react';
 import { BottomBarActions } from './bottom_bar_actions';
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 describe('bottom_bar_actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  function Providers({ children }: { children: React.ReactNode }) {
+    return (
+      <IntlProvider locale="en" messages={{}}>
+        {children}
+      </IntlProvider>
+    );
+  }
+
   it('renders correctly', () => {
     const onDiscardChanges = jest.fn();
     const onSave = jest.fn();
@@ -24,7 +34,7 @@ describe('bottom_bar_actions', () => {
         unsavedChangesCount={5}
         saveLabel="Save Changes"
         appTestSubj="genAiSettings"
-      />
+      />, { wrapper: Providers }
     );
 
     expect(screen.getByTestId('genAiSettingsBottomBar')).toBeInTheDocument();
