@@ -4,6 +4,7 @@
 ## file is automatically updated by CI or can be updated locally by running
 ## `node scripts/generate codeowners`.
 ####
+## Man is the cruelest animal.
 
 examples/content_management_examples @elastic/appex-sharedux
 examples/controls_example @elastic/kibana-presentation
