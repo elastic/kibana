@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isAddressValid, isPortValid } from './validate_address';
+import { isAddressValid, isPortValid, extractHostAndPort } from './validate_address';
 
 describe('Validate address', () => {
   describe('isAddressValid', () => {
@@ -212,6 +212,72 @@ describe('Validate address', () => {
         it('full expanded form with port', () => {
           expect(isPortValid('[2001:0db8:0000:0000:0000:0000:0000:0001]:9300')).toBe(true);
         });
+      });
+    });
+  });
+
+  describe('extractHostAndPort', () => {
+    describe('IPv4 and hostname parsing', () => {
+      it('extracts hostname without port', () => {
+        const result = extractHostAndPort('hostname');
+        expect(result).toEqual({ host: 'hostname' });
+      });
+
+      it('extracts IPv4 without port', () => {
+        const result = extractHostAndPort('1.1.1.1');
+        expect(result).toEqual({ host: '1.1.1.1' });
+      });
+
+      it('extracts IPv4 with port', () => {
+        const result = extractHostAndPort('2.2.2.2:9200');
+        expect(result).toEqual({ host: '2.2.2.2', port: '9200' });
+      });
+
+      it('extracts hostname with port', () => {
+        const result = extractHostAndPort('hostname:9200');
+        expect(result).toEqual({ host: 'hostname', port: '9200' });
+      });
+
+      it('extracts domain with port', () => {
+        const result = extractHostAndPort('example.com:443');
+        expect(result).toEqual({ host: 'example.com', port: '443' });
+      });
+    });
+
+    describe('IPv6 parsing', () => {
+      it('extracts IPv6 host without port', () => {
+        const result = extractHostAndPort('[2001:db8::1]');
+        expect(result).toEqual({ host: '[2001:db8::1]' });
+      });
+
+      it('extracts naked IPv6 host without port', () => {
+        const result = extractHostAndPort('2001:db8::1');
+        expect(result).toEqual({ host: '2001:db8::1' });
+      });
+
+      it('extracts IPv6 host with port', () => {
+        const result = extractHostAndPort('[2001:db8::1]:9300');
+        expect(result).toEqual({ host: '[2001:db8::1]', port: '9300' });
+      });
+
+      it('extracts IPv6 loopback with port', () => {
+        const result = extractHostAndPort('[::1]:9300');
+        expect(result).toEqual({ host: '[::1]', port: '9300' });
+      });
+
+      it('extracts IPv6 wildcard with port', () => {
+        const result = extractHostAndPort('[::]:9300');
+        expect(result).toEqual({ host: '[::]', port: '9300' });
+      });
+
+      it('extracts IPv6 with zone identifier and port', () => {
+        const result = extractHostAndPort('[fe80::1%eth0]:9300');
+        expect(result).toEqual({ host: '[fe80::1%eth0]', port: '9300' });
+      });
+
+      it('extracts IPv4-mapped IPv6 host with port', () => {
+        const result = extractHostAndPort('[::ffff:192.168.1.1]:9300');
+        expect(result).toEqual({ host: '[::ffff:192.168.1.1]', port: '9300' });
       });
     });
   });

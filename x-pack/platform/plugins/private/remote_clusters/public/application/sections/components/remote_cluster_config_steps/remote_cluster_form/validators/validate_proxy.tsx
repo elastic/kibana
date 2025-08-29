@@ -26,7 +26,7 @@ export function validateProxy(proxy?: string): null | JSX.Element {
     return (
       <FormattedMessage
         id="xpack.remoteClusters.remoteClusterForm.proxyError.invalidCharactersMessage"
-        defaultMessage="Address must use host:port format. Example: 127.0.0.1:9400, localhost:9400.
+        defaultMessage="Address must use host:port format. Example: 127.0.0.1:9400, [::1]:9400 or localhost:9400.
           Hosts can only consist of letters, numbers, and dashes."
       />
     );

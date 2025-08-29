@@ -18,33 +18,37 @@ function isValidHostname(hostname: string): boolean {
 }
 
 /**
- * Helps determine if an address is numeric IPv4-like
+ * Helps determine if host is numeric IPv4-like
  * but not necessarily valid IPv4 so we can validate in place
  * and exit without going through ipv6 or hostname checks
  *
  * ex. "1.1", "1.2.3"
  */
-function looksLikeIPv4(address: string): boolean {
+function looksLikeIPv4(host: string): boolean {
   // If it contains dots and all segments are numeric, it's an IPv4 attempt
-  if (!address.includes('.')) return false;
+  if (!host.includes('.')) return false;
 
-  const segments = address.split('.');
+  const segments = host.split('.');
   return segments.every((seg) => /^\d+$/.test(seg));
 }
 
 const IP4_RE = /^\d+\.\d+\.\d+\.\d+$/;
 
-function isValidIPv4(address: string): boolean {
+function isValidIPv4(host: string): boolean {
   // ipaddr.js is permissive with ip4 addresses, allowing things like "1", "1.2", "1.2.3"
   // We want to enforce the full four-octet format, so we add this stricter regex check first
-  return IP4_RE.test(address) && IPv4.isValid(address);
+  return IP4_RE.test(host) && IPv4.isValid(host);
+}
+
+function unbracketIPv6Host(host: string): string {
+  return host.startsWith('[') && host.endsWith(']') ? host.slice(1, -1) : host;
 }
 
 /**
  * Parses a seed node string into address and port components
  * Handles IPv4, IPv6 (bracketed and unbracketed), and hostnames
  */
-function parseAddressAndPort(seedNode: string): { address?: string; port?: string } | undefined {
+export function extractHostAndPort(seedNode: string): { host?: string; port?: string } | undefined {
   // Check for bracketed IPv6
   if (seedNode.startsWith('[')) {
     const bracketEnd = seedNode.indexOf(']');
@@ -52,22 +56,22 @@ function parseAddressAndPort(seedNode: string): { address?: string; port?: strin
       return undefined;
     }
 
-    const address = seedNode.substring(1, bracketEnd);
+    // include brackets in host
+    const host = seedNode.substring(0, bracketEnd + 1);
     const remainder = seedNode.substring(bracketEnd + 1);
 
-    // Check for port after bracket
     if (remainder.startsWith(':')) {
-      return { address, port: remainder.substring(1) };
+      return { host, port: remainder.substring(1) };
     }
 
-    return { address };
+    return { host };
   }
 
   // Check if it's a valid IPv6 without brackets
   // If so, return as address only (no port)
   // because IPv6 with port must be bracketed
   if (IPv6.isValid(seedNode)) {
-    return { address: seedNode };
+    return { host: seedNode };
   }
 
   // For IPv4 or hostname, only allow single colon for port
@@ -83,17 +87,17 @@ function parseAddressAndPort(seedNode: string): { address?: string; port?: strin
   if (colonCount === 1) {
     const colonIndex = seedNode.indexOf(':');
     return {
-      address: seedNode.substring(0, colonIndex),
+      host: seedNode.substring(0, colonIndex),
       port: seedNode.substring(colonIndex + 1),
     };
   }
 
   // No port, just return address
-  return { address: seedNode };
+  return { host: seedNode };
 }
 
 /**
- * Validates the address part of a seed node string.
+ * Validates the host part of a seed node string.
  * Seed node can be in variations of:
  *
  * - hostname
@@ -112,28 +116,27 @@ export function isAddressValid(seedNode?: string): boolean {
     const bracketEnd = seedNode.indexOf(']');
     if (bracketEnd === -1) return false;
 
-    const ipv6Address = seedNode.substring(1, bracketEnd);
-    return IPv6.isValid(ipv6Address);
+    const unbrackedIPv6Host = seedNode.substring(1, bracketEnd);
+    return IPv6.isValid(unbrackedIPv6Host);
   }
 
-  const { address } = parseAddressAndPort(seedNode) ?? {};
-  if (!address) return false;
+  const { host } = extractHostAndPort(seedNode) ?? {};
+  if (!host) return false;
 
-  if (looksLikeIPv4(address)) {
-    return isValidIPv4(address);
+  if (looksLikeIPv4(host)) {
+    return isValidIPv4(host);
   }
 
-  // Try to validate as IPv6 without brackets
+  // At this point we know address is neither bracketed IPv6 nor IPv4-like
   //
-  // Note: While bracketed IPv6 is the standard when specifying ip with ports,
-  // Unbracketed IPv6 is still valid as an address alone
+  // But it could still be unbracketed IPv6 which is valid as host alone
   //
   // ex. "2001:db8::1", "::1", "::"
-  if (IPv6.isValid(address)) {
+  if (IPv6.isValid(host)) {
     return true;
   }
 
-  return isValidHostname(address);
+  return isValidHostname(host);
 }
 
 /**
@@ -151,10 +154,10 @@ export function isAddressValid(seedNode?: string): boolean {
 export function isPortValid(seedNode?: string): boolean {
   if (!seedNode) return false;
 
-  const { address, port } = parseAddressAndPort(seedNode) ?? {};
+  const { host, port } = extractHostAndPort(seedNode) ?? {};
 
   // Must have both valid address and port
-  if (!address || !port) return false;
+  if (!host || !port) return false;
 
   return /^\d+$/.test(port);
 }
