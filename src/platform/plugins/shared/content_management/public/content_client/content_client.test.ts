@@ -11,7 +11,15 @@ import { lastValueFrom } from 'rxjs';
 import { takeWhile, toArray } from 'rxjs';
 import { createCrudClientMock } from '../crud_client/crud_client.mock';
 import { ContentClient } from './content_client';
-import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn, MSearchIn } from '../../common';
+import type {
+  GetIn,
+  CreateIn,
+  UpdateIn,
+  DeleteIn,
+  SearchIn,
+  MSearchIn,
+  ChangeAccessModeIn,
+} from '../../common';
 import { ContentTypeRegistry } from '../registry';
 
 const setup = () => {
@@ -196,5 +204,20 @@ describe('#mSearch', () => {
       contentTypes: [{ contentTypeId: 'testType', version: 3 }], // latest version added
       query: {},
     });
+  });
+});
+
+describe('#changeAccessMode', () => {
+  it('calls rpcClient.changeAccessMode with input and returns output', async () => {
+    const { crudClient, contentClient } = setup();
+    const input: ChangeAccessModeIn = {
+      objects: [{ type: 'testType', id: 'test-id' }],
+      options: { accessMode: 'read_only' },
+    };
+    const output = { objects: [{ type: 'testType', id: 'test-id' }] };
+    // @ts-ignore
+    crudClient.changeAccessMode.mockResolvedValueOnce(output);
+    expect(await contentClient.changeAccessMode(input)).toEqual(output);
+    expect(crudClient.changeAccessMode).toBeCalledWith(input);
   });
 });

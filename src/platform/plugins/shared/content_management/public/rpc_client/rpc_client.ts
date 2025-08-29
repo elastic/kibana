@@ -20,6 +20,8 @@ import type {
   MSearchIn,
   MSearchOut,
   MSearchResult,
+  ChangeAccessModeIn,
+  ChangeAccessModeResult,
 } from '../../common';
 import type { CrudClient } from '../crud_client/crud_client';
 import type {
@@ -60,6 +62,14 @@ export class RpcClient implements CrudClient {
 
   public mSearch<T = unknown>(input: MSearchIn): Promise<MSearchResult<T>> {
     return this.sendMessage<MSearchOut<T>>('mSearch', input).then((r) => r.result);
+  }
+
+  public changeAccessMode<I extends ChangeAccessModeIn = ChangeAccessModeIn>(
+    input: I
+  ): Promise<ChangeAccessModeResult> {
+    return this.sendMessage<{ result: ChangeAccessModeResult }>('changeAccessMode', input).then(
+      (r) => r.result
+    );
   }
 
   private sendMessage = async <O = unknown>(name: ProcedureName, input: any): Promise<O> => {

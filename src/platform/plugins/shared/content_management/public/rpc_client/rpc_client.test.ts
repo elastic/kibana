@@ -47,6 +47,7 @@ describe('RpcClient', () => {
     await rpcClient.delete({ contentTypeId: 'foo', id: '123' });
     await rpcClient.search({ contentTypeId: 'foo', query: {} });
     await rpcClient.mSearch({ contentTypes: [{ contentTypeId: 'foo' }], query: {} });
+    await rpcClient.changeAccessMode({ objects: [{ type: 'foo', id: '123' }], options: {} });
 
     Object.values(proceduresSpys).forEach(({ name, spy }) => {
       expect(spy).toHaveBeenCalledWith(`${API_ENDPOINT}/${name}`, { body: expect.any(String) });

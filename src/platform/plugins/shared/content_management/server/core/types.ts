@@ -24,6 +24,7 @@ import type {
   DeleteResult,
   SearchQuery,
   SearchResult,
+  ChangeAccessModeResult,
 } from '../../common';
 
 export type StorageContextGetTransformFn = (
@@ -85,6 +86,13 @@ export interface ContentStorage<
 
   /** Search items */
   search(ctx: StorageContext, query: SearchQuery, options?: object): Promise<SearchResult<T>>;
+
+  /** Change access mode for items */
+  changeAccessMode?(
+    ctx: StorageContext,
+    objects: Array<{ type: string; id: string }>,
+    options?: { accessMode?: 'read_only' | 'default' }
+  ): Promise<ChangeAccessModeResult>;
 
   /**
    * Opt-in to multi-type search.

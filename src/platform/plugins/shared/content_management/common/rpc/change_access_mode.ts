@@ -18,7 +18,7 @@
 import { schema } from '@kbn/config-schema';
 import type { ProcedureSchemas } from './types';
 
-export const getSchemas: ProcedureSchemas = {
+export const changeAccessModeSchemas: ProcedureSchemas = {
   in: schema.object(
     {
       objects: schema.arrayOf(

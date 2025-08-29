@@ -7,6 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Copyright Elasticsearc  const mockedProcedures: { [key in ProcedureName]: any } = {
+    get: mockedProcedure(() => mockGet),
+    bulkGet: mockedProcedure(() => mockBulkGet),
+    create: mockedProcedure(() => mockCreate),
+    update: mockedProcedure(() => mockUpdate),
+    delete: mockedProcedure(() => mockDelete),
+    search: mockedProcedure(() => mockSearch),
+    mSearch: mockedProcedure(() => mockMSearch),
+    changeAccessMode: mockedProcedure(() => jest.fn()),
+  };d/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Logger } from '@kbn/core/server';
 
 import type { ProcedureName } from '../../../common';
@@ -19,6 +37,7 @@ import { update } from './update';
 import { deleteProc } from './delete';
 import { search } from './search';
 import { getMSearch } from './msearch';
+import { changeAccessMode } from './change_access_mode';
 
 export const getProcedures = (
   logger: Logger
@@ -32,4 +51,5 @@ export const getProcedures = (
   delete: deleteProc,
   search,
   mSearch: getMSearch(logger),
+  changeAccessMode,
 });
