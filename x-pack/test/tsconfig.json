@@ -33,7 +33,7 @@
     "@kbn/rison",
     "@kbn/dataset-quality-plugin",
     "@kbn/ftr-common-functional-ui-services",
-    "@kbn/data-quality-plugin",
+    "@kbn/data-quality",
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
     "@kbn/ml-string-hash",
