@@ -206,8 +206,7 @@ export const reindexServiceFactory = (
     try {
       newSettings = settingsStr ? JSON.parse(settingsStr) : {};
     } catch (err) {
-      log.error(err);
-      throw err;
+      throw new Error(`Could not parse index settings: ${err}`);
     }
 
     const { settings = {} } = flatSettings;

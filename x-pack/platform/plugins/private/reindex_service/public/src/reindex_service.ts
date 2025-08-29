@@ -11,7 +11,6 @@ import type {
   ReindexOperation,
   ReindexOperationCancelResponse,
 } from '@kbn/upgrade-assistant-pkg-common';
-// import { UA_BASE_PATH } from '@kbn/upgrade-assistant-pkg-common';
 import { sendRequest } from '@kbn/es-ui-shared-plugin/public';
 import type { ReindexArgs } from '../../common';
 

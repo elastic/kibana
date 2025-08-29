@@ -244,7 +244,6 @@ export const useReindex = ({
       };
     });
 
-    // todo get version string correctly, check to make sure semver package isn't adding too much to bundle
     const newIndexName = generateNewIndexName(indexName, kibanaVersion);
 
     const { data: reindexOp, error } = await api.startReindexTask({ indexName, newIndexName });

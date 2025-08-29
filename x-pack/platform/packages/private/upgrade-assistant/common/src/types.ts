@@ -110,7 +110,6 @@ export interface ReindexOperation {
    */
   reindexOptions?: ReindexOptions;
   settings?: string; // serialied JSON of index settings to be applied
-  // fieldMappings?: string; // serialized JSON of index mappings to be applied
 }
 
 export interface ReindexOperationCancelResponse {
