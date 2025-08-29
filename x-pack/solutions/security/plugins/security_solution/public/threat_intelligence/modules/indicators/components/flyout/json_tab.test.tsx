@@ -12,7 +12,7 @@ import type { Indicator } from '../../../../../../common/threat_intelligence/typ
 import { generateMockIndicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorsFlyoutJson } from './json_tab';
 import { EMPTY_PROMPT_TEST_ID } from './empty_prompt';
-import { JSON_TAB_CONTENT_TEST_ID } from '../../../../../flyout/document_details/shared/test_ids';
+import { JSON_TAB_CONTENT_TEST_ID } from '../../../../../flyout/shared/components/json_tab';
 
 const mockIndicator: Indicator = generateMockIndicator();
 

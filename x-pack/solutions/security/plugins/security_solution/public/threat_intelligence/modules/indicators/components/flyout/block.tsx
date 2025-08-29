@@ -8,7 +8,6 @@
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorFieldLabel } from '../common/field_label';
@@ -18,27 +17,6 @@ import {
   SecurityCellActionsTrigger,
 } from '../../../../../common/components/cell_actions';
 import { getIndicatorFieldAndValue } from '../../utils/field_value';
-
-/**
- * Show actions wrapper on hover. This is a helper component, limited only to Block
- */
-const VisibleOnHover = euiStyled.div`
-  ${({ theme }) => css`
-    & {
-      height: 100%;
-    }
-
-    & .actionsWrapper {
-      visibility: hidden;
-      display: inline-block;
-      margin-inline-start: ${theme.eui.euiSizeS};
-    }
-
-    &:hover .actionsWrapper {
-      visibility: visible;
-    }
-  `}
-`;
 
 const panelProps = {
   color: 'subdued' as const,
