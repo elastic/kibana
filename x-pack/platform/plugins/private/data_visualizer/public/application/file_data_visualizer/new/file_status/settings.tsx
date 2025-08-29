@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import useDebounce from 'react-use/lib/useDebounce';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiSwitch, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JsonEditor, EDITOR_MODE } from './json_editor';
 
@@ -17,11 +17,11 @@ interface Props {
   settings: IndicesIndexSettings;
   setSettings?: (settings: string) => void;
   readonly?: boolean;
-  showTitle?: boolean;
 }
 
-export const Settings: FC<Props> = ({ settings, setSettings, showTitle, readonly = false }) => {
+export const Settings: FC<Props> = ({ settings, setSettings, readonly = false }) => {
   const [localSettings, setLocalSettings] = useState(JSON.stringify(settings, null, 2));
+  const [showSettings, setShowSettings] = useState<boolean>(false);
 
   useEffect(() => {
     setLocalSettings(JSON.stringify(settings, null, 2));
@@ -37,30 +37,32 @@ export const Settings: FC<Props> = ({ settings, setSettings, showTitle, readonly
     [localSettings]
   );
 
-  const editor = (
-    <JsonEditor
-      mode={EDITOR_MODE.JSON}
-      readOnly={readonly}
-      value={localSettings}
-      onChange={(value) => {
-        setLocalSettings(value);
-      }}
-    />
-  );
+  return (
+    <>
+      <EuiSwitch
+        id={'containsTimeField'}
+        label={
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.customizeIndexSettingsLabel"
+            defaultMessage="Customize index settings"
+          />
+        }
+        checked={showSettings}
+        onChange={(e) => setShowSettings(e.target.checked)}
+      />
 
-  return showTitle ? (
-    <EuiFormRow
-      label={
-        <FormattedMessage
-          id="xpack.dataVisualizer.file.advancedImportSettings.indexSettingsLabel"
-          defaultMessage="Index settings"
+      <EuiSpacer size="m" />
+
+      {showSettings ? (
+        <JsonEditor
+          mode={EDITOR_MODE.JSON}
+          readOnly={readonly}
+          value={localSettings}
+          onChange={(value) => {
+            setLocalSettings(value);
+          }}
         />
-      }
-      fullWidth
-    >
-      {editor}
-    </EuiFormRow>
-  ) : (
-    editor
+      ) : null}
+    </>
   );
 };

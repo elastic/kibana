@@ -8,14 +8,12 @@
 import {
   EuiAccordion,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useState } from 'react';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
@@ -57,34 +55,16 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
       }
       paddingSize="m"
     >
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.mappingsTitle"
-            defaultMessage="Mappings"
-          />
-        </h3>
-      </EuiTitle>
+      <SectionTitle>
+        <FormattedMessage id="xpack.dataVisualizer.file.mappingsTitle" defaultMessage="Mappings" />
+      </SectionTitle>
 
-      <EuiSpacer size="s" />
-
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <Mappings
-            mappings={mappings?.json ?? {}}
-            setMappings={(m) => fileUploadManager.updateMappings(m)}
-            showTitle={true}
-            fileCount={filesStatus.length}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <Settings
-            settings={settings?.json ?? {}}
-            setSettings={(s) => fileUploadManager.updateSettings(s)}
-            showTitle={true}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Mappings
+        mappings={mappings?.json ?? {}}
+        setMappings={(m) => fileUploadManager.updateMappings(m)}
+        showTitle={true}
+        fileCount={filesStatus.length}
+      />
 
       <EuiSpacer />
 
@@ -97,23 +77,18 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
         onCombinedFieldsChange={(f) => setCombinedFields(f)}
         isDisabled={false}
         filesStatus={filesStatus}
-        // isDisabled={initialized === true}
       />
 
       {indexCreateMode === UPLOAD_TYPE.NEW ? (
         <>
           <EuiSpacer />
 
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.dataVisualizer.file.dataViewTitle"
-                defaultMessage="Data view"
-              />
-            </h3>
-          </EuiTitle>
-
-          <EuiSpacer size="s" />
+          <SectionTitle>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.dataViewTitle"
+              defaultMessage="Data view"
+            />
+          </SectionTitle>
 
           <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
             <EuiSwitch
@@ -160,6 +135,28 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
           <EuiSpacer />
         </>
       ) : null}
+
+      <SectionTitle>
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.indexSettingsTitle"
+          defaultMessage="Index settings"
+        />
+      </SectionTitle>
+
+      <Settings
+        settings={settings?.json ?? {}}
+        setSettings={(s) => fileUploadManager.updateSettings(s)}
+      />
     </EuiAccordion>
   );
 };
+
+const SectionTitle: FC<PropsWithChildren<{}>> = ({ children }) => (
+  <>
+    <EuiTitle size="s">
+      <h3>{children}</h3>
+    </EuiTitle>
+
+    <EuiSpacer size="m" />
+  </>
+);

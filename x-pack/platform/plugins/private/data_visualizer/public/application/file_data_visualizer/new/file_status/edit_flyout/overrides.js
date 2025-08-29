@@ -323,14 +323,12 @@ class OverridesUI extends Component {
 
     return (
       <EuiForm>
-        <SectionTitle
-          title={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.editFlyout.overrides.generalSettingsTitle"
-              defaultMessage="General"
-            />
-          }
-        />
+        <SectionTitle>
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.editFlyout.overrides.generalSettingsTitle"
+            defaultMessage="General"
+          />
+        </SectionTitle>
 
         <EuiFormRow
           error={this.linesToSampleErrors}
@@ -479,14 +477,13 @@ class OverridesUI extends Component {
 
         {containsTimeField ? (
           <>
-            <SectionTitle
-              title={
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.editFlyout.overrides.dateAndTimeTitle"
-                  defaultMessage="Date & Time"
-                />
-              }
-            />
+            <SectionTitle>
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.editFlyout.overrides.dateAndTimeTitle"
+                defaultMessage="Date & Time"
+              />
+            </SectionTitle>
+
             <EuiFormRow
               helpText={timestampFormatHelp}
               label={
@@ -545,14 +542,12 @@ class OverridesUI extends Component {
 
         {format === FILE_FORMATS.DELIMITED && originalColumnNames.length > 0 && (
           <React.Fragment>
-            <SectionTitle
-              title={
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.editFlyout.overrides.editFieldNamesTitle"
-                  defaultMessage="Field names"
-                />
-              }
-            />
+            <SectionTitle>
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.editFlyout.overrides.editFieldNamesTitle"
+                defaultMessage="Field names"
+              />
+            </SectionTitle>
 
             {originalColumnNames.map((f, i) => (
               <EuiFormRow label={f} key={f}>
@@ -567,14 +562,12 @@ class OverridesUI extends Component {
 
         {format === FILE_FORMATS.SEMI_STRUCTURED_TEXT && originalGrokFieldNames.length > 0 && (
           <React.Fragment>
-            <SectionTitle
-              title={
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.editFlyout.overrides.editFieldNamesTitle"
-                  defaultMessage="Edit field names"
-                />
-              }
-            />
+            <SectionTitle>
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.editFlyout.overrides.editFieldNamesTitle"
+                defaultMessage="Edit field names"
+              />
+            </SectionTitle>
 
             {originalGrokFieldNames.map((f, i) => (
               <EuiFormRow label={f} key={f}>
@@ -591,11 +584,11 @@ class OverridesUI extends Component {
   }
 }
 
-function SectionTitle({ title }) {
+function SectionTitle({ children }) {
   return (
     <>
       <EuiTitle size="xs">
-        <h3>{title}</h3>
+        <h3>{children}</h3>
       </EuiTitle>
 
       <EuiSpacer size="m" />
