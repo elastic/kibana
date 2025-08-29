@@ -6367,7 +6367,7 @@ paths:
               - id_value
               - id_field
               - criticality_level
-              - \@timestamp
+              - '@timestamp'
             type: string
         - description: The order to sort by.
           in: query
@@ -52029,7 +52029,12 @@ paths:
                                       items:
                                         type: string
                                       type: array
+                                    tags:
+                                      items:
+                                        type: string
+                                      type: array
                                   required:
+                                    - tags
                                     - members
                               required:
                                 - group
@@ -52284,7 +52289,12 @@ paths:
                       items:
                         type: string
                       type: array
+                    tags:
+                      items:
+                        type: string
+                      type: array
                   required:
+                    - tags
                     - members
               required:
                 - group
@@ -62316,6 +62326,7 @@ components:
       description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
       enum:
         - security_labs
+        - defend_insights
         - user
       example: security_labs
       type: string

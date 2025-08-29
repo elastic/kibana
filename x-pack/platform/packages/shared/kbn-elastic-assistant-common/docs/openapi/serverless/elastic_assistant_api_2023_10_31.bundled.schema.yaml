@@ -2722,6 +2722,7 @@ components:
         'user', etc.
       enum:
         - security_labs
+        - defend_insights
         - user
       example: security_labs
       type: string

@@ -10,13 +10,7 @@ import type { IClusterClient, LoggerFactory, Logger } from '@kbn/core/server';
 import type { Subject } from 'rxjs';
 import type { DashboardMigrationsDataClient } from './data/dashboard_migrations_data_client';
 import { DashboardMigrationsDataService } from './data/dashboard_migrations_data_service';
-import type { SiemMigrationsCommonCreateClientParams } from '../common/types';
-import type { DashboardMigrationsClientDependencies } from './types';
-
-export interface DashboardMigrationsCreateClientParams
-  extends SiemMigrationsCommonCreateClientParams {
-  dependencies: DashboardMigrationsClientDependencies;
-}
+import type { DashboardMigrationsCreateClientParams } from './types';
 
 export interface SiemDashboardsMigrationsSetupParams {
   esClusterClient: IClusterClient;
