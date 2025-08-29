@@ -20,6 +20,7 @@ import { useDebounceFn } from '@kbn/react-hooks';
 import { isEqual } from 'lodash';
 import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
+import { firstValueFrom, of } from 'rxjs';
 import type { ESQLEditorDeps } from '../types';
 import {
   appendIndexToJoinCommandByName,
@@ -31,10 +32,16 @@ import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
  * Hook to determine if the current user has the necessary privileges to create a lookup index.
  */
 export const useCanCreateLookupIndex = () => {
+  const {
+    services: { application },
+  } = useKibana<ESQLEditorDeps>();
   const { getPermissions } = useLookupIndexPrivileges();
 
   const { run } = useDebounceFn(
     async (indexName?: string) => {
+      const currentApp = await firstValueFrom(application?.currentAppId$ ?? of(undefined));
+      if (currentApp !== 'discover') return false;
+
       try {
         const resultIndexName = indexName || '*';
         const permissions = await getPermissions([resultIndexName]);

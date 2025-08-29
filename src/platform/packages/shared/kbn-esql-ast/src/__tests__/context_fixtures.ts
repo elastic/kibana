@@ -208,7 +208,6 @@ export const mockContext: ICommandContext = {
     type: 'observability',
     tier: 'complete',
   },
-  appId: 'discover',
 };
 
 export type MockedICommandCallbacks = {

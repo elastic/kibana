@@ -116,16 +116,9 @@ describe('JOIN Autocomplete', () => {
       });
     });
 
-    test('does not suggest create index command for other apps than Discover', async () => {
-      const suggestions = await suggest('FROM index | LEFT JOIN ', { appId: 'dashboard' });
-      const labels = suggestions.map((s) => s.label);
-
-      expect(labels).not.toContain('Create lookup index');
-    });
-
     test('does not suggest the create index command when a user does not have required privileges', async () => {
       (mockCallbacks.canCreateLookupIndex as jest.Mock).mockResolvedValueOnce(false);
-      const suggestions = await suggest('FROM index | LEFT JOIN ', { appId: 'discover' });
+      const suggestions = await suggest('FROM index | LEFT JOIN ');
       const labels = suggestions.map((s) => s.label);
 
       expect(labels).not.toContain('Create lookup index');

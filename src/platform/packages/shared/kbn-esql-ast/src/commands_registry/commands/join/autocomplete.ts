@@ -66,18 +66,13 @@ export async function autocomplete(
     case 'after_mnemonic':
     case 'index': {
       const indexNameInput = commandText.split(' ').pop() ?? '';
-
-      const isCreateCommandEnabled = context?.appId === 'discover';
       const joinSources = context?.joinSources;
-
       const suggestions: ISuggestionItem[] = [];
 
-      if (isCreateCommandEnabled) {
-        const canCreate = (await callbacks?.canCreateLookupIndex?.(indexNameInput)) ?? false;
-        if (canCreate) {
-          const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
-          suggestions.push(createIndexCommandSuggestion);
-        }
+      const canCreate = (await callbacks?.canCreateLookupIndex?.(indexNameInput)) ?? false;
+      if (canCreate) {
+        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
+        suggestions.push(createIndexCommandSuggestion);
       }
 
       if (joinSources?.length) {

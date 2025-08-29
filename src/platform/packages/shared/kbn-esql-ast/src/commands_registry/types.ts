@@ -145,7 +145,6 @@ export interface ICommandContext {
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
-  appId?: string;
 }
 
 /**

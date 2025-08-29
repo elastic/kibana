@@ -63,8 +63,6 @@ export interface ESQLCallbacks {
   ) => Promise<InferenceEndpointsAutocompleteResult>;
   getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
   getActiveProduct?: () => PricingProduct | undefined;
-  /** Returns the current Kibana app ID, e.g. discover, dashboard etc. */
-  getCurrentAppId?: () => Promise<string | undefined>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
 }
 

@@ -42,7 +42,6 @@ import { css, Global } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { FieldType } from '@kbn/esql-ast';
-import { firstValueFrom, of } from 'rxjs';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -532,9 +531,6 @@ const ESQLEditorInternal = function ESQLEditor({
         return variablesService?.areSuggestionsEnabled ?? false;
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
-      getCurrentAppId: async () => {
-        return await firstValueFrom(application?.currentAppId$ ?? of(undefined));
-      },
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
       getEditorExtensions: async (queryString: string) => {
         if (activeSolutionId) {
@@ -584,7 +580,6 @@ const ESQLEditorInternal = function ESQLEditor({
     variablesService?.areSuggestionsEnabled,
     histogramBarTarget,
     activeSolutionId,
-    application?.currentAppId$,
     canCreateLookupIndex,
   ]);
 
