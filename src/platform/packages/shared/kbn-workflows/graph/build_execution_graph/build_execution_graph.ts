@@ -243,7 +243,7 @@ export function visitFallbackStep(
   currentStep: FallbackStep
 ): any {
   const enterTryBlockNodeId = getNodeId(currentStep);
-  const exitTryBlockNodeId = `exitCondition(${enterTryBlockNodeId})`;
+  const exitTryBlockNodeId = `exitTryBlock(${enterTryBlockNodeId})`;
   const normalPathSteps: BaseStep[] = currentStep.normalPathSteps || [];
   const fallbackPathSteps: BaseStep[] = currentStep.fallbackPathSteps || [];
   const enterNormalPathNodeId = `normalPath_${enterTryBlockNodeId}`;
@@ -465,17 +465,17 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
       } as ContinueStep;
     }
 
-    if (onFailureConfig['fallback-steps']) {
+    if (onFailureConfig['fallback']) {
       // Wrap the current step in a fallback step
       // and remove the fallback-step from the current step's on-failure to avoid infinite nesting
-      const fallbackSteps = (currentStep as StepWithOnFailure)?.['on-failure']?.['fallback-steps'];
+      const fallbackSteps = (currentStep as StepWithOnFailure)?.['on-failure']?.['fallback'];
       return {
         name: `fallback_${getNodeId(currentStep)}`,
         type: 'fall-back',
         normalPathSteps: [
           handleStepLevelOperations({
             ...currentStep,
-            'on-failure': omit(onFailureConfig, ['fallback-steps']) as WorkflowOnFailure,
+            'on-failure': omit(onFailureConfig, ['fallback']) as WorkflowOnFailure,
           } as BaseStep),
         ],
         fallbackPathSteps: Array.isArray(fallbackSteps) ? fallbackSteps : [fallbackSteps],

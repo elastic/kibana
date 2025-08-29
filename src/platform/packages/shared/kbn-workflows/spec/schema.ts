@@ -93,7 +93,7 @@ export type BaseStep = z.infer<typeof BaseStepSchema>;
 
 export const WorkflowOnFailureSchema = z.object({
   retry: WorkflowRetrySchema.optional(),
-  'fallback-steps': z.array(BaseStepSchema).min(1),
+  fallback: z.array(BaseStepSchema).min(1),
   continue: z.boolean().optional(),
 });
 export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
@@ -142,7 +142,7 @@ export type HttpStep = z.infer<typeof HttpStepSchema>;
 
 export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
   const schema = WorkflowOnFailureSchema.extend({
-    'fallback-steps': stepSchema.optional(),
+    fallback: stepSchema.optional(),
   });
 
   if (loose) {

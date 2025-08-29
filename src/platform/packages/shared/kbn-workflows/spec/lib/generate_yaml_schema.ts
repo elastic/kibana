@@ -38,7 +38,7 @@ function generateStepSchemaForConnector(
     'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
     with: connector.paramsSchema,
     'on-failure': WorkflowOnFailureSchema.extend({
-      'fallback-steps': z.array(stepSchema).optional(),
+      fallback: z.array(stepSchema).optional(),
     }).optional(),
   });
 }
