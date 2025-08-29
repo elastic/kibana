@@ -36,7 +36,7 @@ export function SimilarSpans({
   return (
     <ContentFrameworkSection
       id="similarSpans"
-      data-test-subj={'docViewerSimilarSpansSection'}
+      data-test-subj="docViewerSimilarSpansSection"
       title={i18n.translate('unifiedDocViewer.observability.traces.similarSpans', {
         defaultMessage: 'Similar spans',
       })}
