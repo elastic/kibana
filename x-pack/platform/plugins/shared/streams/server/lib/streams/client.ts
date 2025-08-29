@@ -736,7 +736,7 @@ export class StreamsClient {
   }
 
   private async syncAssets(name: string, request: Streams.all.UpsertRequest) {
-    const { dashboards, queries } = request;
+    const { dashboards, queries, rules } = request;
 
     // sync dashboards as before
     await this.dependencies.assetClient.syncAssetList(
@@ -746,6 +746,16 @@ export class StreamsClient {
         [ASSET_TYPE]: 'dashboard' as const,
       })),
       'dashboard'
+    );
+
+    // sync rules
+    await this.dependencies.assetClient.syncAssetList(
+      name,
+      rules.map((rule) => ({
+        [ASSET_ID]: rule,
+        [ASSET_TYPE]: 'rule' as const,
+      })),
+      'rule'
     );
 
     // sync rules with asset links
