@@ -11,6 +11,8 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { Query, TimeRange } from '@kbn/es-query';
+import type { SpanLinks } from '@kbn/apm-types';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { FeaturesRegistry } from '../../../common';
 
 /**
@@ -41,6 +43,20 @@ export interface ObservabilityLogsAIAssistantFeatureRenderDeps {
 export interface ObservabilityLogsAIAssistantFeature {
   id: 'observability-logs-ai-assistant';
   render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
+}
+
+export interface ObservabilityTracesSpanLinksFeature {
+  id: 'observability-traces-fetch-span-links';
+  fetchSpanLinks: (
+    params: {
+      traceId: string;
+      docId: string;
+      start: string;
+      end: string;
+      processorEvent?: ProcessorEvent;
+    },
+    signal: AbortSignal
+  ) => Promise<SpanLinks>;
 }
 
 export interface ObservabilityCreateSLOFeature {
@@ -91,6 +107,7 @@ export type DiscoverFeature =
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityCreateSLOFeature
   | ObservabilityLogEventsFeature
+  | ObservabilityTracesSpanLinksFeature
   | SecuritySolutionFeature;
 
 /**

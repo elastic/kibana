@@ -46,6 +46,10 @@ export interface NavigationProps {
    * Required by the grid layout to set the width of the navigation slot.
    */
   setWidth: (width: number) => void;
+  /**
+   * Optional data-test-subj attribute for testing purposes.
+   */
+  'data-test-subj'?: string;
 }
 
 export const Navigation = ({
@@ -54,6 +58,7 @@ export const Navigation = ({
   items,
   logo,
   setWidth,
+  ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = isMobile || isCollapsedProp;
@@ -98,7 +103,7 @@ export const Navigation = ({
       css={css`
         display: flex;
       `}
-      data-test-subj="navigation-root"
+      data-test-subj={rest['data-test-subj'] ?? 'navigation-root'}
     >
       <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo

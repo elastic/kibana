@@ -18,22 +18,24 @@ import {
   TRANSACTION_ID_FIELD,
   getSpanDocumentOverview,
 } from '@kbn/discover-utils';
+import type { TraceIndexes } from '@kbn/discover-utils/src';
 import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
+import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { SpanLinks } from '../components/span_links';
 import { Trace } from '../components/trace';
+import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hooks/use_root_transaction';
+import { DataSourcesProvider } from '../hooks/use_data_sources';
 import { RootSpanProvider } from './hooks/use_root_span';
-import { spanFields, allSpanFields } from './resources/fields';
+import { allSpanFields, spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
 import { SpanSummaryField } from './sub_components/span_summary_field';
 import { SpanSummaryTitle } from './sub_components/span_summary_title';
-import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hooks/use_root_transaction';
-import { DataSourcesProvider } from '../hooks/use_data_sources';
 import {
   getTabContentAvailableHeight,
   DEFAULT_MARGIN_BOTTOM,
@@ -41,13 +43,7 @@ import {
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
 
 export type SpanOverviewProps = DocViewRenderProps & {
-  indexes: {
-    apm: {
-      traces: string;
-      errors: string;
-    };
-    logs: string;
-  };
+  indexes: TraceIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
 };
@@ -89,6 +85,7 @@ export function SpanOverview({
 
   const traceId = flattenedDoc[TRACE_ID_FIELD];
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
+  const spanId = flattenedDoc[SPAN_ID_FIELD];
 
   const containerHeight = containerRef
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
@@ -96,12 +93,8 @@ export function SpanOverview({
 
   return (
     <DataSourcesProvider indexes={indexes}>
-      <RootTransactionProvider traceId={traceId} indexPattern={indexes.apm.traces}>
-        <RootSpanProvider
-          traceId={traceId}
-          transactionId={transactionId}
-          indexPattern={indexes.apm.traces}
-        >
+      <RootTransactionProvider traceId={traceId}>
+        <RootSpanProvider traceId={traceId} transactionId={transactionId}>
           <FieldActionsProvider
             columns={columns}
             filter={filter}
@@ -163,12 +156,16 @@ export function SpanOverview({
                   docId={flattenedDoc[SPAN_ID_FIELD]}
                   displayType="span"
                   dataView={dataView}
-                  tracesIndexPattern={indexes.apm.traces}
                   showWaterfall={showWaterfall}
                   showActions={showActions}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
+                <EuiSpacer size="m" />
+                <SpanLinks traceId={traceId} docId={spanId} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSpacer size="m" />
                 <TraceContextLogEvents
                   traceId={flattenedDoc[TRACE_ID_FIELD]}
                   spanId={flattenedDoc[SPAN_ID_FIELD]}

@@ -19,8 +19,10 @@ import {
   getTransactionDocumentOverview,
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
+import type { TraceIndexes } from '@kbn/discover-utils/src';
 import { getFlattenedTransactionDocumentOverview } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields, allTransactionFields } from './resources/fields';
@@ -37,15 +39,10 @@ import {
   getTabContentAvailableHeight,
 } from '../../../doc_viewer_source/get_height';
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
+import { SpanLinks } from '../components/span_links';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
-  indexes: {
-    apm: {
-      traces: string;
-      errors: string;
-    };
-    logs: string;
-  };
+  indexes: TraceIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
 };
@@ -91,7 +88,7 @@ export function TransactionOverview({
 
   return (
     <DataSourcesProvider indexes={indexes}>
-      <RootTransactionProvider traceId={traceId} indexPattern={indexes.apm.traces}>
+      <RootTransactionProvider traceId={traceId}>
         <FieldActionsProvider
           columns={columns}
           filter={filter}
@@ -154,14 +151,21 @@ export function TransactionOverview({
                     docId={transactionId}
                     displayType="transaction"
                     dataView={dataView}
-                    tracesIndexPattern={indexes.apm.traces}
                     showWaterfall={showWaterfall}
                     showActions={showActions}
                   />
                 </>
               )}
             </EuiFlexItem>
+            <EuiSpacer size="m" />
+            <SpanLinks
+              traceId={traceId}
+              docId={transactionId}
+              processorEvent={ProcessorEvent.transaction}
+            />
+            <EuiFlexItem />
             <EuiFlexItem>
+              <EuiSpacer size="m" />
               <TraceContextLogEvents traceId={traceId} transactionId={transactionId} />
             </EuiFlexItem>
           </EuiFlexGroup>
