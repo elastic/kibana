@@ -21,5 +21,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./get_shareable_references')); // ~ 30s
     loadTestFile(require.resolve('./update_objects_spaces')); // ~ 1m
     loadTestFile(require.resolve('./disable_legacy_url_aliases')); // ~ 30s
+    loadTestFile(require.resolve('./copy_to_space'));
   });
 }
