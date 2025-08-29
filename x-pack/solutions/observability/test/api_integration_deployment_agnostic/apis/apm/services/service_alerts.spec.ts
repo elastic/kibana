@@ -11,11 +11,8 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import {
-  APM_ACTION_VARIABLE_INDEX,
-  APM_ALERTS_INDEX,
-  ApmAlertFields,
-} from '../alerts/helpers/alerting_helper';
+import type { ApmAlertFields } from '../alerts/helpers/alerting_helper';
+import { APM_ACTION_VARIABLE_INDEX, APM_ALERTS_INDEX } from '../alerts/helpers/alerting_helper';
 
 export default function ServiceAlerts({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');

@@ -18,7 +18,7 @@ import {
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { RuleFormStepId } from '../constants';
+import type { RuleFormStepId } from '../constants';
 import { useRuleFormHorizontalSteps, useRuleFormState } from '../hooks';
 import {
   DISABLED_ACTIONS_WARNING_TITLE,

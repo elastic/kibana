@@ -84,6 +84,7 @@
     "@kbn/fleet-plugin",
     "@kbn/search-shared-ui",
     "@kbn/search-indices",
-    "@kbn/charts-theme"
+    "@kbn/charts-theme",
+    "@kbn/licensing-types"
   ]
 }

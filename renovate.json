@@ -21,7 +21,6 @@
     "9.0",
     "8.19",
     "8.18",
-    "8.17",
     "7.17"
   ],
   "prConcurrentLimit": 0,
@@ -526,6 +525,8 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
+        "effort:high",
+        "risk:high",
         "backport:all-open"
       ],
       "enabled": true
@@ -590,7 +591,9 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
-        "backport:all-open"
+        "backport:all-open",
+        "effort:high",
+        "risk:high"
       ],
       "enabled": true
     },
@@ -2324,7 +2327,8 @@
         "release_note:skip",
         "Team:Search",
         "Team:Enterprise Search",
-        "backport:all-open"
+        "backport:all-open",
+        "effort:high"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -3931,7 +3935,9 @@
       "labels": [
         "release_note:skip",
         "backport:all-open",
-        "ci:all-cypress-suites"
+        "ci:all-cypress-suites",
+        "effort:high",
+        "risk:high"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -4617,6 +4623,27 @@
         "Team:Operations",
         "backport:prev-minor",
         "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "moonrepo",
+      "matchDepNames": [
+        "@moonrepo/cli"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main",
+        "/^[9].*/",
+        "8.19"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true

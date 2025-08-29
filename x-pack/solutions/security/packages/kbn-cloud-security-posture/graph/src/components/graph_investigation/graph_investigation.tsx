@@ -26,7 +26,7 @@ import { AnimatedSearchBarContainer, useBorder } from './styles';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
 import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
-import { NodeViewModel } from '../types';
+import type { NodeViewModel } from '../types';
 import { showErrorToast } from '../utils';
 
 const useGraphPopovers = ({
@@ -369,6 +369,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               edges={data?.edges ?? []}
               interactive={true}
               isLocked={isPopoverOpen}
+              showMinimap={true}
             >
               <Panel position="top-right">
                 <Actions

@@ -18,13 +18,13 @@ import {
   TRANSACTION_DURATION_FIELD,
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
+import { useDataSourcesContext } from '../../../hooks/use_data_sources';
 
 interface UseRootTransactionParams {
   traceId: string;
-  indexPattern: string;
 }
 
 interface GetRootTransactionParams {
@@ -85,7 +85,9 @@ export interface Transaction {
   [SERVICE_NAME_FIELD]: string;
 }
 
-const useRootTransaction = ({ traceId, indexPattern }: UseRootTransactionParams) => {
+const useRootTransaction = ({ traceId }: UseRootTransactionParams) => {
+  const { indexes } = useDataSourcesContext();
+  const indexPattern = indexes.apm.traces;
   const { core, data } = getUnifiedDocViewerServices();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -103,9 +105,11 @@ const useRootTransaction = ({ traceId, indexPattern }: UseRootTransactionParams)
     const fetchData = async () => {
       try {
         setLoading(true);
-        const result = await getRootTransaction({ data, signal, traceId, indexPattern });
+        const result = indexPattern
+          ? await getRootTransaction({ data, signal, traceId, indexPattern })
+          : undefined;
 
-        const fields = result.rawResponse.hits.hits[0]?.fields;
+        const fields = result?.rawResponse.hits.hits[0]?.fields;
         const transactionDuration = fields?.[TRANSACTION_DURATION_FIELD];
         const spanId = fields?.[SPAN_ID_FIELD];
         const transactionId = fields?.[TRANSACTION_ID_FIELD];

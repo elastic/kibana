@@ -8,8 +8,8 @@
  */
 
 // import { EcsError } from '@elastic/ecs';
-import { LogRecord } from '@kbn/logging';
-import { Conversion } from './types';
+import type { LogRecord } from '@kbn/logging';
+import type { Conversion } from './types';
 
 function isError(x: any): x is Error {
   return x instanceof Error;

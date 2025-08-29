@@ -214,6 +214,11 @@ export const i18nStrings = {
         defaultMessage: 'Stack',
       }),
     },
+    ai: {
+      title: i18n.translate('securitySolutionPackages.navLinks.mngt.ai', {
+        defaultMessage: 'AI',
+      }),
+    },
     other: {
       title: i18n.translate('securitySolutionPackages.navLinks.mngt.other', {
         defaultMessage: 'Other',

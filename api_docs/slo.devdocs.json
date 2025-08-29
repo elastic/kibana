@@ -909,7 +909,7 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => void; } & { url: ",
+              ") => Promise<void>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -1252,6 +1252,16 @@
         },
         "<",
         "SloDetailsLocatorParams",
+        ">; sloDetailsHistoryLocator: ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.LocatorPublic",
+          "text": "LocatorPublic"
+        },
+        "<",
+        "SloDetailsHistoryLocatorParams",
         ">; sloEditLocator: ",
         {
           "pluginId": "share",

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '../../../monaco_imports';
+import type { monaco } from '../../../monaco_imports';
 
 const brackets = [
   { open: '[', close: ']', token: 'delimiter.square' },

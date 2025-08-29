@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ObjectType } from '@kbn/config-schema';
+import type { ObjectType } from '@kbn/config-schema';
 import { isPlainObject, isArray } from 'lodash';
 
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';

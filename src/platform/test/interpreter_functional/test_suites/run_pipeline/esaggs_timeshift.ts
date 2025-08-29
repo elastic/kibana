@@ -8,9 +8,10 @@
  */
 
 import expect from '@kbn/expect';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { ExpectExpression, expectExpressionProvider } from './helpers';
-import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { ExpectExpression } from './helpers';
+import { expectExpressionProvider } from './helpers';
+import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 function getCell(esaggsResult: any, row: number, column: number): unknown | undefined {
   if (esaggsResult && !esaggsResult.columns) {

@@ -7,8 +7,8 @@
 
 import { expect, test } from '@playwright/test';
 import { PageFactory } from '../page_objects/page_factory';
-import { EntityAnalyticsPage } from '../page_objects/entity_analytics_po';
-import { EntityAnalyticsManagementPage } from '../page_objects/entity_analytics_management_po';
+import type { EntityAnalyticsPage } from '../page_objects/entity_analytics_po';
+import type { EntityAnalyticsManagementPage } from '../page_objects/entity_analytics_management_po';
 import { createEsArchiver } from '../fixtures/es_archiver';
 
 let entityAnalyticsPage: EntityAnalyticsPage;

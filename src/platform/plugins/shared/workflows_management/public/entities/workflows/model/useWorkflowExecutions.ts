@@ -8,10 +8,13 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WorkflowExecutionListDto } from '@kbn/workflows';
-import { useQuery } from '@tanstack/react-query';
+import type { WorkflowExecutionListDto } from '@kbn/workflows';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
-export function useWorkflowExecutions(workflowId: string | null) {
+export function useWorkflowExecutions(
+  workflowId: string | null,
+  options: Omit<UseQueryOptions<WorkflowExecutionListDto>, 'queryKey' | 'queryFn'> = {}
+) {
   const { http } = useKibana().services;
 
   return useQuery<WorkflowExecutionListDto>({
@@ -23,5 +26,6 @@ export function useWorkflowExecutions(workflowId: string | null) {
         },
       }),
     enabled: workflowId !== null,
+    ...options,
   });
 }

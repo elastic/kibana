@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionContext } from '../execution';
+import type { ExecutionContext } from '../execution';
 
 export const createMockContext = () => {
   return {

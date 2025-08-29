@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  createContext,
-  useContext,
-  FunctionComponent,
-  useMemo,
-  PropsWithChildren,
-} from 'react';
-import { NotificationsStart, CoreStart } from '@kbn/core/public';
+import type { FunctionComponent, PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
+import type { NotificationsStart, CoreStart } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
 import type {
   DataViewLazy,
@@ -22,7 +17,7 @@ import type {
   FieldFormatsStart,
   RuntimeFieldSubFields,
 } from '../shared_imports';
-import { ApiService } from '../lib/api';
+import type { ApiService } from '../lib/api';
 import type { InternalFieldType, PluginStart } from '../types';
 
 export interface Context {

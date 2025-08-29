@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_GROUP_BY_FIELD } from '../../../common/lib';
-import { FilterField, State } from '../../../types';
+import type { FilterField, State } from '../../../types';
 
 export const getGroupFiltersByOption = (state: State): FilterField => {
   return state.transient.sidebar.groupFiltersByOption ?? DEFAULT_GROUP_BY_FIELD;
