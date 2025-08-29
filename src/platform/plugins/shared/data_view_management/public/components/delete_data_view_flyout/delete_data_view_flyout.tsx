@@ -94,7 +94,7 @@ export const DeleteDataViewFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={complicatedFlyoutTitleId}>
-            {i18n.translate('indexPatternManagement.editIndexPattern.deleteDataView.title', {
+            {i18n.translate('indexPatternManagement.deleteDataView.flyoutTitle', {
               defaultMessage: 'Delete Data View',
             })}
           </h2>
@@ -113,22 +113,16 @@ export const DeleteDataViewFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={onModalClose} flush="left">
-              {i18n.translate(
-                'indexPatternManagement.editIndexPattern.deleteDataView.cancelButton',
-                {
-                  defaultMessage: 'Cancel',
-                }
-              )}
+              {i18n.translate('indexPatternManagement.deleteDataView.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton onClick={deleteDataViews} color="danger" fill disabled={disableDeleteButton}>
-              {i18n.translate(
-                'indexPatternManagement.editIndexPattern.deleteDataView.deleteButton',
-                {
-                  defaultMessage: 'Delete',
-                }
-              )}
+              {i18n.translate('indexPatternManagement.deleteDataView.deleteButton', {
+                defaultMessage: 'Delete',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
