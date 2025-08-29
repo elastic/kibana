@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('@ess @skipInServerless, @skipInServerlessMKI Endpoint Artifacts space awareness user role backwards compatibility until siemV3', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
 
-    const SIEM_VERSIONS = ['siem', 'siemV2', 'siemV3'] as const;
+    const SIEM_VERSIONS = ['siem', 'siemV2', 'siemV3', 'siemV4'] as const;
 
     let globalArtifactManagerRole: Role;
 
@@ -121,8 +121,10 @@ export default function ({ getService }: FtrProviderContext) {
             const supertestGlobalArtifactManager = await createUserWithSiemPrivileges(siemVersion, [
               ...artifactType.privileges,
 
-              // adding global access to current version, old version should receive it during rule migration
-              ...(siemVersion === SECURITY_FEATURE_ID ? ['global_artifact_management_all'] : []),
+              // adding global access to newer than siemV2, old version should receive it during rule migration
+              ...(siemVersion !== 'siem' && siemVersion !== 'siemV2'
+                ? ['global_artifact_management_all']
+                : []),
             ]);
 
             const createdArtifact = await endpointArtifactTestResources.createArtifact(
