@@ -35,7 +35,7 @@ export const registerRoutes = (router: FleetAuthzRouter, isServerless?: boolean)
           ],
         },
       },
-      summary: `Get Fleet Remote synced integrations status`,
+      summary: `Get remote synced integrations status`,
       options: {
         tags: ['oas-tag:Fleet remote synced integrations'],
       },
