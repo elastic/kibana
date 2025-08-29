@@ -35,7 +35,7 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
   }
 
   /**
-   * Updates a conversation with the new messages.
+   * Gets a conversation by its id.
    * @param options
    * @param options.id The existing conversation id.
    * @param options.authenticatedUser Current authenticated user.
@@ -127,19 +127,15 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
   public updateConversation = async ({
     conversationUpdateProps,
     authenticatedUser,
-    isPatch,
   }: {
     conversationUpdateProps: ConversationUpdateProps;
     authenticatedUser?: AuthenticatedUser;
-    isPatch?: boolean;
   }): Promise<ConversationResponse | null> => {
-    const esClient = await this.options.elasticsearchClientPromise;
+    const dataWriter = await this.getWriter();
     return updateConversation({
-      esClient,
-      logger: this.options.logger,
-      conversationIndex: this.indexTemplateAndPattern.alias,
       conversationUpdateProps,
-      isPatch,
+      dataWriter,
+      logger: this.options.logger,
       user: authenticatedUser ?? this.options.currentUser ?? undefined,
     });
   };
