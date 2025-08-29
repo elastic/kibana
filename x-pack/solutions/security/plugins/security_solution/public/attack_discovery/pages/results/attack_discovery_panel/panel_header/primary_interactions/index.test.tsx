@@ -39,6 +39,13 @@ jest.mock('../../../../use_find_attack_discoveries', () => ({
   useInvalidateFindAttackDiscoveries: jest.fn(() => jest.fn()),
 }));
 
+const mockUseKibanaFeatureFlags = jest
+  .fn()
+  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
+jest.mock('../../../../use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
+}));
+
 const defaultProps = {
   attackDiscovery: getMockAttackDiscoveryAlerts()[0],
   isOpen: 'closed' as const,
