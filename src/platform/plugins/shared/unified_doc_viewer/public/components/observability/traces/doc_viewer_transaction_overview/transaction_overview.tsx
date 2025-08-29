@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
@@ -19,8 +19,10 @@ import {
   getTransactionDocumentOverview,
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
+import type { TraceIndexes } from '@kbn/discover-utils/src';
 import { getFlattenedTransactionDocumentOverview } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields, allTransactionFields } from './resources/fields';
@@ -36,15 +38,10 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../../../doc_viewer_source/get_height';
+import { SpanLinks } from '../components/span_links';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
-  indexes: {
-    apm: {
-      traces: string;
-      errors: string;
-    };
-    logs: string;
-  };
+  indexes: TraceIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
 };
@@ -62,7 +59,7 @@ export function TransactionOverview({
   columnsMeta,
   decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: TransactionOverviewProps) {
-  const containerRef = useRef<HTMLElement>(null);
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { fieldFormats } = getUnifiedDocViewerServices();
   const { formattedDoc, flattenedDoc } = useMemo(
     () => ({
@@ -84,13 +81,13 @@ export function TransactionOverview({
   const traceId = flattenedDoc[TRACE_ID_FIELD];
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
-  const containerHeight = containerRef.current
-    ? getTabContentAvailableHeight(containerRef.current, decreaseAvailableHeightBy)
+  const containerHeight = containerRef
+    ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
     : 0;
 
   return (
     <DataSourcesProvider indexes={indexes}>
-      <RootTransactionProvider traceId={traceId} indexPattern={indexes.apm.traces}>
+      <RootTransactionProvider traceId={traceId}>
         <FieldActionsProvider
           columns={columns}
           filter={filter}
@@ -100,16 +97,14 @@ export function TransactionOverview({
           <EuiFlexGroup
             direction="column"
             gutterSize="m"
-            ref={containerRef}
+            ref={setContainerRef}
             css={
               containerHeight
                 ? css`
-                    height: ${containerHeight}px;
+                    max-height: ${containerHeight}px;
                     overflow: auto;
                   `
-                : css`
-                    display: block;
-                  `
+                : undefined
             }
           >
             <EuiFlexItem>
@@ -155,12 +150,19 @@ export function TransactionOverview({
                     docId={transactionId}
                     displayType="transaction"
                     dataView={dataView}
-                    tracesIndexPattern={indexes.apm.traces}
                     showWaterfall={showWaterfall}
                     showActions={showActions}
                   />
                 </>
               )}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSpacer size="m" />
+              <SpanLinks
+                traceId={traceId}
+                docId={transactionId}
+                processorEvent={ProcessorEvent.transaction}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </FieldActionsProvider>

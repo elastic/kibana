@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyTimestamp, NonEmptyString, User } from '../common_attributes.gen';
+import { NonEmptyString, User, NonEmptyTimestamp } from '../common_attributes.gen';
 
 /**
  * Trace Data
@@ -245,6 +245,10 @@ export const ConversationConfidenceEnum = ConversationConfidence.enum;
 export type Message = z.infer<typeof Message>;
 export const Message = z.object({
   /**
+   * Message id
+   */
+  id: NonEmptyString.optional(),
+  /**
    * Message content.
    */
   content: z.string(),
@@ -256,6 +260,10 @@ export const Message = z.object({
    * Message role.
    */
   role: MessageRole,
+  /**
+   * The user who sent the message.
+   */
+  user: User.optional(),
   /**
    * The timestamp message was sent or received.
    */
@@ -298,25 +306,27 @@ export const ApiConfig = z.object({
   model: z.string().optional(),
 });
 
-export type ConversationSummary = z.infer<typeof ConversationSummary>;
-export const ConversationSummary = z.object({
+export type ConversationSummaryBase = z.infer<typeof ConversationSummaryBase>;
+export const ConversationSummaryBase = z.object({
   /**
    * Summary text of the conversation over time.
    */
-  content: z.string().optional(),
+  semanticContent: z.string().optional(),
   /**
-   * The timestamp summary was updated.
+   * The list of summarized messages.
    */
-  timestamp: NonEmptyTimestamp.optional(),
-  /**
-   * Define if summary is marked as publicly available.
-   */
-  public: z.boolean().optional(),
-  /**
-   * How confident you are about this being a correct and useful learning.
-   */
-  confidence: ConversationConfidence.optional(),
+  summarizedMessageIds: z.array(NonEmptyString).optional(),
 });
+
+export type ConversationSummary = z.infer<typeof ConversationSummary>;
+export const ConversationSummary = ConversationSummaryBase.merge(
+  z.object({
+    /**
+     * The timestamp summary was updated.
+     */
+    timestamp: NonEmptyTimestamp,
+  })
+);
 
 export type ErrorSchema = z.infer<typeof ErrorSchema>;
 export const ErrorSchema = z
@@ -351,6 +361,10 @@ export const ConversationResponse = z.object({
    */
   createdAt: z.string(),
   replacements: Replacements.optional(),
+  /**
+   * The user who created the conversation.
+   */
+  createdBy: User,
   users: z.array(User),
   /**
    * The conversation messages.
@@ -389,12 +403,13 @@ export const ConversationUpdateProps = z.object({
    * LLM API configuration.
    */
   apiConfig: ApiConfig.optional(),
-  summary: ConversationSummary.optional(),
+  summary: ConversationSummaryBase.optional(),
   /**
    * Exclude from last conversation storage.
    */
   excludeFromLastConversationStorage: z.boolean().optional(),
   replacements: Replacements.optional(),
+  users: z.array(User).optional(),
 });
 
 export type ConversationCreateProps = z.infer<typeof ConversationCreateProps>;
