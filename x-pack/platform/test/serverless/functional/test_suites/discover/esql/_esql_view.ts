@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { NULL_LABEL } from '@kbn/field-formats-plugin/common/constants/replacement_labels';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -214,7 +215,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        expect(await cell.getVisibleText()).to.be(' - ');
+        expect(await cell.getVisibleText()).to.be(NULL_LABEL);
         expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',
