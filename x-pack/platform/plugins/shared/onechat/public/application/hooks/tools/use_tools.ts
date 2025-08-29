@@ -14,14 +14,12 @@ import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useOnechatServices } from '../use_onechat_service';
 import { useToasts } from '../use_toasts';
+import { createCustomTag, createInherentTag } from '../../utils/tags';
 
 const getTypeTag = (type: ToolType) => {
   switch (type) {
     case ToolType.builtin:
-      return {
-        inherent: true,
-        value: labels.tools.builtinLabel,
-      };
+      return createInherentTag(labels.tools.builtinLabel);
     default:
       return null;
   }
@@ -29,7 +27,7 @@ const getTypeTag = (type: ToolType) => {
 
 const transformTags = (tools: ToolDefinitionWithSchema[]) => {
   return tools.map((tool) => {
-    const tags = tool.tags.map((tag) => ({ inherent: false, value: tag }));
+    const tags = tool.tags.map((tag) => createCustomTag(tag));
     const typeTag = getTypeTag(tool.type);
     if (typeTag) {
       tags.unshift(typeTag);

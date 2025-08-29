@@ -64,13 +64,3 @@ export interface ToolDefinitionWithSchema<TConfig extends object = Record<string
    */
   schema: JsonSchema7ObjectType;
 }
-
-export interface ToolTag {
-  inherent: boolean;
-  value: string;
-}
-
-export interface DisplayToolDefinitionWithSchema<TConfig extends object = Record<string, unknown>>
-  extends Omit<ToolDefinitionWithSchema<TConfig>, 'tags'> {
-  tags: ToolTag[];
-}

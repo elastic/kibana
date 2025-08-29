@@ -7,7 +7,7 @@
 
 import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
 import { EuiSearchBar } from '@elastic/eui';
-import type { DisplayToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { countBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToolsTags } from '../../../hooks/tools/use_tool_tags';
@@ -15,6 +15,7 @@ import { useToolsService } from '../../../hooks/tools/use_tools';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { labels } from '../../../utils/i18n';
 import { ToolFilterOption } from './tools_table_filter_option';
+import { parseTag } from '../../../utils/tags';
 
 const toValidSearchQuery = (query: string | null): string => {
   try {
@@ -33,11 +34,14 @@ const getToolsTableSearchConfig = ({
   matchesByTag: Record<string, number>;
   tags: string[];
 }): EuiSearchBarProps => {
-  const labelsOptions = tags.map((tag) => ({
-    value: tag,
-    name: tag,
-    view: <ToolFilterOption name={tag} matches={matchesByTag[tag] ?? 0} />,
-  }));
+  const labelsOptions = tags.map((tag) => {
+    const { value } = parseTag(tag);
+    return {
+      value: tag,
+      name: value,
+      view: <ToolFilterOption name={value} matches={matchesByTag[tag] ?? 0} />,
+    };
+  });
 
   return {
     box: {
@@ -59,13 +63,13 @@ const getToolsTableSearchConfig = ({
 
 export interface ToolsTableSearch {
   searchConfig: Search;
-  results: DisplayToolDefinitionWithSchema[];
+  results: ToolDefinitionWithSchema[];
 }
 
 export const useToolsTableSearch = (): ToolsTableSearch => {
   const { tools } = useToolsService();
   const { tags } = useToolsTags();
-  const [results, setResults] = useState<DisplayToolDefinitionWithSchema[]>(tools);
+  const [results, setResults] = useState<ToolDefinitionWithSchema[]>(tools);
   const [searchQuery, setSearchQuery] = useQueryState('search', {
     defaultValue: '',
     parse: toValidSearchQuery,
@@ -94,7 +98,7 @@ export const useToolsTableSearch = (): ToolsTableSearch => {
   );
 
   const matchesByTag = useMemo(() => {
-    return countBy(tools.flatMap((tool) => tool.tags.map((tag) => tag.value)));
+    return countBy(tools.flatMap((tool) => tool.tags));
   }, [tools]);
 
   const searchConfig: Search = useMemo(

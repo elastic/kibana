@@ -7,7 +7,7 @@
 import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSkeletonText, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { DisplayToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useToolsService } from '../../../hooks/tools/use_tools';
@@ -21,7 +21,7 @@ export const OnechatToolsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
   const { tools, isLoading: isLoadingTools, error: toolsError } = useToolsService();
   const [tablePageIndex, setTablePageIndex] = useState(0);
-  const [selectedTools, setSelectedTools] = useState<DisplayToolDefinitionWithSchema[]>([]);
+  const [selectedTools, setSelectedTools] = useState<ToolDefinitionWithSchema[]>([]);
   const { searchConfig, results: tableTools } = useToolsTableSearch();
 
   useEffect(() => {
@@ -55,9 +55,7 @@ export const OnechatToolsTable = memo(() => {
       itemId="id"
       error={toolsError ? labels.tools.listToolsErrorMessage : undefined}
       search={searchConfig}
-      onTableChange={({
-        page: { index },
-      }: CriteriaWithPagination<DisplayToolDefinitionWithSchema>) => {
+      onTableChange={({ page: { index } }: CriteriaWithPagination<ToolDefinitionWithSchema>) => {
         setTablePageIndex(index);
       }}
       pagination={{
@@ -67,7 +65,7 @@ export const OnechatToolsTable = memo(() => {
       }}
       selection={{
         selectable: isEsqlTool,
-        onSelectionChange: (selectedItems: DisplayToolDefinitionWithSchema[]) => {
+        onSelectionChange: (selectedItems: ToolDefinitionWithSchema[]) => {
           setSelectedTools(selectedItems);
         },
         selected: selectedTools,
