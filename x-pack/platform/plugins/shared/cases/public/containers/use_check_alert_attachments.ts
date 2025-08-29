@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { CaseUI } from './types';
 import { type GetAttachments } from '../components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useFindCasesContainingAllSelectedAlerts } from './use_find_cases_containing_all_selected_alerts';
@@ -38,7 +39,9 @@ export const useCheckAlertAttachments = ({
     cases.map(({ id }) => id)
   );
 
-  return { disabledCases: new Set(data?.casesWithAllAttachments ?? []), isLoading: isFetching };
+  const disabledCases = useMemo(() => new Set(data?.casesWithAllAttachments ?? []), [data]);
+
+  return { disabledCases, isLoading: isFetching };
 };
 
 export type UseCheckAlertAttachments = ReturnType<typeof useCheckAlertAttachments>;
