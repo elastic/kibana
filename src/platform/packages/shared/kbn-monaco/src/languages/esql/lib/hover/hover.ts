@@ -24,7 +24,7 @@ import {
   type ESQLSingleAstItem,
   type ESQLSource,
 } from '@kbn/esql-ast/src/types';
-import { collectUserDefinedColumns, type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
+import { type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import { getColumnsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
 import { getQueryForFields } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
 import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
@@ -195,11 +195,9 @@ async function getHintForFunctionArg(
     return [];
   }
   const columnsMap = await getColumnMap();
-  const anyUserDefinedColumns = collectUserDefinedColumns(root.commands, columnsMap, query);
 
   const references = {
     columns: columnsMap,
-    userDefinedColumns: anyUserDefinedColumns,
   };
 
   const { typesToSuggestNext, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(

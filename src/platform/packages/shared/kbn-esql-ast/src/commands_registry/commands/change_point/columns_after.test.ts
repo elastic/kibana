@@ -56,7 +56,7 @@ describe('CHANGE_POINT > columnsAfter', () => {
         name: 'changePointType',
         type: 'keyword',
         userDefined: true,
-        location: { min: 0, max: 0 }, // TODO — location is being assigned incorrectly in the AST
+        location: { min: 0, max: 0 },
       },
       { name: 'pValue', type: 'double', userDefined: true, location: { min: 0, max: 0 } },
     ]);

@@ -51,7 +51,6 @@ import {
 import { getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getSuggestionsToRightOfOperatorExpression } from '../operators';
 import { buildValueDefinitions } from '../values';
-import { excludeUserDefinedColumnsFromCurrentCommand } from './columns';
 import {
   extractTypeFromASTArg,
   getFieldsOrFunctionsSuggestions,
@@ -172,12 +171,6 @@ export async function getFunctionArgsSuggestions(
   const references = {
     columns: columnMap,
   };
-  const userDefinedColumnsExcludingCurrentCommandOnes = excludeUserDefinedColumnsFromCurrentCommand(
-    commands,
-    command,
-    columnMap,
-    innerText
-  );
 
   const { typesToSuggestNext, hasMoreMandatoryArgs, enrichedArgs, argIndex } =
     getValidSignaturesAndTypesToSuggestNext(

@@ -15,6 +15,7 @@ import type { ESQLColumnData, ESQLUserDefinedColumn, ICommandContext } from '../
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
+  query: string,
   context?: ICommandContext
 ) => {
   const columnMap = new Map<string, ESQLColumnData>();
@@ -36,7 +37,7 @@ export const columnsAfter = (
       newColumns.push(newColumn);
     } else if (!Array.isArray(expression)) {
       const newColumn: ESQLUserDefinedColumn = {
-        name: expression.text,
+        name: query.substring(expression.location.min, expression.location.max + 1),
         type: typeOf(expression),
         location: expression.location,
         userDefined: true,

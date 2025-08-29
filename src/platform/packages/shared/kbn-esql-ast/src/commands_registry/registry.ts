@@ -60,6 +60,7 @@ export interface ICommandMethods<TContext = any> {
   columnsAfter?: (
     command: ESQLCommand,
     previousColumns: ESQLColumnData[],
+    query: string,
     context?: TContext
   ) => ESQLColumnData[];
 }

@@ -6,35 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type {
-  ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
-  ICommandContext,
-} from '../../../commands_registry/types';
-import type { ESQLColumn, ESQLCommand, ESQLIdentifier } from '../../../types';
+import type { ICommandContext } from '../../../commands_registry/types';
+import type { ESQLColumn, ESQLIdentifier } from '../../../types';
 import { fuzzySearch } from '../shared';
-
-// FIXME
-export function excludeUserDefinedColumnsFromCurrentCommand(
-  commands: ESQLCommand[],
-  currentCommand: ESQLCommand,
-  fieldsMap: Map<string, ESQLFieldWithMetadata>,
-  queryString: string
-) {
-  const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, queryString);
-  const currentCommandUserDefinedColumns = collectUserDefinedColumns(
-    [currentCommand],
-    fieldsMap,
-    queryString
-  );
-  const resultUserDefinedColumns = new Map<string, ESQLUserDefinedColumn[]>();
-  anyUserDefinedColumns.forEach((value, key) => {
-    if (!currentCommandUserDefinedColumns.has(key)) {
-      resultUserDefinedColumns.set(key, value);
-    }
-  });
-  return resultUserDefinedColumns;
-}
 
 /**
  * TODO - consider calling lookupColumn under the hood of this function. Seems like they should really do the same thing.

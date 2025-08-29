@@ -51,7 +51,7 @@ describe('COMPLETION', () => {
     expect(result).toEqual([
       { name: 'field1', type: 'keyword', userDefined: false },
       { name: 'count', type: 'double', userDefined: false },
-      { name: 'customField', type: 'keyword', userDefined: true, location: { min: 0, max: 0 } }, // TODO location is being computed incorrectly in AST
+      { name: 'customField', type: 'keyword', userDefined: true, location: { min: 0, max: 0 } },
     ]);
   });
 });

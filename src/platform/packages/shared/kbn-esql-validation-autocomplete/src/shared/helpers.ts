@@ -6,23 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  type ESQLAstCommand,
-  esqlCommandRegistry,
-  type FieldType,
-  type FunctionDefinition,
-} from '@kbn/esql-ast';
-import type {
-  ESQLColumnData,
-  ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
-} from '@kbn/esql-ast/src/commands_registry/types';
+import { esqlCommandRegistry, type ESQLAstCommand, type FunctionDefinition } from '@kbn/esql-ast';
+import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLParamLiteral } from '@kbn/esql-ast/src/types';
-import { uniqBy } from 'lodash';
 
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
 import type { ESQLCallbacks } from './types';
-import { collectUserDefinedColumns } from './user_defined_columns';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -78,28 +67,6 @@ export function getParamAtPosition(
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
 
-// --- Fields helpers ---
-
-export function transformMapToESQLFields(
-  inputMap: Map<string, ESQLUserDefinedColumn[]>
-): ESQLFieldWithMetadata[] {
-  const esqlFields: ESQLFieldWithMetadata[] = [];
-
-  for (const [, userDefinedColumns] of inputMap) {
-    for (const userDefinedColumn of userDefinedColumns) {
-      // Only include userDefinedColumns that have a known type
-      if (userDefinedColumn.type) {
-        esqlFields.push({
-          name: userDefinedColumn.name,
-          type: userDefinedColumn.type as FieldType,
-        });
-      }
-    }
-  }
-
-  return esqlFields;
-}
-
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
     return undefined;
@@ -136,22 +103,11 @@ export async function getCurrentQueryAvailableColumns(
   const lastCommand = commands[commands.length - 1];
   const commandDefinition = esqlCommandRegistry.getCommandByName(lastCommand.name);
 
-  // @TODO — all logic in collectUserDefinedColumns
-  // should be will be moved to columnsAfter methods;
-  // though it may still be useful to delineate between
-  // user-defined columns and other fields... need to consider this
-  // If the command has a columnsAfter function, use it to get the fields
   if (commandDefinition?.methods.columnsAfter) {
-    return commandDefinition.methods.columnsAfter(lastCommand, previousPipeFields, {
-      userDefinedColumns: new Map(),
+    return commandDefinition.methods.columnsAfter(lastCommand, previousPipeFields, query, {
+      columns: new Map(),
     });
   } else {
-    // If the command doesn't have a columnsAfter function, use the default behavior
-    const userDefinedColumns = collectUserDefinedColumns(commands, cacheCopy, query);
-    const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
-      userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
-    );
-    const allFields = uniqBy([...(previousPipeFields ?? []), ...arrayOfUserDefinedColumns], 'name');
-    return allFields;
+    return previousPipeFields;
   }
 }
