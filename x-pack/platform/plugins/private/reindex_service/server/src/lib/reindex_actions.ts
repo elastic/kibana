@@ -16,12 +16,8 @@ import type {
 import { REINDEX_OP_TYPE, getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
 import type { FlatSettings } from '@kbn/upgrade-assistant-pkg-server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-common';
-import type {
-  ReindexArgs,
-  ReindexOptions,
-  ReindexSavedObject,
-  ReindexOperation,
-} from '../../../common';
+import type { ReindexArgs, ReindexOptions, ReindexOperation } from '../../../common';
+import type { ReindexSavedObject } from './types';
 import { ReindexStatus, ReindexStep } from '../../../common';
 
 // TODO: base on elasticsearch.requestTimeout?

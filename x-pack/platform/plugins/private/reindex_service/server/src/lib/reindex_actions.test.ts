@@ -10,7 +10,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import moment from 'moment';
 
-import type { ReindexSavedObject } from '../../../common';
+import type { ReindexSavedObject } from './types';
 import { ReindexStatus, ReindexStep } from '../../../common';
 import { type Version } from '@kbn/upgrade-assistant-pkg-common';
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';

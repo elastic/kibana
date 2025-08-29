@@ -13,7 +13,8 @@ import type { IndicesAlias, IndicesIndexSettings } from '@elastic/elasticsearch/
 import { esIndicesStateCheck, getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStatus, ReindexStep } from '../../../common';
-import type { IndexSettings, ReindexSavedObject, IndexWarning } from '../../../common';
+import type { IndexSettings, IndexWarning } from '../../../common';
+import type { ReindexSavedObject } from './types';
 
 import type { ReindexActions } from './reindex_actions';
 

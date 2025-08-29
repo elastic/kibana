@@ -42,7 +42,7 @@ jest.mock('../lib/reindex_service', () => ({
   reindexServiceFactory: () => mockReindexService,
 }));
 
-import type { ReindexSavedObject } from '../../../common';
+import type { ReindexSavedObject } from '../lib/types';
 import { ReindexStatus } from '../../../common';
 import { credentialStoreFactory } from '../lib/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';

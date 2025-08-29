@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-// todo - ones not marked used can be moved to plugin
 export type {
-  IndexWarningType, // used
-  IndexWarning, // used
+  IndexWarningType,
+  IndexWarning,
   QueueSettings,
   ReindexOptions,
-  ReindexStatusResponse, // used
+  ReindexStatusResponse,
   ReindexOperation,
   ReindexOperationCancelResponse,
-  ReindexSavedObject,
 } from './types';
-// yes to these
 export { ReindexStep, ReindexStatus } from './types';
 
 import type { IndicesIndexSettingsKeys } from '@elastic/elasticsearch/lib/api/types';

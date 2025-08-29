@@ -25,12 +25,8 @@ import { error } from './error';
 import { sortAndOrderReindexOperations } from './op_utils';
 import type { GetBatchQueueResponse, PostBatchResponse } from '../../types';
 import { reindexHandler } from './reindex_handler';
-import type {
-  ReindexArgs,
-  ReindexOperation,
-  ReindexStatusResponse,
-  ReindexSavedObject,
-} from '../../../common';
+import type { ReindexArgs, ReindexOperation, ReindexStatusResponse } from '../../../common';
+import type { ReindexSavedObject } from './types';
 import { ReindexStatus } from '../../../common';
 
 export interface ReindexServiceScopedClientArgs {
