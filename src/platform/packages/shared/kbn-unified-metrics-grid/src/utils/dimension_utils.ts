@@ -18,17 +18,13 @@ const getTopLevelNamespace = (metricName: string) => {
   return idx === -1 ? metricName : metricName.slice(0, idx + 1);
 };
 
-export const categorizeDimensions = (
-  dimensions: Dimension[],
-  metricName: string
-) => {
-  const topLevelNamespace = getTopLevelNamespace(metricName)
+export const categorizeDimensions = (dimensions: Dimension[], metricName: string) => {
+  const topLevelNamespace = getTopLevelNamespace(metricName);
 
   return dimensions.reduce(
     (acc, dim) => {
       const isRequired =
-        dim.name.startsWith('attributes.') ||
-        dim.name.startsWith(topLevelNamespace);
+        dim.name.startsWith('attributes.') || dim.name.startsWith(topLevelNamespace);
 
       (isRequired ? acc.requiredDimensions : acc.optionalDimensions).push(dim);
       return acc;
@@ -47,10 +43,7 @@ const getSortPriority = (name: string, topLevelNamespace: string): number => {
   return 2;
 };
 
-export const sortDimensions = (
-  dimensions: Dimension[],
-  topLevelNamespace: string
-) => {
+export const sortDimensions = (dimensions: Dimension[], topLevelNamespace: string) => {
   return [...dimensions].sort((a, b) => {
     const priorityDiff =
       getSortPriority(a.name, topLevelNamespace) - getSortPriority(b.name, topLevelNamespace);

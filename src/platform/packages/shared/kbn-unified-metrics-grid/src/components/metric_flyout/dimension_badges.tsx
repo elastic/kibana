@@ -10,7 +10,8 @@
 import { EuiBadge, EuiToken, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Dimension, sortDimensions } from '../../utils';
+import type { Dimension } from '../../utils';
+import { sortDimensions } from '../../utils';
 
 interface DimensionBadgesProps {
   dimensions: Dimension[];

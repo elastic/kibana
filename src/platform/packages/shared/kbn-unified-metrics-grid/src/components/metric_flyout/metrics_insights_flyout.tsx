@@ -24,10 +24,10 @@ import {
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { css } from '@emotion/react';
 import type { MetricField } from '../../types';
 import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from '../../hooks/use_flyout_a11y';
-import { css } from '@emotion/react';
 
 interface MetricInsightsFlyoutProps {
   metric: MetricField;
@@ -116,20 +116,19 @@ export const MetricInsightsFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-              <EuiTitle
-                size="xs"
-                data-test-subj="docViewerRowDetailsTitle"
-                css={css`
-                  white-space: nowrap;
-                `}
-              >
-                <h2>
-                  {i18n.translate('metricsExperience.metricInsightsFlyout.strong.metricLabel', {
-                    defaultMessage: 'Metric',
-                  })}
-                </h2>
-              </EuiTitle>
-
+            <EuiTitle
+              size="xs"
+              data-test-subj="docViewerRowDetailsTitle"
+              css={css`
+                white-space: nowrap;
+              `}
+            >
+              <h2>
+                {i18n.translate('metricsExperience.metricInsightsFlyout.strong.metricLabel', {
+                  defaultMessage: 'Metric',
+                })}
+              </h2>
+            </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
