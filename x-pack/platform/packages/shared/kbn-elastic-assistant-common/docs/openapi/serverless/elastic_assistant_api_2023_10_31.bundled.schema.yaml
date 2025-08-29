@@ -588,6 +588,16 @@ paths:
             example: 20
             minimum: 0
             type: integer
+        - description: >-
+            Whether to return conversations that the current user owns. If true,
+            only conversations owned by the user are returned.
+          in: query
+          name: is_owner
+          required: false
+          schema:
+            default: false
+            example: true
+            type: boolean
       responses:
         '200':
           content:
@@ -2003,6 +2013,9 @@ components:
           description: The time conversation was created.
           example: '2025-04-30T14:00:00Z'
           type: string
+        createdBy:
+          $ref: '#/components/schemas/User'
+          description: The user who created the conversation.
         excludeFromLastConversationStorage:
           description: Exclude from last conversation storage.
           type: boolean
@@ -2039,6 +2052,7 @@ components:
         - id
         - title
         - createdAt
+        - createdBy
         - users
         - namespace
         - category
@@ -2095,6 +2109,10 @@ components:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
           type: string
+        users:
+          items:
+            $ref: '#/components/schemas/User'
+          type: array
       required:
         - id
     DeleteResponseFields:
@@ -2704,6 +2722,7 @@ components:
         'user', etc.
       enum:
         - security_labs
+        - defend_insights
         - user
       example: security_labs
       type: string
@@ -2723,6 +2742,9 @@ components:
           description: Message content.
           example: Hello, how can I assist you today?
           type: string
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: Message id
         isError:
           description: Is error message.
           example: false
@@ -2744,6 +2766,9 @@ components:
         traceData:
           $ref: '#/components/schemas/TraceData'
           description: Trace data
+        user:
+          $ref: '#/components/schemas/User'
+          description: The user who sent the message.
       required:
         - timestamp
         - content
