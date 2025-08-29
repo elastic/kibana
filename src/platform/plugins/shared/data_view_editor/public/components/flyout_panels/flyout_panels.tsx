@@ -123,10 +123,5 @@ export const useFlyoutPanelsContext = (): Context => {
 const styles = {
   flyoutPanels: css({
     height: '100%',
-    ['@media only screen and (max-width: 767px)']: {
-      '.euiFlyoutFooter': {
-        flexGrow: 1,
-      },
-    },
   }),
 };
