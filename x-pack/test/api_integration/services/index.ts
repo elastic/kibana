@@ -13,7 +13,6 @@ import { services as commonServices } from '../../common/services';
 
 // @ts-ignore not ts yet
 import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
-import { SecuritySolutionApiProvider } from './security_solution_api.gen';
 
 export const services = {
   ...commonServices,
@@ -24,5 +23,4 @@ export const services = {
   usageAPI: UsageAPIProvider,
   ml: MachineLearningProvider,
   ingestManager: IngestManagerProvider,
-  securitySolutionApi: SecuritySolutionApiProvider,
 };
