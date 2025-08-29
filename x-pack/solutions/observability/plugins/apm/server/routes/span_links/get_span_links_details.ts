@@ -8,6 +8,7 @@ import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { chunk, compact, isEmpty, keyBy } from 'lodash';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { SpanLinkDetails } from '@kbn/apm-types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   SERVICE_NAME,
@@ -23,12 +24,16 @@ import {
   SPAN_TYPE,
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
+  DURATION,
+  KIND,
+  SERVICE_LANGUAGE_NAME,
 } from '../../../common/es_fields/apm';
 import type { Environment } from '../../../common/environment_rt';
-import type { SpanLinkDetails } from '../../../common/span_links';
 import type { SpanLink } from '../../../typings/es_schemas/raw/fields/span_links';
 import { getBufferedTimerange } from './utils';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 
 async function fetchSpanLinksDetails({
   apmEventClient,
@@ -48,17 +53,13 @@ async function fetchSpanLinksDetails({
     end,
   });
 
-  const requiredFields = asMutableArray([
-    TRACE_ID,
-    SERVICE_NAME,
-    AGENT_NAME,
-    PROCESSOR_EVENT,
-  ] as const);
+  const requiredFields = asMutableArray([TRACE_ID, SERVICE_NAME] as const);
 
   const requiredTxFields = asMutableArray([
     TRANSACTION_ID,
     TRANSACTION_NAME,
     TRANSACTION_DURATION,
+    AGENT_NAME,
   ] as const);
 
   const requiredSpanFields = asMutableArray([
@@ -67,49 +68,68 @@ async function fetchSpanLinksDetails({
     SPAN_DURATION,
     SPAN_SUBTYPE,
     SPAN_TYPE,
+    AGENT_NAME,
   ] as const);
 
-  const optionalFields = asMutableArray([SERVICE_ENVIRONMENT] as const);
+  const requiredUnprocessedOtelSpanFields = asMutableArray([
+    SPAN_ID,
+    SPAN_NAME,
+    DURATION,
+    KIND,
+    SERVICE_LANGUAGE_NAME,
+  ] as const);
 
-  const response = await apmEventClient.search('get_span_links_details', {
-    apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
-    },
-    fields: [...requiredFields, ...requiredTxFields, ...requiredSpanFields, ...optionalFields],
-    track_total_hits: false,
-    size: 1000,
-    query: {
-      bool: {
-        filter: [
-          ...rangeQuery(startWithBuffer, endWithBuffer),
-          ...kqlQuery(kuery),
-          {
-            bool: {
-              should: spanLinks.map((item) => {
-                return {
-                  bool: {
-                    filter: [
-                      { term: { [TRACE_ID]: item.trace.id } },
-                      {
-                        bool: {
-                          should: [
-                            { term: { [SPAN_ID]: item.span.id } },
-                            { term: { [TRANSACTION_ID]: item.span.id } },
-                          ],
-                          minimum_should_match: 1,
+  const optionalFields = asMutableArray([SERVICE_ENVIRONMENT, PROCESSOR_EVENT] as const);
+
+  const response = await apmEventClient.search(
+    'get_span_links_details',
+    {
+      apm: {
+        events: [ProcessorEvent.span, ProcessorEvent.transaction],
+      },
+      fields: [
+        ...requiredFields,
+        ...requiredTxFields,
+        ...requiredSpanFields,
+        ...requiredUnprocessedOtelSpanFields,
+        ...optionalFields,
+      ],
+      track_total_hits: false,
+      size: 1000,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(startWithBuffer, endWithBuffer),
+            ...kqlQuery(kuery),
+            {
+              bool: {
+                should: spanLinks.map((item) => {
+                  return {
+                    bool: {
+                      filter: [
+                        { term: { [TRACE_ID]: item.trace.id } },
+                        {
+                          bool: {
+                            should: [
+                              { term: { [SPAN_ID]: item.span.id } },
+                              { term: { [TRANSACTION_ID]: item.span.id } },
+                            ],
+                            minimum_should_match: 1,
+                          },
                         },
-                      },
-                    ],
-                  },
-                };
-              }),
-              minimum_should_match: 1,
+                      ],
+                    },
+                  };
+                }),
+                minimum_should_match: 1,
+              },
             },
-          },
-        ],
+          ],
+        },
       },
     },
-  });
+    { skipProcessorEventFilter: true }
+  );
 
   const spanIdsMap = keyBy(spanLinks, 'span.id');
 
@@ -130,49 +150,65 @@ async function fetchSpanLinksDetails({
     })
     .map((hit) => {
       const commonEvent = unflattenKnownApmEventFields(hit.fields, requiredFields);
-
-      const commonDetails = {
-        serviceName: commonEvent.service.name,
-        agentName: commonEvent.agent.name,
-        environment: commonEvent.service.environment as Environment,
-        transactionId: commonEvent.transaction?.id,
-      };
-
-      if (commonEvent.processor.event === ProcessorEvent.transaction) {
-        const event = unflattenKnownApmEventFields(hit.fields, [
-          ...requiredFields,
-          ...requiredTxFields,
-        ]);
-        return {
-          traceId: event.trace.id,
-          spanId: event.transaction.id,
-          processorEvent: commonEvent.processor.event,
-          transactionId: event.transaction.id,
-          details: {
-            ...commonDetails,
-            spanName: event.transaction.name,
-            duration: event.transaction.duration.us,
-          },
+      if (commonEvent.processor?.event) {
+        const commonDetails = {
+          serviceName: commonEvent.service.name,
+          environment: commonEvent.service.environment as Environment,
+          transactionId: commonEvent.transaction?.id,
         };
-      } else {
-        const event = unflattenKnownApmEventFields(hit.fields, [
-          ...requiredFields,
-          ...requiredSpanFields,
-        ]);
+        if (commonEvent.processor.event === ProcessorEvent.transaction) {
+          const event = unflattenKnownApmEventFields(hit.fields, [
+            ...requiredFields,
+            ...requiredTxFields,
+          ]);
+          return {
+            traceId: event.trace.id,
+            spanId: event.transaction.id,
+            transactionId: event.transaction.id,
+            details: {
+              ...commonDetails,
+              agentName: event.agent.name,
+              spanName: event.transaction.name,
+              duration: event.transaction.duration.us,
+            },
+          };
+        } else {
+          const event = unflattenKnownApmEventFields(hit.fields, [
+            ...requiredFields,
+            ...requiredSpanFields,
+          ]);
 
-        return {
-          traceId: event.trace.id,
-          spanId: event.span.id,
-          processorEvent: commonEvent.processor.event,
-          details: {
-            ...commonDetails,
-            spanName: event.span.name,
-            duration: event.span.duration.us,
-            spanSubtype: event.span.subtype,
-            spanType: event.span.type,
-          },
-        };
+          return {
+            traceId: event.trace.id,
+            spanId: event.span.id,
+            details: {
+              ...commonDetails,
+              agentName: event.agent.name,
+              spanName: event.span.name,
+              duration: event.span.duration.us,
+              spanSubtype: event.span.subtype,
+              spanType: event.span.type,
+            },
+          };
+        }
       }
+
+      const event = unflattenKnownApmEventFields(hit.fields, [
+        ...requiredFields,
+        ...requiredUnprocessedOtelSpanFields,
+      ]);
+
+      return {
+        traceId: event.trace.id,
+        spanId: event.span.id,
+        details: {
+          serviceName: commonEvent.service.name,
+          agentName: event.service.language.name as AgentName,
+          spanName: event.span.name,
+          duration: parseOtelDuration(event.duration),
+          environment: event.service.environment as Environment,
+        },
+      };
     });
 }
 
@@ -212,7 +248,7 @@ export async function getSpanLinksDetails({
   // Creates a map for all span links details found
   const spanLinksDetailsMap = linkedSpans.reduce<Record<string, SpanLinkDetails>>(
     (acc, spanLink) => {
-      if (spanLink.processorEvent === ProcessorEvent.transaction) {
+      if (spanLink.transactionId) {
         const key = `${spanLink.traceId}:${spanLink.transactionId}`;
         acc[key] = {
           traceId: spanLink.traceId,
