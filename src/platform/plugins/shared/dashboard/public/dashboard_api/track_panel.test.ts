@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { initializeTrackPanel } from './track_panel';
 
 describe('track panel', () => {
   const mockDashboardContainerRef = document.createElement('div');
+  const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(mockDashboardContainerRef);
   mockDashboardContainerRef.getBoundingClientRect = jest.fn(() => ({ top: 96 } as DOMRect));
   const {
     expandPanel,
@@ -26,7 +28,7 @@ describe('track panel', () => {
     setScrollToPanelId,
     scrollToTop,
     scrollToBottom,
-  } = initializeTrackPanel(async (id: string) => undefined, mockDashboardContainerRef);
+  } = initializeTrackPanel(async (id: string) => undefined, dashboardContainerRef$);
 
   const scrollToSpy = jest.spyOn(window, 'scrollTo');
 
