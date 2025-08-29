@@ -68,7 +68,22 @@ generate_typescript() {
 
   # Run ESLint fix
   echo "--- Running ESLint fix"
-  yarn lint:es --fix "$OTEL_PACKAGE_DIR/src/generated/" || true
+  
+  # Debug: Check for potential syntax issues before ESLint
+  echo "--- Debug: Checking for syntax issues around line 3220"
+  sed -n '3215,3225p' "$OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts" || echo "Could not read lines around 3220"
+  
+  # Run ESLint and capture the error
+  if ! yarn lint:es --fix "$OTEL_PACKAGE_DIR/src/generated/"; then
+    echo "--- ESLint failed! Showing more context around the error"
+    echo "--- Lines 3210-3230 of generated file:"
+    sed -n '3210,3230p' "$OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts" || echo "Could not read file"
+    
+    echo "--- Searching for unterminated strings in the file:"
+    grep -n "'" "$OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts" | grep -v "'.*'," | head -10 || echo "No obvious unterminated strings found"
+    
+    # Don't exit here, let the script continue to see what else might be wrong
+  fi
 }
 
 create_pull_request() {
@@ -219,6 +234,8 @@ main() {
   git diff --exit-code --quiet "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
   yaml_changed=$?
   set -e
+  
+  echo "--- Git diff exit code: $yaml_changed (0=no changes, 1=changes detected)"
 
   if [ $yaml_changed -eq 0 ]; then
     echo "No changes in semantic conventions YAML. Our work is done here."
