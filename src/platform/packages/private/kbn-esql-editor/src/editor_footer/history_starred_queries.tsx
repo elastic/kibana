@@ -700,7 +700,8 @@ export function HistoryAndStarredQueriesTabs({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   data-test-subj="ESQLEditor-history-search"
                   css={css`
-                    width: 400px;
+                    max-width: 400px;
+                    width: ${isSpaceReduced ? '100%' : '400px'};
                   `}
                 />
               </EuiFlexItem>
