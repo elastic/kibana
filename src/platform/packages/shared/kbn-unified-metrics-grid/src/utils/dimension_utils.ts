@@ -13,23 +13,28 @@ export interface Dimension {
   description?: string;
 }
 
+const getTopLevelNamespace = (metricName: string) => {
+  const idx = metricName.indexOf('.');
+  return idx === -1 ? metricName : metricName.slice(0, idx + 1);
+};
+
 export const categorizeDimensions = (
   dimensions: Dimension[],
   metricName: string
 ) => {
-  const topLevelNamespace = metricName.split('.')[0] + '.';
-  const requiredDimensions = dimensions.filter((dim) => {
-    const isAttributes = dim.name.startsWith('attributes.');
-    const isTopLevel = dim.name.startsWith(topLevelNamespace);
-    return isAttributes || isTopLevel;
-  });
-  const optionalDimensions = dimensions.filter((dim) => {
-    const isAttributes = dim.name.startsWith('attributes.');
-    const isTopLevel = dim.name.startsWith(topLevelNamespace);
-    return !(isAttributes || isTopLevel);
-  });
+  const topLevelNamespace = getTopLevelNamespace(metricName)
 
-  return { requiredDimensions, optionalDimensions };
+  return dimensions.reduce(
+    (acc, dim) => {
+      const isRequired =
+        dim.name.startsWith('attributes.') ||
+        dim.name.startsWith(topLevelNamespace);
+
+      (isRequired ? acc.requiredDimensions : acc.optionalDimensions).push(dim);
+      return acc;
+    },
+    { requiredDimensions: [] as Dimension[], optionalDimensions: [] as Dimension[] }
+  );
 };
 
 const getSortPriority = (name: string, topLevelNamespace: string): number => {
