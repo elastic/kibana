@@ -7,19 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPageHeader,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiFilterGroup,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
-import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
-import { useWorkflows } from '../../entities/workflows/model/useWorkflows';
+import React, { useState } from 'react';
+import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../../features/workflow_list/constants';
+import type { WorkflowsSearchParams } from '../../types';
+import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
+import { useWorkflows } from '../../entities/workflows/model/use_workflows';
 import { WorkflowList } from '../../features/workflow_list/ui';
+import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
+import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
+import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/workflow_search_field';
+import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
 
 const workflowTemplateYaml = `name: New workflow
 enabled: false
 triggers:
-  - type: triggers.elastic.manual
+  - type: manual
 steps:
   - name: first-step
     type: console
@@ -29,8 +45,16 @@ steps:
 
 export function WorkflowsPage() {
   const { application, chrome, notifications } = useKibana().services;
-  const { refetch } = useWorkflows();
+  const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
+  const { euiTheme } = useEuiTheme();
   const { createWorkflow } = useWorkflowActions();
+  const [search, setSearch] = useState<WorkflowsSearchParams>({
+    limit: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
+    page: 1,
+    query: '',
+  });
+
+  const { refetch } = useWorkflows(search);
 
   const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
 
@@ -67,8 +91,9 @@ export function WorkflowsPage() {
   };
 
   return (
-    <EuiPageTemplate offset={0}>
-      <EuiPageTemplate.Header>
+    <EuiPageTemplate offset={0} css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}>
+      {/* negative margin to compensate for header's bottom padding and reduce space between header and content */}
+      <EuiPageTemplate.Header bottomBorder={false} css={{ marginBottom: `-${euiTheme.size.l}` }}>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem>
             <EuiPageHeader
@@ -80,7 +105,12 @@ export function WorkflowsPage() {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
               {canCreateWorkflow && (
-                <EuiButton color="text" size="s" onClick={handleCreateWorkflow}>
+                <EuiButton
+                  iconType="plusInCircle"
+                  color="primary"
+                  size="s"
+                  onClick={handleCreateWorkflow}
+                >
                   <FormattedMessage
                     id="workflows.createWorkflowButton"
                     defaultMessage="Create workflow"
@@ -93,7 +123,54 @@ export function WorkflowsPage() {
         </EuiFlexGroup>
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section restrictWidth={false}>
-        <WorkflowList />
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem>
+            <WorkflowSearchField
+              initialValue={search.query || ''}
+              onSearch={(query) =>
+                setSearch((prevState) => {
+                  return { ...prevState, query };
+                })
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup>
+              <WorkflowsFilterPopover
+                filter="enabled"
+                title="Enabled"
+                values={filtersData?.enabled || []}
+                selectedValues={search.enabled || []}
+                onSelectedValuesChanged={(newValues) => {
+                  setSearch((prevState) => {
+                    return { ...prevState, enabled: newValues };
+                  });
+                }}
+              />
+            </EuiFilterGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup>
+              <WorkflowsFilterPopover
+                filter="createdBy"
+                title="Created By"
+                values={filtersData?.createdBy || []}
+                selectedValues={search.createdBy || []}
+                onSelectedValuesChanged={(newValues) => {
+                  setSearch((prevState) => {
+                    return { ...prevState, createdBy: newValues };
+                  });
+                }}
+              />
+            </EuiFilterGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="l" />
+        <WorkflowExecutionStatsBar height={140} />
+        <EuiHorizontalRule />
+
+        <WorkflowList search={search} setSearch={setSearch} />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { StructuredTool } from '@langchain/core/tools';
+import type { StructuredTool } from '@langchain/core/tools';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
-import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
+import type { MessageMetadata } from '@kbn/elastic-assistant-common';
+import { pruneContentReferences } from '@kbn/elastic-assistant-common';
 import { getPrompt } from '@kbn/security-ai-prompts';
 import { isEmpty } from 'lodash';
 import { generateChatTitle } from './nodes/generate_chat_title';
@@ -18,11 +19,11 @@ import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
 import { getLlmClass } from '../../../../routes/utils';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
-import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
-import { AssistantToolParams } from '../../../../types';
-import { AgentExecutor } from '../../executors/types';
+import type { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
+import type { AssistantToolParams } from '../../../../types';
+import type { AgentExecutor } from '../../executors/types';
 import { DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, chatPromptFactory } from './prompts';
-import { GraphInputs } from './types';
+import type { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
@@ -86,10 +87,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
             // prevents the agent from retrying on failure
             // failure could be due to bad connector, we should deliver that result to the client asap
             maxRetries: 0,
-            metadata: {
-              connectorTelemetry: {
-                pluginId: 'security_ai_assistant',
-              },
+            telemetryMetadata: {
+              pluginId: 'security_ai_assistant',
             },
             // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
             // timeout,

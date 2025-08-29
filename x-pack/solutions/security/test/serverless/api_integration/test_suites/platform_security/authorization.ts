@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
@@ -1229,9 +1229,9 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:lists-summary",
                 "api:securitySolution-deleteHostIsolationExceptions",
                 "api:securitySolution-readHostIsolationExceptions",
-                "api:securitySolution-writeGlobalArtifacts",
                 "api:securitySolution-accessHostIsolationExceptions",
                 "api:securitySolution-writeHostIsolationExceptions",
+                "api:securitySolution-writeGlobalArtifacts",
                 "saved_object:exception-list-agnostic/bulk_get",
                 "saved_object:exception-list-agnostic/get",
                 "saved_object:exception-list-agnostic/find",
@@ -3930,9 +3930,9 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:lists-summary",
                 "api:securitySolution-deleteHostIsolationExceptions",
                 "api:securitySolution-readHostIsolationExceptions",
-                "api:securitySolution-writeGlobalArtifacts",
                 "api:securitySolution-accessHostIsolationExceptions",
                 "api:securitySolution-writeHostIsolationExceptions",
+                "api:securitySolution-writeGlobalArtifacts",
                 "saved_object:exception-list-agnostic/bulk_get",
                 "saved_object:exception-list-agnostic/get",
                 "saved_object:exception-list-agnostic/find",

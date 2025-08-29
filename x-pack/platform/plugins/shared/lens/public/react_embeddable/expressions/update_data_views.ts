@@ -7,7 +7,7 @@
 
 import { uniqBy } from 'lodash';
 import { getIndexPatternsObjects } from '../../utils';
-import { LensEmbeddableStartServices, LensRuntimeState } from '../types';
+import type { LensEmbeddableStartServices, LensRuntimeState } from '../types';
 
 export async function getUsedDataViews(
   references: LensRuntimeState['attributes']['references'],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetExceptionFilterSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { GetExceptionFilterSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { LIST_ID, NAMESPACE_TYPE } from '../../constants.mock';
 import { getExceptionListItemSchemaMock } from '../response/exception_list_item_schema.mock';

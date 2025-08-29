@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/public';
+import type { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import {
+import type {
   AvgColumn,
   CardinalityColumn,
   CommonColumnConverterArgs,
@@ -27,12 +27,12 @@ import {
   SumColumn,
   FormulaColumn,
 } from './types';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { Metric } from '../../../../common/types';
+import type { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import type { Metric } from '../../../../common/types';
+import type { SupportedMetric } from '../metrics';
 import {
   getFilterRatioFormula,
   getFormulaFromMetric,
-  SupportedMetric,
   SUPPORTED_METRICS,
   getPipelineSeriesFormula,
 } from '../metrics';

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { Panel } from './types';
+import type { Panel } from './types';
 import { ExpandableFlyout } from '.';
 import { useWindowWidth } from './hooks/use_window_width';
 import { TestProvider } from './test/provider';

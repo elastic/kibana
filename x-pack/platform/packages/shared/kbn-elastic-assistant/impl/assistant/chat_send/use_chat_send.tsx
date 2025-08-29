@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type React from 'react';
+import { useCallback, useState } from 'react';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { useKnowledgeBaseStatus } from '../api/knowledge_base/use_knowledge_base_status';
-import { DataStreamApis } from '../use_data_stream_apis';
+import type { DataStreamApis } from '../use_data_stream_apis';
 import type { ClientMessage } from '../../assistant_context/types';
-import { SelectedPromptContext } from '../prompt_context/types';
+import type { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
-import { Conversation, useAssistantContext } from '../../..';
+import type { Conversation } from '../../..';
+import { useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
 import { useAssistantSpaceId, useAssistantLastConversation } from '../use_space_aware_context';
 
@@ -56,6 +58,7 @@ export const useChatSend = ({
     assistantTelemetry,
     toasts,
     assistantAvailability: { isAssistantEnabled },
+    currentUser,
   } = useAssistantContext();
   const spaceId = useAssistantSpaceId();
   const { setLastConversation } = useAssistantLastConversation({ spaceId });
@@ -97,6 +100,7 @@ export const useChatSend = ({
         currentReplacements: convo.replacements,
         promptText,
         selectedPromptContexts,
+        user: currentUser,
       });
 
       const baseReplacements: Replacements = userMessage.replacements ?? convo.replacements;
@@ -159,6 +163,7 @@ export const useChatSend = ({
       assistantTelemetry,
       createConversation,
       currentConversation,
+      currentUser,
       getConversation,
       http,
       isSetupComplete,

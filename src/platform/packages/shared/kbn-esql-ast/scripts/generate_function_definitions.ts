@@ -11,12 +11,12 @@ import { readdirSync, readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import _ from 'lodash';
-import {
+import type {
   FunctionDefinition,
-  FunctionDefinitionTypes,
   FunctionParameterType,
   Signature,
 } from '../src/definitions/types';
+import { FunctionDefinitionTypes } from '../src/definitions/types';
 import { Location } from '../src/commands_registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/definitions/constants';
 import {

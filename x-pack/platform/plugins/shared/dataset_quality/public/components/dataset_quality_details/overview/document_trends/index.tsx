@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -12,7 +13,6 @@ import {
   EuiSkeletonRectangle,
   EuiSpacer,
   EuiToolTip,
-  OnTimeChangeProps,
 } from '@elastic/eui';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import React, { useCallback } from 'react';

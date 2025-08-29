@@ -5,19 +5,39 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import React from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiCode } from '@elastic/eui';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { FailureStoreModal } from '@kbn/failure-store-modal';
 import {
   overviewPanelDatasetQualityIndicatorDegradedDocs,
   overviewPanelDatasetQualityIndicatorFailedDocs,
+  overviewPanelDatasetQualityIndicatorNoFailureStore,
 } from '../../../../../common/translations';
 import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_panel';
 import { useQualityIssuesDocsChart } from '../../../../hooks/use_quality_issues_docs_chart';
 import { useDatasetQualityDetailsState } from '../../../../hooks/use_dataset_quality_details_state';
 import { DatasetQualityIndicator, QualityPercentageIndicator } from '../../../quality_indicator';
-import { useKibanaContextForPlugin } from '../../../../utils/use_kibana';
 import { Card } from './card';
+
+const degradedDocTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.details.degradedDocTooltip"
+    defaultMessage="Documents with the {ignoredProperty} property, usually due to malformed fields or exceeding the limit of total fields when {ignoredAboveSetting}."
+    values={{
+      ignoredProperty: <EuiCode transparentBackground>_ignored</EuiCode>,
+      ignoredAboveSetting: <EuiCode transparentBackground>_ignore_above: false</EuiCode>,
+    }}
+  />
+);
+
+const failedDocTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.details.failedDocTooltip"
+    defaultMessage="Documents that were rejected during ingestion, usually due to mapping errors or pipeline failures."
+  />
+);
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -40,20 +60,34 @@ export default function QualitySummaryCards({
   } = useOverviewSummaryPanel();
   const { handleDocsTrendChartChange } = useQualityIssuesDocsChart();
   const {
-    dataStream,
     canUserReadFailureStore,
     hasFailureStore,
     loadingState: { dataStreamSettingsLoading },
+    defaultRetentionPeriod,
+    customRetentionPeriod,
+    updateFailureStore,
   } = useDatasetQualityDetailsState();
 
-  const {
-    services: {
-      share: { url: urlService },
-    },
-  } = useKibanaContextForPlugin();
+  const [isFailureStoreModalOpen, setIsFailureStoreModalOpen] = useState(false);
 
-  const locator = urlService.locators.get('INDEX_MANAGEMENT_LOCATOR_ID');
-  const locatorParams = { page: 'data_streams_details', dataStreamName: dataStream } as const;
+  const closeModal = () => {
+    setIsFailureStoreModalOpen(false);
+  };
+
+  const handleSaveModal = async (data: {
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  }) => {
+    updateFailureStore({
+      failureStoreEnabled: data.failureStoreEnabled,
+      customRetentionPeriod: data.customRetentionPeriod,
+    });
+    closeModal();
+  };
+
+  const onClick = () => {
+    setIsFailureStoreModalOpen(true);
+  };
 
   return (
     <EuiFlexGroup gutterSize="m" direction="column" style={{ height: '100%' }}>
@@ -62,6 +96,7 @@ export default function QualitySummaryCards({
           isDisabled={false}
           isSelected={selectedCard === 'degraded'}
           title={overviewPanelDatasetQualityIndicatorDegradedDocs}
+          titleTooltipContent={degradedDocTooltip}
           kpiValue={totalDegradedDocsCount}
           footer={
             <EuiFlexGroup direction="row" gutterSize="s">
@@ -94,30 +129,46 @@ export default function QualitySummaryCards({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        {!dataStreamSettingsLoading && !hasFailureStore && canUserReadFailureStore ? (
-          <Card
-            isDisabled={true}
-            title={overviewPanelDatasetQualityIndicatorFailedDocs}
-            kpiValue={i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
-              defaultMessage: 'No failure store',
-            })}
-            footer={
-              <EuiLink
-                href={locator?.getRedirectUrl(locatorParams)}
-                target="_blank"
-                external={false}
-              >
-                {i18n.translate('xpack.datasetQuality.enableFailureStore', {
-                  defaultMessage: 'Enable failure store',
-                })}
-              </EuiLink>
-            }
-          />
+        {!dataStreamSettingsLoading && !(hasFailureStore && canUserReadFailureStore) ? (
+          <>
+            <Card
+              isDisabled={true}
+              title={overviewPanelDatasetQualityIndicatorNoFailureStore}
+              titleTooltipContent={failedDocTooltip}
+              kpiValue={i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
+                defaultMessage: 'No failure store',
+              })}
+              footer={
+                canUserReadFailureStore && (
+                  <EuiButtonEmpty
+                    onClick={onClick}
+                    data-test-subj="datasetQualityDetailsEnableFailureStoreButton"
+                  >
+                    {i18n.translate('xpack.datasetQuality.enableFailureStore', {
+                      defaultMessage: 'Enable failure store',
+                    })}
+                  </EuiButtonEmpty>
+                )
+              }
+            />
+            {canUserReadFailureStore && isFailureStoreModalOpen && defaultRetentionPeriod && (
+              <FailureStoreModal
+                onCloseModal={closeModal}
+                onSaveModal={handleSaveModal}
+                failureStoreProps={{
+                  failureStoreEnabled: hasFailureStore,
+                  defaultRetentionPeriod,
+                  customRetentionPeriod,
+                }}
+              />
+            )}
+          </>
         ) : (
           <Card
             isDisabled={false}
             isSelected={selectedCard === 'failed'}
             title={overviewPanelDatasetQualityIndicatorFailedDocs}
+            titleTooltipContent={failedDocTooltip}
             kpiValue={totalFailedDocsCount}
             footer={
               <EuiFlexGroup direction="row" gutterSize="s">

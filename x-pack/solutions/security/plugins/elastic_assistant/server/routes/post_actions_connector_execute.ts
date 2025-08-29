@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
 import { schema } from '@kbn/config-schema';
+import type { Message, Replacements } from '@kbn/elastic-assistant-common';
 import {
+  getIsConversationOwner,
   API_VERSIONS,
   newContentReferencesStore,
   ExecuteConnectorRequestBody,
-  Message,
-  Replacements,
   pruneContentReferences,
   ExecuteConnectorRequestQuery,
   POST_ACTIONS_CONNECTOR_EXECUTE,
@@ -26,7 +26,7 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { getPrompt } from '../lib/prompt';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { buildResponse } from '../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../types';
+import type { ElasticAssistantRequestHandlerContext } from '../types';
 import {
   appendAssistantMessageToConversation,
   getIsKnowledgeBaseInstalled,
@@ -35,7 +35,7 @@ import {
   performChecks,
 } from './helpers';
 import { isOpenSourceModel } from './utils';
-import { ConfigSchema } from '../config_schema';
+import type { ConfigSchema } from '../config_schema';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -134,6 +134,24 @@ export const postActionsConnectorExecuteRoute = (
 
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
+          if (conversationId) {
+            const conversation = await conversationsDataClient?.getConversation({
+              id: conversationId,
+            });
+            if (
+              conversation &&
+              !getIsConversationOwner(conversation, {
+                name: checkResponse.currentUser?.username,
+                id: checkResponse.currentUser?.profile_uid,
+              })
+            ) {
+              return resp.error({
+                body: `Updating a conversation is only allowed for the owner of the conversation.`,
+                statusCode: 403,
+              });
+            }
+          }
+
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
           const contentReferencesStore = newContentReferencesStore({
             disabled: request.query.content_references_disabled,

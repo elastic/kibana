@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { EuiPanel, EuiStat, useEuiTheme, EuiHorizontalRule } from '@elastic/eui';
 import type { EuiStatProps } from '@elastic/eui';
 

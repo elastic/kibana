@@ -6,13 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, IToasts } from '@kbn/core/public';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
+import type {
+  ConversationCreateProps,
+  ConversationUpdateProps,
+} from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
-  ApiConfig,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-import { Conversation, ClientMessage } from '../../../assistant_context/types';
+import type { Conversation } from '../../../assistant_context/types';
 
 export interface BulkActionSummary {
   failed: number;
@@ -49,42 +52,38 @@ export interface BulkActionResponse {
   attributes: BulkActionAttributes;
 }
 
-export interface ConversationUpdateParams {
-  id?: string;
-  title?: string;
-  messages?: ClientMessage[];
-  apiConfig?: ApiConfig;
-}
-
 export interface ConversationsBulkActions {
-  update?: Record<string, ConversationUpdateParams>;
-  create?: Record<string, Conversation>;
+  update?: Record<string, ConversationUpdateProps>;
+  create?: Record<string, ConversationCreateProps>;
   delete?: {
     ids: string[];
   };
 }
 
 const transformCreateActions = (
-  createActions: Record<string, Conversation>,
+  createActions: Record<string, ConversationCreateProps>,
   conversationIdsToDelete?: string[]
 ) =>
-  Object.keys(createActions).reduce((conversationsToCreate: Conversation[], conversationId) => {
-    if (createActions && !conversationIdsToDelete?.includes(conversationId)) {
-      conversationsToCreate.push(createActions[conversationId]);
-    }
-    return conversationsToCreate;
-  }, []);
+  Object.keys(createActions).reduce(
+    (conversationsToCreate: ConversationCreateProps[], conversationId) => {
+      if (createActions && !conversationIdsToDelete?.includes(conversationId)) {
+        conversationsToCreate.push(createActions[conversationId]);
+      }
+      return conversationsToCreate;
+    },
+    []
+  );
 
 const transformUpdateActions = (
-  updateActions: Record<string, ConversationUpdateParams>,
+  updateActions: Record<string, ConversationUpdateProps>,
   conversationIdsToDelete?: string[]
 ) =>
   Object.keys(updateActions).reduce(
-    (conversationsToUpdate: ConversationUpdateParams[], conversationId) => {
+    (conversationsToUpdate: ConversationUpdateProps[], conversationId) => {
       if (updateActions && !conversationIdsToDelete?.includes(conversationId)) {
         conversationsToUpdate.push({
-          id: conversationId,
           ...updateActions[conversationId],
+          id: conversationId,
         });
       }
       return conversationsToUpdate;

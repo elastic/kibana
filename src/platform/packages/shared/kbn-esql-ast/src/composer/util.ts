@@ -9,7 +9,7 @@
 
 import { Builder } from '../builder';
 import { ParameterHole } from './parameter_hole';
-import { ComposerQueryTagHole, ParameterShorthandHole } from './types';
+import type { ComposerQueryTagHole, ParameterShorthandHole } from './types';
 
 /**
  * Query composer allows only named ES|QL parameters, because you cannot

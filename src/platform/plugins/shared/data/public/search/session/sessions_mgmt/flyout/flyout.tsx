@@ -18,12 +18,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
-import { SearchSessionsMgmtAPI } from '../lib/api';
+import type { SearchSessionsMgmtAPI } from '../lib/api';
 import { SearchSessionsMgmtTable } from '../components/table';
-import { SearchUsageCollector } from '../../../collectors';
-import { LocatorsStart } from '../types';
+import type { SearchUsageCollector } from '../../../collectors';
+import type { BackgroundSearchOpenedHandler, LocatorsStart } from '../types';
 import { getColumns } from './get_columns';
 
 export const Flyout = ({
@@ -34,6 +34,8 @@ export const Flyout = ({
   config,
   kibanaVersion,
   locators,
+  appId,
+  onBackgroundSearchOpened,
 }: {
   onClose: () => void;
   api: SearchSessionsMgmtAPI;
@@ -42,6 +44,8 @@ export const Flyout = ({
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
   locators: LocatorsStart;
+  appId?: string;
+  onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
 }) => {
   const flyoutId = useGeneratedHtmlId();
 
@@ -68,6 +72,8 @@ export const Flyout = ({
           locators={locators}
           hideRefreshButton
           getColumns={getColumns}
+          appId={appId}
+          onBackgroundSearchOpened={onBackgroundSearchOpened}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

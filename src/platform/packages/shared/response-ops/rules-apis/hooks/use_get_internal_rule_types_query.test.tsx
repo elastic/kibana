@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useGetInternalRuleTypesQuery } from './use_get_internal_rule_types_query';
-import { InternalRuleType, getInternalRuleTypes } from '../apis/get_internal_rule_types';
+import type { InternalRuleType } from '../apis/get_internal_rule_types';
+import { getInternalRuleTypes } from '../apis/get_internal_rule_types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { testQueryClientConfig } from '../test_utils';
 

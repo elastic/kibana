@@ -9,7 +9,7 @@ import { css } from '@emotion/css';
 import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ConversationEventChanges } from '../../../../common/chat_events';
+import type { ConversationEventChanges } from '../../../../common/chat_events';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useConversationList } from '../../hooks/use_conversation_list';
 import { useNavigation } from '../../hooks/use_navigation';

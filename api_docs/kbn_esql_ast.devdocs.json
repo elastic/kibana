@@ -6424,6 +6424,40 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isUnaryExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "isUnaryExpression",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          "ESQLUnaryExpression"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isUnaryExpression.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.isWhereExpression",
         "type": "Function",
         "tags": [],
@@ -7630,12 +7664,12 @@
           {
             "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.ElasticsearchCommandDefinition.license",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "license",
             "description": [],
             "signature": [
-              "\"PLATINUM\" | undefined"
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -8915,12 +8949,12 @@
           {
             "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.FunctionDefinition.license",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "license",
             "description": [],
             "signature": [
-              "\"PLATINUM\" | undefined"
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9420,12 +9454,12 @@
           {
             "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.Signature.license",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "license",
             "description": [],
             "signature": [
-              "\"PLATINUM\" | undefined"
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,

@@ -12,7 +12,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
 import * as Either from 'fp-ts/Either';
-import { TaskCompletedWithRetriableError } from './wait_for_task';
+import type { TaskCompletedWithRetriableError } from './wait_for_task';
 
 jest.mock('./catch_retryable_es_client_errors', () => {
   const { catchRetryableEsClientErrors: actualImplementation } = jest.requireActual(
@@ -81,7 +81,14 @@ describe('waitForPickupUpdatedMappingsTask', () => {
         start_time_in_millis: 312,
         type: 'any type',
       },
-      error: { type: 'search_phase_execution_exception' },
+      error: {
+        type: 'search_phase_execution_exception',
+        caused_by: {
+          type: 'search_phase_execution_exception',
+          reason:
+            'Search rejected due to missing shards [.kibana]. Consider using `allow_partial_search_results` setting to bypass this error.',
+        },
+      },
     });
 
     const task = waitForPickupUpdatedMappingsTask({ client, taskId: '4273', timeout: '2m' });

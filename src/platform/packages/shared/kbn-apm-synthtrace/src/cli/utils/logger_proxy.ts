@@ -8,8 +8,9 @@
  */
 
 import { parentPort, isMainThread, workerData } from 'worker_threads';
-import { createLogger, Logger, LogLevel } from '../../lib/utils/create_logger';
-import { BaseWorkerData } from './workers/types';
+import type { Logger } from '../../lib/utils/create_logger';
+import { createLogger, LogLevel } from '../../lib/utils/create_logger';
+import type { BaseWorkerData } from './workers/types';
 
 const { workerId } = isMainThread ? { workerId: -1 } : (workerData as BaseWorkerData);
 // logging proxy to main thread, ensures we see real time logging

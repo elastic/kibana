@@ -15,7 +15,10 @@ import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import React, { useImperativeHandle } from 'react';
 import { setKibanaServices } from './kibana_services';
-import { DefaultPresentationPanelApi, PanelCompatibleComponent } from './panel_component/types';
+import type {
+  DefaultPresentationPanelApi,
+  PanelCompatibleComponent,
+} from './panel_component/types';
 
 export const setStubKibanaServices = () => {
   const core = coreMock.createStart();
