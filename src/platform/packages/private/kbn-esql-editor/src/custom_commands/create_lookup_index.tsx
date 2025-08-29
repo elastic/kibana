@@ -21,12 +21,20 @@ import { isEqual } from 'lodash';
 import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import { firstValueFrom, of } from 'rxjs';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { ESQLEditorDeps } from '../types';
 import {
   appendIndexToJoinCommandByName,
   appendIndexToJoinCommandByPosition,
 } from './append_index_to_join_command';
 import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
+
+async function isCurrentAppSupported(
+  currentAppId$: ApplicationStart['currentAppId$'] | undefined
+): Promise<boolean> {
+  const currentApp = await firstValueFrom(currentAppId$ ?? of(undefined));
+  return currentApp === 'discover';
+}
 
 /**
  * Hook to determine if the current user has the necessary privileges to create a lookup index.
@@ -39,8 +47,9 @@ export const useCanCreateLookupIndex = () => {
 
   const { run } = useDebounceFn(
     async (indexName?: string) => {
-      const currentApp = await firstValueFrom(application?.currentAppId$ ?? of(undefined));
-      if (currentApp !== 'discover') return false;
+      if ((await isCurrentAppSupported(application?.currentAppId$)) === false) {
+        return false;
+      }
 
       try {
         const resultIndexName = indexName || '*';
@@ -73,7 +82,7 @@ export const useLookupIndexCommand = (
 ) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { uiActions, docLinks },
+    services: { uiActions, application },
   } = useKibana<ESQLEditorDeps>();
   const { getPermissions } = useLookupIndexPrivileges();
 
@@ -108,12 +117,12 @@ export const useLookupIndexCommand = (
     }
   `;
 
-  // TODO: Replace with the actual lookup index docs URL once it's available
-  // @ts-ignore
-  const lookupIndexDocsUrl = docLinks?.links.apis.createIndex;
-
   const { run: addLookupIndicesDecorator } = useDebounceFn(
     async () => {
+      if ((await isCurrentAppSupported(application?.currentAppId$)) === false) {
+        return false;
+      }
+
       const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
       const lookupIndices: string[] = inQueryLookupIndices.current;
       const permissions = await getPermissions(lookupIndices);
