@@ -28,7 +28,7 @@ export class ExitTryBlockNodeImpl implements StepImplementation {
       return;
     }
 
-    this.wfExecutionRuntimeManager.finishStep(this.node.enterNodeId);
+    await this.wfExecutionRuntimeManager.finishStep(this.node.enterNodeId);
     this.wfExecutionRuntimeManager.exitScope();
     this.wfExecutionRuntimeManager.goToNextStep();
   }

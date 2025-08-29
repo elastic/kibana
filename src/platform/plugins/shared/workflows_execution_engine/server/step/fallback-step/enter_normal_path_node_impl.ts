@@ -30,7 +30,7 @@ export class EnterNormalPathNodeImpl implements StepImplementation, StepErrorCat
     );
     const stepState = this.wfExecutionRuntimeManager.getStepState(this.node.id) || {};
 
-    this.wfExecutionRuntimeManager.setStepState(this.node.enterZoneNodeId, {
+    await this.wfExecutionRuntimeManager.setStepState(this.node.enterZoneNodeId, {
       ...stepState,
       error: this.wfExecutionRuntimeManager.getWorkflowExecution().error, // save error to the state of the enter node
     });
