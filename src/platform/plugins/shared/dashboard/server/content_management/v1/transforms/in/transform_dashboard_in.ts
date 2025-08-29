@@ -21,7 +21,7 @@ export const transformDashboardIn = ({
 }: {
   dashboardState: DashboardAttributes;
   references?: SavedObjectReference[];
-}): 
+}):
   | {
       attributes: DashboardSavedObjectAttributes;
       references: SavedObjectReference[];
