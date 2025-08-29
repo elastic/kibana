@@ -33,33 +33,38 @@ export class SuggestedDashboardsClient {
     private alertsClient: InvestigateAlertsClient,
     private alertId: string,
     private referencedPanelManager: ReferencedPanelManager
-  ) {}
+  ) { }
 
   // fetchSuggested retrieves suggested dashboards using two sets of criteria:
   // 1. Unfiltered matches based on fields and indices present in the alert data.
   // 2. Full-text search matches based on the rule name associated with the alert.
   // The results from both searches are merged, scored, and sorted to provide a list of relevant dashboards.
   public async fetchSuggested(alert: AlertData): Promise<SuggestedDashboard[]> {
-    // We're going to run two searches, storing the results in this map to dedup
+    // Run both searches in parallel, we'll await them later
+    const searches = [
+      this.unfilteredMatches(alert.getAllRelevantFields(), alert.getRuleQueryIndex() || ''),
+      this.titleMatches(alert.getRuleName() || ''),
+    ];
+
+    // Here's where we'll store the results, using a map to dedup
     const dashboardsById = new Map<string, SuggestedDashboard>();
-    await Promise.all(
-      [
-        this.unfilteredMatches(alert.getAllRelevantFields(), alert.getRuleQueryIndex() || ''),
-        this.titleMatches(alert.getRuleName() || ''),
-      ].map(async (search) => {
-        (await search).forEach((dashboard) => {
-          const existing = dashboardsById.get(dashboard.id);
-          if (!existing) {
-            dashboardsById.set(dashboard.id, dashboard);
-          } else {
-            existing.matchedBy.fields.push(...(dashboard.matchedBy.fields || []));
-            existing.matchedBy.index.push(...(dashboard.matchedBy.index || []));
-            existing.matchedBy.textMatch =
-              (existing.matchedBy.textMatch || 0) + (dashboard.matchedBy.textMatch || 0);
-          }
-        });
-      })
-    );
+    // This function merges the results from both searches
+    const mergeDashboards = (results: SuggestedDashboard[]) => {
+      results.forEach((dashboard) => {
+        const existing = dashboardsById.get(dashboard.id);
+        if (!existing) {
+          dashboardsById.set(dashboard.id, dashboard);
+        } else {
+          existing.matchedBy.fields.push(...(dashboard.matchedBy.fields || []));
+          existing.matchedBy.index.push(...(dashboard.matchedBy.index || []));
+          existing.matchedBy.textMatch =
+            (existing.matchedBy.textMatch || 0) + (dashboard.matchedBy.textMatch || 0);
+        }
+      });
+    };
+
+    // Wait for the search and processing to complete
+    await Promise.all(searches.map((search) => search.then(mergeDashboards)));
 
     // Return the dashboards sorted by score
     let matchedManagedDashboards = 0;
