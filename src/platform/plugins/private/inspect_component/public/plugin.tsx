@@ -29,23 +29,22 @@ export class InspectComponentPluginPublic implements Plugin {
   }
 
   public start(core: CoreStart) {
-    if (this.isDev) {
+    if (this.isEnabled && this.isDev) {
       Promise.all([
         import('./components/inspect/inspect_button'),
         import('@kbn/react-kibana-mount'),
       ])
         .then(([{ InspectButton }, { toMountPoint }]) => {
-          if (this.isEnabled) {
-            core.chrome.navControls.registerRight({
-              order: 1002,
-              mount: toMountPoint(<InspectButton core={core} />, core.rendering),
-            });
-          }
+          core.chrome.navControls.registerRight({
+            order: 1002,
+            mount: toMountPoint(<InspectButton core={core} />, core.rendering),
+          });
         })
         .catch(() => {
           this.logger.error('Failed to import plugin files.');
         });
     }
+
     return {};
   }
 

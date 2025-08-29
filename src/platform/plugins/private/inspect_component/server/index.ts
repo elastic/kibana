@@ -8,17 +8,17 @@
  */
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { InspectComponentPluginServer } from './plugin';
 import { configSchema } from './config';
 import type { ConfigSchema } from './config';
-
-export const plugin = (initializerContext: PluginInitializerContext) => {
-  return new InspectComponentPluginServer(initializerContext);
-};
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enabled: true,
   },
   schema: configSchema,
+};
+
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { InspectComponentPluginServer } = await import('./plugin');
+  return new InspectComponentPluginServer(initializerContext);
 };

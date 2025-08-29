@@ -29,12 +29,10 @@ export class InspectComponentPluginServer implements Plugin {
   }
 
   public setup(core: CoreSetup) {
-    if (this.isDev) {
+    if (this.isEnabled && this.isDev) {
       import('./routes/routes')
         .then(({ registerInspectComponentRoutes }) => {
-          if (this.isEnabled) {
-            registerInspectComponentRoutes({ httpService: core.http, logger: this.logger });
-          }
+          registerInspectComponentRoutes({ httpService: core.http, logger: this.logger });
         })
         .catch(() => {
           this.logger.error('Failed to import plugin files.');
