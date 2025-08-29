@@ -58,8 +58,10 @@ interface HasImportPermissionParams {
 
 export async function analyzeFile(
   file: string,
-  params: Record<string, string> = {}
+  params: Record<string, string> = {},
+  includePreview: boolean
 ): Promise<AnalysisResult> {
+  const query = includePreview ? { ...params, includePreview: 'true' } : params;
   const { getHttp } = await lazyLoadModules();
   const body = JSON.stringify(file);
   return await getHttp().fetch<AnalysisResult>({
@@ -67,7 +69,7 @@ export async function analyzeFile(
     method: 'POST',
     version: '1',
     body,
-    query: params,
+    query,
   });
 }
 
