@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, EuiProgress, EuiText, EuiPanel } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import type { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -19,6 +19,9 @@ export function BackgroundSearchCallout({
   bgsState: Observable<SearchSessionState>;
 }) {
   const bgSearch = useObservable(bgsState);
+  if (bgSearch !== SearchSessionState.Restored) {
+    return null;
+  }
   return (
     <EuiPanel
       hasShadow={false}
@@ -28,11 +31,7 @@ export function BackgroundSearchCallout({
       paddingSize="s"
     >
       <EuiCallOut size="s">
-        {bgSearch !== SearchSessionState.Restored ? (
-          <EuiProgress size="xs" position="absolute" color="subdued" />
-        ) : undefined}
         <EuiText size="xs">
-          {' '}
           You are viewing cached data from a specific time range from a background search. Changing
           the time range or query will re-run the session.
         </EuiText>

@@ -425,7 +425,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               defaultMessage: 'Discover - Search not yet saved',
             })}
       </h1>
-      {data.search.session.getBackgroundSearchIndicator()}
       <TopNavMemoized
         savedQuery={savedQuery}
         stateContainer={stateContainer}
