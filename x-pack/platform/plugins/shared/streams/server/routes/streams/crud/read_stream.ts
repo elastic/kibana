@@ -11,7 +11,6 @@ import {
   getInheritedFieldsFromAncestors,
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { partition } from 'lodash';
 import type { AssetClient } from '../../../lib/streams/assets/asset_client';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {

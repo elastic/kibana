@@ -5,13 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import {
-  disableStreams,
-  enableStreams,
-  indexDocument,
-  linkRule,
-  unlinkRule,
-} from '../helpers/requests';
+import { disableStreams, enableStreams, linkRule, unlinkRule } from '../helpers/requests';
 import type { StreamsSupertestRepositoryClient } from '../helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from '../helpers/repository_client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
