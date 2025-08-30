@@ -136,7 +136,7 @@ export class ReindexServiceWrapper {
     const throwIfNoPrivileges = async (indexName: string, newIndexName: string): Promise<void> => {
       if (!(await reindexService.hasRequiredPrivileges([indexName, newIndexName]))) {
         throw error.accessForbidden(
-          i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
+          i18n.translate('xpack.reindexService.reindexPrivilegesErrorBatch', {
             defaultMessage:
               'You do not have adequate privileges to reindex "{indexName}" to "{newIndexName}".',
             values: { indexName, newIndexName },
@@ -218,7 +218,7 @@ export class ReindexServiceWrapper {
 
         if (existingOp) {
           throw error.reindexAlreadyInProgress(
-            i18n.translate('xpack.upgradeAssistant.reindex.reindexAlreadyInProgressError', {
+            i18n.translate('xpack.reindexService.reindexAlreadyInProgressError', {
               defaultMessage: 'A reindex operation already in-progress for {indexName}',
               values: { indexName },
             })
