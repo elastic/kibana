@@ -13,3 +13,5 @@ export const GENERIC_FLYOUT_STORAGE_KEYS = {
 };
 
 export const GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ = 'generic-entity-flyout-footer';
+export const GENERIC_ENTITY_FLYOUT_FOOTER_DETAILS_LINK_TEST_SUBJ =
+  'generic-entity-flyout-footer-details-link';

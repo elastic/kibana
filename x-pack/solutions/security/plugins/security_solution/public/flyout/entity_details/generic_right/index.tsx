@@ -35,8 +35,6 @@ import { useGenericEntityCriticality } from './hooks/use_generic_entity_critical
 import { GenericEntityFlyoutHeader } from './header';
 import { GenericEntityFlyoutContent } from './content';
 import { GenericEntityFlyoutFooter } from './footer';
-import { useKibana } from '../../../common/lib/kibana';
-import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 
 interface CommonError {
@@ -73,9 +71,7 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
 export const GENERIC_PANEL_RISK_SCORE_QUERY_ID = 'genericPanelRiskScoreQuery';
 
 export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
-  const { isPreviewMode } = params;
-  const { uiSettings } = useKibana().services;
-  const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+  const { isPreviewMode, scopeId } = params;
 
   // When you destructuring params in the function signature TypeScript loses track
   // of the union type constraints and infers them as potentially undefined
@@ -183,7 +179,6 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
 
   const source = getGenericEntity.data._source;
   const entity = getGenericEntity.data._source.entity;
-  const shouldShowFooter = !isPreviewMode && assetInventoryEnabled;
 
   return (
     <>
@@ -202,7 +197,11 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
         insightsValue={source.entity.id}
         onAssetCriticalityChange={calculateEntityRiskScore}
       />
-      {shouldShowFooter && <GenericEntityFlyoutFooter entityId={entity.id} />}
+      <GenericEntityFlyoutFooter
+        scopeId={scopeId}
+        isPreviewMode={isPreviewMode ?? false}
+        entityId={entity.id}
+      />
     </>
   );
 };
