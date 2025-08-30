@@ -90,8 +90,8 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
     }
   }, [solutionType]);
 
-  // Probe for APM data (span OR transaction) and logs data
-  const { hasApmData, hasLogsData, isLoading } = useMainPageObservabilityProbe();
+  // Probe for all observability data (span, transaction, OR error)
+  const { hasObservabilityData, isLoading } = useMainPageObservabilityProbe();
 
   // Check if user can manage spaces (with demo override)
   const canManageSpaces =
@@ -171,18 +171,18 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
         alt: 'Observability view with APM overview dashboard.',
       },
       {
-        id: 'traces',
-        title: 'Trace analysis and correlation',
-        blurb: 'Follow request flows across services and identify performance bottlenecks.',
-        image: services.addBasePath('/plugins/discover/assets/highlight-trace.png'),
-        alt: 'Observability view showing trace waterfall and service map.',
-      },
-      {
         id: 'alerts',
         title: 'Proactive monitoring and alerts',
         blurb: 'Set up alerts for performance thresholds and get notified of issues early.',
         image: services.addBasePath('/plugins/discover/assets/highlight-pivot.png'),
         alt: 'Observability view with alerting and monitoring dashboards.',
+      },
+      {
+        id: 'nav',
+        title: 'Workflow-based navigation',
+        blurb: 'Get more from your data with workflow-based navigation.',
+        image: services.addBasePath('/plugins/discover/assets/highlight-nav.png'),
+        alt: 'Observability view with workflow-based navigation.',
       },
     ],
     [services.addBasePath]
@@ -190,14 +190,14 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
 
   // Don't render the callout if:
   // - We're in Observability solution (not Classic)
-  // - No APM or logs data detected
+  // - No observability data detected
   // - Still loading
   // - User dismissed the cue
   // - User cannot manage spaces
   // - Full callout is hidden (for demo purposes)
   const shouldRenderCallout =
     solutionType !== 'oblt' &&
-    (hasApmData || hasLogsData) &&
+    hasObservabilityData &&
     !isLoading &&
     !isDismissed &&
     canManageSpaces &&
@@ -222,11 +222,7 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <span>
-                      <strong>
-                        {hasApmData && hasLogsData ? 'APM and logs data detected' :
-                         hasApmData ? 'APM data detected' :
-                         hasLogsData ? 'Logs data detected' : 'Data detected'}
-                      </strong>. {getCalloutMessage()}
+                      <strong>Observability data detected</strong>. {getCalloutMessage()}
                     </span>
                   </EuiFlexItem>
                 </EuiFlexGroup>

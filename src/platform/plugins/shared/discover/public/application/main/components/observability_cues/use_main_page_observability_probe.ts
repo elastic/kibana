@@ -17,8 +17,7 @@ import { useAppStateSelector } from '../../state_management/discover_app_state_c
 import { useCurrentDataView } from '../../state_management/redux';
 
 interface MainPageObservabilityProbeResult {
-  hasApmData: boolean;
-  hasLogsData: boolean;
+  hasObservabilityData: boolean;
   isLoading: boolean;
   error?: Error;
 }
@@ -46,16 +45,27 @@ const isLogsDataStream = (index: string): boolean => {
   return /^(\.ds-)?logs-/.test(index);
 };
 
-const validateApmHit = (hit: Record<string, any>): boolean => {
-  // Check if the hit has the required APM fields
+
+
+const validateObservabilityHit = (hit: Record<string, any>): boolean => {
+  console.log('🔍 [Observability Hit Validation] Validating hit:', {
+    processorEvent: hit.fields?.['processor.event']?.[0],
+    timestamp: hit.fields?.['@timestamp'],
+    _index: hit._index
+  });
+  
+  // Check if the hit has the required basic fields
   const processorEvent = hit.fields?.['processor.event']?.[0];
   const timestamp = hit.fields?.['@timestamp'];
-  const traceId = hit.fields?.['trace.id'];
   
-  // Check if it's a valid APM event type
-  const isValidEvent = processorEvent === 'span' || processorEvent === 'transaction';
+  // Check if it's a valid observability event type
+  const isValidEvent = processorEvent === 'span' || processorEvent === 'transaction' || processorEvent === 'error' || processorEvent === 'log';
   
-  if (!isValidEvent || !timestamp || !traceId) {
+  if (!isValidEvent || !timestamp) {
+    console.log('🔍 [Observability Hit Validation] Failed basic checks:', {
+      isValidEvent,
+      hasTimestamp: !!timestamp
+    });
     return false;
   }
 
@@ -65,6 +75,7 @@ const validateApmHit = (hit: Record<string, any>): boolean => {
     const spanDurationUs = hit.fields?.['span.duration.us'];
     
     if (!spanId || !spanDurationUs) {
+      console.log('🔍 [Observability Hit Validation] Span missing required fields');
       return false;
     }
 
@@ -73,6 +84,7 @@ const validateApmHit = (hit: Record<string, any>): boolean => {
     const isNumeric = typeof durationUs === 'number';
 
     if (!isNumeric) {
+      console.log('🔍 [Observability Hit Validation] Span duration not numeric');
       return false;
     }
   }
@@ -85,6 +97,7 @@ const validateApmHit = (hit: Record<string, any>): boolean => {
     const transactionDurationUs = hit.fields?.['transaction.duration.us'];
     
     if (!transactionId || !transactionName || !transactionType || !transactionDurationUs) {
+      console.log('🔍 [Observability Hit Validation] Transaction missing required fields');
       return false;
     }
 
@@ -93,85 +106,68 @@ const validateApmHit = (hit: Record<string, any>): boolean => {
     const isNumeric = typeof durationUs === 'number';
 
     if (!isNumeric) {
+      console.log('🔍 [Observability Hit Validation] Transaction duration not numeric');
       return false;
     }
   }
 
-  // Check if it's a traces data stream
-  const dataStreamType = hit.fields?.['data_stream.type']?.[0];
-  const isTraces = dataStreamType === 'traces' || isTracesDataStream(hit._index as string);
-
-  if (!isTraces) {
-    return false;
-  }
-
-  return true;
-};
-
-const validateLogsHit = (hit: Record<string, any>): boolean => {
-  // Check if the hit has the required log fields
-  const processorEvent = hit.fields?.['processor.event']?.[0];
-  const timestamp = hit.fields?.['@timestamp'];
-  
-  // Check if it's a valid log event type
-  const isValidEvent = processorEvent === 'log' || processorEvent === 'error';
-  
-  if (!isValidEvent || !timestamp) {
-    return false;
-  }
-
-  // Check for message field (preferred: message, fallback: event.original)
-  const hasMessage = hit.fields?.['message']?.[0] || hit.fields?.['event.original']?.[0];
-  
-  if (!hasMessage) {
-    return false;
-  }
-
-  // Check data stream context
-  const dataStreamType = hit.fields?.['data_stream.type']?.[0];
-  const hasEventDataset = hit.fields?.['event.dataset']?.[0];
-  
-  // For processor.event: "error", allow data_stream.type: "traces" as long as error fields exist
-  let hasValidDataStream = dataStreamType === 'logs' || hasEventDataset;
-  
+  // For error events, check error-specific fields
   if (processorEvent === 'error') {
-    const hasTracesDataStream = dataStreamType === 'traces';
-    const hasErrorFields = hit.fields?.['error.id']?.[0] ||
-                          hit.fields?.['error.message']?.[0] ||
-                          hit.fields?.['error.exception.type']?.[0] ||
-                          hit.fields?.['error.exception.message']?.[0] ||
-                          hit.fields?.['error.stack_trace']?.[0] ||
-                          hit.fields?.['error.exception.stacktrace']?.[0];
+    // Check for message field (preferred: message, fallback: event.original)
+    const hasMessage = hit.fields?.['message']?.[0] || hit.fields?.['event.original']?.[0];
     
-    if (hasTracesDataStream && hasErrorFields) {
-      hasValidDataStream = true;
+    if (!hasMessage) {
+      console.log('🔍 [Observability Hit Validation] Error missing message field');
+      return false;
+    }
+
+    // Check for attribution (any of these): service.name, host.name, container.id, or cloud.provider
+    const hasAttribution = hit.fields?.['service.name']?.[0] ||
+                          hit.fields?.['host.name']?.[0] ||
+                          hit.fields?.['container.id']?.[0] ||
+                          hit.fields?.['cloud.provider']?.[0];
+
+    if (!hasAttribution) {
+      console.log('🔍 [Observability Hit Validation] Error missing attribution');
+      return false;
     }
   }
-  
-  if (!hasValidDataStream) {
-    return false;
+
+  // For log events, check log-specific fields
+  if (processorEvent === 'log') {
+    // Check for message field (preferred: message, fallback: event.original)
+    const hasMessage = hit.fields?.['message']?.[0] || hit.fields?.['event.original']?.[0];
+    
+    if (!hasMessage) {
+      console.log('🔍 [Observability Hit Validation] Log missing message field');
+      return false;
+    }
+
+    // Check for attribution (any of these): service.name, host.name, container.id, or cloud.provider
+    const hasAttribution = hit.fields?.['service.name']?.[0] ||
+                          hit.fields?.['host.name']?.[0] ||
+                          hit.fields?.['container.id']?.[0] ||
+                          hit.fields?.['cloud.provider']?.[0];
+
+    if (!hasAttribution) {
+      console.log('🔍 [Observability Hit Validation] Log missing attribution');
+      return false;
+    }
   }
 
-  // Check for attribution (any of these): service.name, host.name, container.id, or cloud.provider
-  const hasAttribution = hit.fields?.['service.name']?.[0] ||
-                        hit.fields?.['host.name']?.[0] ||
-                        hit.fields?.['container.id']?.[0] ||
-                        hit.fields?.['cloud.provider']?.[0];
-
-  if (!hasAttribution) {
-    return false;
-  }
-
+  console.log('🔍 [Observability Hit Validation] Validation passed');
   return true;
 };
 
-const buildApmProbeQuery = (
+
+
+const buildObservabilityProbeQuery = (
   dataView: Record<string, any>,
   query: Query,
   filters: Filter[],
   timeRange: TimeRange
 ) => {
-  // Build the base probe query for APM data (span OR transaction)
+  // Build the base probe query for all observability data (span OR transaction OR error OR log)
   const probeQuery = {
     bool: {
       filter: [
@@ -180,64 +176,13 @@ const buildApmProbeQuery = (
             should: [
               { term: { 'processor.event': 'span' } },
               { term: { 'processor.event': 'transaction' } },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-        { exists: { field: '@timestamp' } },
-        { exists: { field: 'trace.id' } },
-      ],
-    },
-  };
-
-  // Convert KQL to DSL if needed
-  let finalQuery = probeQuery;
-  if (query && typeof query !== 'string') {
-    try {
-      const esQuery = buildEsQuery(dataView, query, filters);
-      finalQuery = {
-        bool: {
-          must: [probeQuery],
-          filter: esQuery.bool?.filter || [],
-        },
-      };
-    } catch (e) {
-      // If KQL parsing fails, fall back to basic query
-    }
-  }
-
-  return finalQuery;
-};
-
-const buildLogsProbeQuery = (
-  dataView: Record<string, any>,
-  query: Query,
-  filters: Filter[],
-  timeRange: TimeRange
-) => {
-  // Build the base probe query for logs data (log OR error)
-  const probeQuery = {
-    bool: {
-      filter: [
-        {
-          bool: {
-            should: [
-              { term: { 'processor.event': 'log' } },
               { term: { 'processor.event': 'error' } },
+              { term: { 'processor.event': 'log' } },
             ],
             minimum_should_match: 1,
           },
         },
         { exists: { field: '@timestamp' } },
-        {
-          bool: {
-            should: [
-              { exists: { field: 'message' } },
-              { exists: { field: 'event.original' } },
-            ],
-            minimum_should_match: 1,
-          },
-        },
       ],
     },
   };
@@ -261,14 +206,16 @@ const buildLogsProbeQuery = (
   return finalQuery;
 };
 
-const validateApmProbeResponse = (rawResponse: any): boolean => {
+const validateObservabilityProbeResponse = (rawResponse: any): boolean => {
   const hits = rawResponse.hits?.hits || [];
-  return hits.length > 0 && validateApmHit(hits[0]);
-};
-
-const validateLogsProbeResponse = (rawResponse: any): boolean => {
-  const hits = rawResponse.hits?.hits || [];
-  return hits.length > 0 && validateLogsHit(hits[0]);
+  console.log('🔍 [Observability Validation] Checking hits:', hits.length);
+  if (hits.length === 0) {
+    console.log('🔍 [Observability Validation] No hits found');
+    return false;
+  }
+  const isValid = validateObservabilityHit(hits[0]);
+  console.log('🔍 [Observability Validation] First hit validation result:', isValid);
+  return isValid;
 };
 
 export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResult => {
@@ -280,10 +227,9 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
-  const [hasApmData, setHasApmData] = useState(false);
-  const [hasLogsData, setHasLogsData] = useState(false);
+  const [hasObservabilityData, setHasObservabilityData] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const cacheRef = useRef<Map<string, { apmResult: boolean; logsResult: boolean; timestamp: number }>>(new Map());
+  const cacheRef = useRef<Map<string, { result: boolean; timestamp: number }>>(new Map());
 
   const cacheKey = useMemo(() => {
     if (!dataView) return null;
@@ -293,11 +239,16 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
   const probeForObservabilityData = useCallback(async () => {
     if (!dataView || !cacheKey) return;
 
+    console.log('🔍 [Main Page Probe] Starting probe for data view:', {
+      title: dataView.title,
+      indexPattern: dataView.indexPattern,
+      name: dataView.name
+    });
+
     // Check cache first
     const cached = cacheRef.current.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      setHasApmData(cached.apmResult);
-      setHasLogsData(cached.logsResult);
+      setHasObservabilityData(cached.result);
       return;
     }
 
@@ -312,47 +263,27 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
     abortControllerRef.current = new AbortController();
 
     try {
-      // Probe for APM data
-      const apmSearchSource = services.data.search.searchSource.createEmpty();
-      const apmProbeQuery = buildApmProbeQuery(dataView, query, filters, timeRange);
+      console.log('🔍 [Main Page Probe] Building unified observability probe query...');
+      // Single probe for all observability data
+      const searchSource = services.data.search.searchSource.createEmpty();
+      const probeQuery = buildObservabilityProbeQuery(dataView, query, filters, timeRange);
+      console.log('🔍 [Main Page Probe] Unified probe query:', JSON.stringify(probeQuery, null, 2));
 
-      apmSearchSource
+      searchSource
         .setField('index', dataView)
         .setField('size', 1)
-        .setField('query', apmProbeQuery)
-        .setField('trackTotalHits', false)
-        .setField('fields', [
-          'data_stream.type', 
-          'trace.id', 
-          'span.id', 
-          'span.duration.us', 
-          'processor.event',
-          'transaction.id',
-          'transaction.name',
-          'transaction.type',
-          'transaction.duration.us'
-        ]);
-
-      const apmResponse = await lastValueFrom(
-        apmSearchSource.fetch$({
-          signal: abortControllerRef.current.signal,
-        })
-      );
-
-      const hasApmDataResult = validateApmProbeResponse(apmResponse.rawResponse);
-
-      // Probe for logs data
-      const logsSearchSource = services.data.search.searchSource.createEmpty();
-      const logsProbeQuery = buildLogsProbeQuery(dataView, query, filters, timeRange);
-
-      logsSearchSource
-        .setField('index', dataView)
-        .setField('size', 1)
-        .setField('query', logsProbeQuery)
+        .setField('query', probeQuery)
         .setField('trackTotalHits', false)
         .setField('fields', [
           'data_stream.type',
           'processor.event',
+          'trace.id', 
+          'span.id', 
+          'span.duration.us', 
+          'transaction.id',
+          'transaction.name',
+          'transaction.type',
+          'transaction.duration.us',
           'message',
           'event.original',
           'event.dataset',
@@ -368,23 +299,30 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
           'error.exception.stacktrace'
         ]);
 
-      const logsResponse = await lastValueFrom(
-        logsSearchSource.fetch$({
+      const response = await lastValueFrom(
+        searchSource.fetch$({
           signal: abortControllerRef.current.signal,
         })
       );
 
-      const hasLogsDataResult = validateLogsProbeResponse(logsResponse.rawResponse);
+      const hasObservabilityDataResult = validateObservabilityProbeResponse(response.rawResponse);
+      console.log('🔍 [Main Page Probe] Unified probe response:', {
+        hasObservabilityData: hasObservabilityDataResult,
+        hits: response.rawResponse.hits?.hits?.length || 0,
+        firstHit: response.rawResponse.hits?.hits?.[0]
+      });
 
       // Cache results
       cacheRef.current.set(cacheKey, { 
-        apmResult: hasApmDataResult, 
-        logsResult: hasLogsDataResult, 
+        result: hasObservabilityDataResult, 
         timestamp: Date.now() 
       });
       
-      setHasApmData(hasApmDataResult);
-      setHasLogsData(hasLogsDataResult);
+      setHasObservabilityData(hasObservabilityDataResult);
+      
+      console.log('🔍 [Main Page Probe] Final result:', {
+        hasObservabilityData: hasObservabilityDataResult
+      });
     } catch (err) {
       if (err.name === 'AbortError') {
         return; // Request was cancelled
@@ -408,8 +346,7 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
   }, []);
 
   return {
-    hasApmData,
-    hasLogsData,
+    hasObservabilityData,
     isLoading,
     error,
   };

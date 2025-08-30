@@ -208,33 +208,12 @@ export const FlyoutCue: React.FC<FlyoutCueProps> = ({
         return null;
       }
 
-      // Check data stream context
+            // Check data stream context
       const hasLogsDataStream = fields?.['data_stream.type']?.[0] === 'logs';
       const hasEventDataset = source?.event?.dataset || fields?.['event.dataset']?.[0];
-
-      // For processor.event: "error", allow data_stream.type: "traces" as long as error fields exist
-      let hasValidDataStream = hasLogsDataStream || hasEventDataset;
-
-      if (processorEvent === 'error') {
-        const hasTracesDataStream = fields?.['data_stream.type']?.[0] === 'traces';
-        const hasErrorFields =
-          source?.error?.id ||
-          fields?.['error.id']?.[0] ||
-          source?.error?.message ||
-          fields?.['error.message']?.[0] ||
-          source?.error?.exception?.type ||
-          fields?.['error.exception.type']?.[0] ||
-          source?.error?.exception?.message ||
-          fields?.['error.exception.message']?.[0] ||
-          source?.error?.stack_trace ||
-          fields?.['error.stack_trace']?.[0] ||
-          source?.error?.exception?.stacktrace ||
-          fields?.['error.exception.stacktrace']?.[0];
-
-        if (hasTracesDataStream && hasErrorFields) {
-          hasValidDataStream = true;
-        }
-      }
+      
+      // For both log and error events, only allow logs data streams
+      const hasValidDataStream = hasLogsDataStream || hasEventDataset;
 
       if (!hasValidDataStream) {
         return null;
