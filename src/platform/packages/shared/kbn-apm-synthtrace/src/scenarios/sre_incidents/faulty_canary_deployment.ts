@@ -100,7 +100,7 @@ const scenario: Scenario<ApmFields | LogDocument> = async (runOptions) => {
             .logLevel('error')
             .defaults({
               'service.name': SERVICE_NAME,
-              'labels': { 'service_version': CANARY_VERSION },
+              labels: { service_version: CANARY_VERSION },
               'service.environment': ENVIRONMENT,
             })
             .timestamp(timestamp);
@@ -109,8 +109,14 @@ const scenario: Scenario<ApmFields | LogDocument> = async (runOptions) => {
       });
 
       return [
-        withClient(apmEsClient, logger.perf('generating_apm_events', () => apmEvents)),
-        withClient(logsEsClient, logger.perf('generating_log_events', () => logEvents)),
+        withClient(
+          apmEsClient,
+          logger.perf('generating_apm_events', () => apmEvents)
+        ),
+        withClient(
+          logsEsClient,
+          logger.perf('generating_log_events', () => logEvents)
+        ),
       ];
     },
   };

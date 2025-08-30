@@ -98,12 +98,16 @@ const scenario: Scenario<ApmFields | LogDocument> = async (runOptions) => {
         }
 
         // Before the incident, everything works
-        const exitSpan = apiGateway.span(
-          httpExitSpan({
-            spanName: `GET /api/users/{id}`,
-            destinationUrl: `http://${DOWNSTREAM_SERVICE}`,
-          })
-        ).timestamp(timestamp).duration(110).children(userProfileTransaction);
+        const exitSpan = apiGateway
+          .span(
+            httpExitSpan({
+              spanName: `GET /api/users/{id}`,
+              destinationUrl: `http://${DOWNSTREAM_SERVICE}`,
+            })
+          )
+          .timestamp(timestamp)
+          .duration(110)
+          .children(userProfileTransaction);
 
         apiGatewayTransaction.duration(150).success().children(exitSpan);
 
