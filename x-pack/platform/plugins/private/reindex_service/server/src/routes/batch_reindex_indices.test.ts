@@ -213,7 +213,8 @@ describe('reindex API', () => {
         errors: [
           {
             indexName: 'theIndex2',
-            message: 'You do not have adequate privileges to reindex "theIndex2".',
+            message:
+              'You do not have adequate privileges to reindex "theIndex2" to "theIndex2Reindexed".',
           },
           { indexName: 'theIndex3', message: 'oops!' },
         ],
