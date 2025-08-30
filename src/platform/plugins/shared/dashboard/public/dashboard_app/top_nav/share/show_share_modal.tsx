@@ -75,6 +75,7 @@ export function ShowShareModal({
   if (!shareService) return;
 
   const handleChangeAccessMode = async (accessMode: AccessMode) => {
+    if (!savedObjectId) return;
     try {
       await changeAccessMode(accessMode);
     } catch (error) {

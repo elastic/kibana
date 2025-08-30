@@ -73,6 +73,7 @@ export interface SaveDashboardProps {
   panelReferences?: Reference[];
   searchSourceReferences?: Reference[];
   lastSavedId?: string;
+  accessMode?: AccessMode; // Only used for new dashboard creation
 }
 
 export interface GetDashboardStateReturn {

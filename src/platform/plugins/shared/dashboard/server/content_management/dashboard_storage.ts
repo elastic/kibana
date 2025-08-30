@@ -275,10 +275,18 @@ export class DashboardStorage {
     }
 
     // Save data in DB
+    const createOptions = {
+      ...optionsToLatest,
+      references: soReferences,
+      accessControl: {
+        accessMode: optionsToLatest?.accessControl?.accessMode || 'default',
+      },
+    };
+
     const savedObject = await soClient.create<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       soAttributes,
-      { ...optionsToLatest, references: soReferences }
+      createOptions
     );
 
     const { item, error: itemError } = savedObjectToItem(savedObject, false, {

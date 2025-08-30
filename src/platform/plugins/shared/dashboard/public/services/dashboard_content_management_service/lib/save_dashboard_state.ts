@@ -27,6 +27,7 @@ export const saveDashboardState = async ({
   saveOptions,
   dashboardState,
   panelReferences,
+  accessMode,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
   const dashboardContentManagementCache = getDashboardContentManagementCache();
 
@@ -53,12 +54,15 @@ export const saveDashboardState = async ({
             /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
             mergeAttributes: false,
           },
-        }) // TODO: Add accessControl to create
+        })
       : await contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
           contentTypeId: DASHBOARD_CONTENT_ID,
           data: attributes,
           options: {
             references,
+            accessControl: {
+              accessMode,
+            },
           },
         });
     const newId = result.item.id;

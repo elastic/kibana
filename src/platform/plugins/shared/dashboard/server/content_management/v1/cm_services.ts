@@ -360,6 +360,13 @@ export const dashboardCreateOptionsSchema = schema.object({
   overwrite: schema.maybe(createOptionsSchemas.overwrite),
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   initialNamespaces: schema.maybe(createOptionsSchemas.initialNamespaces),
+  accessControl: schema.maybe(
+    schema.object({
+      accessMode: schema.maybe(
+        schema.oneOf([schema.literal('default'), schema.literal('read_only')])
+      ),
+    })
+  ),
 });
 
 export const dashboardUpdateOptionsSchema = schema.object({

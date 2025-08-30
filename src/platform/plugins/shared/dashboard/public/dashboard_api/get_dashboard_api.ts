@@ -166,6 +166,7 @@ export function getDashboardApi({
         isManaged,
         lastSavedId: savedObjectId$.value,
         viewMode: viewModeManager.api.viewMode$.value,
+        accessControl: accessControlManager.api.accessControl$.value,
         ...getState(),
       });
 

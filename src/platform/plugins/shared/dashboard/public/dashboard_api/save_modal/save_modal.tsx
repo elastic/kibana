@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { AccessModeContainer } from '../../dashboard_app/access_control';
+import type { AccessControl } from '../../dashboard_app/access_control';
 import { savedObjectsTaggingService } from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
 
@@ -31,6 +32,7 @@ interface DashboardSaveModalProps {
     newCopyOnSave,
     newTags,
     newTimeRestore,
+    newAccessMode,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: DashboardSaveOptions) => void;
@@ -42,6 +44,7 @@ interface DashboardSaveModalProps {
   showCopyOnSave: boolean;
   showStoreTimeOnSave?: boolean;
   customModalTitle?: string;
+  accessControl?: AccessControl;
 }
 
 type SaveDashboardHandler = (args: {
@@ -62,9 +65,13 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   tags,
   title,
   timeRestore,
+  accessControl,
 }) => {
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
+  const [selectedAccessMode, setSelectedAccessMode] = React.useState(
+    accessControl?.accessMode ?? 'default'
+  );
 
   const saveDashboard = React.useCallback<SaveDashboardHandler>(
     async ({
@@ -79,12 +86,13 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
         newDescription,
         newCopyOnSave,
         newTimeRestore: persistSelectedTimeInterval,
+        newAccessMode: selectedAccessMode,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
         newTags: selectedTags,
       });
     },
-    [onSave, persistSelectedTimeInterval, selectedTags]
+    [onSave, persistSelectedTimeInterval, selectedAccessMode, selectedTags]
   );
 
   const renderDashboardSaveOptions = useCallback(() => {
@@ -136,11 +144,14 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
         ) : null}
         <Fragment>
           <EuiSpacer size="l" />
-          <AccessModeContainer onChangeAccessMode={(value) => {}} />
+          <AccessModeContainer
+            accessControl={accessControl}
+            onChangeAccessMode={setSelectedAccessMode}
+          />
         </Fragment>
       </Fragment>
     );
-  }, [persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave]);
+  }, [persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave, accessControl]);
 
   return (
     <SavedObjectSaveModal
