@@ -138,7 +138,7 @@ export class ReindexServiceWrapper {
         throw error.accessForbidden(
           i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
             defaultMessage: `You do not have adequate privileges to reindex "{indexName}" to "{newIndexName}".`,
-            values: { indexName },
+            values: { indexName, newIndexName },
           })
         );
       }
