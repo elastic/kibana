@@ -126,6 +126,8 @@ function expectAuditEvents(...events: ExpectedAuditEvent[]) {
 describe('Authenticator', () => {
   let mockHTTPAuthenticationProvider: jest.Mocked<PublicMethodsOf<HTTPAuthenticationProvider>>;
   let mockBasicAuthenticationProvider: jest.Mocked<PublicMethodsOf<BasicAuthenticationProvider>>;
+  let mockSamlAuthenticationProvider: jest.Mocked<PublicMethodsOf<SAMLAuthenticationProvider>>;
+
   beforeEach(() => {
     mockHTTPAuthenticationProvider = {
       login: jest.fn(),
@@ -135,6 +137,13 @@ describe('Authenticator', () => {
     };
 
     mockBasicAuthenticationProvider = {
+      login: jest.fn(),
+      authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
+      logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
+      getHTTPAuthenticationScheme: jest.fn(),
+    };
+
+    mockSamlAuthenticationProvider = {
       login: jest.fn(),
       authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
       logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
@@ -153,8 +162,7 @@ describe('Authenticator', () => {
 
     jest.requireMock('./providers/saml').SAMLAuthenticationProvider.mockImplementation(() => ({
       type: 'saml',
-      authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
-      getHTTPAuthenticationScheme: jest.fn(),
+      ...mockSamlAuthenticationProvider,
     }));
   });
 
@@ -1362,6 +1370,104 @@ describe('Authenticator', () => {
           { action: 'user_logout', outcome: 'unknown' },
           { action: 'user_login', outcome: 'success' }
         );
+      });
+    });
+
+    describe('preserves state if provider is type `SAML` and there are remaining requestIds', () => {
+      const userProfileGrant: UserProfileGrant = {
+        type: 'accessToken',
+        accessToken: 'some-token',
+      };
+
+      beforeEach(() => {
+        mockOptions = getMockOptions({
+          providers: {
+            basic: { basic1: { order: 0 } },
+            saml: { saml1: { order: 1, realm: 'saml1' } },
+          },
+        });
+
+        authenticator = new Authenticator(mockOptions);
+      });
+
+      it('preserves state if provider is type `SAML` and there are remaining requestIds', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const user = mockAuthenticatedUser();
+
+        const samlState = {
+          requestIdMap: { 'id-1': '/request-path-1', 'id-2': '/request-path-2' },
+        };
+
+        const mockExistingSessionValue = sessionMock.createValue({
+          username: undefined,
+          provider: { type: 'saml', name: 'saml1' },
+          state: samlState,
+        });
+
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockExistingSessionValue },
+        });
+
+        mockSamlAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.redirectTo('/test/url', { user, userProfileGrant, state: samlState })
+        );
+
+        await expect(
+          authenticator.login(request, { provider: { type: 'saml' }, value: {} })
+        ).resolves.toEqual(
+          AuthenticationResult.redirectTo('/test/url', { user, userProfileGrant, state: samlState })
+        );
+
+        expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
+        expect(mockOptions.session.update).toHaveBeenCalledWith(request, {
+          ...mockExistingSessionValue,
+          userProfileId: 'some-profile-uid',
+          provider: { type: 'saml', name: 'saml1' },
+          state: samlState,
+        });
+      });
+
+      it('does not preserve state if provider is type `SAML` and there are no remaining requestIds', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const user = mockAuthenticatedUser();
+
+        const samlState = {
+          requestIdMap: {},
+        };
+
+        const mockExistingSessionValue = sessionMock.createValue({
+          username: undefined,
+          provider: { type: 'saml', name: 'saml1' },
+          state: samlState,
+        });
+
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockExistingSessionValue },
+        });
+
+        mockSamlAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.redirectTo('/test/url', {
+            user,
+            userProfileGrant,
+            state: samlState,
+          })
+        );
+
+        await expect(
+          authenticator.login(request, { provider: { type: 'saml' }, value: {} })
+        ).resolves.toEqual(
+          AuthenticationResult.redirectTo('/test/url', { user, userProfileGrant, state: samlState })
+        );
+
+        expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
+        expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
+          username: user.username,
+          userProfileId: 'some-profile-uid',
+          provider: { type: 'saml', name: 'saml1' },
+          state: samlState,
+        });
       });
     });
   });
