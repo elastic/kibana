@@ -65,7 +65,7 @@ export function ReinstallButton(props: ReinstallationButtonProps) {
           content={
             <FormattedMessage
               id="xpack.fleet.integrations.installPackage.uploadedTooltip"
-              defaultMessage="This integration was installed by upload and cannot be automatically reinstalled. Please upload it again to reinstall."
+              defaultMessage="This is a custom integration and cannot be automatically reinstalled."
             />
           }
         >
